@@ -15,12 +15,12 @@ is_deeply $users, [], 'users';
 
 my $messages;
 $backend->messages_p({}, {})->then(sub { $messages = shift })->$wait_success('messages_p');
-is_deeply $messages, [], 'messages';
+is_deeply $messages, {end => true, messages => []}, 'messages';
 
 my $notifications;
 $backend->notifications_p({}, {})->then(sub { $notifications = shift })
   ->$wait_success('notifications_p');
-is_deeply $notifications, [], 'notifications';
+is_deeply $notifications, {end => true, messages => []}, 'notifications';
 
 my $user = bless {};
 my $saved;

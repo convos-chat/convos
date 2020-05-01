@@ -62,7 +62,7 @@ sub get_p {
 
   return Mojo::Promise->all(@p)->then(sub {
     my $notifications = shift->[0];
-    $res->{notifications} = $notifications if $notifications;
+    $res->{notifications} = $notifications->{messages} if $notifications;
     return $res;
   });
 }

@@ -26,8 +26,8 @@ sub calculate_unread_p {
   my $self = shift;
 
   return $self->messages_p({after => $self->last_read, limit => 61})->then(sub {
-    my $messages = shift;
-    return $self->{unread} = int @$messages;
+    my $res = shift;
+    return $self->{unread} = int @{$res->{messages}};
   });
 }
 

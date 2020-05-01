@@ -56,25 +56,28 @@ sub subprocess_in_main_process {
 }
 
 sub messages {
-  my $class = shift;
-  my $ts    = shift || 1433817540;    # 2015-06-09T04:39:00
-  my $int   = shift || 2;
-  my @messages;
+  my $class    = shift;
+  my $ts       = shift || time;
+  my $interval = shift || 40;
 
-  $ts = Time::Piece->strptime($ts, '%Y-%m-%dT%H:%M:%S') if $ts =~ /T/;
+  my @messages = split /\n/, data_section qw(t::Helper messages.txt);
+  $ts = $ts =~ /T/ ? Time::Piece->strptime($ts, '%Y-%m-%dT%H:%M:%S') : Time::Piece->gmtime($ts);
+  $ts -= $interval * @messages;
 
-  for (split /\n/, data_section qw(t::Helper messages.txt)) {
-    my ($from, $msg) = split / /, $_, 2;
+  my $i = 0;
+  for my $entry (@messages) {
+    my ($from, $msg) = split /\s/, $entry, 2;
     my $event = $from =~ s/^-// ? 'notice' : $from =~ s/^\*// ? 'action' : 'private';
-    $ts += $int;
-    push @messages,
-      {
+
+    # Test::More::note(sprintf "%s - %s %s\n", $ts->datetime, $from, $msg);
+    $entry = {
       from      => $from,
       highlight => $msg =~ /superman/i ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg,
       ts        => $ts,
       type      => $event,
-      };
+    };
+    $ts += $interval;
   }
 
   return @messages;
@@ -255,84 +258,84 @@ __DATA__
 :hybrid8.local NOTICE AUTH :*** Found your hostname
 :hybrid8.local NOTICE AUTH :*** No Ident response
 @@ messages.txt
-Supergirl For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
-Supergirl To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
-Supergirl The column allows you to format output neatly. ex: 'mount | column -t' will
-*jhthorsen To manage Apache modules use "a2enmod" to enable and "a2dismod" to disable.
-Supergirl To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
-jhthorsen Unsure if AppArmor might be causing an issue? Don't disable it, use the
-Supergirl You can use the text-based web browser w3m to browse the Internet in your
-mr22 If you know you typed a command or password wrong, you can use ctrl + u to
-mr22 Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
--batman Did you know that you can get useful notifications displayed at the bottom
--batman If you want to download a file from a URL via the console, you can use the
-*batman The powernap package allows you to suspend servers which are not being used,
-batman Use "iotop" for measuring hard disk I/O (current read/write) usage per
-batman The Ubuntu Server Team is an open community always looking for feedback and
-batman You can contact the Ubuntu Server team on IRC using chat.freenode.net in
-batman Having trouble with DNS records? dig, ping and named-checkzone are great
-Supergirl To restrict ssh logins to certain commands, have a look at the ForceCommand
-Supergirl An easy way to see what SUPERMAN own
-Supergirl Use "iftop" to monitor current network activity connections per host.
-superman To find a package which name or description contains a keyword use:
-superman You can contact the Ubuntu Server team on IRC using chat.freenode.net in
-*superman Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
-superman Use "top" to get a view of your server's performance such as processor,
-superman If you need to compile a piece of software, you may need to install the
-superman You can edit your network configuration in /etc/network/interfaces and
-superman The free command tells you the status of your memory and swap, how much you
-superman Tired of repeatedly pressing 'y' through some shell process (e.g. fsck)? Try
--superman An easy way to see what processes own which network connections: 'sudo
--superman Successive commands usually process the same argument. 'Alt-.' inserts the
--Supergirl For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
--Supergirl 'screen' can create multiple "windows" which you can detach and re-attach
--Supergirl To find in which file an event has been logged in use 'ls -ltr /var/log |
-Supergirl Reach the end-of-line with ctrl-e and the beginning of line with ctrl-a.
-Supergirl To find in which file an event has been logged in use 'ls -ltr /var/log |
-Supergirl Use "tail -f /var/log/some.log" to see new lines added to a log instantly in
-Supergirl If you want to download a file from a URL via the console, you can use the
-batman The powernap package allows you to suspend servers which are not being used,
-batman The powernap package allows you to suspend servers which are not being used,
-batman To restrict ssh logins to certain commands, have a look at the ForceCommand
-*batman You can add "| grep word" to search for a word in the output of a command.
-*batman If the empty file ~/.hushlogin exists on the server, login to the server
-batman Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
-Supergirl Did you know that releases of Ubuntu labeled LTS are maintained for 5 years
-Supergirl If you want to download a file from a URL via the console, you can use the
-Supergirl Typing 'dmesg | tail' after you plug in usb storage will give you its
-Supergirl Keep your servers time in sync, use the ntpd package.
-Supergirl To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
-Supergirl Documentation and other resources pointers for Ubuntu Server Edition are
-Supergirl Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
--mr_fantastic To have grep return the string you are looking for without checking for
--mr_fantastic If you need to perform a command a second time on a different file, you can
--mr_fantastic Use the 'watch' command to repeat the same command a regular interval and
--mr_fantastic If you know you typed a command or password wrong, you can use ctrl + u to
--mr_fantastic Edit the command line with cut and paste: ctrl-k for cut, and ctrl-y for
-Supergirl 'screen' can create multiple "windows" which you can detach and re-attach
-mr22 Did you know that you can get useful notifications displayed at the bottom
-mr22 'etckeeper' allows you to save changes you make to /etc in a bazaar
-mr22 [convos] jhthorsen pushed 3 new commits to master: https://git.io/vD9nM
-mr22 If you know you typed a command or password wrong, you can use ctrl + u to
-mr22 For a lightweight VPN alternative, have a look at ssh + netcat-openbsd for
-mr22 Keep your servers time in sync, use the ntpd package.
-mr22 To deactivate a service at boot, for example, apache2: 'sudo update-rc.d -f
-mr22 Save time starting to type a command or file name, then press tab to
-mr22 Need a little refresh on networking concept? Take a look at the networking
--mr22 To manage Apache virtualhosts use "a2ensite" to enable and "a2dissite" to
--mr22 If you want to download a file from a URL via the console, you can use the
--mr22 Did you know that you can get useful notifications displayed at the bottom
--mr22 If you executed a command and neglected to use sudo, you can execute "sudo
-mr22 Two packages are recommended to perform backups of your clients and servers
-mr22 Use the 'watch' command to repeat the same command a regular interval and
-mr22 Use lsof to find out which process has open handles for a file. 'lsof +D
-mr22 The column allows you to format output neatly. ex: 'mount | column -t' will
-mr22 If you executed a command and neglected to use sudo, you can execute "sudo
-mr22 You can use the text-based web browser w3m to browse the Internet in your
-mr22 The powernap package allows you to suspend servers which are not being used,
-mr22 [convos] jhthorsen pushed 1 new commit to master: https://git.io/vDQJ7
-mr22 [mojo-irc] jhthorsen pushed https://github.com/Nordaaker/convos/commit/867b89321eb6f4131a394757a2a1017401533079
-mr22 http://convos.by/doc/
-mr22 A for loop in bash syntax: 'for i in *; do echo $i ; done'.
-*mr22 Use "iotop" for measuring hard disk I/O (current read/write) usage per
-mr22 [convos] jhthorsen pushed 1 new commit to master: https://git.io/vDF6H
+river 0 pencil
+arm 1 kettle
+place 2 story
+teaching 3 trade
+coil 4 smile
+yard 5 power
+insect 6 cap
+table 7 advice
+lamp 8 invention
+income 9 frog
+caption 10 teeth
+machine 11 dog
+quarter 12 pets
+self 13 top
+anger 14 fowl
+vacation 15 society
+berry 16 playground
+shirt 17 low
+bag 18 class
+trip 19 governor
+regret 20 men
+industry 21 bed
+name 22 sky
+*coach 23 kittens
+rake 24 wound
+copper 25 card
+driving 26 picture
+guide 27 thing
+stage 28 vase
+birds 29 art
+school 30 vest
+wood 31 question
+lunch 32 punishment
+deer 33 treatment
+eyes 34 recess
+loaf 35 pot
+roll 36 meal
+discussion 37 notebook
+verse 38 hobbies
+account 39 guitar
+month 40 pin
+degree 41 letters
+blade 42 level
+field 43 pie
+glove 44 control
+veil 45 aunt
+*doll 46 bee
+credit 47 potato
+plot 48 acoustics
+airport 49 yard
+doctor 50 curtain
+basketball 51 title
+shade 52 secretary
+truck 53 loss
+-vacation 54 cabbage
+-wall 55 superman notification
+-stitch 56 baby
+-throat 57 bikes
+-behavior 58 milk
+cow 59 underwear
+achiever 60 representative
+wound 61 substance
+profit 62 toys
+shoe 63 argument
+destruction 64 appliance
+chalk 65 canvas
+can 66 stamp
+lettuce 67 steam
+desk 68 shape
+cub 69 pleasure
+muscle 70 zinc
+cough 71 property
+change 72 pear
+*boundary 73 boot
+company 74 unit
+quince 75 bath
+wax 76 pest
+lip 77 number
+flock 78 rings
+volleyball 79 guide
+toad 80 bead

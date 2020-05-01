@@ -55,10 +55,10 @@ like slurp_log('#convos'), qr{\Q<Supergirl> But... SUPERMAN, what about in a cha
 my $notifications;
 $core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
   ->$wait_success('notifications');
-ok delete $notifications->[0]{ts}, 'notifications has timestamp';
+ok delete $notifications->{messages}[0]{ts}, 'notifications has timestamp';
 is $user->unread, 1, 'One unread messages';
 is_deeply(
-  $notifications,
+  $notifications->{messages},
   [{
     connection_id => 'irc-localhost',
     dialog_id     => '#convos',
@@ -86,9 +86,9 @@ t::Helper->irc_server_messages(
 );
 $core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
   ->$wait_success('notifications');
-delete $_->{ts} for @$notifications;
+delete $_->{ts} for @{$notifications->{messages}};
 is_deeply(
-  $notifications,
+  $notifications->{messages},
   [
     map {
       +{

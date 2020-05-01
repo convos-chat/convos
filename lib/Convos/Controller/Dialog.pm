@@ -1,7 +1,7 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'E';
+use Convos::Util qw(E tp);
 use Mojo::JSON qw(false true);
 
 sub last_read {
@@ -51,13 +51,29 @@ sub messages {
 
   $query{$_} = $self->param($_)
     for grep { defined $self->param($_) } qw(after before level limit match);
-  $query{limit} ||= 60;
+  $query{limit} ||= $query{after} && $query{before} ? 200 : 60;
   $query{limit} = 200 if $query{limit} > 200;
 
+  # Input check
+  if ($query{after} and $query{before}) {
+    return $self->render(openapi => E('Must be before "/after".', '/before'), status => 400)
+      if tp($query{after}) > tp($query{before});
+    return $self->render(
+      openapi => E('Must be less than "/after" - 12 months.', '/before'),
+      status  => 400
+    ) if abs(tp($query{after}) - tp($query{before})) > 86400 * 365;
+  }
+
   return $dialog->messages_p(\%query)->then(sub {
-    my $messages = shift;
+    my $res = shift;
     $self->render(
-      openapi => {messages => $messages, end => @$messages < $query{limit} ? true : false});
+      openapi => {
+        end         => $res->{end} // true,
+        messages    => $res->{messages},
+        n_messages  => int(@{$res->{messages}}),
+        n_requested => $res->{limit},
+      }
+    );
   });
 }
 

@@ -1,6 +1,7 @@
 package Convos::Core::Backend;
 use Mojo::Base 'Mojo::EventEmitter';
 
+use Mojo::JSON qw(false true);
 use Mojo::Promise;
 
 sub connections_p {
@@ -32,7 +33,7 @@ sub load_object_p {
 
 sub messages_p {
   my ($self, $obj, $query) = @_;
-  return Mojo::Promise->resolve([]);
+  return Mojo::Promise->resolve({end => true, messages => []});
 }
 
 sub new { shift->SUPER::new(@_)->tap('_setup') }
@@ -46,7 +47,7 @@ sub on {
 
 sub notifications_p {
   my ($self, $user, $query) = @_;
-  return Mojo::Promise->resolve([]);
+  return Mojo::Promise->resolve({end => true, messages => []});
 }
 
 sub save_object_p {
@@ -169,7 +170,7 @@ for the class version.
 
 =head2 messages_p
 
-  $p = $backend->messages_p(\%query)->then(sub { my $messages = shift; });
+  $p = $backend->messages_p(\%query)->then(sub { my $res = shift; });
 
 Used to search for messages stored in backend. The callback will be called
 with the messages found.
@@ -184,13 +185,20 @@ Possible C<%query>:
     match  => $regexp,   # filter messages by a regexp
   }
 
+C<$res> will contain:
+
+  {
+    end      => true,
+    messages => [...],
+  }
+
 =head2 new
 
 Will also call C<_setup()> after the object is created.
 
 =head2 notifications_p
 
-  $p = $backend->notifications_p($user, \%query)->then(sub { my $notifications = shift; });
+  $p = $backend->notifications_p($user, \%query)->then(sub { my $res = shift; });
 
 This method will return notifications, in the same structure as L</messages>.
 

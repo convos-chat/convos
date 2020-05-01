@@ -23,7 +23,7 @@ $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', false)
   ->json_is('/messages', []);
 
 $connection->emit(message => $dialog => $_) for t::Helper->messages(time - 3600);
-$t->get_ok('/api/search?match=apparmor')->status_is(200)->json_is('/end', false);
+$t->get_ok('/api/search?match=secretary')->status_is(200)->json_is('/end', false);
 my $messages = $t->tx->res->json->{messages};
 cmp_deeply(
   $messages,
@@ -31,8 +31,8 @@ cmp_deeply(
     connection_id => 'irc-localhost',
     dialog_id     => '#convos',
     highlight     => false,
-    message       => 'Unsure if AppArmor might be causing an issue? Don\'t disable it, use the',
-    from          => 'jhthorsen',
+    message       => '52 secretary',
+    from          => 'shade',
     ts            => re(qr{^\d+-}),
     type          => 'private',
   }],

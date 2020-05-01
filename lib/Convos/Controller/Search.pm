@@ -27,18 +27,18 @@ sub messages {
 
   my @p = map { (Mojo::Promise->resolve($_), $_->messages_p(\%query)) } @dialogs;
   return Mojo::Promise->all(@p)->then(sub {
-    my @res;
+    my @messages;
 
     while (@_) {
-      my ($dialog, $messages) = map { $_->[0] } shift @_, shift @_;
-      push @res,
+      my ($dialog, $res) = map { $_->[0] } shift @_, shift @_;
+      push @messages,
         map { +{%$_, connection_id => $dialog->connection->id, dialog_id => $dialog->id} }
-        @$messages;
+        @{$res->{messages}};
     }
 
-    @res = sort { $a->{ts} cmp $b->{ts} } @res;
+    @messages = sort { $a->{ts} cmp $b->{ts} } @messages;
 
-    $self->render(openapi => {messages => \@res, end => false});
+    $self->render(openapi => {messages => \@messages, end => false});
   });
 }
 

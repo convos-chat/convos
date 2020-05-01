@@ -1,15 +1,15 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util 'DEBUG';
+use Convos::Util qw(DEBUG tp);
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;
 use Mojo::IOLoop::Subprocess;
-use Mojo::JSON;
+use Mojo::JSON qw(false true);
 use Mojo::Util qw(encode decode);
 use Symbol;
-use Time::Piece;
+use Time::Piece 'gmtime';
 use Time::Seconds;
 
 use constant FLAG_OFFSET    => 48;    # chr 48 == "0"
@@ -99,49 +99,60 @@ sub messages_p {
   $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
 
   $args{limit}    = $query->{limit} || 60;
+  $args{match}    = $query->{match};
   $args{messages} = [];
   $args{re}       = $re;
 
   # If both "before" and "after" are provided
   if ($query->{before} and $query->{after}) {
-    $args{before} = _tp($query->{before});
-    $args{after}  = _tp($query->{after});
+    $args{before}            = tp $query->{before};
+    $args{after}             = tp $query->{after};
+    @args{qw(cursor inc_by)} = ($args{after}, 1);
   }
 
   # If "before" is provided but not "after"
   # Set "after" to 12 months before "before"
   elsif ($query->{before} and !$query->{after}) {
-    $args{before} = _tp($query->{before});
-    $args{after}  = $args{before}->add_months(-12);
+    $args{before}            = tp $query->{before};
+    $args{after}             = $args{before}->add_months(-12);
+    @args{qw(cursor inc_by)} = ($args{before}, -1);
   }
 
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    $args{after}  = _tp($query->{after});
-    $args{before} = $args{after}->add_months(12);
+    $args{after}             = tp $query->{after};
+    $args{before}            = $args{after}->add_months(12);
+    @args{qw(cursor inc_by)} = ($args{after}, 1);
   }
 
   # If neither "before" nor "after" are provided
   # Set "before" to now and "after" to 12 months before "before"
   else {
-    $args{before} = 60 + gmtime;    # make sure we get the message sent right now as well
+    $args{before} = 10 + gmtime;    # make sure we get the message sent right now as well
     $args{after} = $args{before}->add_months(-12);
+    @args{qw(cursor inc_by force_end)} = ($args{before}, -1, 1);
   }
 
   # Do not search if the difference between "before" and "after" is more than 12 months
   # This limits the amount of time that could be spent searching and it also prevents DoS attacks
-  return Mojo::Promise->resolve([])
+  return Mojo::Promise->reject('"after" must be before "before".') if $args{after} > $args{before};
+  return Mojo::Promise->reject('"before" - "after" is longer than 12 months.')
     if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
 
-  # The {cursor} is used to walk through the month-hashed log files
-  $args{cursor} = $args{before};
+  $args{end} = true;
 
-  warn "[@{[$obj->id]}] Searching $args{after} - $args{before} ($args{limit})\n" if DEBUG;
+  warn sprintf "[%s] Getting messages from %s to %s (i=%s, l=%s, c=%s)\n", $obj->id,
+    $args{after}->datetime, $args{before}->datetime, @args{qw(inc_by limit)},
+    $args{cursor}->datetime,
+    if DEBUG;
 
   my $p = Mojo::Promise->new;
   Mojo::IOLoop::Subprocess->new->run(
-    sub { $self->_messages($obj, \%args) },
+    sub {
+      my $res = $self->_messages($obj, \%args);
+      return {end => $res->{end}, limit => $res->{limit}, messages => $res->{messages}};
+    },
     sub { $_[1] ? $p->reject($_[1]) : $p->resolve($_[2]) },
   );
 
@@ -156,8 +167,8 @@ sub notifications_p {
   $query->{limit} ||= 40;
 
   unless ($FH = File::ReadBackwards->new($file)) {
-    warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG;
-    return Mojo::Promise->resolve([]);
+    warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG >= 3;
+    return Mojo::Promise->resolve({end => true, messages => []});
   }
 
   $re = $query->{match} || qr{.};
@@ -169,13 +180,13 @@ sub notifications_p {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
-    my $ts      = _tp($message->{ts});
+    my $ts      = tp $message->{ts};
     $self->_message_type_from($message);
     unshift @notifications, $message;
     last if @notifications == $query->{limit};
   }
 
-  return Mojo::Promise->resolve(\@notifications);
+  return Mojo::Promise->resolve({end => true, messages => \@notifications});
 }
 
 sub save_object_p {
@@ -263,7 +274,7 @@ sub _log {
 
   $dir->make_path unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
-  warn "[@{[$obj->id]}:@{[$t->datetime]}] $file <<< ($message)\n" if DEBUG == 2;
+  warn "[@{[$obj->id]}:@{[$t->datetime]}] $file <<< ($message)\n" if DEBUG >= 3;
   flock $FH, LOCK_EX;
   $FH->syswrite($t->datetime . " $message\n") or die "Write $file: $!";
   flock $FH, LOCK_UN;
@@ -298,30 +309,51 @@ sub _messages {
   my ($self, $obj, $args) = @_;
   my $cursor = $args->{cursor};
 
-  return []                if $args->{after} > $args->{before};
-  return $args->{messages} if $cursor < $args->{after};
-  $args->{cursor} = $args->{cursor}->add_months(-1) while $cursor->mon == $args->{cursor}->mon;
+  # Check if the interval has been exhausted
+  return $args if $cursor < $args->{after} || $cursor > $args->{before}->add_months(1);
 
-  my $file = $self->_log_file($obj, $cursor);
-  my $FH   = File::ReadBackwards->new($file);
-  unless ($FH) {
-    warn "[@{[$obj->id]}] $!: $file\n" if DEBUG >= 2;
+  # Prepare cursor for next time _messages() will be called
+  my $mon = $args->{cursor}->mon;
+  $args->{cursor} = $args->{cursor}->add_months($args->{inc_by}) while $args->{cursor}->mon == $mon;
+
+  my $FH;
+  eval {
+    my $file = $self->_log_file($obj, $cursor);
+    $FH = $args->{inc_by} > 0 ? _open($file) : File::ReadBackwards->new($file);
+    die qq{Can't read "$file": $!\n} unless $FH;
+    warn "[@{[$obj->id]}] Reading $file\n" if DEBUG;
+    1;
+  } or do {
+    warn "[@{[$obj->id]}] $@" if DEBUG >= 2;
     return $self->_messages($obj, $args);
-  }
+  };
 
-  warn "[@{[$obj->id]}] Gettings messages from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $args->{re};
+
     my $flag    = $2 || '0';
     my $message = {message => $3, ts => $1};
-    my $ts      = _tp($message->{ts});
-    next unless $ts < $args->{before} and $ts > $args->{after};
+    my $ts      = tp $message->{ts};
+
+    # my $x       = $ts >= $args->{before} || $ts <= $args->{after} ? '-' : '+';
+    # Test::More::note("($x) $args->{after} <> $1 <> $args->{before} - $3\n");
+    # Not within time boundaries
+    next if $ts >= $args->{before} or $ts <= $args->{after};
+
+    # Found message
     $self->_message_type_from($message);
-    $message->{highlight}
-      = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? Mojo::JSON->true : Mojo::JSON->false;
-    unshift @{$args->{messages}}, $message;
-    return $args->{messages} if int @{$args->{messages}} == $args->{limit};
+    $message->{highlight} = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? true : false;
+    $args->{inc_by} < 0 ? unshift @{$args->{messages}}, $message : push @{$args->{messages}},
+      $message;
+
+    # Get more messages
+    next unless @{$args->{messages}} > $args->{limit};
+
+    # Found more than we searched for
+    $args->{end} = false if !$args->{force_end} or $args->{match};
+    $args->{inc_by} < 0 ? shift @{$args->{messages}} : pop @{$args->{messages}};
+    return $args;
   }
 
   return $self->_messages($obj, $args);
@@ -331,13 +363,18 @@ sub _notifications_file {
   $_[0]->home->child($_[1]->id, 'notifications.log');
 }
 
+sub _open {
+  return undef unless open my $FH, '<', shift;
+  return $FH;
+}
+
 sub _save_notification {
   my ($self, $obj, $ts, $message) = @_;
   my $file = $self->_notifications_file($obj->connection->user);
   my $t    = gmtime $ts;
 
   open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
-  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG == 2;
+  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;
   flock $FH, LOCK_EX;
   printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
   flock $FH, LOCK_UN;
@@ -385,13 +422,6 @@ sub _setup {
       );
     }
   );
-}
-
-sub _tp {
-  local $_ = shift;
-  $_ =~ s!Z$!!;
-  $_ =~ s!\.\d*$!!;
-  Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 
 1;

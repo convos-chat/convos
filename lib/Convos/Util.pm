@@ -4,11 +4,13 @@ use Mojo::Base 'Exporter';
 use JSON::Validator::Error;
 use Mojo::File;
 use Mojo::Util qw(b64_encode md5_sum monkey_patch);
+use Time::Piece ();
+
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK
-  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum);
+  = qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module short_checksum tp);
 
 sub E {
   my ($msg, $path) = @_;
@@ -70,13 +72,6 @@ sub pretty_connection_name {
   $name;
 }
 
-sub short_checksum {
-  my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
-  my $short    = b64_encode pack 'H*', $checksum;
-  $short =~ s![eioEIO+=/\n]!!g;
-  return substr $short, 0, 16;
-}
-
 sub require_module {
   my $name        = pop;
   my $required_by = shift || caller;
@@ -89,6 +84,20 @@ sub require_module {
   \$ ./script/convos cpanm -n $name
 
 HERE
+}
+
+sub short_checksum {
+  my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
+  my $short    = b64_encode pack 'H*', $checksum;
+  $short =~ s![eioEIO+=/\n]!!g;
+  return substr $short, 0, 16;
+}
+
+sub tp {
+  local $_ = shift;
+  $_ =~ s!Z$!!;
+  $_ =~ s!\.\d*$!!;
+  Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 
 1;
@@ -152,6 +161,14 @@ Will turn a given hostname into a nicer connection name.
   require_module "Some::Module";
 
 Will load the module or C<die()> with a message for how to install it.
+
+=head2 tp
+
+  $tp = tp "2020-06-09T02:39:51";
+  $tp = tp "2020-06-09T02:39:51Z";
+  $tp = tp "2020-06-09T02:39:51.001Z";
+
+Used to create a L<Time::Piece> object from a date-time string.
 
 =head2 short_checksum
 

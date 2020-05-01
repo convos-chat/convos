@@ -7,8 +7,8 @@ sub messages {
   my %query = map { defined $self->param($_) ? ($_, $self->param($_)) : () } qw(limit match);
 
   return $user->notifications_p(\%query)->then(sub {
-    my $messages = shift;
-    $self->render(openapi => {messages => $messages});
+    my $res = shift;
+    $self->render(openapi => {end => $res->{end}, messages => $res->{messages}});
   });
 }
 
