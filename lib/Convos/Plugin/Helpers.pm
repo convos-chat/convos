@@ -27,6 +27,7 @@ sub register {
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
 
   $app->linkembedder->ua->insecure(1) if $ENV{LINK_EMBEDDER_ALLOW_INSECURE_SSL};
+  $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
 }
 
 sub _asset_version {
