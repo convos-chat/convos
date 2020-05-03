@@ -89,7 +89,7 @@ sub _backend_connection_create_p {
 sub _exception {
   my ($c, $err) = @_;
   return $EXCEPTION_HELPER->($c, $err) unless $c->openapi->spec;
-  $c->app->log->err($err);
+  $c->app->log->error($err);
   $err =~ s!\sat\s\S+.*!!s;
   return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
 }
