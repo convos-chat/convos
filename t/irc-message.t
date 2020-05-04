@@ -185,7 +185,6 @@ my @sent = (
 my @msg;
 local *Convos::Core::Connection::Irc::_irc_event_privmsg = sub { push @msg, pop(@_)->{raw_line} };
 $connection->send_p('#convos' => $sent[0])->$wait_success('short paste message');
-
 $connection->send_p('#convos' => $sent[1])->$wait_success('long paste message');
 $connection->send_p('#convos' => $sent[2])->$wait_success('many short lines paste message');
 
@@ -206,6 +205,10 @@ for my $msg (@msg) {
   chomp $sent;    # TODO: Is this correct?
   is $file->slurp, $sent, "paste file $basename match sent data";
 }
+
+note 'paste with unicode';
+$connection->send_p('#convos' => "c\no\nn\nv\no\ns\n 2h 46m 55s\n")
+  ->$wait_success('paste with unicode');
 
 done_testing;
 

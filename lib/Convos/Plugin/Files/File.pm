@@ -8,6 +8,7 @@ use Mojo::Asset::File;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Path;
+use Mojo::Util 'encode';
 use Time::HiRes 'time';
 
 has asset    => sub { Mojo::Asset::File->new };
@@ -36,7 +37,7 @@ sub handle_message_to_paste_p {
   my ($class, $backend, $connection, $message) = @_;
   my $self = $class->new(user => $connection->user);
 
-  $self->asset->add_chunk($message);
+  $self->asset->add_chunk(encode 'UTF-8', $message);
   $self->filename('paste.txt');
 
   return $self->save_p;

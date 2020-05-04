@@ -1,3 +1,4 @@
+% use Mojo::Util 'decode';
 % layout 'convos';
 % title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
 
@@ -19,7 +20,7 @@
     % end
   % } else {
     <div class="le-paste is-expanded without-frame">
-      <pre class="paste"><%= $file->{content} || $file->asset->slurp %></pre>
+      <pre class="paste"><%= decode 'UTF-8', $file->{content} || $file->asset->slurp %></pre>
     </div>
   % }
 </main>
