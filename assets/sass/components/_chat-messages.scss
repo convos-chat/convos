@@ -1,7 +1,12 @@
 .message {
   position: relative;
   padding: 2px;
-  overflow: hidden;
+
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
 
   > i {
     font-size: 1.2rem;
@@ -26,12 +31,6 @@
     .message__ts {
       opacity: 0;
       transition: opacity 0.3s;
-
-      & + [role="tooltip"],
-      &:focus + [role="tooltip"],
-      &:hover + [role="tooltip"] {
-        display: none;
-      }
     }
 
     &:hover .message__ts {
@@ -165,8 +164,12 @@
   position: relative;
   z-index: 2;
 
-  &:focus + [role="tooltip"],
-  &:hover + [role="tooltip"] {
+  > div {
+    white-space: pre;
+  }
+
+  &:focus > div,
+  &:hover > div {
     left: auto;
     right: 0;
   }

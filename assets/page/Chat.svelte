@@ -112,8 +112,7 @@ function onClose() {
 
       <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
-        <b class="message__ts" aria-labelledby="{message.id + '_ts'}">{message.ts.getHM()}</b>
-        <div role="tooltip" id="{message.id + '_ts'}">{message.ts.toLocaleString()}</div>
+        <div class="message__ts has-tooltip" data-content="{message.ts.getHM()}"><div>{message.ts.toLocaleString()}</div></div>
         <a href="#input:{message.from}" on:click|preventDefault="{() => chatInput.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
         <div class="message__text">
           {#if chatMessages.canToggleDetails(message)}
