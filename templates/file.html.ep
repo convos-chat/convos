@@ -28,7 +28,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function(e) {
   document.querySelectorAll('pre').forEach(el => {
-    hljs.highlightBlock(el);
+    hljs.lineNumbersBlock(el);
   })
 });
 </script>

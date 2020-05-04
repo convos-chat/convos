@@ -1,7 +1,7 @@
 .hljs {
   display: block;
   overflow-x: auto;
-  padding: 0.5em;
+  padding: 0 0.3rem var(--gutter-small) 0;
   color: var(--syntax-hl-base);
   background: var(--syntax-hl-base-bg);
 }
@@ -193,4 +193,34 @@
 .hljs-variable {
   background: var(--syntax-hl-variable-bg);
   color: var(--syntax-hl-variable);
+}
+
+/* highlightjs-line-numbers.js */
+.hljs-ln {
+  border-collapse: collapse;
+}
+
+.hljs-ln {
+  td {
+    padding: 0;
+  }
+
+  .hljs-ln-numbers {
+    color: var(--syntax-hl-comment);
+    text-align: right;
+    border-right: var(--hr-border);
+    padding-right: 0.5em;
+    width: 1em;
+    opacity: 0.9;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  .hljs-ln-code {
+    padding-left: 0.5em;
+  }
+}
+
+.hljs-ln-n:before {
+  content: attr(data-line-number);
 }

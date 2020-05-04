@@ -1,7 +1,29 @@
-// jshint multistr:true
+let d, w;
 
-(function (w, d) {
-    'use strict';
+export default function(hljs) {
+  let isInitialized = false;
+
+  hljs.lineNumbersBlock = function(element, options) {
+    if (!isInitialized) {
+      d = document;
+      w = window;
+      isInitialized = true;
+    }
+
+    hljs.highlightBlock(element, options);
+    setTimeout(() => (element.innerHTML = lineNumbersInternal(element, options)), 0);
+  };
+}
+
+/*
+ * The rest of the code is from https://github.com/wcoder/highlightjs-line-numbers.js v2.7.0,
+ * but with some modifications:
+ * - Need to pass the rules in .eslintrc.js
+ * - No need for format(), since `...` can be used instead
+ * - addStyles() is moved into the _hljs.scss
+ * - initLineNumbersOnLoad() and documentReady() is not in use in Convos
+ * - Not sure what lineNumbersValue() was used for, so it is also removed
+ */
 
     var TABLE_NAME = 'hljs-ln',
         LINE_NAME = 'hljs-ln-line',
@@ -11,15 +33,6 @@
         DATA_ATTR_NAME = 'data-line-number',
         BREAK_LINE_REGEXP = /\r\n|\r|\n/g;
 
-    if (w.hljs) {
-        w.hljs.initLineNumbersOnLoad = initLineNumbersOnLoad;
-        w.hljs.lineNumbersBlock = lineNumbersBlock;
-        w.hljs.lineNumbersValue = lineNumbersValue;
-
-        addStyles();
-    } else {
-        w.console.error('highlight.js not detected!');
-    }
 
     function isHljsLnCodeDescendant(domElt) {
         var curElt = domElt;
@@ -62,8 +75,8 @@
         }
 
         // extract line numbers
-        var firstLineNumber = parseInt(tdAnchor.dataset.lineNumber);
-        var lastLineNumber = parseInt(tdFocus.dataset.lineNumber);
+        var firstLineNumber = parseInt(tdAnchor.dataset.lineNumber, 10);
+        var lastLineNumber = parseInt(tdFocus.dataset.lineNumber, 10);
 
         // multi-lines copied case
         if (firstLineNumber != lastLineNumber) {
@@ -95,7 +108,7 @@
             var selectedText = firstLineText;
             var hljsLnTable = getHljsLnTable(tdAnchor);
             for (var i = firstLineNumber + 1 ; i < lastLineNumber ; ++i) {
-                var codeLineSel = format('.{0}[{1}="{2}"]', [CODE_BLOCK_NAME, DATA_ATTR_NAME, i]);
+                var codeLineSel = `.${CODE_BLOCK_NAME}[${DATA_ATTR_NAME}="${i}"]`;
                 var codeLineElt = hljsLnTable.querySelector(codeLineSel);
                 selectedText += '\n' + codeLineElt.textContent;
             }
@@ -117,7 +130,7 @@
             var selectionText;
             // workaround an issue with Microsoft Edge as copied line breaks
             // are removed otherwise from the selection string
-            if (window.navigator.userAgent.indexOf("Edge") !== -1) {
+            if (window.navigator.userAgent.indexOf('Edge') !== -1) {
                 selectionText = edgeGetSelectedCodeLines(selection);
             } else {
                 // other browsers can directly use the selection string
@@ -128,70 +141,12 @@
         }
     });
 
-    function addStyles () {
-        var css = d.createElement('style');
-        css.type = 'text/css';
-        css.innerHTML = format(
-            '.{0}{border-collapse:collapse}' +
-            '.{0} td{padding:0}' +
-            '.{1}:before{content:attr({2})}',
-        [
-            TABLE_NAME,
-            NUMBER_LINE_NAME,
-            DATA_ATTR_NAME
-        ]);
-        d.getElementsByTagName('head')[0].appendChild(css);
-    }
-
-    function initLineNumbersOnLoad (options) {
-        if (d.readyState === 'interactive' || d.readyState === 'complete') {
-            documentReady(options);
-        } else {
-            w.addEventListener('DOMContentLoaded', function () {
-                documentReady(options);
-            });
-        }
-    }
-
-    function documentReady (options) {
-        try {
-            var blocks = d.querySelectorAll('code.hljs,code.nohighlight');
-
-            for (var i in blocks) {
-                if (blocks.hasOwnProperty(i)) {
-                    lineNumbersBlock(blocks[i], options);
-                }
-            }
-        } catch (e) {
-            w.console.error('LineNumbers error: ', e);
-        }
-    }
-
-    function lineNumbersBlock (element, options) {
-        if (typeof element !== 'object') return;
-
-        async(function () {
-            element.innerHTML = lineNumbersInternal(element, options);
-        });
-    }
-
-    function lineNumbersValue (value, options) {
-        if (typeof value !== 'string') return;
-
-        var element = document.createElement('code')
-        element.innerHTML = value
-
-        return lineNumbersInternal(element, options);
-    }
-
     function lineNumbersInternal (element, options) {
         // define options or set default
-        options = options || {
-            singleLine: false
-        };
+        options = options || {singleLine: false};
 
         // convert options
-        var firstLineIndex = !!options.singleLine ? 0 : 1;
+        var firstLineIndex = options.singleLine ? 0 : 1;
 
         duplicateMultilineNodes(element);
 
@@ -211,27 +166,18 @@
             var html = '';
 
             for (var i = 0, l = lines.length; i < l; i++) {
-                html += format(
-                    '<tr>' +
-                        '<td class="{0} {1}" {3}="{5}">' +
-                            '<div class="{2}" {3}="{5}"></div>' +
-                        '</td>' +
-                        '<td class="{0} {4}" {3}="{5}">' +
-                            '{6}' +
-                        '</td>' +
-                    '</tr>',
-                [
-                    LINE_NAME,
-                    NUMBERS_BLOCK_NAME,
-                    NUMBER_LINE_NAME,
-                    DATA_ATTR_NAME,
-                    CODE_BLOCK_NAME,
-                    i + 1,
-                    lines[i].length > 0 ? lines[i] : ' '
-                ]);
+                let n = i + 1;
+                html += '<tr>'
+                        + `<td class="${LINE_NAME} ${NUMBERS_BLOCK_NAME}" ${DATA_ATTR_NAME}="${n}">`
+                          + `<div class="${NUMBER_LINE_NAME}" ${DATA_ATTR_NAME}="${n}"></div>`
+                        + '</td>'
+                        + `<td class="${LINE_NAME} ${CODE_BLOCK_NAME}" ${DATA_ATTR_NAME}="${n}">`
+                          + (lines[i].length > 0 ? lines[i] : ' ')
+                        + '</td>'
+                      + '</tr>';
             }
 
-            return format('<table class="{0}">{1}</table>', [ TABLE_NAME, html ]);
+            return `<table class="${TABLE_NAME}">${html}</table>`;
         }
 
         return inputHtml;
@@ -271,7 +217,7 @@
 
         for (var i = 0, result = ''; i < lines.length; i++) {
             var lineText = lines[i].length > 0 ? lines[i] : ' ';
-            result += format('<span class="{0}">{1}</span>\n', [ className,  lineText ]);
+            result += `<span class="${className}">${lineText}</span>\n`;
         }
 
         element.innerHTML = result.trim();
@@ -285,20 +231,3 @@
     function getLinesCount (text) {
         return (text.trim().match(BREAK_LINE_REGEXP) || []).length;
     }
-
-    function async (func) {
-        w.setTimeout(func, 0);
-    }
-
-    /**
-     * {@link https://wcoder.github.io/notes/string-format-for-string-formating-in-javascript}
-     * @param {string} format
-     * @param {array} args
-     */
-    function format (format, args) {
-        return format.replace(/\{(\d+)\}/g, function(m, n){
-            return args[n] ? args[n] : m;
-        });
-    }
-
-}(window, document));

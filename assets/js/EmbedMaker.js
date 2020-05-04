@@ -37,7 +37,7 @@ export default class EmbedMaker extends Reactive {
   }
 
   renderPasteEl(embedEl) {
-    hljs.highlightBlock(embedEl.querySelector('pre'));
+    hljs.lineNumbersBlock(embedEl.querySelector('pre'));
     q(embedEl, '.le-meta', metaEl => {
       metaEl.addEventListener('click', () => metaEl.parentNode.classList.toggle('is-expanded'));
     });

@@ -11,5 +11,5 @@
 
 <script>
 document.addEventListener('DOMContentLoaded',
-  e => document.querySelectorAll('pre').forEach(el => hljs.highlightBlock(el)));
+  e => document.querySelectorAll('pre').forEach(el => hljs.lineNumbersBlock(el)));
 </script>

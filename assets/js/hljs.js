@@ -1,4 +1,5 @@
 import hljs from 'highlight.js/lib/highlight';
+import hljsLineNumbers from './highlightjs-line-numbers';
 
 // TODO: Figure out a better default list.
 // The reasons behind this list are listed below.
@@ -40,5 +41,7 @@ hljs.registerLanguage('scss', scss);
 hljs.registerLanguage('shell', shell);
 hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('yaml', yaml);
+
+hljsLineNumbers(hljs);
 
 export default hljs;
