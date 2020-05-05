@@ -1,17 +1,17 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
-import ScrollSpy from '../js/Scrollspy';
+import Scrollspy from '../js/Scrollspy';
 import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
-const scrollSpy = new ScrollSpy();
+const scrollspy = new Scrollspy();
 let mainEl;
 
-$: scrollSpy.wrapper = mainEl;
-$: scrollSpy.scrollTo($route.hash ? '#' + $route.hash : 0);
+$: scrollspy.wrapper = mainEl;
+$: scrollspy.scrollTo($route.hash ? '#' + $route.hash : 0);
 
 route.update({title: l('Help')});
 </script>
@@ -21,7 +21,7 @@ route.update({title: l('Help')});
 </ChatHeader>
 
 <main class="main" bind:this="{mainEl}">
-  <p on:click="{scrollSpy.scrollTo}">
+  <p on:click="{scrollspy.scrollTo}">
     {l('Jump to:')}
     <a href="#shortcuts">{l('Shortcuts')}</a>,
     <a href="#autocomplete">{l('Autocomplete')}</a>,

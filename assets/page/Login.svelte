@@ -2,7 +2,7 @@
 import Button from '../components/form/Button.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
-import ScrollSpy from '../js/ScrollSpy';
+import Scrollspy from '../js/Scrollspy';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
@@ -11,7 +11,7 @@ import {route} from '../store/Route';
 
 const emailFromParams = location.href.indexOf('email=') != -1;
 const user = getContext('user');
-const scrollSpy = new ScrollSpy();
+const scrollspy = new Scrollspy();
 const loginOp = user.api.operation('loginUser');
 const registerOp = user.api.operation('registerUser');
 
@@ -20,8 +20,8 @@ let mainEl;
 let observer;
 
 $: defaultPos = $route.path.indexOf('register') == -1 ? 0 : '#signup';
-$: scrollSpy.wrapper = mainEl;
-$: scrollSpy.scrollTo($route.hash ? '#' + $route.hash : 0);
+$: scrollspy.wrapper = mainEl;
+$: scrollspy.scrollTo($route.hash ? '#' + $route.hash : 0);
 
 $: if ($loginOp.is('success')) {
   redirectAfterLogin(loginOp);
@@ -85,7 +85,7 @@ async function redirectAfterLogin(op) {
 
         <div class="form-actions">
           <Button icon="sign-in-alt" op="{loginOp}">{l('Sign in')}</Button>
-          <a class="btn is-hallow" on:click="{scrollSpy.scrollTo}" href="#signup">{l('Sign up')}</a>
+          <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#signup">{l('Sign up')}</a>
         </div>
 
         <OperationStatus op="{loginOp}"/>
@@ -100,8 +100,8 @@ async function redirectAfterLogin(op) {
       <p>{l('Please ask your Convos admin for a new link.')}</p>
       <p>
         <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
-        <a class="btn is-hallow" on:click="{scrollSpy.scrollTo}" href="#signin">{l('Sign in')}</a>
-        <a class="btn is-hallow" on:click="{scrollSpy.scrollTo}" href="#top">{l('Home')}</a>
+        <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#signin">{l('Sign in')}</a>
+        <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#top">{l('Home')}</a>
       </p>
     {:else if emailFromParams || process.env.open_to_public || $user.isFirst}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
@@ -133,7 +133,7 @@ async function redirectAfterLogin(op) {
         </div>
 
         {#if !emailFromParams && !$user.isFirst}
-          <p on:click="{scrollSpy.scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
+          <p on:click="{scrollspy.scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
         {/if}
 
         <OperationStatus op="{registerOp}"/>
@@ -141,11 +141,11 @@ async function redirectAfterLogin(op) {
     {:else}
       <h2>{l('Sign up')}</h2>
       <p>{l('Convos is not open for public registration.')}</p>
-      <p on:click="{scrollSpy.scrollTo}">{l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
+      <p on:click="{scrollspy.scrollTo}">{l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
       <div class="form-actions">
         <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
-        <a class="btn is-hallow" on:click="{scrollSpy.scrollTo}" href="#signin">{l('Sign in')}</a>
-        <a class="btn is-hallow" on:click="{scrollSpy.scrollTo}" href="#top">{l('Home')}</a>
+        <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#signin">{l('Sign in')}</a>
+        <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#top">{l('Home')}</a>
       </div>
     {/if}
   </section>
