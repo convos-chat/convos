@@ -209,6 +209,12 @@ textarea {
   .has-remaining-space {
     flex: 1 1 0;
   }
+
+  @media (min-width: #{$input-max-width}) {
+    .text-field {
+      min-width: $input-max-width;
+    }
+  }
 }
 
 .select-field {
@@ -239,13 +245,18 @@ textarea {
 
     @media (max-width: #{$input-max-width}) {
       left: auto;
-      right: 0.7em;
+      right: 0.6em;
     }
   }
 
   &.is-open:after {
     content: fa-content($fa-var-caret-up);
   }
+}
+
+.inputs-side-by-side .select-field:after {
+  left: auto;
+  right: 0.6em;
 }
 
 .select-field__options {
