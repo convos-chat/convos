@@ -10,8 +10,9 @@
    * Atom One Light by Daniel Gamage
    * Original One Light Syntax theme from https://github.com/atom/one-light-syntax
    */
+  --code-bg: #dddedd;
   --syntax-hl-base: #383a42;
-  --syntax-hl-base-bg: #fafafa;
+  --syntax-hl-base-bg: #edeeed;
   --syntax-hl-addition: #50a14f;
   --syntax-hl-attr: #986801;
   --syntax-hl-attribute: #50a14f;

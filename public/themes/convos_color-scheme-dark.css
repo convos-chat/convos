@@ -4,14 +4,15 @@
  */
 
 :root {
-  --body-bg: #1f2122;
-  --text-color: #d1cfca;
+  --body-bg: #333333;
+  --text-color: #f4f4f4;
   --link-color: #d1cfca;
   --quote-color: #d1cfca;
   --error-color: #e37777;
   --success-color: #79a071;
-  --highlight-color: #371114;
+  --highlight-color-bg: #371114;
   --hr-border: 1px solid #4e4e4e;
+  --code-bg: #121712;
   --button-bg: #2c3a2d;
   --button-color: #f9f9f9;
   --button-border: 1px solid #536e55;
@@ -29,11 +30,14 @@
   --input-disabled-color: #bcb8b1;
   --input-placeholder-color: #8e8e8e;
   --input-focus-placeholder-color: #555;
+  --chat-input-border-top: 2px solid #9da79d;
+  --chat-input-border-radius: 0;
+  --chat-input-box-shadow: none;
   --autocomplete-bg: #404040;
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: #222;
-  --ts-color: #4d4d4d;
-  --sidebar-left-bg: #415442;
+  --ts-color: #999;
+  --sidebar-left-bg: #4d574d;
   --sidebar-left-frozen-color: #a7d4aa;
   --sidebar-left-text: #f8f8f8;
   --sidebar-left-outline: #8ece93 auto 3px;
@@ -48,13 +52,13 @@
    * Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
    */
   --syntax-hl-base: #abb2bf;
-  --syntax-hl-base-bg: #282c34;
+  --syntax-hl-base-bg: #2e312e;
   --syntax-hl-addition: #98c379;
   --syntax-hl-attr: #d19a66;
   --syntax-hl-attribute: #98c379;
   --syntax-hl-built-in: #e6c07b;
   --syntax-hl-bullet: #61aeee;
-  --syntax-hl-comment: #5c6370;
+  --syntax-hl-comment: #8b9f9a;
   --syntax-hl-deletion: var(--syntax-hl-base);
   --syntax-hl-doctag: #c678dd;
   --syntax-hl-formula: #c678dd;

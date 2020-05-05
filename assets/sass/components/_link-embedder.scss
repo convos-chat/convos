@@ -83,23 +83,25 @@
 }
 
 .le-paste {
-  background: var(--body-bg);
   font-size: 0.9rem;
   border: var(--hr-border);
-  max-height: 8.5rem;
+  max-height: 8.8em;
   max-width: 100%;
   overflow: hidden;
 
   &.without-frame {
-    border: 0;
-
-    .hljs {
+    &, .hljs {
+      background: transparent;
+      border: 0;
       padding: 0;
+    }
+
+    &:after {
+      content: '' !important;
     }
   }
 
   .hljs {
-    background: transparent;
     margin: 0;
   }
 
@@ -108,12 +110,23 @@
   }
 
   .le-meta {
-    background: var(--body-bg);
+    background: var(--syntax-hl-base-bg);
     color: var(--text-color);
-    padding: var(--gutter-small);
+    padding: 0.3em;
     margin: 0;
-    filter: brightness(0.95);
     cursor: zoom-in;
+    position: relative;
+
+    &:after {
+      @extend .fas;
+      content: fa-content($fa-var-angle-down);
+      font-size: 1.2em;
+      position: absolute;
+      top: 0.4em;
+      right: 0.4em;
+      transition: transform 0.25s;
+      cursor: pointer;
+    }
   }
 
   ol {
@@ -126,6 +139,10 @@
 
     .le-meta {
       cursor: zoom-out;
+
+      &:after {
+        transform: rotate(180deg);
+      }
     }
   }
 }

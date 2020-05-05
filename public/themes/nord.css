@@ -9,9 +9,10 @@
   --quote-color: #88c0d0;
   --error-color: #bf616a;
   --success-color: #a3be8c;
-  --highlight-color: #434c5e;
+  --highlight-color-bg: #434c5e;
   --hr-border: 1px solid #4e4e4e;
   --button-bg: #5E81AC;
+  --code-bg: #05162B;
   --button-color: #ECEFF4;
   --button-border: 1px solid #434C5E;
   --button-focus-outline: 2px solid #97b799;
@@ -27,6 +28,9 @@
   --input-disabled-bg: #3B4252;
   --input-disabled-color: #D8DEE9;
   --input-placeholder-color: #4C566A;
+  --chat-input-border-top: 2px solid #a7adc8;
+  --chat-input-border-radius: 0;
+  --chat-input-box-shadow: none;
   --autocomplete-bg: #cbd3e4;
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: #a9b5d0;
@@ -51,17 +55,18 @@
    * License:    MIT
    */
   --syntax-hl-base: #D8DEE9;
-  --syntax-hl-base-bg: #2E3440;
+  --syntax-hl-base-bg: #3D4557;
   --syntax-hl-addition-bg: rgba(163, 190, 140, 0.5);
   --syntax-hl-deletion-bg: rgba(191, 97, 106, 0.5);
   --syntax-hl-attr: #8FBCBB;
   --syntax-hl-attribute: #D8DEE9;
   --syntax-hl-built-in: #8FBCBB;
   --syntax-hl-bullet: #81A1C1;
-  --syntax-hl-comment: #4C566A;
+  --syntax-hl-comment: #A8B1C2;
   --syntax-hl-doctag: #8FBCBB;
   --syntax-hl-class: #8FBCBB;
   --syntax-hl-code: #8FBCBB;
+  --syntax-hl-code-bg: #D8DEE9;
   --syntax-hl-formula: #8FBCBB;
   --syntax-hl-function: #88C0D0;
   --syntax-hl-keyword: #81A1C1;

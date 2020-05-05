@@ -1,9 +1,10 @@
 .hljs {
+  background: var(--syntax-hl-base-bg);
+  color: var(--syntax-hl-base);
+  padding: 0 0.3rem var(--gutter-small) 0;
+  line-height: 1.4em;
   display: block;
   overflow-x: auto;
-  padding: 0 0.3rem var(--gutter-small) 0;
-  color: var(--syntax-hl-base);
-  background: var(--syntax-hl-base-bg);
 }
 
 .hljs-comment,

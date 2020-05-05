@@ -3,8 +3,10 @@
   background: var(--body-bg);
   margin-top: var(--gutter);
   margin-bottom: 4px;
-  box-shadow: 0px 1px 2px 1px inset rgba(0,0,0,.2);
-  border-radius: 8px;
+  border: var(--chat-input-border);
+  border-top: var(--chat-input-border-top);
+  border-radius: var(--chat-input-border-radius);
+  box-shadow: var(--chat-input-box-shadow);
   display: flex;
   bottom: 0;
   z-index: 3;

@@ -13,8 +13,8 @@
   }
 
   code {
-    background: var(--body-bg);
-    filter: brightness(0.92);
+    background: var(--code-bg);
+    color: var(--syntax-hl-string);
     padding: 0.15em 0.25em;
   }
 
@@ -44,13 +44,9 @@
 
   &.is-type-error .message__text,
   &.is-highlighted .message__text {
-    background-color: var(--highlight-color);
-    border: 3px solid var(--highlight-color);
+    background-color: var(--highlight-color-bg);
+    border: 3px solid var(--highlight-color-bg);
     margin: 0 -3px;
-
-    code {
-      background-color: var(--highlight-color);
-    }
   }
 
   &.is-type-error .message__text,
@@ -193,6 +189,7 @@
   }
 
   span {
+    color: var(--ts-color);
     background: var(--body-bg);
     padding: 0 var(--gutter);
     position: relative;
