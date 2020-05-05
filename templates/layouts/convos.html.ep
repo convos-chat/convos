@@ -46,6 +46,6 @@
   </head>
   <body class="no-js is-logged-out">
     %= content
-    %= asset 'convos.js'
+    %= asset 'convos.js' unless stash 'exception';
   </body>
 </html>

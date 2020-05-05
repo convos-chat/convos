@@ -106,17 +106,18 @@ sub _before_dispatch {
   ]);
 
   # Handle mount point like /apps/convos
-  my $base_url;
-  if ($ENV{CONVOS_REVERSE_PROXY}) {
-    if (my $base = $c->req->headers->header('X-Request-Base')) {
-      $base_url = Mojo::URL->new($base);
-      $c->req->url->base($base_url);
-    }
-    elsif (!$c->app->{convos_reverse_proxy_warn}++) {
-      $c->app->log->warn(
-        'You should set X-Request-Base: https://convos.by/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server'
-      );
-    }
+  my $base_url = $c->req->headers->header('X-Request-Base');
+  if ($base_url and !$ENV{CONVOS_REVERSE_PROXY}) {
+    return $c->reply->exception(
+      'X-Request-Base header was seen, but CONVOS_REVERSE_PROXY is not set');
+  }
+  elsif ($base_url) {
+    $base_url = Mojo::URL->new($base_url);
+    $c->req->url->base($base_url);
+  }
+  elsif ($ENV{CONVOS_REQUEST_BASE}) {
+    $base_url = Mojo::URL->new($ENV{CONVOS_REQUEST_BASE});
+    $c->req->url->base($base_url);
   }
 
   $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
