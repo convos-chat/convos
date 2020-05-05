@@ -20,9 +20,9 @@ is_deeply(
         light   => 'convos_color-scheme-light.css'
       },
     },
-    desert  => {name => 'Deserted', color_schemes => {default => 'desert.css'},},
-    mytheme => {name => 'MyTheme',  color_schemes => {default => 'MyTheme.css'}},
-    nord    => {name => 'Nord',     color_schemes => {default => 'nord.css'}},
+    desert  => {name => 'Desert',  color_schemes => {default => 'desert.css'}},
+    mytheme => {name => 'MyTheme', color_schemes => {default => 'MyTheme.css'}},
+    nord    => {name => 'Nord',    color_schemes => {default => 'nord.css'}},
   },
   'default themes',
 ) or diag explain $t->app->defaults('themes');
