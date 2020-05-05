@@ -32,10 +32,11 @@ export default class User extends Reactive {
     this.prop('rw', 'status', 'pending');
 
     this.prop('persist', 'assetVersion', 0);
-    this.prop('persist', 'colorScheme', 'auto');
     this.prop('persist', 'experimentalLoad', false);
     this.prop('persist', 'showGrid', false);
-    this.prop('persist', 'theme', 'convos');
+
+    this.prop('cookie', 'colorScheme', 'auto');
+    this.prop('cookie', 'theme', 'convos');
 
     const matchMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {addListener: function() {}};
     if (matchMedia.matches) this._osColorScheme = 'dark';
@@ -52,8 +53,8 @@ export default class User extends Reactive {
     const theme = this.themes[this.theme];
     if (!theme) return console.error('[Convos] Invalid theme: ' + this.theme);
 
-    const file = theme.color_schemes[colorScheme] || theme.color_schemes.default;
-    document.getElementById('link_selected_theme').setAttribute('href', route.urlFor('/themes/' + file));
+    const path = theme.variants[colorScheme] || theme.variants.default;
+    document.getElementById('link_selected_theme').setAttribute('href', route.urlFor(path));
 
     const htmlEl = document.documentElement;
     htmlEl.className = htmlEl.className.replace(/theme-\S+/, () => 'theme-' + theme.id);

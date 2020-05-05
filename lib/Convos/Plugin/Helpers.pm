@@ -3,8 +3,8 @@ use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util qw(E pretty_connection_name);
 use LinkEmbedder;
-use Mojo::JSON qw(false true);
-use Mojo::Util 'url_unescape';
+use Mojo::JSON qw(decode_json false true);
+use Mojo::Util qw(b64_decode url_unescape);
 
 my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
 my $EXCEPTION_HELPER;
@@ -18,6 +18,7 @@ sub register {
   $app->helper('backend.dialog'              => \&_backend_dialog);
   $app->helper('backend.user'                => \&_backend_user);
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
+  $app->helper('js_session'                  => \&_js_session);
   $app->helper('l'                           => \&_l);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                    => \&_settings);
@@ -93,6 +94,18 @@ sub _exception {
   $c->app->log->error($err);
   $err =~ s!\sat\s\S+.*!!s;
   return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
+}
+
+sub _js_session {
+  my ($c, $name) = @_;
+  my $stash = $c->stash;
+  return $name ? $stash->{'convos.js.session'}{$name} : $stash->{'convos.js.session'}
+    if $stash->{'convos.js.session'};
+
+  my $cookie = $c->cookie('convos_js');
+  $cookie = $cookie ? decode_json b64_decode $cookie : undef;
+  $stash->{'convos.js.session'} = $cookie || {};
+  return _js_session($c, $name);
 }
 
 sub _l {

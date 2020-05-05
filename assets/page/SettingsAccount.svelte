@@ -15,7 +15,7 @@ const updateUserOp = user.api.operation('updateUser');
 
 const themes = Object.keys(user.themes).map(id => {
   let name = user.themes[id].name;
-  const colorSchemes = Object.keys(user.themes[id].color_schemes || {}).filter(cs => cs != 'default');
+  const colorSchemes = Object.keys(user.themes[id].variants || {}).filter(cs => cs != 'default');
   if (colorSchemes.length) name += ' (' + colorSchemes.sort().join('/') + ')';
   return [id, name];
 });

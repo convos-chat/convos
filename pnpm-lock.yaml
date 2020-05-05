@@ -8,6 +8,7 @@ dependencies:
   core-js: 3.6.4
   highlight.js: 9.18.1
   jest: 25.1.0
+  js-cookie: 2.2.1
   jsdoc: 3.6.3
   jsonhtmlify: 0.0.1
   querystring: 0.2.0
@@ -3972,6 +3973,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-Vg8czh0Q7sFBSUMWWArX/miJeBWYBPpdU/3M/DKSaekLMqrqVPaedp+5mZhie/r0lgrcaYBfwXatEew6gwgiQQ==
+  /js-cookie/2.2.1:
+    dev: false
+    resolution:
+      integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==
   /js-tokens/4.0.0:
     resolution:
       integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
@@ -7350,6 +7355,7 @@ specifiers:
   eslint-plugin-svelte3: ^1.2.3
   highlight.js: ^9.18.1
   jest: ^25.1.0
+  js-cookie: ^2.2.1
   jsdoc: ^3.6.3
   jsonhtmlify: ^0.0.1
   node-sass: ^4.13.1

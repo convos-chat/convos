@@ -11,10 +11,12 @@
  * @see User
  */
 
+import Cookies from 'js-cookie';
 import {isType} from '../js/util';
 
 export default class Reactive {
   constructor() {
+    this.cookieName = 'convos_js';
     this._on = {};
     this._props = {};
   }
@@ -69,18 +71,22 @@ export default class Reactive {
    *     this.some_property = 'new value';
    *
    * @memberof Reactive
-   * @param {String} type either "persist", "ro" or "rw".
+   * @param {String} type either "cookie", "persist", "ro" or "rw".
    * @param {String} name The name of the property
    * @param {Any} value Either a function or default value.
    * @param {Object} params Extra property instructions.
    */
   prop(type, name, value, params = {}) {
-    this._props[name] = {...params, type, value};
+    const prop = {...params, name, type, value};
+    this._props[name] = prop; // this._props must not be set anywhere else!
+
+    prop.updateable = ['cookie', 'persist', 'rw'].indexOf(type) != -1;
 
     switch (type) {
-      case 'persist': return this._localStorageProp(name);
-      case 'ro': return this._readOnlyProp(name);
-      case 'rw': return this._updateableProp(name);
+      case 'cookie': return this._cookieProp(prop);
+      case 'persist': return this._localStorageProp(prop);
+      case 'ro': return this._readOnlyProp(prop);
+      case 'rw': return this._updateableProp(prop);
     }
 
     throw '[' + this.constructor.name + '] Unknown prop type "' + type + '" for prop "' + name + '".';
@@ -117,11 +123,37 @@ export default class Reactive {
       const prop = this._props[name];
       if (!prop) return; // console.log('[' + this.constructor.name + '] Unknown prop "' + name + '".');
       if (!prop.hasOwnProperty('prev')) prop.prev = prop.type == 'ro' ? undefined : prop.value;
-      if (prop.type == 'persist' || prop.type == 'rw') prop.value = params[name];
+      if (prop.updateable) prop.value = params[name];
     });
 
     if (!this._updatedTid) this._updatedTid = setTimeout(this._delayedUpdate.bind(this), 1);
     return this;
+  }
+
+  _cookie(name, value) {
+    const store = document.decodedB64JSONCookies || (document.decodedB64JSONCookies = {});
+
+    if (!store[this.cookieName]) {
+      try {
+        const cookieString = Cookies.get(this.cookieName);
+        store[this.cookieName] = JSON.parse(cookieString ? atob(cookieString) : '{}');
+      } catch(err) {
+        console.error('[Reactive:cookie]', {[name]: err});
+      }
+    }
+
+    const cookie = store[this.cookieName] || {};
+    if (arguments.length == 1) return cookie[name];
+
+    cookie[name] = value;
+    Cookies.set(this.cookieName, btoa(JSON.stringify(cookie), {expires: 365}));
+  }
+
+  _cookieProp(prop) {
+    const fromStorage = this._cookie(prop.name);
+    if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
+    if (isType(fromStorage, 'undef') && !prop.lazy) this._cookie(prop.name, prop.value);
+    this._updateableProp(prop);
   }
 
   _delayedUpdate() {
@@ -132,6 +164,7 @@ export default class Reactive {
       const prev = prop.prev;
       delete prop.prev;
       if (prop.value === prev) return;
+      if (prop.type == 'cookie') this._cookie(name, prop.value);
       if (prop.type == 'persist') this._localStorage(name, prop.value);
       changed[name] = prop.type != 'ro';
     });
@@ -153,23 +186,20 @@ export default class Reactive {
     }
   }
 
-  _localStorageProp(name) {
-    const prop = this._props[name];
-    const fromStorage = this._localStorage(name);
+  _localStorageProp(prop) {
+    const fromStorage = this._localStorage(prop.name);
     if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef') && !this._props[name].lazy) this._localStorage(name, prop.value);
-    this._updateableProp(name);
+    if (isType(fromStorage, 'undef') && !prop.lazy) this._localStorage(prop.name, prop.value);
+    this._updateableProp(prop);
   }
 
-  _readOnlyProp(name) {
-    const prop = this._props[name];
-    if (prop.value === undefined) throw '[' + this.constructor.name + '] Read-only attribute "' + name + '" cannot be undefined';
+  _readOnlyProp(prop) {
+    if (prop.value === undefined) throw '[' + this.constructor.name + '] Read-only attribute "' + prop.name + '" cannot be undefined';
     const get = typeof prop.value == 'function' ? prop.value : () => prop.value;
-    Object.defineProperty(this, name, {get});
+    Object.defineProperty(this, prop.name, {get});
   }
 
-  _updateableProp(name) {
-    const prop = this._props[name];
-    Object.defineProperty(this, name, {get: () => prop.value});
+  _updateableProp(prop) {
+    Object.defineProperty(this, prop.name, {get: () => prop.value});
   }
 }

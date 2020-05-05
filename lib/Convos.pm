@@ -172,10 +172,10 @@ sub _detect_themes {
       $name =~ s!\.css$!!;
     }
 
-    $id                           ||= lc $name;
-    $color_scheme                 ||= 'default';
-    $themes->{$id}{color_schemes} ||= {};
-    $themes->{$id}{color_schemes}{$color_scheme} = $file->basename;
+    $id                      ||= lc $name;
+    $color_scheme            ||= 'default';
+    $themes->{$id}{variants} ||= {};
+    $themes->{$id}{variants}{$color_scheme} = sprintf '/themes/%s', $file->basename;
     $themes->{$id}{name} = $name;
   };
 
@@ -186,8 +186,8 @@ sub _detect_themes {
   $read_theme->($_) for $user_themes->list->each;
 
   for my $theme (values %$themes) {
-    next if $theme->{color_schemes}{default};
-    $theme->{color_schemes}{default} = +(sort { $b cmp $a } values %{$theme->{color_schemes}})[0];
+    next if $theme->{variants}{default};
+    $theme->{variants}{default} = +(sort { $b cmp $a } values %{$theme->{variants}})[0];
   }
 
   $self->defaults(themes => $themes);
