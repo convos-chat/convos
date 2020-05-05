@@ -40,6 +40,7 @@ sub build_assets {
 
 sub test_defaults {
   my ($path, $status) = @_;
-  $t->get_ok($path)->status_is($status)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
-    ->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
+  $t->get_ok($path)->status_is($status)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"]);
+  $t->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]) unless $status == 500;
+  return $t;
 }
