@@ -4,11 +4,12 @@ import ChatMessagesContainer from '../components/ChatMessagesContainer.svelte';
 import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
+import ChatMessages from '../js/ChatMessages';
 import Icon from '../components/Icon.svelte';
 import Scrollspy from '../js/Scrollspy';
+import Time from '../js/Time';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import ChatMessages from '../js/ChatMessages';
 import {l} from '../js/i18n';
 import {route} from '../store/Route';
 
@@ -23,9 +24,10 @@ let messagesHeight = 0;
 
 $: chatMessages.attach({connection: {}, dialog, user});
 $: messages = $dialog.messages;
-$: if ($dialog.query) route.go('/search?q=' + encodeURIComponent($dialog.query), {replace: true});
 $: if (mainEl) setDialogFromRoute($route);
 $: if (mainEl) scrollspy.scrollTo(messagesHeight);
+
+onMount(() => user.search.on('search', (msg) => search(route, msg)));
 
 function dialogUrl(message) {
   const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
@@ -39,16 +41,19 @@ function gotoDialog(e) {
 }
 
 function loadNotifications(route) {
-  dialog.load();
+  if (!dialog.is('success') || dialog.last_read <= new Time() - 10000) dialog.load();
   dialog.setLastRead();
 }
 
-function search(route) {
-  const match = route.param('q');
+function search(route, msg) {
+  const match = msg ? msg.message : route.param('q');
 
   if (chatInput) {
-    chatInput.setValue(match || '');
+    if (!msg) chatInput.setValue(match || '');
     focusMainInputElements('chat_input');
+  }
+  if (route.param('q') != match) {
+    route.go('/search?q=' + encodeURIComponent(match), {replace: true});
   }
 
   return match ? dialog.load({match}) : dialog.update({messages: []});
@@ -56,8 +61,7 @@ function search(route) {
 
 function setDialogFromRoute(route) {
   const d = route.path.indexOf('search') != -1 ? user.search : user.notifications;
-  if (d == dialog && route.param('q') == dialog.query) return;
-  dialog = d;
+  if (d != dialog) dialog = d;
   scrollspy.wrapper = mainEl;
   return dialog.is('search') ? search(route) : loadNotifications(route);
 }

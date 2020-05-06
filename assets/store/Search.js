@@ -46,7 +46,7 @@ export default class Search extends Dialog {
   }
 
   send(msg) {
-    return this.update({query: msg.message});
+    return this.emit('search', msg);
   }
 
   _addOperations() {
