@@ -3,6 +3,7 @@ use lib '.';
 use t::Helper;
 
 my $t = t::Helper->t;
+my $v = $t->app->VERSION;
 
 my $user_themes = Mojo::File->new($t->app->config('home'), 'themes');
 $user_themes->child('README.md')->spurt("# skip this\n");
@@ -15,14 +16,14 @@ is_deeply(
     convos => {
       name     => 'Convos',
       variants => {
-        default => '/themes/convos_color-scheme-light.css',
-        dark    => '/themes/convos_color-scheme-dark.css',
-        light   => '/themes/convos_color-scheme-light.css'
+        default => qq(/themes/convos_color-scheme-light.css?v=$v),
+        dark    => qq(/themes/convos_color-scheme-dark.css?v=$v),
+        light   => qq(/themes/convos_color-scheme-light.css?v=$v),
       },
     },
-    desert  => {name => 'Desert',  variants => {default => '/themes/desert.css'}},
-    mytheme => {name => 'MyTheme', variants => {default => '/themes/MyTheme.css'}},
-    nord    => {name => 'Nord',    variants => {default => '/themes/nord.css'}},
+    desert  => {name => 'Desert',  variants => {default => qq(/themes/desert.css?v=$v)}},
+    mytheme => {name => 'MyTheme', variants => {default => qq(/themes/MyTheme.css?v=$v)}},
+    nord    => {name => 'Nord',    variants => {default => qq(/themes/nord.css?v=$v)}},
   },
   'default themes',
 ) or diag explain $t->app->defaults('themes');
@@ -32,11 +33,11 @@ $t->get_ok('/themes/nope.css')->status_is(404)->content_like(qr{nope\.css not fo
 $t->get_ok('/themes/nope.css')->status_is(404)->content_like(qr{nope\.css not found});
 
 $t->get_ok('/')->status_is(200)
-  ->element_exists('link[href="/themes/convos_color-scheme-light.css"]');
+  ->element_exists(qq(link[href="/themes/convos_color-scheme-light.css?v=$v"]));
 $t->get_ok('/', {Cookie => js_session(colorScheme => 'dark')})->status_is(200)
-  ->element_exists('link[href="/themes/convos_color-scheme-dark.css"]');
+  ->element_exists(qq(link[href="/themes/convos_color-scheme-dark.css?v=$v"]));
 $t->get_ok('/', {Cookie => js_session(colorScheme => 'dark', theme => 'nord')})->status_is(200)
-  ->element_exists('link[href="/themes/nord.css"]');
+  ->element_exists(qq(link[href="/themes/nord.css?v=$v"]));
 
 done_testing;
 

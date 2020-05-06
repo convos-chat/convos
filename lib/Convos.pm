@@ -175,7 +175,8 @@ sub _detect_themes {
     $id                      ||= lc $name;
     $color_scheme            ||= 'default';
     $themes->{$id}{variants} ||= {};
-    $themes->{$id}{variants}{$color_scheme} = sprintf '/themes/%s', $file->basename;
+    $themes->{$id}{variants}{$color_scheme} = sprintf '/themes/%s?v=%s', $file->basename,
+      $self->VERSION;
     $themes->{$id}{name} = $name;
   };
 
