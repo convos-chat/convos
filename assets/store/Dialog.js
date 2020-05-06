@@ -144,12 +144,6 @@ export default class Dialog extends Reactive {
     if (hasMessages && opParams.before && body.end) this.update({startOfHistory: this.messages[0].ts});
     if (hasMessages && !opParams.before && body.end) this.update({endOfHistory: this.messages.slice(-1)[0].ts});
 
-    // Reload the whole conversation if we are not at the end
-    if (maybe == 'after' && !body.end) {
-      this.update({messages: []});
-      await this.load({});
-    }
-
     return this;
   }
 

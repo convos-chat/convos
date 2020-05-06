@@ -125,9 +125,9 @@ async function setDialogFromUser(user) {
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
 
-  let after = isISOTimeString(route.hash) && new Time(route.hash);
+  const after = isISOTimeString(route.hash) && new Time(route.hash);
   await dialog.load({after: after ? after.setSeconds(after.getSeconds() - 5).toISOString() : 'maybe'});
-  if (after && dialog.messages.length < dialog.chunkSize) {
+  if (dialog.messages.length < dialog.chunkSize) {
     const before = dialog.messages[0] && dialog.messages[0].ts.toISOString() || new Time().toISOString();
     await dialog.load({before});
   }
