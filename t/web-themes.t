@@ -21,6 +21,14 @@ is_deeply(
         light   => qq(/themes/convos_color-scheme-light.css?v=$v),
       },
     },
+    'high-contrast' => {
+      name     => 'High-contrast',
+      variants => {
+        default => qq(/themes/high-contrast_color-scheme-light.css?v=$v),
+        dark    => qq(/themes/high-contrast_color-scheme-dark.css?v=$v),
+        light   => qq(/themes/high-contrast_color-scheme-light.css?v=$v),
+      },
+    },
     desert  => {name => 'Desert',  variants => {default => qq(/themes/desert.css?v=$v)}},
     mytheme => {name => 'MyTheme', variants => {default => qq(/themes/MyTheme.css?v=$v)}},
     nord    => {name => 'Nord',    variants => {default => qq(/themes/nord.css?v=$v)}},

@@ -1,0 +1,31 @@
+/*
+ * name: High-contrast
+ * color-scheme: dark
+ */
+
+:root {
+  --body-bg: #222222;
+  --text-color: #fdfdfd;
+  --link-color: #b4eca0;
+  --hr-border: 1px solid #333333;
+  --error-color: #ee2222;
+  --success-color: #338833;
+  --focus-outline: 0 0 1px 2px rgba(243, 218, 218, 0.4);
+  --highlight-color-bg: #000;
+  --code-bg: #ccc;
+  --button-bg: #5f8961;
+  --button-border: 1px solid #444444;
+  --button-danger-bg: #990000;
+  --input-bg: #eee;
+  --input-focus-outline: 2px dotted #eee;
+  --autocomplete-focus: #eeeeee;
+  --autocomplete-focus-bg: #333333;
+  --sidebar-left-bg: #222222;
+  --sidebar-left-border: 1px solid #000000;
+  --sidebar-left-frozen-color: #aaaaaa;
+  --sidebar-left-text: #f8f8f8;
+  --sidebar-left-border-bottom: #887d76;
+  --sidebar-left-search-placeholder-color: #999999;
+  --sidebar-left-search-focus-bg: #5f8961;
+  --syntax-hl-base-bg: #fff;
+}

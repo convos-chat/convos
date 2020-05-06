@@ -280,6 +280,7 @@ textarea {
 
     &.is-active {
       background: var(--autocomplete-focus-bg);
+      color: var(--autocomplete-focus);
     }
   }
 }

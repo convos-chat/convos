@@ -11,6 +11,7 @@
   --highlight-color-bg: #e6dbbf;
   --code-bg: #dfd8c1;
   --button-bg: #62534a;
+  --autocomplete-focus-bg: #ddd4bc;
   --sidebar-left-bg: #eee8d5;
   --sidebar-left-border: 1px solid #d5d2d0;
   --sidebar-left-frozen-color: #77675c;
@@ -30,7 +31,7 @@
   --syntax-hl-attribute: #50a14f;
   --syntax-hl-built-in: #c18401;
   --syntax-hl-bullet: #4078f2;
-  --syntax-hl-comment: #a0a1a7;
+  --syntax-hl-comment: #7b632f;
   --syntax-hl-deletion: #e45649;
   --syntax-hl-doctag: #a626a4;
   --syntax-hl-formula: #a626a4;
