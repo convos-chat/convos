@@ -10,7 +10,7 @@ export default class Search extends Dialog {
       name: 'Search',
     });
 
-    this.prop('rw', 'query', null);
+    this.prop('rw', 'query', '');
     this.update({status: 'success'});
   }
 
@@ -46,7 +46,7 @@ export default class Search extends Dialog {
   }
 
   send(msg) {
-    return this.load({...msg, match: msg.messages});
+    return this.update({query: msg.message});
   }
 
   _addOperations() {

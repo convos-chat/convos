@@ -5,6 +5,7 @@ import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte'
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
+import Scrollspy from '../js/Scrollspy';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import ChatMessages from '../js/ChatMessages';
@@ -12,18 +13,19 @@ import {l} from '../js/i18n';
 import {route} from '../store/Route';
 
 const chatMessages = new ChatMessages();
+const scrollspy = new Scrollspy();
 const user = getContext('user');
 
 let chatInput;
 let dialog = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
+let mainEl;
+let messagesHeight = 0;
 
-$: chatMessages.attach({connection: {}, dialog: $dialog, user});
+$: chatMessages.attach({connection: {}, dialog, user});
 $: messages = $dialog.messages;
-$: load($route, {});
-
-onMount(() => {
-  load(route, {query: true});
-});
+$: if ($dialog.query) route.go('/search?q=' + encodeURIComponent($dialog.query), {replace: true});
+$: if (mainEl) setDialogFromRoute($route);
+$: if (mainEl) scrollspy.scrollTo(messagesHeight);
 
 function dialogUrl(message) {
   const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
@@ -36,14 +38,28 @@ function gotoDialog(e) {
   route.go(e.target.closest('.message').querySelector('a').href);
 }
 
-function load(route, changed) {
+function loadNotifications(route) {
+  dialog.load();
+  dialog.setLastRead();
+}
+
+function search(route) {
   const match = route.param('q');
-  dialog = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
-  if (dialog.is('search') && (!changed.query || typeof match != 'string')) return;
-  if (chatInput) chatInput.setValue(match);
-  dialog.load({match});
-  if (chatInput) focusMainInputElements('chat_input');
-  route.update({title: dialog.is('search') ? l('Search for "%1"', match) : l('Notifications')});
+
+  if (chatInput) {
+    chatInput.setValue(match || '');
+    focusMainInputElements('chat_input');
+  }
+
+  return match ? dialog.load({match}) : dialog.update({messages: []});
+}
+
+function setDialogFromRoute(route) {
+  const d = route.path.indexOf('search') != -1 ? user.search : user.notifications;
+  if (d == dialog && route.param('q') == dialog.query) return;
+  dialog = d;
+  scrollspy.wrapper = mainEl;
+  return dialog.is('search') ? search(route) : loadNotifications(route);
 }
 </script>
 
@@ -51,14 +67,14 @@ function load(route, changed) {
   <h1><a href="#activeMenu:nav" tabindex="-1"><Icon name="{dialog.is('search') ? 'search' : 'bell'}"/><span>{l(dialog.name)}</span></a></h1>
 </ChatHeader>
 
-<main class="main has-search-results">
-  <ChatMessagesContainer dialog="{dialog}">
-    {#if messages.length == 0 && !$dialog.is('loading')}
-      {#if $dialog.is('notifications')}
+<main class="main has-search-results" bind:this="{mainEl}">
+  <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
+    {#if messages.length == 0 && !dialog.is('loading')}
+      {#if dialog.is('notifications')}
         <h2>{l('No notifications.')}</h2>
       {:else if $route.param('q')}
         <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
-      {:else if $dialog.is('search')}
+      {:else if dialog.is('search')}
         <ChatMessage>
           {l('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
           {l('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
