@@ -55,16 +55,8 @@ sub get_p {
     $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
   }
 
-  my @p;
-  push @p, $self->notifications_p if $args->{notifications};
-  push @p, map { $_->calculate_unread_p } @{$res->{dialogs} || []};
-  push @p, Mojo::Promise->resolve unless @p;
-
-  return Mojo::Promise->all(@p)->then(sub {
-    my $notifications = shift->[0];
-    $res->{notifications} = $notifications->{messages} if $notifications;
-    return $res;
-  });
+  my @p = map { $_->calculate_unread_p } @{$res->{dialogs} || []};
+  return @p ? Mojo::Promise->all(@p)->then(sub {$res}) : Mojo::Promise->resolve($res);
 }
 
 sub role {

@@ -462,8 +462,7 @@
         "x-mojo-to": "user#get",
         "parameters": [
           { "name": "connections", "in": "query", "type": "boolean", "description": "Retrieve connection list." },
-          { "name": "dialogs", "in": "query", "type": "boolean", "description": "Retrieve dialog list." },
-          { "name": "notifications", "in": "query", "type": "boolean", "description": "Retrieve notifications list." }
+          { "name": "dialogs", "in": "query", "type": "boolean", "description": "Retrieve dialog list." }
         ],
         "responses": {
           "200": {
