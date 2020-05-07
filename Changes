@@ -14,6 +14,7 @@ Revision history for perl distribution Convos
  - Fix select-field styling on "Add conversation" page
  - Fix "substr outside of string at Mojo/Asset/Memory.pm line 45." warning
  - Fix rendering <Fallback/> pages
+ - Fix loading PWA assets in <head>
  - Replaced Convos icon with "info-circle" icon in chat
  - Avoid inactivity_timeout from /api/embed.json
  - Avoid including the short timestamp when doing copy of chat dialog
