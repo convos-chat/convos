@@ -180,12 +180,16 @@
   font-size: 0.8rem;
   text-align: center;
   line-height: 1rem;
-  border-bottom: var(--hr-border);
-  margin: 0 0 0.8rem 0;
+  border-top: var(--hr-border);
+  margin: 0.8rem 0 0 0;
   height: 0.8rem;
 
   a {
     text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 
   span {
@@ -193,12 +197,19 @@
     background: var(--body-bg);
     padding: 0 var(--gutter);
     position: relative;
-    top: 0.3rem;
+    top: -0.4rem;
   }
 
   &.for-last-read,
   &.for-loading {
     color: var(--error-color);
+  }
+
+  &.for-jump-to-now {
+    @extend %next-to-sidebar;
+    bottom: 3.5rem;
+    border-bottom: 1.5rem solid var(--body-bg);
+    z-index: 3;
   }
 }
 

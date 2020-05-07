@@ -21,16 +21,12 @@ const dragAndDrop = new DragAndDrop();
 const scrollspy = new Scrollspy();
 const user = getContext('user');
 
-// Elements
 let chatInput;
-let mainEl;
-
-// Variables for scrolling
-let messagesHeight = 0;
-
-// Variables for calculating active connection and dialog
 let connection = {};
 let dialog = user.notifications;
+let mainEl;
+let messagesHeight = 0;
+let now = new Time();
 let unsubscribe = {};
 
 $: maybeReloadMessages($route);
@@ -124,11 +120,12 @@ async function setDialogFromUser(user) {
   chatMessages.attach({connection, dialog, user});
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
+  now = new Time();
 
   const after = isISOTimeString(route.hash) && new Time(route.hash);
   await dialog.load({after: after ? after.setSeconds(after.getSeconds() - 5).toISOString() : 'maybe'});
   if (dialog.messages.length < dialog.chunkSize) {
-    const before = dialog.messages[0] && dialog.messages[0].ts.toISOString() || new Time().toISOString();
+    const before = dialog.messages[0] && dialog.messages[0].ts.toISOString() || now.toISOString();
     await dialog.load({before});
   }
 }
@@ -168,6 +165,10 @@ async function setDialogFromUser(user) {
     {/each}
   </ChatMessagesContainer>
 </main>
+
+{#if !dialog.endOfHistory}
+  <ChatMessagesStatusLine class="for-jump-to-now" icon="external-link-alt"><a href="{dialog.path}">{l('Jump to %1', now.toLocaleString())}</a></ChatMessagesStatusLine>
+{/if}
 
 <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
 <ChatParticipants dialog="{dialog}"/>
