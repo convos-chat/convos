@@ -23,20 +23,12 @@ $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', false)
   ->json_is('/messages', []);
 
 $connection->emit(message => $dialog => $_) for t::Helper->messages(time - 3600);
-$t->get_ok('/api/search?match=secretary')->status_is(200)->json_is('/end', false);
-my $messages = $t->tx->res->json->{messages};
-cmp_deeply(
-  $messages,
-  [{
-    connection_id => 'irc-localhost',
-    dialog_id     => '#convos',
-    highlight     => false,
-    message       => '52 secretary',
-    from          => 'shade',
-    ts            => re(qr{^\d+-}),
-    type          => 'private',
-  }],
-  'got messages',
-);
+$t->get_ok('/api/search?match=secretary')->status_is(200)->json_is('/end', false)
+  ->json_is('/messages/0/from', 'shade')->json_is('/messages/0/message', '52 secretary');
+
+$t->get_ok('/api/search?from=profit&match=6')->status_is(200)->json_is('/end', false)
+  ->json_is('/messages/0/from', 'profit')->json_is('/messages/0/message', '62 toys')
+  ->json_is('/messages/1/from', 'profit')->json_is('/messages/1/message', '65 canvas')
+  ->json_is('/messages/2',      undef);
 
 done_testing;

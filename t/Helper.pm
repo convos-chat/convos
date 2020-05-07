@@ -323,7 +323,7 @@ wound 61 substance
 profit 62 toys
 shoe 63 argument
 destruction 64 appliance
-chalk 65 canvas
+profit 65 canvas
 can 66 stamp
 lettuce 67 steam
 desk 68 shape

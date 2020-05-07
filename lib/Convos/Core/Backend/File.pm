@@ -92,16 +92,19 @@ sub load_object_p {
 
 sub messages_p {
   my ($self, $obj, $query) = @_;
-  my $re = $query->{match} || qr{.};
-  my %args;
+  my ($re, %args);
 
-  $re = qr{\Q$re\E}i unless ref $re;
-  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
+  $re       = $query->{match} || qr{.};
+  $re       = qr{\Q$re\E}i unless ref $re;
+  $re       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
+  $args{re} = $re;
+
+  $re = $query->{from};
+  $args{from} = qr/$re/i if $re;
 
   $args{limit}    = $query->{limit} || 60;
   $args{match}    = $query->{match};
   $args{messages} = [];
-  $args{re}       = $re;
 
   # If both "before" and "after" are provided
   if ($query->{before} and $query->{after}) {
@@ -343,6 +346,8 @@ sub _messages {
 
     # Found message
     $self->_message_type_from($message);
+    next if $args->{from} and $message->{from} !~ $args->{from};
+
     $message->{highlight} = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? true : false;
     $args->{inc_by} < 0 ? unshift @{$args->{messages}}, $message : push @{$args->{messages}},
       $message;

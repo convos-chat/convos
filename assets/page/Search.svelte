@@ -10,7 +10,7 @@ import Scrollspy from '../js/Scrollspy';
 import Time from '../js/Time';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import {l} from '../js/i18n';
+import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
 const chatMessages = new ChatMessages();
@@ -80,8 +80,9 @@ function setDialogFromRoute(route) {
         <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
       {:else if dialog.is('search')}
         <ChatMessage>
-          {l('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
-          {l('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
+          {@html lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
+          {@html lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
+          {@html lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
         </ChatMessage>
       {/if}
     {/if}

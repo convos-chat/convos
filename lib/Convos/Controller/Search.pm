@@ -49,6 +49,7 @@ sub _make_query {
   my %query = (
     after  => $self->param('after') || ($tp - DEFAULT_AFTER)->datetime,
     before => $self->param('before'),
+    from   => $self->param('from'),
     limit  => $self->param('limit') || 60,
     match  => $self->param('match'),
   );

@@ -31,10 +31,13 @@ export default class Search extends Dialog {
     // Find dialog
     opParams.match = opParams.match
       .replace(/\s*conversation:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0])
+      .replace(/\s*from:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.from = dialog_id)][0])
       .replace(/\s*([&#]\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0]);
 
     opParams.match = opParams.match.trim();
-    if (!opParams.match.match(/\S/)) return this;
+    if (!opParams.match.match(/\S/)) {
+      return this.update({messages: []}).addMessages([{message: 'Search query "%1" does not contain anything to search for.', vars: [params.message]}]);
+    }
 
     // Load messages
     this.update({messages: [], query: opParams.match, status: 'loading'});

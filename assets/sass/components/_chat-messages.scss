@@ -233,4 +233,8 @@
   .message__from {
     text-decoration: none;
   }
+
+  .is-type-notice .message__text {
+    cursor: inherit;
+  }
 }
