@@ -2,7 +2,6 @@
 const familyToClassName = {regular: 'far', solid: 'fas'};
 
 const contributorIcons = {
-  Convos: '', // Uppercase "C" is not a typo
   batman: 'https://www.gravatar.com/avatar/ab1839667863f31e359d98364cfdef61',
   marcusr: 'https://www.gravatar.com/avatar/6c056546d802b1a9ac186ab63f9fb632',
 };
@@ -82,19 +81,12 @@ export let color = '';
 export let family = '';
 export let name;
 
-onMount(() => {
-  initialized = contributorIcons.Convos ? true : false;
-  if (initialized) return;
-  const icon = document.querySelector('[rel=icon][type="image/png"][sizes="32x32"]')
-    || document.querySelector('[rel=icon][type="image/png"]');
-  if (icon) contributorIcons.Convos = icon.href;
-});
-
 function calculateClassName(name, family, initialized) {
   const cn = [];
   const pick = name.match(/^pick:(.+)$/);
 
   if (pick) {
+    if (pick[1] == 'Convos') return 'fas fa-info-circle'; // Uppercase "C" is not a typo
     if (contributorIcons[pick[1]]) return 'fas fa-contributor for-' + pick[1].toLowerCase();
     cn.push(pickIcon(pick[1]));
   }
