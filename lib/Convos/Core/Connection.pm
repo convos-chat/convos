@@ -203,10 +203,8 @@ sub _stream_on_close {
 
   if ($self->{failed_to_connect}) {
     my $n = 1 + $self->{failed_to_connect};
-    return Mojo::IOLoop->timer(
-      ($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
-      sub { $self and $self->user->core->connect($self, sprintf 'You got disconnected from %s.') }
-    );
+    return Mojo::IOLoop->timer(($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
+      sub { $self and $self->user->core->connect($self, 'You got disconnected.') });
   }
 
   return $self->user->core->connect($self, sprintf 'You got disconnected from %s.',
