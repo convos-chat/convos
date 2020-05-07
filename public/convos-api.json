@@ -390,6 +390,7 @@
           { "name": "dialog_id", "in": "query", "type": "string", "description": "An ID for a dialog" },
           { "name": "after", "in": "query", "type": "string", "format": "date-time", "description": "Find messages after a given ISO 8601 timestamp" },
           { "name": "before", "in": "query", "type": "string", "format": "date-time", "description": "Find messages before a given ISO 8601 timestamp" },
+          { "name": "from", "in": "query", "type": "string", "description": "Sender must match this string" },
           { "name": "limit", "in": "query", "type": "integer", "description": "Max number of messages to retrieve" },
           { "name": "match", "in": "query", "type": "string", "description": "Messages must match this string" }
         ],

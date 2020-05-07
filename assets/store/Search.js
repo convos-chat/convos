@@ -31,7 +31,7 @@ export default class Search extends Dialog {
     // Find dialog
     opParams.match = opParams.match
       .replace(/\s*conversation:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0])
-      .replace(/\s*from:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.from = dialog_id)][0])
+      .replace(/\s*from:(\S+)\s*/, (all, from) => [' ', (opParams.from = from)][0])
       .replace(/\s*([&#]\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0]);
 
     opParams.match = opParams.match.trim();
