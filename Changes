@@ -1,5 +1,25 @@
 Revision history for perl distribution Convos
 
+4.04 Not Released
+ - Add "Jump to now" link in Chat #453
+ - Add line numbers for hljs #461
+ - Add support for searching for "from"
+ - Add "Desert" theme
+ - Add "High contrast" theme, with dark/light mode
+ - Add support for "CONVOS_REQUEST_BASE", which is an alternative to
+   the "X-Request-Base" header
+ - Fix jumping to the right position in chat history #453
+ - Fix edge cases for ?after= and ?before= #459
+ - Fix being able to make a paste with unicode #460
+ - Fix select-field styling on "Add conversation" page
+ - Fix "substr outside of string at Mojo/Asset/Memory.pm line 45." warning
+ - Fix rendering <Fallback/> pages
+ - Replaced Convos icon with "info-circle" icon in chat
+ - Avoid inactivity_timeout from /api/embed.json
+ - Avoid including the short timestamp when doing copy of chat dialog
+ - Will persist theme settings in a cookie to prevent flashing between themes
+  on load
+
 4.03 2020-04-07T11:32:00+0800
  - Fix parsing routes such as /chat/irc-convos/%23x%2Fbar
  - Fix rendering of /file/1/lNqUVc43p0h4jaj5 paths
