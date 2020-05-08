@@ -39,14 +39,9 @@
     <meta name="msapplication-config" content="<%= url_for '/asset/browserconfig.f80fd3df.xml' %>">
     <meta name="msapplication-TileColor" content="#00451D">
     <meta name="theme-color" content="#00451D">
-
     %= asset 'convos.css'
-
-    % my $theme_name = js_session('theme') || 'convos';
-    % my $color_scheme = js_session('colorScheme') || 'default';
-    % my $theme = $themes->{$theme_name} || $themes->{convos};
-    % my $path = $theme->{variants}{$color_scheme} || $theme->{variants}{default};
-    <link rel="stylesheet" type="text/css" href="<%= url_for $path %>" id="link_selected_theme">
+    % my $theme_url = $c->themes->url_for(js_session('theme'), js_session('colorScheme')) || $c->themes->url_for('convos');
+    <link rel="stylesheet" type="text/css" href="<%= $theme_url %>" id="link_selected_theme">
     %= include 'partial/process_js';
   </head>
   <body class="no-js is-logged-out">

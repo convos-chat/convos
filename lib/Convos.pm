@@ -47,7 +47,6 @@ sub startup {
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/err/:code')->to('url#err');
   $r->get('/sw' => [format => 'js']);
-  $r->get('/themes/:theme')->to('user#theme');
 
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
@@ -60,8 +59,6 @@ sub startup {
   $auth_r->get('/search')->to(template => 'index');
 
   $self->_plugins;
-  $self->_detect_themes;
-  Mojo::IOLoop->recurring($ENV{CONVOS_DETECT_THEMES_INTERVAL} || 10, sub { $self->_detect_themes });
 
   # Process svelte assets using rollup.js
   $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
@@ -151,50 +148,6 @@ sub _config {
   return $config;
 }
 
-sub _detect_themes {
-  my $self   = shift;
-  my $themes = {};
-
-  my $read_theme = sub {
-    return unless $_[0] =~ m!\.css$!;
-
-    my $file = shift;
-    my $fh   = $file->open;
-    my ($id, $name, $color_scheme) = ('', '', '');
-
-    while (my $line = readline $fh) {
-      $color_scheme ||= $1 if $line =~ m!\Wcolor-scheme:\s*(\S+)!i;
-      $name         ||= $1 if $line =~ m!\Wname:\s*(\S+)!i;
-      last if $color_scheme and $name;
-    }
-
-    unless ($name) {
-      $name = $file->basename;
-      $name =~ s!\.css$!!;
-    }
-
-    $id                      ||= lc $name;
-    $color_scheme            ||= 'default';
-    $themes->{$id}{variants} ||= {};
-    $themes->{$id}{variants}{$color_scheme} = sprintf '/themes/%s?v=%s', $file->basename,
-      $self->VERSION;
-    $themes->{$id}{name} = $name;
-  };
-
-  $read_theme->($_) for map { path($_, 'themes')->list->each } @{$self->static->paths};
-
-  my $user_themes = path($self->config('home'), 'themes');
-  $user_themes->make_path unless -d $user_themes;
-  $read_theme->($_) for $user_themes->list->each;
-
-  for my $theme (values %$themes) {
-    next if $theme->{variants}{default};
-    $theme->{variants}{default} = +(sort { $b cmp $a } values %{$theme->{variants}})[0];
-  }
-
-  $self->defaults(themes => $themes);
-}
-
 sub _home_in_share {
   my $self = shift;
   my $rel  = path(qw(auto share dist Convos))->to_string;
@@ -215,7 +168,8 @@ sub _plugins {
   my $self = shift;
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
-  my @plugins = qw(Convos::Plugin::Auth Convos::Plugin::Files Convos::Plugin::Helpers);
+  my @plugins
+    = qw(Convos::Plugin::Auth Convos::Plugin::Files Convos::Plugin::Helpers Convos::Plugin::Themes);
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
   for (@plugins) {
     my ($name, $config) = split '\?', $_, 2;

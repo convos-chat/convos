@@ -8,10 +8,10 @@ my $v = $t->app->VERSION;
 my $user_themes = Mojo::File->new($t->app->config('home'), 'themes');
 $user_themes->child('README.md')->spurt("# skip this\n");
 $user_themes->child('MyTheme.css')->spurt("/* custom theme */");
-$t->app->_detect_themes;
+$t->app->themes->detect;
 
 is_deeply(
-  $t->app->defaults('themes'),
+  $t->app->themes->get,
   {
     convos => {
       name     => 'Convos',
@@ -42,7 +42,7 @@ $t->get_ok('/themes/nope.css')->status_is(404)->content_like(qr{nope\.css not fo
 
 $t->get_ok('/')->status_is(200)
   ->element_exists(qq(link[href="/themes/convos_color-scheme-light.css?v=$v"]));
-$t->get_ok('/', {Cookie => js_session(colorScheme => 'dark')})->status_is(200)
+$t->get_ok('/', {Cookie => js_session(colorScheme => 'dark', theme => 'convos')})->status_is(200)
   ->element_exists(qq(link[href="/themes/convos_color-scheme-dark.css?v=$v"]));
 $t->get_ok('/', {Cookie => js_session(colorScheme => 'dark', theme => 'nord')})->status_is(200)
   ->element_exists(qq(link[href="/themes/nord.css?v=$v"]));
