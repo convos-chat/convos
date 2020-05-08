@@ -38,8 +38,9 @@ sub startup {
   my $r = $self->routes;
   $r->get('/')->to(load_user => 1, template => 'index')->name('index');
   $r->get('/docs/*doc_name', {doc_name => ''})->to('user#docs');
+  $r->get('/login')->to('user#login_html');
+  $r->get('/logout')->to('user#logout', format => 'html');
   $r->get('/register')->to('user#register_html');
-  $r->get("/$_")->to(template => 'index')->name($_) for qw(login logout);
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');

@@ -7,6 +7,7 @@ my $t = t::Helper->t;
 
 $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
+$t->get_ok('/login')->status_is(200);
 $t->get_ok('/api/user')->status_is(401);
 
 # make sure this url does not exist from web
@@ -29,5 +30,8 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
   ->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
 
 $t->get_ok('/api/user')->status_is(200);
+$t->get_ok('/login')->status_is(302)->header_is(Location => '/');
+$t->get_ok('/logout')->status_is(302)->header_is(Location => '/login');
+$t->get_ok('/login')->status_is(200);
 
 done_testing;

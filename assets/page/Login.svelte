@@ -48,7 +48,6 @@ onMount(() => {
 });
 
 async function redirectAfterLogin(op) {
-  document.cookie = op.res.headers['Set-Cookie'];
   op.reset();
   await user.load();
   route.go('/');

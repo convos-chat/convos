@@ -87,8 +87,13 @@ sub login {
   );
 }
 
+sub login_html {
+  my $self = shift;
+  return $self->session('email') ? $self->redirect_to('/') : $self->render('index');
+}
+
 sub logout {
-  my $self   = shift->openapi->valid_input or return;
+  my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
   my $format = $self->stash('format') || 'json';
 
   return $self->auth->logout_p({})->then(sub {
@@ -322,6 +327,10 @@ See L<Convos::Manual::API/getUser>.
 =head2 login
 
 See L<Convos::Manual::API/loginUser>.
+
+=head2 login_html
+
+Will redirect to "/" if already logged in.
 
 =head2 logout
 
