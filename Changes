@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.04 Not Released
+4.04 2020-04-09T08:42:00+0800
  - Add "Jump to now" link in Chat #453
  - Add line numbers for hljs #461
  - Add support for searching for "from"
