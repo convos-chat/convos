@@ -50,7 +50,7 @@ onMount(() => {
 async function redirectAfterLogin(op) {
   op.reset();
   await user.load();
-  route.go('/');
+  return user.is('authenticated') ? route.go('/') : location.reload();
 }
 </script>
 

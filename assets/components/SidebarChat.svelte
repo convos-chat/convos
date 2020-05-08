@@ -196,10 +196,10 @@ function renderUnread(dialog) {
         <span>{l('Settings')}</span>
       </Link>
     {/if}
-    <Link href="/api/user/logout.html">
+    <a href="{route.urlFor('/logout')}" target="_self">
       <Icon name="power-off"/>
       <span>{l('Log out')}</span>
-    </Link>
+    </a>
     <Link href="/search?q={encodeURIComponent(searchQuery)}" class="for-search hidden">
       <Icon name="search"/>
       <span>{l('Search for "%1"', searchQuery)}</span>

@@ -33,5 +33,6 @@ $t->get_ok('/api/user')->status_is(200);
 $t->get_ok('/login')->status_is(302)->header_is(Location => '/');
 $t->get_ok('/logout')->status_is(302)->header_is(Location => '/login');
 $t->get_ok('/login')->status_is(200);
+$t->get_ok('/api/user')->status_is(401);
 
 done_testing;

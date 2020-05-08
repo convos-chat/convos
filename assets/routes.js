@@ -15,9 +15,6 @@ export function setupRouting(route, user) {
   route.to('/login', render(Login));
   route.to('/register', render(Login));
 
-  const reload = (route) => location.reload();
-  route.to('/api/user/logout.html', reload);
-
   route.to('/help', render(Help));
   route.to('/settings/account', render(SettingsAccount));
   route.to('/settings/connection', render(ConnectionAdd));
