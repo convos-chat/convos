@@ -183,6 +183,7 @@ my @sent = (
   "abc\ndef\nghi\n" x 200,
 );
 my @msg;
+no warnings 'redefine';
 local *Convos::Core::Connection::Irc::_irc_event_privmsg = sub { push @msg, pop(@_)->{raw_line} };
 $connection->send_p('#convos' => $sent[0])->$wait_success('short paste message');
 $connection->send_p('#convos' => $sent[1])->$wait_success('long paste message');

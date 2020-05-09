@@ -61,8 +61,9 @@ sub messages {
   my $interval = shift || 40;
 
   my @messages = split /\n/, data_section qw(t::Helper messages.txt);
-  $ts = $ts =~ /T/ ? Time::Piece->strptime($ts, '%Y-%m-%dT%H:%M:%S') : Time::Piece->gmtime($ts);
+  $ts -= $ts % 10;
   $ts -= $interval * @messages;
+  $ts = Time::Piece->gmtime($ts);
 
   my $i = 0;
   for my $entry (@messages) {

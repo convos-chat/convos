@@ -55,13 +55,13 @@ $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?before=@{[$b
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2018-01-01T00:39:00')
   ->status_is(200)->json_is('/end', true, 'end')->json_is('/n_messages', 0, 'zero messages');
 
-$before = Time::Piece->gmtime(time - 1800);
+$before = Time::Piece->gmtime(time - 1700);
 note "before=@{[$before->datetime]}, limit=40";
 $t->get_ok(
   "/api/connection/irc-localhost/dialog/%23convos/messages?before=@{[$before->datetime]}&limit=40")
-  ->status_is(200)->json_is('/end', false, 'more')->json_is('/messages/0/from', 'lip')
-  ->json_is('/messages/0/message',  '77 number')->json_is('/messages/39/from', 'loaf')
-  ->json_is('/messages/39/message', '35 pot')->json_is('/n_messages', 40);
+  ->status_is(200)->json_is('/end', false, 'more')->json_is('/messages/0/from', 'toad')
+  ->json_is('/messages/0/message',  '80 bead')->json_is('/messages/39/from', 'verse')
+  ->json_is('/messages/39/message', '38 hobbies')->json_is('/n_messages', 40);
 
 my $after = Time::Piece->gmtime(time - 86400 * 170);
 note "after=@{[$after->datetime]}";
@@ -120,7 +120,7 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1&matc
 note
   'As documented in Time::Piece, doing month math at the end of the month doesn\'t always do what you expect - @jberger';
 $dialog = $connection->dialog({name => '#subtracting_months'});
-$connection->emit(message => $dialog => $_) for t::Helper->messages('2016-10-28T23:40:03', 86400);
+$connection->emit(message => $dialog => $_) for t::Helper->messages(1476063753, 86400);
 $t->get_ok(
   '/api/connection/irc-localhost/dialog/%23subtracting_months/messages?before=2016-10-31T00:02:03')
   ->status_is(200)->json_is('/end', false)->json_is('/messages/0/message', '21 bed')

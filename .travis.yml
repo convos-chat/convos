@@ -1,4 +1,5 @@
 language: perl
+sudo: false
 
 matrix:
   include:
@@ -7,13 +8,15 @@ matrix:
   - perl: "5.22"
 
 env:
-  - "HARNESS_OPTIONS=j1 TEST_POD=1"
+  global:
+   - HARNESS_OPTIONS=j4
+   - TEST_POD=1
 
 install:
-  - "cpanm https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/EV-4.27.tar.gz"
-  - "cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz"
-  - "cpanm -n Test::Pod Test::Pod::Coverage"
-  - "cpanm -n --installdeps ."
+  - cpanm -n EV~"!= 4.28"
+  - cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz
+  - cpanm -n Test::Pod Test::Pod::Coverage
+  - cpanm -n --installdeps .
 
 notifications:
   email:
