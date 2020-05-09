@@ -166,7 +166,7 @@ async function setDialogFromUser(user) {
   </ChatMessagesContainer>
 </main>
 
-{#if !dialog.endOfHistory}
+{#if !dialog.endOfHistory && dialog.messages.length}
   <ChatMessagesStatusLine class="for-jump-to-now" icon="external-link-alt"><a href="{dialog.path}">{l('Jump to %1', now.toLocaleString())}</a></ChatMessagesStatusLine>
 {/if}
 
