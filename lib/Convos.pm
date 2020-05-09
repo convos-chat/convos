@@ -32,7 +32,7 @@ sub startup {
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Autogenerate routes from the OpenAPI specification
-  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.json')->path});
+  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.yaml')->path});
 
   # Add basic routes
   my $r = $self->routes;

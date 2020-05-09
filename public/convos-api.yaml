@@ -1,0 +1,755 @@
+---
+swagger: '2.0'
+info:
+  title: Convos API specification
+  version: 4.4.0
+  description: This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.
+  contact:
+    name: Convos
+    url: https://github.com/Nordaaker/convos
+  license:
+    name: Artistic License version 2.0
+    url: http://opensource.org/licenses/Artistic-2.0
+  termsOfService: SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API.
+
+host: demo.convos.by
+basePath: /api
+schemes: [ http ]
+
+paths:
+  /connection/{connection_id}:
+    delete:
+      operationId: removeConnection
+      summary: Delete a connection and all assosiated data.
+      tags: [ connection ]
+      x-mojo-to: connection#remove
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      responses:
+        '200':
+          description: Remove a connection.
+          schema:
+            $ref: '#/definitions/Success'
+    post:
+      operationId: updateConnection
+      summary: Update a connection.
+      tags: [ connection ]
+      x-mojo-to: connection#update
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            on_connect_commands:
+              description: Commands to be run after the connection is established
+              items:
+                type: string
+            url:
+              description: 'Example: irc://user:pass@irc.perl.org?nick=superman'
+              format: uri
+              type: string
+            wanted_state:
+              description: Connection state
+              enum: [ connected, disconnected ]
+              type: string
+      responses:
+        '200':
+          description: Update a connection.
+          schema:
+            $ref: '#/definitions/Connection'
+
+  /connection/{connection_id}/dialog/{dialog_id}/messages:
+    get:
+      operationId: dialogMessages
+      summary: 'Get a list of messages. Note: this resource require the user to be authenticated first.'
+      tags: [ dialog ]
+      x-mojo-to: dialog#messages
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      - $ref: '#/parameters/dialog_id'
+      - description: Find messages after a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: Find messages before a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: Max number of messages to retrieve
+        in: query
+        name: limit
+        type: integer
+      - description: Messages must match this string
+        in: query
+        name: match
+        type: string
+      responses:
+        '200':
+          description: List of messages.
+          schema:
+            type: object
+            properties:
+              end:
+                description: Indicates if historic messages can be received.
+                type: boolean
+              messages:
+                items:
+                  $ref: '#/definitions/Message'
+
+  /connection/{connection_id}/dialog/{dialog_id}/read:
+    post:
+      operationId: setDialogLastRead
+      summary: Set 'last_read' for a dialog.
+      tags: [ dialog ]
+      x-mojo-to: dialog#last_read
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      - $ref: '#/parameters/dialog_id'
+      responses:
+        '200':
+          description: Successful response.
+          schema:
+            type: object
+            properties:
+              last_read:
+                format: date-time
+                type: string
+
+  /connection/{connection_id}/messages:
+    get:
+      operationId: connectionMessages
+      summary: 'Get a list of messages. Note: this resource require the user to be authenticated first.'
+      tags: [ dialog ]
+      x-mojo-to: dialog#messages
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      - description: Find messages after a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: Find messages before a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: Max number of messages to retrieve
+        in: query
+        name: limit
+        type: integer
+      - description: Messages must match this string
+        in: query
+        name: match
+        type: string
+      responses:
+        '200':
+          description: List of messages.
+          schema:
+            type: object
+            properties:
+              end:
+                description: Indicates if historic messages can be received.
+                type: boolean
+              messages:
+                items:
+                  $ref: '#/definitions/Message'
+
+  /connection/{connection_id}/read:
+    post:
+      operationId: setConnectionLastRead
+      summary: Set 'last_read' for a connection dialog.
+      tags: [ connection ]
+      x-mojo-to: dialog#last_read
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      responses:
+        '200':
+          description: Successful response.
+          schema:
+            type: object
+            properties:
+              last_read:
+                format: date-time
+                type: string
+
+  /connections:
+    get:
+      operationId: listConnections
+      summary: Get all the connections for a user.
+      tags: [ connection ]
+      x-mojo-to: connection#list
+      responses:
+        '200':
+          description: List of connections.
+          schema:
+            type: object
+            properties:
+              connections:
+                items:
+                  $ref: '#/definitions/Connection'
+    post:
+      operationId: createConnection
+      summary: Add a connection.
+      tags: [ connection ]
+      x-mojo-to: connection#create
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          required: [ url ]
+          type: object
+          properties:
+            on_connect_commands:
+              description: Commands to be run after the connection is established
+              items:
+                type: string
+            url:
+              description: 'Example: irc://user:pass@irc.perl.org?nick=superman'
+              type: string
+            wanted_state:
+              description: Connection state
+              enum: [ connected, disconnected ]
+              type: string
+      responses:
+        '200':
+          description: Connection information.
+          schema:
+            $ref: '#/definitions/Connection'
+
+  /dialogs:
+    get:
+      operationId: listDialogs
+      summary: Get a list of all dialogs.
+      tags: [ dialog ]
+      x-mojo-to: dialog#list
+      responses:
+        '200':
+          description: List of messages.
+          schema:
+            type: object
+            properties:
+              dialogs:
+                items:
+                  $ref: '#/definitions/Dialog'
+
+  /embed:
+    get:
+      operationId: embed
+      summary: Get information from a URL
+      tags: [ 'misc' ]
+      x-mojo-to: url#info
+      parameters:
+      - description: URL to resource
+        in: query
+        name: url
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Information about resource.
+
+  /file:
+    post:
+      operationId: uploadFile
+      summary: Upload file.
+      tags: [ files ]
+      x-mojo-to: files#upload
+      parameters:
+      - in: formData
+        name: file
+        required: true
+        type: file
+      - in: formData
+        name: id
+        type: string
+      - in: formData
+        name: write_only
+        type: boolean
+      responses:
+        '200':
+          description: Successfully uploaded.
+          schema:
+            type: object
+            properties:
+              files:
+                items:
+                  type: object
+                  required: [ ext, filename, id, saved, uid, url ]
+                  properties:
+                    ext:
+                      type: string
+                    filename:
+                      type: string
+                    id:
+                      type: string
+                    saved:
+                      format: date-time
+                      type: string
+                    uid:
+                      type: string
+                    url:
+                      format: uri
+                      type: string
+
+  /file/:uid/:fid:
+    get:
+      operationId: getFile
+      summary: Retrieve uploaded file.
+      tags: [ files ]
+      x-mojo-to: files#get
+      parameters:
+      - in: path
+        name: fid
+        required: true
+        type: string
+      - in: path
+        name: uid
+        required: true
+        type: string
+      responses:
+        '200':
+          description: File found and served.
+          schema:
+            type: string
+
+  /notifications:
+    get:
+      description: A notification is added once your name is mentioned in a chat.
+      summary: Get list of notications.
+      tags: [ chat ]
+      x-mojo-to: notifications#messages
+      operationId: notificationMessages
+      responses:
+        '200':
+          description: List of notifications.
+          schema:
+            type: object
+            properties:
+              messages:
+                items:
+                  $ref: '#/definitions/Notification'
+
+  /notifications/read:
+    post:
+      operationId: readNotifications
+      summary: Mark notications as read.
+      tags: [ chat ]
+      x-mojo-to: notifications#read
+      responses:
+        '200':
+          description: Successful response.
+          schema:
+            type: object
+            properties: {}
+
+  /search:
+    get:
+      operationId: searchMessages
+      summary: Search for historic messages.
+      tags: [ search ]
+      x-mojo-to: search#messages
+      parameters:
+      - description: An ID for a connection
+        in: query
+        name: connection_id
+        type: string
+      - description: An ID for a dialog
+        in: query
+        name: dialog_id
+        type: string
+      - description: Find messages after a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: after
+        type: string
+      - description: Find messages before a given ISO 8601 timestamp
+        format: date-time
+        in: query
+        name: before
+        type: string
+      - description: Sender must match this string
+        in: query
+        name: from
+        type: string
+      - description: Max number of messages to retrieve
+        in: query
+        name: limit
+        type: integer
+      - description: Messages must match this string
+        in: query
+        name: match
+        type: string
+      responses:
+        '200':
+          description: List of messages.
+          schema:
+            type: object
+            properties:
+              end:
+                description: Indicates if historic messages can be received.
+                type: boolean
+              messages:
+                items:
+                  $ref: '#/definitions/Message'
+
+  /settings:
+    get:
+      operationId: getSettings
+      summary: Get settings for Convos.
+      tags: [ settings ]
+      x-mojo-to: admin#settings_get
+      responses:
+        '200':
+          description: ServerSettings.
+          schema:
+            $ref: '#/definitions/ServerSettings'
+    post:
+      operationId: updateSettings
+      summary: Update settings for Convos.
+      tags: [ settings ]
+      x-mojo-to: admin#settings_update
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ServerSettings'
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/ServerSettings'
+
+  /user:
+    delete:
+      operationId: deleteUser
+      summary: Delete a user.
+      tags: [ user ]
+      x-mojo-to: user#delete
+      responses:
+        '200':
+          description: Successfully deleted.
+          schema:
+            $ref: '#/definitions/Success'
+    get:
+      operationId: getUser
+      summary: Get user data.
+      tags: [ user ]
+      x-mojo-to: user#get
+      parameters:
+      - description: Retrieve connection list.
+        in: query
+        name: connections
+        type: boolean
+      - description: Retrieve dialog list.
+        in: query
+        name: dialogs
+        type: boolean
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/User'
+    post:
+      operationId: updateUser
+      summary: Update an existing user.
+      tags: [ user ]
+      x-mojo-to: user#update
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            highlight_keywords:
+              description: Extra keywords to highlight on
+              items:
+                type: string
+            password:
+              $ref: '#/definitions/Password'
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/User'
+
+  /user/login:
+    post:
+      operationId: loginUser
+      summary: Log in a user based on email and password.
+      tags: [ user ]
+      x-mojo-to: user#login
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required: [ email, password ]
+          properties:
+            email:
+              description: User email
+              format: email
+              type: string
+            password:
+              description: User password
+              type: string
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/User'
+
+  /user/logout:
+    get:
+      description: This resource will delete any sessions cookies that might be stored in the client.
+      operationId: logoutUser
+      summary: Logout a user.
+      tags: [ user ]
+      x-mojo-to: user#logout
+      responses:
+        '200':
+          description: Successfully logged out.
+          schema:
+            $ref: '#/definitions/Success'
+
+  /user/register:
+    post:
+      operationId: registerUser
+      summary: Register a new user.
+      tags: [ user ]
+      x-mojo-to: user#register
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required: [ email, password ]
+          properties:
+            email:
+              description: User email
+              format: email
+              type: string
+            exp:
+              description: Expire time for a token
+              type: string
+            password:
+              $ref: '#/definitions/Password'
+            token:
+              description: Checksum generated by inviteUser
+              type: string
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/User'
+
+  /user/{email}/invite:
+    post:
+      operationId: inviteUser
+      summary: Generate invite link for an existing / new user.
+      tags: [ user ]
+      x-mojo-to: user#generate_invite_link
+      parameters:
+      - $ref: '#/parameters/email_in_path'
+      - description: Role to give the user.
+        in: query
+        name: role
+        type: string
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            type: object
+            required: [ url ]
+            properties:
+              existing:
+                type: boolean
+              expires:
+                format: date-time
+                type: string
+              url:
+                type: string
+
+parameters:
+  connection_id:
+    description: A unique connection identifier
+    in: path
+    name: connection_id
+    required: true
+    type: string
+  dialog_id:
+    default: ''
+    description: The name of the person or room
+    in: path
+    name: dialog_id
+    required: true
+    type: string
+    x-mojo-placeholder: '#'
+  email_in_path:
+    description: User email
+    format: email
+    in: path
+    name: email
+    required: true
+    type: string
+    x-mojo-placeholder: '#'
+  ident:
+    description: User email or server identity
+    in: path
+    name: ident
+    required: true
+    type: string
+
+definitions:
+  Connection:
+    type: object
+    required: [ connection_id, url ]
+    properties:
+      connection_id:
+        description: Unique identifier for this connection
+        type: string
+      name:
+        description: Name for this connection
+        type: string
+      on_connect_commands:
+        description: Commands to be run after the connection is established
+        items:
+          type: string
+      state:
+        description: Actual connection state
+        enum: [ connected, queued, disconnected ]
+        type: string
+      url:
+        description: 'Example: irc://user:@irc.perl.org?nick=superman (Note: Without password)'
+        format: uri
+        type: string
+      wanted_state:
+        description: Wanted connection state
+        enum: [ connected, disconnected ]
+        type: string
+
+  Dialog:
+    type: object
+    required: [ connection_id, dialog_id, last_read, name, unread ]
+    properties:
+      connection_id:
+        description: Unique identifier for the connection this dialog is part of
+        type: string
+      dialog_id:
+        description: Unique identifier for the dialog
+        type: string
+      last_active:
+        format: date-time
+        type: string
+      last_read:
+        format: date-time
+        type: string
+      name:
+        description: Name of the room or person
+        type: string
+      topic:
+        description: The subjec/topic for this room
+        type: string
+      unread:
+        description: Number of unread messages
+        type: integer
+
+  Message:
+    type: object
+    required: [ message, from , ts ]
+    properties:
+      from:
+        description: Identifier for who sent this message
+        type: string
+      message:
+        description: The message
+        type: string
+      ts:
+        description: 'Example: 2015-09-06T13:49:37Z'
+        format: date-time
+        type: string
+
+  Notification:
+    type: object
+    required: [ message, from , ts ]
+    properties:
+      connection_id:
+        description: Unique identifier for the connection this notification came from
+        type: string
+      dialog_id:
+        description: Dialog ID
+        type: string
+      from:
+        description: Identifier for who sent this message
+        type: string
+      message:
+        description: The message
+        type: string
+      ts:
+        description: 'Example: 2015-09-06T13:49:37Z'
+        format: date-time
+        type: string
+
+  Password:
+    description: User password
+    minLength: 10
+    type: string
+
+  ServerSettings:
+    type: object
+    properties:
+      contact:
+        minLength: 3
+        type: string
+      default_connection:
+        format: uri
+        type: string
+      forced_connection:
+        type: boolean
+      open_to_public:
+        type: boolean
+      organization_name:
+        type: string
+      organization_url:
+        type: string
+
+  Success:
+    type: object
+    properties:
+      message:
+        description: Human readable description
+        type: string
+
+  User:
+    type: object
+    required: [ email, unread ]
+    properties:
+      connections:
+        items:
+          $ref: '#/definitions/Connection'
+      dialogs:
+        items:
+          $ref: '#/definitions/Dialog'
+      email:
+        description: Unique email identifying a user in Convos
+        type: string
+      highlight_keywords:
+        description: Extra keywords to highlight on
+        items:
+          type: string
+      registered:
+        description: 'Example: 2015-09-06T10:47:31Z'
+        format: date-time
+        type: string
+      unread:
+        description: Number of unread notifications
+        type: integer

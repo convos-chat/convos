@@ -38,8 +38,8 @@ if ($ENV{RELEASE}) {
   s!:\s*'\d+\.\d+.\d+'!: '$node_wanted'! for @f;
   untie @f;
 
-  tie @f, 'Tie::File', 'public/convos-api.json' or die $!;
-  s!:\s*"\d+\.\d+.\d+"!: "$node_wanted"! for @f;
+  tie @f, 'Tie::File', 'public/convos-api.yaml' or die $!;
+  s!version:\s*\S+!version: $node_wanted! for @f;
   untie @f;
 
 }
@@ -59,8 +59,8 @@ $failed += is($node_version, $node_wanted, 'correct version in package.json') ? 
 my ($snap_version) = path(qw(snap snapcraft.yaml))->slurp =~ /^version:\s*'([^']+)/m;
 $failed += is($snap_version, $node_wanted, 'correct version in snap/snapcraft.yaml') ? 0 : 1;
 
-my ($api_version) = path(qw(public convos-api.json))->slurp =~ /\s"version":\s*"([^"]+)/m;
-$failed += is($api_version, $node_wanted, 'correct version in public/convos-api.json') ? 0 : 1;
+my ($api_version) = path(qw(public convos-api.yaml))->slurp =~ /\sversion:\s*(\S+)/m;
+$failed += is($api_version, $node_wanted, 'correct version in public/convos-api.yaml') ? 0 : 1;
 
 if ($ENV{RELEASE} and !$failed) {
   system git => add    => 'public';

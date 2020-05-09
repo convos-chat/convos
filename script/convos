@@ -53,7 +53,7 @@ sub command_dev {
   my $script = shift;
   my @cmd    = $script->_cmd_with_secure_listen(@_);
   $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_DEBUG);
-  push @cmd, qw(-w lib -w public/convos-api.json -w templates) unless grep {/^-?-w/} @cmd;
+  push @cmd, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @cmd;
   warn "\$ script/convos webpack @cmd\n";
   exec $^X => qw(script/convos), webpack => @cmd;
   die "Could not exec $^X script/convos webpack @cmd: $!\n";
