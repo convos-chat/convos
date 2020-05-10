@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.05 Not Released
+4.05 2020-04-10T10:06:00+0800
  - Avoid XSS links in the chat
 
 4.04 2020-04-09T08:42:00+0800
