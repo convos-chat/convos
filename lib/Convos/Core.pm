@@ -41,6 +41,16 @@ sub connect {
   return $self;
 }
 
+sub connections_by_id {
+  my ($self, $cid) = @_;
+
+  return $self->users->map(
+    sub {
+      shift->connections->grep(sub { shift->id eq $cid });
+    }
+  )->flatten;
+}
+
 sub get_user_by_uid {
   my ($self, $uid) = @_;
   return +(grep { $_->uid eq $uid } @{$self->users})[0];
@@ -242,6 +252,12 @@ fails.
 
 C<$cb> is optional, but will be passed on to
 L<Convos::Core::Connection/connect> if defined.
+
+=head2 connections_by_id
+
+  $collection = $core->connections_by_id($cid);
+
+Finds all L<Convos::Core::Connection> objects where C<id()> matches C<$cid>.
 
 =head2 get_user
 

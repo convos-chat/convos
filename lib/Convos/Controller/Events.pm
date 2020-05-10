@@ -5,30 +5,29 @@ use Convos::Util qw(DEBUG E);
 use Mojo::JSON 'encode_json';
 use Mojo::Util;
 use Time::HiRes 'time';
+use Scalar::Util qw(blessed weaken);
 
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 60;
 
 sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
-
   return $self->_err('Need to log in first.', {})->finish unless my $user = $self->backend->user;
 
-  Scalar::Util::weaken($self);
-
+  weaken $self;
   my $uid     = $user->id;
   my $backend = $self->app->core->backend;
   my $cb      = $backend->on(
     "user:$uid" => sub {
       my ($backend, $event, $data) = @_;
       my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
-      warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG == 2;
+      warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG >= 2;
       $self->send({json => {%$data, ts => $ts, event => $event}});
     }
   );
 
   $self->on(
     finish => sub {
-      warn "[Convos::Controller::Events] !!! Finish\n" if DEBUG == 2;
+      warn "[Convos::Controller::Events] !!! Finish\n" if DEBUG >= 2;
       $backend->unsubscribe("user:$uid" => $cb);
     }
   );
@@ -38,8 +37,9 @@ sub start {
       my ($self, $data) = @_;
       my $method = sprintf '_event_%s', $data->{method} || 'ping';
       $data->{id} //= Mojo::Util::steady_time();
-      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG == 2;
-      $self->can($method) ? $self->$method($data) : $self->_err('Invalid method.', $data);
+      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG >= 2;
+      my $res = $self->can($method) ? $self->$method($data) : $self->_err('Invalid method.', $data);
+      $res->catch(sub { $self->_err(shift, $data) }) if blessed $res and $res->can('catch');
     }
   );
 }
@@ -56,6 +56,19 @@ sub _event_debug {
   my ($self, $data) = @_;
   $self->log->warn('[ws] <<< ' . encode_json $data) if DEBUG;
   $self->send({json => {event => 'debug'}});
+}
+
+sub _event_rtc {
+  my ($self, $data) = @_;
+  return $self->_err('Connection not found.', $data)
+    unless $data->{connection_id}
+    and my $connection = $self->backend->user->get_connection($data->{connection_id});
+
+  return $connection->rtc_p($data)->then(sub {
+    my $res = shift;
+    $res->{event} = 'rtc';
+    $self->send({json => $res});
+  });
 }
 
 sub _event_send {

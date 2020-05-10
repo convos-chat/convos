@@ -2,6 +2,7 @@ package Convos::Util;
 use Mojo::Base 'Exporter';
 
 use JSON::Validator::Error;
+use Mojo::Collection 'c';
 use Mojo::File;
 use Mojo::Util qw(b64_encode md5_sum monkey_patch);
 use Time::Piece ();
@@ -27,7 +28,7 @@ sub has_many {
   $singular_accessor =~ s!s$!!;
 
   monkey_patch $class => $plural_accessor => sub {
-    return [values %{$_[0]->{$plural_accessor} || {}}];
+    return c(values %{$_[0]->{$plural_accessor} || {}});
   };
 
   monkey_patch $class => "n_$plural_accessor" => sub {
