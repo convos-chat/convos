@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.05 Not Released
+ - Avoid XSS links in the chat
+
 4.04 2020-04-09T08:42:00+0800
  - Add "Jump to now" link in Chat #453
  - Add line numbers for hljs #461

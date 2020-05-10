@@ -120,6 +120,9 @@ export function md(str) {
     return all;
   }).replace(mdLinkRe, (all, text, href) => {
     mdLinks++;
+    const scheme = href.match(/^\s*(\w+):/) || ['', ''];
+    if (scheme[1].length > 4 || scheme[1].match(/^javascript/i)) return all; // Avoid XSS links
+
     const first = href.substring(0, 1);
     const target = ['/', '#'].indexOf(first) != -1 ? '' : '_blank';
     return '<a href="' + route.urlFor(href) + '" target="' + target + '">' + text + '</a>';
