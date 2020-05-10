@@ -69,8 +69,11 @@ sub get {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->unauthorized;
 
-  return $user->get_p($self->req->url->query->to_hash)
-    ->then(sub { $self->render(openapi => shift) });
+  return $user->get_p($self->req->url->query->to_hash)->then(sub {
+    my $user = shift;
+    $user->{rtc} = $self->app->core->settings->rtc;
+    $self->render(openapi => $user);
+  });
 }
 
 sub login {
