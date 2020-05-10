@@ -399,18 +399,12 @@ sub _setup {
       $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
-
-          $self->emit("user:$uid",
-            message =>
-              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
-
           my ($format, @keys) = $self->_format($msg->{type}) or return;
           my $message = sprintf $format, map { $msg->{$_} } @keys;
           my $flag    = FLAG_NONE;
 
           if ($msg->{highlight} and $target->id and !$target->is_private) {
             $self->_save_notification($target, $msg->{ts}, $message);
-            $connection->user->{unread}++;
             $connection->user->save_p;
             $flag |= FLAG_HIGHLIGHT;
           }
@@ -419,14 +413,10 @@ sub _setup {
           $self->_log($target, $msg->{ts}, $message);
         }
       );
-      $connection->on(
-        state => sub {
-          my ($connection, $type, $args) = @_;
-          $self->emit("user:$uid", state => {connection_id => $cid, %$args, type => $type});
-        }
-      );
     }
   );
+
+  return $self->SUPER::_setup;
 }
 
 1;
