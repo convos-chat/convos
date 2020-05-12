@@ -46,6 +46,45 @@ $ CONVOS_REVERSE_PROXY=1 ./script/convos daemon \
 See [CONVOS_REVERSE_PROXY](#mojoreverseproxy) for more details about setting
 up Convos behind a reverse proxy.
 
+## Automatic startup with systemd
+
+Here is an example systemd file, that can be placed in
+`/etc/systemd/system/convos.service`.
+
+Note that the [Environment](#environment) variables should be review and
+changed to suit your needs.
+
+```
+[Unit]
+Description=Convos service
+After=network.target
+
+[Service]
+Environment=CONVOS_HOME=/var/convos
+Environment=CONVOS_REVERSE_PROXY=1
+User=www
+ExecStart=/path/to/convos/script/convos daemon --listen http://*:8081
+KillMode=process
+Restart=on-failure
+SyslogIdentifier=convos
+
+[Install]
+WantedBy=multi-user.target
+```
+
+After creating the file, you can run the following commands to start the
+service:
+
+```
+systemctl daemon-reload
+systemctl enable convos.service
+systemctl start convos.service
+systemctl status convos.service
+```
+
+Running Convos under systemd without a custom `CONVOS_LOG_FILE` will send all
+the log messages to syslog, which normally logs to `/var/log/syslog`.
+
 ## Configuration parameters
 
 ### CONVOS_BACKEND
