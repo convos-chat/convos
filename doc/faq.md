@@ -5,17 +5,6 @@ title: Frequently asked questions
 
 <ul class="toc"></ul>
 
-## Can Convos be extended and customized?
-
-Yes. Convos supports plugins, but there have not yet been any plugins
-developed. We hope to implement
-[#244](https://github.com/Nordaaker/convos/issues/244) and
-[#90](https://github.com/Nordaaker/convos/issues/90) as the first core
-plugins.
-
-Look at the [configuration](/doc/config.html) guide to see which configuration
-parameters that have to be set to load a plugin.
-
 ## Can Convos run behind behind my favorite web server?
 
 Yes, but Convos and the web server need to be configured properly and
@@ -104,6 +93,17 @@ Example Apache config:
       ProxyPass / http://localhost:8080/ keepalive=On
       ProxyPassReverse / http://localhost:8080/
     </VirtualHost>
+
+## Can Convos be extended and customized?
+
+Yes. Convos supports plugins, but there have not yet been any plugins
+developed. We hope to implement
+[#244](https://github.com/Nordaaker/convos/issues/244) and
+[#90](https://github.com/Nordaaker/convos/issues/90) as the first core
+plugins.
+
+Look at the [configuration](/doc/config.html) guide to see which configuration
+parameters that have to be set to load a plugin.
 
 ## Is Convos supported on my flavor of Linux?
 
