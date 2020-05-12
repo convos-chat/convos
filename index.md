@@ -36,7 +36,7 @@ banned from IRC networks with strict limitations.
   The backend server will keep you logged in and logs all the activity in your
   archive.
 
-* __Private__ -
+* ___Private___ -
   Convos is all about privacy. By default, no data will be exchanged with third
   parties. You own and control all your settings, logs and uploaded files from
   your own computer.
@@ -60,7 +60,7 @@ banned from IRC networks with strict limitations.
   mode together with the settings on your desktop/phone. You can also define your
   own themes that are local to your Convos instance.
 
-* __Snappy interface__ -
+* ___Snappy interface___ -
   Convos uses the [sveltejs](https://svelte.dev/) web app compiler in the frontend,
   and the real-time web framework [Mojolicious](https://mojolicious.org/) in the
   backend, making Convos very snappy and lightweight.
@@ -71,7 +71,7 @@ banned from IRC networks with strict limitations.
   download and install Convos. No need for external servers or complex config
   files to get up and running. Run one command, and you are good to go!
 
-* __LDAP support__ -
+* ___LDAP support___ -
   Got your existing users in a LDAP server? Convos can connect to it, meaning you
   can administrate all your users in one place.
 
