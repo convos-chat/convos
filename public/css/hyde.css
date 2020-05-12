@@ -216,3 +216,7 @@ h1.convos-logo a {
 h1.convos-logo a span {
   visibility: hidden;
 }
+
+ul > li > p:first-child {
+  margin: 0;
+}

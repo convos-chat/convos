@@ -5,23 +5,20 @@ title: About
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
 online, and accessible to your web browser, both on desktop and mobile. Run it
-on your home server, or [cloud service](https://www.digitalocean.com/) easily.
-It can be deployed to Docker-based cloud services, or you can just run it as a
-normal [Mojolicious](http://mojolicious.org/) application.
+on your home server, [cloud service](/blog/2019-11-26-convos-on-digital-ocean)
+or in [Docker](/doc/getting-started.md#docker).
 
-Learn more about how to install and configure Convos in the
-[guides](/doc) or just run the two commands below to
-[install](/doc/getting-started.html) and start Convos:
-
-<pre class="highlight"><code>$ curl <a href="https://github.com/Nordaaker/convos/blob/gh-pages/install.sh">https://convos.by/install.sh</a> | sh -
-$ ./convos/script/convos daemon</code></pre>
+Curious? Try ut our [demo](#demo). Eager? [Download and install](/doc/getting-started.html)
+Convos for free! Unsure? Check out the [feature](#features) list.
 
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
 [![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)](https://hub.docker.com/r/nordaaker/convos)
 [![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
 [![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)](https://github.com/nordaaker/convos/issues)
 
-<a href="/2019/10/26/convos-one-point-oh.html"><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
+<div style="height: 340px;overflow:hidden;border-radius: 0.5rem; box-shadow:0 0 8px 3px rgba(0, 0, 0, 0.3)">
+  <a href="/doc/getting-started.html"><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
+</div>
 
 ## Demo
 
@@ -35,39 +32,48 @@ banned from IRC networks with strict limitations.
 
 ## Features
 
-### Always online
+* ___Always online___ -
+  The backend server will keep you logged in and logs all the activity in your
+  archive.
 
-The backend server will keep you logged in and logs all the activity in your
-archive.
+* __Private__ -
+  Convos is all about privacy. By default, no data will be exchanged with third
+  parties. You own and control all your settings, logs and uploaded files from
+  your own computer.
 
-### Archive
+* ___Archive___ -
+  All chats will be logged persistently, which allow you to go back in history or
+  search for any sent message.
 
-All chats will be logged and indexed, which allow you to search in earlier
-conversations.
+* ___Notifications___ -
+  Convos will track whenever you are mentioned in a conversation and display
+  desktop notifications.
 
-### Automatic Previews
+* ___Rich formatting___ -
+  Convos will format markdown, making the IRC experience feel more alive. Emojis
+  support is built in, and photos and video will be displayed inline. No need to
+  click on the link to view the data. You can upload your own files and create
+  pastebins directly from the chat input.
 
-Links to images and video will be displayed inline. No need to click on the
-link to view the data.
+* ___Custom theming___ -
+  Convos comes bundled with a selection of themes that change between dark/light
+  mode together with the settings on your desktop/phone. You can also define your
+  own themes that are local to your Convos instance.
 
-### Notifications
+* __Snappy interface__ -
+  Convos uses the [sveltejs](https://svelte.dev/) web app compiler in the frontend,
+  and the real-time web framework [Mojolicious](https://mojolicious.org/) in the
+  backend, making Convos very snappy and lightweight.
 
-Convos will track whenever you are mentioned in a conversation and display
-desktop notifications.
+* ___Easy to install and extend___ -
+  The main design principle for Convos is to keep simple things simple, and
+  optionally support complexity. With this in mind, it's incredible simple to
+  download and install Convos. No need for external servers or complex config
+  files to get up and running. Run one command, and you are good to go!
 
-## Design principles
-
-* Keep it easy to install.
-* Easy to run - Optional complexity.
-* Easy to use for both humans and computers.
-* Easy to develop and extend.
-* Keep the JS simple and manageable.
-* Archive logs in plain text format.
-
-## Authors
-
-* Jan Henning Thorsen - jhthorsen@cpan.org
-* Marcus Ramberg - marcus@nordaaker.com
+* __LDAP support__ -
+  Got your existing users in a LDAP server? Convos can connect to it, meaning you
+  can administrate all your users in one place.
 
 ## Copyright & License
 
