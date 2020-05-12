@@ -5,6 +5,39 @@ title: Frequently asked questions
 
 <ul class="toc"></ul>
 
+## Where does Convos store logs, settings and uploaded files?
+
+All files are located in the [CONVOS_HOME](./config#convos_home) directory.
+The exact location will be written to the application log, or to screen
+when you start Convos. Look for a log message such as:
+
+    [2020-05-12 00:00:00.00000] [1234] [info] CONVOS_HOME="/home/superwoman/.local/share/convos" # https://convos.by/doc/config.html#convos_home"
+
+Here is a short overview of an example directory structure:
+
+    # Global settings
+    # https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core/Settings.pm#L126
+    /home/superwoman/.local/share/convos/settings.json
+
+    # Location of custom user themes
+    # https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Themes.pm#L91
+    /home/superwoman/.local/share/convos/themes/
+
+    # Private directory per user
+    /home/superwoman/.local/share/convos/joe@example.com/
+
+    # User settings
+    /home/superwoman/.local/share/convos/joe@example.com/user.json
+
+    # Uploaded files are stored with a ".data" extension, and meta information
+    # can be found in the companion ".json" file.
+    /home/superwoman/.local/share/convos/joe@example.com/upload/
+
+    # Chat logs and settings per connection
+    /home/superwoman/.local/share/convos/joe@example.com/irc-servername/
+
+IMPORTANT! The "json" files should never be edited while Convos is running.
+
 ## Can Convos run behind behind my favorite web server?
 
 Yes, but Convos and the web server need to be configured properly and

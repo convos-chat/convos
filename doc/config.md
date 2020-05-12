@@ -75,7 +75,15 @@ This variable is used by
 [Convos::Core::Backend::File](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core/Backend/File.pm)
 to figure out where to store settings and log files.
 
+See the [FAQ](./faq) for more details.
+
 Default: `$HOME/.local/share/convos/`
+
+However if you are running Convos as a [snap](https://snapcraft.io/convos/), then
+`CONVOS_HOME` will be
+[SNAP_USER_COMMON](https://snapcraft.io/docs/environment-variables).
+
+Example: `$HOME/snap/convos/common`
 
 ### CONVOS_INVITE_LINK_VALID_FOR
 
