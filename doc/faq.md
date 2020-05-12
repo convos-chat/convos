@@ -7,7 +7,7 @@ title: Frequently asked questions
 
 ## Where does Convos store logs, settings and uploaded files?
 
-All files are located in the [CONVOS_HOME](./config#convos_home) directory.
+All files are located in the [$CONVOS_HOME](./config#convos_home) directory.
 The exact location will be written to the application log, or to screen
 when you start Convos. Look for a log message such as:
 
@@ -15,28 +15,33 @@ when you start Convos. Look for a log message such as:
 
 Here is a short overview of an example directory structure:
 
-    # Global settings
-    # https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core/Settings.pm#L126
-    /home/superwoman/.local/share/convos/settings.json
+* [Global settings](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core/Settings.pm#L126)
+  ```
+  /home/superwoman/.local/share/convos/settings.json
+  ```
 
-    # Location of custom user themes
-    # https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Themes.pm#L91
-    /home/superwoman/.local/share/convos/themes/
+* [User themes](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Themes.pm#L91)
+  ```
+  /home/superwoman/.local/share/convos/themes/
+  ```
 
-    # Private directory per user
-    /home/superwoman/.local/share/convos/joe@example.com/
+* User settings and logs
+  ```
+  /home/superwoman/.local/share/convos/joe@example.com/
+  /home/superwoman/.local/share/convos/joe@example.com/user.json
+  /home/superwoman/.local/share/convos/joe@example.com/irc-server/
+  ```
 
-    # User settings
-    /home/superwoman/.local/share/convos/joe@example.com/user.json
+* User uploaded and paste files
+  ```
+  /home/superwoman/.local/share/convos/joe@example.com/upload
+  ```
 
-    # Uploaded files are stored with a ".data" extension, and meta information
-    # can be found in the companion ".json" file.
-    /home/superwoman/.local/share/convos/joe@example.com/upload/
+  Uploaded files are stored with a ".data" extension, and meta information can
+  be found in the companion ".json" file.
 
-    # Chat logs and settings per connection
-    /home/superwoman/.local/share/convos/joe@example.com/irc-servername/
-
-IMPORTANT! The "json" files should never be edited while Convos is running.
+IMPORTANT! The "json" files located in `$CONVOS_HOME` should never be edited
+while Convos is running.
 
 ## Can Convos run behind behind my favorite web server?
 
