@@ -1,6 +1,6 @@
 import Reactive from './Reactive';
 import {isISOTimeString} from './Time';
-import {omnibus} from '../Store/Omnibus';
+import {omnibus} from '../store/Omnibus';
 import {route} from '../store/Route';
 
 export default class Scrollspy extends Reactive {
