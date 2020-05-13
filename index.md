@@ -62,19 +62,21 @@ banned from IRC networks with strict limitations.
   that are local to your Convos instance.
 
 * ___Snappy interface___ -
-  Convos uses the [sveltejs](https://svelte.dev/) web app compiler in the frontend,
+  Convos uses the [Svelte](https://svelte.dev/) web app compiler in the frontend,
   and the real-time web framework [Mojolicious](https://mojolicious.org/) in the
   backend, making Convos very snappy and lightweight.
 
 * ___Easy to install and extend___ -
   The main design principle for Convos is to keep simple things simple, and
   optionally support complexity. With this in mind, it's incredible simple to
-  download and install Convos. No need for external servers or complex config
-  files to get up and running. Run one command, and you are good to go!
+  [download and install Convos](/doc/getting-started.html). No need for external
+  servers or complex config files to get up and running. Run one command, and
+  you are good to go!
 
 * ___LDAP support___ -
-  Got your existing users in a LDAP server? Convos can connect to it, meaning you
-  can administrate all your users in one place.
+  Got your existing users in a LDAP server? Convos can
+  [connect to it](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Auth/LDAP.pm#L100),
+  meaning you can administrate all your users in one place.
 
 ## Copyright & License
 
