@@ -3,6 +3,11 @@ layout: post
 title: How to define custom styling for Convos
 ---
 
+This post is outdated. If you want to see a more recent post about theming,
+go to [Theming support in Convos 4.00](/2020/05/14/theming-support-in-4-point-oh.html).
+
+<!--more-->
+
 [Convos 1.x](/2019/10/26/convos-one-point-oh) does no longer support
 defining custom assets in your [CONVOS_HOME](/doc/config) directory.
 
@@ -11,8 +16,6 @@ to modify the source code. Please have a look at the
 [development guide](/doc/develop) to get started. This post will
 build on top of that guide with an example on how to make your own
 custom theme.
-
-<!--more-->
 
 To be able to define a new theme, you must get Convos version 1.01 or
 later.

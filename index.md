@@ -57,8 +57,9 @@ banned from IRC networks with strict limitations.
 
 * ___Custom theming___ -
   Convos comes bundled with a selection of themes that change between dark/light
-  mode together with the settings on your desktop/phone. You can also define your
-  own themes that are local to your Convos instance.
+  mode together with the settings on your desktop/phone. You can also
+  [define your own themes](/2020/05/14/theming-support-in-4-point-oh.html)
+  that are local to your Convos instance.
 
 * ___Snappy interface___ -
   Convos uses the [sveltejs](https://svelte.dev/) web app compiler in the frontend,
