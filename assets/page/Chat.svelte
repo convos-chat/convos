@@ -15,11 +15,11 @@ import {isISOTimeString} from '../js/Time';
 import {l, topicOrStatus} from '../js/i18n';
 import {route} from '../store/Route';
 
-const before = {}; // Holds values so we can compare before/after changes
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
 const scrollspy = new Scrollspy();
 const user = getContext('user');
+const track = {}; // Holds values so we can compare before/after changes
 
 let chatInput;
 let connection = {};
@@ -33,7 +33,6 @@ $: maybeReloadMessages($route);
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
 $: messages = chatMessages.merge($dialog.messages);
-$: window.M = messages;
 $: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 
 chatMessages.attach({connection, dialog, user});
@@ -45,15 +44,15 @@ onMount(() => {
 afterUpdate(() => {
 
   // Remove already embedded elements when scrolling back in history
-  const firstTs = messages.length && messages[0].ts.toISOString();
-  if (firstTs && before.chatFirstTs != firstTs) q(document, '.message__embed', embedEl => embedEl.remove());
-  before.chatFirstTs = firstTs;
+  const firstTs = dialog.messages.length && dialog.messages[0].ts.toISOString() || '';
+  if (firstTs && track.chatFirstTs != firstTs) q(document, '.message__embed', embedEl => embedEl.remove());
+  track.chatFirstTs = firstTs;
 
   // Make sure we observe all message elements
   scrollspy.wrapper = mainEl;
   scrollspy.observe('.message');
-  if (messagesHeight != before.chatMessagesHeight) scrollspy.keepPos(messagesHeight);
-  before.chatMessagesHeight = messagesHeight;
+  if (messagesHeight != track.messagesHeight) scrollspy.keepPos(messagesHeight);
+  track.messagesHeight = messagesHeight;
   q(mainEl, '.message', el => el.classList[el.dataset.ts == $route.hash ? 'add' : 'remove']('has-focus'));
 });
 
@@ -89,8 +88,9 @@ unsubscribe.scroll = scrollspy.on('scroll', entry => {
 });
 
 function maybeReloadMessages(route) {
-  if (before.hasHash && !route.hash && !dialog.endOfHistory) dialog.load({});
-  before.hasHash = route.hash ? true : false;
+  if (track.hasHash && !route.hash) scrollspy.scrollTo(messagesHeight);
+  if (track.hasHash && !route.hash && !dialog.endOfHistory) dialog.load({});
+  track.hasHash = route.hash ? true : false;
 }
 
 function toggleDetails(e) {
@@ -113,7 +113,7 @@ async function setDialogFromUser(user) {
     if (dialog.setLastRead) dialog.setLastRead();
   }
 
-  if (user.omnibus.debug > 1) console.log('[setDialogFromUser]', user.activeDialog.name);
+  if (user.omnibus.debug) console.log('[setDialogFromUser]', user.activeDialog.name);
 
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};
@@ -121,6 +121,7 @@ async function setDialogFromUser(user) {
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
   now = new Time();
+  Object.keys(track).forEach(k => delete track[k]);
 
   const after = isISOTimeString(route.hash) && new Time(route.hash);
   await dialog.load({after: after ? after.setSeconds(after.getSeconds() - 5).toISOString() : 'maybe'});

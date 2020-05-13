@@ -1,12 +1,12 @@
 import Reactive from './Reactive';
-import {debounce} from './util';
 import {isISOTimeString} from './Time';
+import {omnibus} from '../Store/Omnibus';
 import {route} from '../store/Route';
 
 export default class Scrollspy extends Reactive {
   constructor() {
     super();
-    this.onScroll = debounce(this.onScroll.bind(this), 50);
+    this.onScroll = this.onScroll.bind(this);
     this.pos = 'bottom';
     this.scrollTo = this.scrollTo.bind(this);
     this.wrapper = null;
@@ -47,10 +47,15 @@ export default class Scrollspy extends Reactive {
 
   keepPos(height) {
     if (height) this.height = height;
-    if (!this.wrapper || this.onScroll.debounceTid) return;
+
+    const locked = this.onScrollTid && !this.cancelNextOnScroll ? true : false;
+    if (omnibus.debug > 1) console.log('[Scrollspy:keepPos]', {height, locked, scrollTop: this.wrapper && this.wrapper.scrollTop});
+    if (!this.wrapper || locked) return;
 
     const selector = !route.hash ? '' : isISOTimeString(route.hash) ? '[data-ts="' + route.hash + '"]' : '#' + route.hash;
     const el = selector && document.querySelector(selector);
+
+    this.cancelNextOnScroll = true;
 
     if (el) {
       this.scrollTo(el, this.wrapper);
@@ -74,27 +79,31 @@ export default class Scrollspy extends Reactive {
   }
 
   onScroll(e) {
-    if (!this.wrapper) return null;
-    if (this.scrolledByCode) return delete this.scrolledByCode;
+    if (!this.wrapper) return;
+    if (this.onScrollTid) clearTimeout(this.onScrollTid);
 
-    const offsetHeight = this.wrapper.offsetHeight;
-    const scrollTop = this.wrapper.scrollTop;
+    this.onScrollTid = setTimeout(() => {
+      delete this.onScrollTid;
+      const offsetHeight = this.wrapper.offsetHeight;
+      const scrollTop = this.wrapper.scrollTop;
 
-    this.pos
-      = offsetHeight >= this.height ? 'bottom'
-      : scrollTop > this.height - offsetHeight - 50 ? 'bottom'
-      : scrollTop < 100 ? 'top'
-      : 'middle';
+      this.pos
+        = offsetHeight >= this.height ? 'bottom'
+        : scrollTop > this.height - offsetHeight - 50 ? 'bottom'
+        : scrollTop < 100 ? 'top'
+        : 'middle';
 
-    this.emit('scroll', e);
+      if (!this.cancelNextOnScroll) this.emit('scroll', e);
+      delete this.cancelNextOnScroll;
+    }, 50);
   }
 
   scrollTo(to, guard = 0) {
     if (guard >= 5) return; // Give up
     if (!this.wrapper) return setTimeout(() => this.scrollTo(to, guard + 1), 20);
+    if (omnibus.debug > 1) console.log('[Scrollspy:scrollTo]', to);
 
     if (typeof to == 'number') {
-      this.scrolledByCode = true;
       return (this.wrapper.scrollTop = to);
     }
 
