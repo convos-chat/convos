@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.06 2020-04-13T13:19:00+0800
+ - Improved keeping scroll position
+ - Fix loading embeds after the correct message
+
 4.05 2020-04-10T10:06:00+0800
  - Avoid XSS links in the chat
 
