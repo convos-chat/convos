@@ -86,4 +86,4 @@ community.
 Got more questions? Join us in [#convos](irc://irc.freenode.net/%23convos)
 at freenode.net!
 
-Happy theming!
+Happy theming :)

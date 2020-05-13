@@ -20,7 +20,7 @@ Here is a short overview of an example directory structure:
   /home/superwoman/.local/share/convos/settings.json
   ```
 
-* [User themes](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Themes.pm#L91)
+* [User themes](/2020/5/14/theming-support-in-4-point-oh.html)
   ```
   /home/superwoman/.local/share/convos/themes/
   ```

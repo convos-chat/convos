@@ -4,7 +4,7 @@ title: How to define custom styling for Convos
 ---
 
 This post is outdated. If you want to see a more recent post about theming,
-go to [Theming support in Convos 4.00](/2020/05/14/theming-support-in-4-point-oh.html).
+go to [Theming support in Convos 4.00](/2020/5/14/theming-support-in-4-point-oh.html).
 
 <!--more-->
 
