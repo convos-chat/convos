@@ -124,8 +124,8 @@ export function md(str) {
     if (scheme[1].length > 4 || scheme[1].match(/^javascript/i)) return all; // Avoid XSS links
 
     const first = href.substring(0, 1);
-    const target = ['/', '#'].indexOf(first) != -1 ? '' : '_blank';
-    return '<a href="' + route.urlFor(href) + '" target="' + target + '">' + text + '</a>';
+    const target = ['/', '#'].indexOf(first) != -1 ? '' : ' target="_blank"';
+    return '<a href="' + route.urlFor(href) + '"' + target + '>' + text + '</a>';
   }).replace(codeToHtmlRe, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
