@@ -24,7 +24,7 @@ export default class Route extends Reactive {
 
     this._history = window.history;
     this._location = window.location;
-    this._onclick = this._onclick.bind(this);
+    this._onClick = this._onClick.bind(this);
     this._onpopstate = this._onpopstate.bind(this);
 
     this._basePath = '';
@@ -63,7 +63,7 @@ export default class Route extends Reactive {
 
   render(abs, state) {
     if (!this._started) {
-      window.addEventListener('click', this._onclick);
+      window.addEventListener('click', this._onClick);
       window.addEventListener('popstate', this._onpopstate);
       this._started = true;
     }
@@ -152,14 +152,20 @@ export default class Route extends Reactive {
     });
   }
 
-  _onclick(e) {
+  _onClick(e) {
     // This is useful if you want to see on server side what is being clicked on
     // omnibus.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
 
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
 
     const linkEl = e.target && e.target.closest('a');
-    if (!linkEl) return;
+    if (!linkEl || !linkEl.href) return;
+
+    if (linkEl.target == '_self') {
+      let href = linkEl.href.indexOf('/') == 0 ? this.baseUrl + linkEl.href : linkEl.href;
+      if (href == location.href) return location.reload();
+    }
+
     if (linkEl.hasAttribute('download') || linkEl.hasAttribute('target')) return;
 
     // Toggle activeMenu with href="#activeMenu:..."
