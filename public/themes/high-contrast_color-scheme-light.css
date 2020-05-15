@@ -17,9 +17,11 @@
   --button-danger-bg: #990000;
   --button-disabled-bg: #ffb3b3;
   --button-disabled-border: #373737;
+  --button-focus-outline: 1px solid #ff9999;
   --input-focus-outline: 2px dotted #eee;
   --autocomplete-focus: #eeeeee;
   --autocomplete-focus-bg: #333333;
+  --sidebar-right-bg: #f8f8f8;
   --sidebar-left-bg: #222222;
   --sidebar-left-border: 1px solid #000000;
   --sidebar-left-frozen-color: #aaaaaa;

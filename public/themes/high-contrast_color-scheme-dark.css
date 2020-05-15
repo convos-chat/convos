@@ -19,6 +19,7 @@
   --input-bg: #eee;
   --button-disabled-bg: #440000;
   --button-disabled-border: #373737;
+  --button-focus-outline: 1px solid #ff9999;
   --input-focus-outline: 2px dotted #eee;
   --autocomplete-focus: #eeeeee;
   --autocomplete-focus-bg: #333333;
