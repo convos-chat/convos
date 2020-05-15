@@ -1,13 +1,19 @@
 Revision history for perl distribution Convos
 
-4.06 2020-04-13T13:19:00+0800
+4.07 2020-05-15T09:39:00+0800
+ - Fix "Go to start page" and "Retry" links inside <Fallback>
+ - Fix markdown links to relative links will not refresh the page
+ - Changed from "convos green" to red in the "High-contrast" theme #465
+   Contributor: Thibault Duponchelle
+
+4.06 2020-05-13T13:19:00+0800
  - Improved keeping scroll position
  - Fix loading embeds after the correct message
 
-4.05 2020-04-10T10:06:00+0800
+4.05 2020-05-10T10:06:00+0800
  - Avoid XSS links in the chat
 
-4.04 2020-04-09T08:42:00+0800
+4.04 2020-05-09T08:42:00+0800
  - Add "Jump to now" link in Chat #453
  - Add line numbers for hljs #461
  - Add support for searching for "from"
