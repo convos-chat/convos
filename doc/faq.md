@@ -176,6 +176,38 @@ re-install Convos:
 
 Please [contact us](/doc/#get-in-touch) if the above instructions do not work.
 
+## Why convos does not restart after an upgrade of convos code?
+
+Some changes in the convos code do not require any special operation (for instance if you modify assets under `public/` directory).
+
+If you update the convos code and get stuck to the loading page after a refresh like this:
+
+<img height="300px" src="../public/screenshots/2020-05-15-09-40-05-reload-error.png" alt="Stuck during reload">
+
+Then you likely have pulled changes that require you to do a service restart. 
+
+Then simply kill convos with:
+
+```
+$ kill $PID_OF_RUNNING_CONVOS
+``` 
+Or 
+
+```
+$ killall convos    
+```
+
+Then restart convos with :
+```
+$ ./script/convos daemon
+```
+
+Or alternatively if you use systemd:
+
+```
+$ systemctl restart convos.service
+```
+
 ## Why can't Convos do X?
 
 In most cases it's either because we haven't thought about it or haven't had
