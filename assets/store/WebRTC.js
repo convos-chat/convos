@@ -19,8 +19,10 @@ import {omnibus} from '../store/Omnibus';
  * about:webrtc
  */
 export default class WebRTC extends Reactive {
-  constructor() {
+  constructor(params) {
     super();
+
+    this.prop('ro', 'embedMaker', params.embedMaker);
 
     this.prop('rw', 'dialog', null);
     this.prop('rw', 'inCall', false);
@@ -97,6 +99,27 @@ export default class WebRTC extends Reactive {
     }).filter(Boolean);
   }
 
+  render() {
+    this._renderRtcConversation(this.id(this.localStream), this.localStream);
+
+    this.peerConnections({remoteStream: true}).forEach(pc => {
+      this._renderRtcConversation(this.id(pc), pc.remoteStream);
+    });
+
+    if (!this.localStream.id) {
+      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => this.embedMaker.showMediaBig(null));
+    }
+  }
+
+  _ensureEventListenersOnButtons(parentEl) {
+    if (parentEl._addEventListenersToButtonsDone) return;
+    parentEl._addEventListenersToButtonsDone = true;
+    q(parentEl, '.rtc-conversation__hangup', ['click', (e) => this.hangup()]);
+    q(parentEl, '.rtc-conversation__zoom', ['click', (e) => this._toggleZoomed(e)]);
+    q(parentEl, '.rtc-conversation__mute-audio', ['click', (e) => this._toggleMuted(e, 'audio')]);
+    q(parentEl, '.rtc-conversation__mute-video', ['click', (e) => this._toggleMuted(e, 'video')]);
+  }
+
   async _getDevices() {
     const devices = {cameras: [], microphones: [], speakers: [], unknown: []};
     const enumerateDevices = await navigator.mediaDevices.enumerateDevices();
@@ -156,7 +179,70 @@ export default class WebRTC extends Reactive {
     return (this.pc[target] = pc);
   }
 
+  _renderRtcConversation(id, stream) {
+    q(document, '[data-rtc-id="' + (id || 'uuid-missing') + '"]', conversationEl => {
+      const hasVideo = this.constraints.video;
+      conversationEl.classList[hasVideo ? 'remove' : 'add']('has-audio-only');
+      conversationEl.classList[hasVideo ? 'add' : 'remove']('has-video');
+      this._renderVideoEl(conversationEl.querySelector('video'), stream);
+      this._ensureEventListenersOnButtons(conversationEl);
+    });
+  }
+
+  _renderVideoEl(videoEl, stream) {
+    videoEl.width = parseInt(this.videoQuality.split('x')[0], 10);
+    videoEl.height = parseInt(this.videoQuality.split('x')[1], 10);
+    if (videoEl.srcObject == stream) return;
+    videoEl.setAttribute('autoplay', '');
+    videoEl.setAttribute('playsinline', '');
+    videoEl.oncanplay = () => { videoEl.parentNode.className = videoEl.parentNode.className.replace(/has-state-\d+/, 'has-state-' + videoEl.readyState) };
+    videoEl.srcObject = videoEl.classList.contains('is-disabled') ? null : stream;
+  }
+
   _send(event, msg) {
     if (this.dialog) this.dialog.send({...msg, method: 'rtc', event});
+  }
+
+  _toggleMuted(e, kind) {
+    const id = e.target.closest('[data-rtc-id]').dataset.rtcId;
+    e.preventDefault();
+    this.mute(id, kind);
+    const classListMethod = this.isMuted(id, kind) ? 'add' : 'remove';
+    const btnSel = '[data-rtc-id="' + id + '"] .rtc-conversation__mute-' + kind;
+    q(document, btnSel, el => el.classList[classListMethod]('is-active'));
+  }
+
+  _toggleZoomed(e) {
+    e.preventDefault();
+
+    const btn = e.target.closest('.btn');
+    const minimize = btn.classList.contains('is-active');
+    const conversationEl = btn.closest('[data-rtc-id]');
+    const btnSel = '[data-rtc-id="' + conversationEl.dataset.rtcId + '"] .rtc-conversation__zoom';
+    q(document, btnSel, el => el.classList[minimize ? 'remove' : 'add']('is-active'));
+
+    if (minimize) {
+      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => this.embedMaker.showMediaBig(null));
+      return;
+    }
+
+    const mediaWrapper = this.embedMaker.showMediaBig(conversationEl);
+    const conversationFocus = mediaWrapper.querySelector('[data-rtc-id]');
+    conversationFocus.classList.add('has-focus');
+    conversationFocus.classList.remove('is-local');
+
+    const conversationLocal = conversationEl.parentNode.querySelector('.rtc-conversation.is-local').cloneNode(true);
+    mediaWrapper.appendChild(conversationLocal);
+
+    // Do not render the small video previews
+    q(conversationEl.parentNode, 'video', el => el.classList.add('is-disabled'));
+
+    // Allow to go back to small video preview
+    this.embedMaker.on('hidemediawrapper').then(() => {
+      q(conversationEl.parentNode, 'video', el => el.classList.remove('is-disabled'));
+      this.render();
+    });
+
+    this.render();
   }
 }

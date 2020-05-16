@@ -1,4 +1,5 @@
 <script>
+import Button from '../components/form/Button.svelte';
 import ChatMessages from '../js/ChatMessages';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
@@ -17,6 +18,7 @@ import {route} from '../store/Route';
 
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
+const rtc = getContext('rtc');
 const scrollspy = new Scrollspy();
 const user = getContext('user');
 const track = {}; // Holds values so we can compare before/after changes
@@ -33,6 +35,7 @@ $: maybeReloadMessages($route);
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
 $: messages = chatMessages.merge($dialog.messages);
+$: notConnected = $dialog.frozen ? true : false;
 $: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 
 chatMessages.attach({connection, dialog, user});
@@ -60,6 +63,7 @@ onDestroy(() => {
   if (dialog.setLastRead) dialog.setLastRead();
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
+  rtc.hangup();
 });
 
 unsubscribe.observed = scrollspy.on('observed', entry => {
@@ -121,6 +125,7 @@ async function setDialogFromUser(user) {
   route.update({title: dialog.title});
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
   now = new Time();
+  rtc.hangup();
   Object.keys(track).forEach(k => delete track[k]);
 
   const after = isISOTimeString(route.hash) && new Time(route.hash);
@@ -135,7 +140,19 @@ async function setDialogFromUser(user) {
 <ChatHeader>
   <h1><a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(dialog.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, dialog)}</span>
-  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="has-tooltip" data-tooltip="{l('Settings')}"><Icon name="tools"/></a>
+  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip" data-tooltip="{l('Settings')}"><Icon name="tools"/></a>
+  {#if $rtc.localStream.id && $rtc.constraints.video}
+    <Button icon="video-slash" tooltip="{l('Hangup')}" disabled="{notConnected}" on:click="{e => rtc.hangup()}"/>
+  {:else}
+    <Button icon="video" tooltip="{l('Call')}" disabled="{notConnected}" on:click="{e => rtc.call(dialog, {audio: true, video: true})}"/>
+  {/if}
+  <!-- TODO
+  {#if $rtc.localStream.id && !$rtc.constraints.video}
+    <Button icon="phone-slash" tooltip="{l('Hangup')}" disabled="{notConnected}" on:click="{e => rtc.hangup()}"/>
+  {:else}
+    <Button icon="phone" tooltip="{l('Call')}" disabled="{notConnected}" on:click="{e => rtc.call(dialog, {audio: true, video: false})}"/>
+  {/if}
+  -->
 </ChatHeader>
 
 <main class="main has-chat" bind:this="{mainEl}"  on:scroll="{scrollspy.onScroll}">

@@ -17,8 +17,8 @@ import {setupRouting} from './routes';
 import {viewport} from './store/Viewport';
 
 const api = new Api(process.env.api_url, {debug: true});
-const rtc = new WebRTC();
 const user = new User({api, isFirst: process.env.first_user, themes: process.env.themes});
+const rtc = new WebRTC({embedMaker: user.embedMaker});
 
 let [innerHeight, innerWidth] = [0, 0];
 
@@ -46,7 +46,7 @@ function onGlobalKeydown(e) {
   // Esc
   if (e.keyCode == 27) {
     focusMainInputElements('chat_input');
-    q(document, '.fullscreen-media-wrapper', el => showEl(el, false));
+    q(document, '.fullscreen-media-wrapper', el => el.click());
     return;
   }
 
