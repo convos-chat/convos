@@ -133,12 +133,9 @@ async function setDialogFromUser(user) {
 </script>
 
 <ChatHeader>
-  <h1>
-    <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">
-      <Icon name="sliders-h"/><span>{l(dialog.name)}</span>
-    </a>
-  </h1>
-  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="chat-header__topic">{topicOrStatus(connection, dialog)}</a>
+  <h1><a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(dialog.name)}</a></h1>
+  <span class="chat-header__topic">{topicOrStatus(connection, dialog)}</span>
+  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="has-tooltip" data-tooltip="{l('Settings')}"><Icon name="tools"/></a>
 </ChatHeader>
 
 <main class="main has-chat" bind:this="{mainEl}"  on:scroll="{scrollspy.onScroll}">

@@ -45,7 +45,7 @@
   &.for-connection,
   &.for-dialog {
     .fas:hover:before {
-      content: '\f1de';
+      content: fa-content($fa-var-tools);
     }
   }
 
