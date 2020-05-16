@@ -289,3 +289,50 @@ p.help {
   font-size: 0.9rem;
   padding: 0 0.4em;
 }
+
+input[type="file"],
+input[type="file"]:-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+.upload-btn {
+  width: 2em;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+
+  &,
+  input {
+    cursor: pointer;
+  }
+
+  input {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  span {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  span:after {
+    @extend .fas;
+    content: fa-content($fa-var-cloud-upload-alt);
+    color: var(--link-color);
+    text-align: center;
+    display: block;
+    pointer-events: none;
+  }
+
+  input:focus + span:after {
+    outline: var(--button-focus-outline);
+    outline-offset: -2px;
+  }
+}

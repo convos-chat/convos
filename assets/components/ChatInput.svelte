@@ -156,12 +156,12 @@ const keys = {
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
-  <div class="chat-input__upload-wrapper" hidden="{!dialog.is('conversation')}">
-    <span></span>
+  <div class="chat-input__upload-wrapper upload-btn" hidden="{!dialog.is('conversation')}">
     <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
+    <span></span>
   </div>
 
-  <a href="#send" on:click="{sendMessage}" class="chat-input__send"><Icon name="{sendIcon}"/></a>
+  <button type="buttton" on:click="{sendMessage}" class="btn chat-input__send"><Icon name="{sendIcon}"/></button>
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}
