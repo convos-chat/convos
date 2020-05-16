@@ -131,7 +131,7 @@ function renderUnread(dialog) {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <form class="sidebar__header" on:submit="{e => e.preventDefault()}">
+  <form class="sidebar__header has-tooltip is-below" data-tooltip="{l('Search for conversations or messages')}" on:submit="{e => e.preventDefault()}">
     <input type="text" id="search_input"
       placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
       bind:value="{filter}"
