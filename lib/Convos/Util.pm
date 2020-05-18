@@ -87,6 +87,20 @@ sub require_module {
 HERE
 }
 
+sub sdp_compress {
+  return join "\n", map {
+    local $_ = "$_";
+    s/^a=rtpmap/!R/;
+    s/^a=ice-/!I/;
+    $_;
+  } grep { !/^(?:a=extmap:\d|a=fmtp:\d|a=rtcp-fb:\d)/ } split /\r?\n/, shift;
+}
+
+sub sdp_decompress {
+  return join "\r\n",
+    map { local $_ = "$_"; s/^!R/a=rtpmap/; s/^!I/a=ice-/; $_ } split(/\r?\n/, shift), '';
+}
+
 sub short_checksum {
   my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
   my $short    = b64_encode pack 'H*', $checksum;

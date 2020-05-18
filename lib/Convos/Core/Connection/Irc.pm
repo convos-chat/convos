@@ -5,7 +5,8 @@ no warnings 'utf8';
 use Convos::Util qw($CHANNEL_RE DEBUG);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
-use Mojo::Util qw(term_escape trim);
+use Mojo::Parameters;
+use Mojo::Util qw(b64_decode b64_encode gzip gunzip term_escape trim);
 use Parse::IRC ();
 use Time::HiRes 'time';
 
@@ -31,6 +32,53 @@ sub disconnect_p {
   $self->{disconnecting} = 1;    # Prevent getting queued
   $self->_write("QUIT :https://convos.by", sub { $self->_stream_remove($p) });
   return $p;
+}
+
+sub rtc_p {
+  my ($self, $msg) = @_;
+  return Mojo::Promise->reject('Missing property: event.') unless $msg->{event};
+  return Mojo::Promise->reject('Dialog not found.')
+    unless $msg->{dialog_id} and my $dialog = $self->get_dialog($msg->{dialog_id});
+
+  # "signal" messages should only be sent to a single user
+  return $self->_rtc_signal_p($dialog, $msg) if $msg->{event} eq 'signal';
+
+  # Every other message (call, hangup) should be broadcast to all other users
+  $self->_write(sprintf "NOTICE %s %s\r\n",
+    $dialog->name, $self->_make_ctcp_string(RTCZ => uc $msg->{event}));
+
+  $msg->{from} = $self->_nick;
+  return Mojo::Promise->resolve({});
+}
+
+sub _rtc_signal_p {
+  my ($self, $dialog, $msg) = @_;
+  return Mojo::Promise->reject('Missing property: target.') unless $msg->{target};
+
+  my $write = sub {
+    my ($type, $payload) = @_;
+    my @chunks;
+    $payload = b64_encode gzip($payload), '';
+    push @chunks, substr $payload, 0, 400, '' while length $payload;
+    my $n = @chunks - 1;
+    $self->_write(sprintf "NOTICE %s %s\r\n",
+      $msg->{target}, $self->_make_ctcp_string(RTCZ => $type, "$_/$n", $dialog->name, $chunks[$_]))
+      for 0 .. $n;
+  };
+
+  if ($msg->{ice}) {
+    my $payload = Mojo::Parameters->new->param(ice => $msg->{ice});
+    $payload->param($_ => $msg->{$_}) for grep {/[a-z][A-Z]/} keys %$msg;
+    $write->(ICE => $payload->to_string);
+  }
+  elsif ($msg->{answer}) {
+    $write->(ANS => $msg->{answer});
+  }
+  elsif ($msg->{offer}) {
+    $write->(OFR => $msg->{offer});
+  }
+
+  return Mojo::Promise->resolve({});
 }
 
 sub send_p {
@@ -83,6 +131,36 @@ sub _connect_args {
   $self->{myinfo}{nick} = $params->param('nick');
 
   return $self->SUPER::_connect_args;
+}
+
+sub _irc_event_ctcpreply_rtcz {
+  my ($self, $msg) = @_;
+  my ($nick) = IRC::Utils::parse_user($msg->{prefix});
+
+  if ($msg->{params}[1] =~ m!^(ANS|ICE|OFR)\s(\d+)/(\d+)\s(\S+)\s(.+)!) {
+    my ($type, $i, $n, $dialog_id, $payload) = ($1, $2, $3, $4, $5);
+    return if $i > 20;    # Should never need this long message
+
+    $self->{rtc_signal_buf}{$dialog_id}{$type} = [] if $i == 0;
+    $self->{rtc_signal_buf}{$dialog_id}{$type}[$i] = $payload;
+    return if $i != $n;    # Waiting for more messages
+
+    $payload = gunzip b64_decode join '', @{$self->{rtc_signal_buf}{$dialog_id}{$type}};
+    delete $self->{rtc_signal_buf}{$dialog_id}{$type};
+
+    my $dialog = $self->dialog({name => $dialog_id});
+    my $event
+      = $type eq 'ANS' ? {answer => $payload}
+      : $type eq 'OFR' ? {offer => $payload}
+      :                  Mojo::Parameters->new($payload)->to_hash;
+
+    $event->{from} = $nick;
+    $self->emit(rtc => signal => $dialog => $event);
+  }
+  elsif ($msg->{params}[1] =~ m!^(\w+)$!) {
+    my $dialog = $self->dialog({name => $msg->{params}[0]});
+    $self->emit(rtc => lc $1, $dialog => {from => $nick});
+  }
 }
 
 sub _irc_event_ctcp_action {
@@ -1028,6 +1106,10 @@ See L<Convos::Core::Connection/connect>.
 =head2 disconnect_p
 
 See L<Convos::Core::Connection/disconnect_p>.
+
+=head2 rtc_p
+
+See L<Convos::Core::Connection/rtc_p>.
 
 =head2 send_p
 

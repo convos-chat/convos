@@ -20,7 +20,7 @@ sub start {
     "user:$uid" => sub {
       my ($backend, $event, $data) = @_;
       my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
-      warn "[Convos::Controller::Events] >>> @{[encode_json $data]}\n" if DEBUG >= 2;
+      warn "[Convos::Controller::Events] >>> $event @{[encode_json $data]}\n" if DEBUG >= 2;
       $self->send({json => {%$data, ts => $ts, event => $event}});
     }
   );
