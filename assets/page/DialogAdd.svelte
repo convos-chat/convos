@@ -63,7 +63,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
         <span slot="label">{l('Connection')}</span>
       </SelectField>
       <div class="has-remaining-space">
-        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}">{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</Button>
+        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}"><span>{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</span></Button>
       </div>
     </div>
 
@@ -74,7 +74,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
         <span slot="label">{l('Conversation name')}</span>
       </TextField>
       <div class="has-remaining-space">
-        <Button icon="comment" disabled="{!connectionId || !dialogId}">{l('Add')}</Button>
+        <Button icon="comment" disabled="{!connectionId || !dialogId}"><span>{l('Add')}</span></Button>
       </div>
     </div>
 

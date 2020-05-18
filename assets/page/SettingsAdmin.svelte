@@ -70,7 +70,7 @@ function updateSettingsFromForm(e) {
     {/if}
 
     <div class="form-actions">
-      <Button icon="save" op="{inviteLinkOp}">{l('Generate link')}</Button>
+      <Button icon="save" op="{inviteLinkOp}"><span>{l('Generate link')}</span></Button>
     </div>
 
     <OperationStatus op="{inviteLinkOp}"/>
@@ -114,7 +114,7 @@ function updateSettingsFromForm(e) {
     <p class="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
 
     <div class="form-actions">
-      <Button icon="save" op="{updateSettingsOp}">{l('Save settings')}</Button>
+      <Button icon="save" op="{updateSettingsOp}"><span>{l('Save settings')}</span></Button>
     </div>
 
     <OperationStatus op="{updateSettingsOp}"/>

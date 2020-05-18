@@ -145,10 +145,10 @@ async function submitForm(e) {
   </TextArea>
   <div class="form-actions">
     {#if connection.url}
-      <Button icon="save" op="{updateConnectionOp}">{l('Update')}</Button>
-      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}">{l('Delete')}</Button>
+      <Button icon="save" op="{updateConnectionOp}"><span>{l('Update')}</span></Button>
+      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{l('Delete')}</span></Button>
     {:else}
-      <Button icon="save" op="{createConnectionOp}">{l('Create')}</Button>
+      <Button icon="save" op="{createConnectionOp}"><span>{l('Create')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>

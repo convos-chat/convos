@@ -186,8 +186,8 @@ textarea {
     box-shadow: none;
   }
 
-  .fas {
-    margin-right: 0.2em;
+  .fas + span {
+    margin-left: 0.2em;
   }
 }
 

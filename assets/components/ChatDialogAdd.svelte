@@ -21,7 +21,7 @@ const user = getContext('user');
   <h2>{l('You are not part of this conversation.')}</h2>
   <p>{l('Do you want to chat with "%1"?', dialog.dialog_id)}</p>
   <p>
-    <Button type="button" icon="thumbs-up" on:click="{() => dialog.send('/join ' + dialog.dialog_id)}">{l('Yes')}</Button>
-    <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {l('No')}</Link>
+    <Button type="button" icon="thumbs-up" on:click="{() => dialog.send('/join ' + dialog.dialog_id)}"><span>{l('Yes')}</span></Button>
+    <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
   </p>
 {/if}

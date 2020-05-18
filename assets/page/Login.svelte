@@ -83,7 +83,7 @@ async function redirectAfterLogin(op) {
         </TextField>
 
         <div class="form-actions">
-          <Button icon="sign-in-alt" op="{loginOp}">{l('Sign in')}</Button>
+          <Button icon="sign-in-alt" op="{loginOp}"><span>{l('Sign in')}</span></Button>
           <a class="btn is-hallow" on:click="{scrollspy.scrollTo}" href="#signup">{l('Sign up')}</a>
         </div>
 
@@ -128,7 +128,7 @@ async function redirectAfterLogin(op) {
         </TextField>
 
         <div class="form-actions">
-          <Button icon="save" op="{registerOp}">{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</Button>
+          <Button icon="save" op="{registerOp}"><span>{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</span></Button>
         </div>
 
         {#if !emailFromParams && !$user.isFirst}

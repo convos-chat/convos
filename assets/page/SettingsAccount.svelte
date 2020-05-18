@@ -99,7 +99,7 @@ function updateUserFromForm(e) {
     <p>{l('Leave the password fields empty to keep the current password.')}</p>
 
     <div class="form-actions">
-      <Button icon="save" op="{updateUserOp}">{l('Save settings')}</Button>
+      <Button icon="save" op="{updateUserOp}"><span>{l('Save settings')}</span></Button>
     </div>
 
     <OperationStatus op="{updateUserOp}"/>

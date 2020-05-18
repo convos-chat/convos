@@ -32,15 +32,15 @@ $: connection = $user.findDialog({connection_id: dialog.connection_id}) || {};
       <ChatMessage>
         {l('Do you want to be notified when someone sends you a private message?')}
         <br>
-        <Button type="button" icon="thumbs-up" on:click="{() => omnibus.requestPermissionToNotify()}">{l('Yes')}</Button>
-        <Button type="button" icon="thumbs-down" on:click="{() => omnibus.requestPermissionToNotify(false)}">{l('No')}</Button>
+        <Button type="button" icon="thumbs-up" on:click="{() => omnibus.requestPermissionToNotify()}"><span>{l('Yes')}</span></Button>
+        <Button type="button" icon="thumbs-down" on:click="{() => omnibus.requestPermissionToNotify(false)}"><span>{l('No')}</span></Button>
       </ChatMessage>
     {:else if typeof $omnibus.protocols.irc == 'undefined'}
       <ChatMessage>
         {l('Do you want %1 to handle "irc://" links?', l('Convos'))}
         <br>
-        <Button type="button" icon="thumbs-up" on:click="{() => omnibus.registerProtocol('irc', true)}">{l('Yes')}</Button>
-        <Button type="button" icon="thumbs-down" on:click="{() => omnibus.registerProtocol('irc', false)}">{l('No')}</Button>
+        <Button type="button" icon="thumbs-up" on:click="{() => omnibus.registerProtocol('irc', true)}"><span>{l('Yes')}</span></Button>
+        <Button type="button" icon="thumbs-down" on:click="{() => omnibus.registerProtocol('irc', false)}"><span>{l('No')}</span></Button>
       </ChatMessage>
     {/if}
 
