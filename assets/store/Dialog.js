@@ -68,7 +68,7 @@ export default class Dialog extends Reactive {
         this.omnibus.notify(title, msg.message);
       }
 
-      this.update({unread: this.unread + 1});
+      if (!msg.yourself) this.update({unread: this.unread + 1});
     }
 
     return this.addMessages('push', [msg]);

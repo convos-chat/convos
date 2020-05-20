@@ -81,6 +81,7 @@ export default class Connection extends Dialog {
   }
 
   wsEventMessage(params) {
+    params.yourself = params.from == this.nick;
     return params.dialog_id ? this.ensureDialog(params).addMessage(params) : this.addMessage(params);
   }
 

@@ -182,8 +182,10 @@ export default class User extends Reactive {
   }
 
   _calculateUnread() {
+    const activeDialog = this.activeDialog;
     return this.notifications.unread
-      + this.dialogs(dialog => dialog.is_private).reduce((t, d) => { return t + d.unread }, 0);
+      + this.dialogs(dialog => dialog.is_private)
+          .reduce((t, d) => { return t + (d == activeDialog ? 0 : d.unread) }, 0);
   }
 
   _dispatchMessageToDialog(params) {
