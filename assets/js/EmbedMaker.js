@@ -46,7 +46,7 @@ export default class EmbedMaker extends Reactive {
   renderPhoto(embedEl) {
     q(embedEl, 'img', img => img.addEventListener('click', e => {
       e.preventDefault();
-      this.showMedia(img);
+      this.showMediaBig(img);
     }));
   }
 
@@ -56,14 +56,22 @@ export default class EmbedMaker extends Reactive {
     loadScript('//platform.twitter.com/widgets.js');
   }
 
-  showMedia(el) {
+  showMediaBig(el) {
+    const hide = () => {
+      showEl(mediaWrapper, false);
+      this.emit('hidemediawrapper', mediaWrapper);
+    };
+
     const mediaWrapper = ensureChildNode(document.querySelector('body'), 'fullscreen-media-wrapper', mediaWrapper => {
-      mediaWrapper.addEventListener('click', e => showEl(mediaWrapper, e.target != mediaWrapper));
+      mediaWrapper.addEventListener('click', (e) => e.target == mediaWrapper && hide());
     });
 
     removeChildNodes(mediaWrapper);
-    mediaWrapper.appendChild(el.cloneNode());
+    if (el === null) return hide();
+
+    mediaWrapper.appendChild(el.cloneNode(true));
     showEl(mediaWrapper, true);
+    return mediaWrapper;
   }
 
   toggleDetails(messageEl, message) {
