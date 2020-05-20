@@ -30,8 +30,6 @@ has rtc => sub {
   my $self = shift;
   my $config;
 
-  $ENV{CONVOS_STUN} //= 'stun://stun.services.mozilla.com:3478';
-
   for my $type (qw(stun turn)) {
     my $env_key = sprintf 'CONVOS_%s', uc $type;
     my $url     = Mojo::URL->new($ENV{$env_key} // "$type://");

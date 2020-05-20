@@ -23,6 +23,7 @@ export default class WebRTC extends Reactive {
     super();
 
     this.prop('ro', 'embedMaker', params.embedMaker);
+    this.prop('ro', 'enabled', () => (this.peerConfig.ice_servers || []).length);
 
     this.prop('rw', 'dialog', null);
     this.prop('rw', 'inCall', false);
