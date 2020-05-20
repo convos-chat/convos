@@ -8,14 +8,6 @@
   @media (min-width: 1280px) { background-position: left 50% bottom -90px; }
   @media (min-width: 1440px) { background-position: left 50% bottom -130px; }
 
-  @supports (background-blend-mode: darken) {
-    background-image: url(../../images/20200328-nordaaker.jpg);
-    background-attachment: fixed;
-    background-blend-mode: darken;
-    background-repeat: no-repeat;
-    background-size: contain;
-  }
-
   &, a {
     color: var(--sidebar-left-text);
   }
