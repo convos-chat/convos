@@ -24,7 +24,10 @@ export const channelModeCharToModeName = {
 };
 
 export const modeMoniker = {
+  a: '&',
+  h: '%',
   o: '@',
+  q: '~',
   v: '+',
 };
 

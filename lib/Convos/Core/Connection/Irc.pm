@@ -19,7 +19,6 @@ require Convos;
 our $VERSION = Convos->VERSION;
 
 our %CTCP_QUOTE = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
-our %MODES      = ('@'    => 'o', '+'    => 'v');
 
 my %CLASS_DATA;
 sub _available_dialogs { $CLASS_DATA{dialogs}{$_[0]->url->host} ||= {} }
@@ -578,8 +577,8 @@ sub _make_whois_response {
 
   if ($msg->{command} eq 'rpl_whoischannels') {
     for (split /\s+/, $msg->{params}[2] || '') {
-      my ($mode, $channel) = /^([+@]?)(.+)$/;
-      $res->{channels}{$channel} = {mode => $MODES{$mode} || $mode};
+      my ($mode, $channel) = $self->_parse_mode($_);
+      $res->{channels}{$channel} = {mode => $mode};
     }
   }
 }
@@ -588,8 +587,8 @@ sub _make_users_response {
   my ($self, $msg, $users) = @_;
 
   for (split /\s+/, $msg->{params}[3]) {
-    my ($mode, $nick) = m!^([@+])(.+)$! ? ($1, $2) : ('', $_);
-    push @$users, {nick => $nick, mode => $MODES{$mode} || $mode};
+    my ($mode, $nick) = $self->_parse_mode($_);
+    push @$users, {nick => $nick, mode => $mode};
   }
 }
 
@@ -602,6 +601,11 @@ sub _message_type {
 sub _parse {
   state $parser = Parse::IRC->new(ctcp => 1);
   return $parser->parse($_[1]);
+}
+
+sub _parse_mode {
+  state $modes = {'%' => 'h', '&' => 'a', '+' => 'v', '@' => 'o', '~' => 'q'};
+  return $_[1] =~ m!^([%&+@~])(.+)! ? ($modes->{$1}, $2) : ('', $_[1]);
 }
 
 sub _periodic_events {

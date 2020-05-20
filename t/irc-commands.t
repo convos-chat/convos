@@ -144,9 +144,9 @@ is_deeply(
     dialog_id    => '#convos',
     participants => [
       {nick => 'superwoman', mode => ''},
-      {nick => 'superman',   mode => ''},
-      {nick => 'robin',      mode => ''},
-      {nick => 'batboy',     mode => ''},
+      {nick => 'superman',   mode => 'q'},
+      {nick => 'robin',      mode => 'a'},
+      {nick => 'batboy',     mode => 'h'},
       {nick => 'superboy',   mode => 'o'},
       {nick => 'robyn',      mode => 'v'},
     ],
@@ -334,8 +334,8 @@ __DATA__
 :localhost 353 superman @ ##redirected :superwoman @superman
 :localhost 366 superman ##redirected :End of /NAMES list.
 @@ names.irc
-:localhost 353 superman = #convos :superwoman superman robin
-:localhost 353 superman = #convos :batboy @superboy +robyn
+:localhost 353 superman = #convos :superwoman ~superman &robin
+:localhost 353 superman = #convos :%batboy @superboy +robyn
 :localhost 366 superman #convos :End of /NAMES list.
 @@ whois-superwoman.irc
 :localhost 311 superman superwoman SuperWoman irc.example.com * :Convos v10.01
