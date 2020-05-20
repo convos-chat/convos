@@ -222,11 +222,13 @@ export function modeClassNames(modes) {
 }
 
 /**
- * q() is a simpler and shorter version of querySelectorAll().
+ * q() is a simpler and shorter version of querySelectorAll(). This function
+ * can also be used to add event listeners.
  *
  * @example
  * const divs = q(document, 'div'); // Array and not HTMLCollection
- * const hrefs = q(document, 'a', el => el.href);
+ * const hrefs = q(document, 'a', (el) => el.href);
+ * const hrefs = q(document, 'a', ['click', (e) => { ... }]);
  *
  * @param {HTMLElement} parentEl Where you want to start searching.
  * @param {String} sel A CSS selector passed on to querySelectorAll().
@@ -235,6 +237,7 @@ export function modeClassNames(modes) {
 export function q(parentEl, sel, cb) {
   const els = parentEl.querySelectorAll(sel);
   if (!cb) return [].slice.call(els, 0);
+  if (Array.isArray(cb)) return [].forEach.call(els, el => el.addEventListener(cb[0], cb[1]));
   const res = [];
   for (let i = 0; i < els.length; i++) res.push(cb(els[i], i));
   return res;
