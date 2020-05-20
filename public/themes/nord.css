@@ -14,11 +14,11 @@
   --button-bg: #5E81AC;
   --code-bg: #05162B;
   --button-color: #ECEFF4;
-  --button-border: 1px solid #434C5E;
-  --button-focus-outline: 2px solid #97b799;
-  --button-disabled-bg: #4c566a;
-  --button-disabled-color: #86a980;
-  --button-disabled-border: #373737;
+  --button-border: 1px solid #5e81ac;
+  --button-focus-outline: 2px solid #bebcd0;
+  --button-disabled-bg: #bebcd0;
+  --button-disabled-color: #eceff4;
+  --button-disabled-border: #5e81ac;
   --button-danger-bg: #bf616a;
   --button-danger-color: #fff;
   --input-bg: #b2bcd0;
