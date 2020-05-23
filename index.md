@@ -41,13 +41,15 @@ banned from IRC networks with strict limitations.
   parties. You own and control all your settings, logs and uploaded files from
   your own computer.
 
-* ___Archive___ -
-  All chats will be logged persistently, which allow you to go back in history or
-  search for any sent message.
+* ___Video support___ -
+  Convos allows you to start [video conversations](/2020/5/23/experimental-video-support-using-webrtc.html)
+  with a single person or multiple participants in a conversation.
 
-* ___Notifications___ -
-  Convos will track whenever you are mentioned in a conversation and display
-  desktop notifications.
+* ___Custom theming___ -
+  Convos comes bundled with a selection of themes that change between dark/light
+  mode together with the settings on your desktop/phone. You can also
+  [define your own themes](/2020/5/14/theming-support-in-4-point-oh.html)
+  that are local to your Convos instance.
 
 * ___Rich formatting___ -
   Convos will format markdown, making the IRC experience feel more alive. Emojis
@@ -55,11 +57,13 @@ banned from IRC networks with strict limitations.
   click on the link to view the data. You can upload your own files and create
   pastebins directly from the chat input.
 
-* ___Custom theming___ -
-  Convos comes bundled with a selection of themes that change between dark/light
-  mode together with the settings on your desktop/phone. You can also
-  [define your own themes](/2020/5/14/theming-support-in-4-point-oh.html)
-  that are local to your Convos instance.
+* ___Notifications___ -
+  Convos will track whenever you are mentioned in a conversation and display
+  desktop notifications.
+
+* ___Archive___ -
+  All chats will be logged persistently, which allow you to go back in history or
+  search for any sent message.
 
 * ___Snappy interface___ -
   Convos uses the [Svelte](https://svelte.dev/) web app compiler in the frontend,
