@@ -85,17 +85,18 @@ export default class WebRTCPeerConnection extends Reactive {
   }
 
   _processSignalAnswer(msg) {
-    if (this.pc.signalingState != 'have-local-offer') {
-      console.error('[processSignalAnswer] signalingState =', this.pc.signalingState);
+    const pc = this._pc();
+    if (pc.signalingState != 'have-local-offer') {
+      console.error('[processSignalAnswer] signalingState =', pc.signalingState);
       return false;
     }
 
-    this.pc.setRemoteDescription(new RTCSessionDescription({sdp: msg.answer, type: 'answer'}));
+    pc.setRemoteDescription(new RTCSessionDescription({sdp: msg.answer, type: 'answer'}));
     return true;
   }
 
   _processIceSignalIceCandiate(msg) {
-    this.pc.addIceCandidate(new RTCIceCandidate({candidate: msg.ice, sdpMid: msg.sdpMid, sdpMLineIndex: msg.sdpMLineIndex}));
+    this._pc().addIceCandidate(new RTCIceCandidate({candidate: msg.ice, sdpMid: msg.sdpMid, sdpMLineIndex: msg.sdpMLineIndex}));
     return true;
   }
 
@@ -109,7 +110,7 @@ export default class WebRTCPeerConnection extends Reactive {
       return false;
     }
 
-    this.pc.setRemoteDescription(new RTCSessionDescription({sdp: msg.offer, type: 'offer'}));
+    pc.setRemoteDescription(new RTCSessionDescription({sdp: msg.offer, type: 'offer'}));
     pc.createAnswer().then(sdp => {
       pc.setLocalDescription(sdp);
       this.emit('signal', {answer: sdp.sdp, target: this.target});
