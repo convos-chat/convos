@@ -141,7 +141,7 @@ async function setDialogFromUser(user) {
   <h1><a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(dialog.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, dialog)}</span>
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip" data-tooltip="{l('Settings')}"><Icon name="tools"/></a>
-  {#if $rtc.enabled}
+  {#if $rtc.enabled && $dialog.dialog_id}
     {#if $rtc.localStream.id && $rtc.constraints.video}
       <Button icon="video-slash" tooltip="{l('Hangup')}" disabled="{notConnected}" on:click="{e => rtc.hangup()}"/>
     {:else}
