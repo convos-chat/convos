@@ -64,8 +64,7 @@ sub _detect {
 
 sub _get {
   my ($self, $c, $name) = @_;
-  my $cache = $c->stash->{'themes.cached'} ||= $self->_themes_with_correct_url($c);
-  return @_ == 2 ? $cache : $cache->{$name};
+  return @_ == 2 ? $self->_themes : $self->_themes->{$name};
 }
 
 sub _serve {
@@ -78,21 +77,6 @@ sub _serve {
   }
 
   return $c->render(text => "/* $theme.css not found */\n", status => 404);
-}
-
-sub _themes_with_correct_url {
-  my ($self, $c) = @_;
-  my $themes = $self->_themes;
-  my %corrected;
-
-  for my $name (keys %$themes) {
-    $corrected{$name} = {%{$themes->{$name}}, variants => {}};
-    for my $variant (keys %{$themes->{variants}}) {
-      $corrected{$name}{variants}{$variant} = $c->url_for($themes->{variants}{$variant});
-    }
-  }
-
-  return \%corrected;
 }
 
 sub _url_for {
