@@ -6,11 +6,14 @@ title: Video support in Convos v4.08
 Convos [v4.08](https://github.com/Nordaaker/convos/blob/4.08/Changes#L3) is
 fresh from the bakery, and this time we are proud to announce video support!
 
+<!--more-->
+
 ## How do I enable video support in Convos?
 
 If you are just testing out Convos, you won't see any button to start the video
-chat. The reason for this is that the underlying technology require third party
-services to function.
+chat. The reason for this is that the underlying technology require a
+[secure connection](#a-secure-connection), a [STUN server](#stun-server)
+and optionally a [TURN](#turn-server) server.
 
 ### A secure connection
 
