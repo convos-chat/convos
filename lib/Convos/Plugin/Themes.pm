@@ -83,7 +83,7 @@ sub _url_for {
   my ($self, $c, $name, $color_scheme) = @_;
   return undef unless my $theme = $self->_get($c, $name || '');
   $color_scheme ||= 'default';
-  return $theme->{variants}{$color_scheme} || $theme->{variants}{default};
+  return $c->url_for($theme->{variants}{$color_scheme} || $theme->{variants}{default});
 }
 
 1;
