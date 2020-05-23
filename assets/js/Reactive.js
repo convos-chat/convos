@@ -146,7 +146,7 @@ export default class Reactive {
     if (arguments.length == 1) return cookie[name];
 
     cookie[name] = value;
-    Cookies.set(this.cookieName, btoa(JSON.stringify(cookie), {expires: 365}));
+    Cookies.set(this.cookieName, btoa(JSON.stringify(cookie)), {expires: 365, SameSite: 'Lax'});
   }
 
   _cookieProp(prop) {
