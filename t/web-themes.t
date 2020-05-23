@@ -13,7 +13,7 @@ $t->app->themes->detect;
 is_deeply(
   $t->app->themes->get,
   {
-    convos => {
+    'convos' => {
       name     => 'Convos',
       variants => {
         default => qq(/themes/convos_color-scheme-light.css?v=$v),
@@ -29,9 +29,10 @@ is_deeply(
         light   => qq(/themes/high-contrast_color-scheme-light.css?v=$v),
       },
     },
-    desert  => {name => 'Desert',  variants => {default => qq(/themes/desert.css?v=$v)}},
-    mytheme => {name => 'MyTheme', variants => {default => qq(/themes/MyTheme.css?v=$v)}},
-    nord    => {name => 'Nord',    variants => {default => qq(/themes/nord.css?v=$v)}},
+    'desert'  => {name => 'Desert',  variants => {default => qq(/themes/desert.css?v=$v)}},
+    'mytheme' => {name => 'MyTheme', variants => {default => qq(/themes/MyTheme.css?v=$v)}},
+    'nord'    => {name => 'Nord',    variants => {default => qq(/themes/nord.css?v=$v)}},
+    'south'   => {name => 'South',   variants => {default => qq(/themes/south.css?v=$v)}},
   },
   'default themes',
 ) or diag explain $t->app->defaults('themes');
