@@ -11,6 +11,9 @@
   --highlight-color-bg: #e6dbbf;
   --code-bg: #dfd8c1;
   --button-bg: #62534a;
+  --button-border: #62534a;
+  --button-disabled-bg: #95867d ;
+  --button-focus-outline: 1px solid #95867d;
   --autocomplete-focus-bg: #ddd4bc;
   --sidebar-left-bg: #eee8d5;
   --sidebar-left-border: 1px solid #d5d2d0;
