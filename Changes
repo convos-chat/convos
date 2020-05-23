@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.09 Not Released
+ - Avoid hearing yourself locally through video chat
+
 4.08 2020-05-23T15:32:00+0800
  - Add EXPERIMENTAL video support #204
  - Will send desktop notification on video call #472

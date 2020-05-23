@@ -194,6 +194,7 @@ export default class WebRTC extends Reactive {
     videoEl.width = parseInt(this.videoQuality.split('x')[0], 10);
     videoEl.height = parseInt(this.videoQuality.split('x')[1], 10);
     if (videoEl.srcObject == stream) return;
+    if (stream == this.localStream) [videoEl.muted, videoEl.volume] = [true, 0];
     videoEl.setAttribute('autoplay', '');
     videoEl.setAttribute('playsinline', '');
     videoEl.oncanplay = () => { videoEl.parentNode.className = videoEl.parentNode.className.replace(/has-state-\d+/, 'has-state-' + videoEl.readyState) };
