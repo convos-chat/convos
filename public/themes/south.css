@@ -1,0 +1,32 @@
+/*
+ * name: South
+ */
+
+:root {
+  --body-bg: #fdfdfd;
+  --link-color: #993300;
+  --hr-border: 1px solid #ba8c58;
+  --error-color: #ee2222;
+  --success-color: #338833;
+  --focus-outline: 0 0 1px 2px rgba(186, 140, 58, 0.4);
+  --highlight-color-bg: #d0effb;
+  --code-bg: #ccc;
+  --button-bg: #ba8c58;
+  --button-border: 1px solid #ba8c58;
+  --button-danger-bg: #ba8c58;
+  --button-disabled-bg: #e1cdb7;
+  --button-disabled-border: #373737;
+  --button-focus-outline: 1px solid #ba8c58;
+  --input-focus-outline: 2px dotted #eee;
+  --autocomplete-focus: #eeeeee;
+  --autocomplete-focus-bg: #333333;
+  --sidebar-right-bg: #f9f9f9;
+  --sidebar-left-bg: #0c9ddc;
+  --sidebar-left-border: 1px solid #000000;
+  --sidebar-left-frozen-color: #aaaaaa;
+  --sidebar-left-text: #f8f8f8;
+  --sidebar-left-border-bottom: #fff;
+  --sidebar-left-search-placeholder-color: #999999;
+  --sidebar-left-search-focus-bg: #ba8c58;
+  --syntax-hl-base-bg: #fff;
+}
