@@ -65,7 +65,7 @@ export default class Dialog extends Reactive {
     if (msg.from && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
       if (msg.highlight || this.is_private || this.wantNotifications) {
         const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-        this.omnibus.notify(title, msg.message);
+        this.omnibus.notify(title, msg.message, {path: this.path});
       }
 
       if (!msg.yourself) this.update({unread: this.unread + 1});
@@ -127,15 +127,20 @@ export default class Dialog extends Reactive {
     if (maybe && this.is('success')) return this;
     if (maybe == 'after') delete this.participantsLoaded;
 
+    const internalMessages = [];
     const opParams = this._loadOpParams(params);
     if (this._hasEndOfStream(opParams)) return this;
-    if (this._shouldClearMessages(opParams)) this.update({messages: []});
+    if (this._shouldClearMessages(opParams)) {
+      internalMessages.push.apply(internalMessages, this.messages.filter(msg => msg.internal));
+      this.update({messages: []});
+    }
 
     // Load messages
     this.update({status: 'loading'});
     await this.messagesOp.perform(opParams);
     const body = this.messagesOp.res.body;
     this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
+    this.addMessages('push', internalMessages);
     this.update({status: this.messagesOp.status});
     if (this.messages.length <= 10) this.update({first_time: true});
 
@@ -194,7 +199,11 @@ export default class Dialog extends Reactive {
   }
 
   wsEventRtc(params) {
-    if (params.type == 'call') this.addMessage({message: '%1 is calling.', vars: [params.from]});
+    if (params.type == 'call') {
+      this.addMessage({highlight: true, message: '%1 is calling.', vars: [params.from]});
+      this.omnibus.notify(params.dialog_id, l('%1 is calling.', params.from), {force: true, path: this.path});
+    }
+
     if (params.type == 'hangup') this.addMessage({message: '%1 ended the call.', vars: [params.from]});
     this.emit('rtc', params);
   }

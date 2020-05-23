@@ -127,6 +127,9 @@ export default class Connection extends Dialog {
     this.wsEventPart(params);
   }
 
+  // A connection cannot handle WebRTC events
+  wsEventRtc(params) { }
+
   wsEventSentJoin(params) {
     this.wsEventJoin(params);
   }

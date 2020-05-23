@@ -35,7 +35,7 @@ export default class Omnibus extends Reactive {
 
     // TODO: Specify icon
     const notification = this._notification(title, {...params, body});
-    notification.onclick = (e) => { window.focus(); notification.close() };
+    notification.onclick = (e) => this._onNotificationClick(e, notification, params);
     setTimeout(() => notification.close(), this.notificationCloseDelay);
     return notification;
   }
@@ -152,6 +152,12 @@ export default class Omnibus extends Reactive {
       fallback.error = err;
       return fallback;
     }
+  }
+
+  _onNotificationClick(e, notification, params) {
+    notification.close();
+    window.focus();
+    if (params.path) this.route.go(params.path);
   }
 
   _send(msg) {
