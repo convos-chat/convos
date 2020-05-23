@@ -43,24 +43,23 @@ sub rtc_p {
   return $self->_rtc_signal_p($dialog, $msg) if $msg->{event} eq 'signal';
 
   # Every other message (call, hangup) should be broadcast to all other users
-  $self->_write(sprintf "NOTICE %s %s\r\n",
+  return $self->_write_p(sprintf "NOTICE %s %s\r\n",
     $dialog->name, $self->_make_ctcp_string(RTCZ => uc $msg->{event}));
-
-  $msg->{from} = $self->_nick;
-  return Mojo::Promise->resolve({});
 }
 
 sub _rtc_signal_p {
   my ($self, $dialog, $msg) = @_;
   return Mojo::Promise->reject('Missing property: target.') unless $msg->{target};
 
+  my @p;
   my $write = sub {
     my ($type, $payload) = @_;
     my @chunks;
     $payload = b64_encode gzip($payload), '';
     push @chunks, substr $payload, 0, 400, '' while length $payload;
     my $n = @chunks - 1;
-    $self->_write(sprintf "NOTICE %s %s\r\n",
+    push @p,
+      $self->_write_p(sprintf "NOTICE %s %s\r\n",
       $msg->{target}, $self->_make_ctcp_string(RTCZ => $type, "$_/$n", $dialog->name, $chunks[$_]))
       for 0 .. $n;
   };
@@ -77,7 +76,9 @@ sub _rtc_signal_p {
     $write->(OFR => sdp_encode $msg->{offer});
   }
 
-  return Mojo::Promise->resolve({});
+  return @p
+    ? Mojo::Promise->all(@p)->then(sub { +{} })
+    : Mojo::Promise->reject('Missing property: answer/ice/offer.');
 }
 
 sub send_p {
@@ -157,7 +158,8 @@ sub _irc_event_ctcpreply_rtcz {
     $self->emit(rtc => signal => $dialog => $event);
   }
   elsif ($msg->{params}[1] =~ m!^(\w+)$!) {
-    my $dialog = $self->dialog({name => $msg->{params}[0]});
+    my $dialog_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
+    my $dialog      = $self->dialog({name => $dialog_name});
     $self->emit(rtc => lc $1, $dialog => {from => $nick});
   }
 }

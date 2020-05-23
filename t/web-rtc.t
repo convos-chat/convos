@@ -51,7 +51,7 @@ $t_robin->{nick} = "t_robin_$$";
 setup($t_robin);
 wait_for_message_ok($t_robin, qr{"dialog_id":".ct_web_rtc"});
 
-%msg = (connection_id => 'irc-localhost', dialog_id => '#ct_web_rtc', event => 'call',);
+%msg = (connection_id => 'irc-localhost', dialog_id => '#ct_web_rtc', event => 'call');
 $t_robin->send_ok({json => {method => 'rtc', %msg}});
 wait_for_message_ok($t_robin, qr{"event":"rtc"});
 

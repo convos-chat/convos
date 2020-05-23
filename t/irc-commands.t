@@ -212,7 +212,7 @@ is_deeply(
 );
 
 $res = $connection->send_p('', '/join #protected S3cret')
-  ->$wait_success(qr{JOIN \#protected S3cret} => [__PACKAGE__, 'join-protected.irc'],);
+  ->$wait_success(qr{JOIN \#protected S3cret} => [__PACKAGE__, 'join-protected.irc']);
 is_deeply(
   $res,
   {dialog_id => '#protected', topic => '', topic_by => '', users => {}},
@@ -307,7 +307,7 @@ $irc_server->emit('close_stream');
 Mojo::IOLoop->start;
 ok !Mojo::IOLoop->stream($id), 'stream was removed';
 
-t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome',);
+t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome');
 isnt $connection->{stream_id}, $id, 'got new stream id';
 ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 

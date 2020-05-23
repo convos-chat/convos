@@ -16,6 +16,8 @@ $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
 $ENV{MOJO_MODE} ||= 'test';
 
+sub irc_server {$IRC_SERVER}
+
 sub irc_server_connect {
   my ($class, $connection) = @_;
 
@@ -31,6 +33,14 @@ sub irc_server_connect {
   return $class->irc_server_connect($connection);
 }
 
+# 1. Respond with "welcome.irc" when a line matching "NICK" is sent to the IRC server
+# t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], ...);
+#
+# 2. Pretend that some data is sent from the server
+# t::Helper->irc_server_messages(from_server => "...\r\n");
+#
+# 3. Check that the "_irc_event_kick" event gets fired after some other condition
+# t::Helper->irc_server_messages(from_server => "...\r\n", $connection => '_irc_event_kick');
 sub irc_server_messages {
   my ($class, @rules) = @_;
   my $p  = 0;
@@ -114,11 +124,12 @@ sub t_selenium_register {
 }
 
 sub wait_reject {
-  my ($p, $err, $desc) = (shift, shift, @_ % 2 ? pop : 'promise rejected');
+  my ($p, $err, $desc) = (shift, shift, @_ % 2 ? pop : '');
   my $got;
   __PACKAGE__->irc_server_messages(@_) if @_;
   $p->then(sub { }, sub { $got = shift // ''; })->wait;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
+  $desc ||= !ref $err && $err ? $err : 'promise rejected';
   Test::More::is($got, $err, $desc);
   return $p;
 }
