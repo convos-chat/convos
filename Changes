@@ -1,5 +1,18 @@
 Revision history for perl distribution Convos
 
+4.08 2020-05-23T15:32:00+0800
+ - Add EXPERIMENTAL video support #204
+ - Will send desktop notification on video call #472
+ - Add support for parsing "ahq" user modes #471
+ - Add "South" theme #469
+   Contributor: Thibault Duponchelle
+ - Fix not forgetting theme settings when browsere is closed
+ - Fix how unread count is presented/calculated #470
+ - Fix serving themes from correct URL behind reverse proxy
+ - Fix button colors for all themes #467 #468
+   Contributor: Thibault Duponchelle
+ - Removed Nordaaker background on login screen #439
+
 4.07 2020-05-15T09:39:00+0800
  - Fix "Go to start page" and "Retry" links inside <Fallback>
  - Fix markdown links to relative links will not refresh the page
