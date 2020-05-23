@@ -17,10 +17,13 @@ route.update({title: l('Help')});
 </script>
 
 <ChatHeader>
-  <h1>{l('Help')}</h1><small>v{process.env.version}</small>
+  <h1>{l('Help')}</h1>
 </ChatHeader>
 
 <main class="main" bind:this="{mainEl}">
+  <p>
+    {@html lmd('Current version: [v%1](%2).', process.env.version, 'https://github.com/Nordaaker/convos/blob/master/Changes#L1')}
+  </p>
   <p on:click="{scrollspy.scrollTo}">
     {l('Jump to:')}
     <a href="#shortcuts">{l('Shortcuts')}</a>,

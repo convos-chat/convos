@@ -68,7 +68,8 @@ function setDialogFromRoute(route) {
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:nav" tabindex="-1"><Icon name="{dialog.is('search') ? 'search' : 'bell'}"/><span>{l(dialog.name)}</span></a></h1>
+  <h1><a href="#activeMenu:nav" tabindex="-1"><span>{l(dialog.name)}</span></a></h1>
+  <a href="{$dialog.is('search') ? '/search': '/settings/account'}" class="btn has-tooltip" data-tooltip="{l('Account')}"><Icon name="{dialog.is('search') ? 'search' : 'bell'}"/></a>
 </ChatHeader>
 
 <main class="main has-search-results" bind:this="{mainEl}">

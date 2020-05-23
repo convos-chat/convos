@@ -121,7 +121,7 @@ export function md(str) {
   }).replace(mdLinkRe, (all, text, href) => {
     mdLinks++;
     const scheme = href.match(/^\s*(\w+):/) || ['', ''];
-    if (scheme[1].length > 4 || scheme[1].match(/^javascript/i)) return all; // Avoid XSS links
+    if (scheme[1].length > 5 || scheme[1].match(/^javascript/i)) return all; // Avoid XSS links
 
     const first = href.substring(0, 1);
     const target = ['/', '#'].indexOf(first) != -1 ? '' : ' target="_blank"';
