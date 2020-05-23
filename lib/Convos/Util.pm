@@ -4,7 +4,7 @@ use Mojo::Base 'Exporter';
 use JSON::Validator::Error;
 use Mojo::Collection 'c';
 use Mojo::File;
-use Mojo::Util qw(b64_encode md5_sum monkey_patch);
+use Mojo::Util qw(b64_decode b64_encode md5_sum monkey_patch);
 use Time::Piece ();
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
@@ -12,7 +12,7 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module),
-  qw(sdp_compress sdp_decompress short_checksum tp),
+  qw(sdp_decode sdp_encode short_checksum tp),
 );
 
 sub E {
@@ -89,18 +89,26 @@ sub require_module {
 HERE
 }
 
-sub sdp_compress {
-  return join "\n", map {
+sub sdp_decode {
+  return join "\r\n", map {
     local $_ = "$_";
-    s/^a=rtpmap/!R/;
-    s/^a=ice-/!I/;
+    s/^F!(.+)\s(.+)/{"a=fingerprint:$1 " . join ':', map {uc sprintf '%02x', ord $_} split '', b64_decode $2}/e;
+    s/^I!/a=ice-/;
+    s/^R!/a=rtpmap:/;
+    s/^T!(\d+)/a=rtpmap:$1 telephone-event/;
     $_;
-  } grep { !/^(?:a=extmap:\d|a=fmtp:\d|a=rtcp-fb:\d)/ } split /\r?\n/, shift;
+  } split(/\r?\n/, shift), '';
 }
 
-sub sdp_decompress {
-  return join "\r\n",
-    map { local $_ = "$_"; s/^!R/a=rtpmap/; s/^!I/a=ice-/; $_ } split(/\r?\n/, shift), '';
+sub sdp_encode {
+  return join "\n", map {
+    s/a=fingerprint:(.+)\s(.+)/{"F!$1 " . b64_encode(join('', map {chr hex} split ':', $2), '')}/e;
+    local $_ = "$_";
+    s/^a=rtpmap:(\d+) telephone-event/T!$1/;
+    s/^a=rtpmap:/R!/;
+    s/^a=ice-/I!/;
+    $_;
+  } grep { !/^(?:a=ssrc|a=extmap:\d|a=fmtp:\d|a=rtcp-fb:\d)/ } split /\r?\n/, shift;
 }
 
 sub short_checksum {
@@ -179,17 +187,17 @@ Will turn a given hostname into a nicer connection name.
 
 Will load the module or C<die()> with a message for how to install it.
 
-=head2 sdp_compress
+=head2 sdp_decode
 
-  $sdp = sdp_compress "v=0\r\n...";
+  $sdp = sdp_decode "v=0\n...";
 
-Will filter off some lines from the SDP message, which is not required.
+Used to decode the C<$sdp> created by L</sdp_encode>.
 
-=head2 sdp_decompress
+=head2 sdp_encode
 
-  $sdp = sdp_decompress "v=0\n...";
+  $sdp = sdp_encode "v=0\r\n...";
 
-Used to decompress the C<$sdp> created by L</sdp_compress>.
+Will filter and compress a SDP message.
 
 =head2 tp
 
