@@ -1,0 +1,65 @@
+/*
+ * name: Hacker
+ */
+
+:root {
+
+  /* Backgrounds */
+  --sidebar-left-bg: black;
+  --body-bg: black;
+  --sidebar-right-bg: black;
+  
+
+  /* Text color */
+  --text-color: #77ff77; 
+  --link-color: green; /* Send text, upload file, setting hamburger... */
+  --sidebar-right-text: #666666; /* Text color on right panel */
+  --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
+
+  /* The bakground when someone mentions you */
+  --highlight-color-bg: #990000;
+
+  /* Left panel */
+  --sidebar-left-border: 1px solid black; /* Separator between left panel, can generally be ignored */
+  --sidebar-left-border-bottom: #003300; /* Separator below "conversation" or "email" */
+  --sidebar-left-frozen-color: #003300; /* Color of rooms when not connected */
+  --sidebar-left-search-focus-bg: black; /* The background of the room name selected */
+  --focus-outline: 0 0 3px 3px rgba(0, 255, 0, 0.5); /* Big shadow when selected */
+
+  /* Buttons */
+  --button-bg: green;
+  --button-color: #181818;
+  --button-border: 1px solid black;
+  --button-danger-bg: #990000; /* Appears when you try to do something wrong */
+  --button-disabled-bg: #002200;
+  --button-disabled-border: 1px solid #002200; /* The border of a disabled button */
+  --button-focus-outline: 1px solid #006600;
+  --button-disabled-color: #006600;
+
+  /* Various */
+  --hr-border: 1px dashed green; /* Discussion separator between days */
+  --code-bg: red; /* Bg color for code tags */
+
+  /* Inputs */
+  --input-focus-outline: 1px dotted green; /* Dashed border when selected */
+  --input-bg: #181818; 
+  --input-color: #009900; /* The text typed */
+  --input-border: 1px solid green; /* Green borders */
+  --chat-input-bg: #181818; /* Where you type your messages */
+
+  --input-disabled-bg: #181818;
+  --input-disabled-color: #009900;
+  --input-placeholder-color: #009900;
+  --input-focus-placeholder-color: #bbb;
+
+  /* Keep as is */
+  --error-color: #ee2222;
+  --success-color: #338833;
+  --syntax-hl-base-bg: #fff;
+
+  /* Listbox */
+  --autocomplete-bg: #181818;
+  --autocomplete-border: 1px solid #888;
+  --autocomplete-focus-bg: green;
+
+}
