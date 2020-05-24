@@ -110,13 +110,42 @@
     left: 0;
   }
 
+  .rtc-conversation__info {
+    background: rgba(0, 0, 0, 0.8);
+    color: #f0f0f0;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: var(--gutter) 2.5rem 0 2.5rem;
+    opacity: 0.9;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+
+    &:after {
+      content: '';
+      height: 2.5rem;
+      display: block;
+    }
+  }
+
   .rtc-conversation__name {
+    color: #f0f0f0;
+    text-decoration: none;
     text-align: center;
     margin: 0.2rem;
     position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
+    z-index: 11;
+
+    &a:hover span {
+      text-decoration: underline;
+    }
   }
 
   .rtc-conversation__hangup {
@@ -147,8 +176,18 @@
       display: none;
     }
 
+    .rtc-conversation__info {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.5rem;
+      position: absolute;
+      top: 0;
+      left: 0.5rem;
+      top: 1.5rem;
+    }
+
     .rtc-conversation__name {
-      color: #fff;
+      color: #f0f0f0;
+      text-decoration: none;
       position: absolute;
       top: var(--gutter-small);
       left: var(--gutter-small);

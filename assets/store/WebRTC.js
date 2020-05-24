@@ -1,7 +1,7 @@
 import adapter from 'webrtc-adapter';
 import Reactive from '../js/Reactive';
 import WebRTCPeerConnection from './WebRTCPeerConnection';
-import {clone, q} from '../js/util';
+import {clone, q, showEl} from '../js/util';
 import {omnibus} from '../store/Omnibus';
 
 /*
@@ -64,10 +64,12 @@ export default class WebRTC extends Reactive {
     this.update({localStream});
     this._send('call', {});
     this._getDevices();
+    this._tid = setInterval(() => this._refreshWebRTCPeerConnectionInfo(), 2000);
   }
 
   hangup() {
     if (!this.inCall) return;
+    if (this._tid) clearTimeout(this._tid);
     this._send('hangup', {});
     this._mapPc(pc => pc.hangup());
     if (this.localStream.getTracks) this.localStream.getTracks().forEach(track => track.stop());
@@ -115,6 +117,7 @@ export default class WebRTC extends Reactive {
   _ensureEventListenersOnButtons(parentEl) {
     if (parentEl._addEventListenersToButtonsDone) return;
     parentEl._addEventListenersToButtonsDone = true;
+    q(parentEl, '.rtc-conversation__name', ['click', (e) => this._toggleInfo(e)]);
     q(parentEl, '.rtc-conversation__hangup', ['click', (e) => this.hangup()]);
     q(parentEl, '.rtc-conversation__zoom', ['click', (e) => this._toggleZoomed(e)]);
     q(parentEl, '.rtc-conversation__mute-audio', ['click', (e) => this._toggleMuted(e, 'audio')]);
@@ -180,6 +183,10 @@ export default class WebRTC extends Reactive {
     return (this.pc[target] = pc);
   }
 
+  _refreshWebRTCPeerConnectionInfo() {
+    this._mapPc(pc => pc.refreshInfo());
+  }
+
   _renderRtcConversation(id, stream) {
     q(document, '[data-rtc-id="' + (id || 'uuid-missing') + '"]', conversationEl => {
       const hasVideo = this.constraints.video;
@@ -203,6 +210,12 @@ export default class WebRTC extends Reactive {
 
   _send(event, msg) {
     if (this.dialog) this.dialog.send({...msg, method: 'rtc', event});
+  }
+
+  _toggleInfo(e) {
+    e.preventDefault();
+    const infoEl = q(e.target.closest('[data-rtc-id]'), '.rtc-conversation__info')[0];
+    if (infoEl) showEl(infoEl, 'toggle');
   }
 
   _toggleMuted(e, kind) {

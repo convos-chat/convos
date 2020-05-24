@@ -7,6 +7,7 @@ export default class WebRTCPeerConnection extends Reactive {
     this.prop('ro', 'localStream', params.localStream);
     this.prop('ro', 'peerConfig', params.peerConfig);
     this.prop('ro', 'target', params.target);
+    this.prop('rw', 'info', this._infoTemplate());
     this.prop('rw', 'remoteStream', null);
     this.prop('rw', 'role', '');
 
@@ -29,15 +30,34 @@ export default class WebRTCPeerConnection extends Reactive {
     this.emit('hangup');
   }
 
-  async info() {
-    const stats = this.pc ? await this.pc.getStats(null) : {};
+  async refreshInfo() {
+    const stats = this.pc ? Array.from((await this.pc.getStats()).values()) : [];
+    const info = this._infoTemplate();
 
-    return {
-      iceConnectionState: this.pc && this.pc.iceConnectionState || '',
-      iceGatheringState: this.pc && this.pc.iceGatheringState || '',
-      signalingState: this.pc && this.pc.signalingState || '',
-      ...stats,
-    };
+    stats.forEach(item => {
+      if (item.type == 'local-candidate') {
+        info.localAddress = item.address || '';
+      }
+      else if (item.type == 'remote-candidate') {
+        info.remoteAddress = item.address || '';
+      }
+      else if (item.type == 'candidate-pair') {
+        info.bytesReceived = item.bytesReceived;
+        info.bytesSent = item.bytesSent;
+      }
+      else if (item.type == 'inbound-rtp') {
+        const type = item.kind || item.mediaType || 'unknown';
+        ['bitrateMean', 'discardedPackets', 'framerateMean', 'framesDecoded', 'jitter', 'nackCount', 'packetsLost', 'packetsReceived']
+          .forEach(k => { info[type].inbound[k] = item[k] || 0 });
+      }
+      else if (item.type == 'outbound-rtp') {
+        const type = item.kind || item.mediaType || 'unknown';
+        ['bitrateMean', 'droppedFrames', 'framerateMean', 'framesEncoded', 'nackCount', 'packetsSent']
+          .forEach(k => { info[type].outbound[k] = item[k] || 0 });
+      }
+    });
+
+    return this.update({info});
   }
 
   signal(msg) {
@@ -46,15 +66,29 @@ export default class WebRTCPeerConnection extends Reactive {
     this._processSignalQueue();
   }
 
+  _infoTemplate() {
+    return {
+      bytesReceived: 0,
+      bytesSent: 0,
+      iceConnectionState: this.pc && this.pc.iceConnectionState || '',
+      iceGatheringState: this.pc && this.pc.iceGatheringState || '',
+      localAddress: '',
+      remoteAddress: '',
+      signalingState: this.pc && this.pc.signalingState || '',
+      audio: {inbound: {}, outbound: {}},
+      video: {inbound: {}, outbound: {}},
+    };
+  }
+
   _onIceCandidate({candidate}) {
     if (!candidate) return;
     this.emit('signal', {ice: candidate.candidate, sdpMid: candidate.sdpMid, sdpMLineIndex: candidate.sdpMLineIndex, target: this.target});
   }
 
   _onTrack({streams, track}) {
-    track.onended = (e) => this._todo('onended', e);
-    track.onmute = (e) => this._todo('onmute', e);
-    track.onunmute = (e) => this._todo('onunmute', e);
+    track.onended = (e) => this.refreshInfo();
+    track.onmute = (e) => this.refreshInfo();
+    track.onunmute = (e) => this.refreshInfo();
     this.update({remoteStream: streams[0] || null});
   }
 
@@ -64,10 +98,10 @@ export default class WebRTCPeerConnection extends Reactive {
     const pc = new RTCPeerConnection(this.peerConfig);
     this.localStream.getTracks().forEach(track => pc.addTrack(track, this.localStream));
     pc.onicecandidate = (e) => this._onIceCandidate(e);
-    pc.oniceconnectionstatechange = (e) => this._todo('oniceconnectionstatechange', e);
-    pc.onicegatheringstatechange = (e) => this._todo('onicegatheringstatechange', e);
-    pc.onremovetrack = (e) => this._todo('onremovetrack', e);
-    pc.onsignalingstatechange = (e) => this._todo('onsignalingstatechange', e);
+    pc.oniceconnectionstatechange = (e) => this.refreshInfo();
+    pc.onicegatheringstatechange = (e) => this.refreshInfo();
+    pc.onremovetrack = (e) => this.refreshInfo();
+    pc.onsignalingstatechange = (e) => this.refreshInfo();
     pc.ontrack = (e) => this._onTrack(e);
 
     return (this.pc = pc);
@@ -121,9 +155,5 @@ export default class WebRTCPeerConnection extends Reactive {
 
   _throwifStarted() {
     if (this.role) throw '[WebRTCPeerConnection] Already started ' + this.target + ' as ' + this.role;
-  }
-
-  _todo(name, e) {
-    console.log('TODO: ' + name, e);
   }
 }

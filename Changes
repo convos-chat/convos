@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.09 Not Released
  - Avoid hearing yourself locally through video chat
+ - Can toggle WebRTC connection info by clicking on participant nick
  - Fix accepting calls in private conversations
  - Fix rendering of main menu on small screens
  - Fix making the chat input field stand out on small screens
