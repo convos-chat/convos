@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.09 Not Released
+4.09 2020-05-24T12:17:00+0800
  - Avoid hearing yourself locally through video chat
  - Can toggle WebRTC connection info by clicking on participant nick
  - Fix accepting calls in private conversations
