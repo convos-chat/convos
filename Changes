@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.11 Not Released
+ - Fix upload files button in chat-input
+ - Add animations to some of the buttons
+
 4.10 2020-05-24T12:32:00+0800
  - Fix sending WeBRTC signals between private conversations
 

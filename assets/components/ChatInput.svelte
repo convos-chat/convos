@@ -156,10 +156,10 @@ const keys = {
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
-  <div class="chat-input__upload-wrapper upload-btn" hidden="{!dialog.is('conversation')}">
+  <label class="upload is-hallow" hidden="{!dialog.is('conversation')}">
     <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
-    <span></span>
-  </div>
+    <Icon name="cloud-upload-alt"/>
+  </label>
 
   <button type="buttton" on:click="{sendMessage}" class="btn chat-input__send"><Icon name="{sendIcon}"/></button>
 

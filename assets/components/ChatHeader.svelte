@@ -8,8 +8,9 @@ const user = getContext('user');
 
 <header class="chat-header">
   <slot/>
-  <a href="#activeMenu:{$route.activeMenu ? '' : 'nav'}" class="chat-header__hamburger">
-    <Icon name="{$route.activeMenu ? 'times-circle' : 'bars'}"/>
+  <a href="#activeMenu:nav" class="btn is-hamburger can-toggle" class:is-toggled="{$route.activeMenu == 'nav'}">
+    <Icon name="bars"/>
+    <Icon name="times"/>
     <small class="chat-header__unread" hidden="{!$user.unread}">{$user.unread}</small>
   </a>
 </header>
