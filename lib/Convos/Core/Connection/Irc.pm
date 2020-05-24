@@ -138,9 +138,14 @@ sub _irc_event_ctcpreply_rtcz {
   my ($nick) = IRC::Utils::parse_user($msg->{prefix});
 
   if ($msg->{params}[1] =~ m!^(ANS|ICE|OFR)\s(\d+)/(\d+)\s(\S+)\s(.+)!) {
-    my ($type, $i, $n, $dialog_id, $payload) = ($1, $2, $3, $4, $5);
+    my ($type, $i, $n, $dialog_name, $payload) = ($1, $2, $3, $4, $5);
     return if $i > 20;    # Should never need this long message
 
+    $dialog_name = $nick if $self->_is_current_nick($dialog_name);
+    my $dialog    = $self->dialog({name => $dialog_name});
+    my $dialog_id = $dialog->id;
+
+    $dialog_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
     $self->{rtc_signal_buf}{$dialog_id}{$type} = [] if $i == 0;
     $self->{rtc_signal_buf}{$dialog_id}{$type}[$i] = $payload;
     return if $i != $n;    # Waiting for more messages
@@ -148,7 +153,6 @@ sub _irc_event_ctcpreply_rtcz {
     $payload = gunzip b64_decode join '', @{$self->{rtc_signal_buf}{$dialog_id}{$type}};
     delete $self->{rtc_signal_buf}{$dialog_id}{$type};
 
-    my $dialog = $self->dialog({name => $dialog_id});
     my $event
       = $type eq 'ANS' ? {answer => sdp_decode $payload}
       : $type eq 'OFR' ? {offer => sdp_decode $payload}

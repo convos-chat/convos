@@ -64,6 +64,22 @@ is_deeply(
   'got incoming call'
 );
 
+note 'incoming signalling superwoman';
+@rtc_events = ();
+t::Helper->irc_server_messages(
+  from_server =>
+    ":superwoman!sg\@example.com NOTICE superman :\x01RTCZ ICE 0/0 superman H4sIADvpyV4AA8tMTrU1UDVwUTVw1IVQo7xR3ihvlDfKG+WN8kZ5o7xR3vDiAQBX4L2X9AoAAA==\x01\r\n",
+  $connection, '_irc_event_ctcpreply_rtcz',
+);
+is_deeply(
+  \@rtc_events,
+  [[
+    signal => $connection->get_dialog('superwoman'),
+    {from => 'superwoman', ice => "0\r\n-\r\n" x 200}
+  ]],
+  'got incoming signal'
+);
+
 note 'hangup in superwoman';
 @rtc_events = ();
 t::Helper->irc_server_messages(
