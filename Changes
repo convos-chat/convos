@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.10 Not Released
+4.10 2020-05-24T12:32:00+0800
  - Fix sending WeBRTC signals between private conversations
 
 4.09 2020-05-24T12:17:00+0800
