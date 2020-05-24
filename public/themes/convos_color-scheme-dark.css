@@ -30,9 +30,8 @@
   --input-disabled-color: #bcb8b1;
   --input-placeholder-color: #8e8e8e;
   --input-focus-placeholder-color: #555;
-  --chat-input-border-top: 2px solid #9da79d;
-  --chat-input-border-radius: 0;
-  --chat-input-box-shadow: none;
+  --chat-input-bg: #242424;
+  --chat-input-border: 1px solid #444;
   --autocomplete-bg: #404040;
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: #222;

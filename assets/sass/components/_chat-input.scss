@@ -1,12 +1,11 @@
 .chat-input {
   @extend %next-to-sidebar;
-  background: var(--body-bg);
+  background: var(--chat-input-bg);
   margin-top: var(--gutter);
   margin-bottom: 4px;
   border: var(--chat-input-border);
-  border-top: var(--chat-input-border-top);
   border-radius: var(--chat-input-border-radius);
-  box-shadow: var(--chat-input-box-shadow);
+  padding-top: 3px; // Try to make room for the box-shadow
   display: flex;
   bottom: 0;
   z-index: 3;
