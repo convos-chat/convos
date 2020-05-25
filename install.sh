@@ -41,8 +41,18 @@ missing () {
   exit 1;
 }
 
+echo "--------------------------------------------------";
+echo "Installing Convos ...            https://convos.by";
+echo "--------------------------------------------------";
 find_bin perl || missing "perl";
 git_clone || fetch_tar || missing "git, curl or wget";
 echo "> $perl convos/script/convos install";
 $perl convos/script/convos install;
+
+echo "--------------------------------------------------";
+echo "Thank you for trying out Convos! Need help? Check";
+echo "out https://convos.chat/doc, or come talk to us in"
+echo "#convos on irc.freenode.net."
+echo "--------------------------------------------------";
+
 exit $?;
