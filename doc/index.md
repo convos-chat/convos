@@ -50,12 +50,13 @@ and [Svelte](https://svelte.dev/).
 
 | Language   | Files | Lines |
 |------------|-------|-------|
-| Perl       |    22 |  2619 |
-| Sass       |    30 |  1748 |
-| Svelte     |    29 |  1784 |
-| JavaScript |    22 |  1554 |
+| Perl       |    26 |  3310 |
+| Svelte     |    29 |  2041 |
+| JavaScript |    29 |  2839 |
+| Sass       |    30 |  2423 |
 | SVG        |     1 |    11 |
 |------------|-------|-------|
-| SUM:       |   104 |  7716 |
+| SUM:       |   117 | 10624 |
 
-Updated after 2.00 release, using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`
+
+Updated after 4.12 release, using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`
