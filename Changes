@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+4.13 Not Released
+ - Add light variant of "Nord" theme #476
+   Contributor: Thibault Duponchelle
+ - Avoid making pictures from convos.by gargantic
+
 4.12 2020-05-25T10:04:00+0800
  - Fix unread count styling on small screens
 
