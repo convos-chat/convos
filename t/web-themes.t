@@ -31,8 +31,15 @@ is_deeply(
     },
     'desert'  => {name => 'Desert',  variants => {default => qq(/themes/desert.css?v=$v)}},
     'mytheme' => {name => 'MyTheme', variants => {default => qq(/themes/MyTheme.css?v=$v)}},
-    'nord'    => {name => 'Nord',    variants => {default => qq(/themes/nord.css?v=$v)}},
-    'south'   => {name => 'South',   variants => {default => qq(/themes/south.css?v=$v)}},
+    'nord'    => {
+      name     => 'Nord',
+      variants => {
+        default => qq(/themes/nord_color-scheme-light.css?v=$v),
+        dark    => qq(/themes/nord_color-scheme-dark.css?v=$v),
+        light   => qq(/themes/nord_color-scheme-light.css?v=$v),
+      }
+    },
+    'south' => {name => 'South', variants => {default => qq(/themes/south.css?v=$v)}},
   },
   'default themes',
 ) or diag explain $t->app->defaults('themes');
@@ -46,7 +53,7 @@ $t->get_ok('/')->status_is(200)
 $t->get_ok('/', {Cookie => js_session(colorScheme => 'dark', theme => 'convos')})->status_is(200)
   ->element_exists(qq(link[href="/themes/convos_color-scheme-dark.css?v=$v"]));
 $t->get_ok('/', {Cookie => js_session(colorScheme => 'dark', theme => 'nord')})->status_is(200)
-  ->element_exists(qq(link[href="/themes/nord.css?v=$v"]));
+  ->element_exists(qq(link[href="/themes/nord_color-scheme-dark.css?v=$v"]));
 
 done_testing;
 
