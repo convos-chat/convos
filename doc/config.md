@@ -7,7 +7,7 @@ title: Configuration
 
 ## Introduction
 
-Most of the configuration is available from ["Settings"](https://convos.by/2019/11/24/convos-one-point-two.html)
+Most of the configuration is available from ["Settings"](/2019/11/24/convos-one-point-two.html)
 after you have logged in as an admin user. Even so, there are some settings
 that can be tweaked when starting Convos.
 

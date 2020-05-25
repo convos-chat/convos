@@ -14,7 +14,7 @@ to make Convos fit your needs.
 The two commands below will download and start Convos:
 
 ```bash
-curl https://convos.by/install.sh | sh -
+curl https://convos.chat/install.sh | sh -
 ./convos/script/convos daemon
 ```
 
@@ -22,7 +22,7 @@ That's it! After the commands above, you can point your browser to
 [http://localhost:3000](http://localhost:3000) to sign up, and start chatting.
 
 You can invite new users to Convos, by sharing an
-[invite link](https://convos.by/2019/11/24/convos-one-point-two.html).
+[invite link](https://convos.chat/2019/11/24/convos-one-point-two.html).
 
 ## Running convos
 
@@ -48,7 +48,7 @@ Upgrading Convos is as simple as installing it. Just need to stop Convos
 before fetching the latest version:
 
     $ killall convos
-    $ curl https://convos.by/install.sh | sh -
+    $ curl https://convos.chat/install.sh | sh -
     $ ./convos/script/convos daemon
 
 See the

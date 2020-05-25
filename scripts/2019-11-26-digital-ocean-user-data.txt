@@ -31,7 +31,7 @@ cd /opt/convos && perl ./script/convos install
 
 mkdir /var/convos/certs
 openssl genrsa -out /var/convos/certs/convos.key 8096
-openssl req -new -sha256 -x509 -extensions v3_ca -days 3650 -key /var/convos/certs/convos.key -out /var/convos/certs/convos.cert -subj "/CN=example.convos.by"
+openssl req -new -sha256 -x509 -extensions v3_ca -days 3650 -key /var/convos/certs/convos.key -out /var/convos/certs/convos.cert -subj "/CN=example.convos.chat"
 chown www -R /var/convos/certs
 
 # Make sure Convos starts on boot

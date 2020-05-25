@@ -1,5 +1,5 @@
 (function($) {
-  if (document.location.href.match(/^http:\/\/(www.)?convos.by/)) {
+  if (document.location.href.match(/^http:\/\/(www.)?convos.chat/)) {
     document.location = document.location.href.replace(/^http:/, "https:");
   }
 

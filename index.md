@@ -22,7 +22,7 @@ Convos for free! Unsure? Check out the [feature](#features) list.
 
 ## Demo
 
-There is an online demo running at [demo.convos.by](http://demo.convos.by).
+There is an online demo running at [demo.convos.chat](http://demo.convos.chat).
 Register with your email address and try it out. There should be someone
 lurking in the `#test` channel.
 

@@ -59,7 +59,7 @@ specified by the Convos admin.
 
 ### Improved help section
 
-The [Help](http://demo.convos.by/help) page now has information about rich
+The [Help](http://demo.convos.chat/help) page now has information about rich
 formatting support and autocomplete. Check it out for new features and changes!
 
 ### Nicks with MixedCaps
@@ -90,7 +90,7 @@ The next releases in Convos should be covered in different milestones. Check
 out the [1.01](https://github.com/Nordaaker/convos/milestone/9) milestone for
 planned tasks.
 
-Curious about Convos? Try out the [demo](http://demo.convos.by) or
+Curious about Convos? Try out the [demo](http://demo.convos.chat) or
 [install](/doc/getting-started.html#quick-start-guide) Convos on your
 computer/server.
 

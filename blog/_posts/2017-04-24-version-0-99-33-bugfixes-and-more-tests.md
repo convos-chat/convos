@@ -45,7 +45,7 @@ received all the replies. This logic is now improved in version
 expected.
 
 I wonder if I have misunderstood something. Please
-[contact](https://convos.by/doc#get-in-touch) me, if you have any information
+[contact](/doc#get-in-touch) me, if you have any information
 regarding this.
 
 ## Active user tracking

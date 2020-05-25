@@ -8,7 +8,7 @@ no external resources on the public internet should ever be needed. This ideas
 was also taken into consideration when we decided bundle a
 [pastebin](https://github.com/Nordaaker/convos/pull/329) with Convos. The
 pastebin implementation stores the data in
-[CONVOS_HOME](https://convos.by/doc/config.html#convos_home), meaning you are
+[CONVOS_HOME](/doc/config.html#convos_home), meaning you are
 in full control of the data shared.
 
 <!--more-->

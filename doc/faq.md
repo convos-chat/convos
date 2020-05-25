@@ -11,7 +11,7 @@ All files are located in the [$CONVOS_HOME](./config#convos_home) directory.
 The exact location will be written to the application log, or to screen
 when you start Convos. Look for a log message such as:
 
-    [2020-05-12 00:00:00.00000] [1234] [info] CONVOS_HOME="/home/superwoman/.local/share/convos" # https://convos.by/doc/config.html#convos_home"
+    [2020-05-12 00:00:00.00000] [1234] [info] CONVOS_HOME="/home/superwoman/.local/share/convos" # https://convos.chat/doc/config.html#convos_home"
 
 Here is a short overview of an example directory structure:
 

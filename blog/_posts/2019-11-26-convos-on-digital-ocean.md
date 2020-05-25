@@ -48,7 +48,7 @@ choice.
      * Tick **User data** and copy/paste in these two lines of code:
        ```bash
        #!/bin/sh
-       wget https://convos.by/scripts/2019-11-26-digital-ocean-user-data.txt -O - | /bin/sh -
+       wget https://convos.chat/scripts/2019-11-26-digital-ocean-user-data.txt -O - | /bin/sh -
        ```
    * **Authentication**: "SSH keys" is highly recommended, but Choose one-time
      password, if you don't have any experience with SSH.

@@ -6,7 +6,7 @@ tag: perl
 
 ## Introduction
 
-[Convos](http://convos.by/) is a chat application that runs in your browser.
+[Convos](/) is a chat application that runs in your browser.
 It allows you to be persistently connected to IRC servers, where you can leave
 the office and up the conversation on the bus without being disconnected.
 
@@ -154,7 +154,7 @@ can be started as a
 The next version will ultimately be able to be started with a command like
 this:
 
-    $ curl https://convos.by/code-1.0 | perl - daemon
+    $ curl https://convos.chat/code-1.0 | perl - daemon
 
 Even if Convos doesn't reach that point, it will run as a single process
 - both the backend and frontend.

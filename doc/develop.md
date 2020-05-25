@@ -212,7 +212,7 @@ be started without any external database.
 Convos has an OpenAPI powered REST API. The specification is used to both
 generate perl code for validation, and to generate documentation. Resources:
 
-* [Documentation](http://demo.convos.by/api.html)
+* [Documentation](http://demo.convos.chat/api.html)
 * [Specification](https://github.com/nordaaker/convos/blob/master/public/convos-api.json)
 * [OpenAPI](https://www.openapis.org/)
 * [Mojolicious::Plugin::OpenAPI](https://metacpan.org/pod/Mojolicious::Plugin::OpenAPI)
