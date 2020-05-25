@@ -6,7 +6,7 @@ permalink:        /blog/:year/:i_month/:i_day/:slug.html
 # Setup
 title:            Convos
 tagline:          'Convos - Better group chat'
-description:      'A multiuser chat application.'
+description:      'A multiuser chat web app for IRC. Always online, supports video, custom theming and is extremely easy to install'
 url:              https://convos.chat
 baseurl:          /
 
