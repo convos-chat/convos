@@ -1,10 +1,10 @@
 /*
  * name: Nord
- * color-scheme: dark
+ * color-scheme: light
  */
 
 :root {
-  --body-bg: #2e3440;
+  --body-bg: #4c566a;
   --text-color: #d8dee9;
   --link-color: #88c0d0;
   --quote-color: #88c0d0;
@@ -30,11 +30,12 @@
   --input-disabled-color: #D8DEE9;
   --input-placeholder-color: #4C566A;
   --chat-input-bg: #23272f;
+  --chat-input-bg: #363c4a;
   --autocomplete-bg: #cbd3e4;
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: #a9b5d0;
   --ts-color: #b7bdc8;
-  --sidebar-left-bg: #4C566A;
+  --sidebar-left-bg: #2e3440;
   --sidebar-left-frozen-color: #88C0D0;
   --sidebar-left-text: #D8DEE9;
   --sidebar-left-outline: #8ece93 auto 3px;
