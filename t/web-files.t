@@ -27,7 +27,7 @@ $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
 my $fid = $t->tx->res->json('/files/0/id');
 $t->get_ok("/file/1/$fid")->status_is(200)
   ->element_exists('.le-paste > pre.paste', 'pre.paste so LinkEmbedder can do the right thing')
-  ->header_is('X-Provider-Name', 'Convos')->text_is('header h1', 'web-files.t')
+  ->header_is('X-Provider-Name', 'ConvosApp')->text_is('header h1', 'web-files.t')
   ->text_like('header small', qr{^\d+-\d+-\d+})
   ->content_like(qr{\<pre class="paste"\>.*use t::Helper}s);
 $t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
