@@ -4,7 +4,7 @@
   background: var(--body-bg);
   padding-top: var(--gutter);
   padding-bottom: var(--gutter-small);
-  box-shadow: 0 4px 5px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--chat-header-box-shadow);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
