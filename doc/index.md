@@ -3,6 +3,13 @@ layout: page
 title: Documentation
 ---
 
+## Index
+
+* [Getting started](/doc/getting-started.html)
+* [Frequently asked questions](/doc/faq.html)
+* [Configuring Convos](/doc/config.html)
+* [Guide for developers](/doc/develop.html)
+
 ## Getting started
 
 Check out the [getting started](/doc/getting-started.html) guide if you need
