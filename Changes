@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.12 2020-05-25T10:04:00+0800
+ - Fix unread count styling on small screens
+
 4.11 2020-05-25T09:55:00+0800
  - Fix upload files button in chat-input
  - Add animations to some of the buttons

@@ -85,3 +85,18 @@
     display: none;
   }
 }
+
+.chat-header__unread {
+  background: var(--sidebar-left-bg);
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.4em;
+  border-radius: 50%;
+  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+  width: 1.2em;
+  height: 1.2em;
+  display: block;
+  position: absolute;
+  top: 1.5em;
+  right: 0;
+}
