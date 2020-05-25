@@ -117,7 +117,7 @@ The command below will create production assets, which will be used when you
 start the [production](/doc/getting-started.html#git-clone) version of Convos:
 
 ```bash
-BUILD_ASSETS=1 prove -l t/production-resources.t
+./script/convos build
 ````
 
 ## Directory structure
