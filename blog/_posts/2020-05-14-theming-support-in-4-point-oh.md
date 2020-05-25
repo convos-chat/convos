@@ -42,6 +42,8 @@ The "color-scheme" is only useful if you have both a "light" and a "dark"
 version of the theme. The filename will be completely ignored if the header
 exist, so you can name the file whatever you want.
 
+N.B. : It is important to name your color scheme "light", "dark" or "auto" because it is linked to [css media prefers-color-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme).
+
 The rest of the file should mostly contain variable definitions.
 [github.com/Nordaaker/convos/blob/master/assets/sass/_variables.scss](https://github.com/Nordaaker/convos/blob/master/assets/sass/_variables.scss)
 shows the available variables that you can override. Here is an example of a
