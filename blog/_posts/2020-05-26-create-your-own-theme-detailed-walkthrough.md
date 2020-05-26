@@ -75,6 +75,11 @@ I used it to click magically on the color that I needed to know the value...
 
 ![](/public/screenshots/2020-05-26-htmlnotation.png)
 
+Another solution consists to use the eye dropper from Firefox ! 
+
+![](/public/screenshots/2020-05-26-ffeyedropper.png)
+
+
 
 ## Panel backgrounds 
 
