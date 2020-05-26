@@ -13,7 +13,7 @@ Follow this detailed walkthrough written by [Thibault Duponchelle](https://githu
 
 ## Smooth start
 
-You have to go to your server where convos is running or you can do this tutorial locally : 
+You have to go to the location where convos is running (it can be locally) : 
 
 `cd $CONVOS_HOME/themes`
 
@@ -23,9 +23,11 @@ Then a good way to start is to copy paste an existing theme, choose wisely the o
 
 `curl https://raw.githubusercontent.com/Nordaaker/convos/master/public/themes/high-contrast_color-scheme-light.css > mytheme.css`
 
-(here I chose light version of hight-contrast, would have been smarter to choose a dark version)
+(here I chose light version of hight-contrast, it would have been smarter to choose a dark version)
 
 The name of your file is not important, the theme name will be included in the header of the CSS file.
+
+Let's edit the theme :
 
 `$EDITOR mytheme.css`
 
@@ -41,7 +43,7 @@ refresh your page) :
 ![](/public/screenshots/2020-05-26-choosenewtheme.png)
 
 We created our theme, and switched to it. At the moment, our new theme is a vanilla copy of `high-contrast light` but it's
-a start and we can now play with it (and it will be reflected in our convos in almost real time).
+just a start and we can now play with it (and it will be reflected in our convos in almost real time).
 
 **It is very easy to develop a new theme because without even having to restart convos, your changes are immediately
 viewable !!!**
@@ -54,6 +56,14 @@ If it is your first theme, I recommend a light theme (bg light and text dark), i
 Honestly I first started by typing **"hacker theme green"** in [google image](https://www.google.com/search?q=hacker+theme+green&tbm=isch&ved=2ahUKEwjljK2Zwc_pAhUMHBoKHU3MDPQQ2-cCegQIABAA&oq=hacker+theme+green&gs_lcp=CgNpbWcQAzoCCCk6BAgAEBM6AggAOgQIABAeOgYIABAIEB5QnwlYhxVgmRdoAXAAeACAAWaIAfQEkgEDNS4ymAEAoAEBqgELZ3dzLXdpei1pbWc&sclient=img&ei=V_zLXqWFE4y4aM2Ys6AP&bih=771&biw=1533&client=ubuntu&hs=Vge&safe=active) and I looked at results.
 
 ![](/public/screenshots/2020-05-26-google.png)
+
+Some screenies were close to what I wanted to achieve. For instance this screenshot : 
+
+![](/public/screenshots/2020-05-26-greentheme.png)
+
+Or this other one where we see inputs and listbox : 
+
+![](/public/screenshots/2020-05-26-greenblacklinux.png)
 
 It gave me an idea about what colors to put together : 
 * First the green is really flashy, let’s go for flashy then.
