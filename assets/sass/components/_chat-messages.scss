@@ -46,6 +46,7 @@
   &.is-highlighted .message__text {
     background-color: var(--highlight-color-bg);
     border: 3px solid var(--highlight-color-bg);
+    color: var(--highlight-color);
     margin: 0 -3px;
   }
 
