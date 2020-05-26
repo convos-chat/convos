@@ -57,10 +57,10 @@ sub irc_server_messages {
 sub subprocess_in_main_process {
   require Mojo::IOLoop::Subprocess;
   Mojo::Util::monkey_patch(
-    'Mojo::IOLoop::Subprocess' => run => sub {
+    'Mojo::IOLoop::Subprocess' => run_p => sub {
       my ($subprocess, $child, $parent) = @_;
       my @res = eval { $subprocess->$child };
-      $subprocess->tap($parent, $@, @res);
+      return $@ ? Mojo::Promise->reject($@) : Mojo::Promise->resolve(@res);
     }
   );
 }

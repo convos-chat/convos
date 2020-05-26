@@ -5,7 +5,6 @@ use Convos::Util qw(DEBUG tp);
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;
-use Mojo::IOLoop::Subprocess;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(encode decode);
 use Symbol;
@@ -51,14 +50,7 @@ sub connections_p {
 sub delete_messages_p {
   my ($self, $obj) = @_;
   return Mojo::Promise->reject('Unknown target.') unless $obj and $obj->connection;
-
-  my $p = Mojo::Promise->new;
-  Mojo::IOLoop::Subprocess->new->run(
-    sub { $self->_delete_messages($obj) },
-    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($obj) },
-  );
-
-  return $p;
+  return Mojo::IOLoop->subprocess->run_p(sub { $self->_delete_messages($obj) })->then(sub {$obj});
 }
 
 sub delete_object_p {
@@ -68,13 +60,7 @@ sub delete_object_p {
     $obj->unsubscribe($_) for qw(dialog message state);
   }
 
-  my $p = Mojo::Promise->new;
-  Mojo::IOLoop::Subprocess->new->run(
-    sub { $self->_delete_object($obj) },
-    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($obj) },
-  );
-
-  return $p;
+  return Mojo::IOLoop->subprocess->run_p(sub { $self->_delete_object($obj) })->then(sub {$obj});
 }
 
 sub load_object_p {
@@ -150,16 +136,10 @@ sub messages_p {
     $args{cursor}->datetime,
     if DEBUG;
 
-  my $p = Mojo::Promise->new;
-  Mojo::IOLoop::Subprocess->new->run(
-    sub {
-      my $res = $self->_messages($obj, \%args);
-      return {end => $res->{end}, limit => $res->{limit}, messages => $res->{messages}};
-    },
-    sub { $_[1] ? $p->reject($_[1]) : $p->resolve($_[2]) },
-  );
-
-  return $p;
+  return Mojo::IOLoop->subprocess->run_p(sub {
+    my $res = $self->_messages($obj, \%args);
+    return {end => $res->{end}, limit => $res->{limit}, messages => $res->{messages}};
+  });
 }
 
 sub notifications_p {
