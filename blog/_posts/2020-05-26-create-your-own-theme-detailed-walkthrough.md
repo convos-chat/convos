@@ -237,7 +237,7 @@ But I can give you some hints :
 
 Here the winning text/bg color duo is a light green for the background and a green for the text.
 
-The disabled appears when a button is not clickable then both when disabled or when clicked (for as short period).
+The disabled appears when a button is not clickable then both when disabled or when clicked (for a short period).
 
 ![](/public/screenshots/2020-05-26-disabled.png)
 
