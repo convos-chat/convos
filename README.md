@@ -18,7 +18,7 @@ frontend is held together by the progressive JavaScript framework
 
 ## Quick start guide
 
-See "[Getting started](https://convos.by/doc/getting-started.html)" for other
+See "[Getting started](https://convos.by/doc/start)" for other
 options and more information.
 
 ### Shell Install

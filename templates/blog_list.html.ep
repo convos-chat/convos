@@ -1,0 +1,24 @@
+% layout 'convos';
+% title settings('organization_name') eq 'Convos' ? 'Blog index - Convos' : 'Blog index for ' . settings('organization_name');
+
+%= include 'partial/cms_header'
+
+<header class="cms-header">
+  <h1><%=l 'Blog' %></h1>
+</header>
+
+<main class="cms-content blog-list">
+  % unless (@$blogs) {
+    <p><%=l 'This blog is empty.' %></p>
+  % }
+  % for my $blog (@$blogs) {
+    <section class="blog-list__item">
+      <h2><%= $blog->{meta}{heading} || $blog->{meta}{title} %></h2>
+      <div class="cms-date"><%= link_to $blog->{meta}{date}, $blog->{meta}{url} %></div>
+      <p class="cms-excerpt"><%= $blog->{excerpt} %></p>
+      <div class="cms-more"><%= link_to l('Read more'), $blog->{meta}{url} %></p>
+    </section>
+  % }
+</main>
+
+%= include 'partial/cms_footer'

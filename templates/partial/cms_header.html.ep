@@ -1,0 +1,18 @@
+<div class="cms-navbar-wrapper">
+  <nav class="cms-navbar">
+    %= link_to '/', class => 'cms-navbar__brand', begin
+      <%= image '/images/convos-light.png', class => 'cms-navbar__logo', alt => '' %>
+    % end
+
+    <input type="checkbox" id="hamburger_checkbox_toggle" autocomplete="off">
+    <label for="hamburger_checkbox_toggle" class="btn is-hamburger can-toggle">
+      <i class="fas fa-bars"></i>
+      <i class="fas fa-times"></i>
+      <span><%=l 'Menu' %></span>
+    </label>
+
+    <div class="cms-navbar__links">
+      <a href="<%= url_for '/doc/' %>"><i class="fas fa-book visible-sm"></i>Documentation</a>
+    </div>
+  </nav>
+</div>

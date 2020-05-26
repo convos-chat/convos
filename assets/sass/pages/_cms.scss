@@ -1,0 +1,245 @@
+body.for-cms .has-max-width,
+.cms-content,
+.cms-header,
+.cms-navbar {
+  margin: 0 auto;
+  padding: var(--gutter);
+  max-width: var(--content-max-width);
+}
+
+/*
+ * Generic navigation styling
+ */
+.cms-navbar-wrapper {
+  background: var(--sidebar-left-bg);
+}
+
+.cms-navbar {
+  position: relative;
+  z-index: 10;
+
+  > * {
+    display: block;
+  }
+
+  .btn.is-hamburger {
+    @extend .is-hallow;
+    @extend .is-narrow;
+    font-size: 1.4rem;
+    margin-right: -0.5rem;
+    position: absolute;
+    top: 0.6rem;
+    right: 1rem;
+
+    span {
+      position: absolute;
+      top: 0.6rem;
+      right: 2.2rem;
+      font-size: 1rem;
+    }
+  }
+
+  a,
+  .btn,
+  .btn.is-hamburger {
+    color: var(--sidebar-left-text);
+  }
+}
+
+.cms-navbar__logo {
+  vertical-align: middle;
+  height: 2rem;
+}
+
+.cms-navbar__links {
+  background: var(--sidebar-left-bg);
+
+  a {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem 0 -1rem;
+    display: block;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+#hamburger_checkbox_toggle {
+  opacity: 0;
+  position: absolute;
+  left: -100px;
+}
+
+/*
+ * Navigation using hamburger menu
+ *
+ * Markup order is significant:
+ * 1. <checkbox id="hamburger_checkbox_toggle">
+ * 2. <label for="hamburger_checkbox_toggle">...</label>
+ * 3. <div class="cms-navbar__links">...</div>
+ */
+@include if_screen("<=two-columns") {
+  .cms-navbar {
+    max-height: 4rem;
+    overflow: visible;
+  }
+
+  .cms-navbar__links {
+    box-shadow: var(--chat-header-box-shadow);
+    margin: 1rem -1rem;
+    padding: 0 1rem;
+    max-height: 0;
+    opacity: 0.3;
+    overflow: auto;
+    transition: all 0.2s ease-in-out;
+
+    a > i,
+    a > img {
+      padding-right: 0.3rem;
+      width: 1.6rem;
+    }
+
+    a > img {
+      height: 1.3rem;
+      vertical-align: sub;
+    }
+
+    a:last-child {
+      margin-bottom: 1rem;
+    }
+  }
+
+  #hamburger_checkbox_toggle:checked + label {
+    i {
+      transform: rotate(180deg);
+      transform-origin: center;
+      opacity: 0;
+    }
+
+    i:nth-child(2) {
+      opacity: 1;
+    }
+
+    & + .cms-navbar__links {
+      opacity: 0.95;
+      max-height: 80vh;
+    }
+  }
+}
+
+/*
+ * All navigation items are visible on big screens.
+ * Hamburger and main brand are hidden.
+ */
+@include if_screen(">two-columns") {
+  .cms-navbar__brand,
+  .cms-navbar .btn.is-hamburger {
+    display: none;
+  }
+
+  .cms-navbar__links {
+    display: flex;
+    align-items: baseline;
+
+    img {
+      margin: -0.5rem 0.4rem;
+      height: 2rem;
+    }
+  }
+}
+
+/*
+ * .cms-header
+ * .cms-content
+ * .cms-footer
+ */
+
+.cms-header {
+  padding-bottom: 1px;
+}
+
+.cms-header + .cms-content {
+  padding-top: 0;
+}
+
+.cms-content {
+  h2 {
+    padding-bottom: 0.3rem;
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  img {
+    border-radius: 2px;
+    box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
+.footer-wrapper {
+  background: var(--footer-bg);
+  font-size: 0.9rem;
+  margin-top: 4rem;
+  padding: var(--gutter) 0;
+  min-height: 30vh;
+
+  &,
+  a {
+    color: var(--sidebar-left-text);
+  }
+}
+
+/*
+ * Other cms elements
+ */
+
+.blog-list__item {
+  margin-bottom: 2rem;
+}
+
+.cms-date {
+  font-size: 0.9rem;
+  position: relative;
+  top: -0.5rem;
+}
+
+.cards {
+  margin: 0 -var(--gutter);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cards--card {
+  text-align: center;
+  text-decoration: none;
+  border: var(--hr-border);
+  border-radius: 0.5rem;
+  width: 95%;
+  margin: calc(var(--gutter) / 2);
+  padding: 2rem var(--gutter);
+  display: block;
+  transition: filter 0.25s ease-in-out;
+
+  @include if_screen(">two-columns") {
+    max-width: calc(var(--content-max-width) / 3.5);
+  }
+
+  > i {
+    color: var(--link-color);
+    font-size: 3rem;
+  }
+}
+
+a.cards--card {
+  color: var(--text-color);
+
+  &:hover {
+    filter: brightness(0.1);
+  }
+
+  u {
+    color: var(--link-color);
+  }
+}

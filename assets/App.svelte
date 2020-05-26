@@ -27,7 +27,6 @@ setContext('user', user);
 
 window.hljs = hljs; // Required by paste plugin
 route.update({baseUrl: process.env.base_url});
-setupRouting(route, user);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set
@@ -37,8 +36,12 @@ $: viewport.update({height: innerHeight, width: innerWidth});
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $route.title : $route.title;
 
 onMount(() => {
+  const body = document.querySelector('body');
   loadScript(route.urlFor('/images/emojis.js'));
-  if (user.showGrid) document.querySelector('body').classList.add('with-grid');
+  q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
+  if (user.showGrid) body.classList.add('with-grid');
+  if (body.classList.contains('for-cms')) return;
+  setupRouting(route, user);
   user.load(process.env.load_user);
 });
 

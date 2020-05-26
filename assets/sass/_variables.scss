@@ -143,3 +143,14 @@ $sidebar-item-icon-width: 1.5rem;
   --syntax-hl-variable-bg: inherit;
   --syntax-hl-variable: inherit;
 }
+
+body.for-cms {
+  --font-size: 18px;
+  --content-max-width: 52rem;
+  --footer-bg: #333;
+  --footer-color: var(--sidebar-left-text);
+
+  .cms-content {
+    --h2-font-size: 2rem;
+  }
+}

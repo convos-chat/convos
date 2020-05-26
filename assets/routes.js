@@ -27,7 +27,7 @@ export function setupRouting(route, user) {
   route.to('/chat/:connection_id/:dialog_id', render(Chat));
 
   const noop = () => {};
-  route.to('/docs/*', noop);
+  route.to('/doc/*', noop);
   route.to('/file/*', noop);
   route.to('/paste/*', noop);
 

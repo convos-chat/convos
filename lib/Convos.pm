@@ -36,8 +36,10 @@ sub startup {
 
   # Add basic routes
   my $r = $self->routes;
-  $r->get('/')->to(load_user => 1, template => 'index')->name('index');
-  $r->get('/docs/*doc_name', {doc_name => ''})->to('user#docs');
+  $r->get('/')->to('cms#index')->name('index');
+  $r->get('/blog')->to('cms#blog_list');
+  $r->get('/blog/:year/:mon/:mday/:name', {page => 1})->to('cms#blog_entry')->name('blog_entry');
+  $r->get('/doc/*file',                   {file => 'index'})->to('cms#doc')->name('doc');
   $r->get('/login')->to('user#login_html');
   $r->get('/logout')->to('user#logout', format => 'html');
   $r->get('/register')->to('user#register_html');
@@ -58,8 +60,6 @@ sub startup {
   $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
   $auth_r->get('/search')->to(template => 'index');
 
-  $self->_plugins;
-
   # Process svelte assets using rollup.js
   $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
   $self->plugin(
@@ -69,6 +69,7 @@ sub startup {
     }
   );
 
+  $self->_plugins;
   $self->hook(around_action   => \&_around_action);
   $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(before_dispatch => \&_before_dispatch);
@@ -168,8 +169,11 @@ sub _plugins {
   my $self = shift;
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
-  my @plugins
-    = qw(Convos::Plugin::Auth Convos::Plugin::Files Convos::Plugin::Helpers Convos::Plugin::Themes);
+  my @plugins = (
+    qw(Convos::Plugin::Auth Convos::Plugin::Cms Convos::Plugin::Files),
+    qw(Convos::Plugin::Helpers Convos::Plugin::Themes)
+  );
+
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
   for (@plugins) {
     my ($name, $config) = split '\?', $_, 2;

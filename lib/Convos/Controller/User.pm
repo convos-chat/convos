@@ -23,24 +23,6 @@ sub delete {
   });
 }
 
-sub docs {
-  my $self = shift;
-
-  my $file = $self->app->static->file(sprintf 'docs/%s.html', $self->stash('doc_name'));
-  return $self->redirect_to('/docs/module-util') unless $file;
-
-  my $doc = Mojo::DOM->new($file->slurp);
-  $doc->find('a[href]')->each(sub { $_[0]->{href} =~ s!^([/\w].*)\.html$!$1! });
-
-  my %sections = (h1 => $doc->at('#main h1'), main => $doc->at('#main'), nav => $doc->at('nav'),);
-
-  $sections{main}->at('h1')->remove;
-  $sections{nav}->at('h2')->remove;
-
-  $self->title($doc->at('title')->text);
-  $self->render('user/docs', %sections);
-}
-
 sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
   return $self->unauthorized unless my $admin_from = $self->user_has_admin_rights;
@@ -92,7 +74,7 @@ sub login {
 
 sub login_html {
   my $self = shift;
-  return $self->session('email') ? $self->redirect_to('/') : $self->render('index');
+  return $self->session('email') ? $self->redirect_to('/chat') : $self->render('index');
 }
 
 sub logout {
@@ -302,10 +284,6 @@ user related actions.
 =head2 delete
 
 See L<Convos::Manual::API/deleteUser>.
-
-=head2 docs
-
-Will render docs built with C<pnpm run generate-docs>.
 
 =head2 generate_invite_link
 

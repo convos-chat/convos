@@ -1,0 +1,34 @@
+% layout 'convos';
+
+%= include 'partial/cms_header'
+
+% if ($doc->{before_content}) {
+  %== $doc->{before_content}
+% } else {
+  <header class="cms-header">
+    <h1><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
+    <a href="<%= url_for %>" class="cms-date"><%= $doc->{meta}{date} %></a>
+  </header>
+% }
+
+<article class="cms-content">
+  % if ($doc->{before_content} and $doc->{meta}{heading}) {
+    <h1 class="cms-main-header"><%= $doc->{meta}{heading} %></h1>
+  % }
+  %== $doc->{body}
+</article>
+
+% if ($doc->{after_content}) {
+  %== $doc->{after_content}
+% }
+
+%= include 'partial/cms_footer'
+
+<script>
+document.addEventListener('DOMContentLoaded', function(e) {
+  document.querySelectorAll('pre').forEach(el => {
+    hljs.lineNumbersBlock(el);
+  })
+});
+</script>
+

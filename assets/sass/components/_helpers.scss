@@ -34,6 +34,10 @@ body.with-grid::after {
   }
 }
 
+.text-center {
+  text-align: center;
+}
+
 %tooltip-popup {
   font-size: 0.9rem;
   font-weight: normal;
@@ -81,5 +85,17 @@ body.with-grid::after {
   &:focus,
   &:hover {
     @extend %tooltip-popup-visible;
+  }
+}
+
+@include if_screen("<=two-columns") {
+  .hidden-sm {
+    display: none;
+  }
+}
+
+@include if_screen(">two-columns") {
+  .visible-sm {
+    display: none;
   }
 }

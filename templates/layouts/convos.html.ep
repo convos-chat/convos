@@ -19,7 +19,6 @@
     <meta property="og:title" content="<%= title %>">
     <meta property="og:url" content="<%= $social->{url} %>">
     <noscript><style>.has-js { display: none; }</style></noscript>
-
     <link rel="apple-touch-icon" sizes="57x57" href="<%= url_for '/asset/apple-touch-icon-57x57.e024a83e.png' %>">
     <link rel="apple-touch-icon" sizes="60x60" href="<%= url_for '/asset/apple-touch-icon-60x60.51c5a95b.png' %>">
     <link rel="apple-touch-icon" sizes="72x72" href="<%= url_for '/asset/apple-touch-icon-72x72.231a66c9.png' %>">
@@ -39,12 +38,14 @@
     <meta name="msapplication-config" content="<%= url_for '/asset/browserconfig.f80fd3df.xml' %>">
     <meta name="msapplication-TileColor" content="#00451D">
     <meta name="theme-color" content="#00451D">
+    %= tag 'link', rel => 'canonical', href => $social->{canonical} if $social->{canonical};
     %= asset 'convos.css'
     % my $theme_url = $c->themes->url_for(js_session('theme'), js_session('colorScheme')) || $c->themes->url_for('convos');
     <link rel="stylesheet" type="text/css" href="<%= $theme_url %>" id="link_selected_theme">
+    %= tag style => sub { stash 'custom_css' } if stash 'custom_css';
     %= include 'partial/process_js';
   </head>
-  <body class="no-js is-logged-out">
+  <body class="no-js <%= stash('for_cms') ? 'for-cms' : 'app is-logged-out' %>">
     %= content
     %= asset 'convos.js' unless stash 'exception';
   </body>

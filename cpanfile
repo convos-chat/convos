@@ -10,6 +10,7 @@ requires "Mojolicious"                    => "8.38";
 requires "Mojolicious::Plugin::OpenAPI"   => "3.30";
 requires "Mojolicious::Plugin::Webpack"   => "0.12";
 requires "Parse::IRC"                     => "1.22";
+requires "Text::MultiMarkdown"            => "1.00";
 requires "Time::Piece"                    => "1.20";
 requires "Unicode::UTF8"                  => "0.62";
 
