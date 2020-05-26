@@ -4,36 +4,41 @@ title: Create your own theme in minutes !
 ---
 
 In Convos [v4.xx](https://convos.chat/blog/2020/5/14/theming-support-in-4-point-oh.html) it is super easy to customize
-or create a theme.  Follow this detailed walkthrough where I create a **"hack3r"** theme ! 
+or create a theme.  Follow this detailed walkthrough written by [Thibault Duponchelle](https://github.com/thibaultduponchelle) on how to create a **"hack3r"** theme ! 
 
 <!--more-->
 
 
 ## Smooth start
 
-You have to connect to your server where convos is running or you can do this tutorial locally : 
+You have to go to your server where convos is running or you can do this tutorial locally : 
 
-`cd $CONVOS_HOME/public/themes`
+`cd $CONVOS_HOME/themes`
 
-Then copy past an existing theme :
+For you informations, `$CONVOS_HOME` is where convos puts all user settings and user themes. See [FAQ](https://convos.chat/doc/faq.html#where-does-convos-store-logs-settings-and-uploaded-files).
 
-`cp high-contrast_color-scheme-light.css mytheme.css`
+Then a good way to start is to copy paste an existing theme, choose wisely the one that is the simplest and closest to what you want to achieve :
+
+`curl https://raw.githubusercontent.com/Nordaaker/convos/master/public/themes/high-contrast_color-scheme-light.css > mytheme.css`
+
+(here I chose light version of hight-contrast, would have been smarter to choose a dark version)
 
 The name of your file is not important, the theme name will be included in the header of the CSS file.
 
-`vi mytheme.css`
+`$EDITOR mytheme.css`
 
 Choose your theme name :
 
-``` /*
- * name: Hacker */ ```
+    /*
+     * name: Hacker 
+    */ 
 
 When you go to your convos instance settings, you will already be able to select your new theme (maybe you will need to
 refresh your page) :
 
 ![](/public/screenshots/2020-05-26-choosenewtheme.png)
 
-We created our theme, and moved on it. At the moment, our new theme is a vanilla copy of `high-contrast light` but it's
+We created our theme, and switched to it. At the moment, our new theme is a vanilla copy of `high-contrast light` but it's
 a start and we can now play with it (and it will be reflected in our convos in almost real time).
 
 **It is very easy to develop a new theme because without even having to restart convos, your changes are immediately
@@ -50,8 +55,9 @@ Honestly I first started by typing **"hacker theme green"** in [google image](ht
 
 It gave me an idea about what colors to put together : 
 * First the green is really flashy, let’s go for flashy then.
-* There is black background or eventually dark grey background (cool, I will try to put this grey on one panel, I
-  usually don't like having all convos panel the same color)
+* There is black background or eventually dark grey background. In my mind I was thinking 
+  *"cool, I will try to put this grey on one panel !"* because 
+  usually don't like having all convos panel the same color
 * Text colors are usually green or grey
 
 To have the color of the grey used in one of the screenshots (the grey in the treeview renders well with overall black
@@ -59,7 +65,7 @@ bg) :
 
 ![](/public/screenshots/2020-05-26-grey.png)
 
-I use the *"eye dropper"* from [gimp](https://www.gimp.org/downloads/) :
+I use the *"eye dropper"* from [The GIMP](https://www.gimp.org/downloads/) :
 
 ![](/public/screenshots/2020-05-26-gimp.png)
 
@@ -81,13 +87,14 @@ arrange this, I made some tests and I finally used black everywhere !
 
 Then look at our first modification.
 
-``` /* Backgrounds */ --sidebar-left-bg: black; --body-bg: black; --sidebar-right-bg: black;
-
-```
+    /* Backgrounds */ 
+    --sidebar-left-bg: black; 
+    --body-bg: black; 
+    --sidebar-right-bg: black;
 
 I can use color shortcuts names (`black`) or hex values (`#RRGGBB` from `#000000` to `#ffffff`)
 
-You can use for instance an [online color picker](https://www.w3schools.com/colors/colors_picker.asp) to find colors
+You can use for instance an [online color picker](https://www.tutorialrepublic.com/html-reference/html-color-picker.php) to find colors
 values or shades. 
 
 Let's imagine "I want a green like this one but darker" you can type the current green value in the color picker and
@@ -98,16 +105,14 @@ choose another level of shade.
 
 ## Edit text colors 
 
-Having such dark barckground immediatly revealed text colors issues. 
+Having such dark barckground immediatly revealed text color issues. 
 
 On the left I will use a **hacker's green**, on the right a grey and in the middle a light green with higher contrast.
 
-```
-  /* Text color */
-  --text-color: #77ff77; /* The body text color (mid panel) */
-  --sidebar-right-text: #666666; /* Text color on right panel */
-  --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
-```
+    /* Text color */
+    --text-color: #77ff77; /* The body text color (mid panel) */
+    --sidebar-right-text: #666666; /* Text color on right panel */
+    --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
 
 ![](/public/screenshots/2020-05-26-textcolor.png)
 
@@ -117,7 +122,7 @@ On the left I will use a **hacker's green**, on the right a grey and in the midd
 Next we can change the links color (send button, upload file, settings) to green (it is the hacker color that we will
 use with dark shades) : 
 
-`--link-color: green;`
+    --link-color: green;
 
 will produce :
 
@@ -131,7 +136,7 @@ will produce :
 
 Next, the highlight when you are mentionned. I will choose a red to hightlight when someone talk to me : 
 
-`--highlight-color-bg: #990000;`
+    --highlight-color-bg: #990000;
 
 I do not use `red` color name because it is too flashy.
 
@@ -151,8 +156,7 @@ of green".
 
 Then I set the `--sidebar-left-border: 1px solid black;` (which is an invisible border between left panel and mid panel.  
 
-Then I set the `--sidebar-left-search-focus-bg: black;` that will let an impression of transparency (simply because we
-set the background the same color than what is behind).
+Then I set the `--sidebar-left-search-focus-bg: transparent;` so that there will be no background, only a shadow around.
 
 I continue with `--sidebar-left-frozen-color: #003300;` that is what you can see when you're not connected to a room
 (server does not exists or you're actually in the process of connecting to irc).
@@ -161,10 +165,18 @@ To give you a demo, I started a connection to an server that does not exist (eff
 
 ![](/public/screenshots/2020-05-26-frozen.png)
 
+You can also disconnect from a server by disabling the connection in the settings :
+
+![](/public/screenshots/2020-05-26-disco.png)
+
+And you get the same *"frozen"* effect :
+
+![](/public/screenshots/2020-05-26-disconnected.png)
+
 
 I will also change the color of left panel separator : 
 
-`--sidebar-left-border-bottom: #003300;`
+    --sidebar-left-border-bottom: #003300;
 
 ![](/public/screenshots/2020-05-26-hr.png)
 
@@ -184,12 +196,12 @@ I start with `--button-bg: green;` and `--button-color: #181818;` to have this :
 Border is hidden with `--button-border: 1px solid black;`
 
 For the disabled button I set something like this :
-```
-  --button-disabled-bg: #002200;
-  --button-disabled-border: 1px solid #002200; /* The border of a disabled button */
-  --button-focus-outline: 1px solid #006600;
-  --button-disabled-color: #006600;
-```
+
+    --button-disabled-bg: #002200;
+    --button-disabled-border: 1px solid #002200; /* The border of a disabled button */
+    --button-focus-outline: 1px solid #006600;
+    --button-disabled-color: #006600;
+
 
 How to choose the color for disabled button ?
 
@@ -216,7 +228,7 @@ Now I now have this buttons :
 
 On the right the nicknames need some customization then I changed their color to grey : 
 
-`  --sidebar-right-text: #181818;` 
+    --sidebar-right-text: #181818;
 
 ![](/public/screenshots/2020-05-26-rightgrey.png)
 
@@ -225,7 +237,7 @@ On the right the nicknames need some customization then I changed their color to
 
 I will also change the conversation separator to make it dashed and green : 
 
-`--hr-border: 1px dashed green;`
+    --hr-border: 1px dashed green;
 
 ![](/public/screenshots/2020-05-26-sep.png)
 
@@ -239,13 +251,13 @@ And I set the background color of `code` tag to red with `--code-bg: red;`
 I want also to add some sugar to my input focus to add a small green border, a dotter border when theyr are clicked and
 a light grey placholder text color : 
 
-```
-  /* Inputs */
-  --input-focus-outline: 1px dotted green;
-  --input-bg: #181818;
-  --input-color: #009900;
-  --input-border: 1px solid green;
-```
+
+    /* Inputs */
+    --input-focus-outline: 1px dotted green;
+    --input-bg: #181818;
+    --input-color: #009900;
+    --input-border: 1px solid green;
+
 
 It will produce :
 
@@ -266,12 +278,12 @@ Finally I added `--chat-input-bg: #181818;` to improve chat input box color :
 Listbox will use the style from input section but requires also some more customization.
 
 With the following CSS, I can set 
-```
-  /* Listbox */
-  --autocomplete-bg: #181818;
-  --autocomplete-border: 1px solid #888;
-  --autocomplete-focus-bg: green;
-```
+
+    /* Listbox */
+    --autocomplete-bg: #181818;
+    --autocomplete-border: 1px solid #888;
+    --autocomplete-focus-bg: green;
+
 
 ![](/public/screenshots/2020-05-26-listbox.png)
 
@@ -288,85 +300,84 @@ and
 
 And the CSS code :
 
-```
-/*
- * name: Hacker
- */
 
-:root {
-
-  /* Backgrounds */
-  --sidebar-left-bg: black;
-  --body-bg: black;
-  --sidebar-right-bg: black;
-  
-
-  /* Text color */
-  --text-color: #77ff77; 
-  --link-color: green; /* Send text, upload file, setting hamburger... */
-  --sidebar-right-text: #666666; /* Text color on right panel */
-  --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
-
-  /* The bakground when someone mentions you */
-  --highlight-color-bg: #990000;
-
-  /* Left panel */
-  --sidebar-left-border: 1px solid black; /* Separator between left panel, can generally be ignored */
-  --sidebar-left-border-bottom: #003300; /* Separator below "conversation" or "email" */
-  --sidebar-left-frozen-color: #003300; /* Color of rooms when not connected */
-  --sidebar-left-search-focus-bg: black; /* The background of the room name selected */
-  --focus-outline: 0 0 3px 3px rgba(0, 255, 0, 0.5); /* Big shadow when selected */
-
-  /*
-  --sidebar-left-frozen-focus-bg: red;
-  --sidebar-left-search-focus-border: red; /* The background of the room name selected */
-
-  /* Buttons */
-  --button-bg: green;
-  --button-color: #181818;
-  --button-border: 1px solid black;
-  --button-danger-bg: #990000; /* Appears when you try to do something wrong */
-  --button-disabled-bg: #002200;
-  --button-disabled-border: 1px solid #002200; /* The border of a disabled button */
-  --button-focus-outline: 1px solid #006600;
-  --button-disabled-color: #006600;
-
-  /* Various */
-  --hr-border: 1px dashed green; /* Discussion separator between days */
-  --code-bg: red; /* Bg color for code tags */
-
-  /* Inputs */
-  --input-focus-outline: 1px dotted green; /* Dashed border when selected */
-  --input-bg: #181818; 
-  --input-color: #009900; /* The text typed */
-  --input-border: 1px solid green; /* Green borders */
-  --chat-input-bg: #181818; /* Where you type your messages */
-  --input-disabled-bg: #181818;
-  --input-disabled-color: #009900;
-  --input-placeholder-color: #009900;
-  --input-focus-placeholder-color: #bbb;
-
-  /* Keep as is */
-  --error-color: #ee2222;
-  --success-color: #338833;
-  --syntax-hl-base-bg: #fff;
-  
-  /* Listbox */
-  --autocomplete-bg: #181818;
-  --autocomplete-border: 1px solid #888;
-  --autocomplete-focus-bg: green;
-
-}
-```
-
-
+    /*
+     * name: Hacker
+     */
+    
+    :root {
+    
+      /* Backgrounds */
+      --sidebar-left-bg: black;
+      --body-bg: black;
+      --sidebar-right-bg: black;
+      
+    
+      /* Text color */
+      --text-color: #77ff77; 
+      --link-color: green; /* Send text, upload file, setting hamburger... */
+      --sidebar-right-text: #666666; /* Text color on right panel */
+      --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
+    
+      /* The bakground when someone mentions you */
+      --highlight-color-bg: #990000;
+    
+      /* Left panel */
+      --sidebar-left-border: 1px solid black; /* Separator between left panel, can generally be ignored */
+      --sidebar-left-border-bottom: #003300; /* Separator below "conversation" or "email" */
+      --sidebar-left-frozen-color: #003300; /* Color of rooms when not connected */
+      --sidebar-left-search-focus-bg: transparent; /* The background of the room name selected */
+      --focus-outline: 0 0 3px 3px rgba(0, 255, 0, 0.5); /* Big shadow when selected */
+    
+      /*
+      --sidebar-left-frozen-focus-bg: red;
+      --sidebar-left-search-focus-border: red; /* The background of the room name selected */
+    
+      /* Buttons */
+      --button-bg: green;
+      --button-color: #181818;
+      --button-border: 1px solid black;
+      --button-danger-bg: #990000; /* Appears when you try to do something wrong */
+      --button-disabled-bg: #002200;
+      --button-disabled-border: 1px solid #002200; /* The border of a disabled button */
+      --button-focus-outline: 1px solid #006600;
+      --button-disabled-color: #006600;
+    
+      /* Various */
+      --hr-border: 1px dashed green; /* Discussion separator between days */
+      --code-bg: red; /* Bg color for code tags */
+    
+      /* Inputs */
+      --input-focus-outline: 1px dotted green; /* Dashed border when selected */
+      --input-bg: #181818; 
+      --input-color: #009900; /* The text typed */
+      --input-border: 1px solid green; /* Green borders */
+      --chat-input-bg: #181818; /* Where you type your messages */
+      --input-disabled-bg: #181818;
+      --input-disabled-color: #009900;
+      --input-placeholder-color: #009900;
+      --input-focus-placeholder-color: #bbb;
+    
+      /* Keep as is */
+      --error-color: #ee2222;
+      --success-color: #338833;
+      --syntax-hl-base-bg: #fff;
+      
+      /* Listbox */
+      --autocomplete-bg: #181818;
+      --autocomplete-border: 1px solid #888;
+      --autocomplete-focus-bg: green;
+    
+    }
+    
+    
 ## Tips and tricks
 
 * Everything you don't define is inherited
-* Only some vars can be overriden, to know which one, check other themes, try some obvious names or check in `*.scss`
-  files. If missing, you can ask to add them.
+* Only some vars can be overriden, to know which one, check other themes, try some obvious names or check into [`*.scss`
+  files](https://github.com/Nordaaker/convos/blob/master/assets/sass/_variables.scss). If missing, you can [ask to add them](https://convos.chat/doc/#get-in-touch).
 * The help page proposes some demo page, it is very convenient to test all pages (even the one that print not usually
   like 404)
 * Light theme is easier for beginners because there are few variables to customize (do not need to set input backgrounds
   for instance).
-
+    
