@@ -57,15 +57,17 @@ Honestly I first started by typing **"hacker theme green"** in [google image](ht
 
 ![](/public/screenshots/2020-05-26-google.png)
 
-Some screenies were close to what I wanted to achieve. For instance this screenshot : 
+Some screenies were close to what I wanted to achieve. 
+
+For instance this screenshot : 
 
 ![](/public/screenshots/2020-05-26-greentheme.png)
 
-Or this other one where we see inputs and listbox : 
+Or this other one where we see more inputs and listbox : 
 
 ![](/public/screenshots/2020-05-26-greenblacklinux.png)
 
-It gave me an idea about what colors to put together : 
+It gave me a better idea about what I wanted to do and which colors to put together : 
 * First the green is really flashy, let’s go for flashy then.
 * There is black background or eventually dark grey background. In my mind I was thinking 
   *"cool, I will try to put this grey on one panel !"* because 
@@ -91,6 +93,8 @@ Another solution consists to use the eye dropper from Firefox !
 
 ![](/public/screenshots/2020-05-26-ffeyedropper.png)
 
+You find it in *Menu > Web Developer*.
+
 
 
 ## Panel backgrounds 
@@ -98,6 +102,8 @@ Another solution consists to use the eye dropper from Firefox !
 Ok let's start changing the colors. 
 
 It is a **hacker** theme, it has to be daaark ! 
+
+![](/public/screenshots/2020-05-26-fear.png)
 
 Therefore I wanted to put black on left/mid panel and grey on right panel... I was actually not sure about how to
 arrange this, I made some tests and I finally used black everywhere !
