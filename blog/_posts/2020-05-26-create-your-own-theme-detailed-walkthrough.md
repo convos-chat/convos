@@ -4,7 +4,9 @@ title: Create your own theme in minutes !
 ---
 
 In Convos [v4.xx](https://convos.chat/blog/2020/5/14/theming-support-in-4-point-oh.html) it is super easy to customize
-or create a theme.  Follow this detailed walkthrough written by [Thibault Duponchelle](https://github.com/thibaultduponchelle) on how to create a **"hack3r"** theme ! 
+or create a theme. 
+
+Follow this detailed walkthrough written by [Thibault Duponchelle](https://github.com/thibaultduponchelle) on how to create a **"hack3r"** theme ! 
 
 <!--more-->
 
