@@ -21,6 +21,7 @@ export let readonly = false;
 export let value = '';
 
 $: visibleOptions = filterOptions(options, typed);
+$: if (humanEl) renderHuman(value);
 $: if (open == true) activeIndex = 0;
 $: if (open == false) typed = '';
 
@@ -79,7 +80,7 @@ function keyup(e) {
   if (e.key.length == 1 || e.key == 'Backspace') typed = humanEl.value;
 }
 
-async function selectOption(e) {
+function selectOption(e) {
   let opt;
   if (e.type == 'keydown') {
     opt = visibleOptions.length ? visibleOptions[activeIndex] : [];
@@ -91,10 +92,14 @@ async function selectOption(e) {
 
   if (!opt.length) opt = [''];
   value = opt[0];
-  humanEl.value = opt.length > 1 ? opt[1] : opt[0];
+  open = false;
+}
+
+async function renderHuman(needle) {
+  const opt = visibleOptions.filter(opt => opt[0] == needle)[0] || [];
+  humanEl.value = opt.length > 1 ? opt[1] : opt.length ? opt[0] : needle;
   await tick();
   humanEl.setSelectionRange(0, 9999);
-  open = false;
 }
 
 function toggle(e) {
