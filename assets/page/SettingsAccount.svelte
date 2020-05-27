@@ -9,9 +9,25 @@ import {getContext} from 'svelte';
 import {l} from '../js/i18n';
 import {route} from '../store/Route';
 
-const colorSchemeOptions = [['auto', 'Auto'], ['dark', 'Dark'], ['light', 'Light']];
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
+
+// "colorSchemeOptions" will get calculated each time "theme" changes
+$: colorSchemeOptions = calculateColorSchemeOptions(theme);
+$: colorScheme = resetColorScheme(theme);
+
+function calculateColorSchemeOptions(id) {
+  const options = [['auto', 'Auto']];
+  const theme = user.themes[id] || {variants: {}};
+  if (theme.variants.dark) options.push(['dark', 'Dark']);
+  if (theme.variants.light) options.push(['light', 'Light']);
+  return options;
+}
+
+function resetColorScheme(id) {
+  colorScheme = 'auto';
+  return colorScheme;
+}
 
 const themes = Object.keys(user.themes).map(id => {
   let name = user.themes[id].name;
@@ -20,8 +36,9 @@ const themes = Object.keys(user.themes).map(id => {
   return [id, name];
 });
 
+
 let formEl;
-let colorScheme = user.colorScheme;
+colorScheme = user.colorScheme;
 let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
 let notificationsDisabled = user.omnibus.notifyPermission == 'denied';
 let theme = user.theme;
