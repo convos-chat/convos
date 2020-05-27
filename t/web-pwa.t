@@ -32,9 +32,11 @@ sub test_browserconfig {
 
 sub test_webmanifest {
   subtest 'webmanifest' => sub {
-    my $icons       = $t->tx->res->json->{icons};
-    my $screenshots = $t->tx->res->json->{screenshots};
+    my $json        = $t->tx->res->json;
+    my $icons       = $json->{icons};
+    my $screenshots = $json->{screenshots};
     $t->get_ok($_->{src})->status_is(200) for @$icons, @$screenshots;
+    like $json->{description}, qr{chat application}, 'description';
     is @$icons + @$screenshots, 10, 'icons and screenshots';
   };
 }
