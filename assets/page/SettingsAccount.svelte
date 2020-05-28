@@ -12,23 +12,6 @@ import {route} from '../store/Route';
 const user = getContext('user');
 const updateUserOp = user.api.operation('updateUser');
 
-// "colorSchemeOptions" will get calculated each time "theme" changes
-$: colorSchemeOptions = calculateColorSchemeOptions(theme);
-$: colorScheme = resetColorScheme(theme);
-
-function calculateColorSchemeOptions(id) {
-  const options = [['auto', 'Auto']];
-  const theme = user.themes[id] || {variants: {}};
-  if (theme.variants.dark) options.push(['dark', 'Dark']);
-  if (theme.variants.light) options.push(['light', 'Light']);
-  return options;
-}
-
-function resetColorScheme(id) {
-  colorScheme = 'auto';
-  return colorScheme;
-}
-
 const themes = Object.keys(user.themes).map(id => {
   let name = user.themes[id].name;
   const colorSchemes = Object.keys(user.themes[id].variants || {}).filter(cs => cs != 'default');
@@ -36,9 +19,9 @@ const themes = Object.keys(user.themes).map(id => {
   return [id, name];
 });
 
-
 let formEl;
-colorScheme = user.colorScheme;
+let colorSchemeOptions = [];
+let colorScheme = user.colorScheme;
 let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
 let notificationsDisabled = user.omnibus.notifyPermission == 'denied';
 let theme = user.theme;
@@ -51,6 +34,17 @@ updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
 });
+
+$: calculateColorSchemeOptions(theme);
+
+function calculateColorSchemeOptions(id) {
+  const options = [['auto', 'Auto']];
+  const theme = user.themes[id] || {variants: {}};
+  if (theme.variants.dark) options.push(['dark', 'Dark']);
+  if (theme.variants.light) options.push(['light', 'Light']);
+  colorSchemeOptions = options;
+  colorScheme = 'auto';
+}
 
 function updateUserFromForm(e) {
   const form = e.target;
