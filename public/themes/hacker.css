@@ -23,7 +23,7 @@
   --sidebar-left-border: 1px solid black; /* Separator between left panel, can generally be ignored */
   --sidebar-left-border-bottom: #003300; /* Separator below "conversation" or "email" */
   --sidebar-left-frozen-color: #003300; /* Color of rooms when not connected */
-  --sidebar-left-search-focus-bg: black; /* The background of the room name selected */
+  --sidebar-left-search-focus-bg: transparent; /* The background of the room name selected */
   --focus-outline: 0 0 3px 3px rgba(0, 255, 0, 0.5); /* Big shadow when selected */
 
   /* Buttons */
