@@ -1,0 +1,24 @@
+<div class="cms-navbar-wrapper">
+  <nav class="cms-navbar">
+    %= link_to '/', class => 'cms-navbar__brand', begin
+      <%= image '/images/convos-light.png', class => 'cms-navbar__logo', alt => '' %>
+    % end
+
+    <input type="checkbox" id="hamburger_checkbox_toggle" autocomplete="off">
+    <label for="hamburger_checkbox_toggle" class="btn is-hamburger can-toggle">
+      <i class="fas fa-bars"></i>
+      <i class="fas fa-times"></i>
+      <span><%=l 'Menu' %></span>
+    </label>
+
+    <div class="cms-navbar__links">
+      <a href="<%= url_for '/' %>"><%= image '/images/convos-icon-light.png', alt => '' %>About</a>
+      <a href="<%= url_for '/doc/start' %>"><i class="fas fa-running visible-sm"></i>Get started</a>
+      <a href="<%= url_for '/doc/' %>"><i class="fas fa-book visible-sm"></i>Documentation</a>
+      <a href="<%= url_for '/blog' %>"><i class="fas fa-glasses visible-sm"></i>Blog</a>
+      <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
+      <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i><span class="visible-sm">Twitter</span></a>
+      <a href="https://duckduckgo.com/?q=site:convos.by"><i class="fas fa-search"></i><span class="visible-sm">Search...</span></a>
+    </div>
+  </nav>
+</div>

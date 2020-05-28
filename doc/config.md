@@ -1,47 +1,40 @@
 ---
-layout: page
 title: Configuration
 ---
 
-<ul class="toc"></ul>
-
 ## Introduction
 
-Most of the configuration is available from ["Settings"](/2019/11/24/convos-one-point-two.html)
+Most of the configuration is available from ["Settings"](/blog/2019/11/24/convos-one-point-two)
 after you have logged in as an admin user. Even so, there are some settings
 that can be tweaked when starting Convos.
 
-```bash
-$ CONVOS_HOME=/var/convos ./script/convos daemon
-```
+    CONVOS_HOME=/var/convos ./script/convos daemon
 
 ## Listen
 
 You can make convos listen to a variety of addresses:
 
-```bash
-# Listen on all IPv4 interfaces
-$ ./script/convos daemon --listen http://*:8080
+    # Listen on all IPv4 interfaces
+    ./script/convos daemon --listen http://*:8080
 
-# Listen on all IPv4 and IPv6 interfaces
-$ ./script/convos daemon --listen "http://[::]:8000"
+    # Listen on all IPv4 and IPv6 interfaces
+    ./script/convos daemon --listen "http://[::]:8000"
 
-# Listen on a specific IPv4 and IPv6 interface
-$ ./script/convos daemon \
-  --listen "http://127.0.0.1:8080" \
-  --listen "http://[::1]:8080"
+    # Listen on a specific IPv4 and IPv6 interface
+    ./script/convos daemon \
+      --listen "http://127.0.0.1:8080" \
+      --listen "http://[::1]:8080"
 
-# Listen on HTTPS with a default untrusted certificate
-$ ./script/convos daemon --listen https://*:4000
-
-# Use a custom certificate and key
-$ ./script/convos daemon --listen \
-  "https://*:8000?cert=/path/to/server.crt&key=/path/to/server.key"
-
-# Make convos available behind a reverse proxy
-$ CONVOS_REVERSE_PROXY=1 ./script/convos daemon \
-  --listen http://127.0.0.1:8080
-```
+    # Listen on HTTPS with a default untrusted certificate
+    ./script/convos daemon --listen https://*:4000
+    
+    # Use a custom certificate and key
+    ./script/convos daemon --listen \
+      "https://*:8000?cert=/path/to/server.crt&key=/path/to/server.key"
+    
+    # Make convos available behind a reverse proxy
+    CONVOS_REVERSE_PROXY=1 ./script/convos daemon \
+      --listen http://127.0.0.1:8080
 
 See [CONVOS_REVERSE_PROXY](#mojoreverseproxy) for more details about setting
 up Convos behind a reverse proxy.
@@ -54,33 +47,29 @@ Here is an example systemd file, that can be placed in
 Note that the [Environment](#environment) variables should be review and
 changed to suit your needs.
 
-```
-[Unit]
-Description=Convos service
-After=network.target
-
-[Service]
-Environment=CONVOS_HOME=/var/convos
-Environment=CONVOS_REVERSE_PROXY=1
-User=www
-ExecStart=/path/to/convos/script/convos daemon --listen http://*:8081
-KillMode=process
-Restart=on-failure
-SyslogIdentifier=convos
-
-[Install]
-WantedBy=multi-user.target
-```
+    [Unit]
+    Description=Convos service
+    After=network.target
+    
+    [Service]
+    Environment=CONVOS_HOME=/var/convos
+    Environment=CONVOS_REVERSE_PROXY=1
+    User=www
+    ExecStart=/path/to/convos/script/convos daemon --listen http://*:8081
+    KillMode=process
+    Restart=on-failure
+    SyslogIdentifier=convos
+    
+    [Install]
+    WantedBy=multi-user.target
 
 After creating the file, you can run the following commands to start the
 service:
 
-```
-systemctl daemon-reload
-systemctl enable convos.service
-systemctl start convos.service
-systemctl status convos.service
-```
+    systemctl daemon-reload
+    systemctl enable convos.service
+    systemctl start convos.service
+    systemctl status convos.service
 
 Running Convos under systemd without a custom `CONVOS_LOG_FILE` will send all
 the log messages to syslog, which normally logs to `/var/log/syslog`.
@@ -142,19 +131,17 @@ STDERR.
 ### CONVOS_MAX_UPLOAD_SIZE
 
 Set this variable to specify the max size in bytes of a file that is uploaded
-to Convos. See also the [FAQ](./faq.html#can-convos-run-behind-behind-my-favorite-web-server),
+to Convos. See also the [FAQ](/doc/faq#can-convos-run-behind-behind-my-favorite-web-server),
 in case your Convos installation runs behind a reverse proxy.
 
 Default: `40000000` (40MB)
 
 ### CONVOS_PLUGINS
 
-A list (comma separated) of perl modules that can be loaded into the backend
+A list (comma separated) of Perl modules that can be loaded into the backend
 for optional functionality. Example
 
-```bash
-$ CONVOS_PLUGINS=My::Cool::Plugin,My::Upload::Override ./script/convos daemon
-```
+    CONVOS_PLUGINS=My::Cool::Plugin,My::Upload::Override ./script/convos daemon
 
 ### CONVOS_REVERSE_PROXY
 
@@ -165,5 +152,5 @@ support, this allows Mojolicious to automatically pick up the
 Note that setting this environment variable without a reverse proxy in front
 will be a security issue.
 
-The [FAQ](./faq.html#can-convos-run-behind-behind-my-favorite-web-server)
+The [FAQ](/doc/faq#can-convos-run-behind-behind-my-favorite-web-server)
 has more details on how to set up Convos behind a reverse proxy server.

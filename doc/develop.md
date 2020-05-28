@@ -1,9 +1,6 @@
 ---
-layout: page
 title: Developement guide
 ---
-
-<ul class="toc"></ul>
 
 ## Overview
 
@@ -23,9 +20,7 @@ The first step is to clone the Convos repository. You can either do this
 directly on [github](https://github.com/nordaaker/convos) or by running the
 command below:
 
-```bash
-$ git clone https://github.com/nordaaker/convos.git
-```
+    git clone https://github.com/nordaaker/convos.git
 
 The command above will create a "convos" directory in the current working
 directory. The following steps need to be run from the project root, meaning
@@ -35,10 +30,8 @@ you should `cd ./convos` first.
 
 Once you have the source code you should install the dependencies:
 
-```bash
-$ pnpm i
-$ script/convos install --develop
-```
+    pnpm i
+    script/convos install --develop
 
 [pnpm](https://pnpm.js.org/) is used to install all the JavaScript dependencies.
 You could use "npm" instead, but "pnpm" is highly recommended.
@@ -49,10 +42,8 @@ dependencies are installed in `local/lib/`. If you want to install them
 globally or in your `$HOME/perl5` directy, then use one of these command
 instead:
 
-```bash
-$ perl ./script/cpanm --installdeps --sudo .
-$ perl ./script/cpanm --installdeps .
-```
+    ./script/cpanm --installdeps --sudo .
+    ./script/cpanm --installdeps .
 
 ## Installing an IRC daemon
 
@@ -60,10 +51,8 @@ It is highly suggested that you install an IRC daemon, since many networks
 will ban you if you reconnect too often. Any IRC compatible server will work,
 but [ircd](http://www.ircd-hybrid.org) is a good alternative:
 
-```bash
-$ sudo apt-get install ircd-hybrid # ubuntu
-$ brew install ircd-hybrid         # osx
-```
+    sudo apt-get install ircd-hybrid # ubuntu
+    brew install ircd-hybrid         # osx
 
 Please ask in [#convos on freenode.net](irc://chat.freenode.net/%23convos) if
 you want to use the [demo](/#demo) IRC server instead of installing your own.
@@ -73,16 +62,12 @@ you want to use the [demo](/#demo) IRC server instead of installing your own.
 The basics of getting the application running in development mode is the
 command below:
 
-```bash
-$ ./script/convos dev
-```
+    ./script/convos dev
 
 The command above is the same as:
 
-```bash
-$ CONVOS_DEBUG=1 script/convos webpack \
-    -w lib -w public/convos-api.json -w templates
-```
+    CONVOS_DEBUG=1 script/convos webpack \
+      -w lib -w public/convos-api.json -w templates
 
 `CONVOS_DEBUG` will print extra low level debug information to STDERR, which is
 useful to discover bugs. The `-w` switch is for watching different files and
@@ -99,26 +84,20 @@ development certificates.
 After you have installed `mkcert` you can simply run the following commands to
 get a secure connection:
 
-```bash
-$ mkcert localhost
-$ ./script/convos dev
-```
+    mkcert localhost
+    ./script/convos dev
 
 The default address for the secure server will be
 [https://localhost:3443/](localhost:3443/), but you can change that:
 
-```bash
-$ ./script/convos dev --listen https://localhost:8443
-```
+    ./script/convos dev --listen https://localhost:8443
 
 ## Building production assets
 
 The command below will create production assets, which will be used when you
-start the [production](/doc/getting-started.html#git-clone) version of Convos:
+start the [production](/doc/start#git-clone) version of Convos:
 
-```bash
-./script/convos build
-````
+    ./script/convos build
 
 ## Directory structure
 
@@ -127,7 +106,7 @@ start the [production](/doc/getting-started.html#git-clone) version of Convos:
   The [assets](https://github.com/nordaaker/convos/tree/master/assets)
   directory contains all JavaScript and Sass files, which will be used to
   generate the public files. The convertion is done with
-  [Webpack](https://metacpan.org/pod/Mojolicious::Plugin::Webpack).
+  [Webpack](/doc/Mojolicious/Plugin/Webpack).
 
 * ./cpanfile
 
@@ -172,16 +151,16 @@ start the [production](/doc/getting-started.html#git-clone) version of Convos:
                   '-------------'
 
 The frontend contains of a single template, embedded inside of
-[Convos.pm](https://github.com/nordaaker/convos/blob/master/lib/Convos.pm) The
+[Convos.pm](/doc/Convos) The
 rest of the frontend consist of a JavaScript application, powered by
 [Svelte](http://svelte.dev). This application gets its data from a OpenAPI
 powered JSON API with a thin logical layer inside the controllers:
 
-* [Convos::Controller::Connection](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/Connection.pm)
-* [Convos::Controller::Dialog](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/Dialog.pm)
-* [Convos::Controller::Events](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/Events.pm)
-* [Convos::Controller::Notifications](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/Notifications.pm)
-* [Convos::Controller::User](https://github.com/nordaaker/convos/blob/master/lib/Convos/Controller/User.pm)
+* [Convos::Controller::Connection](/doc/Convos/Controller/Connection)
+* [Convos::Controller::Dialog](/doc/Convos/Controller/Dialog)
+* [Convos::Controller::Events](/doc/Convos/Controller/Events)
+* [Convos::Controller::Notifications](/doc/Convos/Controller/Notifications)
+* [Convos::Controller::User](/doc/Convos/Controller/User)
 
 ## Convos core
 
@@ -193,7 +172,7 @@ powered JSON API with a thin logical layer inside the controllers:
         \_____| User |__| Connections |__| Dialogs |
               '------'  '-------------'  '---------'
 
-[Convos::Core](https://github.com/nordaaker/convos/blob/master/lib/Convos/Core.pm)
+[Convos::Core](/doc/Convos)
 is the heart of Convos. The core takes care of connections, dialogs can
 persist to a backend and provide hooks for plugins.
 
@@ -201,7 +180,7 @@ The design makes Convos a multi-user application, that can persist to any
 backend (memory, file storage, redis, ...) and connect to any chat server,
 as well as keeping any number of dialogs active.
 
-The way the [backend](https://github.com/nordaaker/convos/blob/master/lib/Convos/Core/Backend.pm)
+The way the [backend](/doc/Convos/Core/Backend)
 is hooked into the rest of the object graph is by events. Any user, connection
 or dialog can emit new events that the Backend can choose to persist to
 storage. The default backend is a file-based backend, which enables Convos to
@@ -210,12 +189,12 @@ be started without any external database.
 ## API
 
 Convos has an OpenAPI powered REST API. The specification is used to both
-generate perl code for validation, and to generate documentation. Resources:
+generate Perl code for validation, and to generate documentation. Resources:
 
-* [Documentation](http://demo.convos.chat/api.html)
+* [Documentation](/api.html)
 * [Specification](https://github.com/nordaaker/convos/blob/master/public/convos-api.json)
 * [OpenAPI](https://www.openapis.org/)
-* [Mojolicious::Plugin::OpenAPI](https://metacpan.org/pod/Mojolicious::Plugin::OpenAPI)
+* [Mojolicious::Plugin::OpenAPI](/doc/Mojolicious/Plugin/OpenAPI)
 
 TODO: Need to document the WebSocket API as well.
 

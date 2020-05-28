@@ -1,9 +1,6 @@
 ---
-layout: page
 title: Frequently asked questions
 ---
-
-<ul class="toc"></ul>
 
 ## Where does Convos store logs, settings and uploaded files?
 
@@ -11,31 +8,27 @@ All files are located in the [$CONVOS_HOME](./config#convos_home) directory.
 The exact location will be written to the application log, or to screen
 when you start Convos. Look for a log message such as:
 
-    [2020-05-12 00:00:00.00000] [1234] [info] CONVOS_HOME="/home/superwoman/.local/share/convos" # https://convos.chat/doc/config.html#convos_home"
+    [2020-05-12 00:00:00.00000] [1234] [info] CONVOS_HOME="/home/superwoman/.local/share/convos" # https://convos.chat/doc/config#convos_home"
 
 Here is a short overview of an example directory structure:
 
-* [Global settings](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Core/Settings.pm#L126)
-  ```
-  /home/superwoman/.local/share/convos/settings.json
-  ```
+* [Global settings](/doc/Convos/Core/Settings)
 
-* [User themes](/2020/5/14/theming-support-in-4-point-oh.html)
-  ```
-  /home/superwoman/.local/share/convos/themes/
-  ```
+      /home/superwoman/.local/share/convos/settings.json
+
+* [User themes](/blog/2020/5/14/theming-support-in-4-point-oh)
+
+      /home/superwoman/.local/share/convos/themes/
 
 * User settings and logs
-  ```
-  /home/superwoman/.local/share/convos/joe@example.com/
-  /home/superwoman/.local/share/convos/joe@example.com/user.json
-  /home/superwoman/.local/share/convos/joe@example.com/irc-server/
-  ```
+
+      /home/superwoman/.local/share/convos/joe@example.com/
+      /home/superwoman/.local/share/convos/joe@example.com/user.json
+      /home/superwoman/.local/share/convos/joe@example.com/irc-server/
 
 * User uploaded and paste files
-  ```
-  /home/superwoman/.local/share/convos/joe@example.com/upload
-  ```
+
+      /home/superwoman/.local/share/convos/joe@example.com/upload
 
   Uploaded files are stored with a ".data" extension, and meta information can
   be found in the companion ".json" file.
@@ -50,7 +43,7 @@ Yes, but Convos and the web server need to be configured properly and
 chain.
 
 The first thing is that the environment variable
-[CONVOS_REVERSE_PROXY](/doc/config.html#CONVOS_REVERSE_PROXY) must be set to a
+[CONVOS_REVERSE_PROXY](/doc/config#CONVOS_REVERSE_PROXY) must be set to a
 true value.
 
 The other thing is that the reverse proxy needs to pass on some HTTP headers to
@@ -66,7 +59,7 @@ or Apache:
 
 Start convos behind a reverse proxy:
 
-    $ CONVOS_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
+    CONVOS_REVERSE_PROXY=1 ./script/convos daemon --listen http://127.0.0.1:8080
 
 Example nginx config:
 
@@ -105,14 +98,14 @@ Example nginx config:
 
 Example Apache config:
 
-    <VirtualHost your-domain.com:80>
+    &lt;VirtualHost your-domain.com:80>
       ServerAdmin admin@your-domain.com
       ServerName your-domain.com
 
-      <Proxy *>
+      &lt;Proxy *>
         Order allow,deny
         Allow from all
-      </Proxy>
+      &lt;/Proxy>
 
       # Enable Convos to construct correct URLs by passing on custom headers.
       ProxyRequests Off
@@ -130,7 +123,7 @@ Example Apache config:
       ProxyPass /events ws://localhost:8080/events
       ProxyPass / http://localhost:8080/ keepalive=On
       ProxyPassReverse / http://localhost:8080/
-    </VirtualHost>
+    &lt;/VirtualHost>
 
 ## Can Convos be extended and customized?
 
@@ -140,7 +133,7 @@ developed. We hope to implement
 [#90](https://github.com/Nordaaker/convos/issues/90) as the first core
 plugins.
 
-Look at the [configuration](/doc/config.html) guide to see which configuration
+Look at the [configuration](/doc/config) guide to see which configuration
 parameters that have to be set to load a plugin.
 
 ## Is Convos supported on my flavor of Linux?
@@ -155,7 +148,7 @@ application, such as putty, it will also kill any running instance of Convos.
 
 To prevent this, you can run this command:
 
-    $ nohup script/convos daemon &
+    nohup script/convos daemon &
 
 The `&` at the end will send Convos to the background. `nohup` is mostly
 optional, but is usually a good idea.
@@ -171,8 +164,8 @@ re-install Convos:
     # Purge all the installed packages
     rm -rf local/{bin,lib,man}
     # Reinstall packages
-    $ perl script/cpanm -n -l $PWD/local Module::Install
-    $ ./script/convos install
+    ./script/cpanm -n -l $PWD/local Module::Install
+    ./script/convos install
 
 Please [contact us](/doc/#get-in-touch) if the above instructions do not work.
 

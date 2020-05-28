@@ -1,90 +1,218 @@
 ---
-layout: page
-title: About
+title: About Convos - The simplest IRC client around
 ---
+
+<div class="hero-wrapper is-before-content">
+  <header class="hero has-max-width">
+    <div class="hero--text">
+      <h1>
+        <img src="/images/convos-light.png" alt="Convos">
+        <small class="tagline">&mdash; A better chat experience</small>
+        <small>Convos is the simplest way to use IRC, and it keeps you always online.</small>
+      </h1>
+      <a href="#demo" class="btn">Try the demo</a>
+    </div>
+
+    <a href="/doc/start" class="hero--media">
+      <img src="/screenshots/2020-05-28-convos-chat.jpg" alt="Picture of Convos conversation">
+    </a>
+  </header>
+</div>
+
+<section class="cards">
+  <a href="#demo" class="cards--card">
+    <i class="fas fa-eye"></i>
+    <h3>Curious?</h3>
+    <span>Check out the <u>demo</u>!</span>
+  </a>
+  <a href="/doc/start" class="cards--card">
+    <i class="fas fa-running"></i>
+    <h3>Ready to start?</h3>
+    <span><u>Install</u> Convos.</span>
+  </a>
+  <a href="#features" class="cards--card">
+    <i class="fas fa-list-ul"></i>
+    <h3>Undecided?</h3>
+    <span>Check out our <u>feature list</u>.</span>
+  </a>
+</section>
+
+## About
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
 online, and accessible to your web browser, both on desktop and mobile. Run it
-on your home server, [cloud service](/blog/2019-11-26-convos-on-digital-ocean)
-or in [Docker](/doc/getting-started.md#docker).
+on your home server, [cloud service](/blog/2019/11/26/convos-on-digital-ocean)
+or in [Docker](/doc/start#docker).
 
-Curious? Try ut our [demo](#demo). Eager? [Download and install](/doc/getting-started.html)
-Convos for free! Unsure? Check out the [feature](#features) list.
-
-[![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
-[![Docker Build Status](https://img.shields.io/docker/build/nordaaker/convos)](https://hub.docker.com/r/nordaaker/convos)
-[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
-[![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)](https://github.com/nordaaker/convos/issues)
-
-<div style="height: 340px;overflow:hidden;border-radius: 0.5rem; box-shadow:0 0 8px 3px rgba(0, 0, 0, 0.3)">
-  <a href="/doc/getting-started.html"><img src="/public/screenshots/2019-10-26-conversation.jpg" alt="Picture of Convos conversation"></a>
+<div class="text-center">
+  <a href="https://snapcraft.io/convos"><img src="https://snapcraft.io/convos/badge.svg" alt="snapcraft.io"></a>
+  <a href="https://hub.docker.com/r/nordaaker/convos"><img src="https://img.shields.io/docker/build/nordaaker/convos" alt="Docker"></a>
+  <!-- a href="https://travis-ci.org/Nordaaker/convos"><img src="https://travis-ci.org/Nordaaker/convos.svg?branch=master" alt="Build status"></a -->
+  <a href="https://github.com/nordaaker/convos/issues"><img src="https://img.shields.io/github/issues/nordaaker/convos" alt="Issues"></a>
 </div>
 
-## Demo
+## Newsletter
 
-There is an online demo running at [demo.convos.chat](http://demo.convos.chat).
-Register with your email address and try it out. There should be someone
-lurking in the `#test` channel.
+<form class="signup">
+  <div class="text-field">
+    <input type="text" name="email" placeholder="your@email">
+  </div>
+  <button class="btn">Sign up</button>
+</form>
 
-Note that the demo is [locked](/doc/config.html#convosforcedircserver) to the
-IRC server running on localhost. This is to prevent the server from getting
-banned from IRC networks with strict limitations.
+<p class="text-center">
+  Sign up with your e-mail address to get Convos news delivered to your inbox!
+</p>
 
 ## Features
 
-* ___Always online___ -
-  The backend server will keep you logged in and logs all the activity in your
-  archive.
+<section class="cards is-wide">
+  <div class="cards--card">
+    <i class="fas fa-plug"></i>
+    <h3>Always online</h3>
+    <p>Convos keeps you logged in and logs all the activity in your archive.</p>
+  </div>
+  <div class="cards--card">
+    <i class="fas fa-video"></i>
+    <h3>Video chat</h3>
+    <p>With Convos you can <a href="/blog/2020/5/23/experimental-video-support-using-webrtc">video chat</a>
+    with a single person or multiple participants in a conversation.</p>
+  </div>
+  <div class="cards--card">
+    <i class="fas fa-paint-roller"></i>
+    <h3>Theming</h3>
+    <p>Convos comes bundled with a selection of <a href="/blog/2020/5/14/theming-support-in-4-point-oh">themes</a>, and also supports dark mode</p>
+  </div>
+  <div class="cards--card">
+    <i class="fas fa-grin-hearts"></i>
+    <h3>Rich formatting</h3>
+    <p>Convos makes the chat come alive with emojis and media displayed inline.</p>
+  </div>
+  <div class="cards--card">
+    <i class="fas fa-user-shield"></i>
+    <h3>Private</h3>
+    <p>You own and control all your settings, logs and uploaded files from <a href="/doc/faq">your own computer</a>.</p>
+  </div>
+  <div class="cards--card">
+    <i class="fas fa-download"></i>
+    <h3>Easy to install</h3>
+    <p>No need for external servers or complex config files to <a href="/doc/start">get up and running</a>.</p>
+  </div>
+</section>
 
-* ___Private___ -
-  Convos is all about privacy. By default, no data will be exchanged with third
-  parties. You own and control all your settings, logs and uploaded files from
-  your own computer.
+## Demo
 
-* ___Video support___ -
-  Convos allows you to start [video conversations](/2020/5/23/experimental-video-support-using-webrtc.html)
-  with a single person or multiple participants in a conversation.
+Want to try out Convos?  Register with your email address and try it out. There
+should be someone lurking in the `#test` channel.
 
-* ___Custom theming___ -
-  Convos comes bundled with a selection of themes that change between dark/light
-  mode together with the settings on your desktop/phone. You can also
-  [define your own themes](/2020/5/14/theming-support-in-4-point-oh.html)
-  that are local to your Convos instance.
+<div class="text-center">
+  <a href="/login" class="btn">Register</a>
+  <br>
+  <br>
+</div>
 
-* ___Rich formatting___ -
-  Convos will format markdown, making the IRC experience feel more alive. Emojis
-  support is built in, and photos and video will be displayed inline. No need to
-  click on the link to view the data. You can upload your own files and create
-  pastebins directly from the chat input.
+Note that the demo is [locked](/doc/config#convosforcedircserver) to the
+IRC server running on localhost. This is to prevent the server from getting
+banned from IRC networks with strict limitations.
 
-* ___Notifications___ -
-  Convos will track whenever you are mentioned in a conversation and display
-  desktop notifications.
+<style>
+.cms-content > h2 {
+  text-align: center;
+}
 
-* ___Archive___ -
-  All chats will be logged persistently, which allow you to go back in history or
-  search for any sent message.
+.hero-wrapper {
+  background: var(--sidebar-left-bg);
+  margin-bottom: 5rem;
+}
 
-* ___Snappy interface___ -
-  Convos uses the [Svelte](https://svelte.dev/) web app compiler in the frontend,
-  and the real-time web framework [Mojolicious](https://mojolicious.org/) in the
-  backend, making Convos very snappy and lightweight.
+.hero {
+  height: 80vh;
+  max-height: 20rem;
+  padding: 2rem var(--gutter) 0 var(--gutter);
+}
 
-* ___Easy to install and extend___ -
-  The main design principle for Convos is to keep simple things simple, and
-  optionally support complexity. With this in mind, it's incredible simple to
-  [download and install Convos](/doc/getting-started.html). No need for external
-  servers or complex config files to get up and running. Run one command, and
-  you are good to go!
+.hero--text {
+  color: var(--sidebar-left-text);
+  text-align: center;
+}
 
-* ___LDAP support___ -
-  Got your existing users in a LDAP server? Convos can
-  [connect to it](https://github.com/Nordaaker/convos/blob/master/lib/Convos/Plugin/Auth/LDAP.pm#L100),
-  meaning you can administrate all your users in one place.
+.hero--text h1 {
+  font-size: 2.8rem;
+  margin-top: 0;
+}
 
-## Copyright & License
+.hero--text h1 img {
+  display: none;
+}
 
-Copyright (C) 2012-{{ site.time | date: '%Y' }}, Nordaaker.
+.hero--text h1 small {
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin: 0.5rem 0;
+  display: block;
+}
 
-This program is free software, you can redistribute it and/or modify it under
-the terms of the Artistic License version 2.0.
+.hero--text h1 .tagline {
+  font-size: 1.2rem;
+  font-style: italic;
+}
+
+.hero--media {
+  display: block;
+  position: relative;
+  top: 1.5rem;
+}
+
+.hero--media img {
+  border-radius: 0.5rem;
+  box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.25);
+}
+
+.signup {
+  max-width: 24rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: end;
+}
+
+.signup > * {
+  margin: 0;
+}
+
+.signup .text-field {
+  flex: 1 0 0;
+}
+
+@media (min-width: 800px) {
+  .hero {
+    display: flex;
+    align-items: center;
+  }
+
+  .hero--text {
+    padding: var(--gutter);
+    text-align: left;
+    width: 50%;
+    max-width: 20rem;
+  }
+
+  .hero--text h1 img {
+    display: block;
+    height: 2.8rem;
+  }
+
+  .hero--media {
+    width: 50%;
+    left: 2rem;
+    transform: scale(1.2);
+  }
+}
+
+@media (min-width: 1100px) {
+  .hero--media {
+    top: 3rem;
+    left: 6rem;
+    transform: scale(1.5);
+  }
+}
+</style>

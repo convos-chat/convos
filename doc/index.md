@@ -1,33 +1,32 @@
 ---
-layout: page
 title: Documentation
 ---
 
 ## Index
 
-* [Getting started](/doc/getting-started.html)
-* [Frequently asked questions](/doc/faq.html)
-* [Configuring Convos](/doc/config.html)
-* [Guide for developers](/doc/develop.html)
+* [Getting started](/doc/start)
+* [Frequently asked questions](/doc/faq)
+* [Configuring Convos](/doc/config)
+* [Guide for developers](/doc/develop)
 
 ## Getting started
 
-Check out the [getting started](/doc/getting-started.html) guide if you need
+Check out the [getting started](/doc/start) guide if you need
 help regarding how to download, install, and run Convos.
 
 ## Configuring
 
-The [configuration](/doc/config.html) guide explains how to customize Convos.
+The [configuration](/doc/config) guide explains how to customize Convos.
 Note that there is no need to configure Convos to get it running! Convos has
 sane defaults, which makes it a breeze to start.
 
-You might also want to check out the [faq](/doc/faq.html) for the most common
+You might also want to check out the [faq](/doc/faq) for the most common
 obstacles while setting up and running Convos.
 
 ## Developing
 
 Are you interested in developing Convos? The check out the
-[develop](/doc/develop.html) guide. We want _you_ on our team!
+[develop](/doc/develop) guide. We want _you_ on our team!
 
 ## Get in touch
 
@@ -55,7 +54,6 @@ and [Svelte](https://svelte.dev/).
 | JavaScript |    29 |  2839 |
 | Sass       |    30 |  2423 |
 | SVG        |     1 |    11 |
-|------------|-------|-------|
 | SUM:       |   117 | 10624 |
 
 
