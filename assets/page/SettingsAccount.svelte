@@ -26,7 +26,7 @@ let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
 let notificationsDisabled = user.omnibus.notifyPermission == 'denied';
 let theme = user.theme;
 let wantNotifications = user.omnibus.wantNotifications;
-let highlight_keywords = user.highlight_keywords.join(', ');
+let highlight_keywords = user.highlight_keywords;
 
 route.update({title: l('Account')});
 
@@ -63,7 +63,7 @@ function updateUserFromForm(e) {
   }
 
   user.embedMaker.update({expandUrlToMedia});
-  user.update({colorScheme, theme});
+  user.update({highlight_keywords, colorScheme, theme});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -78,7 +78,7 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Email')}</span>
     </TextField>
 
-    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlight_keywords}">
+    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" bind:value="{highlight_keywords}">
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
