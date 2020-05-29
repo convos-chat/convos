@@ -40,6 +40,7 @@ is_deeply(
       }
     },
     'south' => {name => 'South', variants => {default => qq(/themes/south.css?v=$v)}},
+    'hacker' => {name => 'Hacker', variants => {default => qq(/themes/hacker.css?v=$v)}},
   },
   'default themes',
 ) or diag explain $t->app->defaults('themes');
