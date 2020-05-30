@@ -108,6 +108,7 @@ sub send_p {
 
   return $self->_send_kick_p($target, $message)  if $cmd eq 'KICK';
   return $self->_send_mode_p($target, $message)  if $cmd eq 'MODE';
+  return $self->_send_oper_p($target, $message)  if $cmd eq 'OPER';
   return $self->_send_topic_p($target, $message) if $cmd eq 'TOPIC';
 
   return $self->_send_ison_p($message || $target) if $cmd eq 'ISON';
@@ -547,6 +548,14 @@ sub _make_names_response {
     if $msg->{command} eq 'rpl_namreply';
 }
 
+sub _make_oper_response {
+  my ($self, $msg, $res, $p) = @_;
+  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
+  $self->{myinfo}{server_op} = true;
+  $self->emit(state => me => $self->{myinfo});
+  return $p->resolve($self->{myinfo});
+}
+
 sub _make_part_response {
   my ($self, $msg, $res, $p) = @_;
   $self->_remove_dialog(delete $res->{target})->save_p if $res->{target};
@@ -857,6 +866,19 @@ sub _send_nick_p {
   $self->emit(state => me => $self->{myinfo});
   return $self->_write_p("NICK $nick\r\n") if $self->{stream};
   return Mojo::Promise->resolve({});
+}
+
+sub _send_oper_p {
+  my ($self, $target, $message) = @_;
+
+  return $self->_write_and_wait_p(
+    "OPER $message", {},
+    err_needmoreparams => {},
+    err_nooperhost     => {},
+    err_passwdmismatch => {},
+    rpl_youreoper      => {},
+    '_make_oper_response',
+  );
 }
 
 sub _send_part_p {

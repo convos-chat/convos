@@ -77,4 +77,5 @@ commands.push({cmd: '/kick', example: '/kick <nick>', description: 'Kick a user 
 commands.push({cmd: '/mode', example: '/mode [+|-][b|o|v] <user>', description: 'Change mode of yourself or a user'});
 commands.push({cmd: '/reconnect', example: '/reconnect', description: 'Restart the current connection.'});
 commands.push({cmd: '/clear', example: '/clear history <#channel> or /clear history <nick>', description: 'Delete all history for the given conversation.'});
+commands.push({cmd: '/oper', example: '/oper <msg>', description: 'Send server operator messages.'});
 commands.push({cmd: '/raw', example: '/raw <msg>', description: 'Allow you to send any RFC 2812 message.'});

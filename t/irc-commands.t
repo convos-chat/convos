@@ -298,6 +298,11 @@ $connection->send_p('', '/raw FOO some stuff')->$wait_success(
   $connection, '_irc_event_err_unknowncommand',
 );
 
+note 'oper command';
+$res = $connection->send_p('', '/oper foo bar')->catch(sub { $err = shift })
+  ->$wait_success(qr{OPER}, [__PACKAGE__, 'oper.irc']);
+is $res->{server_op}, true, 'server_op';
+
 note 'server disconnect';
 @state = ();
 my $id = $connection->{stream_id};
@@ -337,6 +342,8 @@ __DATA__
 :localhost 353 superman = #convos :superwoman ~superman &robin
 :localhost 353 superman = #convos :%batboy @superboy +robyn
 :localhost 366 superman #convos :End of /NAMES list.
+@@ oper.irc
+:localhost 381 superman :You are now an IRC operator
 @@ whois-superwoman.irc
 :localhost 311 superman superwoman SuperWoman irc.example.com * :Convos v10.01
 :localhost 319 superman superwoman :#test123 @#convos

@@ -22,6 +22,7 @@ export default class Connection extends Dialog {
     const nick = me.nick || this.url.searchParams.get('nick') || '';
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', me.real_host || this.url.hostname);
+    this.prop('rw', 'server_op', me.server_op || false);
     this.participants([{nick}]);
   }
 
@@ -77,6 +78,7 @@ export default class Connection extends Dialog {
 
   wsEventMe(params) {
     this.wsEventNickChange(params);
+    if (params.server_op) this.addMessage({message: 'You are an IRC operator.', vars: [], highlight: true});
     this.update(params);
   }
 
