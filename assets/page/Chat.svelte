@@ -69,7 +69,7 @@ onDestroy(() => {
 unsubscribe.observed = scrollspy.on('observed', entry => {
   if (!entry.isIntersecting) return;
   const message = messages[entry.target.dataset.index] || {};
-  if (message.embeds) user.embedMaker.render(entry.target, message.embeds);
+  if (message.embeds && message.embeds.length) user.embedMaker.render(entry.target, message.embeds);
 });
 
 unsubscribe.scroll = scrollspy.on('scroll', entry => {

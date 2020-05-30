@@ -27,7 +27,10 @@ export default class EmbedMaker extends Reactive {
       delete existingEls[url];
     });
 
-    Object.keys(existingEls).forEach(url => existingEls[url].remove());
+    Object.keys(existingEls).forEach(url => {
+      const el = existingEls[url];
+      if (!el.classList.contains('has-message-details')) el.remove();
+    });
   }
 
   renderInstagram(embedEl) {
