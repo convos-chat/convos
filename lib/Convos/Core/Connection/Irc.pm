@@ -116,7 +116,7 @@ sub send_p {
 
   return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
   return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
-  return $self->_write_p($message)                  if $cmd eq 'RAW';
+  return $self->_write_p($message)                  if $cmd eq 'QUOTE';
 
   return Mojo::Promise->reject('Unknown command.');
 }

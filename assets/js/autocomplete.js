@@ -78,4 +78,4 @@ commands.push({cmd: '/mode', example: '/mode [+|-][b|o|v] <user>', description: 
 commands.push({cmd: '/reconnect', example: '/reconnect', description: 'Restart the current connection.'});
 commands.push({cmd: '/clear', example: '/clear history <#channel> or /clear history <nick>', description: 'Delete all history for the given conversation.'});
 commands.push({cmd: '/oper', example: '/oper <msg>', description: 'Send server operator messages.'});
-commands.push({cmd: '/raw', example: '/raw <msg>', description: 'Allow you to send any RFC 2812 message.'});
+commands.push({cmd: '/quote', example: '/quote <irc-command>', description: 'Allow you to send any raw IRC message.'});

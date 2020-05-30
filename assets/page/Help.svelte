@@ -71,6 +71,7 @@ route.update({title: l('Help')});
   </dl>
 
   <h2 id="commands">{l('Available commands')}</h2>
+  <p>{@html lmd('Any message starting with a-z is prefixed with "`/quote`", when sending from a connection conversation.')}</p>
   <dl>
     {#each commands as command}
       <dt>{command.example}</dt>

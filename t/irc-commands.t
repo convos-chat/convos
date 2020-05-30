@@ -293,7 +293,7 @@ note 'unknown commands';
 $connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
 like $err, qr{Unknown command}, 'Unknown command';
 
-$connection->send_p('', '/raw FOO some stuff')->$wait_success(
+$connection->send_p('', '/quote FOO some stuff')->$wait_success(
   qr{FOO} => ":localhost 421 superman FOO :Unknown command\r\n",
   $connection, '_irc_event_err_unknowncommand',
 );

@@ -91,12 +91,12 @@ export function sendMessage(e) {
   // Aliases
   msg.message = msg.message.replace(/^\/close/i, '/part');
   msg.message = msg.message.replace(/^\/j\b/i, '/join');
+  msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
   const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
 
   if (msg.message.length) {
-    const sender = dialog.is('search') ? dialog : user.omnibus;
-    sender.send(msg, res => {
+    dialog.send(msg, res => {
       if (!res.errors || !dialog) return;
       res.stopPropagation();
       res.vars = [res.message, extractErrorMessage(res.errors)];
@@ -105,7 +105,7 @@ export function sendMessage(e) {
     });
   }
 
-  if (dialog.is('conversation')) inputEl.value = '';
+  if (!dialog.is('search')) inputEl.value = '';
 
   pos = 0;
 }

@@ -55,6 +55,12 @@ export default class Connection extends Dialog {
     return this.update({dialogs: true});
   }
 
+  send(message, methodName) {
+    if (typeof message == 'string') message = {message};
+    if (message.message.indexOf('/') != 0) message.message = '/quote ' + message.message;
+    return super.send(message, methodName);
+  }
+
   update(params) {
     if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
     return super.update(params);
