@@ -4,6 +4,8 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
+plan skip_all => 'TEST_ALL=1' unless $ENV{TEST_ALL};
+
 t::Helper->subprocess_in_main_process;
 
 my $t = t::Helper->t;
