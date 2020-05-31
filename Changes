@@ -1,28 +1,40 @@
 Revision history for perl distribution Convos
 
-4.13 Not Released
+4.13 2020-05-31T10:04:00+0900
  - Add light variant of "Nord" theme #476
    Contributor: Thibault Duponchelle
- - Avoid making pictures from convos.by gargantic
+ - Add "Hacker" theme #479
+   Contributor: Thibault Duponchelle
+ - Add support for "OPER" command
+ - Fix "Color scheme" dropdown reflect the options from the theme #482
+   Contributor: Thibault Duponchelle
+ - Fix "Notifications keywords" text field value has new value after saving
+   user account #485 #486
+ - Fix description in site.webmanifest.ep
+ - Fix font awesome cache issue
+ - Fix toggling message details
+ - Fix not making pictures from https://convos.chat gargantic
+ - Changed "/raw" to "/quote"
+ - Changed to always sending "/quote" messages from connection conversation
 
-4.12 2020-05-25T10:04:00+0800
+4.12 2020-05-25T10:04:00+0900
  - Fix unread count styling on small screens
 
-4.11 2020-05-25T09:55:00+0800
+4.11 2020-05-25T09:55:00+0900
  - Fix upload files button in chat-input
  - Add animations to some of the buttons
 
-4.10 2020-05-24T12:32:00+0800
+4.10 2020-05-24T12:32:00+0900
  - Fix sending WeBRTC signals between private conversations
 
-4.09 2020-05-24T12:17:00+0800
+4.09 2020-05-24T12:17:00+0900
  - Avoid hearing yourself locally through video chat
  - Can toggle WebRTC connection info by clicking on participant nick
  - Fix accepting calls in private conversations
  - Fix rendering of main menu on small screens
  - Fix making the chat input field stand out on small screens
 
-4.08 2020-05-23T15:32:00+0800
+4.08 2020-05-23T15:32:00+0900
  - Add EXPERIMENTAL video support #204
  - Will send desktop notification on video call #472
  - Add support for parsing "ahq" user modes #471
@@ -35,20 +47,20 @@ Revision history for perl distribution Convos
    Contributor: Thibault Duponchelle
  - Removed Nordaaker background on login screen #439
 
-4.07 2020-05-15T09:39:00+0800
+4.07 2020-05-15T09:39:00+0900
  - Fix "Go to start page" and "Retry" links inside <Fallback>
  - Fix markdown links to relative links will not refresh the page
  - Changed from "convos green" to red in the "High-contrast" theme #465
    Contributor: Thibault Duponchelle
 
-4.06 2020-05-13T13:19:00+0800
+4.06 2020-05-13T13:19:00+0900
  - Improved keeping scroll position
  - Fix loading embeds after the correct message
 
-4.05 2020-05-10T10:06:00+0800
+4.05 2020-05-10T10:06:00+0900
  - Avoid XSS links in the chat
 
-4.04 2020-05-09T08:42:00+0800
+4.04 2020-05-09T08:42:00+0900
  - Add "Jump to now" link in Chat #453
  - Add line numbers for hljs #461
  - Add support for searching for "from"
@@ -70,16 +82,16 @@ Revision history for perl distribution Convos
  - Will persist theme settings in a cookie to prevent flashing between themes
    on load
 
-4.03 2020-04-07T11:32:00+0800
+4.03 2020-04-07T11:32:00+0900
  - Fix parsing routes such as /chat/irc-convos/%23x%2Fbar
  - Fix rendering of /file/1/lNqUVc43p0h4jaj5 paths
 
-4.02 2020-04-06T22:10:00+0800
+4.02 2020-04-06T22:10:00+0900
  - Fix not being able to subscribe to store
  - Fix not showing the nav menu by default on small screens
  - Made the chat input look more like an input
 
-4.01 2020-04-06T21:39:00+0800
+4.01 2020-04-06T21:39:00+0900
  - Add Nordaaker as background image to login screen #439
  - Add support for searching for anything from main search input #457
  - Fix rendering convos images on small screen #450
