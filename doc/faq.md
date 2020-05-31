@@ -39,19 +39,18 @@ while Convos is running.
 ## Can Convos run behind behind my favorite web server?
 
 Yes, but Convos and the web server need to be configured properly and
-[WebSockets](https://www.websocket.org/) need to be supported through the
+[WebSockets](https://www.websocket.org/) need to be supported through the whole
 chain.
 
 The first thing is that the environment variable
 [CONVOS_REVERSE_PROXY](/doc/config#CONVOS_REVERSE_PROXY) must be set to a
 true value.
 
-The other thing is that the reverse proxy needs to pass on some HTTP headers to
-Convos, so correct URLs will be generated. Below are two examples for
+The second thing is that the reverse proxy needs to pass on some HTTP headers
+to Convos, so correct URLs will be generated. Below are two examples for
 setting up Convos behind nginx or Apache. Here are the important headers:
 
 * "Host" header must be set to the original request's "Host" header.
-* "X-Forwarded-Proto" header must be set to either "http" or "https".
 * "X-Request-Base" header must be set to the root URL for Convos.
 
 Here is a complete example on how to start Convos, and configur either nginx
@@ -91,7 +90,6 @@ Example nginx config:
         # is not "/".
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Request-Base "$scheme://$host/whatever/convos";
       }
     }
@@ -110,7 +108,6 @@ Example Apache config:
       # Enable Convos to construct correct URLs by passing on custom headers.
       ProxyRequests Off
       ProxyPreserveHost On
-      RequestHeader set X-Forwarded-Proto "http"
       RequestHeader set X-Request-Base "http://your-domain.com/"
 
       # https://httpd.apache.org/docs/current/mod/mod_remoteip.html

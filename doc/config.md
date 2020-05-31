@@ -143,11 +143,21 @@ for optional functionality. Example
 
     CONVOS_PLUGINS=My::Cool::Plugin,My::Upload::Override ./script/convos daemon
 
+### CONVOS_REQUEST_BASE
+
+`CONVOS_REQUEST_BASE` can be used instead of `CONVOS_REVERSE_PROXY` and
+the `X-Request-Base` HTTP header set in your [web server config](/doc/faq.html).
+
+Examples:
+
+    CONVOS_REQUEST_BASE=https://convos.example.com/
+    CONVOS_REQUEST_BASE=https://example.com/apps/convos
+
 ### CONVOS_REVERSE_PROXY
 
-The `CONVOS_REVERSE_PROXY` environment variable can be used to enable proxy
-support, this allows Mojolicious to automatically pick up the
-`X-Forwarded-For` and `X-Forwarded-Proto` HTTP headers.
+The `CONVOS_REVERSE_PROXY` environment variable must be set to "1" to enable
+reverse proxy support. This will then allow Convos to automatically pick up the
+`X-Forwarded-For` HTTP headers set in your reverse proxy web server.
 
 Note that setting this environment variable without a reverse proxy in front
 will be a security issue.
