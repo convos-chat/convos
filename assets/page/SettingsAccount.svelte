@@ -32,8 +32,8 @@ route.update({title: l('Account')});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;
-  user.update({highlight_keywords: req.body.highlight_keywords});
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
+  user.update({colorScheme, theme, highlight_keywords: req.body.highlight_keywords});
 });
 
 $: calculateColorSchemeOptions(theme);
@@ -64,7 +64,6 @@ function updateUserFromForm(e) {
   }
 
   user.embedMaker.update({expandUrlToMedia});
-  user.update({colorScheme, theme});
   updateUserOp.perform(e.target);
 }
 </script>
