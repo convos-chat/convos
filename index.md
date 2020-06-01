@@ -8,19 +8,18 @@ title: About Convos - The simplest IRC client around
       <h1>
         <img src="/images/convos-light.png" alt="Convos">
         <small class="tagline">&mdash; A better chat experience</small>
-        <small>Convos is the simplest way to use IRC, and it keeps you always online.</small>
+        <small>Convos is the simplest way to use IRC and it is always online.</small>
       </h1>
-      <a href="#demo" class="btn">Try the demo</a>
+      <a href="#instant-demo" class="btn"><i class="fas fa-sign-in-alt"></i> Try the demo</a>
     </div>
-
-    <a href="/doc/start" class="hero--media">
+    <a href="#instant-demo" class="hero--media">
       <img src="/screenshots/2020-05-28-convos-chat.jpg" alt="Picture of Convos conversation">
     </a>
   </header>
 </div>
 
 <section class="cards">
-  <a href="#demo" class="cards--card">
+  <a href="#instant-demo" class="cards--card">
     <i class="fas fa-eye"></i>
     <h3>Curious?</h3>
     <span>Check out the <u>demo</u>!</span>
@@ -40,8 +39,11 @@ title: About Convos - The simplest IRC client around
 ## About
 
 Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
-online, and accessible to your web browser, both on desktop and mobile. Run it
-on your home server, [cloud service](/blog/2019/11/26/convos-on-digital-ocean)
+online, and accessible to your web browser, both on desktop and mobile.
+
+TODO
+
+Run it on your home server, [cloud service](/blog/2019/11/26/convos-on-digital-ocean),
 or in [Docker](/doc/start#docker).
 
 <div class="text-center">
@@ -81,18 +83,19 @@ or in [Docker](/doc/start#docker).
   <div class="cards--card">
     <i class="fas fa-plug"></i>
     <h3>Always online</h3>
-    <p>Convos keeps you logged in and logs all the activity in your archive.</p>
+    <p>Convos keeps you online and logs all activity in your archive.</p>
   </div>
   <div class="cards--card">
     <i class="fas fa-video"></i>
     <h3>Video chat</h3>
-    <p>With Convos you can <a href="/blog/2020/5/23/experimental-video-support-using-webrtc">video chat</a>
-    with a single person or multiple participants in a conversation.</p>
+    <p>Convos let's you <a href="/blog/2020/5/23/experimental-video-support-using-webrtc">video chat</a>
+      with a single person or multiple participants.</p>
   </div>
   <div class="cards--card">
     <i class="fas fa-paint-roller"></i>
-    <h3>Theming</h3>
-    <p>Convos comes bundled with a selection of <a href="/blog/2020/5/14/theming-support-in-4-point-oh">themes</a>, and also supports dark mode</p>
+    <h3>Themes</h3>
+    <p>Convos comes with a selection of <a href="/blog/2020/5/14/theming-support-in-4-point-oh">color themes</a>,
+      so you can personalize it to your taste.</p>
   </div>
   <div class="cards--card">
     <i class="fas fa-grin-hearts"></i>
@@ -102,7 +105,7 @@ or in [Docker](/doc/start#docker).
   <div class="cards--card">
     <i class="fas fa-user-shield"></i>
     <h3>Private</h3>
-    <p>You own and control all your settings, logs and uploaded files from <a href="/doc/faq">your own computer</a>.</p>
+    <p>You own and control all your settings, logs, and uploaded files from <a href="/doc/faq">your server</a>.</p>
   </div>
   <div class="cards--card">
     <i class="fas fa-download"></i>
@@ -111,16 +114,15 @@ or in [Docker](/doc/start#docker).
   </div>
 </section>
 
-## Demo
+## Instant demo
 
-Want to try out Convos?  Register with your email address and try it out. There
-should be someone lurking in the `#test` channel.
+Want to try out Convos? Sign up with your email address and instantly see how
+Convos works. You might also run into the developers in the `#convos` channel.
 
-<div class="text-center">
-  <a href="/login" class="btn">Register</a>
-  <br>
-  <br>
-</div>
+<p class="text-center has-extra-vertical-margin">
+  <a href="/login#signup" class="btn"><i class="fas fa-user-plus"></i> Sign up</a>
+  <a href="/login" class="btn"><i class="fas fa-sign-in-alt"></i> Sign in</a>
+</p>
 
 Note that the demo is [locked](/doc/config#convosforcedircserver) to the
 IRC server running on localhost. This is to prevent the server from getting

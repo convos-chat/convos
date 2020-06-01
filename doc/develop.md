@@ -55,7 +55,7 @@ but [ircd](http://www.ircd-hybrid.org) is a good alternative:
     brew install ircd-hybrid         # osx
 
 Please ask in [#convos on freenode.net](irc://chat.freenode.net/%23convos) if
-you want to use the [demo](/#demo) IRC server instead of installing your own.
+you want to use the [demo](/#instant-demo) IRC server instead of installing your own.
 
 ## Starting the application
 
