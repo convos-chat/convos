@@ -1,4 +1,5 @@
 body.for-cms .has-max-width,
+body.for-cms .toc,
 .cms-content,
 .cms-navbar {
   margin: 0 auto;
@@ -155,6 +156,10 @@ body.for-cms .has-max-width,
  */
 
 .cms-content {
+  a:hover {
+    text-decoration: none;
+  }
+
   h2 {
     padding-bottom: 0.3rem;
     padding-top: 1.5rem;
@@ -231,5 +236,13 @@ a.cards--card {
 
   u {
     color: var(--link-color);
+  }
+}
+
+.toc a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }

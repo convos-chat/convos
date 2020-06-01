@@ -9,6 +9,7 @@
 <article class="cms-content">
   <h1 class="cms-header"><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
   <a href="<%= url_for %>" class="cms-date"><%= $doc->{meta}{date} %></a>
+  %= include 'partial/toc', toc => $doc->{toc} if $doc->{meta}{toc};
   %== $doc->{body}
 </article>
 

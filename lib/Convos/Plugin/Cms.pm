@@ -143,9 +143,13 @@ sub _rewrite_href {
 sub _rewrite_markdown_document {
   my ($self, $dom, $doc) = @_;
 
-  $dom->find('h1, h2')->each(sub {
+  my @toc;
+  $dom->find('h1, h2, h3')->each(sub {
     my $tag = shift;
     $tag->{id} ||= slugify(trim $tag->all_text);
+    return if $tag->tag eq 'h1';
+    push @toc, [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
+    push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';
   });
 
   $dom->find('pre')->each(sub {
@@ -177,6 +181,7 @@ sub _rewrite_markdown_document {
   $doc->{body}           = $dom;
   $doc->{after_content}  = $doc->{after_content} ? Mojo::DOM->new($doc->{after_content}) : undef;
   $doc->{before_content} = $doc->{before_content} ? Mojo::DOM->new($doc->{before_content}) : undef;
+  $doc->{toc}            = \@toc;
 }
 
 # Heavily inspired by Mojolicious::Plugin::MojoDocs
