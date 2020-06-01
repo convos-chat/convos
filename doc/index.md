@@ -3,10 +3,12 @@ title: Documentation
 description: Getting started - FAQ - Configuring - Guide for developers - Statistics
 ---
 
-* [Getting started](/doc/start)
-* [Frequently asked questions](/doc/faq)
-* [Configuring Convos](/doc/config)
-* [Guide for developers](/doc/develop)
+<ul class="toc">
+  <li><a href="/doc/start">Getting started</a></li>
+  <li><a href="/doc/faq">Frequently asked </a></li>
+  <li><a href="/doc/config">Configuring Convos</a></li>
+  <li><a href="/doc/develop">Guide for developers</a></li>
+</ul>
 
 ## Getting started
 
@@ -46,14 +48,18 @@ The backend of Convos is written in [Perl](https://www.perl.org/) and
 with [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 and [Svelte](https://svelte.dev/).
 
-| Language   | Files | Lines |
-|------------|-------|-------|
-| Perl       |    26 |  3310 |
-| Svelte     |    29 |  2041 |
-| JavaScript |    29 |  2839 |
-| Sass       |    30 |  2423 |
-| SVG        |     1 |    11 |
-| SUM:       |   117 | 10624 |
-
+<table class="table">
+  <thead>
+    <tr><th>Language</th><th>Files</th><th>Lines</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Perl</td><td>26</td><td>3310</td></tr>
+    <tr><td>Svelte</td><td>29</td><td>2041</td></tr>
+    <tr><td>JavaScript</td><td>29</td><td>2041</td></tr>
+    <tr><td>Sass</td><td>30</td><td>2839</td></tr>
+    <tr><td>SVG</td><td>1</td><td>11</td></tr>
+    <tr><td>Total</td><td>117</td><td>10624</td></tr>
+  </tbody>
+</table>
 
 Updated after 4.12 release, using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`

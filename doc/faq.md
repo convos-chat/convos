@@ -15,21 +15,21 @@ Here is a short overview of an example directory structure:
 
 * [Global settings](/doc/Convos/Core/Settings)
 
-      /home/superwoman/.local/share/convos/settings.json
+        /home/superwoman/.local/share/convos/settings.json
 
 * [User themes](/blog/2020/5/14/theming-support-in-4-point-oh)
 
-      /home/superwoman/.local/share/convos/themes/
+        /home/superwoman/.local/share/convos/themes/
 
 * User settings and logs
 
-      /home/superwoman/.local/share/convos/joe@example.com/
-      /home/superwoman/.local/share/convos/joe@example.com/user.json
-      /home/superwoman/.local/share/convos/joe@example.com/irc-server/
+        /home/superwoman/.local/share/convos/joe@example.com/
+        /home/superwoman/.local/share/convos/joe@example.com/user.json
+        /home/superwoman/.local/share/convos/joe@example.com/irc-server/
 
 * User uploaded and paste files
 
-      /home/superwoman/.local/share/convos/joe@example.com/upload
+        /home/superwoman/.local/share/convos/joe@example.com/upload
 
   Uploaded files are stored with a ".data" extension, and meta information can
   be found in the companion ".json" file.
