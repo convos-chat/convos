@@ -20,6 +20,6 @@
     { "src": "<%= url_for '/asset/android-chrome-512x512.81649762.png' %>", "sizes": "512x512", "type": "image/png" }
   ],
   "screenshots": [
-    { "src": "<%= url_for '/images/convos_screenshot.jpg' %>", "sizes": "2045x1530", "type": "image/jpeg" }
+    { "src": "<%= url_for '/images/2020-05-28-convos-chat.jpg' %>", "sizes": "2045x1530", "type": "image/jpeg" }
   ]
 }

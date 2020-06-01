@@ -10,7 +10,7 @@ $ENV{MOJO_MODE}      = 'development';
 
 my $t     = t::Helper->t->get_ok('/');
 my $url   = $t->ua->server->url;
-my $image = '/images/convos_screenshot.jpg';
+my $image = '/images/2020-05-28-convos-chat.jpg';
 
 $t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos - Better group chat')
   ->element_exists(

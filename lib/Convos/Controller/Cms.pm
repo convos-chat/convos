@@ -64,6 +64,7 @@ sub _render_doc {
   my ($self, $template, $doc) = @_;
 
   my $meta = $doc->{meta};
+  $meta->{image} = $self->url_for($meta->{image})->to_abs;
   $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
   $self->social($_ => $meta->{$_})
     for grep { defined $meta->{$_} } qw(canonical description image url);
@@ -74,6 +75,7 @@ sub _render_doc {
 sub _render_perldoc {
   my ($self, $path) = @_;
   my $src = path($path)->slurp;
+
   $self->respond_to(
     txt  => {data => $src},
     html => sub {

@@ -163,7 +163,7 @@ sub _social {
 
   # Defaults
   $social->{description} ||= 'A chat application that runs in your web browser';
-  $social->{image}       ||= $c->url_for('/images/convos_screenshot.jpg')->to_abs;
+  $social->{image}       ||= $c->url_for('/images/2020-05-28-convos-chat.jpg')->to_abs;
   $social->{url}         ||= $c->url_for('/')->to_abs;
 
   # Get
