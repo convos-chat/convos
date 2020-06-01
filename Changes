@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.14 2020-06-01T21:56:00+0900
+ - Add CMS functionality
+ - Fixed highlight color for dark themes
+
 4.13 2020-05-31T10:04:00+0900
  - Add light variant of "Nord" theme #476
    Contributor: Thibault Duponchelle
