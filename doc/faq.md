@@ -1,5 +1,6 @@
 ---
 title: Frequently asked questions
+toc: true
 ---
 
 ## Where does Convos store logs, settings and uploaded files?

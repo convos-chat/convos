@@ -1,5 +1,7 @@
 ---
 title: About Convos - The simplest IRC client around
+description: A multiuser chat web app for IRC. Always online, supports video, custom theming and is extremely easy to install
+image: /screenshots/2020-05-28-convos-chat.jpg
 ---
 
 <div class="hero-wrapper is-before-content">

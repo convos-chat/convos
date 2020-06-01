@@ -1,8 +1,7 @@
 ---
 title: Documentation
+description: Getting started - FAQ - Configuring - Guide for developers - Statistics
 ---
-
-## Index
 
 * [Getting started](/doc/start)
 * [Frequently asked questions](/doc/faq)

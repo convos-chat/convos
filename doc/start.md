@@ -1,5 +1,7 @@
 ---
 title: Getting started
+toc: true
+image: /screenshots/2020-06-02-install.png
 ---
 
 ## Quick start guide
