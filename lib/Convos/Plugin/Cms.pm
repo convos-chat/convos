@@ -7,14 +7,14 @@ use Mojo::Cache;
 use Mojo::Collection;
 use Mojo::DOM;
 use Mojo::URL;
-use Mojo::Util qw(decode trim);
+use Mojo::Util qw(decode slugify trim);
 use Pod::Simple::Search;
 use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
-use Text::MultiMarkdown;
+use Text::Markdown;
 
 has _cache => sub { Mojo::Cache->new(max_keys => 20) };
-has _tmm   => sub { Text::MultiMarkdown->new };
+has _md    => sub { Text::Markdown->new };
 
 sub register {
   my ($self, $app, $config) = @_;
@@ -88,41 +88,9 @@ sub _parse_markdown_document {
   }
 
   $body .= $_ while readline $FH;
-  $body = Mojo::DOM->new($self->_tmm->markdown($body));
+  $body = Mojo::DOM->new($self->_md->markdown($body));
   $body->find('p:empty')->each('remove');
-
-  unless ($params->{scan}) {
-    $body->find('pre')->each(sub {
-      my $tag      = shift;
-      my $pre_text = $tag->all_text;
-      $pre_text =~ s![\r\n]+$!!s;
-      $tag->content($pre_text);
-    });
-
-    $body->find('style:not(.inline)')->each(sub {
-      my $tag = shift;
-      $doc->{custom_css} .= $tag->all_text . "\n";
-      $tag->remove;
-    });
-
-    $body->find('.is-after-content')->each(sub {
-      my $tag = shift;
-      $doc->{after_content} .= "$tag";
-      $tag->remove;
-    });
-
-    $body->find('.is-before-content')->each(sub {
-      my $tag = shift;
-      $doc->{before_content} .= "$tag";
-      $tag->remove;
-    });
-
-    $doc->{custom_css} =~ s!</?\w+>!!g;    # Remove <p> tags inside <style>
-    $doc->{body}          = $body;
-    $doc->{after_content} = $doc->{after_content} ? Mojo::DOM->new($doc->{after_content}) : undef;
-    $doc->{before_content}
-      = $doc->{before_content} ? Mojo::DOM->new($doc->{before_content}) : undef;
-  }
+  $self->_rewrite_markdown_document($body, $doc) unless $params->{scan};
 
   if (my $h1 = $body->at('h1:is(:root)')) {
     $doc->{meta}{heading} = trim $h1->all_text;
@@ -170,6 +138,45 @@ sub _rewrite_href {
     $md->{$section}->find('a[href^="/"]')->each(sub { $_[0]->{href} = $c->url_for($_[0]->{href}) });
     $md->{$section}->find('img[src^="/"]')->each(sub { $_[0]->{src} = $c->url_for($_[0]->{src}) });
   }
+}
+
+sub _rewrite_markdown_document {
+  my ($self, $dom, $doc) = @_;
+
+  $dom->find('h1, h2')->each(sub {
+    my $tag = shift;
+    $tag->{id} ||= slugify(trim $tag->all_text);
+  });
+
+  $dom->find('pre')->each(sub {
+    my $tag      = shift;
+    my $pre_text = $tag->all_text;
+    $pre_text =~ s![\r\n]+$!!s;
+    $tag->content($pre_text);
+  });
+
+  $dom->find('style:not(.inline)')->each(sub {
+    my $tag = shift;
+    $doc->{custom_css} .= $tag->all_text . "\n";
+    $tag->remove;
+  });
+
+  $dom->find('.is-after-content')->each(sub {
+    my $tag = shift;
+    $doc->{after_content} .= "$tag";
+    $tag->remove;
+  });
+
+  $dom->find('.is-before-content')->each(sub {
+    my $tag = shift;
+    $doc->{before_content} .= "$tag";
+    $tag->remove;
+  });
+
+  $doc->{custom_css} =~ s!</?\w+>!!g;    # Remove <p> tags inside <style>
+  $doc->{body}           = $dom;
+  $doc->{after_content}  = $doc->{after_content} ? Mojo::DOM->new($doc->{after_content}) : undef;
+  $doc->{before_content} = $doc->{before_content} ? Mojo::DOM->new($doc->{before_content}) : undef;
 }
 
 # Heavily inspired by Mojolicious::Plugin::MojoDocs
