@@ -127,6 +127,15 @@ IRC server running on localhost. This is to prevent the server from getting
 banned from IRC networks with strict limitations.
 
 <style>
+.cms-content > h1 {
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  position: absolute;
+  top: -1px;
+  left: -1px;
+}
+
 .cms-content > h2 {
   text-align: center;
 }
