@@ -4,17 +4,11 @@
 
 % if ($doc->{before_content}) {
   %== $doc->{before_content}
-% } else {
-  <header class="cms-header">
-    <h1><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
-    <a href="<%= url_for %>" class="cms-date"><%= $doc->{meta}{date} %></a>
-  </header>
 % }
 
 <article class="cms-content">
-  % if ($doc->{before_content} and $doc->{meta}{heading}) {
-    <h1 class="cms-main-header"><%= $doc->{meta}{heading} %></h1>
-  % }
+  <h1 class="cms-header"><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
+  <a href="<%= url_for %>" class="cms-date"><%= $doc->{meta}{date} %></a>
   %== $doc->{body}
 </article>
 

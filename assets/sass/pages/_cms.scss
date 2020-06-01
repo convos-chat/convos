@@ -1,6 +1,5 @@
 body.for-cms .has-max-width,
 .cms-content,
-.cms-header,
 .cms-navbar {
   margin: 0 auto;
   padding: var(--gutter);
@@ -151,18 +150,9 @@ body.for-cms .has-max-width,
 }
 
 /*
- * .cms-header
  * .cms-content
  * .cms-footer
  */
-
-.cms-header {
-  padding-bottom: 1px;
-}
-
-.cms-header + .cms-content {
-  padding-top: 0;
-}
 
 .cms-content {
   h2 {
