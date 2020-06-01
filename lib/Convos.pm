@@ -9,7 +9,7 @@ use Mojo::JSON qw(false true);
 use Mojo::Util;
 use Scalar::Util 'blessed';
 
-our $VERSION = '4.15';
+our $VERSION = '4.16';
 
 $ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
 
@@ -190,7 +190,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-4.15
+4.16
 
 =head1 DESCRIPTION
 

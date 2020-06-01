@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.16 2020-06-01T22:16:00+0900
+ - Cannot load Module::Install directly
+
 4.15 2020-06-01T22:07:00+0900
  - Add missing dependency
 

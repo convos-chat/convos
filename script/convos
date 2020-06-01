@@ -18,7 +18,7 @@ use Config;
 use File::Spec;
 use FindBin;
 
-our $VERSION = '4.15';
+our $VERSION = '4.16';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
@@ -199,7 +199,7 @@ sub _dependencies {
   my $load = sub {
     my ($mode, $module, $version) = @_;
     local ($@, $!) = ('', 0);
-    eval "use $module $version;1";
+    eval "use $module $version ();1";
     my $err = $@;
     $err =~ s! at .*!!s;
     $err =~ s! in \@INC.*!!s;
