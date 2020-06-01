@@ -35,11 +35,11 @@
   </article>
 
   <footer class="welcome-screen__footer">
-    <a href="https://convos.by/">Convos</a>
+    <a href="https://convos.chat/">Convos</a>
     &mdash;
-    <a href="https://convos.by/blog"><%=l 'Blog' %></a>
+    <a href="https://convos.chat/blog"><%=l 'Blog' %></a>
     &mdash;
-    <a href="https://convos.by/doc"><%=l 'Documentation' %></a>
+    <a href="https://convos.chat/doc"><%=l 'Documentation' %></a>
     &mdash;
     <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
   </footer>

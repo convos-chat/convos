@@ -3,7 +3,7 @@ version: '4.13.0'
 summary: Multiuser chat application that runs in your web browser
 description: |
   The supported chat protocol is currently IRC.
-  See http://convos.by for more details.
+  See http://convos.chat for more details.
 icon: assets/images/convos-icon.svg
 
 base: core18

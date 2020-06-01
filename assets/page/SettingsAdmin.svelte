@@ -85,7 +85,7 @@ function updateSettingsFromForm(e) {
       <p class="help" slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
 
-    <TextField name="organization_url" placeholder="{l('https://convos.by')}" bind:value="{convosSettings.organization_url}">
+    <TextField name="organization_url" placeholder="{l('https://convos.chat')}" bind:value="{convosSettings.organization_url}">
       <span slot="label">{l('Organization URL')}</span>
       <p class="help" slot="help">{l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>

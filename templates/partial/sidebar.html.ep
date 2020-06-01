@@ -5,7 +5,7 @@
   <nav class="sidebar-left__nav">
     <a href="/login" target="_self"><%=l 'Login' %></a>
     <a href="/register" target="_self"><%=l 'Create account' %></a>
-    <a href="https://convos.by/doc" target="_self"><%=l 'Documentation' %></a>
+    <a href="https://convos.chat/doc" target="_self"><%=l 'Documentation' %></a>
     <a href="https://github.com/Nordaaker/convos" target="_self"><%=l 'GitHub' %></a>
   </nav>
 </div>

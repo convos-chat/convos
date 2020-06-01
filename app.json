@@ -1,7 +1,7 @@
 {
    "name": "Convos",
-   "website": "http://convos.by",
-   "logo": "http://convos.by/public/convos-icon.png",
+   "website": "http://convos.chat",
+   "logo": "http://convos.chat/public/convos-icon.png",
    "description": "Multiuser chat application that runs in your web browser.",
    "success_url": "/",
    "addons": [],

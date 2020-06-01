@@ -10,7 +10,7 @@ Convos is a multiuser chat application that runs in your web browser.
 The supported chat protocol is currently IRC, but Convos can be extended to
 support other protocols as well.
 
-See [convos.by](http://convos.by) for more details.
+See [convos.chat](http://convos.chat) for more details.
 
 The backend is powered by [Mojolicious](http://mojolicious.org), while the
 frontend is held together by the progressive JavaScript framework
@@ -18,13 +18,13 @@ frontend is held together by the progressive JavaScript framework
 
 ## Quick start guide
 
-See "[Getting started](https://convos.by/doc/start)" for other
+See "[Getting started](https://convos.chat/doc/start)" for other
 options and more information.
 
 ### Shell Install
 
 ```bash
-curl https://convos.by/install.sh | sh -
+curl https://convos.chat/install.sh | sh -
 ./convos/script/convos daemon;
 ```
 
@@ -66,7 +66,7 @@ It's mostly stable, but might require extra tools and packages to run.
 ### gh-pages
 
 "[gh-pages](https://github.com/Nordaaker/convos/tree/gh-pages)" is the source
-for [http://convos.by](http://convos.by), which is built with
+for [http://convos.chat](http://convos.chat), which is built with
 [github pages](https://pages.github.com/).
 
 ### backup/convos-0.8604

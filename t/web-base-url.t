@@ -42,7 +42,7 @@ $ENV{CONVOS_REVERSE_PROXY} = 0;
 $t->get_ok('/t/base-url?x=4', {'X-Request-Base' => 'http://example.com/sub'})->status_is(500)
   ->content_like(qr{CONVOS_REVERSE_PROXY});
 
-$ENV{CONVOS_REQUEST_BASE} = 'https://convos.by/demo';
+$ENV{CONVOS_REQUEST_BASE} = 'https://convos.chat/demo';
 $t->get_ok('/t/base-url?x=5')->status_is(200)->json_is('/url_for', '/demo/foo/bar')
   ->json_is('/web_url_rel', '/demo/foo/bar');
 

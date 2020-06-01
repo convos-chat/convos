@@ -1,11 +1,11 @@
 import ConnURL from '../assets/js/ConnURL';
 
 test('ConnURL http', () => {
-  const url = new ConnURL('http://convos.by/');
-  expect(url.toString()).toBe('http://convos.by/');
+  const url = new ConnURL('http://convos.chat/');
+  expect(url.toString()).toBe('http://convos.chat/');
 
-  url.href = 'https://convos.by/';
-  expect(url.toString()).toBe('https://convos.by/');
+  url.href = 'https://convos.chat/';
+  expect(url.toString()).toBe('https://convos.chat/');
 });
 
 test('ConnURL irc', () => {

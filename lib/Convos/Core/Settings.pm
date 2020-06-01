@@ -53,7 +53,7 @@ has rtc => sub {
 has session_secrets => \&_build_session_secrets;
 
 sub defaults {
-  return {organization_name => 'Convos', organization_url => 'https://convos.by'};
+  return {organization_name => 'Convos', organization_url => 'https://convos.chat'};
 }
 
 sub load_p {

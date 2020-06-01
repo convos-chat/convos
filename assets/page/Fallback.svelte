@@ -26,7 +26,7 @@ route.update({title: l(messages[realStatus])});
     <h1>
       <a href="{$route.baseUrl}"><span>{l(realStatus == 'loading' ? 'Convos' : messages[realStatus])}</span></a>
       {#if process.env.organization_name != 'Convos'}
-        {#if process.env.organization_url != 'https://convos.by'}
+        {#if process.env.organization_url != 'https://convos.chat'}
           <small class="subtitle">{realStatus == 'loading' ? '' : l('Convos')} {@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
         {:else}
           <small class="subtitle">{realStatus == 'loading' ? '' : l('Convos')} {l('for %1', process.env.organization_name)}</small>
@@ -53,11 +53,11 @@ route.update({title: l(messages[realStatus])});
   </article>
 
   <footer class="welcome-screen__footer">
-    <a href="https://convos.by/" target="_blank">Convos</a>
+    <a href="https://convos.chat/" target="_blank">Convos</a>
     &mdash;
-    <a href="https://convos.by/blog" target="_blank">{l('Blog')}</a>
+    <a href="https://convos.chat/blog" target="_blank">{l('Blog')}</a>
     &mdash;
-    <a href="https://convos.by/doc" target="_blank">{l('Documentation')}</a>
+    <a href="https://convos.chat/doc" target="_blank">{l('Documentation')}</a>
     &mdash;
     <a href="https://github.com/Nordaaker/convos" target="_blank">{l('GitHub')}</a>
   </footer>

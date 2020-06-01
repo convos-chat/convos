@@ -12,7 +12,7 @@ info:
     url: http://opensource.org/licenses/Artistic-2.0
   termsOfService: SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API.
 
-host: demo.convos.by
+host: convos.chat
 basePath: /api
 schemes: [ http ]
 

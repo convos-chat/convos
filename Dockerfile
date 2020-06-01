@@ -1,6 +1,6 @@
 # nordaaker/convos
 #
-# See https://convos.by/doc/config.html for details about the environment variables
+# See https://convos.chat/doc/config.html for details about the environment variables
 #
 # BUILD: docker build --no-cache --rm -t nordaaker/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data nordaaker/convos

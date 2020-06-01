@@ -138,8 +138,7 @@ sub _config {
     delete $self->log->{handle};
   }
 
-  $self->log->info(
-    qq(CONVOS_HOME="$config->{home}" # https://convos.by/doc/config.html#convos_home"));
+  $self->log->info(qq(CONVOS_HOME="$config->{home}" # https://convos.chat/doc/config#convos_home"));
 
   my $settings = $self->core->settings;
   $settings->load_p->wait;
@@ -203,13 +202,13 @@ starting points for Convos:
 
 =over 2
 
-=item * L<Documentation index|https://convos.by/doc/>
+=item * L<Documentation index|https://convos.chat/doc/>
 
-=item * L<Getting started|https://convos.by/doc/getting-started.html>
+=item * L<Getting started|https://convos.chat/doc/start>
 
-=item * L<Development guide|https://convos.by/doc/develop.html>
+=item * L<Development guide|https://convos.chat/doc/develop>
 
-=item * L<REST API reference|https://demo.convos.by/api.html>
+=item * L<REST API reference|https://convos.chat/api>
 
 =back
 

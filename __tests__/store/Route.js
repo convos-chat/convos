@@ -3,7 +3,7 @@ import Route from '../../assets/store/Route';
 test('defaults', () => {
   const r = new Route({});
 
-  r._location = {hash: '#foo', href: 'https://demo.convos.by/chat'};
+  r._location = {hash: '#foo', href: 'https://demo.convos.chat/chat'};
 
   expect(r.activeMenu).toBe('');
   expect(r.basePath).toBe('');
@@ -21,14 +21,14 @@ test('defaults', () => {
 test('baseUrl', () => {
   const r = new Route({});
 
-  r.update({baseUrl: 'https://demo.convos.by/whatever///'});
-  expect(r.baseUrl).toBe('https://demo.convos.by/whatever');
+  r.update({baseUrl: 'https://demo.convos.chat/whatever///'});
+  expect(r.baseUrl).toBe('https://demo.convos.chat/whatever');
   expect(r.basePath).toBe('/whatever');
 });
 
 test('routing', () => {
   const r = new Route({});
-  r.update({baseUrl: 'https://demo.convos.by///'});
+  r.update({baseUrl: 'https://demo.convos.chat///'});
 
   r._location = {href: ''};
 
@@ -66,11 +66,11 @@ test('routing', () => {
   r.update({title: 'cool beans'});
   r.go('/chat/irc-foo/%23x%2Fbar#cool_beans');
   expect(r.path).toBe('/chat/irc-foo/%23x%2Fbar');
-  r.go('https://demo.convos.by/not/found');
-  r.go('https://demo.convos.by/not/found'); // noop
+  r.go('https://demo.convos.chat/not/found');
+  r.go('https://demo.convos.chat/not/found'); // noop
   expect(r.path).toBe('/not/found');
 
-  r.update({baseUrl: 'https://demo.convos.by/whatever/', title: 'abs'});
+  r.update({baseUrl: 'https://demo.convos.chat/whatever/', title: 'abs'});
   r.go('/help', {foo: 'bar'}, true);
   expect(r.path).toBe('/help');
 
@@ -83,11 +83,11 @@ test('routing', () => {
   ]);
 
   expect(history).toEqual([
-    ['pushState', {}, '', 'https://demo.convos.by/?x=2&y=3#0'],
-    ['pushState', {}, '', 'https://demo.convos.by/chat/irc-foo?ts=2020'],
-    ['pushState', {}, 'cool beans', 'https://demo.convos.by/chat/irc-foo/%23x%2Fbar#cool_beans'],
-    ['pushState', {}, 'cool beans', 'https://demo.convos.by/not/found'],
-    ['replaceState', {foo: 'bar'}, 'abs', 'https://demo.convos.by/whatever/help'],
+    ['pushState', {}, '', 'https://demo.convos.chat/?x=2&y=3#0'],
+    ['pushState', {}, '', 'https://demo.convos.chat/chat/irc-foo?ts=2020'],
+    ['pushState', {}, 'cool beans', 'https://demo.convos.chat/chat/irc-foo/%23x%2Fbar#cool_beans'],
+    ['pushState', {}, 'cool beans', 'https://demo.convos.chat/not/found'],
+    ['replaceState', {foo: 'bar'}, 'abs', 'https://demo.convos.chat/whatever/help'],
   ]);
 });
 
@@ -108,8 +108,8 @@ test('urlFor', () => {
   const r = new Route({});
   expect(r.urlFor('/foo')).toBe('/foo');
 
-  r.update({baseUrl: 'https://demo.convos.by/whatever///'});
+  r.update({baseUrl: 'https://demo.convos.chat/whatever///'});
   expect(r.urlFor('/foo')).toBe('/whatever/foo');
-  expect(r.urlFor('https://convos.by/blog/')).toBe('https://convos.by/blog/');
+  expect(r.urlFor('https://convos.chat/blog/')).toBe('https://convos.chat/blog/');
   expect(r.urlFor('#hash')).toBe('#hash');
 });

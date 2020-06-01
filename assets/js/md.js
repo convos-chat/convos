@@ -89,11 +89,11 @@ export function emojis(lookup, type = 'single') {
  * // Hey <em>foo</em> <em>foo</em> <strong>bar</strong> <strong>bar</strong> <em><strong>baz</strong></em> <em><strong>baz</strong></em>
  * md("Hey *foo* _foo_ **bar** __baz__ ***baz***!");
  *
- * // A <a href="https://convos.by">link</a>
- * md("A [link](https://convos.by)");
+ * // A <a href="https://convos.chat">link</a>
+ * md("A [link](https://convos.chat)");
  *
- * // A link to <a href="https://convos.by" target="_blank">convos.by</a>
- * md('A link to https://convos.by');
+ * // A link to <a href="https://convos.chat" target="_blank">convos.chat</a>
+ * md('A link to https://convos.chat');
  *
  * // A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>
  * md('A link to mailto:jhthorsen@cpan.org');

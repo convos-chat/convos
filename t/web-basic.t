@@ -30,7 +30,7 @@ $t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos - Better 
   ->element_exists(qq(meta[property="og:url"][content="$url"]));
 
 $t->text_like('noscript p', qr{javascript}i);
-$t->text_is('a[href="https://convos.by/doc"]', 'Documentation');
+$t->text_is('a[href="https://convos.chat/doc"]', 'Documentation');
 
 $t->text_like('script', qr{"api_url":"\\/api"}m,      'api_url')
   ->text_like('script', qr{"ws_url":"ws:.*/events"}m, 'ws_url');

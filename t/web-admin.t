@@ -20,7 +20,7 @@ $t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
   ->json_hasnt('/session_secrets')->json_is('/contact', 'mailto:root@localhost')
   ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
-  ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.by');
+  ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat');
 
 note 'input validation';
 $t->post_ok(
@@ -28,7 +28,7 @@ $t->post_ok(
   json => {
     contact            => 'jhthorsen@cpan.org',
     default_connection => 'localhost:6667',
-    organization_url   => 'convos.by',
+    organization_url   => 'convos.chat',
   }
 )->status_is(400)->json_is('/errors/0/message', 'Contact URL need to start with "mailto:".')
   ->json_is('/errors/1/message', 'Connection URL require a scheme and host.')

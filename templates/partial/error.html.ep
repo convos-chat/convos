@@ -9,7 +9,7 @@
     % if ($status == 404) {
       <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
     % } elsif ($c->req->headers->header('X-Request-Base')) {
-      % $more_url = 'https://convos.by/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server';
+      % $more_url = 'https://convos.chat/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server';
       <p><%=l 'Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?' %></p>
     % } else {
       <p>

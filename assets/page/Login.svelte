@@ -59,7 +59,7 @@ async function redirectAfterLogin(op) {
     <h1>
       <Link href="/"><span>{l('Convos')}</span></Link>
       {#if process.env.organization_name != 'Convos'}
-        {#if process.env.organization_url != 'https://convos.by'}
+        {#if process.env.organization_url != 'https://convos.chat'}
           <small class="subtitle">{@html lmd('for [%1](%2)', process.env.organization_name, process.env.organization_url)}</small>
         {:else}
           <small class="subtitle">{l('for %1', process.env.organization_name)}</small>
@@ -150,11 +150,11 @@ async function redirectAfterLogin(op) {
   </section>
 
   <footer class="welcome-screen__footer fade-in">
-    <Link href="https://convos.by/">Convos</Link>
+    <Link href="https://convos.chat/">Convos</Link>
     &mdash;
-    <Link href="https://convos.by/blog">{l('Blog')}</Link>
+    <Link href="https://convos.chat/blog">{l('Blog')}</Link>
     &mdash;
-    <Link href="https://convos.by/doc">{l('Documentation')}</Link>
+    <Link href="https://convos.chat/doc">{l('Documentation')}</Link>
     &mdash;
     <Link href="https://github.com/Nordaaker/convos">{l('GitHub')}</Link>
   </footer>

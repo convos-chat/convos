@@ -15,7 +15,7 @@ $t->post_ok('/api/user/superman@example.com/invite', {'X-Local-Secret' => 'abc'}
 
 note 'first user does not need invite link';
 $t->get_ok('/register')->status_is(200)->content_like(qr{"first_user":true});
-my %register = (email => 'first@convos.by', password => 'firstpassword');
+my %register = (email => 'first@convos.chat', password => 'firstpassword');
 $t->post_ok('/api/user/register', json => \%register)->status_is(200);
 $t->get_ok('/api/user/logout.html')->status_is(302)->header_is(Location => '/login');
 

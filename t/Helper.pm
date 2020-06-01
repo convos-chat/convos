@@ -105,7 +105,7 @@ sub t_selenium {
     unless eval 'require Test::Mojo::Role::Selenium;1';
 
   $ENV{CONVOS_BACKEND}            ||= 'Convos::Core::Backend';
-  $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://irc.convos.by/%23convos';
+  $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://irc.convos.chat/%23convos';
   $ENV{MOJO_SELENIUM_DRIVER}      ||= 'Selenium::Firefox';
   $ENV{MOJO_MODE} = 'development' if $ENV{MOJO_MODE} eq 'test';
 

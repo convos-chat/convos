@@ -29,7 +29,7 @@ sub disconnect_p {
   return $p->resolve({}) unless $self->{stream};
 
   $self->{disconnecting} = 1;    # Prevent getting queued
-  $self->_write("QUIT :https://convos.by", sub { $self->_stream_remove($p) });
+  $self->_write("QUIT :https://convos.chat", sub { $self->_stream_remove($p) });
   return $p;
 }
 
@@ -1028,7 +1028,7 @@ sub _stream {
   my $mode = $url->query->param('mode') || 0;
   $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
   $self->_write("NICK $nick\r\n");
-  $self->_write("USER $user $mode * :https://convos.by/\r\n");
+  $self->_write("USER $user $mode * :https://convos.chat/\r\n");
 }
 
 sub _stream_on_read {

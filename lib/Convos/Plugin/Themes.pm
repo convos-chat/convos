@@ -107,7 +107,7 @@ There are multiple themes
 L<bundled|https://github.com/Nordaaker/convos/tree/master/public/themes> with
 Convos, but you can also create your own custom themes. The custom themes must
 be placed in
-L<$CONVOS_HOME/themes|https://convos.by/doc/config.html#convos_home>. The
+L<$CONVOS_HOME/themes|https://convos.chat/doc/config#convos_home>. The
 default location is:
 
   $HOME/.local/share/convos/themes/

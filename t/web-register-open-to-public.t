@@ -24,8 +24,8 @@ my $json = decode_json($t->tx->res->text =~ m!const settings\s*=\s*([^;]+)!m ? $
 is $json->{api_url}, '/api',                  'settings.api_url';
 is $json->{contact}, 'mailto:root@localhost', 'settings.contact';
 is $json->{open_to_public}, true, 'open_to_public';
-is $json->{organization_name}, 'Convos',            'settings.organization_name';
-is $json->{organization_url},  'https://convos.by', 'settings.organization_url';
+is $json->{organization_name}, 'Convos',              'settings.organization_name';
+is $json->{organization_url},  'https://convos.chat', 'settings.organization_url';
 ok $json->{base_url},          'settings.base_url';
 ok $json->{default_connection}, 'settings.default_connection';
 ok $json->{version},            'settings.version';
