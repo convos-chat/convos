@@ -1,0 +1,19 @@
+% layout 'convos';
+
+%= include 'partial/cms_header'
+
+<main class="cms-content">
+  %= $perldoc
+</main>
+
+%= include 'partial/cms_footer'
+
+<script>
+document.addEventListener('DOMContentLoaded', function(e) {
+  document.querySelectorAll('pre').forEach(el => {
+    hljs.lineNumbersBlock(el);
+  })
+});
+</script>
+
+

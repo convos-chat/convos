@@ -1,6 +1,9 @@
 package Convos::Controller::Cms;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Mojo::File 'path';
+use Pod::Simple::Search;
+
 sub blog_entry {
   my $self  = shift;
   my $stash = $self->stash;
@@ -32,8 +35,18 @@ sub doc {
   return $self->cms->document_p(\@path)->then(sub {
     my $doc = shift;
     return $self->redirect_to($doc->{redirect_to}) if $doc->{redirect_to};
-    return $self->reply->not_found unless $doc->{body};
-    return $self->_render_doc(cms => $doc);
+    return $self->_render_doc(cms => $doc) if $doc->{body};
+
+    my $module       = join '::', split '/', $self->stash('file');
+    my $metacpan_url = "https://metacpan.org/pod/$module";
+    $self->stash(module => $module);
+    $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
+
+    my $path = Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
+    return $self->_render_perldoc($path) if $path and -r $path;
+
+    return $self->redirect_to($metacpan_url) if $module =~ m![A-Z]!;
+    return $self->reply->not_found;
   });
 }
 
@@ -56,6 +69,17 @@ sub _render_doc {
     for grep { defined $meta->{$_} } qw(canonical description image url);
 
   $self->render($template, custom_css => $doc->{custom_css}, doc => $doc, for_cms => 1);
+}
+
+sub _render_perldoc {
+  my ($self, $path) = @_;
+  my $src = path($path)->slurp;
+  $self->respond_to(
+    txt  => {data => $src},
+    html => sub {
+      $self->render('perldoc', perldoc => $self->cms->pod_to_html($src), doc => {}, for_cms => 1);
+    }
+  );
 }
 
 1;

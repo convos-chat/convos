@@ -2,10 +2,14 @@ package Convos::Plugin::Cms;
 use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util 'tp';
+use Mojo::ByteStream;
 use Mojo::Cache;
 use Mojo::Collection;
 use Mojo::DOM;
+use Mojo::URL;
 use Mojo::Util qw(decode trim);
+use Pod::Simple::Search;
+use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
 use Text::MultiMarkdown;
 
@@ -22,6 +26,7 @@ sub register {
 
   $app->helper('cms.blogs_p'          => sub { $self->_blogs_p(@_) });
   $app->helper('cms.document_p'       => sub { $self->_document_p(@_) });
+  $app->helper('cms.pod_to_html'      => sub { my $c = shift; _rewrite_pod($c, _pod_to_html(@_)) });
   $app->helper('cms.scan_for_blogs_p' => sub { $self->_scan_for_blogs_p(shift->app) });
 }
 
@@ -54,6 +59,10 @@ sub _document_p {
   };
 
   return $p;
+}
+
+sub _indentation {
+  (sort map {/^(\s+)/} @{shift()})[0];
 }
 
 sub _parse_markdown_document {
@@ -140,6 +149,20 @@ sub _parse_markdown_document {
   return $doc;
 }
 
+# Heavily inspired by Mojolicious::Plugin::MojoDocs
+sub _pod_to_html {
+  return '' unless defined(my $pod = ref $_[0] eq 'CODE' ? shift->() : shift);
+
+  my $parser = Pod::Simple::XHTML->new;
+  $parser->perldoc_url_prefix('https://metacpan.org/pod/');
+  $parser->$_('') for qw(html_header html_footer);
+  $parser->anchor_items(1);
+  $parser->strip_verbatim_indent(\&_indentation);
+  $parser->output_string(\(my $output));
+  return $@ unless eval { $parser->parse_string_document("$pod"); 1 };
+  return $output;
+}
+
 sub _rewrite_href {
   my ($self, $c, $md) = @_;
 
@@ -147,6 +170,25 @@ sub _rewrite_href {
     $md->{$section}->find('a[href^="/"]')->each(sub { $_[0]->{href} = $c->url_for($_[0]->{href}) });
     $md->{$section}->find('img[src^="/"]')->each(sub { $_[0]->{src} = $c->url_for($_[0]->{src}) });
   }
+}
+
+# Heavily inspired by Mojolicious::Plugin::MojoDocs
+sub _rewrite_pod {
+  my ($c, $html) = @_;
+
+  my $dom      = Mojo::DOM->new($html);
+  my $base_url = $c->url_for('/doc/');
+  $_->{href} =~ s!^https://metacpan\.org/pod/!$base_url! and $_->{href} =~ s!::!/!gi
+    for $dom->find('a[href]')->map('attr')->each;
+
+  for my $e ($dom->find('pre > code')->each) {
+    next if (my $str = $e->content) =~ /^\s*(?:\$|Usage:)\s+/m;
+    next unless $str =~ /[\$\@\%]\w|-&gt;\w|^use\s+\w/m;
+    my $attrs = $e->attr;
+    my $class = $attrs->{class};
+  }
+
+  return Mojo::ByteStream->new("$dom");
 }
 
 sub _scan_for_blogs_p {
