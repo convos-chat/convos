@@ -8,7 +8,6 @@
   --sidebar-left-bg: black;
   --body-bg: black;
   --sidebar-right-bg: black;
-  
 
   /* Text color */
   --text-color: #77ff77; 
@@ -16,8 +15,8 @@
   --sidebar-right-text: #666666; /* Text color on right panel */
   --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
 
-  /* The bakground when someone mentions you */
-  --highlight-color-bg: #990000;
+  /* The background when someone mentions you */
+  --highlight-color-bg: #55b855;
 
   /* Left panel */
   --sidebar-left-border: 1px solid black; /* Separator between left panel, can generally be ignored */
