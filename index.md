@@ -53,16 +53,27 @@ or in [Docker](/doc/start#docker).
 
 ## Newsletter
 
-<form class="signup">
-  <div class="text-field">
-    <input type="text" name="email" placeholder="your@email">
-  </div>
-  <button class="btn">Sign up</button>
-</form>
-
-<p class="text-center">
-  Sign up with your e-mail address to get Convos news delivered to your inbox!
-</p>
+<!-- Begin Mailchimp Signup Form -->
+<div id="mc_embed_signup">
+  <form action="https://chat.us3.list-manage.com/subscribe/post?u=cb576a11a8fb288554f82bbe8&amp;id=3ed96b7f9e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <p class="text-center">
+      Sign up with your email address to get Convos news!
+    </p>
+    <div id="mc_embed_signup_scroll" class="signup">
+      <div class="mc-field-group text-field">
+        <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" placeholder="Email address" required>
+      </div>
+      <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_cb576a11a8fb288554f82bbe8_3ed96b7f9e" tabindex="-1" value=""></div>
+      <button type="submit" class="button btn" name="subscribe" id="mc-embedded-subscribe">Sign up</button>
+    </div>
+    <div id="mce-responses">
+      <div class="response" id="mce-error-response" style="display:none"></div>
+      <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>
+  </form>
+</div>
+<script type='text/javascript' src='//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script><script type='text/javascript'>(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
 
 ## Features
 
@@ -168,11 +179,14 @@ banned from IRC networks with strict limitations.
   box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.25);
 }
 
-.signup {
-  max-width: 24rem;
+\#mc_embed_signup {
+  max-width: 28rem;
   margin: 0 auto;
+}
+
+.signup {
   display: flex;
-  align-items: end;
+  align-items: start;
 }
 
 .signup > * {
@@ -181,6 +195,10 @@ banned from IRC networks with strict limitations.
 
 .signup .text-field {
   flex: 1 0 0;
+}
+
+\#mce-responses {
+  margin: 1rem 0;
 }
 
 @media (min-width: 800px) {
@@ -214,5 +232,9 @@ banned from IRC networks with strict limitations.
     left: 6rem;
     transform: scale(1.5);
   }
+}
+
+\#mc_embed_signup div.mce_inline_error {
+  font-weight: inherit !important;
 }
 </style>
