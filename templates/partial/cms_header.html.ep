@@ -18,7 +18,7 @@
       <a href="<%= url_for '/blog' %>"><i class="fas fa-glasses visible-sm"></i>Blog</a>
       <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
       <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i><span class="visible-sm">Twitter</span></a>
-      <a href="https://duckduckgo.com/?q=site:convos.by"><i class="fas fa-search"></i><span class="visible-sm">Search...</span></a>
+      <a href="https://www.google.com/search?q=site%3Aconvos.chat"><i class="fas fa-search"></i><span class="visible-sm">Search...</span></a>
     </div>
   </nav>
 </div>
