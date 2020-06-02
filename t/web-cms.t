@@ -34,6 +34,7 @@ $cms_dir->child(qw(blog 2020 2020-05-17-too-cool.md))->spurt(<<"HERE");
 ---
 title: Cool title
 heading: Cool heading
+toc: true
 ---
 ## Cool sub title
 This blog is about
@@ -41,6 +42,16 @@ some cool stuff.
 
 ## Cool other title
 And then some!
+
+<div markdown>
+  ### Another heading
+  And a paragraph.
+  ![fab](github)
+  ![fas](eye)
+
+      code inside
+
+</div>
 
 <div class="is-before-content">Is before content.</div>
 <div class="is-after-content">Is after content.</div>
@@ -53,11 +64,17 @@ HERE
 
 $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(200)->header_is('X-Provider-Name', undef)
   ->element_exists('article.cms-content')->text_is('title', 'Cool title - Convos')
+  ->element_exists('meta[name="description"][content="This blog is about some cool stuff."]')
   ->text_is('h1', 'Cool heading')->element_exists('body.for-cms')
   ->text_like('article.cms-content p', qr{This blog is about.*some cool stuff}s)
-  ->text_like('head > style',          qr{background: red})->text_unlike('head > style', qr{<p>})
+  ->text_is('.toc li a[href="#cool-sub-title"]',     'Cool sub title')
+  ->text_is('.toc li li a[href="#another-heading"]', 'Another heading')
+  ->text_like('head > style', qr{background: red})->text_unlike('head > style', qr{<p>})
   ->text_is('body > .is-before-content', 'Is before content.')
-  ->text_is('body > .is-after-content',  'Is after content.');
+  ->text_is('body > .is-after-content',  'Is after content.')
+  ->text_is('[markdown] h3',  'Another heading')->text_like('[markdown] p', qr{And a paragraph})
+  ->text_is('[markdown] pre', 'code inside')->element_exists('[markdown] i[class="fas fa-eye"]')
+  ->element_exists('[markdown] i[class="fab fa-github"]')->element_exists_not('attr');
 
 note 'blog index';
 $t->get_ok('/blog')->status_is(200)->header_is('X-Provider-Name', undef)->element_exists('main')

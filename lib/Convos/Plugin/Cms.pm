@@ -7,14 +7,14 @@ use Mojo::Cache;
 use Mojo::Collection;
 use Mojo::DOM;
 use Mojo::URL;
-use Mojo::Util qw(decode slugify trim);
+use Mojo::Util qw(decode slugify trim xml_escape);
 use Pod::Simple::Search;
 use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
 use Text::Markdown;
 
 has _cache => sub { Mojo::Cache->new(max_keys => 20) };
-has _md    => sub { Text::Markdown->new };
+has _md    => sub { Text::Markdown->new(empty_element_suffix => '>', trust_list_start_value => 1) };
 
 sub register {
   my ($self, $app, $config) = @_;
@@ -51,7 +51,7 @@ sub _document_p {
 
   my $p = Mojo::Promise->new;
   eval {
-    my $md = -r $file ? $self->_parse_markdown_document($file, {}) : {};
+    my $md = -r $file ? $self->_parse_document($file, {}) : {};
     $self->_rewrite_href($c, $md);
     $p->resolve($md);
   } or do {
@@ -61,11 +61,7 @@ sub _document_p {
   return $p;
 }
 
-sub _indentation {
-  (sort map {/^(\s+)/} @{shift()})[0];
-}
-
-sub _parse_markdown_document {
+sub _parse_document {
   my ($self, $file, $params) = @_;
   my $mtime = $file->stat->mtime;
   my $doc   = $ENV{CONVOS_CMS_NO_CACHE} ? undef : $self->_cache->get("$file");
@@ -88,9 +84,9 @@ sub _parse_markdown_document {
   }
 
   $body .= $_ while readline $FH;
-  $body = Mojo::DOM->new($self->_md->markdown($body));
-  $body->find('p:empty')->each('remove');
-  $self->_rewrite_markdown_document($body, $doc) unless $params->{scan};
+  $body = Mojo::DOM->new($body);
+  $self->_parse_markdown($body, $doc);
+  $self->_rewrite_document($body, $doc) unless $params->{scan};
 
   if (my $h1 = $body->at('h1:is(:root)')) {
     $doc->{meta}{heading} = trim $h1->all_text;
@@ -120,6 +116,27 @@ sub _parse_markdown_document {
   return $doc;
 }
 
+sub _parse_markdown {
+  my ($self, $dom) = @_;
+
+  $dom->find('[markdown]')->each(sub {
+    my $tag      = shift;
+    my $markdown = $tag->content;
+    my $indent   = $markdown =~ s!^([ ]+)!!m ? $1 : '';
+    $markdown =~ s!^$indent!!mg;
+    $tag->content($self->_md->markdown($markdown));
+  });
+
+  $dom->child_nodes->each(sub {
+    my $tag = shift;
+    $tag->replace($self->_md->markdown(xml_escape $tag->content))
+      if $tag->type eq 'text'
+      or $tag->type eq 'raw';
+  });
+
+  $dom->find('p:empty')->each('remove');
+}
+
 # Heavily inspired by Mojolicious::Plugin::MojoDocs
 sub _pod_to_html {
   return '' unless defined(my $pod = ref $_[0] eq 'CODE' ? shift->() : shift);
@@ -128,7 +145,7 @@ sub _pod_to_html {
   $parser->perldoc_url_prefix('https://metacpan.org/pod/');
   $parser->$_('') for qw(html_header html_footer);
   $parser->anchor_items(1);
-  $parser->strip_verbatim_indent(\&_indentation);
+  $parser->strip_verbatim_indent(sub { (sort map {/^(\s+)/} @{shift()})[0] });
   $parser->output_string(\(my $output));
   return $@ unless eval { $parser->parse_string_document("$pod"); 1 };
   return $output;
@@ -143,7 +160,7 @@ sub _rewrite_href {
   }
 }
 
-sub _rewrite_markdown_document {
+sub _rewrite_document {
   my ($self, $dom, $doc) = @_;
 
   my @toc;
@@ -153,6 +170,12 @@ sub _rewrite_markdown_document {
     return if $tag->tag eq 'h1';
     push @toc, [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
     push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';
+  });
+
+  $dom->find('img[alt="fas"], img[alt="fab"]')->each(sub {
+    my $tag = shift;
+    $tag->tag('i');
+    $tag->{class} = join ' ', delete $tag->{alt}, 'fa-' . delete $tag->{src};
   });
 
   $dom->find('pre')->each(sub {
@@ -168,15 +191,10 @@ sub _rewrite_markdown_document {
     $tag->remove;
   });
 
-  $dom->find('.is-after-content')->each(sub {
+  $dom->find('.is-after-content, .is-before-content')->each(sub {
     my $tag = shift;
-    $doc->{after_content} .= "$tag";
-    $tag->remove;
-  });
-
-  $dom->find('.is-before-content')->each(sub {
-    my $tag = shift;
-    $doc->{before_content} .= "$tag";
+    my $key = $tag->attr('class') =~ /is-after/ ? 'after_content' : 'before_content';
+    $doc->{$key} .= "$tag";
     $tag->remove;
   });
 
@@ -213,8 +231,7 @@ sub _scan_for_blogs_p {
     my @blogs;
     for my $year ($app->core->home->child(qw(content blog))->list({dir => 1})->each) {
       return unless $year->basename =~ m!^(\d{4})$!;
-      push @blogs,
-        $year->list->map(sub { $self->_parse_markdown_document(shift, {scan => 1}) })->each;
+      push @blogs, $year->list->map(sub { $self->_parse_document(shift, {scan => 1}) })->each;
     }
 
     return [sort { $b->{ts} <=> $a->{ts} } @blogs];
