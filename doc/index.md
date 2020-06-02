@@ -39,7 +39,7 @@ You can join [#convos](irc://chat.freenode.net:6697/#convos) on
 message on [twitter](https://twitter.com/convosby) or create an
 [issue](https://github.com/Nordaaker/convos/issues) on Github. If you're more
 of the email type, then send an email to
-<a href="mailto:jhthorsen@cpan.org">jhthorsen@cpan.org</a>.
+<a href="mailto:contact@convos.chat">contact@convos.chat</a>.
 
 ## Statistics
 
