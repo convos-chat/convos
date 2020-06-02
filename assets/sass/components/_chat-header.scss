@@ -38,6 +38,10 @@
     text-overflow: ellipsis;
     flex-shrink: 0;
 
+    a {
+      color: inherit;
+    }
+
     @include if_screen("<=two-columns") {
       flex: 1 0 0;
     }
