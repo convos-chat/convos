@@ -213,17 +213,28 @@ body.for-cms .toc,
   border-radius: 0.5rem;
   width: 95%;
   margin: calc(var(--gutter) / 2);
-  padding: 2rem var(--gutter);
+  padding: 1.5rem var(--gutter);
   display: block;
   transition: filter 0.25s ease-in-out;
 
-  @include if_screen(">two-columns") {
-    max-width: calc(var(--content-max-width) / 3.5);
-  }
-
   > i {
     color: var(--link-color);
-    font-size: 3rem;
+    font-size: 2rem;
+    margin-bottom: -0.5rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  @include if_screen(">two-columns") {
+    max-width: calc(var(--content-max-width) / 3.5);
+    padding: 2rem var(--gutter);
+
+    i {
+      margin: 0;
+      font-size: 3rem;
+    }
   }
 }
 
