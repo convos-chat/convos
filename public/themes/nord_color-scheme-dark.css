@@ -93,3 +93,8 @@
   --syntax-hl-type: #8FBCBB;
   --syntax-hl-variable: #D8DEE9;
 }
+
+.welcome-screen {
+  background: linear-gradient(#445745, #3c6a3e);
+  background-attachment: fixed;
+}

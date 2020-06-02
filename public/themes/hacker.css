@@ -13,7 +13,7 @@
   --text-color: #77ff77; 
   --link-color: green; /* Send text, upload file, setting hamburger... */
   --sidebar-right-text: #666666; /* Text color on right panel */
-  --sidebar-left-text: green; /* Color of rooms when connected (selected or not) */
+  --sidebar-left-text: #6aca6a; /* Color of rooms when connected (selected or not) */
 
   /* The background when someone mentions you */
   --highlight-color-bg: #55b855;
@@ -60,5 +60,9 @@
   --autocomplete-bg: #181818;
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: green;
+}
 
+.welcome-screen {
+  background: radial-gradient(#2a4216, #1c4a1e)
+  background-attachment: fixed;
 }
