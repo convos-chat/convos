@@ -40,13 +40,12 @@ image: /screenshots/2020-05-28-convos-chat.jpg
 
 ## About
 
-Convos is the simplest way to use [IRC](http://www.irchelp.org/). It is always
-online, and accessible to your web browser, both on desktop and mobile.
-
-TODO
-
-Run it on your home server, [cloud service](/blog/2019/11/26/convos-on-digital-ocean),
-or in [Docker](/doc/start#docker).
+Convos is an IRC client that runs in your browser and brings the IRC experience
+into the 21st century. It features a persistent bouncer on the server side that
+will keep you online even after you close your browser window. Want to use
+Convos on your phone? No problem! Convos is fully responsive and fits any
+screen. Convos can be installed on your home server,
+[cloud service](/blog/2019/11/26/convos-on-digital-ocean), or in [Docker](/doc/start#docker).
 
 <div class="text-center">
   <a href="https://snapcraft.io/convos"><img src="https://snapcraft.io/convos/badge.svg" alt="snapcraft.io"></a>
