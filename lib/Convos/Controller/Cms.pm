@@ -34,7 +34,7 @@ sub doc {
 
   return $self->cms->document_p(\@path)->then(sub {
     my $doc = shift;
-    return $self->redirect_to($doc->{redirect_to}) if $doc->{redirect_to};
+    return $self->redirect_to($doc->{meta}{redirect_to}) if $doc->{meta}{redirect_to};
     return $self->_render_doc(cms => $doc) if $doc->{body};
 
     my $module       = join '::', split '/', $self->stash('file');
