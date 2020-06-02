@@ -23,6 +23,7 @@ sub blog_list {
   return $self->cms->blogs_p({page => $self->param('p')})->then(sub {
     my $blogs = shift;
     $_->{meta}{url} = $self->url_for('blog_entry', $_->{meta})->to_abs for @$blogs;
+    $self->res->headers->remove('X-Provider-Name');
     $self->render('blog_list', blogs => $blogs, for_cms => 1);
   });
 }
@@ -69,6 +70,7 @@ sub _render_doc {
   $self->social($_ => $meta->{$_})
     for grep { defined $meta->{$_} } qw(canonical description image url);
 
+  $self->res->headers->remove('X-Provider-Name');
   $self->render($template, custom_css => $doc->{custom_css}, doc => $doc, for_cms => 1);
 }
 
@@ -79,6 +81,7 @@ sub _render_perldoc {
   $self->respond_to(
     txt  => {data => $src},
     html => sub {
+      $self->res->headers->remove('X-Provider-Name');
       $self->render('perldoc', perldoc => $self->cms->pod_to_html($src), doc => {}, for_cms => 1);
     }
   );
