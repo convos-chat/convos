@@ -100,6 +100,9 @@ sub _parse_markdown_document {
 
   if (my $p = $body->at('p:is(:root)')) {
     $doc->{excerpt} = $p->all_text;
+    $doc->{meta}{description}
+      ||= length($doc->{excerpt}) > 150 ? substr($doc->{excerpt}, 0, 160) . '...' : $doc->{excerpt};
+    $doc->{meta}{description} =~ s!\r?\n! !g;
   }
 
   my $tp
