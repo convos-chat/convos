@@ -150,12 +150,12 @@ async function redirectAfterLogin(op) {
   </section>
 
   <footer class="welcome-screen__footer fade-in">
-    <Link href="https://convos.chat/">Convos</Link>
+    <Link href="https://convos.chat/" target="_blank">Convos</Link>
     &mdash;
-    <Link href="https://convos.chat/blog">{l('Blog')}</Link>
+    <Link href="https://convos.chat/blog" target="_blank">{l('Blog')}</Link>
     &mdash;
-    <Link href="https://convos.chat/doc">{l('Documentation')}</Link>
+    <Link href="https://convos.chat/doc" target="_blank">{l('Documentation')}</Link>
     &mdash;
-    <Link href="https://github.com/Nordaaker/convos">{l('GitHub')}</Link>
+    <Link href="https://github.com/Nordaaker/convos" target="_blank">{l('GitHub')}</Link>
   </footer>
 </main>
