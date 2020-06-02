@@ -81,8 +81,12 @@ sub _render_perldoc {
   $self->respond_to(
     txt  => {data => $src},
     html => sub {
+      my $doc  = $self->cms->perldoc($src);
+      my $meta = $doc->{meta};
       $self->res->headers->remove('X-Provider-Name');
-      $self->render('perldoc', perldoc => $self->cms->pod_to_html($src), doc => {}, for_cms => 1);
+      $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
+      $self->social(description => $meta->{description}) if $meta->{description};
+      $self->render('perldoc', doc => $doc, for_cms => 1);
     }
   );
 }

@@ -26,7 +26,7 @@ sub register {
 
   $app->helper('cms.blogs_p'          => sub { $self->_blogs_p(@_) });
   $app->helper('cms.document_p'       => sub { $self->_document_p(@_) });
-  $app->helper('cms.pod_to_html'      => sub { my $c = shift; _rewrite_pod($c, _pod_to_html(@_)) });
+  $app->helper('cms.perldoc'          => sub { $self->_perldoc(@_) });
   $app->helper('cms.scan_for_blogs_p' => sub { $self->_scan_for_blogs_p(shift->app) });
 }
 
@@ -61,6 +61,23 @@ sub _document_p {
   return $p;
 }
 
+sub _extract_excerpt {
+  my ($self, $dom, $doc) = @_;
+  my $p = $dom->at('p:is(:root)') or return;
+  $doc->{excerpt} = $p->all_text;
+  $doc->{meta}{description}
+    ||= length($doc->{excerpt}) > 150 ? substr($doc->{excerpt}, 0, 160) . '...' : $doc->{excerpt};
+  $doc->{meta}{description} =~ s!\r?\n! !g;
+}
+
+sub _extract_heading {
+  my ($self, $dom, $doc) = @_;
+  my $h1 = $dom->at('h1:is(:root)') or return;
+  $doc->{meta}{heading} = trim $h1->all_text;
+  $doc->{meta}{title} ||= trim $h1->all_text;
+  $h1->remove;
+}
+
 sub _parse_document {
   my ($self, $file, $params) = @_;
   my $mtime = $file->stat->mtime;
@@ -87,19 +104,8 @@ sub _parse_document {
   $body = Mojo::DOM->new($body);
   $self->_parse_markdown($body, $doc);
   $self->_rewrite_document($body, $doc) unless $params->{scan};
-
-  if (my $h1 = $body->at('h1:is(:root)')) {
-    $doc->{meta}{heading} = trim $h1->all_text;
-    $doc->{meta}{title} ||= trim $h1->all_text;
-    $h1->remove;
-  }
-
-  if (my $p = $body->at('p:is(:root)')) {
-    $doc->{excerpt} = $p->all_text;
-    $doc->{meta}{description}
-      ||= length($doc->{excerpt}) > 150 ? substr($doc->{excerpt}, 0, 160) . '...' : $doc->{excerpt};
-    $doc->{meta}{description} =~ s!\r?\n! !g;
-  }
+  $self->_extract_excerpt($body, $doc);
+  $self->_extract_heading($body, $doc);
 
   my $tp
     = $file->basename =~ m!(\d{4}-\d{2}-\d{2})! ? tp "${1}T00:00:00" : Time::Piece->new($mtime);
@@ -137,10 +143,50 @@ sub _parse_markdown {
   $dom->find('p:empty')->each('remove');
 }
 
-# Heavily inspired by Mojolicious::Plugin::MojoDocs
-sub _pod_to_html {
-  return '' unless defined(my $pod = ref $_[0] eq 'CODE' ? shift->() : shift);
+sub _perldoc {
+  my ($self, $c, $pod) = @_;
+  my $dom = Mojo::DOM->new(_perldoc_to_html($pod));
+  my $doc = {body => $dom, meta => {}};
 
+  my $base_url = $c->url_for('/doc/');
+  $_->{href} =~ s!^https://metacpan\.org/pod/!$base_url! and $_->{href} =~ s!::!/!gi
+    for $dom->find('a[href]')->map('attr')->each;
+
+  my @toc;
+  $dom->find('h1, h2, h3')->each(sub {
+    my $tag = shift;
+    $tag->{id} = slugify(trim $tag->all_text);
+
+    if ($tag->{id} eq 'name' and $tag->next and $tag->next->tag eq 'p') {
+      my $next = $tag->next;
+      $next->tag('h1');
+      $tag->remove;
+    }
+    else {
+      $tag->tag('h' . ($1 + 1)) if $tag->tag =~ m!(\d+)!;
+      push @toc, [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
+      push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';
+    }
+  });
+
+  for my $e ($dom->find('pre > code')->each) {
+    next if (my $str = $e->content) =~ /^\s*(?:\$|Usage:)\s+/m;
+    next unless $str =~ /[\$\@\%]\w|-&gt;\w|^use\s+\w/m;
+    my $attrs = $e->attr;
+    my $class = $attrs->{class};
+  }
+
+  $dom->find('p:empty')->each('remove');
+  $self->_extract_excerpt($dom, $doc);
+  $self->_extract_heading($dom, $doc);
+  $doc->{toc} = \@toc;
+
+  return $doc;
+}
+
+# Heavily inspired by Mojolicious::Plugin::MojoDocs
+sub _perldoc_to_html {
+  my ($pod) = @_;
   my $parser = Pod::Simple::XHTML->new;
   $parser->perldoc_url_prefix('https://metacpan.org/pod/');
   $parser->$_('') for qw(html_header html_footer);
@@ -155,6 +201,7 @@ sub _rewrite_href {
   my ($self, $c, $md) = @_;
 
   for my $section (grep { $md->{$_} } qw(after_content before_content body)) {
+    next unless $md->{$section};
     $md->{$section}->find('a[href^="/"]')->each(sub { $_[0]->{href} = $c->url_for($_[0]->{href}) });
     $md->{$section}->find('img[src^="/"]')->each(sub { $_[0]->{src} = $c->url_for($_[0]->{src}) });
   }
@@ -203,25 +250,6 @@ sub _rewrite_document {
   $doc->{after_content}  = $doc->{after_content} ? Mojo::DOM->new($doc->{after_content}) : undef;
   $doc->{before_content} = $doc->{before_content} ? Mojo::DOM->new($doc->{before_content}) : undef;
   $doc->{toc}            = \@toc;
-}
-
-# Heavily inspired by Mojolicious::Plugin::MojoDocs
-sub _rewrite_pod {
-  my ($c, $html) = @_;
-
-  my $dom      = Mojo::DOM->new($html);
-  my $base_url = $c->url_for('/doc/');
-  $_->{href} =~ s!^https://metacpan\.org/pod/!$base_url! and $_->{href} =~ s!::!/!gi
-    for $dom->find('a[href]')->map('attr')->each;
-
-  for my $e ($dom->find('pre > code')->each) {
-    next if (my $str = $e->content) =~ /^\s*(?:\$|Usage:)\s+/m;
-    next unless $str =~ /[\$\@\%]\w|-&gt;\w|^use\s+\w/m;
-    my $attrs = $e->attr;
-    my $class = $attrs->{class};
-  }
-
-  return Mojo::ByteStream->new("$dom");
 }
 
 sub _scan_for_blogs_p {

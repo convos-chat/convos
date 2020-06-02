@@ -44,11 +44,9 @@ sub connect {
 sub connections_by_id {
   my ($self, $cid) = @_;
 
-  return $self->users->map(
-    sub {
-      shift->connections->grep(sub { shift->id eq $cid });
-    }
-  )->flatten;
+  return $self->users->map(sub {
+    shift->connections->grep(sub { shift->id eq $cid });
+  })->flatten;
 }
 
 sub get_user_by_uid {
@@ -156,12 +154,11 @@ sub DESTROY {
 
 =head1 NAME
 
-Convos::Core - Convos Models
+Convos::Core - Convos backend
 
 =head1 DESCRIPTION
 
-L<Convos::Core> is a class which is used to instantiate other core objects
-with proper defaults.
+L<Convos::Core> is the heart of the Convos backend.
 
 =head1 SYNOPSIS
 

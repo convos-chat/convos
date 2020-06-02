@@ -8,7 +8,11 @@ my $t = t::Helper->t;
 note 'bundled doc';
 $t->get_ok('/doc/nope')->status_is(404)->element_exists('h1')->text_is('h1', 'Not Found (404)');
 $t->get_ok('/doc/Convos/Core')->status_is(200)->header_is('X-Provider-Name', undef)
-  ->element_exists('h1');
+  ->element_exists(
+  'meta[name="description"][content="Convos::Core is the heart of the Convos backend."]')
+  ->text_is('.toc li a[href="#description"]', 'DESCRIPTION')
+  ->text_is('title',                          'Convos::Core - Convos backend - Convos')
+  ->text_is('h1.cms-header',                  'Convos::Core - Convos backend');
 
 note 'default index file';
 $t->get_ok('/')->status_is(200)->header_is('X-Provider-Name', 'ConvosApp')
