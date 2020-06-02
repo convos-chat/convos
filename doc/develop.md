@@ -7,7 +7,9 @@ toc: true
 
 This guide is for people who want to hack on Convos.
 
-It is helpful if you are familiar with [git](http://git-scm.com).
+Not familiar with Perl? That's fine: [Half of Convos](/doc#statistics) is
+JavaScript and CSS, so you can modify the frontend using web knowledge.
+It is however helpful if you are familiar with [git](http://git-scm.com),
 [Mojolicious](http://mojolicious.org) and basic [Perl](http://perl.org) tools,
 such as [prove](https://metacpan.org/pod/distribution/TAP-Parser/bin/prove)
 and [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm).
@@ -32,7 +34,7 @@ you should `cd ./convos` first.
 Once you have the source code you should install the dependencies:
 
     pnpm i
-    script/convos install --develop
+    ./script/convos install --develop
 
 [pnpm](https://pnpm.js.org/) is used to install all the JavaScript dependencies.
 You could use "npm" instead, but "pnpm" is highly recommended.
@@ -106,8 +108,8 @@ start the [production](/doc/start#git-clone) version of Convos:
 
   The [assets](https://github.com/nordaaker/convos/tree/master/assets)
   directory contains all JavaScript and Sass files, which will be used to
-  generate the public files. The convertion is done with
-  [Webpack](/doc/Mojolicious/Plugin/Webpack).
+  generate the public files. The conversion is done with
+  [Mojolicious::Plugin::Webpack](/doc/Mojolicious/Plugin/Webpack).
 
 * ./cpanfile
 
@@ -137,9 +139,12 @@ start the [production](/doc/start#git-clone) version of Convos:
 * ./t
 
   The [t](https://github.com/nordaaker/convos/tree/master/t) directory
-  contains the test files for the Perl code.
+  contains test files for the Perl code.
 
-  TODO: Add JavaScript tests.
+* ./\_\_tests__
+
+  The [__tests__](https://github.com/nordaaker/convos/tree/master/__tests__)
+  directory contains test files for the JavaScript code.
 
 ## Convos frontend
 
@@ -151,11 +156,10 @@ start the [production](/doc/start#git-clone) version of Convos:
           \_______| Controllers |
                   '-------------'
 
-The frontend contains of a single template, embedded inside of
-[Convos.pm](/doc/Convos) The
-rest of the frontend consist of a JavaScript application, powered by
-[Svelte](http://svelte.dev). This application gets its data from a OpenAPI
-powered JSON API with a thin logical layer inside the controllers:
+The frontend contains of a single template. The rest of the frontend consist of
+a JavaScript application, powered by [Svelte](http://svelte.dev). This
+application gets its data from a [OpenAPI powered JSON API](/api.html powered)
+with a thin logical layer inside the controllers:
 
 * [Convos::Controller::Connection](/doc/Convos/Controller/Connection)
 * [Convos::Controller::Dialog](/doc/Convos/Controller/Dialog)
@@ -173,7 +177,7 @@ powered JSON API with a thin logical layer inside the controllers:
         \_____| User |__| Connections |__| Dialogs |
               '------'  '-------------'  '---------'
 
-[Convos::Core](/doc/Convos)
+[Convos::Core](/doc/Convos/Core)
 is the heart of Convos. The core takes care of connections, dialogs can
 persist to a backend and provide hooks for plugins.
 
