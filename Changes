@@ -1,7 +1,17 @@
 Revision history for perl distribution Convos
 
-4.17 Not Released
+4.17 2020-06-03T10:19:00+0900
  - Fix absolute URL to social image from CMS
+ - Fix not setting X-Provider-Name in CMS mode
+ - Fix API links in POD
+ - Fix "redirect_to" for CMS
+ - Add TOC to cms pages and perldoc
+ - Add shortcut for FontAwesome icon inside markdown
+ - Can automatically pull description from the first paragraph
+ - Reduce docker image size #492
+ - Improved login screen design
+ - Improved rendering of perldoc
+ - Improved support for markdown inside tags
  - Replaced Text::MultiMarkdown with Text::Markdown since it is easier to install
 
 4.16 2020-06-01T22:16:00+0900
