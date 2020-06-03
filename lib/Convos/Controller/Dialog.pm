@@ -94,15 +94,15 @@ dialog related actions.
 
 =head2 last_read
 
-See L<Convos::Manual::API/setDialogLastRead>.
+See L<https://convos.chat/api.html#op-post--connection--connection_id--dialog--dialog_id--read>
 
 =head2 list
 
-See L<Convos::Manual::API/listDialogs>.
+See L<https://convos.chat/api.html#op-get--dialogs>
 
 =head2 messages
 
-See L<Convos::Manual::API/messagesForDialog>.
+See L<https://convos.chat/api.html#op-get--connection--connection_id--dialog--dialog_id--messages>
 
 =head1 SEE ALSO
 

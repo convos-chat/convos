@@ -283,19 +283,19 @@ user related actions.
 
 =head2 delete
 
-See L<Convos::Manual::API/deleteUser>.
+See L<https://convos.chat/api.html#op-delete--user>
 
 =head2 generate_invite_link
 
-See L<Convos::Manual::API/inviteUser>.
+See L<https://convos.chat/api.html#op-post--user--email--invite>
 
 =head2 get
 
-See L<Convos::Manual::API/getUser>.
+See L<https://convos.chat/api.html#op-get--user>
 
 =head2 login
 
-See L<Convos::Manual::API/loginUser>.
+See L<https://convos.chat/api.html#op-post--user-login>
 
 =head2 login_html
 
@@ -303,7 +303,7 @@ Will redirect to "/" if already logged in.
 
 =head2 logout
 
-See L<Convos::Manual::API/logoutUser>.
+See L<https://convos.chat/api.html#op-get--user-logout>
 
 =head2 redirect_if_not_logged_in
 
@@ -312,7 +312,7 @@ does not have a valid session cookie.
 
 =head2 register
 
-See L<Convos::Manual::API/registerUser>.
+See L<https://convos.chat/api.html#op-post--user-register>
 
 =head2 register_html
 
@@ -320,7 +320,7 @@ Will handle the "uri" that can hold "irc://...." URLs.
 
 =head2 update
 
-See L<Convos::Manual::API/updateUser>.
+See L<https://convos.chat/api.html#op-post--user>
 
 =head1 SEE ALSO
 

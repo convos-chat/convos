@@ -36,11 +36,11 @@ notifications related actions.
 
 =head2 messages
 
-See L<Convos::Manual::API/notificationMessages>.
+See L<https://convos.chat/api.html#op-get--notifications>
 
 =head2 read
 
-See L<Convos::Manual::API/readNotifications>.
+See L<https://convos.chat/api.html#op-post--notifications-read>
 
 =head1 SEE ALSO
 

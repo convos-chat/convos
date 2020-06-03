@@ -67,11 +67,11 @@ admin related actions.
 
 =head2 settings_get
 
-See L<Convos::Manual::API/getSettings>.
+See L<https://convos.chat/api.html#op-get--settings>
 
 =head2 settings_update
 
-See L<Convos::Manual::API/updateSettings>.
+See L<https://convos.chat/api.html#op-post--settings>
 
 =head1 SEE ALSO
 

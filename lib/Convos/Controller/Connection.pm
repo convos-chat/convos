@@ -154,19 +154,19 @@ user related actions.
 
 =head2 create
 
-See L<Convos::Manual::API/createConnection>.
+See L<https://convos.chat/api.html#op-post--connections>
 
 =head2 list
 
-See L<Convos::Manual::API/listConnections>.
+See L<https://convos.chat/api.html#op-get--connections>
 
 =head2 remove
 
-See L<Convos::Manual::API/removeConnection>.
+See L<https://convos.chat/api.html#op-delete--connection--connection_id->
 
 =head2 update
 
-See L<Convos::Manual::API/updateConnection>.
+See L<https://convos.chat/api.html#op-post--connection--connection_id->
 
 =head1 SEE ALSO
 

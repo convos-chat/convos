@@ -56,11 +56,11 @@ user files related actions.
 
 =head2 get
 
-See L<Convos::Manual::API/getFile>.
+See L<https://convos.chat/api.html#op-get--file--uid--fid>.
 
 =head2 upload
 
-See L<Convos::Manual::API/uploadFiles>.
+See L<https://convos.chat/api.html#op-post--file>.
 
 =head1 SEE ALSO
 

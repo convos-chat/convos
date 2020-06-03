@@ -69,7 +69,7 @@ Convos::Controller::Search - Search for messages
 
 =head2 messages
 
-See L<Convos::Manual::API/searchMessages>.
+See L<https://convos.chat/api.html#op-get--search>
 
 =head1 SEE ALSO
 
