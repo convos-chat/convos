@@ -119,7 +119,10 @@ Example front-matter:
 
 Any [Perl document](/doc/Convos) available on the system can also be rendered
 under the "/doc" path. This feature is currently experimental: The URL might
-change in the future, in case it causes too many collisions.
+change in the future, in case it causes too many collisions. This feature
+must however be enabled with an environment variable:
+
+    CONVOS_CMS_PERLDOC=1 ./script/convos daemon
 
 ## What is next?
 
