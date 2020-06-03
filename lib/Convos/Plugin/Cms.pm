@@ -13,6 +13,8 @@ use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
 use Text::Markdown;
 
+$ENV{CONVOS_CMS_SCAN_INTERVAL} ||= 15;
+
 has _cache => sub { Mojo::Cache->new(max_keys => 20) };
 has _md    => sub { Text::Markdown->new(empty_element_suffix => '>', trust_list_start_value => 1) };
 
@@ -28,6 +30,8 @@ sub register {
   $app->helper('cms.document_p'       => sub { $self->_document_p(@_) });
   $app->helper('cms.perldoc'          => sub { $self->_perldoc(@_) });
   $app->helper('cms.scan_for_blogs_p' => sub { $self->_scan_for_blogs_p(shift->app) });
+
+  Mojo::IOLoop->recurring($ENV{CONVOS_CMS_SCAN_INTERVAL} => sub { $app->cms->scan_for_blogs_p });
 }
 
 sub _blogs_p {
@@ -191,7 +195,9 @@ sub _perldoc_to_html {
   $parser->perldoc_url_prefix('https://metacpan.org/pod/');
   $parser->$_('') for qw(html_header html_footer);
   $parser->anchor_items(1);
-  $parser->strip_verbatim_indent(sub { (sort map {/^(\s+)/} @{shift()})[0] });
+  $parser->strip_verbatim_indent(sub {
+    (sort map {/^(\s+)/} @{shift()})[0];
+  });
   $parser->output_string(\(my $output));
   return $@ unless eval { $parser->parse_string_document("$pod"); 1 };
   return $output;
