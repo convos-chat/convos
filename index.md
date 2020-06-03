@@ -191,7 +191,7 @@ banned from IRC networks with strict limitations.
   box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.25);
 }
 
-\#mc_embed_signup {
+#mc_embed_signup {
   max-width: 28rem;
   margin: 0 auto;
 }
@@ -209,7 +209,7 @@ banned from IRC networks with strict limitations.
   flex: 1 0 0;
 }
 
-\#mce-responses {
+#mce-responses {
   margin: 1rem 0;
 }
 
@@ -246,7 +246,7 @@ banned from IRC networks with strict limitations.
   }
 }
 
-\#mc_embed_signup div.mce_inline_error {
+#mc_embed_signup div.mce_inline_error {
   font-weight: inherit !important;
 }
 </style>
