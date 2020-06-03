@@ -13,7 +13,8 @@ my (@url, %uniq) = ($ENV{TEST_CMS_START_PAGE} || '/');
 while (@url) {
   $t->get_ok(shift @url)->status_is(200);
   push @url,
-    grep { !$uniq{$_}++ } map { $_->{href} || $_->{src} } $t->tx->res->dom('[href^="/"]')->each,
+    grep { !m!/doc/[A-Z]! && !$uniq{$_}++ }
+    map  { $_->{href} || $_->{src} } $t->tx->res->dom('[href^="/"]')->each,
     $t->tx->res->dom('[src^="/"]')->each;
   last unless @url;
 }
