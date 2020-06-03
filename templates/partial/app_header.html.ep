@@ -1,0 +1,38 @@
+% my $home_url = settings('organization_url') || url_for('/');
+
+<div class="cms-navbar-wrapper hidden-for-app">
+  <nav class="cms-navbar">
+    %= link_to $home_url, class => 'cms-navbar__brand', begin
+      <%= image '/images/convos-light.png', class => 'cms-navbar__logo', alt => '' %>
+    % end
+
+    <input type="checkbox" id="hamburger_checkbox_toggle" autocomplete="off">
+    <label for="hamburger_checkbox_toggle" class="btn is-hamburger can-toggle">
+      <i class="fas fa-bars"></i>
+      <i class="fas fa-times"></i>
+      <span><%=l 'Menu' %></span>
+    </label>
+
+    <div class="cms-navbar__links">
+      <a href="<%= $home_url %>"><%= image '/images/convos-icon-light.png', alt => '' %><%= settings('organization_name') eq 'Convos' ? l('About') : settings('organization_name') %></a>
+      % if (settings('organization_name') eq 'Convos') {
+        <a href="https://convos.chat/blog"><i class="fas fa-glasses visible-sm"></i><%=l 'Blog' %></a>
+        <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
+        <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i><span class="visible-sm">Twitter</span></a>
+      % }
+      <span class="is-spacer hidden-sm">&nbsp;</span>
+      % if (session 'email') {
+        %= link_to '/chat', class => 'has-js', begin
+          <i class="fas fa-sign-in-alt"></i> <%=l 'Chat' %>
+        % end
+      % } else {
+        %= link_to '/login#signup', class => 'has-js', begin
+          <i class="fas fa-user-plus"></i> <%=l 'Sign up' %>
+        % end
+        %= link_to '/login#signin', class => 'has-js', begin
+          <i class="fas fa-sign-in-alt"></i> <%=l 'Sign in' %>
+        % end
+      % }
+    </div>
+  </nav>
+</div>

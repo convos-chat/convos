@@ -27,8 +27,8 @@ $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
 my $fid = $t->tx->res->json('/files/0/id');
 $t->get_ok("/file/1/$fid")->status_is(200)
   ->element_exists('.le-paste > pre.paste', 'pre.paste so LinkEmbedder can do the right thing')
-  ->header_is('X-Provider-Name', 'ConvosApp')->text_is('header h1', 'web-files.t')
-  ->text_like('header small', qr{^\d+-\d+-\d+})
+  ->header_is('X-Provider-Name', 'ConvosApp')->text_is('h1', 'web-files.t')
+  ->text_like('.cms-date', qr{^\d+-\d+-\d+})
   ->content_like(qr{\<pre class="paste"\>.*use t::Helper}s);
 $t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
   ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre class="paste"\>.*use t::Helper}s);
@@ -51,8 +51,8 @@ $t->websocket_ok('/events')->send_ok({json => \%send})
 my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});
 isnt $url->path->[-1], $fid, 'paste does not have the same id as file';
-$t->get_ok($url->path->to_string)->status_is(200)->text_is('header h1', 'paste.txt')
-  ->text_like('header small', qr{^\d+-\d+-\d+})->content_like(qr{\<pre class="paste"\>xxxxxxxx}s);
+$t->get_ok($url->path->to_string)->status_is(200)->text_is('h1', 'paste.txt')
+  ->text_like('.cms-date', qr{^\d+-\d+-\d+})->content_like(qr{\<pre class="paste"\>xxxxxxxx}s);
 
 note 'back compat paste route';
 my $paste = $user->core->home->child(qw(superman@example.com upload 149545306873033))
@@ -63,7 +63,7 @@ ok -e $paste, 'legacy paste exists';
 $t->get_ok("/paste/10000000000000000000/149545306873033")->status_is(404);
 $t->get_ok("/paste/$user_sha1/100000000000000")->status_is(404);
 $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)
-  ->header_is('Cache-Control', 'max-age=86400')->text_is('header h1', 'paste.txt')
+  ->header_is('Cache-Control', 'max-age=86400')->text_is('h1', 'paste.txt')
   ->content_like(qr{\<pre class="paste"\>.*curl -s www}s);
 
 ok !-e $paste, 'legacy paste was moved';

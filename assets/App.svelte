@@ -3,7 +3,6 @@ import Api from './js/Api';
 import ConnectionSettings from './components/ConnectionSettings.svelte';
 import DialogSettings from './components/DialogSettings.svelte';
 import Fallback from './page/Fallback.svelte';
-import hljs from './js/hljs';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 import User from './store/User';
@@ -25,7 +24,6 @@ let [innerHeight, innerWidth] = [0, 0];
 setContext('rtc', rtc);
 setContext('user', user);
 
-window.hljs = hljs; // Required by paste plugin
 route.update({baseUrl: process.env.base_url});
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
@@ -40,8 +38,7 @@ onMount(() => {
   loadScript(route.urlFor('/images/emojis.js'));
   q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
   if (user.showGrid) body.classList.add('with-grid');
-  if (body.classList.contains('for-cms')) return;
-  setupRouting(route, user);
+  if (process.env.load_user) setupRouting(route, user);
   user.load(process.env.load_user);
 });
 

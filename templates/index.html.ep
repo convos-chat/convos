@@ -1,46 +1,54 @@
 % layout 'convos';
 % title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
+% stash for_cms => 1;
 
-<main class="welcome-screen js-remove">
-  <article class="welcome-screen__about">
-    %= include 'partial/convos-heading'
+%= include 'partial/app_header'
 
+<div class="hero-wrapper is-small hidden-for-app">
+  <header class="hero">
+    <div class="hero--text">
+      <h1 class="hidden-sm">
+        %= image '/images/convos-light.png', alt => 'Convos'
+      </h1>
+      <p class="tagline">
+        % if (settings('organization_name') ne 'Convos') {
+          &mdash; <a href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
+        % } else {
+          &mdash; A better chat experience
+        % }
+      </p>
+      <p class="small">Convos is the simplest way to use IRC and it is always online.</p>
+    </div>
+  </header>
+</div>
+
+<main class="app-container has-js">
+  <h2><%=l 'Loading' %></h2>
+  <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
+  <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting Convos...' %></p>
+  <p>
+    %= link_to settings('contact'), class => 'btn', begin
+      <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
+    % end
+  </p>
+</main>
+
+<noscript>
+  <article>
+    <h2><%=l 'Javascript is disabled' %></h2>
+    <p class="error">
+      %=l 'Javascript is disabled so Convos cannot start.'
+      %=l 'Please enable Javascript and try again.'
+    </p>
     <p>
-      %=l 'Convos is the simplest way to use IRC, and it keeps you always online.'
-    </p>
-
-    <p class="has-js">
-      <i class="fas fa-download"></i>
-      %=l 'Downloading Convos...'
-    </p>
-
-    <p class="has-js">
-      <i class="fas fa-spinner fa-spin"></i>
-      %=l 'Starting Convos...'
-    </p>
-
-    <noscript>
-      <p class="error">
-        %=l 'Javascript is disabled, so Convos cannot start. Please enable Javascript and try again.'
-      </p>
-      <p>
-        %= link_to l('Try again'), '/', class => 'btn'
-        %= link_to l('Contact admin'), settings('contact'), class => 'btn is-hallow'
-      </p>
-    </noscript>
-
-    <p class="has-js">
-      %= link_to l('Contact admin'), settings('contact'), class => 'btn'
+      %= link_to '', class => 'btn', begin
+        <i class="fas fa-sync-alt"></i> <%=l 'Try again' %>
+      % end
+      %= link_to settings('contact'), class => 'btn is-hallow', begin
+        <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
+      % end
     </p>
   </article>
+</noscript>
 
-  <footer class="welcome-screen__footer">
-    <a href="https://convos.chat/">Convos</a>
-    &mdash;
-    <a href="https://convos.chat/blog"><%=l 'Blog' %></a>
-    &mdash;
-    <a href="https://convos.chat/doc"><%=l 'Documentation' %></a>
-    &mdash;
-    <a href="https://github.com/Nordaaker/convos"><%=l 'GitHub' %></a>
-  </footer>
-</main>
+%= include 'partial/app_footer'

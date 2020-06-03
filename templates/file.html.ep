@@ -6,14 +6,12 @@
 % social image => $file->public_url(1) if $file->mime_type =~ m!^image!;
 % social url => $c->req->url->to_abs;
 
-%= include 'partial/sidebar', js_remove => 0
+%= include 'partial/app_header'
 
-<header class="chat-header">
+<main>
   <h1><%=l $file->filename %></h1>
-  <small class="ts"><%= $file->saved %></small>
-</header>
+  <p><small class="cms-date"><%= $file->saved %></small></p>
 
-<main class="main">
   % if ($file->mime_type =~ m!^image!) {
     %= link_to $file->public_url(1), download => 'download', begin
       %= image $file->public_url(1), alt => $file->filename
@@ -24,6 +22,8 @@
     </div>
   % }
 </main>
+
+%= include 'partial/app_footer', minimal_footer => 1
 
 <script>
 document.addEventListener('DOMContentLoaded', function(e) {

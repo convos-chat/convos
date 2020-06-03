@@ -56,6 +56,7 @@ function render(component) {
     for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
     const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
+    replaceClassName('body', /(for-)(app|cms)/, requireLogin ? 'app' : 'cms');
     route.update({component, requireLogin});
     if (requireLogin) route.update({lastUrl: location.href});
   };

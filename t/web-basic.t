@@ -30,7 +30,7 @@ $t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos - Better 
   ->element_exists(qq(meta[property="og:url"][content="$url"]));
 
 $t->text_like('noscript p', qr{javascript}i);
-$t->text_is('a[href="https://convos.chat/doc"]', 'Documentation');
+$t->text_is('a[href="https://convos.chat/blog"]', 'Blog');
 
 $t->text_like('script', qr{"api_url":"\\/api"}m,      'api_url')
   ->text_like('script', qr{"ws_url":"ws:.*/events"}m, 'ws_url');
@@ -48,7 +48,7 @@ $t->content_like(qr{window.process.env\s*=})->text_is('title', 'Convos for Examp
   ->element_exists(qq(meta[property="og:site_name"][content="Example"]))
   ->element_exists(qq(meta[property="og:title"][content="Convos for Example"]));
 
-$t->text_is('a[href="http://example.com"]', 'for Example');
+$t->text_is('.hero a[href="http://example.com"]', 'for Example');
 $t->get_ok($image)->status_is(200);
 
 done_testing;

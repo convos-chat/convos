@@ -6,11 +6,11 @@
   %== $doc->{before_content}
 % }
 
-<main class="cms-content">
+<article>
   <h1 class="cms-header"><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
   %= include 'partial/toc', toc => $doc->{toc} if $doc->{meta}{toc};
   %== $doc->{body}
-</main>
+</article>
 
 % if ($doc->{after_content}) {
   %== $doc->{after_content}

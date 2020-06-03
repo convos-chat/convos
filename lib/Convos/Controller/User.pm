@@ -74,7 +74,9 @@ sub login {
 
 sub login_html {
   my $self = shift;
-  return $self->session('email') ? $self->redirect_to('/chat') : $self->render('index');
+  return $self->session('email')
+    ? $self->redirect_to('/chat')
+    : $self->render('index', load_user => 1);
 }
 
 sub logout {

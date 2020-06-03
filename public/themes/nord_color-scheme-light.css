@@ -95,7 +95,6 @@
   --syntax-hl-variable: #D8DEE9;
 }
 
-.welcome-screen {
-  background: linear-gradient(#6b996d, #638a83);
-  background-attachment: fixed;
+body.for-cms {
+  --footer-bg: #434c60;
 }

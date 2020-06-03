@@ -2,25 +2,28 @@
 % my $more_url = '';
 % layout 'convos';
 % title join ' ', l($message), "($status)";
+% stash for_cms => 1;
 
-<main class="welcome-screen js-remove">
-  <article class="welcome-screen_fallback">
-    <h1><%=l $message %> (<%= $status %>)</h1>
-    % if ($status == 404) {
-      <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
-    % } elsif ($c->req->headers->header('X-Request-Base')) {
-      % $more_url = 'https://convos.chat/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server';
-      <p><%=l 'Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?' %></p>
-    % } else {
-      <p>
-        %=l 'This should not happen.'
-        Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
-        if the problem does not go away.
-      </p>
-    % }
-      <p>
-        %= link_to l('Read more'), $more_url, class => 'btn' if $more_url;
-        %= link_to l('Go to landing page'), 'index', class => 'btn'
-      </p>
-  </article>
-</main>
+%= include 'partial/app_header'
+
+<article>
+  <h1><%=l $message %> (<%= $status %>)</h1>
+  % if ($status == 404) {
+    <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
+  % } elsif ($c->req->headers->header('X-Request-Base')) {
+    % $more_url = 'https://convos.chat/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server';
+    <p><%=l 'Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?' %></p>
+  % } else {
+    <p>
+      %=l 'This should not happen.'
+      Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
+      if the problem does not go away.
+    </p>
+  % }
+  <p>
+    %= link_to l('Read more'), $more_url, class => 'btn' if $more_url;
+    %= link_to l('Go to landing page'), 'index', class => 'btn'
+  </p>
+</article>
+
+%= include 'partial/app_footer'

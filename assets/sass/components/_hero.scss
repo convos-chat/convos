@@ -1,0 +1,62 @@
+.hero-wrapper {
+  background: var(--sidebar-left-bg);
+}
+
+.hero {
+  margin: 0 auto;
+  padding-bottom: var(--gutter);
+  max-width: var(--content-max-width);
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &,
+  a {
+    color: var(--sidebar-left-text);
+  }
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.hero-cta {
+  margin: 2.5rem 0;
+}
+
+.hero--text {
+  text-align: center;
+
+  h1 {
+    font-size: 2.8rem;
+    margin: 0;
+  }
+
+  .small,
+  .tagline {
+    margin: 0.2rem 0;
+  }
+
+  .tagline {
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+}
+
+@include if_screen(">two-columns") {
+  .hero {
+    display: flex;
+    align-items: center;
+  }
+
+  .hero--text {
+    padding: var(--gutter);
+    text-align: left;
+  }
+}

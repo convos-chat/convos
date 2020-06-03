@@ -26,18 +26,6 @@ h1 {
   @include if_screen(">two-columns") {
     font-size: var(--h1-font-size);
   }
-
-  .subtitle {
-    font-size: 0.4em;
-    font-weight: normal;
-    font-style: italic;
-    margin-top: 0.2em;
-    display: block;
-
-    a:hover {
-      text-decoration: underline;
-    }
-  }
 }
 
 h2 {
@@ -101,4 +89,8 @@ th {
 .has-extra-vertical-margin {
   margin-top: 2rem;
   margin-bottom: 2rem;
+}
+
+.small {
+  font-size: 0.9rem;
 }

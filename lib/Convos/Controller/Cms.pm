@@ -57,8 +57,8 @@ sub index {
 
   return $self->cms->document_p(['index'])->then(sub {
     my $doc = shift;
-    return $self->render('index', load_user => 1) unless $doc->{body};
-    return $self->_render_doc(cms => $doc);
+    return $self->_render_doc(cms => $doc) if $doc->{body};
+    return $self->stash(load_user => 1)->render('index');
   });
 }
 

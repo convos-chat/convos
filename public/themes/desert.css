@@ -62,8 +62,3 @@
   --syntax-hl-type: #986801;
   --syntax-hl-variable: #986801;
 }
-
-.welcome-screen {
-  background: rgb(238,232,213);
-  background: radial-gradient(circle, rgba(238,232,213,1) 50%, rgba(182,174,152,1) 100%);
-}

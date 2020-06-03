@@ -45,7 +45,7 @@
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css';
     %= include 'partial/process_js';
   </head>
-  <body class="no-js <%= stash('for_cms') ? 'for-cms' : 'app is-logged-out' %>">
+  <body class="no-js <%= stash('for_cms') ? 'for-cms' : 'for-app is-logged-out' %>">
     %= content
     %= asset 'convos.js' unless stash 'exception';
   </body>

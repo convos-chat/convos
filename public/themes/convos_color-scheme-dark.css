@@ -85,3 +85,7 @@
   --syntax-hl-type: #d19a66;
   --syntax-hl-variable: #d19a66;
 }
+
+body.for-cms {
+  --footer-bg: #252525;
+}

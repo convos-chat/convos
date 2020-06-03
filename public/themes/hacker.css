@@ -61,8 +61,3 @@
   --autocomplete-border: 1px solid #888;
   --autocomplete-focus-bg: green;
 }
-
-.welcome-screen {
-  background: radial-gradient(#2a4216, #1c4a1e)
-  background-attachment: fixed;
-}

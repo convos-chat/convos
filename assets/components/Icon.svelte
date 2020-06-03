@@ -1,5 +1,5 @@
 <script context="module">
-const familyToClassName = {regular: 'far', solid: 'fas'};
+const familyToClassName = {brand: 'fab', regular: 'far', solid: 'fas'};
 
 const contributorIcons = {
   batman: 'https://www.gravatar.com/avatar/ab1839667863f31e359d98364cfdef61',

@@ -4,24 +4,20 @@ body {
   padding: 0;
   margin: 0;
 
-  &.app {
+  &.for-app {
     height: 100%;
     width: 100%;
     overflow: hidden;
+
+    .hidden-for-app {
+      display: none !important;
+    }
   }
 
   &.is-logged-out {
     overflow: auto;
     scroll-behavior: smooth;
   }
-}
-
-body.no-js .has-js {
-  display: none;
-}
-
-body.has-js .no-js {
-  display: none;
 }
 
 .main {

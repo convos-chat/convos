@@ -1,10 +1,23 @@
-body.for-cms .has-max-width,
-body.for-cms .toc,
-.cms-content,
+body.for-cms {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+
+  > article,
+  > main,
+  > noscript {
+    flex: 1;
+  }
+}
+
+body.for-cms > article,
+body.for-cms > main,
+body.for-cms .footer,
 .cms-navbar {
   margin: 0 auto;
   padding: var(--gutter);
-  max-width: var(--content-max-width);
+  width: var(--content-max-width);
+  max-width: 100%;
 }
 
 /*
@@ -66,6 +79,12 @@ body.for-cms .toc,
   }
 }
 
+body.no-js .cms-navbar__links .has-js {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
 #hamburger_checkbox_toggle {
   opacity: 0;
   position: absolute;
@@ -123,7 +142,7 @@ body.for-cms .toc,
     }
 
     & + .cms-navbar__links {
-      opacity: 0.95;
+      opacity: 1;
       max-height: 80vh;
     }
   }
@@ -143,6 +162,10 @@ body.for-cms .toc,
     display: flex;
     align-items: baseline;
 
+    .is-spacer {
+      flex: 1 0 0;
+    }
+
     img {
       margin: -0.5rem 0.4rem;
       height: 2rem;
@@ -150,12 +173,10 @@ body.for-cms .toc,
   }
 }
 
-/*
- * .cms-content
- * .cms-footer
- */
+body.for-cms > article,
+body.for-cms > main {
+  padding-top: 0;
 
-.cms-content {
   a:hover {
     text-decoration: none;
   }
@@ -179,9 +200,33 @@ body.for-cms .toc,
   padding: var(--gutter) 0;
   min-height: 30vh;
 
+  &.is-small {
+    min-height: auto;
+  }
+
   &,
   a {
     color: var(--sidebar-left-text);
+    text-decoration: none;
+  }
+
+  img {
+    max-height: 2.2rem;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+
+    > * {
+      display: block;
+      margin-right: 1rem;
+    }
+  }
+
+  p {
+    margin-top: 1rem;
+    margin-bottom: 0;
   }
 }
 
