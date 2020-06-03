@@ -43,7 +43,8 @@ sub doc {
     $self->stash(module => $module);
     $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
 
-    my $path = Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
+    my $path = $ENV{CONVOS_CMS_PERLDOC}
+      && Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
     return $self->_render_perldoc($path) if $path and -r $path;
 
     return $self->redirect_to($metacpan_url) if $module =~ m![A-Z]!;

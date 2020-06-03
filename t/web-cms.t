@@ -2,7 +2,8 @@
 use lib '.';
 use t::Helper;
 
-$ENV{MOJO_MODE} = 'production';
+$ENV{CONVOS_CMS_PERLDOC} = 1;
+$ENV{MOJO_MODE}          = 'production';
 my $t = t::Helper->t;
 
 note 'bundled doc';
