@@ -5,7 +5,7 @@ description: Getting started - FAQ - Configuring - Guide for developers - Statis
 
 <ul class="toc">
   <li><a href="/doc/start">Getting started</a></li>
-  <li><a href="/doc/faq">Frequently asked </a></li>
+  <li><a href="/doc/faq">Frequently asked questions</a></li>
   <li><a href="/doc/config">Configuring Convos</a></li>
   <li><a href="/doc/develop">Guide for developers</a></li>
 </ul>
