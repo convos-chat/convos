@@ -5,13 +5,11 @@ image: /screenshots/2020-05-28-convos-chat.jpg
 ---
 
 <div class="hero-wrapper is-before-content">
-  <header class="hero has-max-width">
+  <header class="hero">
     <div class="hero--text">
-      <h1>
-        <img src="/images/convos-light.png" alt="Convos">
-        <small class="tagline">&mdash; A better chat experience</small>
-        <small>Convos is the simplest way to use IRC and it is always online.</small>
-      </h1>
+      <h1><img src="/images/convos-light.png" alt="Convos"></h1>
+      <p class="tagline">&mdash; A better chat experience</p>
+      <p class="small">Convos is the simplest way to use IRC and it is always online.</p>
       <a href="#instant-demo" class="btn"><i class="fas fa-sign-in-alt"></i> Try the demo</a>
     </div>
     <a href="#instant-demo" class="hero--media">
@@ -130,7 +128,7 @@ IRC server running on localhost. This is to prevent the server from getting
 banned from IRC networks with strict limitations.
 
 <style>
-.cms-content > h1 {
+article > h1 {
   height: 1px;
   width: 1px;
   overflow: hidden;
@@ -139,48 +137,17 @@ banned from IRC networks with strict limitations.
   left: -1px;
 }
 
-.cms-content > h2 {
+article > h2 {
   text-align: center;
 }
 
 .hero-wrapper {
-  background: var(--sidebar-left-bg);
-  margin-bottom: 5rem;
-}
-
-.hero {
-  height: 80vh;
-  max-height: 20rem;
-  padding: 2rem var(--gutter) 0 var(--gutter);
-}
-
-.hero--text {
-  color: var(--sidebar-left-text);
-  text-align: center;
-}
-
-.hero--text h1 {
-  font-size: 2.8rem;
-  margin-top: 0;
-}
-
-.hero--text h1 img {
-  display: none;
-}
-
-.hero--text h1 small {
-  font-size: 0.9rem;
-  font-weight: normal;
-  margin: 0.5rem 0;
-  display: block;
-}
-
-.hero--text h1 .tagline {
-  font-size: 1.2rem;
-  font-style: italic;
+  margin-bottom: 2rem;
 }
 
 .hero--media {
+  text-align: center;
+  padding: 1rem;
   display: block;
   position: relative;
   top: 1.5rem;
@@ -189,11 +156,7 @@ banned from IRC networks with strict limitations.
 .hero--media img {
   border-radius: 0.5rem;
   box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.25);
-}
-
-#mc_embed_signup {
-  max-width: 28rem;
-  margin: 0 auto;
+  max-width: 90%;
 }
 
 .signup {
@@ -209,29 +172,32 @@ banned from IRC networks with strict limitations.
   flex: 1 0 0;
 }
 
+#mc_embed_signup {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
 #mce-responses {
   margin: 1rem 0;
 }
 
+#mc_embed_signup div.mce_inline_error {
+  font-weight: inherit !important;
+}
+
 @media (min-width: 800px) {
-  .hero {
-    display: flex;
-    align-items: center;
+  .hero-wrapper {
+    margin-bottom: 4rem;
   }
 
   .hero--text {
-    padding: var(--gutter);
-    text-align: left;
-    width: 50%;
     max-width: 20rem;
-  }
-
-  .hero--text h1 img {
-    display: block;
-    height: 2.8rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 
   .hero--media {
+    padding: 0;
     width: 50%;
     left: 2rem;
     transform: scale(1.2);
@@ -239,14 +205,14 @@ banned from IRC networks with strict limitations.
 }
 
 @media (min-width: 1100px) {
+  .hero-wrapper {
+    margin-bottom: 8rem;
+  }
+
   .hero--media {
     top: 3rem;
     left: 6rem;
     transform: scale(1.5);
   }
-}
-
-#mc_embed_signup div.mce_inline_error {
-  font-weight: inherit !important;
 }
 </style>
