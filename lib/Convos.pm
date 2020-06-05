@@ -91,9 +91,6 @@ sub _around_action {
 sub _before_dispatch {
   my $c = shift;
 
-  # Used when registering the first user
-  $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
-
   # Handle /whatever/with%2Fslash/...
   my $path     = $c->req->url->path;
   my $path_str = "$path";
@@ -123,6 +120,9 @@ sub _before_dispatch {
   $c->app->core->base_url($base_url);
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
+
+  # Used when registering the first user
+  $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
 }
 
 sub _config {
