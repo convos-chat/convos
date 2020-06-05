@@ -1,5 +1,12 @@
 Revision history for perl distribution Convos
 
+4.18 2020-06-05T13:37:00+0900
+ - New login and fallback page design that matches https://convos.chat
+ - Fix <SelectField> click and filter issues
+ - Fix reverse proxy detection for the first user
+ - Perldoc rendering must be enabled with CONVOS_CMS_PERLDOC=1
+ - Will scan for new blogs every 15 seconds
+
 4.17 2020-06-03T10:35:00+0900
  - Fix absolute URL to social image from CMS
  - Fix not setting X-Provider-Name in CMS mode
