@@ -111,7 +111,7 @@ sub t_selenium {
 
   require Test::Mojo;
   my $t = Test::Mojo->with_roles('+Selenium')->new($app || 'Convos')->setup_or_skip_all;
-  $t->set_window_size([1024, 768])->navigate_ok('/')->status_is(200);
+  $t->set_window_size([1024, 768])->navigate_ok('/login')->status_is(200);
 
   return $t;
 }

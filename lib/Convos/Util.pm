@@ -71,6 +71,7 @@ sub pretty_connection_name {
   $name =~ s!^(irc|chat)\.!!;                           # remove common prefixes from server name
   $name =~ s!:\d+$!!;                                   # remove port
   $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
+  $name =~ s!\.chat$!!;
   $name =~ s![\W_]+!-!g;                                # make pretty url
   $name;
 }
