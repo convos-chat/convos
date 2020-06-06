@@ -158,7 +158,8 @@ Examples:
 
 The `CONVOS_REVERSE_PROXY` environment variable must be set to "1" to enable
 reverse proxy support. This will then allow Convos to automatically pick up the
-`X-Forwarded-For` HTTP headers set in your reverse proxy web server.
+`X-Forwarded-For` and `X-Request-Base` HTTP headers set in your reverse proxy
+web server.
 
 Note that setting this environment variable without a reverse proxy in front
 will be a security issue.
