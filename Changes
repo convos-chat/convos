@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.19 Not Released
+4.19 2020-06-10T08:39:00+0900
  - Fix rendering "Account" page on touch devices
  - Fix login/cms footer and header on small screens
  - Fix cpanfile for Text::Markdown
