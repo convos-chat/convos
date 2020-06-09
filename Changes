@@ -1,7 +1,7 @@
 Revision history for perl distribution Convos
 
 4.19 Not Released
- - Fix rendering "Account" page on iOS
+ - Fix rendering "Account" page on touch devices
  - Fix login/cms footer and header on small screens
  - Fix cpanfile for Text::Markdown
  - Bumped JSON::Validator and Mojolicious::Plugin::OpenAPI dependencies
