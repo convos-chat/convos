@@ -99,11 +99,9 @@ function selectOption(e) {
   open = false;
 }
 
-async function renderHuman(needle) {
+function renderHuman(needle) {
   const opt = visibleOptions.filter(opt => opt[0] == needle)[0] || [];
   humanEl.value = opt.length > 1 ? opt[1] : opt.length ? opt[0] : needle;
-  await tick();
-  humanEl.setSelectionRange(0, 9999);
 }
 
 function toggle(e) {
