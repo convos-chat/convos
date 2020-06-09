@@ -197,11 +197,12 @@ body.for-cms > main {
   background: var(--footer-bg);
   font-size: 0.9rem;
   margin-top: 4rem;
-  padding: var(--gutter) 0;
+  padding-top: 1rem;
   min-height: 30vh;
 
   &.is-small {
     min-height: auto;
+    padding-top: 0;
   }
 
   &,

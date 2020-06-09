@@ -7,17 +7,15 @@
 <div class="hero-wrapper is-small hidden-for-app">
   <header class="hero">
     <div class="hero--text">
-      <h1 class="hidden-sm">
-        %= image '/images/convos-light.png', alt => 'Convos'
-      </h1>
-      <p class="tagline">
+      <div class="hero--header hidden-sm"><%= image '/images/convos-light.png', alt => 'Convos' %></div>
+      <div class="hero--tagline">
         % if (settings('organization_name') ne 'Convos') {
           &mdash; <a href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
         % } else {
           &mdash; A better chat experience
         % }
-      </p>
-      <p class="small">Convos is the simplest way to use IRC and it is always online.</p>
+      </div>
+      <div class="hero--body">Convos is the simplest way to use IRC and it is always online.</div>
     </div>
   </header>
 </div>

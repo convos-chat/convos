@@ -1,19 +1,10 @@
 <div class="footer-wrapper is-small hidden-for-app">
   <footer class="footer">
     <nav>
-      <a href="https://convos.chat"><%= image '/images/convos-light.png', alt => 'Convos' %></a>
       <a href="https://convos.chat/blog"></i><%=l 'Blog' %></a>
+      <a href="https://github.com/Nordaaker/convos/blob/master/LICENSE"><%=l 'License' %></a>
       <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i></a>
       <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i></a>
     </nav>
-    % unless (stash 'minimal_footer') {
-      <p>
-        Copyright (C) 2012-2020, <a href="https://github.com/nordaaker">Nordaaker</a>.
-      </p>
-      <p>
-        This program is free software, you can redistribute it and/or modify it under
-        the terms of the Artistic License version 2.0.
-      </p>
-    % }
   </footer>
 </div>

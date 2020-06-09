@@ -23,7 +23,7 @@
   % }
 </main>
 
-%= include 'partial/app_footer', minimal_footer => 1
+%= include 'partial/app_footer'
 
 <script>
 document.addEventListener('DOMContentLoaded', function(e) {

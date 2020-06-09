@@ -14,7 +14,7 @@
     </label>
 
     <div class="cms-navbar__links">
-      <a href="<%= $home_url %>"><%= image '/images/convos-icon-light.png', alt => '' %><%= settings('organization_name') eq 'Convos' ? l('About') : settings('organization_name') %></a>
+      <a href="<%= $home_url %>"><%= image '/images/convos-icon-light.png', alt => '', class => 'visible-sm' %><%= settings('organization_name') eq 'Convos' ? l('About') : settings('organization_name') %></a>
       % if (settings('organization_name') eq 'Convos') {
         <a href="https://convos.chat/blog"><i class="fas fa-glasses visible-sm"></i><%=l 'Blog' %></a>
         <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>

@@ -4,7 +4,8 @@
 
 .hero {
   margin: 0 auto;
-  padding-bottom: var(--gutter);
+  padding: var(--gutter);
+  padding-top: 0;
   max-width: var(--content-max-width);
 
   nav {
@@ -26,27 +27,21 @@
   }
 }
 
-.hero-cta {
-  margin: 2.5rem 0;
+.hero--header {
+  margin-bottom: 1rem;
 }
 
-.hero--text {
-  text-align: center;
+.hero--tagline {
+  margin: 0.5rem 0;
+}
 
-  h1 {
-    font-size: 2.8rem;
-    margin: 0;
-  }
+.hero--body {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
 
-  .small,
-  .tagline {
-    margin: 0.2rem 0;
-  }
-
-  .tagline {
-    font-size: 1.2rem;
-    font-style: italic;
-  }
+.hero--footer {
+  margin-top: 1rem;
 }
 
 @include if_screen(">two-columns") {
@@ -56,7 +51,7 @@
   }
 
   .hero--text {
-    padding: var(--gutter);
-    text-align: left;
+    padding-top: var(--gutter);
+    padding-footer: var(--gutter);
   }
 }
