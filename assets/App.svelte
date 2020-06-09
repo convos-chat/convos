@@ -64,7 +64,7 @@ function onGlobalKeydown(e) {
   bind:innerWidth="{innerWidth}"/>
 
 {#if $user.is('offline')}
-  <Fallback status="offline"/>
+  <Fallback/>
 {:else if $route.component && $route.requireLogin && $user.is('authenticated')}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
@@ -90,5 +90,5 @@ function onGlobalKeydown(e) {
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
 {:else}
-  <svelte:component this="{$route.component}"/>
+  <svelte:component this="{$route.component || Fallback}"/>
 {/if}
