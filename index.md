@@ -7,10 +7,10 @@ image: /screenshots/2020-05-28-convos-chat.jpg
 <div class="hero-wrapper is-before-content">
   <header class="hero">
     <div class="hero--text">
-      <h1><img src="/images/convos-light.png" alt="Convos"></h1>
-      <p class="tagline">&mdash; A better chat experience</p>
-      <p class="small">Convos is the simplest way to use IRC and it is always online.</p>
-      <a href="#instant-demo" class="btn"><i class="fas fa-sign-in-alt"></i> Try the demo</a>
+      <div class="hero--header hidden-sm"><img src="/images/convos-light.png" alt="Convos"></div>
+      <div class="hero--tagline">&mdash; A better chat experience</div>
+      <div class="hero--body">Convos is the simplest way to use IRC and it is always online.</div>
+      <div class="hero--footer"><a href="#instant-demo" class="btn"><i class="fas fa-sign-in-alt"></i> Try the demo</a></div>
     </div>
     <a href="#instant-demo" class="hero--media">
       <img src="/screenshots/2020-05-28-convos-chat.jpg" alt="Picture of Convos conversation">
@@ -145,12 +145,16 @@ article > h2 {
   margin-bottom: 2rem;
 }
 
+.hero--footer {
+  text-align: center;
+}
+
 .hero--media {
   text-align: center;
-  padding: 1rem;
+  padding-top: 1rem;
   display: block;
   position: relative;
-  top: 1.5rem;
+  top: 1.8rem;
 }
 
 .hero--media img {
@@ -194,6 +198,10 @@ article > h2 {
     max-width: 20rem;
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+
+  .hero--footer {
+    text-align: left;
   }
 
   .hero--media {
