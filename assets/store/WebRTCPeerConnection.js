@@ -1,9 +1,11 @@
 import Reactive from '../js/Reactive';
+import {uuidv4} from '../js/util';
 
 export default class WebRTCPeerConnection extends Reactive {
   constructor(params) {
     super(params);
 
+    this.prop('ro', 'id', uuidv4());
     this.prop('ro', 'localStream', params.localStream);
     this.prop('ro', 'peerConfig', params.peerConfig);
     this.prop('ro', 'target', params.target);

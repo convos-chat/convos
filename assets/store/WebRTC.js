@@ -23,10 +23,9 @@ export default class WebRTC extends Reactive {
     super();
 
     this.prop('ro', 'embedMaker', params.embedMaker);
-    this.prop('ro', 'enabled', () => (this.peerConfig.ice_servers || []).length);
+    this.prop('ro', 'enabled', () => !!(this.peerConfig.ice_servers || []).length);
 
     this.prop('rw', 'dialog', null);
-    this.prop('rw', 'inCall', false);
     this.prop('rw', 'localStream', {id: ''});
     this.prop('rw', 'peerConfig', {});
 
@@ -43,7 +42,7 @@ export default class WebRTC extends Reactive {
       ['HD',       '1280x720'], // HD
     ]);
 
-    this.pc = {};
+    this.connections = {};
     this.unsubscribe = {};
 
     // Try to cleanup before we close the window
@@ -53,44 +52,46 @@ export default class WebRTC extends Reactive {
   }
 
   async call(dialog, constraints) {
-    if (this.inCall) this.hangup();
+    if (this.localStream.id) await this.hangup();
     if (!constraints) constraints = this.constraints;
 
-    if (this.unsubscribe.dialogRtc) this.unsubscribe.dialogRtc();
     this.unsubscribe.dialogRtc = dialog.on('rtc', msg => this._onSignal(msg));
-    this.update({inCall: true, constraints, dialog});
+    this.update({constraints, dialog});
 
-    const localStream = await navigator.mediaDevices.getUserMedia(this.constraints);
+    const localStream = await navigator.mediaDevices.getUserMedia(constraints);
     this.update({localStream});
     this._send('call', {});
     this._getDevices();
-    this._tid = setInterval(() => this._refreshWebRTCPeerConnectionInfo(), 2000);
   }
 
-  hangup() {
-    if (!this.inCall) return;
-    if (this._tid) clearTimeout(this._tid);
+  async hangup() {
+    if (!this.localStream.id) return;
     this._send('hangup', {});
     this._mapPc(pc => pc.hangup());
     if (this.localStream.getTracks) this.localStream.getTracks().forEach(track => track.stop());
-    this.update({inCall: false, localStream: {id: ''}});
+    if (this.unsubscribe.dialogRtc) this.unsubscribe.dialogRtc();
+    this.update({localStream: {id: ''}});
   }
 
   id(obj) {
-    return String(obj && obj.id || obj || '').toLowerCase()
-      .replace(/\W+$/, '').replace(/\W/g, '-').replace(/^[^a-z]+/i, 'uuid-');
+    const id = String(obj && obj.id || obj || '').toLowerCase().replace(/\W/g, '-');
+    return id ? 'uuid-' + id : '';
   }
 
-  isMuted(target, kind) {
+  isMuted(target, kind = 'audio') {
     const stream = this.peerConnections({target}).map(pc => pc.remoteStream)[0] || this.localStream;
+    if (!stream.id) return true;
+
     const tracks = kind == 'audio' ? stream.getAudioTracks() : stream.getVideoTracks();
+    if (!tracks.length) return true;
+
     return tracks.filter(track => track.enabled).length == tracks.length ? false : true;
   }
 
   mute(target, kind, mute) {
     const stream = this.peerConnections({target}).map(pc => pc.remoteStream)[0] || this.localStream;
     const tracks = kind == 'audio' ? stream.getAudioTracks() : stream.getVideoTracks();
-    tracks.forEach(track => { track.enabled = mute === undefined ? !track.enabled : mute });
+    tracks.forEach(track => { track.enabled = mute === undefined ? !track.enabled : !mute });
     this.emit('update', this, {});
   }
 
@@ -114,6 +115,28 @@ export default class WebRTC extends Reactive {
     }
   }
 
+  _connection(msg) {
+    const target = msg.from;
+
+    // Clean up old connections
+    if (this.connections[target] && ['call', 'hangup'].indexOf(msg.type) != -1) {
+      this.connections[target].hangup();
+      delete this.connections[target];
+    }
+
+    // Return existing connection
+    if (this.connections[target]) return this.connections[target];
+
+    // Create connection
+    const peerConfig = this._normalizedPeerConfig(this.peerConfig);
+    const pc = new WebRTCPeerConnection({localStream: this.localStream, target, peerConfig});
+    pc.on('hangup', () => delete this.connections[target]);
+    pc.on('signal', msg => this._send('signal', msg));
+    pc.on('update', () => this.emit('update', this, {}));
+    this.emit('connection', (this.connections[target] = pc));
+    return pc;
+  }
+
   _ensureEventListenersOnButtons(parentEl) {
     if (parentEl._addEventListenersToButtonsDone) return;
     parentEl._addEventListenersToButtonsDone = true;
@@ -134,14 +157,14 @@ export default class WebRTC extends Reactive {
                  : dev.kind == 'videoinput' ? 'cameras'
                  : 'unknown';
 
-      devices[type].push({id: dev.deviceId, type: dev.kind, name: dev.label || dev.text || dev.deviceId});
+      devices[type].push({id: dev.deviceId, name: dev.label || dev.text || dev.deviceId});
     });
 
     this.update(devices);
   }
 
   _mapPc(cb) {
-    return Object.keys(this.pc).map(target => cb(this.pc[target]));
+    return Object.keys(this.connections).map(target => cb(this.connections[target]));
   }
 
   _normalizedPeerConfig() {
@@ -158,33 +181,9 @@ export default class WebRTC extends Reactive {
   }
 
   _onSignal(msg) {
-    if (msg.type == 'signal') return this._pc(msg).signal(msg);
-    if (msg.type == 'call') return this._pc(msg).call(msg);
-    if (msg.type == 'hangup') return this._pc(msg).hangup(msg);
-  }
-
-  _pc(msg) {
-    const target = msg.from;
-
-    // Clean up old connections
-    if (this.pc[target] && ['call', 'hangup'].indexOf(msg.type) != -1) {
-      this.pc[target].hangup();
-      delete this.pc[target];
-    }
-
-    // Return current connection
-    if (this.pc[target]) return this.pc[target];
-
-    const peerConfig = this._normalizedPeerConfig(this.peerConfig);
-    const pc = new WebRTCPeerConnection({localStream: this.localStream, target, peerConfig});
-    pc.on('hangup', () => delete this.pc[target]);
-    pc.on('signal', msg => this._send('signal', msg));
-    pc.on('update', () => this.emit('update', this, {}));
-    return (this.pc[target] = pc);
-  }
-
-  _refreshWebRTCPeerConnectionInfo() {
-    this._mapPc(pc => pc.refreshInfo());
+    if (msg.type == 'signal') return this._connection(msg).signal(msg);
+    if (msg.type == 'call') return this._connection(msg).call(msg);
+    if (msg.type == 'hangup') return this._connection(msg).hangup(msg);
   }
 
   _renderRtcConversation(id, stream) {
