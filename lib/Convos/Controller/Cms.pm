@@ -13,7 +13,8 @@ sub blog_entry {
   return $self->cms->document_p(\@path)->then(sub {
     my $doc = shift;
     return $self->reply->not_found unless $doc->{body};
-    return $self->_render_doc(blog_entry => $doc);
+    $self->_meta_to_social($doc->{meta});
+    $self->_render_doc(blog_entry => $doc);
   });
 }
 
@@ -62,15 +63,17 @@ sub index {
   });
 }
 
-sub _render_doc {
-  my ($self, $template, $doc) = @_;
-
-  my $meta = $doc->{meta};
+sub _meta_to_social {
+  my ($self, $meta) = @_;
   $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
   $self->social($_ => $meta->{$_})
     for grep { defined $meta->{$_} } qw(canonical description image url);
   $meta->{image} = $self->url_for($meta->{image})->to_abs if $meta->{image};
+}
 
+sub _render_doc {
+  my ($self, $template, $doc) = @_;
+  $self->_meta_to_social($doc->{meta});
   $self->res->headers->remove('X-Provider-Name');
   $self->render($template, custom_css => $doc->{custom_css}, doc => $doc, for_cms => 1);
 }
