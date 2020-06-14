@@ -1,6 +1,7 @@
 ---
 title: Coturn for WebRTC NAT Traversal
 canonical: https://marcus.nordaaker.com/post/coturn-for-webrtc-nat-traversal/
+author: Marcus Ramberg
 ---
 
 This article will show you how to set up [Coturn](https://github.com/coturn/coturn). This is a service that allows hosts behind NAT to communicate peer to peer with webrtc. STUN is helping to negotiate port/ip and TURN will proxy the actual traffic if all else fails.

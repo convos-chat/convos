@@ -1,5 +1,6 @@
 ---
 title: Video support in Convos v4.08
+author: Jan Henning Thorsen
 ---
 
 Convos [v4.08](https://github.com/Nordaaker/convos/blob/4.08/Changes#L3) is

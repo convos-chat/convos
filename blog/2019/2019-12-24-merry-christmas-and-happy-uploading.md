@@ -1,5 +1,6 @@
 ---
 title: Merry Christmas and happy uploading!
+author: Jan Henning Thorsen
 ---
 
 Santa's Little Helpers have been working hard to bring you the

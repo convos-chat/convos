@@ -1,5 +1,6 @@
 ---
 title: How to get Convos up and running on DigitalOcean
+author: Jan Henning Thorsen
 ---
 
 Not sure how to get your Convos to be truly always online in the cloud? Fear

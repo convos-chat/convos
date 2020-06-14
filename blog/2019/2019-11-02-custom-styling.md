@@ -1,5 +1,6 @@
 ---
 title: How to define custom styling for Convos
+author: Jan Henning Thorsen
 ---
 
 This post is outdated. If you want to see a more recent post about theming,

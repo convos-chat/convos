@@ -1,5 +1,6 @@
 ---
 title: Convos loves Docker
+author: Jan Henning Thorsen
 ---
 
 We now have an official [Docker](https://hub.docker.com/r/nordaaker/convos/)

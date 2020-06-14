@@ -1,5 +1,6 @@
 ---
 title: Convos 1.00 is out in the wild
+author: Jan Henning Thorsen
 ---
 
 It sure did take way too long time, but I've finally managed to release Convos

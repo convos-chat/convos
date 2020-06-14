@@ -1,5 +1,6 @@
 ---
 title: Convos version 0.99_33 is out with bugfixes
+author: Jan Henning Thorsen
 ---
 
 Version [0.99_33](https://github.com/Nordaaker/convos/tree/stable) has been

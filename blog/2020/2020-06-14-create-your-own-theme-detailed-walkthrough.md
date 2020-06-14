@@ -1,6 +1,6 @@
 ---
-author: Thibault Duponchelle
 title: Create your own theme in minutes!
+author: Thibault Duponchelle
 ---
 
 In Convos [v4.xx](/blog/2020/5/14/theming-support-in-4-point-oh.html)

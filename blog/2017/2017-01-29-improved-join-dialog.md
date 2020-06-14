@@ -1,5 +1,6 @@
 ---
 title: Convos version 0.99_24 is out
+author: Jan Henning Thorsen
 ---
 
 Version [0.99_24](https://github.com/Nordaaker/convos/tree/stable/Changes) is

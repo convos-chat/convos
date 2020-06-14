@@ -1,5 +1,6 @@
 ---
 title: We all like shiny things
+author: Jan Henning Thorsen
 ---
 
 It's been a while since the last post, but that doesn't mean there aren't cool 

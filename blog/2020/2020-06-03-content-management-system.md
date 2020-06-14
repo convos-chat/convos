@@ -1,6 +1,7 @@
 ---
 title: Convos as a document and blogging service
 image: /screenshots/2020-06-03-webpage.jpg
+author: Jan Henning Thorsen
 ---
 
 A CMS in Convos? Why? How..? [https://convos.chat](https://convos.chat) used to

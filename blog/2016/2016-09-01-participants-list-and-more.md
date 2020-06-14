@@ -1,5 +1,6 @@
 ---
 title: Add participants list and more
+author: Jan Henning Thorsen
 ---
 
 The [stable](https://github.com/Nordaaker/convos/tree/stable) branch has now

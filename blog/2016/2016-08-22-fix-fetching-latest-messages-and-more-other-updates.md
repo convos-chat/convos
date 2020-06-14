@@ -1,5 +1,6 @@
 ---
 title: Fixed fetching latest messages on websocket reconnect and other juicy updates
+author: Jan Henning Thorsen
 ---
 
 The [stable](https://github.com/Nordaaker/convos/tree/stable) branch has now

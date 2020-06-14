@@ -1,5 +1,6 @@
 ---
 title: Convos got a built in pastebin
+author: Jan Henning Thorsen
 ---
 
 Convos has a high focus on privacy. Convos can be run on closed network, and

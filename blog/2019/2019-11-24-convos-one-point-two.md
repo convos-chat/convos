@@ -1,5 +1,6 @@
 ---
 title: Convos is more user-friendly than ever
+author: Jan Henning Thorsen
 ---
 
 Convos has always been about making the most user-friendly chat interface for

@@ -1,5 +1,6 @@
 ---
 title: Theming support in Convos 4.00
+author: Jan Henning Thorsen
 ---
 
 Convos 4.00 made it a lot simpler to define custom themes.
