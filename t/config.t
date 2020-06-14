@@ -15,7 +15,7 @@ is $convos->config->{home}, $ENV{CONVOS_HOME}, 'home from ENV';
 is $convos->settings('organization_name'), 'Convos',              'default organization_name';
 is $convos->settings('organization_url'),  'https://convos.chat', 'default organization_url';
 is $convos->config->{hypnotoad}{pid_file}, undef, 'default pid_file';
-like $convos->settings('local_secret'), qr/^\w{32}$/, 'generated local_secret';
+like $convos->settings('local_secret'), qr/^\w{40}$/, 'generated local_secret';
 like $secret, qr/^[a-z0-9]{40}$/, 'default secrets';
 
 note 'Make sure we load the same secret';

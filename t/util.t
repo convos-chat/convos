@@ -1,5 +1,5 @@
 use Test::More;
-use Convos::Util qw(require_module sdp_decode sdp_encode short_checksum);
+use Convos::Util qw(generate_secret require_module sdp_decode sdp_encode short_checksum);
 use Mojo::Loader 'data_section';
 use Mojo::Util qw(b64_encode gzip md5_sum);
 
@@ -15,6 +15,14 @@ like $err, qr{\./script/convos cpanm -n Foo::Bar},        'require_module failed
 
 eval { require_module 'Convos::Util' };
 ok !$@, 'require_module success';
+
+note 'generate_secret';
+is length(generate_secret), 40, 'generate_secret';
+my %secrets;
+map { $secrets{+Convos::Util::_generate_secret_urandom()}++ } 1 .. 1000 if -r '/dev/urandom';
+map { $secrets{+Convos::Util::_generate_secret_fallback()}++ } 1 .. 1000;
+is_deeply [values %secrets], [map {1} values %secrets],
+  '1..1000 is not nearly enough to prove anything, but testing it anyways';
 
 for my $name (qw(answer.sdp offer.sdp)) {
   my $sdp     = data_section 'main', $name;

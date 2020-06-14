@@ -3,16 +3,17 @@ use Mojo::Base 'Exporter';
 
 use JSON::Validator::Error;
 use Mojo::Collection 'c';
-use Mojo::File;
-use Mojo::Util qw(b64_decode b64_encode md5_sum monkey_patch);
-use Time::Piece ();
+use Mojo::Util qw(b64_decode b64_encode md5_sum monkey_patch sha1_sum);
+use Sys::Hostname ();
+use Time::HiRes   ();
+use Time::Piece   ();
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG E has_many pretty_connection_name require_module),
-  qw(sdp_decode sdp_encode short_checksum tp),
+  qw($CHANNEL_RE DEBUG E generate_secret has_many pretty_connection_name),
+  qw(require_module sdp_decode sdp_encode short_checksum tp),
 );
 
 sub E {
@@ -20,6 +21,10 @@ sub E {
   $msg =~ s! at \S+.*!!s;
   $msg =~ s!:.*!.!s;
   return {errors => [JSON::Validator::Error->new($path, $msg)]};
+}
+
+sub generate_secret {
+  return eval { _generate_secret_urandom() } || _generate_secret_fallback();
 }
 
 sub has_many {
@@ -126,6 +131,18 @@ sub tp {
   Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 
+sub _generate_secret_fallback {
+  return sha1_sum join ':', rand(), $$, $<, Sys::Hostname::hostname(), Time::HiRes::time();
+}
+
+sub _generate_secret_urandom {
+  my $len = shift || $ENV{CONVOS_SECRET_URANDOM_READ_LEN} || 128;
+  open my $fh, '<', '/dev/urandom' or die "Can't open /dev/urandom: $!";
+  my $ret = sysread $fh, my ($secret), $len;
+  return sha1_sum $secret if $ret == $len;
+  die qq{Could not read $len bytes from "/dev/urandom": $!};
+}
+
 1;
 
 =encoding utf8
@@ -144,6 +161,18 @@ Convos::Util - Utility functions
 L<Convos::Util> is a utily module for L<Convos>.
 
 =head1 FUNCTIONS
+
+=head2 generate_secret
+
+  $str = generate_secret;
+
+Returns a SHA1 sum of bytes from "/dev/urandom" or fallback to a SHA1 sum of:
+
+    rand()     # Not cryptographically secure, but pseudo random
+    $$         # Will probably be "1" inside Docker and probably less than 32768 on Linux
+    $<         # Will probably be "0" inside Docker and probably less than 10000 on Linux
+    hostname() # Will be unique inside Docker and guessable on Linux
+    time()     # Floating seconds since the epoch (Ex: 1592094819.82439)
 
 =head2 has_many
 

@@ -1,10 +1,10 @@
 package Convos::Core::Settings;
 use Mojo::Base -base;
 
+use Convos::Util 'generate_secret';
 use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;
-use Mojo::Util;
 
 has contact => sub { $ENV{CONVOS_CONTACT} || 'mailto:root@localhost' };
 sub core { shift->{core} or die 'core is required in constructor' }
@@ -12,7 +12,7 @@ has default_connection => \&_build_default_connection;
 has forced_connection =>
   sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
 sub id {'settings'}
-has local_secret   => \&_build_local_secret;
+has local_secret   => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
 has open_to_public => sub {false};
 has organization_name =>
   sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
@@ -63,14 +63,8 @@ sub load_p {
 
 sub save_p {
   my $self = shift;
-
   $self->_set_attributes(shift, 0) if ref $_[0] eq 'HASH';
   my $p = $self->core->backend->save_object_p($self, @_);
-
-  # Remove legacy secrets file
-  my $file = $self->_legacy_session_secrets_file;
-  $file->remove if -e $file;
-
   return $p;
 }
 
@@ -91,28 +85,16 @@ sub _build_default_connection {
   return Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
 }
 
-sub _build_local_secret {
-  my $self = shift;
-  return $ENV{CONVOS_LOCAL_SECRET} if $ENV{CONVOS_LOCAL_SECRET};
-
-  my $secret = Mojo::Util::md5_sum(join ':', $self->core->home->to_string, $<, $(, $0);
-  return $secret;
-}
-
 sub _build_session_secrets {
   my $self = shift;
   return [split /,/, $ENV{CONVOS_SECRETS} || ''] if $ENV{CONVOS_SECRETS};
 
-  my $secrets;
-  my $file = $self->_legacy_session_secrets_file;
-  $secrets = [split /‚/, $file->slurp] if -e $file;
-  return $secrets if $secrets and @$secrets;
+  my $file    = $self->core->home->child('secrets');
+  my $secrets = -r $file ? [split /‚/, $file->slurp] : [];
+  $file->remove if -e $file;
 
-  $secrets = [Mojo::Util::sha1_sum(join ':', rand(), $$, $<, $(, $^X, Time::HiRes::time())];
-  return $secrets;
+  return @$secrets ? $secrets : [generate_secret];
 }
-
-sub _legacy_session_secrets_file { shift->core->home->child('secrets') }
 
 sub _set_attributes {
   my ($self, $params, $safe_source) = @_;
