@@ -165,9 +165,9 @@ my $message_34243 = path('t/data/long-message-34243.txt')->slurp;
 require Convos::Plugin::Files::File;
 $core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
 $connection->send_p('#convos' => $message_34243)->$wait_success('send_p super long message');
-like slurp_log('#convos'), qr{file/1/ktGW3DYcdBw5nB54}, 'created paste from long message';
+like slurp_log('#convos'), qr{file/1/LDxaQ0MXZpWGTmJm}, 'created paste from long message';
 chomp $message_34243;
-is $user_home->child('upload/ktGW3DYcdBw5nB54.data')->slurp, $message_34243, 'paste matches';
+is $user_home->child('upload/LDxaQ0MXZpWGTmJm.data')->slurp, $message_34243, 'paste matches';
 
 note 'single space';
 $connection->send_p('#convos' => ' ')->$wait_success('send_p single space');
@@ -192,9 +192,9 @@ $connection->send_p('#convos' => $sent[2])->$wait_success('many short lines past
 is_deeply(
   \@msg,
   [
-    ':superman PRIVMSG #convos :file/1/Yf317MsGajxcw0Kj',
-    ':superman PRIVMSG #convos :file/1/4vprpCqxzuY25LVx',
-    ':superman PRIVMSG #convos :file/1/NaqVcgy4F1292BqA',
+    ':superman PRIVMSG #convos :file/1/uL1Qca5fcqt7S1aU',
+    ':superman PRIVMSG #convos :file/1/V1sP00ZC8JSNhQBA',
+    ':superman PRIVMSG #convos :file/1/HHghB4hap3tVP3cB',
   ],
   'created paste messages',
 );
