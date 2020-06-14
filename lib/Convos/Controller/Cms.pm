@@ -66,10 +66,10 @@ sub _render_doc {
   my ($self, $template, $doc) = @_;
 
   my $meta = $doc->{meta};
-  $meta->{image} = $self->url_for($meta->{image})->to_abs;
   $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
   $self->social($_ => $meta->{$_})
     for grep { defined $meta->{$_} } qw(canonical description image url);
+  $meta->{image} = $self->url_for($meta->{image})->to_abs if $meta->{image};
 
   $self->res->headers->remove('X-Provider-Name');
   $self->render($template, custom_css => $doc->{custom_css}, doc => $doc, for_cms => 1);
