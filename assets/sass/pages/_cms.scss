@@ -8,6 +8,11 @@ body.for-cms {
   > noscript {
     flex: 1;
   }
+
+  code {
+    background: var(--syntax-hl-base-bg);
+    padding: 2px 4px;
+  }
 }
 
 body.for-cms > article,
