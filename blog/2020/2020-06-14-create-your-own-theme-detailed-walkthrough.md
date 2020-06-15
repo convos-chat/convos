@@ -28,7 +28,7 @@ one that is the simplest and closest to what you want to achieve:
     curl https://raw.githubusercontent.com/Nordaaker/convos/master/public/themes/high-contrast_color-scheme-light.css > mytheme.css
 
 Here I chose light version of hight-contrast, but it would have been smarter to
-choose a dark version, since this theme is black and green.
+choose a dark version, since this theme I decided to create is intended to be black and green.
 
 The name of your file is not important, the theme name will be included in the
 header of the CSS file.
@@ -77,7 +77,7 @@ Or this other one where we see more inputs and listbox:
 It gave me a better idea about what I wanted to do and which colors to put
 together:
 
-* First the green is really flashy, let’s go for flashy then.
+* First the green is really flashy, let's go for flashy then.
 * There is black background or eventually dark grey background. In my mind I
   was thinking "cool, I will try to put this grey on one panel!" because
   usually don't like having all convos panel the same color
