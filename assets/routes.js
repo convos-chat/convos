@@ -6,7 +6,6 @@ import DialogAdd from './page/DialogAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
-import RedirectToLast from './page/RedirectToLast.svelte';
 import Search from './page/Search.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
@@ -31,7 +30,7 @@ export function setupRouting(route, user) {
   route.to('/file/*', noop);
   route.to('/paste/*', noop);
 
-  route.to('/', render(RedirectToLast));
+  route.to('/', render(Login));
   route.to('*', render(Fallback));
 
   listenToDialogEvents(route, user);
@@ -54,7 +53,7 @@ function render(component) {
   return (route) => {
     const removeEls = document.querySelectorAll('.js-remove');
     for (let i = 0; i < removeEls.length; i++) removeEls[i].remove();
-    const requireLogin = [Fallback, Login, RedirectToLast].indexOf(component) == -1;
+    const requireLogin = [Fallback, Login].indexOf(component) == -1;
     replaceClassName('body', /(is-logged-)\S+/, requireLogin ? 'in' : 'out');
     replaceClassName('body', /(for-)(app|cms)/, requireLogin ? 'app' : 'cms');
     route.update({component, requireLogin});

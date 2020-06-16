@@ -72,13 +72,6 @@ sub login {
   );
 }
 
-sub login_html {
-  my $self = shift;
-  return $self->session('email')
-    ? $self->redirect_to('/chat')
-    : $self->render('index', load_user => 1);
-}
-
 sub logout {
   my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
   my $format = $self->stash('format') || 'json';
@@ -88,12 +81,6 @@ sub logout {
     return $self->redirect_to('/login') if $format eq 'html';
     return $self->render(openapi => {message => 'Logged out.'});
   });
-}
-
-sub redirect_if_not_logged_in {
-  my $self = shift;
-  return $self->redirect_to('/login') unless my $user = $self->backend->user;
-  return $self->stash(load_user => 1, user => $user);
 }
 
 sub register {
@@ -299,18 +286,9 @@ See L<https://convos.chat/api.html#op-get--user>
 
 See L<https://convos.chat/api.html#op-post--user-login>
 
-=head2 login_html
-
-Will redirect to "/" if already logged in.
-
 =head2 logout
 
 See L<https://convos.chat/api.html#op-get--user-logout>
-
-=head2 redirect_if_not_logged_in
-
-Used in a L<Mojolicious::Routes::Route/under> to respond with 302, if the user
-does not have a valid session cookie.
 
 =head2 register
 

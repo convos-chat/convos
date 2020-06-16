@@ -40,7 +40,6 @@ sub startup {
   $r->get('/blog')->to('cms#blog_list');
   $r->get('/blog/:year/:mon/:mday/:name', {page => 1})->to('cms#blog_entry')->name('blog_entry');
   $r->get('/doc/*file',                   {file => 'index'})->to('cms#doc')->name('doc');
-  $r->get('/login')->to('user#login_html');
   $r->get('/logout')->to('user#logout', format => 'html');
   $r->get('/register')->to('user#register_html');
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
@@ -53,12 +52,13 @@ sub startup {
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
 
-  # Require authentication
-  my $auth_r = $r->under('/')->to('user#redirect_if_not_logged_in');
-  $auth_r->get('/help')->to(template => 'index');
-  $auth_r->get('/chat/*rest',     {rest => ''})->to(template => 'index');
-  $auth_r->get('/settings/*rest', {rest => ''})->to(template => 'index');
-  $auth_r->get('/search')->to(template => 'index');
+  # Chat resources
+  my $user_r = $r->under('/')->to(template => 'index', load_user => 1);
+  $user_r->get('/help')->to(template => 'index');
+  $user_r->get('/chat/*rest', {rest => ''});
+  $user_r->get('/login');
+  $user_r->get('/settings/*rest', {rest => ''});
+  $user_r->get('/search');
 
   # Process svelte assets using rollup.js
   $ENV{MOJO_WEBPACK_CONFIG} = 'rollup.config.js';
