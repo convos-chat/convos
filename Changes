@@ -1,5 +1,15 @@
 Revision history for perl distribution Convos
 
+4.20 2020-06-18T08:31:00+0900
+ - Fix hanging up a WebRTC call
+ - Fix iOS issue where /login screen is rendered when actually logged in
+ - Fix invalid social "image" for blog posts
+ - Add formatting for <code> for the CMS
+ - Converted short_checksum() to use sha1_sum
+ - Fix generating random local secret for Docker
+   You might want to regenerate your "local_secret" in
+   $CONVOS_HOME/settings.json if you are using Docker
+
 4.19 2020-06-10T08:39:00+0900
  - Fix rendering "Account" page on touch devices
  - Fix login/cms footer and header on small screens
