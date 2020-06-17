@@ -14,8 +14,7 @@ body {
     }
   }
 
-  &.is-logged-out {
-    overflow: auto;
+  &.for-cms {
     scroll-behavior: smooth;
   }
 }
@@ -34,18 +33,6 @@ body {
     content: '';
     height: 4rem;
     display: block;
-  }
-}
-
-@include if_screen("<=two-columns") {
-  body.is-logged-out {
-    overflow: auto;
-
-    .main {
-      position: static;
-      padding: var(--gutter-big);
-      min-height: auto;
-    }
   }
 }
 

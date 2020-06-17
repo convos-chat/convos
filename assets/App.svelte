@@ -11,6 +11,7 @@ import {focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/uti
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
 import {onMount, setContext} from 'svelte';
+import {replaceClassName} from './js/util';
 import {route} from './store/Route';
 import {setupRouting} from './routes';
 import {viewport} from './store/Viewport';
@@ -32,6 +33,7 @@ user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after 
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
 $: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $route.title : $route.title;
+$: replaceBodyClassName($route, $user);
 
 onMount(() => {
   const body = document.querySelector('body');
@@ -41,6 +43,11 @@ onMount(() => {
   if (process.env.load_user) setupRouting(route, user);
   user.load(process.env.load_user);
 });
+
+function replaceBodyClassName(route, user) {
+  const appMode = route.component && route.requireLogin && user.is('authenticated');
+  replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
+}
 
 function onGlobalKeydown(e) {
   // Esc
@@ -89,6 +96,8 @@ function onGlobalKeydown(e) {
   {#if $route.activeMenu && !$viewport.isWide}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
+{:else if $route.requireLogin}
+  <Login/>
 {:else}
   <svelte:component this="{$route.component || Fallback}"/>
 {/if}

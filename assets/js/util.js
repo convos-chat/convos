@@ -266,8 +266,8 @@ export function removeChildNodes(el) {
  * replaceClassName() will replace a className by doing search and replace.
  *
  * @example
- * // Will replace what is currently the class with "is-logged-out"
- * replaceClassName('body', /is-logged-(\S+)/, 'out');
+ * // Will replace what is currently the class with "for-cms"
+ * replaceClassName('body', /(for-)app/, 'cms');
  *
  * @param {String} sel A CSS selector
  * @param {RegExp} re A RegExp to search for an existing class name
