@@ -83,10 +83,6 @@ function registered() {
         <Button icon="save" op="{registerOp}"><span>{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</span></Button>
       </div>
 
-      {#if !emailFromParams && !$user.isFirst}
-        <p on:click="{scrollspy.scrollTo}">{@html lmd('Go and [sign in](%1) if you already have an account.', '#signin')}</p>
-      {/if}
-
       <OperationStatus op="{registerOp}"/>
     </form>
   {:else}
@@ -109,6 +105,7 @@ function registered() {
 
       <TextField type="password" name="password" autocomplete="current-password">
         <span slot="label">{l('Password')}</span>
+        <p class="help" slot="help">{@html lmd('Contact your [Convos admin](%1) if you have forgotten your password.', process.env.contact)}</p>
       </TextField>
 
       <div class="form-actions">
