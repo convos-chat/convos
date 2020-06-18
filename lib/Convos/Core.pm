@@ -114,7 +114,7 @@ sub start {
 has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
   $attrs->{email} = trim lc $attrs->{email} || '';
-  $attrs->{uid}   = $self->n_users + 1;
+  $attrs->{uid} ||= $self->n_users + 1;
   $attrs->{uid}++ while $self->get_user_by_uid($attrs->{uid});
   my $user = Convos::Core::User->new($attrs);
   die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;

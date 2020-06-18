@@ -10,7 +10,7 @@ my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user;
 
 note 'jhthorsen connections';
-$user = $core->user({email => 'jhthorsen@cpan.org'});
+$user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
 $user->save_p->$wait_success('save_p');
 
 # 1: localhost connects instantly
@@ -24,7 +24,7 @@ $user->connection({name => 'magnet2', protocol => 'irc'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save_p->$wait_success('save_p');
 
 note 'mramberg connections';
-$user = $core->user({email => 'mramberg@cpan.org'});
+$user = $core->user({email => 'mramberg@cpan.org', uid => 32});
 $user->save_p->$wait_success('save_p');
 
 # 0: will not be connected
@@ -51,7 +51,7 @@ Mojo::Util::monkey_patch(
     my $host_port = $_[0]->url->host_port;
     $connect{$host_port}++;
     note "@{[time]} monkey_patch connect to $host_port\n" if $ENV{HARNESS_IS_VERBOSE};
-    Mojo::IOLoop->stop if sum(values %connect) == $expected;
+    Mojo::IOLoop->stop                                    if sum(values %connect) == $expected;
   }
 );
 
@@ -66,5 +66,7 @@ is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'local
 Mojo::IOLoop->start;
 is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'localhost' => 1},
   'started duplicate connection delayed';
+
+is $core->get_user('mramberg@cpan.org')->uid, 32, 'uid from storage';
 
 done_testing;
