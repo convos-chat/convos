@@ -1,12 +1,12 @@
 use Test::More;
 use Convos::Util qw(generate_secret require_module sdp_decode sdp_encode short_checksum);
 use Mojo::Loader 'data_section';
-use Mojo::Util qw(b64_encode gzip md5_sum);
+use Mojo::Util qw(b64_encode gzip sha1_sum);
 
-is short_checksum(md5_sum(3)), '7Mvfktc4v4MZ8q68', 'short_checksum md5_sum';
-is short_checksum('jhthorsen@cpan.org'), 'gGgA67dutavZz2t6', 'short_checksum email';
-is short_checksum(md5_sum('jhthorsen@cpan.org')), 'gGgA67dutavZz2t6',
-  'short_checksum md5_sum email';
+is short_checksum(sha1_sum(3)), 'd952uzY7q7tY7bH4', 'short_checksum sha1_sum';
+is short_checksum('jhthorsen@cpan.org'), 'gNQ981Q2TztxSsRL', 'short_checksum email';
+is short_checksum(sha1_sum('jhthorsen@cpan.org')), 'gNQ981Q2TztxSsRL',
+  'short_checksum sha1_sum email';
 
 eval { require_module 'Foo::Bar' };
 my $err = $@;
