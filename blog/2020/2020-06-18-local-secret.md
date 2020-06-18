@@ -11,7 +11,7 @@ Docker.
 There are two secrets that is very important for the overall security of
 Convos: `CONVOS_LOCAL_SECRET` and `CONVOS_SECRETS`.
 
-* `CONVOS_SECRETS` is used to check that the [session cookie](/doc/Mojolicious/Sessions)
+* `CONVOS_SECRETS` is used to check that the [session cookie](/doc/Mojolicious#secrets)
   is not altered on the client side. If this value is known to the public then a
   hacker can change the session cookie and log in as any existing user.
 * `CONVOS_LOCAL_SECRET` on the other hand is used by admins who generates either
