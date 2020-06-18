@@ -85,3 +85,8 @@ been exploited.
 You might want to rotate your secrets from time to time. This means that you
 follow the steps [above](#what-should-you-do) every now and then to make sure
 your secrets are indeed private to Convos.
+
+## Special thanks
+
+Special thanks to [Stig P](https://github.com/stigtsp) for pointing out how bad the
+"local_secret" generator was inside Docker.
