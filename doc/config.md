@@ -11,6 +11,14 @@ that can be tweaked when starting Convos.
 
     CONVOS_HOME=/var/convos ./script/convos daemon
 
+New to shell environment variables? Remember to set them before the "convos" command.
+
+    # Right
+    CONVOS_STUN="stun://stun.services.mozilla.com:3478" ./script/convos daemon
+
+    # Wrong
+    ./script/convos daemon CONVOS_STUN="stun://stun.services.mozilla.com:3478"
+
 ## Listen
 
 You can make convos listen to a variety of addresses:
@@ -166,3 +174,27 @@ will be a security issue.
 
 The [FAQ](/doc/faq#can-convos-run-behind-behind-my-favorite-web-server)
 has more details on how to set up Convos behind a reverse proxy server.
+
+### CONVOS_STUN
+
+Must be set to enable audio and video chat in Convos. See [CONVOS_TURN](#convos_turn) and
+"[Video support in Convos v4.08](/blog/2020/5/23/experimental-video-support-using-webrtc)"
+for more information.
+
+Example:
+
+    CONVOS_STUN="stun://stun.services.mozilla.com:3478"
+
+### CONVOS_TURN
+
+Must be set if you need to proxy audio and video streams through a central
+server. This is the case if NAT traversal / peer-to-peer connection fails.
+
+See also [CONVOS_STUN](#convos_stun),
+"[Coturn for WebRTC NAT Traversal](/blog/2020/6/13/coturn-for-webrtc-nat-traversal)" and
+"[Introduction to WebRTC protocols](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols)"
+for more information.
+
+Example:
+
+    CONVOS_TURN="turn://user:pass@coturn.example.com:5349"

@@ -29,7 +29,7 @@ Then we edit `/etc/turnserver.conf` - It should look roughly like this:
     fingerprint
     lt-cred-mech
 
-    user username:pass
+    user username:s3cret
 
     cert=/etc/letsencrypt/live/coturn.example.org/fullchain.pem
     pkey=/etc/letsencrypt/live/coturn.example.org/privkey.pem
@@ -51,8 +51,8 @@ run `systemctl start coturn`.
 
 To use such a server with Convos, it requires a couple of environment variables to be set:
 
-    Environment=CONVOS_STUN=stun://user:pass@coturn.example.5349
-    Environment=CONVOS_TURN=turn://user:pas@coturn.example.5349
+    Environment=CONVOS_STUN=stun://user:s3cret@coturn.example.com:5349
+    Environment=CONVOS_TURN=turn://user:s3cret@coturn.example.com:5349
 
 (Assuming you run Convos under systemd)
 
