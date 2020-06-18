@@ -107,7 +107,7 @@ sub _set_attributes {
     for grep { defined $params->{$_} } qw(default_connection organization_url);
 
   if ($safe_source) {
-    $self->$_($params->{$_}) for grep { defined $params->{$_} } qw(local_secret session_secrets);
+    $self->$_($params->{$_}) for grep { $params->{$_} } qw(local_secret session_secrets);
   }
 
   return $self;
