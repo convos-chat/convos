@@ -3,7 +3,7 @@ use Mojo::Base 'Exporter';
 
 use JSON::Validator::Error;
 use Mojo::Collection 'c';
-use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
+use Mojo::Util qw(b64_decode b64_encode md5_sum monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
 use Time::Piece   ();
@@ -118,7 +118,7 @@ sub sdp_encode {
 }
 
 sub short_checksum {
-  my $checksum = 40 == length $_[0] && $_[0] =~ /^[a-z0-9]{40}$/ ? shift : sha1_sum shift;
+  my $checksum = 32 == length $_[0] && $_[0] =~ /^[a-z0-9]{32}$/ ? shift : md5_sum shift;
   my $short    = b64_encode pack 'H*', $checksum;
   $short =~ s![eioEIO+=/\n]!!g;
   return substr $short, 0, 16;
@@ -239,12 +239,12 @@ Used to create a L<Time::Piece> object from a date-time string.
 
 =head2 short_checksum
 
-  $str = short_checksum($sha1_sum);
+  $str = short_checksum($md5_sum);
 
 Will take a MD5 or SHA1 string and shorten it.
 
   # "7Mvfktc4v4MZ8q68"
-  short_checksum "77de68daecd823babbb58edb1c8e14d7106e83bb";
+  short_checksum "eccbc87e4b5ce2fe28308fd9f2a7baf3";
 
 =head1 SEE ALSO
 
