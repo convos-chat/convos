@@ -45,7 +45,7 @@ onMount(() => {
 });
 
 function replaceBodyClassName(route, user) {
-  const appMode = route.component && route.requireLogin && user.is('authenticated');
+  const appMode = route.component && route.requireLogin && user.is('authenticated') && !user.is('offline');
   replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
 }
 
