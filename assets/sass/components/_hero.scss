@@ -5,7 +5,6 @@
 .hero {
   margin: 0 auto;
   padding: var(--gutter);
-  padding-top: 0;
   max-width: var(--content-max-width);
 
   nav {
@@ -46,6 +45,7 @@
 
 @include if_screen(">two-columns") {
   .hero {
+    padding-top: 2rem;
     display: flex;
     align-items: center;
   }
