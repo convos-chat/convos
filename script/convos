@@ -15,6 +15,7 @@ use feature 'state';
 use strict;
 use warnings;
 use Config;
+use Cwd ();
 use File::Spec;
 use FindBin;
 
@@ -25,7 +26,7 @@ our $VERSION = '4.22';
 
 # Need to be first, because it is called without parenthesis
 sub path_to {
-  state $home = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
+  state $home = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
   return File::Spec->catfile($home, @_);
 }
 
@@ -93,12 +94,15 @@ For developers:
   convos eval --help
 
 Commands:
+  build    Build JavaScript and CSS assets
   cpanm    Run cpanm and install to local lib
   daemon   Start the Convos server
   dev      Start the Convos development server
-  eval     Run code against Convos
+  eval     Run Perl code against Convos
   exec     Run shell command with Convos environment
   get      Perform HTTP request
+  install  Install dependencies
+  upgrade  Upgrade Convos to latest version
   version  Show versions of available modules
 
 See also https://convos.chat/doc for more information.
@@ -125,6 +129,38 @@ You can now run "$0 daemon --listen http://*:8000" to start Convos,
 or "$0 help" for more information.
 
 HERE
+}
+
+sub command_upgrade {
+  my $script = shift;
+
+  my $home = path_to;
+  chdir $home or die "Couldn't change working directory to $home: $!";
+
+  if (-d '.git') {
+    my %branches = map { s![\s\r\n]+$!!; my $c = !!s!\*\s*!!; ($_ => $c) } qx(git branch);
+    my ($branch) = grep { $branches{$_} } keys %branches;
+    die qq(Couldn't find active git branch in "$home".\n) unless $branch;
+    $script->_run_or_abort(qw(git pull origin) => $branch);
+  }
+  else {
+    my $version = $ENV{CONVOS_WANTED_VERSION} || 'stable';                         # experimental
+    my $url     = "https://github.com/nordaaker/convos/archive/$version.tar.gz";
+    my $tar     = _which('tar') or die qq(Couldn't find executable "tar".);
+    my $tar_cmd = "$tar xz --strip-components 1";
+
+    if (my $curl = _which('curl')) {
+      $script->_run_or_abort("$curl -s -L $url | $tar_cmd");
+    }
+    elsif (my $wget = _which('wget')) {
+      $script->_run_or_abort("$wget -q -O - $url | $tar_cmd");
+    }
+    else {
+      die qq(Couldn't find executable "curl" or "wget".);
+    }
+  }
+
+  return $script->command_install;
 }
 
 sub command_version {
@@ -248,6 +284,13 @@ sub _exit {
   exit 0 + ($? || $!);
 }
 
+sub _run_or_abort {
+  my ($script, @cmd) = @_;
+  return if $script->command_exec(@cmd);
+  my $exit_value = $? >> 8;
+  die "# Couldn't execute @cmd: $exit_value\n";
+}
+
 sub _setup_env {
   my ($script, $command) = @_;
   local ($@, $!) = ('', 0);
@@ -315,4 +358,13 @@ sub _warn_running_as_root {
   --------------------------------------------------------------------
 
 HERE
+}
+
+sub _which {
+  my $name = shift;
+  for my $dir (split ':', $ENV{PATH}) {
+    my $path = File::Spec->catfile($dir, $name);
+    return $path if -x $path;
+  }
+  return undef;
 }
