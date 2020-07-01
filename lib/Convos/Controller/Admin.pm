@@ -1,14 +1,17 @@
 package Convos::Controller::Admin;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Convos::Util 'disk_usage';
 use Mojo::JSON qw(false true);
 
 sub settings_get {
   my $self = shift->openapi->valid_input or return;
   return $self->unauthorized unless $self->user_has_admin_rights;
 
-  my $settings = $self->app->core->settings->TO_JSON;
-  my $config   = $self->render(openapi => $settings);
+  my $core     = $self->app->core;
+  my $settings = $core->settings->TO_JSON;
+  eval { $settings->{disk_usage} = disk_usage $core->home };
+  $self->render(openapi => $settings);
 }
 
 sub settings_update {

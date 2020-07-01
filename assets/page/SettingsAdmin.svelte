@@ -4,7 +4,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {copyToClipboard} from '../js/util';
+import {copyToClipboard, humanReadableNumber} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
@@ -17,6 +17,7 @@ const updateSettingsOp = user.api.operation('updateSettings');
 let convosSettings = {};
 
 $: invite = $inviteLinkOp.res.body || {};
+$: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
 
 updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
@@ -32,6 +33,20 @@ onMount(async () => {
   body.contact = body.contact.replace(/mailto:/, '');
   convosSettings = body;
 });
+
+function calculateDiskUsage(usage) {
+  if (!usage) return null;
+  const blockSize = usage.block_size || 1024;
+
+  return {
+    blocks_pct: Math.ceil(usage.blocks_used / usage.blocks_total * 100),
+    blocks_total: humanReadableNumber(blockSize * usage.blocks_total, 'B'),
+    blocks_used: humanReadableNumber(blockSize * usage.blocks_used, 'B'),
+    inodes_pct: Math.ceil(usage.inodes_used / usage.inodes_total * 100),
+    inodes_total: humanReadableNumber(usage.inodes_total),
+    inodes_used: humanReadableNumber(usage.inodes_used),
+  };
+}
 
 function generateInviteLink(e) {
   inviteLinkOp.perform(e.target);
@@ -119,4 +134,18 @@ function updateSettingsFromForm(e) {
 
     <OperationStatus op="{updateSettingsOp}"/>
   </form>
+
+  {#if diskUsage}
+    <div id="disk-usage">
+      <h2>{l('Disk usage')}</h2>
+      <div class="progress">
+        <div class="progress__bar" style="width:{diskUsage.blocks_pct}%;">{diskUsage.blocks_pct}%</div>
+      </div>
+      <p class="help">{l('Disk usage')}: {diskUsage.blocks_used} / {diskUsage.blocks_total}</p>
+       <div class="progress">
+        <div class="progress__bar" style="width:{diskUsage.inodes_pct}%;">{diskUsage.inodes_pct}%</div>
+      </div>
+      <p class="help">{l('Inode usage')}: {diskUsage.inodes_used} / {diskUsage.inodes_total}</p>
+    </div>
+  {/if}
 </main>

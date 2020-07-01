@@ -10,6 +10,7 @@
  * @exports ensureChildNode
  * @exports extractErrorMessage
  * @exports hsvToRgb
+ * @export humanReadableNumber
  * @exports isType
  * @exports loadScript
  * @exports modeClassNames
@@ -22,7 +23,11 @@
  * @exports tagNameIs
  * @exports uuidv4
  */
+
 const goldenRatio = 0.618033988749;
+const k = 1000;
+const M = k * 1000;
+const G = M * 1000;
 
 /**
  * Used to take snake case and turn it into camel case.
@@ -174,6 +179,23 @@ export function hsvToRgb(hue = 0, saturation = 0.5, value = 0.95) {
   }
 
   return [Math.floor(red * 255), Math.floor(green * 255), Math.floor(blue * 255)];
+}
+
+/*
+ * humanReadableNumber() will take a number and return a number in kilo, mega
+ * or giga.
+ *
+ * @param {Number} n Number of bytes
+ * @returns {String} Example: 2.4k, 3.4M or 8G
+ */
+export function humanReadableNumber(n, suffix) {
+  const h = n < k ? [n, '']
+          : n < M ? [n / k, 'k']
+          : n < G ? [n / M, 'M']
+          :         [n / G, 'G'];
+
+  const v = String(Math.round(h[0] * 10) / 10);
+  return (v.match(/\./) ? v : v + '.0') + h[1] + (suffix ? suffix : '');
 }
 
 /**

@@ -713,6 +713,23 @@ definitions:
       default_connection:
         format: uri
         type: string
+      disk_usage:
+        type: object
+        properties:
+          blocks_free:
+            type: integer
+          block_size:
+            type: integer
+          blocks_total:
+            type: integer
+          blocks_used:
+            type: integer
+          inodes_free:
+            type: integer
+          inodes_total:
+            type: integer
+          inodes_used:
+            type: integer
       forced_connection:
         type: boolean
       open_to_public:

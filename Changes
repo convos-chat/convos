@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.23 Not Released
  - Add "script/convos upgrade" sub-command
+ - Add disk usage to the settings page
 
 4.22 2020-06-18T11:11:00+0900
  - Fix not generating new "uid" for the users on restart

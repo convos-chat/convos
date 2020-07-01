@@ -23,6 +23,14 @@ $t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
   ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat');
 
+SKIP: {
+  local $TODO = "Cannot test on $^O", 1 unless $^O eq 'darwin' or $^O eq 'linux';
+  $t->json_like('/disk_usage/dev', qr{/dev/})->json_like('/disk_usage/block_size', qr{\d+})
+    ->json_like('/disk_usage/blocks_free', qr{\d+})->json_like('/disk_usage/blocks_total', qr{\d+})
+    ->json_like('/disk_usage/blocks_used', qr{\d+})->json_like('/disk_usage/inodes_free',  qr{\d+})
+    ->json_like('/disk_usage/inodes_total', qr{\d+})->json_like('/disk_usage/inodes_used', qr{\d+});
+}
+
 note 'input validation';
 $t->post_ok(
   '/api/settings',

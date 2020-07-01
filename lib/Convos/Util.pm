@@ -12,7 +12,7 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG E generate_secret has_many pretty_connection_name),
+  qw($CHANNEL_RE DEBUG E disk_usage generate_secret has_many pretty_connection_name),
   qw(require_module sdp_decode sdp_encode short_checksum tp),
 );
 
@@ -21,6 +21,36 @@ sub E {
   $msg =~ s! at \S+.*!!s;
   $msg =~ s!:.*!.!s;
   return {errors => [JSON::Validator::Error->new($path, $msg)]};
+}
+
+sub disk_usage {
+  my $path = shift;
+  state $df_bin = $ENV{CONVOS_DF_BINARY} || (-x '/bin/df' ? '/bin/df' : 'df');
+  state $key    = sub { s!^i!! ? "inodes_$_" : "blocks_$_" };
+
+  local $! = 1;
+  my %usage;
+  for my $opt ('', '-i') {
+    next unless open my $DF, '-|', $df_bin => $opt ? ($opt) : () => $path;
+    my $heading = readline $DF;
+    my @stats   = split /\s+/, readline $DF;
+    my @heading
+      = $heading =~ m!\bused.*iused!i ? qw(skip used free skip iused ifree)
+      : $opt eq '-i'                  ? qw(itotal iused ifree)
+      :                                 qw(total used free);
+
+    $usage{dev}        = shift @stats;
+    $usage{block_size} = $heading =~ /(\d+)-blocks/i ? $1 : 1024;
+    $usage{$key->()}   = shift @stats || 0 for @heading;
+    last if defined $usage{inodes_used};
+  }
+
+  delete $usage{blocks_skip};
+  die "Couldn't get disk usage: $!" unless %usage;
+  $usage{blocks_total} ||= $usage{blocks_used} + $usage{blocks_free};
+  $usage{inodes_total} ||= $usage{inodes_used} + $usage{inodes_free};
+  $usage{$_} = int $usage{$_} for grep { $_ ne 'dev' } keys %usage;
+  return \%usage;
 }
 
 sub generate_secret {
@@ -161,6 +191,25 @@ Convos::Util - Utility functions
 L<Convos::Util> is a utily module for L<Convos>.
 
 =head1 FUNCTIONS
+
+=head2 disk_usage
+
+  $usage = disk_usage $device;
+  $usage = disk_usage $path;
+
+Returns the number of blocks and inodes for a device or path. Will throw an
+exception if C<df> is not available. Example C<$usage>:
+
+  {
+    dev          => /dev/disk1s5,
+    block_size   => 512,
+    blocks_free  => 135681136,
+    blocks_total => 157617272,
+    blocks_used  => 21936136,
+    inodes_free  => 4881965009,
+    inodes_total => 4882452880,
+    inodes_used  => 487871,
+  }
 
 =head2 generate_secret
 
