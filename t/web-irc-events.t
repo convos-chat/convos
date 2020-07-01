@@ -8,7 +8,8 @@ $user->save_p;
 
 my $ws = t::Helper->t($th->app);
 $ws->websocket_ok('/events')
-  ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.')->finish_ok;
+  ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.')
+  ->json_message_is('/event', 'handshake')->finish_ok;
 
 for my $t ($th, $ws) {
   $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
@@ -59,13 +60,13 @@ $send{dialog_id} = '#convos';
 $send{id}        = '42';
 $ws->send_ok({json => \%send})->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/event', 'state')
-  ->json_message_is('/kicker', 'superman')->json_message_is('/message', 'So long...')
-  ->json_message_is('/nick', 'superduper')->json_message_is('/type', 'part')
+  ->json_message_is('/kicker',    'superman')->json_message_is('/message', 'So long...')
+  ->json_message_is('/nick',      'superduper')->json_message_is('/type', 'part')
   ->json_message_like('/ts', qr{^\d+-\d+-\d+});
 
 $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
   ->json_message_is('/dialog_id', '#convos')->json_message_is('/event', 'sent')
-  ->json_message_is('/id', '42')->json_message_is('/message', '/kick superduper')
-  ->json_message_is('/method', 'send');
+  ->json_message_is('/id',        '42')->json_message_is('/message', '/kick superduper')
+  ->json_message_is('/method',    'send');
 
 done_testing;
