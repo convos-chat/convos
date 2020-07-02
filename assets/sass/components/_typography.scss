@@ -55,6 +55,11 @@ dd {
 ol,
 ul {
   padding-left: 1.5rem;
+
+  ol,
+  ul {
+    margin-top: 0;
+  }
 }
 
 code,
