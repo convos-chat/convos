@@ -1,0 +1,644 @@
+#: assets/page/Help.svelte:55
+msgid "\"#\" will show the matching conversation names."
+msgstr "\"#\" will show the matching conversation names."
+
+#: assets/page/Help.svelte:54
+msgid "\"/\" will show the available commands."
+msgstr "\"/\" will show the available commands."
+
+#: assets/page/Help.svelte:53
+msgid "\":\" followed by a character will show matching emojis."
+msgstr "\":\" followed by a character will show matching emojis."
+
+#: assets/page/Help.svelte:52
+msgid "\"@\" followed by a character will show matching nicks in the current conversation."
+msgstr "\"@\" followed by a character will show matching nicks in the current conversation."
+
+#: assets/page/DialogAdd.svelte:71
+msgid "#room or nick"
+msgstr "#room or nick"
+
+#: assets/page/Search.svelte:99
+msgid "%1 in %2"
+msgstr "%1 in %2"
+
+#: assets/page/Help.svelte:65
+msgid "*some text*, **some text**, ***some text***"
+msgstr "*some text*, **some text**, ***some text***"
+
+#: assets/page/Help.svelte:63
+msgid "> some text"
+msgstr "> some text"
+
+#: assets/page/Help.svelte:64
+msgid "A line starting with \">\" will be converted into a quote."
+msgstr "A line starting with \">\" will be converted into a quote."
+
+#: assets/page/SettingsAdmin.svelte:78
+msgid "A link was generated"
+msgstr "A link was generated"
+
+#: assets/components/SidebarChat.svelte:187
+msgid "Account"
+msgstr "Account"
+
+#: assets/page/DialogAdd.svelte:77
+msgid "Add"
+msgstr "Add"
+
+#: assets/components/SidebarChat.svelte:183
+msgid "Add connection"
+msgstr "Add connection"
+
+#: assets/components/SidebarChat.svelte:179
+msgid "Add conversation"
+msgstr "Add conversation"
+
+#: assets/page/SettingsAdmin.svelte:109
+msgid "Admin email"
+msgstr "Admin email"
+
+#: assets/page/Login.svelte:61
+msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
+msgstr "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
+
+#: assets/page/Help.svelte:49
+msgid "Autocomplete"
+msgstr "Autocomplete"
+
+#: assets/page/Help.svelte:73
+msgid "Available commands"
+msgstr "Available commands"
+
+#: assets/page/Help.svelte:85
+msgid "Bug/issue tracker"
+msgstr "Bug/issue tracker"
+
+#: assets/page/Chat.svelte:147
+msgid "Call"
+msgstr "Call"
+
+#: assets/page/SettingsAdmin.svelte:100
+msgid "Can be changed if you want to add a touch of your organization."
+msgstr "Can be changed if you want to add a touch of your organization."
+
+#: assets/page/Help.svelte:46
+msgid "Clicking on the icon next to the conversation name will take you to settings."
+msgstr "Clicking on the icon next to the conversation name will take you to settings."
+
+#: assets/page/SettingsAccount.svelte:100
+msgid "Color scheme"
+msgstr "Color scheme"
+
+#: assets/components/SettingsHeader.svelte:9
+msgid "Connection"
+msgstr "Connection"
+
+#: assets/components/ChatDialogAdd.svelte:14
+msgid "Connection does not exist."
+msgstr "Connection does not exist."
+
+#: assets/components/ConnectionSettings.svelte:26
+msgid "Connection not found."
+msgstr "Connection not found."
+
+#: assets/page/Fallback.svelte:34
+msgid "Contact admin"
+msgstr "Contact admin"
+
+#: assets/components/SettingsHeader.svelte:9
+msgid "Conversation"
+msgstr "Conversation"
+
+#: assets/components/ConnectionForm.svelte:122
+msgid "Conversation name"
+msgstr "Conversation name"
+
+#: assets/components/DialogSettings.svelte:55
+msgid "Conversation with %1 is frozen. Reason: %2"
+msgstr "Conversation with %1 is frozen. Reason: %2"
+
+#: assets/components/SidebarChat.svelte:145
+msgid "Conversations"
+msgstr "Conversations"
+
+#: assets/components/ChatMessagesContainer.svelte:40
+msgid "Convos"
+msgstr "Convos"
+
+#: assets/page/Login.svelte:90
+msgid "Convos is not open for public registration."
+msgstr "Convos is not open for public registration."
+
+#: assets/page/SettingsAdmin.svelte:95
+msgid "Convos settings"
+msgstr "Convos settings"
+
+#: assets/page/Help.svelte:59
+msgid "Convos supports some special way of formatting text:"
+msgstr "Convos supports some special way of formatting text:"
+
+#: assets/components/ConnectionForm.svelte:151
+msgid "Create"
+msgstr "Create"
+
+#: assets/components/ConnectionSettings.svelte:30
+msgid "Currently connected to %1."
+msgstr "Currently connected to %1."
+
+#: assets/components/ConnectionSettings.svelte:32
+msgid "Currently connecting to %1."
+msgstr "Currently connecting to %1."
+
+#: assets/components/ConnectionSettings.svelte:28
+msgid "Currently disconnected from %1."
+msgstr "Currently disconnected from %1."
+
+#: assets/page/SettingsAdmin.svelte:114
+msgid "Default connection URL"
+msgstr "Default connection URL"
+
+#: assets/components/ConnectionForm.svelte:149
+msgid "Delete"
+msgstr "Delete"
+
+#: assets/page/Help.svelte:95
+msgid "Demo error pages"
+msgstr "Demo error pages"
+
+#: assets/page/SettingsAdmin.svelte:144
+msgid "Disk usage"
+msgstr "Disk usage"
+
+#: assets/components/ChatMessagesContainer.svelte:40
+msgid "Do you want %1 to handle \"irc://\" links?"
+msgstr "Do you want %1 to handle \"irc://\" links?"
+
+#: assets/components/ChatMessagesContainer.svelte:33
+msgid "Do you want to be notified when someone sends you a private message?"
+msgstr "Do you want to be notified when someone sends you a private message?"
+
+#: assets/components/ChatDialogAdd.svelte:22
+msgid "Do you want to chat with \"%1\"?"
+msgstr "Do you want to chat with \"%1\"?"
+
+#: assets/components/ChatDialogAdd.svelte:15
+msgid "Do you want to create the connection \"%1\"?"
+msgstr "Do you want to create the connection \"%1\"?"
+
+#: assets/page/Fallback.svelte:31
+msgid "Downloaded Convos."
+msgstr "Downloaded Convos."
+
+#: assets/page/Login.svelte:103
+msgid "E-mail"
+msgstr "E-mail"
+
+#: assets/page/SettingsAccount.svelte:78
+msgid "Email"
+msgstr "Email"
+
+#: assets/page/SettingsAccount.svelte:87
+msgid "Enable notifications"
+msgstr "Enable notifications"
+
+#: assets/page/DialogAdd.svelte:56
+msgid "Enter the name of an exising conversation, or create a new conversation."
+msgstr "Enter the name of an exising conversation, or create a new conversation."
+
+#: assets/components/ConnectionForm.svelte:121
+msgid "Ex: #convos"
+msgstr "Ex: #convos"
+
+#: assets/components/ConnectionForm.svelte:105
+msgid "Ex: chat.freenode.net:6697"
+msgstr "Ex: chat.freenode.net:6697"
+
+#: assets/page/SettingsAdmin.svelte:108
+msgid "Ex: jhthorsen@cpan.org"
+msgstr "Ex: jhthorsen@cpan.org"
+
+#: assets/page/Login.svelte:102
+msgid "Ex: john@doe.com"
+msgstr "Ex: john@doe.com"
+
+#: assets/components/ConnectionForm.svelte:112
+msgid "Ex: your-name"
+msgstr "Ex: your-name"
+
+#: assets/page/SettingsAccount.svelte:92
+msgid "Expand URL to media"
+msgstr "Expand URL to media"
+
+#: assets/page/SettingsAdmin.svelte:122
+msgid "Force default connection"
+msgstr "Force default connection"
+
+#: assets/page/SettingsAdmin.svelte:88
+msgid "Generate link"
+msgstr "Generate link"
+
+#: assets/page/SettingsAdmin.svelte:66
+msgid "Global settings"
+msgstr "Global settings"
+
+#: assets/page/Fallback.svelte:43
+msgid "Go to start page"
+msgstr "Go to start page"
+
+#: assets/page/Chat.svelte:145
+msgid "Hangup"
+msgstr "Hangup"
+
+#: assets/components/SidebarChat.svelte:191
+msgid "Help"
+msgstr "Help"
+
+#: assets/page/Login.svelte:79
+msgid "Hint: Use a phrase from a book."
+msgstr "Hint: Use a phrase from a book."
+
+#: assets/components/ConnectionForm.svelte:106
+msgid "Host and port"
+msgstr "Host and port"
+
+#: assets/page/SettingsAdmin.svelte:148
+msgid "Inode usage"
+msgstr "Inode usage"
+
+#: assets/page/Login.svelte:51
+msgid "Invalid invite/recover URL"
+msgstr "Invalid invite/recover URL"
+
+#: assets/page/DialogAdd.svelte:57
+msgid "It is also possible to load in all existing conversations for a given connection."
+msgstr "It is also possible to load in all existing conversations for a given connection."
+
+#: assets/page/Chat.svelte:180
+msgid "Jump to %1"
+msgstr "Jump to %1"
+
+#: assets/page/Help.svelte:28
+msgid "Jump to:"
+msgstr "Jump to:"
+
+#: assets/components/DialogSettings.svelte:96
+msgid "Leave"
+msgstr "Leave"
+
+#: assets/page/SettingsAccount.svelte:110
+msgid "Leave the password fields empty to keep the current password."
+msgstr "Leave the password fields empty to keep the current password."
+
+#: assets/page/DialogAdd.svelte:66
+msgid "Load"
+msgstr "Load"
+
+#: assets/page/Fallback.svelte:33
+msgid "Loading user data..."
+msgstr "Loading user data..."
+
+#: assets/components/ChatMessagesContainer.svelte:48
+msgid "Loading..."
+msgstr "Loading..."
+
+#: assets/components/SidebarChat.svelte:201
+msgid "Log out"
+msgstr "Log out"
+
+#: assets/page/Chat.svelte:161
+msgid "New messages"
+msgstr "New messages"
+
+#: assets/components/ConnectionForm.svelte:113
+msgid "Nickname"
+msgstr "Nickname"
+
+#: assets/components/ChatMessagesContainer.svelte:43
+msgid "No"
+msgstr "No"
+
+#: assets/components/SidebarChat.svelte:149
+msgid "No conversations"
+msgstr "No conversations"
+
+#: assets/page/Search.svelte:79
+msgid "No notifications."
+msgstr "No notifications."
+
+#: assets/page/Search.svelte:81
+msgid "No search results for \"%1\"."
+msgstr "No search results for \"%1\"."
+
+#: assets/components/DialogSettings.svelte:71
+msgid "No topic is set."
+msgstr "No topic is set."
+
+#: assets/page/SettingsAdmin.svelte:98
+msgid "Nordaaker"
+msgstr "Nordaaker"
+
+#: assets/page/SettingsAccount.svelte:82
+msgid "Notification keywords"
+msgstr "Notification keywords"
+
+#: assets/components/SidebarChat.svelte:170
+msgid "Notifications"
+msgstr "Notifications"
+
+#: assets/components/ConnectionForm.svelte:144
+msgid "On-connect commands"
+msgstr "On-connect commands"
+
+#: assets/page/Help.svelte:45
+msgid "Open conversation or connection settings"
+msgstr "Open conversation or connection settings"
+
+#: assets/page/SettingsAdmin.svelte:104
+msgid "Organization URL"
+msgstr "Organization URL"
+
+#: assets/page/SettingsAdmin.svelte:99
+msgid "Organization name"
+msgstr "Organization name"
+
+#: assets/page/Help.svelte:82
+msgid "Other resources"
+msgstr "Other resources"
+
+#: assets/components/ChatParticipants.svelte:76
+msgid "Participants (%1)"
+msgstr "Participants (%1)"
+
+#: assets/components/DialogSettings.svelte:82
+msgid "Password"
+msgstr "Password"
+
+#: assets/page/Login.svelte:53
+msgid "Please ask your Convos admin for a new link."
+msgstr "Please ask your Convos admin for a new link."
+
+#: assets/page/Login.svelte:91
+msgid "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
+msgstr "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
+
+#: assets/components/DialogSettings.svelte:57
+msgid "Private conversation with %1."
+msgstr "Private conversation with %1."
+
+#: assets/page/Help.svelte:84
+msgid "Project homepage"
+msgstr "Project homepage"
+
+#: assets/page/Login.svelte:59
+msgid "Recover account"
+msgstr "Recover account"
+
+#: assets/page/SettingsAdmin.svelte:71
+msgid "Recover or invite"
+msgstr "Recover or invite"
+
+#: assets/page/DialogAdd.svelte:66
+msgid "Refresh"
+msgstr "Refresh"
+
+#: assets/page/SettingsAdmin.svelte:127
+msgid "Registration is open to public"
+msgstr "Registration is open to public"
+
+#: assets/page/SettingsAccount.svelte:107
+msgid "Repeat password"
+msgstr "Repeat password"
+
+#: assets/page/Fallback.svelte:40
+msgid "Retry"
+msgstr "Retry"
+
+#: assets/page/SettingsAdmin.svelte:132
+msgid "Save settings"
+msgstr "Save settings"
+
+#: assets/components/SidebarChat.svelte:175
+msgid "Search"
+msgstr "Search"
+
+#: assets/components/SidebarChat.svelte:205
+msgid "Search for \"%1\""
+msgstr "Search for \"%1\""
+
+#: assets/components/SidebarChat.svelte:134
+msgid "Search for conversations or messages"
+msgstr "Search for conversations or messages"
+
+#: assets/components/ConnectionForm.svelte:127
+msgid "Secure connection (TLS)"
+msgstr "Secure connection (TLS)"
+
+#: assets/page/DialogAdd.svelte:62
+msgid "Select..."
+msgstr "Select..."
+
+#: assets/components/DialogSettings.svelte:87
+msgid "Send me notifications"
+msgstr "Send me notifications"
+
+#: assets/page/Login.svelte:83
+msgid "Set new password"
+msgstr "Set new password"
+
+#: assets/components/SidebarChat.svelte:196
+msgid "Settings"
+msgstr "Settings"
+
+#: assets/page/Help.svelte:44
+msgid "Shift focus between chat input and search in sidebar."
+msgstr "Shift focus between chat input and search in sidebar."
+
+#: assets/page/Help.svelte:41
+msgid "Shortcuts"
+msgstr "Shortcuts"
+
+#: assets/components/ConnectionForm.svelte:135
+msgid "Show advanced settings"
+msgstr "Show advanced settings"
+
+#: assets/page/DialogAdd.svelte:90
+msgid "Showing %1 of %2 conversations, but the list is still loading."
+msgstr "Showing %1 of %2 conversations, but the list is still loading."
+
+#: assets/page/DialogAdd.svelte:88
+msgid "Showing %1 of %2 conversations."
+msgstr "Showing %1 of %2 conversations."
+
+#: assets/page/Login.svelte:112
+msgid "Sign in"
+msgstr "Sign in"
+
+#: assets/page/Login.svelte:89
+msgid "Sign up"
+msgstr "Sign up"
+
+#: assets/page/Help.svelte:86
+msgid "Source code"
+msgstr "Source code"
+
+#: assets/page/Fallback.svelte:32
+msgid "Started Convos."
+msgstr "Started Convos."
+
+#: assets/components/ChatMessagesContainer.svelte:26
+msgid "Started chatting on %1"
+msgstr "Started chatting on %1"
+
+#: assets/page/Help.svelte:58
+msgid "Text formatting"
+msgstr "Text formatting"
+
+#: assets/page/Fallback.svelte:36
+msgid "The Convos Team have been searching and searching, but the requested page could not be found."
+msgstr "The Convos Team have been searching and searching, but the requested page could not be found."
+
+#: assets/page/Help.svelte:50
+msgid "The following rules apply when typing a message:"
+msgstr "The following rules apply when typing a message:"
+
+#: assets/page/Login.svelte:52
+msgid "The link has expired."
+msgstr "The link has expired."
+
+#: assets/page/Login.svelte:52
+msgid "The link is invalid."
+msgstr "The link is invalid."
+
+#: assets/page/SettingsAdmin.svelte:117
+msgid "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
+msgstr "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
+
+#: assets/page/SettingsAccount.svelte:96
+msgid "Theme"
+msgstr "Theme"
+
+#: assets/page/SettingsAdmin.svelte:110
+msgid "This email can be used by users to get in touch with the Convos admin."
+msgstr "This email can be used by users to get in touch with the Convos admin."
+
+#: assets/page/SettingsAdmin.svelte:116
+msgid "This is the default connection new users will connect to."
+msgstr "This is the default connection new users will connect to."
+
+#: assets/page/SettingsAdmin.svelte:124
+msgid "Tick this box if you want to prevent users from creating custom connections."
+msgstr "Tick this box if you want to prevent users from creating custom connections."
+
+#: assets/page/SettingsAdmin.svelte:129
+msgid "Tick this box if you want users to be able to register without an invite URL."
+msgstr "Tick this box if you want users to be able to register without an invite URL."
+
+#: assets/page/SettingsAdmin.svelte:84
+msgid "Tip: Clicking on the link will copy it to your clipboard."
+msgstr "Tip: Clicking on the link will copy it to your clipboard."
+
+#: assets/components/DialogSettings.svelte:76
+msgid "Topic"
+msgstr "Topic"
+
+#: assets/page/Help.svelte:70
+msgid "URLs will be converted to links, and might be embedded in the chat."
+msgstr "URLs will be converted to links, and might be embedded in the chat."
+
+#: assets/page/Fallback.svelte:39
+msgid "Unable to connect to Convos. Please try again later or check your network connection."
+msgstr "Unable to connect to Convos. Please try again later or check your network connection."
+
+#: assets/components/DialogSettings.svelte:94
+msgid "Update"
+msgstr "Update"
+
+#: assets/page/SettingsAdmin.svelte:105
+msgid "Used together with \"Organization name\" to add a link to your organization on the login screen."
+msgstr "Used together with \"Organization name\" to add a link to your organization on the login screen."
+
+#: assets/page/SettingsAdmin.svelte:74
+msgid "User email"
+msgstr "User email"
+
+#: assets/components/ConnectionForm.svelte:138
+msgid "Username"
+msgstr "Username"
+
+#: assets/page/SettingsAdmin.svelte:72
+msgid "Using this form, you can generate an invite link for new users, or a recover password link for existing users."
+msgstr "Using this form, you can generate an invite link for new users, or a recover password link for existing users."
+
+#: assets/components/ConnectionForm.svelte:131
+msgid "Verify certificate (TLS)"
+msgstr "Verify certificate (TLS)"
+
+#: assets/components/ConnectionForm.svelte:118
+msgid "Want to be connected"
+msgstr "Want to be connected"
+
+#: assets/page/Help.svelte:62
+msgid "Will be automatically converted into emojis."
+msgstr "Will be automatically converted into emojis."
+
+#: assets/components/ChatMessagesContainer.svelte:42
+msgid "Yes"
+msgstr "Yes"
+
+#: assets/components/DialogSettings.svelte:59
+msgid "You are channel operator in %1."
+msgstr "You are channel operator in %1."
+
+#: assets/components/DialogSettings.svelte:61
+msgid "You are not a channel operator in %1."
+msgstr "You are not a channel operator in %1."
+
+#: assets/components/ChatDialogAdd.svelte:21
+msgid "You are not part of this conversation."
+msgstr "You are not part of this conversation."
+
+#: assets/page/SettingsAccount.svelte:119
+msgid "You cannot receive notifications, because it is denied by your browser."
+msgstr "You cannot receive notifications, because it is denied by your browser."
+
+#: assets/page/Login.svelte:70
+msgid "Your email is from the invite link."
+msgstr "Your email is from the invite link."
+
+#: assets/page/Login.svelte:72
+msgid "Your email will be used if you forget your password."
+msgstr "Your email will be used if you forget your password."
+
+#: assets/page/Help.svelte:67
+msgid "`some fragment`"
+msgstr "`some fragment`"
+
+#: assets/page/SettingsAdmin.svelte:103
+msgid "https://convos.chat"
+msgstr "https://convos.chat"
+
+#: assets/page/SettingsAdmin.svelte:113
+msgid "irc://chat.freenode.net:6697/%%23convos"
+msgstr "irc://chat.freenode.net:6697/%%23convos"
+
+#: assets/page/Search.svelte:81
+msgid "q"
+msgstr "q"
+
+#: assets/page/Help.svelte:43
+msgid "shift+enter"
+msgstr "shift+enter"
+
+#: assets/components/ChatParticipants.svelte:39
+msgid "unknown"
+msgstr "unknown"
+
+#: assets/page/SettingsAdmin.svelte:73
+msgid "user@example.com"
+msgstr "user@example.com"
+
+#: assets/page/SettingsAccount.svelte:81
+msgid "whatever, keywords"
+msgstr "whatever, keywords"
+
