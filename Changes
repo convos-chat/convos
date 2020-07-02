@@ -3,6 +3,11 @@ Revision history for perl distribution Convos
 4.23 Not Released
  - Add "script/convos upgrade" sub-command
  - Add disk usage to the settings page
+ - Add "bot" functionality through Convos::Plugin::Bot #502
+   * Add "Calc" bot action
+   * Add "Core" bot action
+   * Add "Hailo" bot action
+   * Add "Karma" bot action
 
 4.22 2020-06-18T11:11:00+0900
  - Fix not generating new "uid" for the users on restart

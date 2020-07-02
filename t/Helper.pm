@@ -54,6 +54,18 @@ sub irc_server_messages {
   $IRC_SERVER->unsubscribe(message => $cb);
 }
 
+sub make_default_server {
+  my ($class, $scheme) = (@_, 'irc');
+  return $IRC_SERVER if $IRC_SERVER;
+
+  my $port = Mojo::IOLoop::Server->generate_port;
+  my $url  = Mojo::URL->new->host('127.0.0.1')->port($port)->scheme($scheme);
+  Mojo::IOLoop->server({address => $url->host, port => $url->port}, \&_on_irc_server_connect);
+  $url->query->param(tls => 0);
+  $ENV{CONVOS_DEFAULT_CONNECTION} ||= "$url";
+  return ($IRC_SERVER = Mojo::EventEmitter->new(connect_url => $url));
+}
+
 sub subprocess_in_main_process {
   require Mojo::IOLoop::Subprocess;
   Mojo::Util::monkey_patch(

@@ -173,8 +173,8 @@ sub _plugins {
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
   my @plugins = (
-    qw(Convos::Plugin::Auth Convos::Plugin::Cms Convos::Plugin::Files),
-    qw(Convos::Plugin::Helpers Convos::Plugin::Themes)
+    qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
+    qw(Convos::Plugin::Files Convos::Plugin::Helpers Convos::Plugin::Themes)
   );
 
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
