@@ -5,10 +5,6 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-# Keep it running for branches such as jhthorsen/cool-feature
-plan skip_all => 'Not sure why this test fails on travis' if $ENV{TRAVIS_BUILD_ID}
-  and $ENV{TRAVIS_BRANCH} =~ m!^([\w\.]+)$!;
-
 my $core = core();
 my $user = $core->user({email => 'test.user@example.com'});
 $user->save_p->$wait_success;
@@ -39,8 +35,7 @@ t::Helper->irc_server_messages(
   qr{NICK} => ['welcome.irc'],
   $connection, '_irc_event_rpl_welcome',
   qr{PRIVMSG NickServ} => ['identify.irc'],
-  $connection, '_irc_event_privmsg',
-  qr{JOIN} => ['join-convos.irc'],
+  qr{JOIN}             => ['join-convos.irc'],
   $connection, '_irc_event_join', $connection, '_irc_event_rpl_topic', $connection,
   '_irc_event_rpl_topicwhotime', $connection, '_irc_event_rpl_namreply', $connection,
   '_irc_event_rpl_endofnames',
