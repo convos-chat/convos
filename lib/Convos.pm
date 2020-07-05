@@ -17,7 +17,11 @@ has core => sub {
   my $self = shift;
   my $home = Cwd::abs_path($self->config('home')) || $self->config('home');
 
-  return Convos::Core->new(backend => $self->config('backend'), home => path(split '/', $home));
+  return Convos::Core->new(
+    backend => $self->config('backend'),
+    home    => path(split '/', $home),
+    log     => $self->log
+  );
 };
 
 sub startup {

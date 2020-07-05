@@ -6,6 +6,7 @@ use Convos::Core::Settings;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
 use Mojo::File;
+use Mojo::Log;
 use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojolicious::Plugins;
@@ -13,6 +14,7 @@ use Mojolicious::Plugins;
 has backend  => sub { Convos::Core::Backend->new };
 has base_url => sub { Mojo::URL->new };
 has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+has log      => sub { Mojo::Log->new };
 
 has settings => sub {
   my $self     = shift;
@@ -229,6 +231,13 @@ instance.
   $core = $core->home(Mojo::File->new($ENV{CONVOS_HOME});
 
 Holds a L<Mojo::File> object pointing to where Convos store data.
+
+=head2 log
+
+  $log = $core->log;
+  $core = $core->log(Mojo::Log->new);
+
+Holds a L<Mojo::Log> object.
 
 =head1 METHODS
 
