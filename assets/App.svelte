@@ -1,20 +1,23 @@
 <script>
 import Api from './js/Api';
+import User from './store/User';
+import WebRTC from './store/WebRTC';
+import {focusMainInputElements, loadScript, q, replaceClassName} from './js/util';
+import {fade} from 'svelte/transition';
+import {onMount, setContext} from 'svelte';
+import {l} from './js/i18n';
+import {notify} from './js/Notify';
+import {route} from './store/Route';
+import {socket} from './js/Socket';
+import {setupRouting} from './routes';
+import {viewport} from './store/Viewport';
+
+// Page components
 import ConnectionSettings from './components/ConnectionSettings.svelte';
 import DialogSettings from './components/DialogSettings.svelte';
 import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
-import User from './store/User';
-import WebRTC from './store/WebRTC';
-import {focusMainInputElements, loadScript, q, showEl, tagNameIs} from './js/util';
-import {fade} from 'svelte/transition';
-import {l} from './js/i18n';
-import {onMount, setContext} from 'svelte';
-import {replaceClassName} from './js/util';
-import {route} from './store/Route';
-import {setupRouting} from './routes';
-import {viewport} from './store/Viewport';
 
 const api = new Api(process.env.api_url, {debug: true});
 const user = new User({api, isFirst: process.env.first_user, themes: process.env.themes});
@@ -23,12 +26,15 @@ const rtc = new WebRTC({embedMaker: user.embedMaker});
 let [innerHeight, innerWidth] = [0, 0];
 
 setContext('rtc', rtc);
+setContext('socket', socket('/events').update({url: process.env.ws_url}).toFunction());
 setContext('user', user);
 
 route.update({baseUrl: process.env.base_url});
+registerServiceWorker();
+
+notify().on('click', (params) => (params.path && route.go(params.path)));
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
-user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set
 
 $: calculateTitle($route, $user);
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
@@ -53,6 +59,15 @@ function calculateTitle(route, user) {
     = organizationName == 'Convos' ? l('%1 - Convos', title) : l('%1 - Convos for %2', title, organizationName);
 }
 
+async function registerServiceWorker() {
+  if (!navigator.serviceWorker) return;
+  const reg = await navigator.serviceWorker.register(route.urlFor('/sw.js'));
+  const assetVersion = process.env.asset_version;
+  if (user.assetVersion == assetVersion) return;
+  user.update({assetVersion});
+  reg.update();
+}
+
 function replaceBodyClassName(route, user) {
   const appMode = route.component && route.requireLogin && user.is('authenticated') && !user.is('offline');
   replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
@@ -74,14 +89,12 @@ function onGlobalKeydown(e) {
 </script>
 
 <svelte:window
-  on:focus="{() => user.email && user.omnibus.send('ping')}"
+  on:focus="{() => user.email && socket('/events', {})}"
   on:keydown="{onGlobalKeydown}"
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>
 
-{#if $user.is('offline')}
-  <Fallback/>
-{:else if $route.component && $route.requireLogin && $user.is('authenticated')}
+{#if $route.component && $route.requireLogin && $user.is('authenticated')}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
     and a lot of $route updates prevents the <SidebarChat/> and/or

@@ -5,8 +5,9 @@ import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '..
 import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
-import {omnibus} from '../store/Omnibus';
+import {notify} from '../js/Notify';
 import {route} from '../store/Route';
+import {socket} from '../js/Socket';
 
 const channelRe = new RegExp('^[#&]');
 
@@ -28,7 +29,6 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
-    this.prop('ro', 'omnibus', params.omnibus || omnibus);
     this.prop('ro', 'path', route.dialogPath(params));
 
     this.prop('rw', 'endOfHistory', null);
@@ -65,7 +65,7 @@ export default class Dialog extends Reactive {
     if (msg.from && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
       if (msg.highlight || this.is_private || this.wantNotifications) {
         const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-        this.omnibus.notify(title, msg.message, {path: this.path});
+        notify(msg.message, {path: this.path, title});
       }
 
       if (!msg.yourself) this.update({unread: this.unread + 1});
@@ -178,12 +178,9 @@ export default class Dialog extends Reactive {
     return this._participants.toArray();
   }
 
-  send(message, methodName) {
+  send(message) {
     if (typeof message == 'string') message = {message};
-    this.omnibus.send(
-      {connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message},
-      typeof methodName == 'function' ? methodName : methodName ? this[methodName].bind(this) : null,
-    );
+    return socket('/events', {method: 'send', connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message});
   }
 
   async setLastRead() {
@@ -199,11 +196,7 @@ export default class Dialog extends Reactive {
   }
 
   wsEventRtc(params) {
-    if (params.type == 'call') {
-      this.addMessage({highlight: true, message: '%1 is calling.', vars: [params.from]});
-      this.omnibus.notify(params.dialog_id, l('%1 is calling.', params.from), {force: true, path: this.path});
-    }
-
+    if (params.type == 'call') this.addMessage({highlight: true, message: '%1 is calling.', vars: [params.from]});
     if (params.type == 'hangup') this.addMessage({message: '%1 ended the call.', vars: [params.from]});
     this.emit('rtc', params);
   }
@@ -306,7 +299,7 @@ export default class Dialog extends Reactive {
     if (this.participantsLoaded || !this.dialog_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is_private ? this.send('/ison', '_noop') : this.send('/names', '_updateParticipants');
+    return this.is_private ? this.send('/ison') : this.send('/names').then(this._updateParticipants.bind(this));
   }
 
   _noop() {

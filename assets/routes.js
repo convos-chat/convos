@@ -36,11 +36,11 @@ export function setupRouting(route, user) {
 }
 
 function listenToDialogEvents(route, user) {
-  user.omnibus.on('wsEventSentJoin', e => {
+  user.on('wsEventSentJoin', e => {
     route.go(route.dialogPath(e));
   });
 
-  user.omnibus.on('wsEventSentPart', e => {
+  user.on('wsEventSentPart', e => {
     const conn = user.findDialog({connection_id: e.connection_id});
     if (!conn) return route.go('/settings/connection');
     const dialog = conn.dialogs.toArray()[0];

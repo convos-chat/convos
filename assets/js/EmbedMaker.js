@@ -5,7 +5,7 @@ import {jsonhtmlify} from 'jsonhtmlify';
 import {sameOrigin} from './util';
 
 export default class EmbedMaker extends Reactive {
-  constructor(params) {
+  constructor() {
     super();
     this.name = 'EmbedMaker';
     this.prop('persist', 'disableInstagram', false);

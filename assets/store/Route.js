@@ -153,9 +153,6 @@ export default class Route extends Reactive {
   }
 
   _onClick(e) {
-    // This is useful if you want to see on server side what is being clicked on
-    // omnibus.send({method: 'debug', type: e.type, target: e.target.tagName, className: e.target.className});
-
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
 
     const linkEl = e.target && e.target.closest('a');

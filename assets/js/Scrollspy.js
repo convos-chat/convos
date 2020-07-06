@@ -1,6 +1,5 @@
 import Reactive from './Reactive';
 import {isISOTimeString} from './Time';
-import {omnibus} from '../store/Omnibus';
 import {route} from '../store/Route';
 
 export default class Scrollspy extends Reactive {
@@ -49,7 +48,6 @@ export default class Scrollspy extends Reactive {
     if (height) this.height = height;
 
     const locked = this.onScrollTid && !this.cancelNextOnScroll ? true : false;
-    if (omnibus.debug > 1) console.log('[Scrollspy:keepPos]', {height, locked, scrollTop: this.wrapper && this.wrapper.scrollTop});
     if (!this.wrapper || locked) return;
 
     const selector = !route.hash ? '' : isISOTimeString(route.hash) ? '[data-ts="' + route.hash + '"]' : '#' + route.hash;
@@ -101,11 +99,7 @@ export default class Scrollspy extends Reactive {
   scrollTo(to, guard = 0) {
     if (guard >= 5) return; // Give up
     if (!this.wrapper) return setTimeout(() => this.scrollTo(to, guard + 1), 20);
-    if (omnibus.debug > 1) console.log('[Scrollspy:scrollTo]', to);
-
-    if (typeof to == 'number') {
-      return (this.wrapper.scrollTop = to);
-    }
+    if (typeof to == 'number') return (this.wrapper.scrollTop = to);
 
     if (typeof to == 'string') {
       if (to.indexOf('#') == 0) to = '#' + to.substring(1).replace(/\W/g, '-').replace(/^([^a-zA-Z_])/, '_$1');

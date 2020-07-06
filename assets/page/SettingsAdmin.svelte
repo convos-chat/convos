@@ -7,6 +7,7 @@ import TextField from '../components/form/TextField.svelte';
 import {copyToClipboard, humanReadableNumber} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
 const user = getContext('user');
@@ -54,7 +55,7 @@ function generateInviteLink(e) {
 
 function copyInviteLink(e) {
   const copied = copyToClipboard(e.target);
-  if (copied) user.omnibus.notify('Invite link copied', copied, {force: true});
+  if (copied) notify(copied, {title: l('Invite link copied')});
 }
 
 function updateSettingsFromForm(e) {

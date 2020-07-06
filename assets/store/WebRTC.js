@@ -2,7 +2,6 @@ import adapter from 'webrtc-adapter';
 import Reactive from '../js/Reactive';
 import WebRTCPeerConnection from './WebRTCPeerConnection';
 import {clone, q, showEl} from '../js/util';
-import {omnibus} from '../store/Omnibus';
 
 /*
  * https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API

@@ -105,7 +105,6 @@ function toggleDetails(e) {
 function setDialogFromRoute(route) {
   const [connection_id, dialog_id] = ['connection_id', 'dialog_id'].map(k => route.param(k));
   if (dialog.connection_id == connection_id && dialog.dialog_id == dialog_id) return;
-  if (user.omnibus.debug > 1) console.log('[setDialogFromRoute]', JSON.stringify([connection_id, dialog_id]));
   user.setActiveDialog({connection_id, dialog_id}); // Triggers setDialogFromUser()
 }
 
@@ -116,8 +115,6 @@ async function setDialogFromUser(user) {
     unsubscribe.dialog();
     if (dialog.setLastRead) dialog.setLastRead();
   }
-
-  if (user.omnibus.debug) console.log('[setDialogFromUser]', user.activeDialog.name);
 
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || {};

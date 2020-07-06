@@ -5,9 +5,9 @@ import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
-import {extractErrorMessage} from '../js/util';
-import {omnibus} from '../store/Omnibus';
+import {camelize, extractErrorMessage} from '../js/util';
 import {route} from './Route';
+import {socket} from './../js/Socket';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -17,11 +17,10 @@ export default class User extends Reactive {
     this.prop('ro', 'api', () => api);
     this.prop('ro', 'connections', new SortedMap());
     this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
-    this.prop('ro', 'embedMaker', new EmbedMaker({api}));
+    this.prop('ro', 'embedMaker', new EmbedMaker());
     this.prop('ro', 'isFirst', params.isFirst || false);
     this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({api}));
-    this.prop('ro', 'omnibus', params.omnibus || omnibus);
     this.prop('ro', 'search', new Search({api}));
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'themes', params.themes || {});
@@ -39,14 +38,12 @@ export default class User extends Reactive {
     this.prop('cookie', 'colorScheme', 'auto');
     this.prop('cookie', 'theme', 'convos');
 
+    socket('/events').on('message', (msg) => this._dispatchMessage(msg));
+    socket('/events').on('update', (socket) => this._onConnectionChange(socket));
+
     const matchMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {addListener: function() {}};
     if (matchMedia.matches) this._osColorScheme = 'dark';
     matchMedia.addListener(e => { this._osColorScheme = e.matches ? 'dark' : 'light' });
-
-    this._listenToOmnibus();
-
-    // Used to test WebSocket reconnect logic
-    // setInterval(() => (this.omnibus.ws && this.omnibus.ws.close()), 3000);
   }
 
   activateTheme() {
@@ -138,7 +135,7 @@ export default class User extends Reactive {
     this.roles.clear();
     this.roles.add(body.email ? 'authenticated' : 'anonymous');
     (body.roles || []).forEach(role => this.roles.add(role));
-    if (this.email) this.omnibus.send('ping');
+    if (this.email) socket('/events', {});
 
     this.update({
       highlight_keywords: body.highlight_keywords || [],
@@ -177,10 +174,6 @@ export default class User extends Reactive {
     return this;
   }
 
-  wsEventPong(params) {
-    this.wsPongTimestamp = params.ts;
-  }
-
   _calculateUnread() {
     const activeDialog = this.activeDialog;
     return this.notifications.unread
@@ -188,39 +181,32 @@ export default class User extends Reactive {
           .reduce((t, d) => { return t + (d == activeDialog ? 0 : d.unread) }, 0);
   }
 
-  _dispatchMessageToDialog(params) {
-    const conn = this.findDialog({connection_id: params.connection_id});
-    if (!conn) return;
-    if (conn[params.dispatchTo]) conn[params.dispatchTo](params);
-    if (!params.bubbles) return;
+  _dispatchMessage(msg) {
+    msg.dispatchTo = camelize('wsEvent_' + this._getEventNameFromMessage(msg));
+    msg.bubbles = true;
+    msg.stopPropagation = () => { msg.bubbles = false };
+    this.emit(msg.dispatchTo, msg);
 
-    const dialog = conn.findDialog(params);
-    if (dialog && dialog[params.dispatchTo]) dialog[params.dispatchTo](params);
+    const conn = this.findDialog({connection_id: msg.connection_id});
+    if (!conn) return;
+    if (conn[msg.dispatchTo]) conn[msg.dispatchTo](msg);
+    if (!msg.bubbles) return;
+
+    const dialog = conn.findDialog(msg);
+    if (dialog && dialog[msg.dispatchTo]) dialog[msg.dispatchTo](msg);
   }
 
-  _listenToOmnibus() {
-    this.omnibus.on('close', () => {
-      this.connections.forEach(conn => conn.update({state: 'unreachable'}));
-      this.update({status: 'pending'});
-    });
+  _getEventNameFromMessage(msg) {
+    if (msg.errors) return 'error';
+    if (msg.event == 'state') return msg.type;
 
-    this.omnibus.on('open', () => {
-      if (this.is('pending') && this.email) return this.load();
-    });
+    if (msg.event == 'sent' && msg.message.match(/\/\S+/)) {
+      msg.command = msg.message.split(/\s+/).filter(s => s.length);
+      msg.command[0] = msg.command[0].substring(1);
+      return 'sent_' + msg.command[0];
+    }
 
-    this.omnibus.on('message', params => {
-      this._dispatchMessageToDialog(params);
-      this.emit(params.dispatchTo, params);
-      if (this[params.dispatchTo]) this[params.dispatchTo](params);
-    });
-
-    this.omnibus.on('serviceWorker', (reg) => {
-      const assetVersion = process.env.asset_version;
-      if (this.omnibus.debug) console.log('[serviceWorker]', [this.assetVersion, assetVersion].join(' == '));
-      if (this.assetVersion == assetVersion) return;
-      reg.update();
-      this.update({assetVersion});
-    });
+    return msg.event;
   }
 
   _maybeUpgradeActiveDialog(dialog) {
@@ -229,5 +215,15 @@ export default class User extends Reactive {
     if (dialog.dialog_id && dialog.dialog_id != active.dialog_id) return dialog;
     this.update({activeDialog: dialog});
     return dialog;
+  }
+
+  _onConnectionChange(socket) {
+    if (socket.is('close')) {
+      this.connections.forEach(conn => conn.update({state: 'unreachable'}));
+      this.update({status: 'pending'});
+    }
+    else if (socket.is('open')) {
+      this.load();
+    }
   }
 }

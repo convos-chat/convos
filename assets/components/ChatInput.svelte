@@ -93,18 +93,7 @@ export function sendMessage(e) {
   msg.message = msg.message.replace(/^\/j\b/i, '/join');
   msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
-  const action = (msg.message.match(/^\/(\w+)\s*(\S*)/) || ['', 'message', '']).slice(1);
-
-  if (msg.message.length) {
-    dialog.send(msg, res => {
-      if (!res.errors || !dialog) return;
-      res.stopPropagation();
-      res.vars = [res.message, extractErrorMessage(res.errors)];
-      res.message = 'Could not send message "%1": %2';
-      dialog.addMessage(res);
-    });
-  }
-
+  if (msg.message.length) dialog.send(msg);
   if (!dialog.is('search')) inputEl.value = '';
 
   pos = 0;

@@ -9,6 +9,7 @@ import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 import {route} from '../store/Route';
 
+const socket = getContext('socket');
 const user = getContext('user');
 
 let availableDialogs = {dialogs: [], done: null, n_dialogs: 0};
@@ -29,19 +30,18 @@ function addDialog(e) {
   if (connectionId && dialogId) user.findDialog({connection_id: connectionId}).send('/join ' + dialogId);
 }
 
-function loadConversations(e) {
+async function loadConversations(e) {
   let message = '/list' + (dialogId.length ? ' /' + dialogId + '/' : '');
   if (e.type == 'click' && availableDialogs.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
-  user.omnibus.send({connection_id: connectionId, message}, (params) => {
-    const error = extractErrorMessage(params);
-    availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : params;
+  const res = await socket({connection_id: connectionId, message, method: 'send'});
+  const error = extractErrorMessage(res);
+  availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : res;
 
-    let interval = e.interval ? e.interval + 500 : 500;
-    if (interval > 2000) interval = 2000;
-    if (!error && !params.done) loadConversationsTid = setTimeout(() => loadConversations({interval}), interval);
-  });
+  let interval = e.interval ? e.interval + 500 : 500;
+  if (interval > 2000) interval = 2000;
+  if (!error && !res.done) loadConversationsTid = setTimeout(() => loadConversations({interval}), interval);
 }
 
 const debouncedLoadConversations = debounce(loadConversations, 250);

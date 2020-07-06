@@ -13,6 +13,7 @@ import {modeClassNames} from '../js/util';
 export let dialog;
 export let transition;
 
+const socket = getContext('socket');
 const user = getContext('user');
 
 let dialogPassword = '';
@@ -31,18 +32,18 @@ function calculateIsOperator(dialog) {
 }
 
 function partDialog(e) {
-  user.omnibus.send({message: '/part', dialog});
+  socket({method: 'send', message: '/part', connection_id: dialog.connection_id, dialog_id: dialog.dialog_id});
 }
 
 function saveDialogSettings(e) {
   if (dialogPassword) {
     const message = isOperator ? '/mode +k ' + dialogPassword : '/join ' + dialog.name + ' ' + dialogPassword;
-    user.omnibus.send({message, dialog});
+    socket({method: 'send', message, dialog});
     dialogPassword = '';
   }
 
   if (isOperator && dialogTopic != dialog.topic) {
-    user.omnibus.send({message: '/topic ' + dialogTopic, dialog});
+    socket({method: 'send', message: '/topic ' + dialogTopic, dialog});
   }
 }
 </script>

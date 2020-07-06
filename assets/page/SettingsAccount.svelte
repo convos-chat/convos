@@ -5,8 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {getContext} from 'svelte';
+import {getContext, onDestroy} from 'svelte';
 import {l} from '../js/i18n';
+import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
 const user = getContext('user');
@@ -23,10 +24,9 @@ let formEl;
 let colorSchemeOptions = [];
 let colorScheme = user.colorScheme;
 let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
-let notificationsDisabled = user.omnibus.notifyPermission == 'denied';
-let theme = user.theme;
-let wantNotifications = user.omnibus.wantNotifications;
 let highlight_keywords = user.highlight_keywords.join(', ');
+let theme = user.theme;
+let wantNotifications = notify().wantNotifications;
 
 route.update({title: l('Account')});
 
@@ -35,6 +35,8 @@ updateUserOp.on('start', req => {
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
   user.update({colorScheme, theme, highlight_keywords: req.body.highlight_keywords});
 });
+
+onDestroy(notify().on('update', notifyWantNotificationsChanged));
 
 $: calculateColorSchemeOptions(theme);
 
@@ -47,16 +49,17 @@ function calculateColorSchemeOptions(id) {
   colorScheme = 'auto';
 }
 
+function notifyWantNotificationsChanged(notify, changed) {
+  if (!changed.wantNotifications && !changed.desktopAccess) return;
+  if (notify.wantNotifications) notify.show(l('You have enabled notifications.'), {force: true});
+}
+
 function updateUserFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
   if (wantNotifications) {
-    user.omnibus.requestPermissionToNotify(status => {
-      if (status != 'denied') return;
-      wantNotifications = false;
-      notificationsDisabled = true;
-    });
+    notify().requestDesktopAccess();
   }
 
   if (passwords.join('').length && passwords[0] != passwords[1]) {
@@ -64,6 +67,7 @@ function updateUserFromForm(e) {
   }
 
   user.embedMaker.update({expandUrlToMedia});
+  notify().update({wantNotifications});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -82,11 +86,9 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 
-    {#if !notificationsDisabled}
-      <Checkbox name="notifications" bind:checked="{wantNotifications}">
-        <span slot="label">{l('Enable notifications')}</span>
-      </Checkbox>
-    {/if}
+    <Checkbox name="notifications" bind:checked="{wantNotifications}">
+      <span slot="label">{l('Enable notifications')}</span>
+    </Checkbox>
 
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
       <span slot="label">{l('Expand URL to media')}</span>
@@ -114,9 +116,5 @@ function updateUserFromForm(e) {
     </div>
 
     <OperationStatus op="{updateUserOp}"/>
-
-    {#if notificationsDisabled}
-      <p class="error">{l('You cannot receive notifications, because it is denied by your browser.')}</p>
-    {/if}
   </form>
 </main>
