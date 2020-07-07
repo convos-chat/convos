@@ -15,6 +15,7 @@ let inputEl;
 let pos = 0;
 let uploadEl;
 
+const api = getContext('api');
 const user = getContext('user');
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
@@ -106,7 +107,7 @@ function uploadFiles(e) {
 
   const formData = new FormData();
   formData.append('file', files[0]);
-  user.api.operation('uploadFile').perform({formData}).then(op => {
+  api('uploadFile').perform({formData}).then(op => {
     const res = op.res.body;
     if (res.files && res.files.length) return add(res.files[0].url);
     if (res.errors) dialog.addMessage({message: 'Could not upload file: %1', vars: [l(extractErrorMessage(res.errors))], type: 'error'});

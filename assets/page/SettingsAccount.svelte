@@ -10,8 +10,9 @@ import {l} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
+const api = getContext('api');
 const user = getContext('user');
-const updateUserOp = user.api.operation('updateUser');
+const updateUserOp = api('updateUser');
 
 const themes = Object.keys(user.themes).map(id => {
   let name = user.themes[id].name;

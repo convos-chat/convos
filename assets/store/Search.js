@@ -1,4 +1,5 @@
 import Dialog from './Dialog';
+import {api} from '../js/Api';
 
 export default class Search extends Dialog {
   constructor(params) {
@@ -53,7 +54,7 @@ export default class Search extends Dialog {
   }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', this.api.operation('searchMessages'));
+    this.prop('ro', 'messagesOp', api('/api', 'searchMessages'));
     this.prop('ro', 'setLastReadOp', null);
   }
 

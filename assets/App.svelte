@@ -1,7 +1,7 @@
 <script>
-import Api from './js/Api';
 import User from './store/User';
 import WebRTC from './store/WebRTC';
+import {api} from './js/Api';
 import {focusMainInputElements, loadScript, q, replaceClassName} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
@@ -19,12 +19,12 @@ import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 
-const api = new Api(process.env.api_url, {debug: true});
-const user = new User({api, isFirst: process.env.first_user, themes: process.env.themes});
+const user = new User({isFirst: process.env.first_user, themes: process.env.themes});
 const rtc = new WebRTC({embedMaker: user.embedMaker});
 
 let [innerHeight, innerWidth] = [0, 0];
 
+setContext('api', api('/api').update({url: process.env.api_url}).toFunction());
 setContext('rtc', rtc);
 setContext('socket', socket('/events').update({url: process.env.ws_url}).toFunction());
 setContext('user', user);

@@ -12,10 +12,12 @@ import {route} from '../store/Route';
 
 export let dialog = {};
 
+const api = getContext('api');
 const user = getContext('user');
-const createConnectionOp = user.api.operation('createConnection');
-const removeConnectionOp = user.api.operation('removeConnection');
-const updateConnectionOp = user.api.operation('updateConnection');
+
+const createConnectionOp = api('createConnection');
+const removeConnectionOp = api('removeConnection');
+const updateConnectionOp = api('updateConnection');
 
 [createConnectionOp, updateConnectionOp].forEach(op => {
   op.on('start', req => {

@@ -6,6 +6,7 @@ import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {camelize, extractErrorMessage} from '../js/util';
+import {api} from './../js/Api';
 import {route} from './Route';
 import {socket} from './../js/Socket';
 
@@ -13,15 +14,13 @@ export default class User extends Reactive {
   constructor(params) {
     super();
 
-    const api = params.api;
-    this.prop('ro', 'api', () => api);
     this.prop('ro', 'connections', new SortedMap());
     this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
     this.prop('ro', 'embedMaker', new EmbedMaker());
     this.prop('ro', 'isFirst', params.isFirst || false);
-    this.prop('ro', 'getUserOp', api.operation('getUser', {connections: true, dialogs: true}));
-    this.prop('ro', 'notifications', new Notifications({api}));
-    this.prop('ro', 'search', new Search({api}));
+    this.prop('ro', 'getUserOp', api('/api', 'getUser', {connections: true, dialogs: true}));
+    this.prop('ro', 'notifications', new Notifications({}));
+    this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());
@@ -82,7 +81,7 @@ export default class User extends Reactive {
     if (conn) return conn.update(params);
 
     // Create connection
-    conn = new Connection({...params, api: this.api});
+    conn = new Connection({...params});
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('dialogadd', (dialog) => this._maybeUpgradeActiveDialog(dialog));
@@ -163,7 +162,7 @@ export default class User extends Reactive {
     if (activeDialog) return this.update({activeDialog});
 
     // Need to expand params manually, in case we are passing in a reactive object
-    const props = {...params, connection_id: params.connection_id || '', api: this.api, frozen: 'Not found.'};
+    const props = {...params, connection_id: params.connection_id || '', frozen: 'Not found.'};
     ['dialog_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
     return this.update({activeDialog: props.dialog_id ? new Dialog(props) : new Connection(props)});
   }

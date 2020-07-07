@@ -10,11 +10,13 @@ import {l, lmd} from '../js/i18n';
 import {q} from '../js/util';
 import {route} from '../store/Route';
 
-const emailFromParams = location.href.indexOf('email=') != -1;
+const api = getContext('api');
 const user = getContext('user');
+
+const emailFromParams = location.href.indexOf('email=') != -1;
 const scrollspy = new Scrollspy();
-const loginOp = user.api.operation('loginUser');
-const registerOp = user.api.operation('registerUser');
+const loginOp = api('loginUser');
+const registerOp = api('registerUser');
 
 let formEl;
 

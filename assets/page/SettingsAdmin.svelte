@@ -10,10 +10,12 @@ import {l, lmd} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
+const api = getContext('api');
 const user = getContext('user');
-const getSettingsOp = user.api.operation('getSettings');
-const inviteLinkOp = user.api.operation('inviteUser');
-const updateSettingsOp = user.api.operation('updateSettings');
+
+const getSettingsOp = api('getSettings');
+const inviteLinkOp = api('inviteUser');
+const updateSettingsOp = api('updateSettings');
 
 let convosSettings = {};
 

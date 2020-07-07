@@ -1,10 +1,7 @@
 import User from '../../assets/store/User';
-import Api from '../../assets/js/Api';
-
-const api = new Api({});
 
 test('ensureDialog connection', () => {
-  const user = new User({api});
+  const user = new User({});
 
   const conn = user.ensureDialog({connection_id: 'irc-foo'});
   expect(conn.connection_id).toBe('irc-foo');
@@ -25,7 +22,7 @@ test('ensureDialog connection', () => {
 });
 
 test('ensureDialog dialog', () => {
-  const user = new User({api});
+  const user = new User({});
 
   const dialog = user.ensureDialog({connection_id: 'irc-foo', dialog_id: '#cf'});
   expect(dialog.connection_id).toBe('irc-foo');
@@ -41,7 +38,7 @@ test('ensureDialog dialog', () => {
 });
 
 test('removeDialog connection', () => {
-  const user = new User({api});
+  const user = new User({});
 
   const conn = user.ensureDialog({connection_id: 'irc-baz'});
   user.update({activeDialog: conn});
@@ -54,7 +51,7 @@ test('removeDialog connection', () => {
 });
 
 test('removeDialog dialog', () => {
-  const user = new User({api});
+  const user = new User({});
 
   const conn = user.ensureDialog({connection_id: 'irc-bax'});
   const dialog = user.ensureDialog({connection_id: 'irc-bax', dialog_id: '#cx'});

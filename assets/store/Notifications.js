@@ -1,4 +1,5 @@
 import Dialog from './Dialog';
+import {api} from '../js/Api';
 
 export default class Notifications extends Dialog {
   constructor(params) {
@@ -30,7 +31,7 @@ export default class Notifications extends Dialog {
   send() { }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', this.api.operation('notificationMessages'));
-    this.prop('ro', 'setLastReadOp', this.api.operation('readNotifications'));
+    this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
+    this.prop('ro', 'setLastReadOp', api('/api', 'readNotifications'));
   }
 }

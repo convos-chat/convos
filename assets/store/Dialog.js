@@ -1,6 +1,7 @@
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
+import {api} from '../js/Api';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
 import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
@@ -24,7 +25,6 @@ export default class Dialog extends Reactive {
     super();
 
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
-    this.prop('ro', 'api', params.api);
     this.prop('ro', 'chunkSize', 60);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
@@ -257,8 +257,8 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', this.api.operation('dialogMessages'));
-    this.prop('ro', 'setLastReadOp', this.api.operation('setDialogLastRead'));
+    this.prop('ro', 'messagesOp', api('/api', 'dialogMessages'));
+    this.prop('ro', 'setLastReadOp', api('/api', 'setDialogLastRead'));
   }
 
   _calculateModes(modeMap, modeStr, target) {

@@ -1,5 +1,6 @@
 import hljs from './hljs';
 import Reactive from './Reactive';
+import {api} from './Api';
 import {ensureChildNode, loadScript, q, removeChildNodes, showEl} from './util';
 import {jsonhtmlify} from 'jsonhtmlify';
 import {sameOrigin} from './util';
@@ -11,7 +12,6 @@ export default class EmbedMaker extends Reactive {
     this.prop('persist', 'disableInstagram', false);
     this.prop('persist', 'disableTwitter', false);
     this.prop('persist', 'expandUrlToMedia', true);
-    this.prop('ro', 'api', params.api);
     this.prop('ro', 'embeds', {});
   }
 
@@ -104,7 +104,7 @@ export default class EmbedMaker extends Reactive {
 
   _loadAndRender(url) {
     this.embeds[url] = {};
-    return this.api.operation('embed', {url}).perform().then(op => {
+    return api('/api', 'embed', {url}).perform().then(op => {
       const embed = op.res.body;
       if (!embed.html) return;
 

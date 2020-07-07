@@ -2,6 +2,7 @@ import ConnURL from '../js/ConnURL';
 import Dialog from './Dialog';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
+import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
 
 const sortDialogs = (a, b) => {
@@ -30,7 +31,7 @@ export default class Connection extends Dialog {
     let dialog = this.dialogs.get(params.dialog_id);
     if (dialog) return dialog.update(params);
 
-    dialog = new Dialog({...params, connection_id: this.connection_id, api: this.api});
+    dialog = new Dialog({...params, connection_id: this.connection_id});
     dialog.on('message', params => this.emit('message', params));
     dialog.on('update', () => this.update({dialogs: true}));
     this._addDefaultParticipants(dialog);
@@ -222,8 +223,8 @@ export default class Connection extends Dialog {
   }
 
   _addOperations() {
-    this.prop('ro', 'setLastReadOp', this.api.operation('setConnectionLastRead'));
-    this.prop('ro', 'messagesOp', this.api.operation('connectionMessages'));
+    this.prop('ro', 'setLastReadOp', api('/api', 'setConnectionLastRead'));
+    this.prop('ro', 'messagesOp', api('/api', 'connectionMessages'));
   }
 
   _calculateFrozen() {

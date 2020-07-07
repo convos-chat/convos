@@ -8,12 +8,21 @@
  */
 
 import Operation from '../store/Operation';
+import Reactive from './Reactive';
 import {isType} from '../js/util';
 
-export default class Api {
-  constructor(url) {
-    this.protocol = location.protocol;
-    this.url = url;
+export const api = (id, operationId, params) => {
+  const singleton = api.singletons[id] || (api.singletons[id] = new Api());
+  return operationId ? singleton.operation(operationId, params) : singleton;
+};
+
+api.singletons = {};
+
+class Api extends Reactive {
+  constructor() {
+    super();
+    this.prop('rw', 'protocol', location.protocol || 'http');
+    this.prop('rw', 'url', '');
   }
 
   /**
@@ -72,6 +81,20 @@ export default class Api {
 
     if (this._ops && operationId) return this._ops[operationId];
     if (this._spec) return this._spec;
+  }
+
+  /**
+   * Turns the object into a function.
+   *
+   * @example
+   * const api = new Api().toFunction();
+   * api('getUser', {}) == api().operation('getUser', {});
+   *
+   * @memberof Api
+   * @returns {Function}
+   */
+  toFunction() {
+    return (operationId, params) => operationId ? this.operation(operationId, params) : this;
   }
 
   _resolveRef(p) {

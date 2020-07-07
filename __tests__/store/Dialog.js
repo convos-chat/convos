@@ -1,14 +1,13 @@
-import Api from '../../assets/js/Api.js';
 import Dialog from '../../assets/store/Dialog';
 import {socket as getSocket} from '../../assets/js/Socket';
 
 const socket = getSocket('/events').update({url: 'wss://example.convos.chat'});
 
 test('constructor', () => {
-  let d = dialog({});
+  let d = new Dialog({});
   expect(d.name).toBe('ERR');
 
-  d = dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
+  d = new Dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
   expect(d.color).toBe('#6bafb2');
   expect(d.connection_id).toBe('irc-freenode');
   expect(d.dialog_id).toBe('#convos');
@@ -25,7 +24,7 @@ test('constructor', () => {
 });
 
 test('load', async () => {
-  const d = dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
+  const d = new Dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
   expect(d.status).toBe('pending');
 
   d.messagesOp.perform = mockMessagesOpPerform({
@@ -86,11 +85,6 @@ test('load', async () => {
     {fromId: 'supergirl', id: 'msg_2', markdown: 'Something new', type: 'private'},
   ]);
 });
-
-function dialog(params) {
-  const api = new Api();
-  return new Dialog({api, ...params});
-}
 
 function mockMessagesOpPerform(res) {
   return function(params) {
