@@ -1,10 +1,10 @@
 Revision history for perl distribution Convos
 
-4.23 Not Released
+4.23 2020-07-08T19:06:00+0900
  - Fix rendering /register route
  - Add "script/convos upgrade" sub-command
  - Add disk usage to the settings page
- - Add "bot" functionality through Convos::Plugin::Bot #502
+ - Add EXPERIMENTAL "bot" functionality through Convos::Plugin::Bot #502
    * Add "Calc" bot action
    * Add "Core" bot action
    * Add "Hailo" bot action
