@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 4.23 Not Released
+ - Fix rendering /register route
  - Add "script/convos upgrade" sub-command
  - Add disk usage to the settings page
  - Add "bot" functionality through Convos::Plugin::Bot #502

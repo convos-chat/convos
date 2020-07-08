@@ -91,6 +91,7 @@ export default class Route extends Reactive {
       return this;
     }
 
+    console.log({abs, pathname, routes: this._routes, url});
     throw '[Route] No route for "' + abs + '".';
   }
 

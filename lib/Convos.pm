@@ -45,7 +45,6 @@ sub startup {
   $r->get('/blog/:year/:mon/:mday/:name', {page => 1})->to('cms#blog_entry')->name('blog_entry');
   $r->get('/doc/*file',                   {file => 'index'})->to('cms#doc')->name('doc');
   $r->get('/logout')->to('user#logout', format => 'html');
-  $r->get('/register')->to('user#register_html');
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
@@ -61,6 +60,7 @@ sub startup {
   $user_r->get('/help')->to(template => 'index');
   $user_r->get('/chat/*rest', {rest => ''});
   $user_r->get('/login');
+  $user_r->get('/register')->to('user#register_html');
   $user_r->get('/settings/*rest', {rest => ''});
   $user_r->get('/search');
 
