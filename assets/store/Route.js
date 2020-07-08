@@ -72,7 +72,6 @@ export default class Route extends Reactive {
     if (!state) state = this.state;
 
     const pathname = abs.substr(this.baseUrl.length);
-
     const url = pathname.split('#')[0].split('?');
     this._query = url.length == 2 ? qs.parse(url.pop()) : {};
     this._path = url[0];

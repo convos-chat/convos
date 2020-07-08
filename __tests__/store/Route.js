@@ -30,20 +30,8 @@ test('routing', () => {
   const r = new Route({});
   r.update({baseUrl: 'https://demo.convos.chat///'});
 
-  r._location = {href: ''};
-
-  const history = [];
-  const hist = (name) => {
-    return (...params) => {
-      history.push([name, ...params]);
-      r._location.href = params.pop();
-      r._location.hash = (r._location.href.match(/#(.+)/) || ['', ''])[1];
-    };
-  };
-
-  r._history = {pushState: hist('pushState'), replaceState: hist('replaceState')};
-
   let matched = [];
+  const history = mockHistory(r);
   const cb = (route) => matched.push({...route.params, ...route.query, hash: route.hash});
 
   r.to('/chat/:connection_id', cb);
@@ -91,6 +79,18 @@ test('routing', () => {
   ]);
 });
 
+test('convos.internal', () => {
+  const r = new Route({}).update({baseUrl: 'https://convos.internal/'});
+  const history = mockHistory(r);
+
+  let registered = 0;
+  r.to('/register', () => registered++);
+  r.go('/register?email=test%40internal&exp=1594263232&token=abc', {}, false);
+  r.go('https://convos.internal/register?email=test%40internal&exp=1594263232&token=def', {}, false);
+
+  expect(registered).toBe(2);
+});
+
 test('param', () => {
   const r = new Route({});
 
@@ -113,3 +113,19 @@ test('urlFor', () => {
   expect(r.urlFor('https://convos.chat/blog/')).toBe('https://convos.chat/blog/');
   expect(r.urlFor('#hash')).toBe('#hash');
 });
+
+function mockHistory(r) {
+  const history = [];
+  const hist = (name) => {
+    return (...params) => {
+      history.push([name, ...params]);
+      r._location.href = params.pop();
+      r._location.hash = (r._location.href.match(/#(.+)/) || ['', ''])[1];
+    };
+  };
+
+  r._history = {pushState: hist('pushState'), replaceState: hist('replaceState')};
+  r._location = {href: ''};
+
+  return history;
+}
