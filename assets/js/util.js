@@ -21,6 +21,7 @@
  * @exports showEl
  * @exports str2color
  * @exports tagNameIs
+ * @exports timer
  * @exports uuidv4
  */
 
@@ -363,6 +364,21 @@ export function str2color(str, nColors = 100) {
  */
 export function tagNameIs(el, tagName) {
   return el && el.tagName && el.tagName.toLowerCase() === tagName || false;
+}
+
+/**
+ * Combines setTimeout() and Promise.
+ *
+ * @param {Number} ms Number of milliseconds before resolving the promise
+ * @param {Any} success Will reject the promise if it is a string
+ * @returns {Promise} A promise to be resolved/rejected in the future
+ */
+export function timer(ms, res = true) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      typeof res == 'function' ? resolve(res()) : typeof res == 'string' ? reject(res) : resolve(res);
+    }, ms);
+  });
 }
 
 /**
