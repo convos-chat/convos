@@ -65,7 +65,7 @@ sub index {
 
 sub _meta_to_social {
   my ($self, $meta) = @_;
-  $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
+  $self->title($meta->{title});
   $self->social($_ => $meta->{$_})
     for grep { defined $meta->{$_} } qw(canonical description image url);
   $meta->{image} = $self->url_for($meta->{image})->to_abs if $meta->{image};
@@ -88,7 +88,7 @@ sub _render_perldoc {
       my $doc  = $self->cms->perldoc($src);
       my $meta = $doc->{meta};
       $self->res->headers->remove('X-Provider-Name');
-      $self->title(join ' - ', $meta->{title}, $self->settings('organization_name'));
+      $self->title($meta->{title});
       $self->social(description => $meta->{description}) if $meta->{description};
       $self->render('perldoc', doc => $doc, for_cms => 1);
     }

@@ -3,7 +3,11 @@
 <!DOCTYPE html>
 <html class="theme-default" lang="en">
   <head>
-    <title><%= title %></title>
+    % if (settings('organization_name') eq 'Convos') {
+      <title><%=l '%1 - Convos', title %></title>
+    % } else {
+      <title><%=l '%1 - Convos for %2', title, settings('organization_name') %></title>
+    % }
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="description" content="<%= $social->{description} %>">

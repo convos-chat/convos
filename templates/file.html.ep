@@ -1,6 +1,6 @@
 % use Mojo::Util 'decode';
 % layout 'convos';
-% title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
+% title $file->filename;
 
 % social description => $file->filename;
 % social image => $file->public_url(1) if $file->mime_type =~ m!^image!;

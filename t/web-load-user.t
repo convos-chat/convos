@@ -14,7 +14,7 @@ my @resources = (
 
 for my $resource (@resources) {
   subtest $resource => sub {
-    $t->get_ok($resource)->status_is($resource =~ /email=/ ? 400 : 200);
+    $t->get_ok($resource)->status_is($resource =~ /email=/ ? 410 : 200);
     my $json = decode_json($t->tx->res->text =~ m!const settings\s*=\s*([^;]+)!m ? $1 : '{}');
     is $json->{api_url}, '/api',                  'api_url';
     is $json->{contact}, 'mailto:root@localhost', 'contact';

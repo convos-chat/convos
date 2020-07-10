@@ -30,9 +30,9 @@ user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.re
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 user.omnibus.start({route, wsUrl: process.env.ws_url}); // Must be called after "baseUrl" is set
 
+$: calculateTitle($route, $user);
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
-$: if (document) document.title = $user.unread ? '(' + $user.unread + ') ' + $route.title : $route.title;
 $: replaceBodyClassName($route, $user);
 
 onMount(() => {
@@ -43,6 +43,15 @@ onMount(() => {
   if (process.env.load_user) setupRouting(route, user);
   user.load(process.env.load_user);
 });
+
+function calculateTitle(route, user) {
+  if (!document) return;
+  const organizationName = process.env.organization_name;
+  const title = user.unread ? '(' + user.unread + ') ' + route.title : route.title;
+
+  document.title
+    = organizationName == 'Convos' ? l('%1 - Convos', title) : l('%1 - Convos for %2', title, organizationName);
+}
 
 function replaceBodyClassName(route, user) {
   const appMode = route.component && route.requireLogin && user.is('authenticated') && !user.is('offline');

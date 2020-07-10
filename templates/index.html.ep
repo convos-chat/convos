@@ -1,5 +1,5 @@
 % layout 'convos';
-% title settings('organization_name') eq 'Convos' ? 'Convos - Better group chat' : 'Convos for ' . settings('organization_name');
+% title 'Better group chat';
 % stash for_cms => 1;
 
 %= include 'partial/app_header'

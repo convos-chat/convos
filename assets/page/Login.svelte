@@ -19,6 +19,7 @@ const registerOp = user.api.operation('registerUser');
 let formEl;
 
 $: redirect($user);
+$: route.update({title: $route.path.match(/register/) ? l('Register') : l('Login')});
 $: scrollspy.scrollTo($route.hash ? '#' + $route.hash : 0);
 $: if ($loginOp.is('success')) redirectAfterLogin(loginOp);
 $: if ($registerOp.is('success')) registered();

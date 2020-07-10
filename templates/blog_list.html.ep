@@ -1,5 +1,5 @@
 % layout 'convos';
-% title settings('organization_name') eq 'Convos' ? 'Blog index - Convos' : 'Blog index for ' . settings('organization_name');
+% title 'Blog index';
 
 %= include 'partial/cms_header'
 
