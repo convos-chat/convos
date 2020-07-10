@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.24 Not Released
  - Synchronized title between server and client side
+ - Improved loading time by getting user data from WebSocket
 
 4.23 2020-07-08T19:06:00+0900
  - Fix rendering /register route

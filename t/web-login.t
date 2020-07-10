@@ -29,6 +29,10 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
   ->status_is(200)->json_is('/email', 'superman@example.com')
   ->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
 
+$t->websocket_ok('/events')
+  ->send_ok({json => {method => 'load', object => 'user', params => {connections => 1}}})
+  ->message_ok->json_message_is('/user/email', 'superman@example.com')->finish_ok;
+
 $t->get_ok('/api/user')->status_is(200);
 $t->get_ok('/login')->status_is(200);
 $t->get_ok('/logout')->status_is(302)->header_is(Location => '/login');

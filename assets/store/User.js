@@ -6,7 +6,6 @@ import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {camelize, extractErrorMessage} from '../js/util';
-import {api} from './../js/Api';
 import {route} from './Route';
 import {socket} from './../js/Socket';
 
@@ -15,10 +14,8 @@ export default class User extends Reactive {
     super();
 
     this.prop('ro', 'connections', new SortedMap());
-    this.prop('ro', 'email', () => this.getUserOp.res.body.email || '');
     this.prop('ro', 'embedMaker', new EmbedMaker());
     this.prop('ro', 'isFirst', params.isFirst || false);
-    this.prop('ro', 'getUserOp', api('/api', 'getUser', {connections: true, dialogs: true}));
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
@@ -26,6 +23,7 @@ export default class User extends Reactive {
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'activeDialog', this.notifications);
+    this.prop('rw', 'email', '');
     this.prop('rw', 'highlight_keywords', []);
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
@@ -100,7 +98,6 @@ export default class User extends Reactive {
   is(statusOrRole) {
     if (Array.isArray(statusOrRole)) return !!statusOrRole.filter(sr => this.is(sr)).length;
     if (this.roles.has(statusOrRole)) return true;
-    if (statusOrRole == 'offline') return extractErrorMessage(this.getUserOp.err || [], 'source') == 'fetch';
     return this.status == statusOrRole;
   }
 
@@ -114,9 +111,10 @@ export default class User extends Reactive {
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
-    await this.getUserOp.perform();
+    const res = await socket('/events', {method: 'load', object: 'user', params: {connections: true, dialogs: true}});
+    if (res.errors) return this.update({status: 'error'});
 
-    const body = this.getUserOp.res.body;
+    const body = res.user;
     const keep = {};
     if (!this.experimentalLoad) this.connections.clear();
     (body.connections || []).forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
@@ -134,13 +132,13 @@ export default class User extends Reactive {
     this.roles.clear();
     this.roles.add(body.email ? 'authenticated' : 'anonymous');
     (body.roles || []).forEach(role => this.roles.add(role));
-    if (this.email) socket('/events', {});
 
     this.update({
+      email: body.email,
       highlight_keywords: body.highlight_keywords || [],
       roles: true,
       rtc: body.rtc || {},
-      status: this.getUserOp.status,
+      status: 'success',
     });
 
     return this;
