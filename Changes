@@ -5,6 +5,8 @@ Revision history for perl distribution Convos
  - Improved loading time by getting user data from WebSocket
  - Fix Notifications links when mounted under /whatever
  - Fix t/web-admin #504
+ - Fix rendering links inside `code` #503
+ - Changed to showing "https://" in links
 
 4.23 2020-07-08T19:06:00+0900
  - Fix rendering /register route
