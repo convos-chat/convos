@@ -7,7 +7,7 @@ global.navigator.mediaDevices = TestMediaDevices;
 global.RTCPeerConnection = TestRTCPeerConnection;
 
 test('constructor', () => {
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
   expect(webrtc.enabled).toBe(false);
   expect(webrtc.localStream.id).toBeFalsy()
   expect(webrtc.localStream).toEqual({id: ''});
@@ -16,7 +16,7 @@ test('constructor', () => {
 });
 
 test('id', () => {
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
   expect(webrtc.id({id: '42'})).toBe('uuid-42');
   expect(webrtc.id('..42  ')).toBe('uuid---42--');
   expect(webrtc.id()).toBe('');
@@ -24,7 +24,7 @@ test('id', () => {
 
 test('mute', async () => {
   const dialog = mockedDialog();
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
   expect(webrtc.isMuted()).toBe(true);
 
   await webrtc.call(dialog);
@@ -50,7 +50,7 @@ test('mute', async () => {
 
 test('call', async () => {
   const dialog = mockedDialog();
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
 
   await webrtc.call(dialog);
   expect(webrtc.localStream.id).toBeTruthy();
@@ -64,7 +64,7 @@ test('call', async () => {
 
 test('hangup', async () => {
   const dialog = mockedDialog();
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
 
   await webrtc.hangup(); // noop
   await webrtc.call(dialog);
@@ -110,7 +110,7 @@ test('peerConfig', async () => {
   };
 
   const dialog = mockedDialog();
-  const webrtc = new WebRTC({embedMaker: {}});
+  const webrtc = new WebRTC({});
   webrtc.update({peerConfig});
   expect(webrtc.enabled).toBe(true);
 
@@ -129,7 +129,7 @@ test('peerConfig', async () => {
 
 // test('signal', async () => {
 //   const dialog = mockedDialog();
-//   const webrtc = new WebRTC({embedMaker: {}});
+//   const webrtc = new WebRTC({});
 // 
 //   await webrtc.call(dialog);
 // 

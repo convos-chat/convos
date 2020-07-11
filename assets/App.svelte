@@ -20,7 +20,7 @@ import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 
 const user = new User({isFirst: process.env.first_user, themes: process.env.themes});
-const rtc = new WebRTC({embedMaker: user.embedMaker});
+const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
 

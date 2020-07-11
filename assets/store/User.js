@@ -1,6 +1,5 @@
 import Connection from './Connection';
 import Dialog from './Dialog';
-import EmbedMaker from '../js/EmbedMaker';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
@@ -14,7 +13,6 @@ export default class User extends Reactive {
     super();
 
     this.prop('ro', 'connections', new SortedMap());
-    this.prop('ro', 'embedMaker', new EmbedMaker());
     this.prop('ro', 'isFirst', params.isFirst || false);
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));

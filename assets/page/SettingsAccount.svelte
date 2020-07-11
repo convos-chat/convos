@@ -6,6 +6,7 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
+import {embedMaker} from '../js/EmbedMaker';
 import {l} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
@@ -67,7 +68,7 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  user.embedMaker.update({expandUrlToMedia});
+  embedMaker.update({expandUrlToMedia});
   notify().update({wantNotifications});
   updateUserOp.perform(e.target);
 }

@@ -2,6 +2,7 @@ import adapter from 'webrtc-adapter';
 import Reactive from '../js/Reactive';
 import WebRTCPeerConnection from './WebRTCPeerConnection';
 import {clone, q, showEl} from '../js/util';
+import {embedMaker} from '../js/EmbedMaker';
 
 /*
  * https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
@@ -21,7 +22,6 @@ export default class WebRTC extends Reactive {
   constructor(params) {
     super();
 
-    this.prop('ro', 'embedMaker', params.embedMaker);
     this.prop('ro', 'enabled', () => !!(this.peerConfig.ice_servers || []).length);
 
     this.prop('rw', 'dialog', null);
@@ -110,7 +110,7 @@ export default class WebRTC extends Reactive {
     });
 
     if (!this.localStream.id) {
-      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => this.embedMaker.showMediaBig(null));
+      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => embedMaker.showMediaBig(null));
     }
   }
 
@@ -235,11 +235,11 @@ export default class WebRTC extends Reactive {
     q(document, btnSel, el => el.classList[minimize ? 'remove' : 'add']('is-active'));
 
     if (minimize) {
-      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => this.embedMaker.showMediaBig(null));
+      q(document, '.fullscreen-media-wrapper [data-rtc-id]', () => embedMaker.showMediaBig(null));
       return;
     }
 
-    const mediaWrapper = this.embedMaker.showMediaBig(conversationEl);
+    const mediaWrapper = embedMaker.showMediaBig(conversationEl);
     const conversationFocus = mediaWrapper.querySelector('[data-rtc-id]');
     conversationFocus.classList.add('has-focus');
     conversationFocus.classList.remove('is-local');
@@ -251,7 +251,7 @@ export default class WebRTC extends Reactive {
     q(conversationEl.parentNode, 'video', el => el.classList.add('is-disabled'));
 
     // Allow to go back to small video preview
-    this.embedMaker.on('hidemediawrapper').then(() => {
+    embedMaker.on('hidemediawrapper').then(() => {
       q(conversationEl.parentNode, 'video', el => el.classList.remove('is-disabled'));
       this.render();
     });

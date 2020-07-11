@@ -11,6 +11,7 @@ import Icon from '../components/Icon.svelte';
 import Scrollspy from '../js/Scrollspy';
 import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
+import {embedMaker} from '../js/EmbedMaker';
 import {focusMainInputElements, q} from '../js/util';
 import {isISOTimeString} from '../js/Time';
 import {l, topicOrStatus} from '../js/i18n';
@@ -69,7 +70,7 @@ onDestroy(() => {
 unsubscribe.observed = scrollspy.on('observed', entry => {
   if (!entry.isIntersecting) return;
   const message = messages[entry.target.dataset.index] || {};
-  if (message.embeds && message.embeds.length) user.embedMaker.render(entry.target, message.embeds);
+  if (message.embeds && message.embeds.length) embedMaker.render(entry.target, message.embeds);
 });
 
 unsubscribe.scroll = scrollspy.on('scroll', entry => {
@@ -99,7 +100,7 @@ function maybeReloadMessages(route) {
 
 function toggleDetails(e) {
   const messageEl = e.target.closest('.message');
-  user.embedMaker.toggleDetails(messageEl, messages[messageEl.dataset.index]);
+  embedMaker.toggleDetails(messageEl, messages[messageEl.dataset.index]);
 }
 
 function setDialogFromRoute(route) {

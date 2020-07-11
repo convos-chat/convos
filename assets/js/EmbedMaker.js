@@ -168,3 +168,5 @@ export default class EmbedMaker extends Reactive {
     img.style.visibility = 'visible';
   }
 }
+
+export const embedMaker = new EmbedMaker();
