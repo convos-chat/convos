@@ -1,5 +1,5 @@
 import hljs from 'highlight.js/lib/highlight';
-import hljsLineNumbers from './highlightjs-line-numbers';
+import hljsLineNumbers from './hljs-line-numbers';
 
 // TODO: Figure out a better default list.
 // The reasons behind this list are listed below.
