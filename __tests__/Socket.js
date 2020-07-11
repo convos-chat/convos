@@ -74,7 +74,23 @@ test('send', async () => {
 
   const res = await socket.send({foo: 42});
   expect(socket.ws.sent).toEqual([{id: '1', foo: 42}]);
+  expect(socket.waiting).toEqual({});
   expect(res).toEqual({id: '1', sent: true});
+});
+
+test('send - error', async () => {
+  const socket = new Socket().update({url: 'wss://example.convos.chat'});
+
+  later(
+    () => (socket.ws.readyState = WebSocket.OPEN),
+    () => socket.ws.onopen({}),
+    () => socket.ws.onmessage({data: '{"errors":[{"message":"yikes"}]}'}),
+  );
+
+  const res = await socket.send({foo: 42});
+  expect(socket.ws.sent).toEqual([{id: '1', foo: 42}]);
+  expect(socket.waiting).toEqual({});
+  expect(res).toEqual({errors: [{message: 'yikes'}]});
 });
 
 test('reconnectIn', async () => {

@@ -13,7 +13,6 @@ export default class User extends Reactive {
     super();
 
     this.prop('ro', 'connections', new SortedMap());
-    this.prop('ro', 'isFirst', params.isFirst || false);
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
@@ -22,12 +21,11 @@ export default class User extends Reactive {
 
     this.prop('rw', 'activeDialog', this.notifications);
     this.prop('rw', 'email', '');
-    this.prop('rw', 'highlight_keywords', []);
+    this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
 
     this.prop('persist', 'assetVersion', 0);
-    this.prop('persist', 'experimentalLoad', false);
     this.prop('persist', 'showGrid', false);
 
     this.prop('cookie', 'colorScheme', 'auto');
@@ -110,36 +108,24 @@ export default class User extends Reactive {
 
     this.update({status: 'loading'});
     const res = await socket('/events', {method: 'load', object: 'user', params: {connections: true, dialogs: true}});
-    if (res.errors) return this.update({status: 'error'});
+    const data = res.user || {};
 
-    const body = res.user;
-    const keep = {};
-    if (!this.experimentalLoad) this.connections.clear();
-    (body.connections || []).forEach(conn => (keep[this.ensureDialog({...conn, status: 'pending'}).path] = true));
-    (body.dialogs || []).forEach(dialog => (keep[this.ensureDialog({...dialog, status: 'pending'}).path] = true));
+    this.connections.clear();
+    (data.connections || []).forEach(conn => this.ensureDialog({...conn, status: 'pending'}));
+    (data.dialogs || []).forEach(dialog => this.ensureDialog({...dialog, status: 'pending'}));
 
-    // Remove connections and dialogs that is not part of the new response
-    this.connections.forEach(conn => {
-      if (!keep[conn.path]) return this.connections.delete(conn.connection_id);
-      conn.dialogs.forEach(dialog => {
-        if (!keep[dialog.path]) conn.dialogs.delete(dialog.dialog_id);
-      });
-    });
-
-    this.notifications.update({unread: body.unread || 0});
+    this.notifications.update({unread: data.unread || 0});
     this.roles.clear();
-    this.roles.add(body.email ? 'authenticated' : 'anonymous');
-    (body.roles || []).forEach(role => this.roles.add(role));
+    this.roles.add(data.email ? 'authenticated' : 'anonymous');
+    (data.roles || []).forEach(role => this.roles.add(role));
 
-    this.update({
-      email: body.email,
-      highlight_keywords: body.highlight_keywords || [],
+    return this.update({
+      email: data.email || '',
+      highlightKeywords: data.highlight_keywords || [],
       roles: true,
-      rtc: body.rtc || {},
-      status: 'success',
+      rtc: data.rtc || {},
+      status: res.errors ? 'error' : 'success',
     });
-
-    return this;
   }
 
   removeDialog(params) {

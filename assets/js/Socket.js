@@ -195,7 +195,9 @@ export default class Socket extends Reactive {
     const queue = this.queue;
     while (queue.length) {
       if (this.ws.readyState != WebSocket.OPEN) return;
-      this.ws.send(this.deflateMessage(queue.shift()));
+      const msg = queue.shift();
+      this.ws.send(this.deflateMessage(msg));
+      this.waiting[msg.id] = msg;
     }
   }
 
@@ -217,8 +219,17 @@ export default class Socket extends Reactive {
 
   _onMessage(e) {
     const msg = this.inflateMessage(e.data);
-    this.emit('message_' + msg.id, msg);
+
+    if (msg.id) {
+      this.emit('message_' + msg.id, msg);
+      delete this.waiting[msg.id];
+    }
+
     this.emit('message', msg);
+
+    if (!msg.errors || msg.id) return;
+    Object.keys(this.waiting).forEach(id => this.emit('message_' + id, msg));
+    this.waiting = {};
   }
 
   _onOffline(e) {

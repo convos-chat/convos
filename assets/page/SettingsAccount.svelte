@@ -25,8 +25,8 @@ const themes = Object.keys(user.themes).map(id => {
 let formEl;
 let colorSchemeOptions = [];
 let colorScheme = user.colorScheme;
-let expandUrlToMedia = user.embedMaker.expandUrlToMedia;
-let highlight_keywords = user.highlight_keywords.join(', ');
+let expandUrlToMedia = embedMaker.expandUrlToMedia;
+let highlightKeywords = user.highlightKeywords.join(', ');
 let theme = user.theme;
 let wantNotifications = notify().wantNotifications;
 
@@ -35,7 +35,7 @@ route.update({title: l('Account')});
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
-  user.update({colorScheme, theme, highlight_keywords: req.body.highlight_keywords});
+  user.update({colorScheme, theme, highlightKeywords: req.body.highlight_keywords});
 });
 
 onDestroy(notify().on('update', notifyWantNotificationsChanged));
@@ -84,7 +84,7 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Email')}</span>
     </TextField>
 
-    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlight_keywords}">
+    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlightKeywords}">
       <span slot="label">{l('Notification keywords')}</span>
     </TextField>
 

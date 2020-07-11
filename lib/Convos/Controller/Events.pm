@@ -13,9 +13,6 @@ my %RESPONSE_EVENT_NAME = (ping => 'pong', send => 'sent');
 
 sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
-  return $self->_err($self->param('err'), {method => 'handshake'})->finish(1008)
-    if $self->param('err');
-
   return $self->_err('Need to log in first.', {method => 'handshake'})->finish(1008)
     unless my $user = $self->backend->user;
 

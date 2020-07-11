@@ -14,6 +14,7 @@ const api = getContext('api');
 const user = getContext('user');
 
 const emailFromParams = location.href.indexOf('email=') != -1;
+const isFirst = process.env.first_user;
 const scrollspy = new Scrollspy();
 const loginOp = api('loginUser');
 const registerOp = api('registerUser');
@@ -57,10 +58,10 @@ function registered() {
     <p>
       <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
     </p>
-  {:else if emailFromParams || process.env.open_to_public || $user.isFirst}
+  {:else if emailFromParams || process.env.open_to_public || isFirst}
     <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
       <h2>{l(process.env.existing_user ? 'Recover account' : 'Sign up')}</h2>
-      {#if $user.isFirst}
+      {#if isFirst}
         <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
       {/if}
       <input type="hidden" name="exp">
@@ -98,7 +99,7 @@ function registered() {
   {/if}
 </section>
 
-{#if !$user.isFirst}
+{#if !isFirst}
   <section id="signin">
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{l('Sign in')}</h2>

@@ -19,7 +19,7 @@ import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 
-const user = new User({isFirst: process.env.first_user, themes: process.env.themes});
+const user = new User({themes: process.env.themes});
 const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
