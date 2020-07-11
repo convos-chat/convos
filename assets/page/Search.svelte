@@ -31,7 +31,7 @@ onMount(() => user.search.on('search', (msg) => search(route, msg)));
 
 function dialogUrl(message) {
   const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
-  return url + '#' + message.ts.toISOString();
+  return route.urlFor(url + '#' + message.ts.toISOString());
 }
 
 function gotoDialog(e) {
