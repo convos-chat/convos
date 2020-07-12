@@ -2,10 +2,12 @@
 use lib '.';
 use Convos::Util 'short_checksum';
 use t::Helper;
+use t::Server::Irc;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend::File';
-my $t    = t::Helper->t;
-my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
+my $server = t::Server::Irc->new->start;
+my $t      = t::Helper->t;
+my $user   = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 $user->save_p->$wait_success('save_p');
 
 my $asset = Mojo::Asset::File->new({path => __FILE__});
@@ -38,8 +40,8 @@ $t->get_ok("/file/1/1000000000000000")->status_is(404);
 
 note 'set up connection';
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-t::Helper->irc_server_connect($connection);
-t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome');
+$server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
+  ->client_event_ok('_irc_event_rpl_welcome')->process_ok;
 
 note 'handle_message_to_paste_p';
 my %send = (connection_id => $connection->id, dialog_id => 'superwoman', method => 'send');

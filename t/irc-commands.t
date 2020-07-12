@@ -1,18 +1,21 @@
 #!perl
 use lib '.';
 use t::Helper;
+use t::Server::Irc;
 use Mojo::IOLoop;
 use Convos::Core;
 
 $ENV{CONVOS_CONNECT_DELAY} = 0.2;
-my $core = Convos::Core->new(backend => 'Convos::Core::Backend');
+my $server = t::Server::Irc->new->start;
+my $core   = Convos::Core->new(backend => 'Convos::Core::Backend');
 $core->start;
 
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my ($err, $res);
+my ($err, $p, $res);
 
 my @state;
+$connection->url($server->url);
 $connection->on(state => sub { push @state, [@_[1, 2]] });
 
 ok !$connection->get_dialog('#convos'), 'convos channel does not exist';
@@ -76,51 +79,63 @@ cmp_deeply(
 ) or diag explain \@state;
 
 note 'disconnect and connect';
-my $irc_server = t::Helper->irc_server_connect($connection);
-$connection->send_p('', '/disconnect')->$wait_success('disconnect');
-$connection->send_p('', '/connect')->$wait_success('connect');
-t::Helper->irc_server_messages(
-  qr{NICK} => ['welcome.irc'],
-  $connection, '_irc_event_rpl_welcome',
-  qr{JOIN} => ['join-convos.irc'],
-  $connection, '_irc_event_join',
-);
+$connection->send_p('', '/disconnect')->$wait_success('disconnect command');
+$server->auto_connect(0)->client($connection)->server_event_ok('_irc_event_nick')
+  ->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
+  ->server_write_ok(['join-convos.irc'])->client_event_ok('_irc_event_join');
+$connection->send_p('', '/connect')->$wait_success('connect command');
+$server->process_ok('connect');
 
 note 'kick';
-$connection->send_p('#nope', '/kick superwoman')->catch(sub { $err = shift })
-  ->$wait_success(from_server => ":localhost 403 superman #nope :No such channel\r\n");
+$server->server_event_ok('_irc_event_kick')
+  ->server_write_ok(":localhost 403 superman #nope :No such channel\r\n");
+$connection->send_p('#nope', '/kick superwoman')->catch(sub { $err = shift })->$wait_success;
+$server->processed_ok;
 is $err, 'No such channel', 'kick #nope';
 
-$res = $connection->send_p('#convos', '/kick superwoman')
-  ->$wait_success(from_server => ":localhost KICK #convos superwoman :superman\r\n");
+$server->server_event_ok('_irc_event_kick')
+  ->server_write_ok(":localhost KICK #convos superwoman :superman\r\n");
+$res = $connection->send_p('#convos', '/kick superwoman')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {}, 'kick response');
 
 note 'mode';
-$connection->send_p('#nope', '/mode superwoman')->catch(sub { $err = shift })
-  ->$wait_success(qr{MODE} => ":localhost 461 superman #nope :Not enough parameters\r\n");
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost 461 superman #nope :Not enough parameters\r\n");
+$connection->send_p('#nope', '/mode superwoman')->catch(sub { $err = shift })->$wait_success;
+$server->processed_ok;
 is $err, 'Not enough parameters', 'mode superwoman';
 
-$res = $connection->send_p('#convos', '/mode')
-  ->$wait_success(qr{MODE} => ":localhost 324 superman #convos +intu\r\n");
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost 324 superman #convos +intu\r\n");
+$res = $connection->send_p('#convos', '/mode')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {mode => '+intu'}, 'mode response');
 
-$res = $connection->send_p('#convos', '/mode +k secret')
-  ->$wait_success(qr{MODE} => ":localhost MODE #convos +k :secret\r\n");
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost MODE #convos +k :secret\r\n");
+$res = $connection->send_p('#convos', '/mode +k secret')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {}, 'mode +k response - current channel');
 
-$res = $connection->send_p('', '/mode #otherchan +k secret')
-  ->$wait_success(qr{MODE} => ":localhost MODE #otherchan +k :secret\r\n");
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
+$res = $connection->send_p('', '/mode #otherchan +k secret')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {}, 'mode +k response - with no dialog_id');
 
-$res = $connection->send_p('#convos', '/mode #otherchan +k secret')
-  ->$wait_success(qr{MODE} => ":localhost MODE #otherchan +k :secret\r\n");
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
+$res = $connection->send_p('#convos', '/mode #otherchan +k secret')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {}, 'mode +k response - with custom channel');
 
-$res = $connection->send_p('#convos', '/mode b')->$wait_success(
-  qr{MODE} =>
-    ":localhost 367 superman #convos x!*@* superman!~superman@125-12-219-233.rev.home.ne.jp 1577498687\r\n",
-  from_server => ":localhost 368 superman #convos :End of Channel Ban List\r\n",
-);
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(
+  ":localhost 367 superman #convos x!*@* superman!~superman@125-12-219-233.rev.home.ne.jp 1577498687\r\n"
+)->server_write_ok(":localhost 368 superman #convos :End of Channel Ban List\r\n");
+$res = $connection->send_p('#convos', '/mode b')->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   {
@@ -136,8 +151,9 @@ is_deeply(
 );
 
 note 'names';
-$res = $connection->send_p('#convos', '/names')
-  ->$wait_success(from_server => [__PACKAGE__, 'names.irc']);
+$server->server_event_ok('_irc_event_names')->server_write_ok(['names.irc']);
+$res = $connection->send_p('#convos', '/names')->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   {
@@ -156,16 +172,22 @@ is_deeply(
 
 note 'topic';
 @state = ();
-$res   = $connection->send_p('#convos', '/topic')
-  ->$wait_success(from_server => ":localhost 331 superman #convos :No topic is set\r\n");
+$server->server_event_ok('_irc_event_topic')
+  ->server_write_ok(":localhost 331 superman #convos :No topic is set\r\n");
+$res = $connection->send_p('#convos', '/topic')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {dialog_id => '#convos', topic => ''}, 'topic');
 
-$res = $connection->send_p('#convos', '/topic')
-  ->$wait_success(from_server => ":localhost 332 superman #convos :cool topic\r\n");
+$server->server_event_ok('_irc_event_topic')
+  ->server_write_ok(":localhost 332 superman #convos :cool topic\r\n");
+$res = $connection->send_p('#convos', '/topic')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {dialog_id => '#convos', topic => 'cool topic'}, 'topic');
 
-$res = $connection->send_p('#convos', '/topic Some cool stuff')
-  ->$wait_success(from_server => ":localhost TOPIC #convos :Some cool\r\n");
+$server->server_event_ok('_irc_event_topic')
+  ->server_write_ok(":localhost TOPIC #convos :Some cool\r\n");
+$res = $connection->send_p('#convos', '/topic Some cool stuff')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {dialog_id => '#convos', topic => 'Some cool'}, 'set topic');
 
 cmp_deeply(
@@ -178,10 +200,12 @@ cmp_deeply(
 ) or diag explain \@state;
 
 note 'ison';
+$server->server_event_ok('_irc_event_ison')
+  ->server_write_ok(":localhost 303 test21362 :other SuperBoy superbad\r\n");
 $res
   = Mojo::Promise->all(map { $connection->send_p('', "/ison $_") } qw(SuperBoy superwoman SUPERBAD))
-  ->then(sub { [map { $_->[0] } @_] })
-  ->$wait_success(from_server => ":localhost 303 test21362 :other SuperBoy superbad\r\n");
+  ->then(sub { [map { $_->[0] } @_] })->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   [
@@ -192,8 +216,10 @@ is_deeply(
   'ison nick',
 );
 
-$res = $connection->send_p('Superduper', '/ison')
-  ->$wait_success(from_server => ":localhost 303 test21362 :superduper\r\n");
+$server->server_event_ok('_irc_event_ison')
+  ->server_write_ok(":localhost 303 test21362 :superduper\r\n");
+$res = $connection->send_p('Superduper', '/ison')->$wait_success;
+$server->processed_ok;
 is_deeply $res, {nick => 'Superduper', online => true}, 'ison';
 
 note 'join';
@@ -201,18 +227,21 @@ is $connection->n_dialogs, 2, 'number of dialogs before list join';
 $connection->send_p('', '/join #foo,#bar,#baz')->$wait_success;
 is $connection->n_dialogs, 2, 'number of dialogs did not change';
 
-$res = $connection->send_p('', '/join #redirected')->$wait_success(
-  from_server             => [__PACKAGE__, 'join-redirected-1.irc'],
-  qr{JOIN \#\#redirected} => [__PACKAGE__, 'join-redirected-2.irc'],
-);
+note 'join redirected';
+$server->server_event_ok('_irc_event_join')->server_write_ok(['join-redirected-1.irc'])
+  ->server_event_ok('_irc_event_join')->server_write_ok(['join-redirected-2.irc']);
+$res = $connection->send_p('', '/join #redirected')->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   {dialog_id => '##redirected', topic => '', topic_by => '', users => {}},
   'join redirected'
 );
 
-$res = $connection->send_p('', '/join #protected S3cret')
-  ->$wait_success(qr{JOIN \#protected S3cret} => [__PACKAGE__, 'join-protected.irc']);
+note 'join protected';
+$server->server_event_ok('_irc_event_join')->server_write_ok(['join-protected.irc']);
+$res = $connection->send_p('', '/join #protected S3cret')->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   {dialog_id => '#protected', topic => '', topic_by => '', users => {}},
@@ -224,16 +253,17 @@ is $res->{dialog_id}, 'some_user', 'join alias for query';
 $connection->send_p('', '/part some_user')->$wait_success('clean up for state test later on');
 
 note 'list';
-$res = $connection->send_p('', '/list')
-  ->$wait_success(from_server => ":localhost 321 superman Channel :Users  Name\r\n");
+$p = $connection->send_p('', '/list');
+$server->server_event_ok('_irc_event_list')
+  ->server_write_ok(":localhost 321 superman Channel :Users  Name\r\n")
+  ->client_event_ok('_irc_event_rpl_liststart')->process_ok;
+$res = $p->$wait_success;
 is_deeply($res, {n_dialogs => 0, dialogs => [], done => false}, 'list empty');
 
-t::Helper->irc_server_messages(
-  from_server => ":localhost 322 superman #Test123 1 :[+nt]\r\n",
-  $connection, '_irc_event_rpl_list',
-  from_server => ":localhost 322 superman #convos 42 :[+nt] some cool topic\r\n",
-  $connection, '_irc_event_rpl_list',
-);
+$server->server_write_ok(":localhost 322 superman #Test123 1 :[+nt]\r\n")
+  ->client_event_ok('_irc_event_rpl_list')
+  ->server_write_ok(":localhost 322 superman #convos 42 :[+nt] some cool topic\r\n")
+  ->client_event_ok('_irc_event_rpl_list')->process_ok;
 $res = $connection->send_p('', '/list')->$wait_success;
 is_deeply(
   $res,
@@ -248,16 +278,15 @@ is_deeply(
   'list dialogs',
 );
 
-t::Helper->irc_server_messages(
-  from_server => ":localhost 323 superman :End of /LIST\r\n",
-  $connection => '_irc_event_rpl_listend',
-);
+$server->server_write_ok(":localhost 323 superman :End of /LIST\r\n")
+  ->client_event_ok('_irc_event_rpl_listend')->process_ok;
 $res = $connection->send_p('', '/list')->$wait_success;
 ok $res->{done}, 'list done';
 
 note 'whois';
-$res = $connection->send_p('', '/whois superwoman')
-  ->$wait_success(qr{WHOIS}, [__PACKAGE__, 'whois-superwoman.irc']);
+$server->server_event_ok('_irc_event_whois')->server_write_ok(['whois-superwoman.irc']);
+$res = $connection->send_p('', '/whois superwoman')->$wait_success;
+$server->processed_ok;
 is_deeply(
   $res,
   {
@@ -278,14 +307,16 @@ note 'close and part';
 $res = $connection->send_p('#convos', '/close superwoman')->$wait_success;
 is_deeply($res, {}, 'close superwoman response');
 
-$connection->send_p('#convos', '/close #foo')->catch(sub { $err = shift })
-  ->$wait_success(qr{PART}, ":localhost 442 superman #foo :You are not on that channel\r\n");
+$server->server_event_ok('_irc_event_part')
+  ->server_write_ok(":localhost 442 superman #foo :You are not on that channel\r\n");
+$connection->send_p('#convos', '/close #foo')->catch(sub { $err = shift })->$wait_success;
 is $err, 'You are not on that channel', 'close #foo';
 
 $connection->dialog({name => '#convos'});
 ok $connection->get_dialog('#convos'), 'has convos dialog';
-$res = $connection->send_p('#convos', '/part')
-  ->$wait_success(qr{PART} => ":localhost PART #convos\r\n");
+$server->server_event_ok('_irc_event_part')->server_write_ok(":localhost PART #convos\r\n");
+$res = $connection->send_p('#convos', '/part')->$wait_success;
+$server->processed_ok;
 is_deeply($res, {}, 'part #convos');
 ok !$connection->get_dialog('#convos'), 'convos dialog was removed';
 
@@ -293,14 +324,15 @@ note 'unknown commands';
 $connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
 like $err, qr{Unknown command}, 'Unknown command';
 
-$connection->send_p('', '/quote FOO some stuff')->$wait_success(
-  qr{FOO} => ":localhost 421 superman FOO :Unknown command\r\n",
-  $connection, '_irc_event_err_unknowncommand',
-);
+$connection->send_p('', '/quote FOO some stuff')->$wait_success;
+$server->server_event_ok('_irc_event_foo')
+  ->server_write_ok(":localhost 421 superman FOO :Unknown command\r\n")
+  ->client_event_ok('_irc_event_err_unknowncommand')->process_ok;
 
 note 'oper command';
-$res = $connection->send_p('', '/oper foo bar')->catch(sub { $err = shift })
-  ->$wait_success(qr{OPER}, [__PACKAGE__, 'oper.irc']);
+$server->server_event_ok('_irc_event_oper')->server_write_ok(['oper.irc']);
+$res = $connection->send_p('', '/oper foo bar')->catch(sub { $err = shift })->$wait_success;
+$server->processed_ok;
 is $res->{server_op}, true, 'server_op';
 
 note 'server disconnect';
@@ -308,11 +340,12 @@ note 'server disconnect';
 my $id = $connection->{stream_id};
 ok !!Mojo::IOLoop->stream($id), 'got stream';
 $connection->once(state => sub { Mojo::IOLoop->stop });
-$irc_server->emit('close_stream');
+$server->close_connections;
 Mojo::IOLoop->start;
 ok !Mojo::IOLoop->stream($id), 'stream was removed';
 
-t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], $connection, '_irc_event_rpl_welcome');
+$server->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
+  ->client_event_ok('_irc_event_rpl_welcome')->process_ok;
 isnt $connection->{stream_id}, $id, 'got new stream id';
 ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 

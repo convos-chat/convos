@@ -2,11 +2,13 @@
 BEGIN { $ENV{CONVOS_SKIP_CONNECT} = 1 }
 use lib '.';
 use t::Helper;
+use t::Server::Irc;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my $core = core();
-my $user = $core->user({email => 'test.user@example.com'});
+my $server = t::Server::Irc->new->start;
+my $core   = core();
+my $user   = $core->user({email => 'test.user@example.com'});
 $user->save_p->$wait_success;
 
 my $connection = $user->connection({name => 'example', protocol => 'irc'});
@@ -29,19 +31,14 @@ note 'on_connect_commands';
 my @on_connect_commands = ('/msg NickServ identify s3cret', '/msg superwoman you are too cool');
 $connection->on_connect_commands([@on_connect_commands]);
 
-t::Helper->irc_server_connect($connection);
-
-t::Helper->irc_server_messages(
-  qr{NICK} => ['welcome.irc'],
-  $connection, '_irc_event_rpl_welcome',
-  qr{PRIVMSG NickServ} => ['identify.irc'],
-  qr{JOIN}             => ['join-convos.irc'],
-  $connection, '_irc_event_join', $connection, '_irc_event_rpl_topic', $connection,
-  '_irc_event_rpl_topicwhotime', $connection, '_irc_event_rpl_namreply', $connection,
-  '_irc_event_rpl_endofnames',
-);
-
-t::Helper->irc_server_messages(qr{ISON} => ['ison.irc'], $connection, '_irc_event_rpl_ison');
+$server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
+  ->client_event_ok('_irc_event_rpl_welcome')->server_event_ok('_irc_event_privmsg')
+  ->server_write_ok(['identify.irc'])->server_event_ok('_irc_event_join')
+  ->server_write_ok(['join-convos.irc'])->client_event_ok('_irc_event_join')
+  ->client_event_ok('_irc_event_rpl_topic')->client_event_ok('_irc_event_rpl_topicwhotime')
+  ->client_event_ok('_irc_event_rpl_namreply')->client_event_ok('_irc_event_rpl_endofnames')
+  ->server_event_ok('_irc_event_ison')->server_write_ok(['ison.irc'])
+  ->client_event_ok('_irc_event_rpl_ison')->process_ok('on_connect_commands');
 
 is_deeply($connection->on_connect_commands,
   [@on_connect_commands], 'on_connect_commands still has the same elements');

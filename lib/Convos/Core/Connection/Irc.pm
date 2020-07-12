@@ -128,7 +128,7 @@ sub _connect_args {
 
   $self->_periodic_events;
   $url->port($params->param('tls') ? 6669 : 6667) unless $url->port;
-  $params->param(nick => $self->_nick) unless $params->param('nick');
+  $params->param(nick => $self->_nick)            unless $params->param('nick');
   $self->{myinfo}{nick} = $params->param('nick');
 
   return $self->SUPER::_connect_args;

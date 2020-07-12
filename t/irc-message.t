@@ -3,11 +3,13 @@ BEGIN { $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} = 5 }
 
 use lib '.';
 use t::Helper;
+use t::Server::Irc;
 use Mojo::File 'path';
 use Mojo::IOLoop;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
+my $server     = t::Server::Irc->new->start;
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
@@ -21,34 +23,28 @@ like $err, qr{without target}, 'send: without target';
 $connection->send_p('#test_convos' => '0')->catch(sub { $err = shift })->$wait_success('send_p');
 like $err, qr{Not connected}i, 'send: not connected';
 
-t::Helper->irc_server_connect($connection);
-
-t::Helper->irc_server_messages(
-  qr{NICK}    => ['welcome.irc'],
-  qr{USER}    => ":Supergirl!sg\@example.com PRIVMSG #convos :not a superdupersuperman?\r\n",
-  $connection => '_irc_event_privmsg',
-);
+$server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
+  ->server_write_ok(":Supergirl!sg\@example.com PRIVMSG #convos :not a superdupersuperman?\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok;
 
 note 'notifications';
 is $user->unread, 0, 'notifications';
 like slurp_log('#convos'), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
-t::Helper->irc_server_messages(
-  from_server =>
-    ":Supergirl!sg\@example.com PRIVMSG superman :Hey! Do you get any notifications?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server => ":Supergirl!sg\@example.com PRIVMSG superman :Yikes! how are you?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server =>
-    ":superman!sm\@example.com PRIVMSG #convos :What if I mention myself as superman?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server =>
-    ":Supergirl!sg\@example.com PRIVMSG #convos :But... SUPERMAN, what about in a channel?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server =>
-    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a normal message in a channel?\r\n",
-  $connection => '_irc_event_privmsg',
-);
+$server->server_write_ok(
+  ":Supergirl!sg\@example.com PRIVMSG superman :Hey! Do you get any notifications?\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(":Supergirl!sg\@example.com PRIVMSG superman :Yikes! how are you?\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(
+  ":superman!sm\@example.com PRIVMSG #convos :What if I mention myself as superman?\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(
+  ":Supergirl!sg\@example.com PRIVMSG #convos :But... SUPERMAN, what about in a channel?\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(
+  ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a normal message in a channel?\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok;
 like slurp_log('#convos'), qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}m,
   'notification';
 
@@ -72,18 +68,16 @@ is_deeply(
 note 'highlight_keywords';
 $user->highlight_keywords(['normal', 'Yikes', ' '])->_normalize_attributes;
 
-t::Helper->irc_server_messages(
-  from_server =>
-    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a message with space in a channel?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server => ":Supergirl!sg\@example.com PRIVMSG #convos :Yikes! yikes:/\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server =>
-    ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a NORMAL message in a channel?\r\n",
-  $connection => '_irc_event_privmsg',
-  from_server => ":Supergirl!sg\@example.com PRIVMSG #convos :Some other random message\r\n",
-  $connection => '_irc_event_privmsg',
-);
+$server->server_write_ok(
+  ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a message with space in a channel?\r\n"
+)->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(":Supergirl!sg\@example.com PRIVMSG #convos :Yikes! yikes:/\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(
+  ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a NORMAL message in a channel?\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(":Supergirl!sg\@example.com PRIVMSG #convos :Some other random message\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok;
 $core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
   ->$wait_success('notifications');
 delete $_->{ts} for @{$notifications->{messages}};
@@ -106,17 +100,13 @@ is_deeply(
 );
 is $user->unread, 3, 'One unread messages';
 
-t::Helper->irc_server_messages(
-  from_server => ":Supergirl!sg\@example.com PRIVMSG superman :does this work?!\r\n",
-  $connection => '_irc_event_privmsg',
-);
+$server->server_write_ok(":Supergirl!sg\@example.com PRIVMSG superman :does this work?!\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok;
 like slurp_log("supergirl"), qr{\Q<Supergirl> does this work?\E}m, 'private message';
 
-t::Helper->irc_server_messages(
-  from_server =>
-    ":jhthorsen!jhthorsen\@example.com PRIVMSG #convos :\x{1}ACTION convos rocks!\x{1}\r\n",
-  $connection => '_irc_event_ctcp_action',
-);
+$server->server_write_ok(
+  ":jhthorsen!jhthorsen\@example.com PRIVMSG #convos :\x{1}ACTION convos rocks!\x{1}\r\n")
+  ->client_event_ok('_irc_event_ctcp_action')->process_ok;
 like slurp_log('#convos'), qr{\Q* jhthorsen convos rocks\E}m, 'ctcp_action';
 
 note 'test stripping away invalid characters in a message';
@@ -129,16 +119,12 @@ like slurp_log('#convos'), qr{\Q<superman> some regular / message\E}m, 'loopback
 $connection->send_p('#convos' => "/say /me is a command")->$wait_success('send_p /say');
 like slurp_log('#convos'), qr{\Q<superman> /me is a command\E}m, 'me is a command';
 
-t::Helper->irc_server_messages(
-  from_server => ":Supergirl!sg\@example.com NOTICE superman :notice this?\r\n",
-  $connection => '_irc_event_notice',
-);
+$server->server_write_ok(":Supergirl!sg\@example.com NOTICE superman :notice this?\r\n")
+  ->client_event_ok('_irc_event_notice')->process_ok;
 like slurp_log("supergirl"), qr{\Q-Supergirl- notice this?\E}m, 'irc_notice';
 
-t::Helper->irc_server_messages(
-  from_server => ":superduper!sd\@example.com PRIVMSG #convos foo-bar-baz, yes?\r\n",
-  $connection => '_irc_event_privmsg',
-);
+$server->server_write_ok(":superduper!sd\@example.com PRIVMSG #convos foo-bar-baz, yes?\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok;
 like slurp_log('#convos'), qr{\Q<superduper> foo-bar-baz, yes?\E}m, 'superduper';
 
 note 'split messages';

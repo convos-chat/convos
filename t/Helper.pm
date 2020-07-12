@@ -10,61 +10,11 @@ use Mojo::Loader 'data_section';
 use Mojo::URL;
 use Mojo::Util 'term_escape';
 
-our ($CONVOS_HOME, $IRC_SERVER);
+our $CONVOS_HOME;
 
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
 $ENV{MOJO_MODE} ||= 'test';
-
-sub irc_server {$IRC_SERVER}
-
-sub irc_server_connect {
-  my ($class, $connection) = @_;
-
-  return +($IRC_SERVER, $connection->url($IRC_SERVER->{connect_url}->clone)->connect)[0]
-    if $IRC_SERVER;
-
-  my $port = Mojo::IOLoop::Server->generate_port;
-  my $url  = Mojo::URL->new->host('127.0.0.1')->port($port)->scheme('irc');
-  $url->query->param(tls => 0);
-
-  Mojo::IOLoop->server({address => $url->host, port => $url->port}, \&_on_irc_server_connect);
-  $IRC_SERVER = Mojo::EventEmitter->new(connect_url => $url);
-  return $class->irc_server_connect($connection);
-}
-
-# 1. Respond with "welcome.irc" when a line matching "NICK" is sent to the IRC server
-# t::Helper->irc_server_messages(qr{NICK} => ['welcome.irc'], ...);
-#
-# 2. Pretend that some data is sent from the server
-# t::Helper->irc_server_messages(from_server => "...\r\n");
-#
-# 3. Check that the "_irc_event_kick" event gets fired after some other condition
-# t::Helper->irc_server_messages(from_server => "...\r\n", $connection => '_irc_event_kick');
-sub irc_server_messages {
-  my ($class, @rules) = @_;
-  my $p  = 0;
-  my $cb = $IRC_SERVER->on(message => sub { $class->_on_irc_server_message(\@rules, \$p, @_) });
-
-  while ($p < @rules) {
-    $class->_on_irc_server_message(\@rules, \$p, $IRC_SERVER, '') if $rules[$p] eq 'from_server';
-    Mojo::IOLoop->one_tick;
-  }
-
-  $IRC_SERVER->unsubscribe(message => $cb);
-}
-
-sub make_default_server {
-  my ($class, $scheme) = (@_, 'irc');
-  return $IRC_SERVER if $IRC_SERVER;
-
-  my $port = Mojo::IOLoop::Server->generate_port;
-  my $url  = Mojo::URL->new->host('127.0.0.1')->port($port)->scheme($scheme);
-  Mojo::IOLoop->server({address => $url->host, port => $url->port}, \&_on_irc_server_connect);
-  $url->query->param(tls => 0);
-  $ENV{CONVOS_DEFAULT_CONNECTION} ||= "$url";
-  return ($IRC_SERVER = Mojo::EventEmitter->new(connect_url => $url));
-}
 
 sub subprocess_in_main_process {
   require Mojo::IOLoop::Subprocess;
@@ -138,7 +88,6 @@ sub t_selenium_register {
 sub wait_reject {
   my ($p, $err, $desc) = (shift, shift, @_ % 2 ? pop : '');
   my $got;
-  __PACKAGE__->irc_server_messages(@_) if @_;
   $p->then(sub { }, sub { $got = shift // ''; })->wait;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
   $desc ||= !ref $err && $err ? $err : 'promise rejected';
@@ -149,7 +98,6 @@ sub wait_reject {
 sub wait_success {
   my ($p,   $desc) = (shift, @_ % 2 ? pop : 'promise resolved');
   my ($err, @res)  = (undef);
-  __PACKAGE__->irc_server_messages(@_) if @_;
   $p->then(sub { @res = @_ }, sub { $err = shift // ''; })->wait;
   local $Test::Builder::Level = $Test::Builder::Level + 1;
   Test::More::is($err, undef, $desc);
@@ -194,93 +142,9 @@ END {
   }
 }
 
-sub _on_irc_server_connect {
-  my ($ioloop, $stream) = @_;
-  my $concat_buf = '';
-
-  $stream->timeout(0);
-  $stream->on(
-    read => sub {
-      $concat_buf .= $_[1];
-      $IRC_SERVER->emit(message => $1) while $concat_buf =~ s/^([^\015\012]+)[\015\012]//m;
-    }
-  );
-
-  $IRC_SERVER->on(close_stream => sub { $stream->close });
-  $IRC_SERVER->on(write        => sub { _stream_write($stream, $_[1]) });
-  $IRC_SERVER->emit(write => data_section qw(t::Helper start.irc));
-}
-
-sub _on_irc_server_message {
-  my ($class, $rules, $pos, $server, $incoming) = @_;
-
-  my ($re, $response) = ($rules->[$$pos], $rules->[$$pos + 1]);
-  return unless $response;
-
-  my $next = $$pos + 2;
-  while (UNIVERSAL::isa($rules->[$next], 'Convos::Core::Connection')) {
-    my $event_name = $rules->[$next + 1];
-    $rules->[$next]->once($event_name => sub { Test::More::ok(1, "$event_name()"); $$pos += 2 });
-    $next += 2;
-  }
-
-  if ($re eq 'from_server') {
-    $response = $class->_server_write_to_connections($server, $response);
-    Test::More::ok(1, substr "sent [$$pos] $response", 0, 80);
-    $$pos += 2;
-    return;
-  }
-
-  Test::More::note("irc_server_messages '$incoming' =~ $re ($response)") if 0;
-  return unless $incoming =~ $re;
-
-  $response = $class->_server_write_to_connections($server, $response);
-  Test::More::like($incoming, $re, substr term_escape("responded [$$pos] $response"), 0, 80);
-  $$pos += 2;
-}
-
-sub _server_write_to_connections {
-  my ($class, $server, $response) = @_;
-
-  if (ref $response eq 'ARRAY') {
-    my @from = @$response == 1 ? ($class, @$response) : (@$response);
-    $response = data_section @from;
-    die "Could not find data section (@from)" unless $response;
-  }
-
-  $server->emit(write => $response);
-  $response =~ s!\n!\\x0a!g;
-  term_escape $response;
-}
-
-sub _stream_write {
-  my $stream = shift;
-  $stream->{to_connection} .= $_[0] if @_;
-  $stream->{to_connection} =~ s/[\015\012]+/\015\012/g;
-  return $stream->write(substr($stream->{to_connection}, 0, int(10 + rand 20), ''),
-    sub { _stream_write(shift) });
-}
-
 1;
 
 __DATA__
-@@ join-convos.irc
-:Superman!superman@i.love.debian.org JOIN :#convos
-:hybrid8.debian.local 332 Superman #convos :some cool topic
-:hybrid8.debian.local 333 Superman #convos superman!superman@i.love.debian.org 1432932059
-:hybrid8.debian.local 353 Superman = #convos :Superman @batman
-:hybrid8.debian.local 366 Superman #convos :End of /NAMES list.
-@@ identify.irc
-:NickServ!clark.kent\@i.love.debian.org PRIVMSG #superman :You are now identified for batman
-@@ ison.irc
-:hybrid8.debian.local 303 test21362 :private_ryan
-@@ welcome.irc
-:hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
-@@ start.irc
-:hybrid8.local NOTICE AUTH :*** Looking up your hostname...
-:hybrid8.local NOTICE AUTH :*** Checking Ident
-:hybrid8.local NOTICE AUTH :*** Found your hostname
-:hybrid8.local NOTICE AUTH :*** No Ident response
 @@ messages.txt
 river 0 pencil
 arm 1 kettle
