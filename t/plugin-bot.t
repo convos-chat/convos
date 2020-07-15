@@ -3,22 +3,23 @@ BEGIN { $ENV{CONVOS_BOT_LOAD_INTERVAL} = 0.05 }
 
 use lib '.';
 use t::Helper;
+use t::Server::Irc;
 use Convos::Util 'pretty_connection_name';
 use Mojo::Loader 'data_section';
 
-plan skip_all => 'TEST_BOT=1' unless $ENV{TEST_BOT};
+plan skip_all => 'TEST_BOT=1' unless $ENV{TEST_BOT} or $ENV{TEST_ALL};
 
-t::Helper->make_default_server;
-
-$ENV{CONVOS_BOT_EMAIL} ||= 'bot@convos.chat';
-my $t    = t::Helper->t;
-my $core = $t->app->core;
+$ENV{CONVOS_BOT_EMAIL} ||= 'botman@convos.chat';
+my $server = t::Server::Irc->new(auto_connect => 0)->start;
+my $t      = t::Helper->t;
+my $core   = $t->app->core;
 
 my $bot = $t->app->bot;
 ok $bot->isa('Convos::Plugin::Bot'), 'bot helper';
 
 is $core->n_users, 0, 'bot will not register before the first user';
 
+$core->settings->default_connection($server->url);
 $core->settings->open_to_public(true);
 $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
@@ -35,19 +36,22 @@ Mojo::Promise->timer(0.05)->wait;
 ok $bot->action($_), "$_ present" for qw(core karma);
 ok !$bot->action('hailo'), "Convos::Plugin::Bot::Action::Hailo not present";
 
-my $connection_url = Mojo::URL->new($ENV{CONVOS_DEFAULT_CONNECTION});
-my $connection_id  = join '-', $connection_url->scheme,
-  pretty_connection_name($connection_url->host);
-ok $bot->user->get_connection($connection_id), 'bot connection';
+my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url->host);
+my $connection    = $bot->user->get_connection($connection_id);
+ok $connection, 'bot connection';
 
 note 'load all_actions.yaml';
 delete $bot->config->data->{ts};
+my $msg;
+$server->client($connection)->server_event_ok('_irc_event_nick')
+  ->server_write_ok(['welcome-botman.irc'])->server_event_ok('_irc_event_mode', sub { $msg = pop });
 $config_file->spurt(config('all_actions.yaml'));
-Mojo::Promise->timer(0.1)->wait;
+$server->process_ok('mode +B');
 ok $bot->action('hailo'),                              'action by a-z';
 ok $bot->action('Hailo'),                              'action by A-Z';
 ok $bot->action('Convos::Plugin::Bot::Action::Hailo'), 'action by fqn';
 is $bot->action('hailo')->config, $bot->config, 'config is shared';
+like $msg->{raw_line}, qr{MODE botman \+B}, 'mode +B';
 
 my $hailo = $bot->action('hailo');
 my $event = {};
@@ -75,7 +79,7 @@ done_testing;
 
 sub config {
   my $config = data_section('main', shift);
-  $config =~ s!\bCONVOS_DEFAULT_CONNECTION\b!$ENV{CONVOS_DEFAULT_CONNECTION}!g;
+  $config =~ s!\bCONVOS_DEFAULT_CONNECTION\b!{$server->url->to_string}!ge;
   return $config;
 }
 
@@ -87,6 +91,7 @@ actions:
 
 connections:
 - url: CONVOS_DEFAULT_CONNECTION
+  wanted_state: disconnected
 
 @@ all_actions.yaml
 actions:
@@ -103,6 +108,7 @@ actions:
 # Specify which servers to connect to
 connections:
 - url: CONVOS_DEFAULT_CONNECTION
+  wanted_state: connected
   actions:
     Convos::Plugin::Bot::Action::Hailo:
       free_speak_ratio: 0.001
@@ -111,3 +117,6 @@ connections:
       actions:
         Convos::Plugin::Bot::Action::Hailo:
           free_speak_ratio: 0.5
+
+@@ welcome-botman.irc
+:hybrid8.debian.local 001 botman :Welcome to the debian Internet Relay Chat Network botman
