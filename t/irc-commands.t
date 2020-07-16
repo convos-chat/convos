@@ -324,10 +324,11 @@ note 'unknown commands';
 $connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
 like $err, qr{Unknown command}, 'Unknown command';
 
-$connection->send_p('', '/quote FOO some stuff')->$wait_success;
 $server->server_event_ok('_irc_event_foo')
   ->server_write_ok(":localhost 421 superman FOO :Unknown command\r\n")
-  ->client_event_ok('_irc_event_err_unknowncommand')->process_ok;
+  ->client_event_ok('_irc_event_err_unknowncommand');
+$connection->send_p('', '/quote FOO some stuff')->$wait_success;
+$server->process_ok;
 
 note 'oper command';
 $server->server_event_ok('_irc_event_oper')->server_write_ok(['oper.irc']);

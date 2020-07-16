@@ -1,6 +1,7 @@
 package t::Server::Irc;
 use Mojo::Base 'Mojo::EventEmitter';
 
+use Carp 'confess';
 use Convos::Core::Connection::Irc;
 use Mojo::Loader;
 
@@ -43,7 +44,13 @@ sub close_connections {
 
 sub process_ok {
   my ($self, $desc) = @_;
-  my $run = sub { Mojo::IOLoop->one_tick while $self->{outstanding_events} };
+  my $tid = Mojo::IOLoop->timer(5 => sub { $self->_handle_process_timeout($desc) });
+
+  my $run = sub {
+    Mojo::IOLoop->one_tick while $self->{outstanding_events};
+    Mojo::IOLoop->remove($tid);
+  };
+
   return $self->_test(subtest => $desc, $run) if $desc;
   return $self->tap($run);
 }
@@ -150,6 +157,14 @@ sub _handle_client_event_item {
   );
 }
 
+sub _handle_process_timeout {
+  my ($self, $desc) = @_;
+  $self->{outstanding_events} = 0;
+  $self->{queue}              = [];
+  return Test::More::ok(0, $desc) if $desc;
+  confess 'Timeout!';
+}
+
 sub _handle_server_event_item {
   my ($self, $c_conn, $event, $cb) = @_;
 
@@ -191,22 +206,6 @@ sub _patch_connection_class {
 
   Mojo::Util::monkey_patch($self->connection_class => write => sub { shift->_write(@_) })
     unless $self->connection_class->can('write');
-}
-
-sub _wait_for_connection {
-  my ($self, $c_conn) = @_;
-  my $s_conn = $self->_find_server_conn($c_conn);
-  return $s_conn if $s_conn;
-
-  $self->once(
-    connection => sub {
-      $s_conn = $self->_find_server_conn($c_conn);
-      Mojo::IOLoop->stop;
-    }
-  );
-
-  Mojo::IOLoop->start;
-  return $s_conn;
 }
 
 1;

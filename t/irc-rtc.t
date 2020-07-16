@@ -26,9 +26,10 @@ $connection->rtc_p({%msg})->$wait_reject('Not connected.');
 
 $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
   ->process_ok;
+$server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $res = $connection->rtc_p({%msg})->$wait_success('call #convos');
+$server->processed_ok;
 is_deeply $res, {}, 'called #convos';
-$server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop })->process_ok;
 is $msg->{raw_line}, "NOTICE #convos :\x01RTCZ CALL\x01", 'rtcz';
 
 note 'hangup superwoman';
@@ -38,7 +39,7 @@ $connection->dialog({name => 'superwoman'});
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $res = $connection->rtc_p({%msg})->$wait_success('call superwoman');
 is_deeply $res, {}, 'called superwoman';
-$server->process_ok;
+$server->processed_ok;
 is $msg->{raw_line}, "NOTICE superwoman :\x01RTCZ HANGUP\x01", 'rtcz';
 
 note 'signalling #convos';
@@ -47,7 +48,7 @@ $connection->rtc_p({%msg})->$wait_reject('Missing property: target.');
 $msg{target} = 'superwoman';
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $connection->rtc_p({%msg})->$wait_success('event ice #convos');
-$server->process_ok;
+$server->processed_ok;
 like $msg->{raw_line}, qr{NOTICE superwoman :\x01RTCZ ICE 0/0 \#convos \S+==\x01},
   'rtcz ice #convos';
 
@@ -57,7 +58,7 @@ delete $msg{ice};
 $msg{target} = 'superwoman';
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $connection->rtc_p({%msg})->$wait_success('event answer superwoman');
-$server->process_ok;
+$server->processed_ok;
 like $msg->{raw_line}, qr{NOTICE superwoman :\x01RTCZ ANS 0/0 superwoman \S+==\x01},
   'rtcz answer superwoman';
 
