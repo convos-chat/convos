@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 4.24 Not Released
  - Synchronized title between server and client side
  - Improved loading time by getting user data from WebSocket
+ - Fix setting proper bot mode (+B)
  - Fix Notifications links when mounted under /whatever
  - Fix t/web-admin #504
  - Fix rendering links inside `code` #503
