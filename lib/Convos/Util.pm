@@ -57,7 +57,8 @@ sub has_many {
   $singular_accessor =~ s!s$!!;
 
   monkey_patch $class => $plural_accessor => sub {
-    return c(values %{$_[0]->{$plural_accessor} || {}});
+    my $all = $_[0]->{$plural_accessor} || {};
+    return c(map { $all->{$_} } sort keys %$all);
   };
 
   monkey_patch $class => "n_$plural_accessor" => sub {

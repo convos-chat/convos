@@ -56,6 +56,13 @@ sub get {
   });
 }
 
+sub list {
+  my $self       = shift->openapi->valid_input  or return;
+  my $admin_from = $self->user_has_admin_rights or return $self->reply->errors([], 401);
+  my $users      = $self->app->core->users;
+  $self->render(openapi => {users => $users});
+}
+
 sub login {
   my $self = shift->openapi->valid_input or return;
 
@@ -280,6 +287,10 @@ See L<https://convos.chat/api.html#op-post--user--email--invite>
 =head2 get
 
 See L<https://convos.chat/api.html#op-get--user>
+
+=head2 list
+
+See L<https://convos.chat/api.html#op-get--users>
 
 =head2 login
 

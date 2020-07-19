@@ -579,6 +579,28 @@ paths:
               url:
                 type: string
 
+  /users:
+    get:
+      operationId: getUsers
+      summary: List Convos users
+      tags: [ user ]
+      x-mojo-to: user#list
+      parameters:
+      - description: Find users after in pagination
+        in: query
+        name: after
+        type: string
+      responses:
+        '200':
+          description: List of users.
+          schema:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+
 parameters:
   connection_id:
     description: A unique connection identifier
