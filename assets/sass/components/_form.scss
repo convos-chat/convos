@@ -166,15 +166,6 @@ textarea {
     outline-offset: -2px;
   }
 
-  &[disabled] {
-    background: var(--button-disabled-bg);
-    color: var(--button-disabled-color);
-    border: var(--button-disabled-border);
-    box-shadow: none;
-    filter: none;
-    cursor: not-allowed;
-  }
-
   &.can-toggle {
     position: relative;
 
@@ -238,6 +229,15 @@ textarea {
 
   .fas + span {
     margin-left: 0.2em;
+  }
+
+  &[disabled] {
+    background: var(--button-disabled-bg);
+    color: var(--button-disabled-color);
+    border: var(--button-disabled-border);
+    box-shadow: none;
+    filter: none;
+    cursor: not-allowed;
   }
 }
 
