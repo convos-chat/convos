@@ -75,9 +75,11 @@ export default class Operation extends Reactive {
     return this._promise || (this._promise = new Promise(resolve => {
       this.api.spec(this.id).then(opSpec => {
         if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".', 'spec'));
-        this.update({status: 'loading'});
+
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
-        this.emit('start', req);
+        if (!url) throw req;
+
+        this.update({status: 'loading'}).emit('start', req);
         if (isType(req.body, 'object') && typeof req.body.has != 'function') req.body = JSON.stringify(req.body);
         return fetch(url, req);
       }).then(res => {
@@ -87,7 +89,7 @@ export default class Operation extends Reactive {
         resolve(this.parse(res, json));
       }).catch(err => {
         delete this._promise;
-        resolve(this.error('Failed fetching operationId "' + this.id + '": ' + err, 'fetch'));
+        resolve(this.error(Array.isArray(err) ? err : 'Failed fetching operationId "' + this.id + '": ' + err, 'fetch'));
       });
     }));
   }
@@ -176,9 +178,13 @@ export default class Operation extends Reactive {
   _paramsToRequest(opSpec, params) {
     const fetchParams = {headers: this.req.headers, method: opSpec.method};
     const url = new URL(opSpec.url);
+    const errors = [];
 
     (opSpec.parameters || []).forEach(p => {
-      if (!this._hasProperty(params, p) && !p.required) {
+      if (!this._hasProperty(params, p) && p.required) {
+        errors.push({message: 'Missing property.', path: '/' + p.name});
+      }
+      else if (!this._hasProperty(params, p) && !p.required) {
         return;
       }
       else if (p.in == 'path') {
@@ -203,6 +209,6 @@ export default class Operation extends Reactive {
       }
     });
 
-    return [url, fetchParams];
+    return errors.length ? [null, errors] : [url, fetchParams];
   }
 }
