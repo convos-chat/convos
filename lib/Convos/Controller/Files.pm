@@ -1,8 +1,6 @@
 package Convos::Controller::Files;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'E';
-
 sub get {
   my $self = shift;
 
@@ -22,14 +20,14 @@ sub upload {
   # TODO: Move this to Mojolicious::Plugin::OpenAPI
   # Handle "Maximum message size exceeded"
   my $error = $self->req->error;
-  $self->render(openapi => E($error->{message}, '/file'), status => 400) if $error;
+  $self->reply->errors([[$error->{message}, '/file']], 400) if $error;
 
   return unless $self->openapi->valid_input;
-  return $self->unauthorized unless my $user = $self->backend->user;
+  return $self->reply->errors([], 401) unless my $user = $self->backend->user;
 
   my $upload = $self->req->upload('file');
   my $err;
-  return $self->render(openapi => E($err, '/file'), status => 400)
+  return $self->reply->errors([[$err, '/file']], 400)
     if $err = !$upload ? 'No upload.' : !$upload->filename ? 'Unknown filename.' : '';
 
   my %args = (filename => $upload->filename);

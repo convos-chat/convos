@@ -1,22 +1,21 @@
 package Convos::Controller::Connection;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'E';
 use Mojo::Util 'trim';
 
 sub create {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my $json = $self->req->json;
-  my $url = Mojo::URL->new($json->{url} || '');
+  my $url  = Mojo::URL->new($json->{url} || '');
 
   if ($self->settings('forced_connection')) {
     my $default_connection = Mojo::URL->new($self->settings('default_connection'));
-    return $self->render(openapi => E('Will only accept forced connection URL.'), status => 400)
+    return $self->reply->errors('Will only accept forced connection URL.', 400)
       if $url->host_port ne $default_connection->host_port;
   }
 
-  return $self->render(openapi => E('Missing "host" in URL'), status => 400) unless $url->host;
+  return $self->reply->errors('Missing "host" in URL', 400) unless $url->host;
 
   return $self->backend->connection_create_p($url)->then(
     sub {
@@ -27,14 +26,14 @@ sub create {
       $self->render(openapi => $connection);
     },
     sub {
-      $self->render(openapi => E(shift || 'Could not create connection.'), status => 400);
+      $self->reply->errors(shift || 'Could not create connection.', 400);
     },
   );
 }
 
 sub list {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my @connections;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
@@ -46,7 +45,7 @@ sub list {
 
 sub remove {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
   return $user->remove_connection_p($self->stash('connection_id'))->then(sub {
     $self->render(openapi => {});
@@ -55,7 +54,7 @@ sub remove {
 
 sub update {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my $json = $self->req->json;
   my $wanted_state = $json->{wanted_state} || '';
   my $connection;
@@ -66,7 +65,7 @@ sub update {
     $connection->wanted_state($wanted_state) if $wanted_state;
     1;
   } or do {
-    return $self->render(openapi => E('Connection not found.'), status => 404);
+    return $self->reply->errors('Connection not found.', 404);
   };
 
   if (my $cmds = $json->{on_connect_commands}) {

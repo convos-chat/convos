@@ -1,7 +1,7 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util qw(E tp);
+use Convos::Util 'tp';
 use Mojo::JSON qw(false true);
 
 sub last_read {
@@ -10,8 +10,8 @@ sub last_read {
   my $last_read = Mojo::Date->new->to_datetime;
 
   unless ($dialog) {
-    return $self->unauthorized unless $self->backend->user;
-    return $self->render(openapi => E('Dialog not found.'), status => 404);
+    return $self->reply->errors([],                  401) unless $self->backend->user;
+    return $self->reply->errors('Dialog not found.', 404);
   }
 
   $dialog->last_read($last_read);
@@ -22,7 +22,7 @@ sub last_read {
 
 sub list {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my @dialogs;
 
   my @p;
@@ -45,7 +45,7 @@ sub messages {
   my %query;
 
   unless ($dialog) {
-    return $self->unauthorized unless $self->backend->user;
+    return $self->reply->errors([], 401) unless $self->backend->user;
     return $self->render(openapi => {messages => [], end => true});
   }
 
@@ -56,12 +56,10 @@ sub messages {
 
   # Input check
   if ($query{after} and $query{before}) {
-    return $self->render(openapi => E('Must be before "/after".', '/before'), status => 400)
+    return $self->reply->errors([['Must be before "/after".', '/before']], 400)
       if tp($query{after}) > tp($query{before});
-    return $self->render(
-      openapi => E('Must be less than "/after" - 12 months.', '/before'),
-      status  => 400
-    ) if abs(tp($query{after}) - tp($query{before})) > 86400 * 365;
+    return $self->reply->errors([['Must be less than "/after" - 12 months.', '/before']], 400)
+      if abs(tp($query{after}) - tp($query{before})) > 86400 * 365;
   }
 
   return $dialog->messages_p(\%query)->then(sub {

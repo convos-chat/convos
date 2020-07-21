@@ -1,7 +1,6 @@
 package Convos::Controller::User;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'E';
 use Mojo::DOM;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(hmac_sha1_sum trim);
@@ -11,11 +10,10 @@ use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
 
 sub delete {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
-  if (@{$self->app->core->users} <= 1) {
-    return $self->render(openapi => E('You are the only user left.'), status => 400);
-  }
+  return $self->reply->errors('You are the only user left.', 400)
+    if @{$self->app->core->users} <= 1;
 
   return $self->app->core->backend->delete_object_p($user)->then(sub {
     delete $self->session->{email};
@@ -25,7 +23,7 @@ sub delete {
 
 sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
-  return $self->unauthorized unless my $admin_from = $self->user_has_admin_rights;
+  return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
 
   my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
   my $user     = $self->app->core->get_user($self->stash('email'));
@@ -49,7 +47,7 @@ sub generate_invite_link {
 
 sub get {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
   return $user->get_p($self->req->url->query->to_hash)->then(sub {
     my $user = shift;
@@ -67,7 +65,7 @@ sub login {
       $self->session(email => $user->email)->render(openapi => $user);
     },
     sub {
-      $self->render(openapi => {errors => [{message => shift, path => '/'}]}, status => 400);
+      $self->reply->errors(shift, 400);
     },
   );
 }
@@ -92,13 +90,14 @@ sub register {
   if ($self->app->core->n_users) {
 
     # Validate input
-    return $self->unauthorized('Convos registration is not open to public.')
+    return $self->reply->errors('Convos registration is not open to public.', 401)
       if !$json->{token} and !$self->settings('open_to_public');
 
     # TODO: Add test
-    return $self->unauthorized('Email is taken.') if !$json->{token} and $user;
+    return $self->reply->errors('Email is taken.', 401) if !$json->{token} and $user;
 
-    return $self->unauthorized('Invalid token. You have to ask your Convos admin for a new link.')
+    return $self->reply->errors('Invalid token. You have to ask your Convos admin for a new link.',
+      401)
       if $json->{token} and !$self->_is_valid_invite_token($user, {%$json});
 
     # Update existing user
@@ -133,7 +132,7 @@ sub register_html {
 sub update {
   my $self = shift->openapi->valid_input or return;
   my $json = $self->_clean_json;
-  my $user = $self->backend->user or return $self->unauthorized;
+  my $user = $self->backend->user or return $self->reply->errors([], 401);
 
   # TODO: Add support for changing email
 

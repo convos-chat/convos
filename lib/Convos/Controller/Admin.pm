@@ -6,7 +6,7 @@ use Mojo::JSON qw(false true);
 
 sub settings_get {
   my $self = shift->openapi->valid_input or return;
-  return $self->unauthorized unless $self->user_has_admin_rights;
+  return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
 
   my $core     = $self->app->core;
   my $settings = $core->settings->TO_JSON;
@@ -16,10 +16,10 @@ sub settings_get {
 
 sub settings_update {
   my $self = shift->openapi->valid_input or return;
-  return $self->unauthorized unless $self->user_has_admin_rights;
+  return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
 
   my ($err, $json) = $self->_clean_json($self->req->json);
-  return $self->render(openapi => {errors => $err}, status => 400) if @$err;
+  return $self->reply->errors($err, 400) if @$err;
   return $self->app->core->settings->save_p($json)->then(sub { $self->render(openapi => shift) });
 }
 
@@ -32,21 +32,19 @@ sub _clean_json {
 
   my @err;
   if ($clean{contact}) {
-    push @err, {message => 'Contact URL need to start with "mailto:".', path => '/email'}
+    push @err, ['Contact URL need to start with "mailto:".', '/email']
       unless $clean{contact} =~ m!^mailto:.*!;
   }
 
   if ($clean{default_connection}) {
     $clean{default_connection} = Mojo::URL->new($clean{default_connection});
-    push @err,
-      {message => 'Connection URL require a scheme and host.', path => '/default_connection'}
+    push @err, ['Connection URL require a scheme and host.', '/default_connection']
       unless $clean{default_connection}->scheme eq 'irc' and $clean{default_connection}->host;
   }
 
   if ($clean{organization_url}) {
     $clean{organization_url} = Mojo::URL->new($clean{organization_url});
-    push @err,
-      {message => 'Organization URL require a scheme and host.', path => '/organization_url'}
+    push @err, ['Organization URL require a scheme and host.', '/organization_url']
       unless $clean{organization_url}->scheme =~ m!^http! and $clean{organization_url}->host;
   }
 

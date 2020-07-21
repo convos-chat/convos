@@ -1,7 +1,6 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
 
-use JSON::Validator::Error;
 use Mojo::Collection 'c';
 use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
@@ -12,16 +11,9 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG E disk_usage generate_secret has_many pretty_connection_name),
+  qw($CHANNEL_RE DEBUG disk_usage generate_secret has_many pretty_connection_name),
   qw(require_module sdp_decode sdp_encode short_checksum tp),
 );
-
-sub E {
-  my ($msg, $path) = @_;
-  $msg =~ s! at \S+.*!!s;
-  $msg =~ s!:.*!.!s;
-  return {errors => [JSON::Validator::Error->new($path, $msg)]};
-}
 
 sub disk_usage {
   my $path = shift;

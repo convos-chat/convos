@@ -1,7 +1,7 @@
 package Convos::Controller::Events;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util qw(DEBUG E);
+use Convos::Util 'DEBUG';
 use Mojo::JSON 'encode_json';
 use Mojo::Util;
 use Time::HiRes 'time';
@@ -50,7 +50,7 @@ sub start {
 
 sub _err {
   my ($self, $err, $data) = @_;
-  my $res = E $err;
+  my $res = {errors => [{message => $err}]};
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = $RESPONSE_EVENT_NAME{$data->{method}} || $data->{method} || 'unknown';
   $self->send({json => $res});

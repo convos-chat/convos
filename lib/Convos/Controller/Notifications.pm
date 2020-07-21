@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub messages {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my %query = map { defined $self->param($_) ? ($_, $self->param($_)) : () } qw(limit match);
 
   return $user->notifications_p(\%query)->then(sub {
@@ -14,7 +14,7 @@ sub messages {
 
 sub read {
   my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->unauthorized;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
   return $user->unread(0)->save_p->then(sub { $self->render(openapi => {}) });
 }

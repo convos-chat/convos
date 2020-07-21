@@ -1,7 +1,8 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw(E pretty_connection_name);
+use Convos::Util 'pretty_connection_name';
+use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json false true);
 use Mojo::Util qw(b64_decode url_unescape);
@@ -22,9 +23,9 @@ sub register {
   $app->helper('l'                           => \&_l);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                    => \&_settings);
+  $app->helper('reply.errors'                => \&_reply_errors);
   $app->helper('reply.exception'             => \&_exception);
   $app->helper('social'                      => \&_social);
-  $app->helper('unauthorized'                => \&_unauthorized);
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
 
   $app->linkembedder->ua->insecure(1) if $ENV{LINK_EMBEDDER_ALLOW_INSECURE_SSL};
@@ -114,6 +115,27 @@ sub _l {
   return $lexicon;
 }
 
+sub _reply_errors {
+  my ($self, $errors, $status) = @_;
+
+  $errors = [["$errors"]] unless ref $errors eq 'ARRAY';
+  $errors = [
+    map {
+      my ($msg, $path) = @$_;
+      $msg =~ s! at \S+.*!!s;
+      $msg =~ s!:\s.*!.!s;
+      JSON::Validator::Error->new($path || '/', $msg);
+    } @$errors
+  ];
+
+  $status ||= 501;
+  $errors->[0] = JSON::Validator::Error->new('/', 'Need to log in first.')
+    if $status == 401 and !@$errors;
+
+  $self->render(json => {errors => $errors}, status => $status);
+  return undef;
+}
+
 sub _settings {
   my $c        = shift;
   my $settings = $c->stash->{'convos.settings'} ||= _setup_settings($c);
@@ -174,10 +196,6 @@ sub _social {
   return $c;
 }
 
-sub _unauthorized {
-  shift->render(json => E(shift || 'Need to log in first.'), status => 401);
-}
-
 sub _user_has_admin_rights {
   my $c              = shift;
   my $x_local_secret = $c->req->headers->header('X-Local-Secret');
@@ -233,11 +251,13 @@ C<%args>:
 Used to return a L<Convos::User> object representing the logged in user
 or a user with email C<$email>.
 
-=head2 unauthorized
+=head2 reply.errors
 
-  $c = $c->unauthorized;
+  undef = $c->reply->errors([], 401);
+  undef = $c->reply->errors([[$msg, $path], ...], $status);
+  undef = $c->reply->errors($msg, $status);
 
-Used to render an OpenAPI response with status code 401.
+Used to render an OpenAPI error response.
 
 =head1 METHODS
 
