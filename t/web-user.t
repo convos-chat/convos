@@ -13,8 +13,9 @@ $ENV{CONVOS_TURN} = 'turn://superman:k2@turn.example.com:3478';
 my $t = t::Helper->t;
 
 $t->get_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
-$t->delete_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
-$t->post_ok('/api/user', json => {})->status_is(401)
+$t->delete_ok('/api/user/superman@example.com')->status_is(401)
+  ->json_is('/errors/0/message', 'Need to log in first.');
+$t->post_ok('/api/user/superman@example.com', json => {})->status_is(401)
   ->json_is('/errors/0/message', 'Need to log in first.')->json_is('/errors/0/path', '/');
 
 $t->post_ok('/api/user/register',
@@ -22,7 +23,7 @@ $t->post_ok('/api/user/register',
   ->json_is('/email', 'superman@example.com')->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
 my $registered = $t->tx->res->json->{registered};
 
-$t->post_ok('/api/user', json => {})->status_is(200);
+$t->post_ok('/api/user/superman@example.com', json => {})->status_is(200);
 
 $t->get_ok('/api/user')->status_is(200);
 is_deeply(
@@ -57,8 +58,8 @@ is_deeply(
   'user object'
 );
 
-$t->post_ok('/api/user', json => {highlight_keywords => [' ', '-', '.', '  ,', '    ', 'foo ']})
-  ->status_is(200);
+$t->post_ok('/api/user/superman@example.com',
+  json => {highlight_keywords => [' ', '-', '.', '  ,', '    ', 'foo ']})->status_is(200);
 $t->get_ok('/api/user')->status_is(200)->json_is('/email', 'superman@example.com')
   ->json_is('/highlight_keywords', ['foo']);
 
@@ -98,7 +99,7 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)
 
 $t->post_ok('/api/notifications/read')->status_is(200);
 
-$t->delete_ok('/api/user')->status_is(400)
+$t->delete_ok('/api/user/superman@example.com')->status_is(400)
   ->json_is('/errors/0/message', 'You are the only user left.');
 
 $t->get_ok('/api/user/logout')->status_is(200);

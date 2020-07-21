@@ -427,16 +427,6 @@ paths:
             $ref: '#/definitions/ServerSettings'
 
   /user:
-    delete:
-      operationId: deleteUser
-      summary: Delete a user.
-      tags: [ user ]
-      x-mojo-to: user#delete
-      responses:
-        '200':
-          description: Successfully deleted.
-          schema:
-            $ref: '#/definitions/Success'
     get:
       operationId: getUser
       summary: Get user data.
@@ -451,29 +441,6 @@ paths:
         in: query
         name: dialogs
         type: boolean
-      responses:
-        '200':
-          description: User profile.
-          schema:
-            $ref: '#/definitions/User'
-    post:
-      operationId: updateUser
-      summary: Update an existing user.
-      tags: [ user ]
-      x-mojo-to: user#update
-      parameters:
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          properties:
-            highlight_keywords:
-              description: Extra keywords to highlight on
-              items:
-                type: string
-            password:
-              $ref: '#/definitions/Password'
       responses:
         '200':
           description: User profile.
@@ -552,6 +519,49 @@ paths:
           schema:
             $ref: '#/definitions/User'
 
+  /user/{email}:
+    delete:
+      operationId: deleteUser
+      summary: Delete a user.
+      tags: [ user ]
+      x-mojo-to: user#remove
+      parameters:
+      - $ref: '#/parameters/email_in_path'
+      responses:
+        '200':
+          description: Successfully deleted.
+          schema:
+            $ref: '#/definitions/Success'
+    post:
+      operationId: updateUser
+      summary: Update an existing user.
+      tags: [ user ]
+      x-mojo-to: user#update
+      parameters:
+      - $ref: '#/parameters/email_in_path'
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            highlight_keywords:
+              description: Extra keywords to highlight on
+              items:
+                type: string
+            password:
+              $ref: '#/definitions/Password'
+            roles:
+              description: User roles, such as admin and bot.
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: User profile.
+          schema:
+            $ref: '#/definitions/User'
+
   /user/{email}/invite:
     post:
       operationId: inviteUser
@@ -560,10 +570,6 @@ paths:
       x-mojo-to: user#generate_invite_link
       parameters:
       - $ref: '#/parameters/email_in_path'
-      - description: Role to give the user.
-        in: query
-        name: role
-        type: string
       responses:
         '200':
           description: User profile.
