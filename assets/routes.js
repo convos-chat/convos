@@ -1,4 +1,3 @@
-
 import Chat from './page/Chat.svelte';
 import ConnectionAdd from './page/ConnectionAdd.svelte';
 import DialogAdd from './page/DialogAdd.svelte';
@@ -8,6 +7,7 @@ import Login from './page/Login.svelte';
 import Search from './page/Search.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
+import SettingsAdminUsers from './page/SettingsAdminUsers.svelte';
 
 export function setupRouting(route, user) {
   route.to('/login', render(Login));
@@ -17,6 +17,7 @@ export function setupRouting(route, user) {
   route.to('/settings/account', render(SettingsAccount));
   route.to('/settings/connection', render(ConnectionAdd));
   route.to('/settings/conversation', render(DialogAdd));
+  route.to('/settings/users', render(SettingsAdminUsers));
   route.to('/settings', render(SettingsAdmin));
   route.to('/search', render(Search));
 

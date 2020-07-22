@@ -14,12 +14,10 @@ const api = getContext('api');
 const user = getContext('user');
 
 const getSettingsOp = api('getSettings');
-const inviteLinkOp = api('inviteUser');
 const updateSettingsOp = api('updateSettings');
 
 let convosSettings = {};
 
-$: invite = $inviteLinkOp.res.body || {};
 $: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
 
 updateSettingsOp.on('start', req => {
@@ -51,15 +49,6 @@ function calculateDiskUsage(usage) {
   };
 }
 
-function generateInviteLink(e) {
-  inviteLinkOp.perform(e.target);
-}
-
-function copyInviteLink(e) {
-  const copied = copyToClipboard(e.target);
-  if (copied) notify(copied, {title: l('Invite link copied')});
-}
-
 function updateSettingsFromForm(e) {
   updateSettingsOp.perform(e.target);
 }
@@ -70,30 +59,6 @@ function updateSettingsFromForm(e) {
 </ChatHeader>
 
 <main class="main">
-  <form id="recover-or-invite" method="post" on:submit|preventDefault="{generateInviteLink}">
-    <h2>{l('Recover or invite')}</h2>
-    <p>{l('Using this form, you can generate an invite link for new users, or a recover password link for existing users.')}</p>
-    <TextField type="email" name="email" placeholder="{l('user@example.com')}">
-      <span slot="label">{l('User email')}</span>
-    </TextField>
-
-    {#if invite.url}
-      <h3>{l('A link was generated')}</h3>
-      <p>
-        {@html lmd(invite.existing ? 'Copy and send the link to your *existing* user.' : 'Copy and send the link to your *new* user.')}
-        {@html lmd('The link is valid until **%1**.', new Date(invite.expires).toLocaleString())}
-      </p>
-      <a href="{invite.url}" on:click|preventDefault="{copyInviteLink}">{invite.url}</a>
-      <p><small>{l('Tip: Clicking on the link will copy it to your clipboard.')}</small></p>
-    {/if}
-
-    <div class="form-actions">
-      <Button icon="save" op="{inviteLinkOp}"><span>{l('Generate link')}</span></Button>
-    </div>
-
-    <OperationStatus op="{inviteLinkOp}"/>
-  </form>
-
   <form id="convos-settings" method="post" on:submit|preventDefault="{updateSettingsFromForm}">
     <h2>{l('Convos settings')}</h2>
     <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', process.env.base_url)}</p>
