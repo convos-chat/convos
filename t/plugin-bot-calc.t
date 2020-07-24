@@ -17,6 +17,6 @@ is $calc->reply({command => 'calc rm -rf .'}),           'Invalid function "rm"'
 is $calc->reply({command => 'calc system("rm -rf .")'}), 'Invalid function "system"', 'system rm';
 is $calc->reply({command => 'calc 10 / 0'}), 'Error in function "/": Illegal division by zero',
   'calc 10 / 2';
-is $calc->reply({command => 'calc sqrt(4)'}), 'sqrt(4) = 2', 'calc sqrt(4)';
+is $calc->reply({command => 'calc: sqrt(4)'}), 'sqrt(4) = 2', 'calc sqrt(4)';
 
 done_testing;
