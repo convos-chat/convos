@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.28 Not Released
+4.28 2020-07-24T18:05:00+0900
  - Fix detecting if Convos has focus, which again enables notifications
 
 4.27 2020-07-24T16:20:00+0900
