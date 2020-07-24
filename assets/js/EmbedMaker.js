@@ -155,7 +155,7 @@ export default class EmbedMaker extends Reactive {
       pos += 2;
       switch (uint16) {
         case 0xffe1: // Start of EXIF
-          var endianNess = scanner.getUint16(idx + 8);
+          var endianNess = dv.getUint16(idx + 8);
           if (endianNess === 0x4949) littleEndian = true;
           maxBytes = dv.getUint16(pos, littleEndian) - pos;
           pos += 2;
