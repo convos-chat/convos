@@ -13,7 +13,7 @@ has forced_connection =>
   sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
 sub id {'settings'}
 has local_secret   => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
-has open_to_public => sub {false};
+has open_to_public => sub { $ENV{CONVOS_OPEN_TO_PUBLIC} ? true : false };
 has organization_name =>
   sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
 has organization_url =>

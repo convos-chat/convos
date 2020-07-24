@@ -67,6 +67,15 @@ sub new {
   return $self;
 }
 
+sub remove_user_p {
+  my ($self, $user) = @_;
+  my @p = $user->connections->map(sub { $user->remove_connection_p($_) })->each;
+  my $p = @p ? Mojo::Promise->all(@p) : Mojo::Promise->resolve;
+
+  return $p->then(sub { $self->backend->delete_object_p($user) })
+    ->then(sub { $self->remove_user($user->id); $user });
+}
+
 sub start {
   my $self = shift;
   return $self if !@_ and $self->{started}++;
@@ -291,6 +300,12 @@ Object constructor. Builds L</backend> if a classname is provided.
 
 Will start the backend. This means finding all users and start connections
 if state is not "disconnected".
+
+=head2 remove_user_p
+
+  $p = $core->remove_user_p($user)->then(sub { $user });
+
+Used to delete user data and remove the user from C<$core>.
 
 =head2 user
 

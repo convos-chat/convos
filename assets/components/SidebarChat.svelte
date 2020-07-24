@@ -195,6 +195,10 @@ function renderUnread(dialog) {
         <Icon name="tools"/>
         <span>{l('Settings')}</span>
       </Link>
+      <Link href="/settings/users">
+        <Icon name="users"/>
+        <span>{l('Users')}</span>
+      </Link>
     {/if}
     <a href="{route.urlFor('/logout')}" target="_self">
       <Icon name="power-off"/>

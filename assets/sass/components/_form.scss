@@ -381,5 +381,7 @@ input[type="file"]:-webkit-file-upload-button {
   text-shadow: 0 1px 2px var(--button-bg);
   padding-left: 4px;
   padding-right: 4px;
+  max-width: 100%;
   overflow: visible;
+  transition: width 0.5s ease-in;
 }

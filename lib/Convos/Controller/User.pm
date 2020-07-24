@@ -8,30 +8,23 @@ use Socket qw(inet_aton AF_INET);
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
 
-sub delete {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
-
-  return $self->reply->errors('You are the only user left.', 400)
-    if @{$self->app->core->users} <= 1;
-
-  return $self->app->core->backend->delete_object_p($user)->then(sub {
-    delete $self->session->{email};
-    $self->render(openapi => {message => 'You have been erased.'});
-  });
-}
+has _email => sub {
+  my $email = shift->param('email') || '';
+  $email =~ s!\.json$!!;
+  return trim $email;
+};
 
 sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
   return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
 
   my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
-  my $user     = $self->app->core->get_user($self->stash('email'));
+  my $user     = $self->app->core->get_user($self->_email);
   my $password = $user ? $user->password : $self->settings('local_secret');
 
   my $params
     = $self->_add_invite_token_to_params(
-    {email => $self->stash('email'), exp => $exp, password => $password},
+    {email => $self->_email, exp => $exp, password => $password},
     $self->app->secrets->[0]);
 
   my $invite_url = $self->url_for('register');
@@ -54,6 +47,14 @@ sub get {
     $user->{rtc} = $self->app->core->settings->rtc;
     $self->render(openapi => $user);
   });
+}
+
+sub list {
+  my $self       = shift->openapi->valid_input or return;
+  my $admin_from = $self->user_has_admin_rights
+    or return $self->reply->errors('Only admins can list users.', 403);
+  my $users = $self->app->core->users;
+  $self->render(openapi => {users => $users});
 }
 
 sub login {
@@ -86,7 +87,7 @@ sub register {
   my $json = $self->_clean_json;
   my $user = $self->app->core->get_user($json->{email});
 
-  # The first user can join without invite link
+  # Only the first user can join without invite link
   if ($self->app->core->n_users) {
 
     # Validate input
@@ -96,9 +97,10 @@ sub register {
     # TODO: Add test
     return $self->reply->errors('Email is taken.', 401) if !$json->{token} and $user;
 
-    return $self->reply->errors('Invalid token. You have to ask your Convos admin for a new link.',
-      401)
-      if $json->{token} and !$self->_is_valid_invite_token($user, {%$json});
+    if ($json->{token} and !$self->_is_valid_invite_token($user, {%$json})) {
+      return $self->reply->errors(
+        'Invalid token. You have to ask your Convos admin for a new link.', 401);
+    }
 
     # Update existing user
     return $self->_update_user($json, $user) if $user;
@@ -129,10 +131,23 @@ sub register_html {
   $self->render('index');
 }
 
+sub remove {
+  my $self = shift->openapi->valid_input           or return;
+  my $user = $self->_get_user_from_param('delete') or return;
+
+  return $self->reply->errors('You are the only user left.', 400)
+    if @{$self->app->core->users} <= 1;
+
+  return $self->app->core->remove_user_p($user)->then(sub {
+    delete $self->session->{email} if $user->email eq $self->session('email');
+    $self->render(openapi => {message => 'Deleted.'});
+  });
+}
+
 sub update {
-  my $self = shift->openapi->valid_input or return;
+  my $self = shift->openapi->valid_input           or return;
+  my $user = $self->_get_user_from_param('update') or return;
   my $json = $self->_clean_json;
-  my $user = $self->backend->user or return $self->reply->errors([], 401);
 
   # TODO: Add support for changing email
 
@@ -156,8 +171,9 @@ sub _clean_json {
     delete $json->{$k} unless length $json->{$k};
   }
 
-  $json->{highlight_keywords} = [grep {/\w/} map { trim $_ } @{$json->{highlight_keywords}}]
-    if $json->{highlight_keywords};
+  for my $k (qw(highlight_keywords roles)) {
+    $json->{$k} = [grep {/\w/} map { trim $_ } @{$json->{$k}}] if $json->{$k};
+  }
 
   return $json;
 }
@@ -184,6 +200,21 @@ sub _existing_dialog {
   my ($self, $url, $conn) = @_;
   return undef unless my $dialog_name = $url->path->[0];
   return $conn->get_dialog(lc $dialog_name);
+}
+
+sub _get_user_from_param {
+  my ($self, $op) = @_;
+
+  my $user = $self->backend->user or return $self->reply->errors([], 401);
+  return $user if $user->email eq $self->_email;
+
+  return $self->reply->errors("Only admins can $op other users.", 403)
+    unless $self->user_has_admin_rights;
+
+  my $target_user = $self->app->core->get_user($self->_email);
+  return $target_user                                                   if $target_user;
+  return +($self->render(openapi => {message => 'Deleted.'}), undef)[1] if $op eq 'delete';
+  return $self->reply->errors('No such user.', 404);
 }
 
 sub _is_valid_invite_token {
@@ -231,8 +262,7 @@ sub _register_html_conn_url_redirect {
 sub _register_html_handle_invite_url {
   my $self = shift;
 
-  my $params
-    = {token => $self->param('token'), email => $self->param('email'), exp => $self->param('exp')};
+  my $params = {token => $self->param('token'), email => $self->_email, exp => $self->param('exp')};
 
   return unless $params->{token} and $params->{email} and $params->{exp};
   return $self->stash(status => 410) if $params->{exp} =~ m!\D! or $params->{exp} < time;
@@ -247,9 +277,11 @@ sub _update_user {
   my ($self, $json, $user) = @_;
 
   $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
-  $user->set_password($json->{password})                 if $json->{password};
+  $user->roles($json->{roles})           if $json->{roles} and $self->user_has_admin_rights;
+  $user->set_password($json->{password}) if $json->{password};
   $user->save_p->then(sub {
-    $self->session(email => $user->email);
+    my $session_email = $self->session('email');
+    $self->session(email => $user->email) if !$session_email or $user->email eq $session_email;
     $self->render(openapi => $user);
   });
 }
@@ -269,10 +301,6 @@ user related actions.
 
 =head1 METHODS
 
-=head2 delete
-
-See L<https://convos.chat/api.html#op-delete--user>
-
 =head2 generate_invite_link
 
 See L<https://convos.chat/api.html#op-post--user--email--invite>
@@ -280,6 +308,10 @@ See L<https://convos.chat/api.html#op-post--user--email--invite>
 =head2 get
 
 See L<https://convos.chat/api.html#op-get--user>
+
+=head2 list
+
+See L<https://convos.chat/api.html#op-get--users>
 
 =head2 login
 
@@ -296,6 +328,10 @@ See L<https://convos.chat/api.html#op-post--user-register>
 =head2 register_html
 
 Will handle the "uri" that can hold "irc://...." URLs.
+
+=head2 remove
+
+See L<https://convos.chat/api.html#op-delete--user>
 
 =head2 update
 

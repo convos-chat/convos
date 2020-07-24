@@ -35,11 +35,11 @@ export default class Time extends Date {
    * @memberof Time
    * @returns {String} Example "Sept 15"
    */
-  getHumanDate() {
+  getHumanDate(params = {}) {
     let str = this.getMonthAbbr() + ' ' + this.getDate();
     const now = new Time();
     const sameYear = this.getYear() == now.getYear();
-    if (!sameYear) str += ', ' + this.getFullYear();
+    if (!sameYear || params.year) str += ', ' + this.getFullYear();
     return str;
   }
 
