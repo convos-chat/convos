@@ -43,6 +43,31 @@ sub _construct_action {
   return $action;
 }
 
+sub _dialog_join {
+  my ($self, $connection, $dialog_config) = @_;
+  my $dialog = $connection->dialog({name => $dialog_config->{dialog_id}});
+
+  $dialog->password($dialog_config->{password}) if $dialog_config->{password};
+  return $dialog->frozen('Not connected.') unless $connection->state eq 'connected';
+
+  my $command = sprintf '/join %s', $dialog->name;
+  $command .= ' ' . $dialog->password if $dialog->password;
+  $connection->send_p('', $command)->catch(sub {
+    $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
+  });
+}
+
+sub _dialog_part {
+  my ($self, $connection, $dialog_config) = @_;
+  my $dialog = $connection->dialog_remove(lc $dialog_config->{dialog_id});
+  return unless $connection->state eq 'connected';
+
+  my $command = sprintf '/part %s', $dialog->name;
+  $connection->send_p('', $command)->catch(sub {
+    $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
+  });
+}
+
 sub _ensure_action {
   my ($self, $config) = @_;
   my $action_class = $config->{class} or return;
@@ -74,32 +99,17 @@ sub _ensure_connection {
   $connection->on(state => sub { $self and $self->_on_state(@_) }) unless $has_connection;
   $connection->url($url);
   $connection->wanted_state($config->{wanted_state} || 'connected');
-  $self->_ensure_dialogs($connection, $config);
-}
-
-sub _ensure_dialogs {
-  my ($self, $connection, $config) = @_;
-
-  my $state_method = $connection->wanted_state eq 'connected' ? 'connect' : 'disconnect_p';
-  $connection->$state_method if $connection->state ne $connection->wanted_state;
 
   my $dialogs = $config->{dialogs} || {};
   for my $dialog_id (keys %$dialogs) {
-    my $dialog_config = $dialogs->{$dialog_id};
-    my $dialog
-      = $dialog_config->{part}
-      ? $connection->remove_dialog(lc $dialog_id)
-      : $connection->dialog({name => $dialog_id});
-
-    $dialog->password($dialogs->{$dialog_id}{password}) if $dialogs->{$dialog_id}{password};
-
-    next unless $connection->state eq 'connected';
-    my $command = sprintf '/%s %s', ($dialog_config->{part} ? 'part' : 'join'), $dialog_id;
-    $command .= ' ' . $dialog->password if !$dialog_config->{part} and $dialog->password;
-    $connection->send_p('', $command)->catch(sub {
-      $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
-    });
+    my $dialog_method
+      = ($dialogs->{$dialog_id}{state} || '') eq 'part' ? '_dialog_part' : '_dialog_join';
+    local $dialogs->{$dialog_id}{dialog_id} = $dialog_id;
+    $self->$dialog_method($connection, $dialogs->{$dialog_id});
   }
+
+  my $state_method = $connection->wanted_state eq 'connected' ? 'connect' : 'disconnect_p';
+  $connection->$state_method unless $connection->state eq $connection->wanted_state;
 }
 
 sub _load_config {
