@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.27 Not Released
+ - Removed auto-rotate image code
+
 4.26 2020-07-24T11:20:00+0900
  - Add bot "spool" action
  - Fix loading bot "karma" action

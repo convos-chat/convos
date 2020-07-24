@@ -125,51 +125,7 @@ export default class EmbedMaker extends Reactive {
   }
 
   _processImage(img) {
-    if (!sameOrigin(img.src)) return img.addEventListener('error', () => (img.style.display = 'none')); // TODO
-
-    img.originalSource = img.src;
-    img.src = '';
-    img.style.visibility = 'hidden';
-    fetch(img.originalSource).then(res => {
-      const contentType = res.headers.get('Content-Type');
-      return !contentType ? this._renderImage(img, new ArrayBuffer(0), {})
-        : res.arrayBuffer().then(buf => this._renderImage(img, buf, {contentType}));
-    });
-  }
-
-  _renderImage(img, buf, {contentType}) {
-    const exifRotation = {1: 0, 3: 180, 6: 90, 8: 270};
-
-    const dv = new DataView(buf);
-    if (!contentType || buf.length < 2 || dv.getUint16(0) != 0xffd8) {
-      img.src = img.originalSource;
-      img.style.visibility = 'visible';
-      return;
-    }
-
-    let littleEndian = false;
-    let maxBytes = dv.byteLength;
-    let pos = 2;
-    let read;
-    while (pos < maxBytes - 2 && !img.orientation) {
-      const uint16 = dv.getUint16(pos);
-      pos += 2;
-      switch (uint16) {
-        case 0xffe1: // Start of EXIF
-          read = dv.getUint16(pos + 8);
-          if (read === 0x4949) littleEndian = true;
-          maxBytes = dv.getUint16(pos, littleEndian) - pos;
-          pos += 2;
-          break;
-        case 0x0112: // Orientation tag
-          img.orientation = exifRotation[dv.getUint16(pos + 6, littleEndian)];
-          break;
-      }
-    }
-
-    if (img.orientation !== undefined) img.style.transform = 'rotate(' + img.orientation + 'deg)';
-    img.src = 'data:' + contentType + ';base64,' + this._bufAsBase64(buf);
-    img.style.visibility = 'visible';
+    img.addEventListener('error', () => (img.style.display = 'none'));
   }
 }
 
