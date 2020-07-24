@@ -147,19 +147,17 @@ export default class EmbedMaker extends Reactive {
       return;
     }
 
+    let littleEndian = false;
     let maxBytes = dv.byteLength;
     let pos = 2;
-    var littleEndian = false;
     while (pos < maxBytes - 2 && !img.orientation) {
       const uint16 = dv.getUint16(pos);
       pos += 2;
       switch (uint16) {
         case 0xffe1: // Start of EXIF
           var endianNess = scanner.getUint16(idx + 8);
-          if (endianNess === 0x4949) {
-            littleEndian = true;
-          }
-          maxBytes = dv.getUint16(pos, littleEndian)-pos;
+          if (endianNess === 0x4949) littleEndian = true;
+          maxBytes = dv.getUint16(pos, littleEndian) - pos;
           pos += 2;
           break;
         case 0x0112: // Orientation tag
