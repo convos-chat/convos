@@ -62,7 +62,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (msg.from && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
+    if (msg.from && !msg.yourself && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
       if (msg.highlight || this.is_private || this.wantNotifications) {
         const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
         notify(msg.message, {path: this.path, title});

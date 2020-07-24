@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.27 Not Released
  - Removed auto-rotate image code
+ - Fix not getting notifications when you send messages
  - Fix showing notifications when chat is not focused
 
 4.26 2020-07-24T11:20:00+0900
