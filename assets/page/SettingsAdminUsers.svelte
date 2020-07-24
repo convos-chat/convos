@@ -113,10 +113,10 @@ function updateUserFromForm(e) {
     </form>
   {:else}
     <form id="invite" method="post" on:submit|preventDefault="{generateInviteLink}">
-      <h2>{l('Invite')}</h2>
+      <h2>{l('Invite or recover password')}</h2>
       <TextField type="email" name="email" placeholder="{l('user@example.com')}">
         <span slot="label">{l('User email')}</span>
-        <p class="help" slot="help">{l('Using this form, you can generate an invite link for new users.')}</p>
+        <p class="help" slot="help">{l('Using this form, you can generate a forgotten password or invite link for a user.')}</p>
       </TextField>
 
       {#if invite.url}
