@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.25 Not Released
+ - Add bot "spool" action
+ - Fix loading bot "karma" action
+
 4.24 2020-07-24T09:55:00+0900
  - Add functionality for managing users #417 #505
  - Add API enpoint for listing users #417
