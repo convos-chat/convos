@@ -10,10 +10,7 @@ class Notify extends Reactive {
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'wantNotifications', null);
     this.prop('rw', 'desktopAccess', this.Notification.permission);
-    this.prop('rw', 'documentVisible', !document.hidden);
-
-    this._onVisibilityChange = this._onVisibilityChange.bind(this);
-    document.addEventListener('visibilitychange', this._onVisibilityChange);
+    this.prop('ro', 'documentVisible', () => !document.hidden);
   }
 
   requestDesktopAccess() {
@@ -30,7 +27,7 @@ class Notify extends Reactive {
   _cannotShowOnDesktop(params = {}) {
     if (this.Notification.permission != 'granted') return this.Notification.permission || 'unknown';
     if (!this.wantNotifications) return 'wantNotifications=false';
-    if (!params.force && !this.documentVisible) return 'window.focus=false';
+    if (!params.force && this.documentVisible) return 'window.hidden=false';
     return '';
   }
 
@@ -38,10 +35,6 @@ class Notify extends Reactive {
     notification.close();
     window.focus();
     this.emit('click', {...params, sourceEvent: e});
-  }
-
-  _onVisibilityChange(e) {
-    this.update({documentVisible: !document.hidden});
   }
 
   _showInConsole(message, params) {
