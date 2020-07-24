@@ -80,6 +80,7 @@ sub _ensure_action {
     $self->config->data->{action}{$action_class} = $config;
     $action->enabled($config->{enabled} // 1);
   } or do {
+    delete $self->actions->{$action_class};
     $self->_log->error("Couldn't register bot action $action_class: $@");
   };
 }

@@ -53,7 +53,7 @@ create table if not exists karma (
 )
 HERE
 
-  $self->_dbh->do('create index karma__topic on karma (topic)');
+  $self->_dbh->do('create index if not exists karma__topic on karma (topic)');
 }
 
 sub _dbh {
