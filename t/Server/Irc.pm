@@ -24,8 +24,8 @@ sub client {
 }
 
 sub client_event_ok {
-  my ($self, $event) = @_;
-  push @{$self->{queue}}, [\&_handle_client_event_item, $self->client, $event];
+  my ($self, $event, $cb) = @_;
+  push @{$self->{queue}}, [\&_handle_client_event_item, $self->client, $event, $cb];
   $self->_dequeue unless $self->{outstanding_events}++;
   return $self;
 }
@@ -146,13 +146,14 @@ sub _handle_client_connect {
 }
 
 sub _handle_client_event_item {
-  my ($self, $c_conn, $event) = @_;
+  my ($self, $c_conn, $event, $cb) = @_;
 
   $c_conn->once(
     $event => sub {
       my ($conn, @event) = @_;
       $self->{outstanding_events}--;
       $self->_test(ok => 1, "client $event")->_dequeue;
+      $conn->$cb(@event) if $cb;
     }
   );
 }

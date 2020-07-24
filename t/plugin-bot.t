@@ -44,7 +44,8 @@ note 'load all_actions.yaml';
 delete $bot->config->data->{ts};
 my $msg;
 $server->client($connection)->server_event_ok('_irc_event_nick')
-  ->server_write_ok(['welcome-botman.irc'])->server_event_ok('_irc_event_mode', sub { $msg = pop });
+  ->server_write_ok(['welcome-botman.irc'])->server_event_ok('_irc_event_mode', sub { $msg = pop })
+  ->server_event_ok('_irc_event_join');
 $config_file->spurt(config('all_actions.yaml'));
 $server->process_ok('mode +B');
 ok $bot->action('hailo'),                              'action by a-z';
@@ -62,18 +63,25 @@ is $hailo->event_config($event, 'free_speak_ratio'), 0.001, 'connection free_spe
 $event->{dialog_id} = '#convos';
 is $hailo->event_config($event, 'free_speak_ratio'), 0.5, 'dialog free_speak_ratio';
 
-my $user_event_name = sprintf 'user:%s', $bot->user->id;
-$core->backend->emit(
-  $user_event_name => message => {
-    connection_id => $connection_id,
-    dialog_id     => 'superwoman',
-    from          => 'superwoman',
-    highlight     => false,
-    message       => 'Help!',
-    ts            => time,
-    type          => 'private',
-  }
-);
+note 'make sure we do not reply multiple times when reloading config';
+for my $name (qw(two_actions.yaml all_actions.yaml all_actions.yaml)) {
+  delete $bot->config->data->{ts};
+  $config_file->spurt(config($name));
+  Mojo::Promise->timer(0.1)->wait;
+}
+
+my $replied = 0;
+Mojo::Util::monkey_patch('Convos::Plugin::Bot::Action::Core',
+  reply => sub { $replied++; 'Some help' });
+$server->client($connection)->server_write_ok(":superman!sg\@example.com PRIVMSG botman :Help\r\n")
+  ->server_event_ok('_irc_event_privmsg', sub { $event = pop })
+  ->process_ok('superman writes botman');
+$server->client($core->get_user('superman@example.com')->connections->[0])
+  ->server_write_ok("$event->{raw_line}\r\n")
+  ->client_event_ok('_irc_event_privmsg', sub { $event = pop })
+  ->process_ok('botman replies to superman');
+is $event->{params}[1], 'Some help', 'got reply to help';
+is $replied, 1, 'does not reply to own messages';
 
 done_testing;
 

@@ -163,7 +163,10 @@ sub _register_user {
 
 sub _run_actions_with_message {
   my ($self, $event) = @_;
-  return unless $event->{dialog_id};
+  return unless $event->{dialog_id} and $event->{from};
+
+  my $connection = $self->user->get_connection($event->{connection_id});
+  return if lc $event->{from} eq lc $connection->nick;
 
   my $command = $event->{message};
   local $event->{is_private} = $event->{dialog_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
@@ -177,8 +180,7 @@ sub _run_actions_with_message {
     next if $reply or !defined($reply = $action->reply($event));
   }
 
-  $self->user->get_connection($event->{connection_id})->send_p($event->{dialog_id}, $reply)
-    if $reply;
+  $connection->send_p($event->{dialog_id}, $reply) if $reply;
 }
 
 sub _user_is_registered {
