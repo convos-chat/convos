@@ -79,6 +79,16 @@ sub new {
   $self;
 }
 
+sub nick {
+  my $self = shift;
+  my $nick;
+  return $nick if $nick = $self->{myinfo}{nick};
+  return $nick if $nick = $self->url->query->param('nick');
+  $nick = $self->user->email =~ /^([^@]+)/ ? $1 : 'guest';
+  $nick =~ s!\W!_!g;
+  return $nick;
+}
+
 sub rtc_p {
   my ($self, $msg) = @_;
   return Mojo::Promise->reject('Missing property: event.')   unless $msg->{event};
@@ -86,7 +96,7 @@ sub rtc_p {
   return Mojo::Promise->reject('Dialog not found.')
     unless $msg->{dialog_id} and my $dialog = $self->get_dialog($msg->{dialog_id});
 
-  $msg->{from} = $self->_nick;
+  $msg->{from} = $self->nick;
 
   # "signal" messages should only be sent to a single user
   return $self->_rtc_signal_p($msg) if $msg->{event} eq 'signal';
@@ -164,17 +174,6 @@ sub _debug {
 #warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
 }
 
-# The active nick
-sub _nick {
-  my $self = shift;
-  my $nick;
-  return $nick if $nick = $self->{myinfo}{nick};
-  return $nick if $nick = $self->url->query->param('nick');
-  $nick = $self->user->email =~ /^([^@]+)/ ? $1 : 'guest';
-  $nick =~ s!\W!_!g;
-  return $nick;
-}
-
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
@@ -186,7 +185,7 @@ sub _notice {
 sub _remove_dialog {
   my ($self, $name) = @_;
   my $dialog = $self->remove_dialog($name);
-  $self->emit(state => part => {dialog_id => lc $name, nick => $self->_nick});
+  $self->emit(state => part => {dialog_id => lc $name, nick => $self->nick});
   return $self;
 }
 
@@ -196,7 +195,7 @@ sub _rtc_signal_p {
 
   $self->user->core->connections_by_id($self->id)->each(sub {
     my $other = shift;
-    return if $other eq $self or $other->_nick ne $msg->{target};
+    return if $other eq $self or $other->nick ne $msg->{target};
     my $dialog = $other->get_dialog($msg->{dialog_id});
     $other->emit(rtc => signal => $dialog => $msg) if $dialog and !$dialog->frozen;
   });
@@ -494,6 +493,12 @@ Returns a L<Convos::Core::Dialog> object or undef.
   $conn = Convos::Core::Connection->new(\%attrs);
 
 Creates a new connection object.
+
+=head2 nick
+
+  $str = $connection->nick;
+
+Returns the current nick.
 
 =head2 rtc_p
 

@@ -128,7 +128,7 @@ sub _connect_args {
 
   $self->_periodic_events;
   $url->port($params->param('tls') ? 6669 : 6667) unless $url->port;
-  $params->param(nick => $self->_nick)            unless $params->param('nick');
+  $params->param(nick => $self->nick)             unless $params->param('nick');
   $self->{myinfo}{nick} = $params->param('nick');
 
   return $self->SUPER::_connect_args;
@@ -360,7 +360,7 @@ sub _irc_event_privmsg {
   $from   ||= $self->id;
 
   unless ($self->_is_current_nick($nick)) {
-    $highlight = grep { $message[0] =~ /\b\Q$_\E\b/i } $self->_nick,
+    $highlight = grep { $message[0] =~ /\b\Q$_\E\b/i } $self->nick,
       @{$self->user->highlight_keywords};
   }
 
@@ -457,7 +457,7 @@ sub _irc_event_topic {
 sub _irc_event_rpl_namreply     { }
 sub _irc_event_rpl_topicwhotime { }
 
-sub _is_current_nick { lc $_[0]->_nick eq lc $_[1] }
+sub _is_current_nick { lc $_[0]->nick eq lc $_[1] }
 
 sub _make_ctcp_string {
   my $self = shift;
@@ -786,7 +786,7 @@ sub _send_message_p {
   }
 
   for (@$messages) {
-    $_ = $self->_parse(sprintf ':%s PRIVMSG %s :%s', $self->_nick, $target, $_);
+    $_ = $self->_parse(sprintf ':%s PRIVMSG %s :%s', $self->nick, $target, $_);
     return Mojo::Promise->reject('Unable to construct PRIVMSG.') unless ref $_;
   }
 
@@ -795,7 +795,7 @@ sub _send_message_p {
   # err_cannotsendtochan, err_nosuchnick, err_notoplevel, err_toomanytargets,
   # err_wildtoplevel, irc_rpl_away
 
-  my $nick = $self->_nick;
+  my $nick = $self->nick;
   my $user = $self->url->username || $nick;
   return Mojo::Promise->all(map { $self->_write_p($_->{raw_line}) } @$messages)->then(sub {
     for my $msg (@$messages) {
@@ -1023,7 +1023,7 @@ sub _stream {
   return if $err;
 
   my $url  = $self->url;
-  my $nick = $self->_nick;
+  my $nick = $self->nick;
   my $user = $url->username || $nick;
   my $mode = $url->query->param('mode') || 0;
   $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
