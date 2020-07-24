@@ -1,16 +1,13 @@
 import Reactive from './Reactive';
 import {l} from '../js/i18n';
 
-class Notify extends Reactive {
+export default class Notify extends Reactive {
   constructor() {
     super();
-
     this.Notification = window.Notification || {permission: 'denied'};
-
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'wantNotifications', null);
     this.prop('rw', 'desktopAccess', this.Notification.permission);
-    this.prop('ro', 'documentVisible', () => !document.hidden);
   }
 
   requestDesktopAccess() {
@@ -21,13 +18,14 @@ class Notify extends Reactive {
 
   show(message, params = {}) {
     if (!params.title) params.title = document.title;
-    return this._cannotShowOnDesktop(params) ? this._showInConsole(message, params) : this._showOnDesktop(message, params);
+    const cannotShowOnDesktop = this._cannotShowOnDesktop(params);
+    return cannotShowOnDesktop ? this._showInConsole(message, {...params, cannotShowOnDesktop}) : this._showOnDesktop(message, params);
   }
 
   _cannotShowOnDesktop(params = {}) {
-    if (this.Notification.permission != 'granted') return this.Notification.permission || 'unknown';
-    if (!this.wantNotifications) return 'wantNotifications=false';
-    if (!params.force && this.documentVisible) return 'window.hidden=false';
+    if (this.desktopAccess != 'granted') return this.Notification.permission || 'unknown';
+    if (!this.wantNotifications) return '!wantNotifications';
+    if (!params.force && document.hasFocus()) return 'hasFocus';
     return '';
   }
 
@@ -44,6 +42,7 @@ class Notify extends Reactive {
   _showOnDesktop(message, params) {
     const notification = new Notification(params.title, {...params, body: message});
     notification.onclick = (e) => this._onClick(e, notification, params);
+    this.notification = notification; // For testing
     setTimeout(() => notification.close(), this.notificationCloseDelay);
   }
 }

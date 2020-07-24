@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.28 Not Released
+ - Fix detecting if Convos has focus, which again enables notifications
+
 4.27 2020-07-24T16:20:00+0900
  - Removed auto-rotate image code
  - Fix not getting notifications when you send messages
