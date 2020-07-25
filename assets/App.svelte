@@ -32,7 +32,7 @@ setContext('user', user);
 route.update({baseUrl: process.env.base_url});
 registerServiceWorker();
 
-notify().on('click', (params) => (params.path && route.go(params.path)));
+notify.on('click', (params) => (params.path && route.go(params.path)));
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 

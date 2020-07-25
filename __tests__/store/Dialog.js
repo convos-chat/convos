@@ -86,6 +86,42 @@ test('load', async () => {
   ]);
 });
 
+test('addMessage channel', () => {
+  const d = new Dialog({connection_id: 'irc-localhost', dialog_id: '#test'});
+  expect(d.unread).toBe(0);
+
+  d.addMessage({from: 'supergirl', highlight: true, message: 'n1', type: 'private', yourself: true});
+  expect(d.unread).toBe(0);
+
+  d.addMessage({from: 'supergirl', highlight: true, message: 'n2', type: 'private'});
+  expect(d.unread).toBe(1);
+  expect(d.lastNotification.title).toBe('supergirl in #test');
+  expect(d.lastNotification.body).toBe('n2');
+
+  document.hasFocus = () => true;
+  d.addMessage({from: 'supergirl', highlight: true, message: 'n3', type: 'private'});
+  expect(d.lastNotification.body).toBe('n2');
+  document.hasFocus = () => false;
+});
+
+test('addMessage private', () => {
+  const d = new Dialog({connection_id: 'irc-localhost', dialog_id: 'supergirl'});
+  expect(d.unread).toBe(0);
+
+  d.addMessage({from: 'supergirl', message: 'n1', type: 'private', yourself: true});
+  expect(d.unread).toBe(0);
+
+  d.addMessage({from: 'supergirl', message: 'n2', type: 'private'});
+  expect(d.unread).toBe(1);
+  expect(d.lastNotification.title).toBe('supergirl');
+  expect(d.lastNotification.body).toBe('n2');
+
+  document.hasFocus = () => true;
+  d.addMessage({from: 'supergirl', message: 'n3', type: 'private'});
+  expect(d.lastNotification.body).toBe('n2');
+  document.hasFocus = () => false;
+});
+
 function mockMessagesOpPerform(res) {
   return function(params) {
     this.performed = params;

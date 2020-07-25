@@ -62,15 +62,8 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (msg.from && !msg.yourself && ['action', 'error', 'private'].indexOf(msg.type) != -1) {
-      if (msg.highlight || this.is_private || this.wantNotifications) {
-        const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-        notify(msg.message, {path: this.path, title});
-      }
-
-      if (!msg.yourself) this.update({unread: this.unread + 1});
-    }
-
+    if (!msg.yourself) this.update({unread: this.unread + 1});
+    this._maybeNotify(msg);
     return this.addMessages('push', [msg]);
   }
 
@@ -300,6 +293,16 @@ export default class Dialog extends Reactive {
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
     return this.is_private ? this.send('/ison') : this.send('/names').then(this._updateParticipants.bind(this));
+  }
+
+  _maybeNotify(msg) {
+    if (!msg.from || msg.yourself) return;
+    if (!msg.highlight && !this.is_private && !this.wantNotifications) return;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+    if (notify.appHasFocus) return;
+
+    const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
+    this.lastNotification = notify.show(msg.message, {path: this.path, title});
   }
 
   _noop() {

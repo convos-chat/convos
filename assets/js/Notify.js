@@ -7,6 +7,7 @@ export default class Notify extends Reactive {
     this.Notification = window.Notification || {permission: 'denied'};
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'wantNotifications', null);
+    this.prop('ro', 'appHasFocus', () => document.hasFocus());
     this.prop('rw', 'desktopAccess', this.Notification.permission);
   }
 
@@ -25,7 +26,6 @@ export default class Notify extends Reactive {
   _cannotShowOnDesktop(params = {}) {
     if (this.desktopAccess != 'granted') return this.Notification.permission || 'unknown';
     if (!this.wantNotifications) return '!wantNotifications';
-    if (!params.force && document.hasFocus()) return 'hasFocus';
     return '';
   }
 
@@ -37,15 +37,15 @@ export default class Notify extends Reactive {
 
   _showInConsole(message, params) {
     console.info('[Notify]', message, params);
+    return {...params, body: message, close: () => {}};
   }
 
   _showOnDesktop(message, params) {
     const notification = new Notification(params.title, {...params, body: message});
     notification.onclick = (e) => this._onClick(e, notification, params);
-    this.notification = notification; // For testing
     setTimeout(() => notification.close(), this.notificationCloseDelay);
+    return notification;
   }
 }
 
-export const notify = (message, params) => (message ? notify.singleton.show(message, params) : notify.singleton);
-notify.singleton = new Notify();
+export const notify = new Notify();

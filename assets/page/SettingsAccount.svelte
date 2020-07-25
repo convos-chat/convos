@@ -28,7 +28,7 @@ let colorScheme = user.colorScheme;
 let expandUrlToMedia = embedMaker.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
 let theme = user.theme;
-let wantNotifications = notify().wantNotifications;
+let wantNotifications = notify.wantNotifications;
 
 route.update({title: l('Account')});
 
@@ -38,7 +38,7 @@ updateUserOp.on('start', req => {
   user.update({colorScheme, theme, highlightKeywords: req.body.highlight_keywords});
 });
 
-onDestroy(notify().on('update', notifyWantNotificationsChanged));
+onDestroy(notify.on('update', notifyWantNotificationsChanged));
 
 $: calculateColorSchemeOptions(theme);
 
@@ -53,7 +53,7 @@ function calculateColorSchemeOptions(id) {
 
 function notifyWantNotificationsChanged(notify, changed) {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
-  if (notify.wantNotifications) notify.show(l('You have enabled notifications.'), {force: true});
+  if (notify.wantNotifications) notify.show(l('You have enabled notifications.'));
 }
 
 function updateUserFromForm(e) {
@@ -61,7 +61,7 @@ function updateUserFromForm(e) {
   const passwords = [form.password.value, form.password_again.value];
 
   if (wantNotifications) {
-    notify().requestDesktopAccess();
+    notify.requestDesktopAccess();
   }
 
   if (passwords.join('').length && passwords[0] != passwords[1]) {
@@ -69,7 +69,7 @@ function updateUserFromForm(e) {
   }
 
   embedMaker.update({expandUrlToMedia});
-  notify().update({wantNotifications});
+  notify.update({wantNotifications});
   updateUserOp.perform(e.target);
 }
 </script>

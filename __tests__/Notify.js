@@ -28,17 +28,13 @@ test('cannotShowOnDesktop', () => {
   notify.requestDesktopAccess();
   expect(notify._cannotShowOnDesktop()).toBe('!wantNotifications');
 
-  document.hasFocus = () => true;
   notify.update({wantNotifications: true});
-  expect(notify._cannotShowOnDesktop()).toBe('hasFocus');
-  expect(notify._cannotShowOnDesktop({force: true})).toBe('');
-
-  document.hasFocus = () => false;
   expect(notify._cannotShowOnDesktop({})).toBe('');
 });
 
 test('show', async () => {
   const notify = new Notify();
+  let notification;
 
   const consoleLog = [];
   document.title = 'document title';
@@ -48,13 +44,13 @@ test('show', async () => {
   consoleLog.pop();
 
   notify.update({desktopAccess: 'granted', notificationCloseDelay: 10, wantNotifications: true});
-  notify.show('desktop message');
+  notification = notify.show('desktop message');
   expect(consoleLog).toEqual([]);
-  expect(notify.notification.title).toBe('document title');
-  expect(notify.notification.params).toEqual({body: 'desktop message'});
-  expect(notify.notification.closed).toBe(undefined);
-  expect(typeof notify.notification.onclick).toBe('function');
+  expect(notification.title).toBe('document title');
+  expect(notification.params).toEqual({body: 'desktop message'});
+  expect(notification.closed).toBe(undefined);
+  expect(typeof notification.onclick).toBe('function');
 
   await timer(20);
-  expect(notify.notification.closed).toBe(true);
+  expect(notification.closed).toBe(true);
 });
