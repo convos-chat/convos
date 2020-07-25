@@ -6,8 +6,10 @@ import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
+import {copyToClipboard} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
 const api = getContext('api');
@@ -38,7 +40,7 @@ onMount(async () => {
 
 function copyInviteLink(e) {
   const copied = copyToClipboard(e.target);
-  if (copied) notify(copied, {title: l('Invite link copied')});
+  if (copied) notify(copied, {force: true, title: l('Invite link copied')});
 }
 
 async function deleteUserFromForm(e) {

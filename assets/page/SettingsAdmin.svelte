@@ -4,10 +4,9 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {copyToClipboard, humanReadableNumber} from '../js/util';
 import {getContext, onMount} from 'svelte';
+import {humanReadableNumber} from '../js/util';
 import {l, lmd} from '../js/i18n';
-import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
 const api = getContext('api');
