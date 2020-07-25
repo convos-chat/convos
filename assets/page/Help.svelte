@@ -96,7 +96,6 @@ route.update({title: l('Help')});
   <ul>
     <li><Link href="/err/loading">Loading</Link></li>
     <li><Link href="/err/not_found">Not found</Link></li>
-    <li><Link href="/err/offline">Offline</Link></li>
     <li><Link href="/err/unknown">Unknown</Link></li>
   </ul>
 </main>

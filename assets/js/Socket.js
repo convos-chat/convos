@@ -22,11 +22,18 @@ export const socket = (id, msg) => {
 
 socket.singletons = {};
 
+const readyStateHuman = [];
+readyStateHuman[WebSocket.CONNECTING] = 'connecting';
+readyStateHuman[WebSocket.OPEN] = 'open';
+readyStateHuman[WebSocket.CLOSING] = 'closing';
+readyStateHuman[WebSocket.CLOSED] = 'closed';
+
 export default class Socket extends Reactive {
   constructor() {
     super();
 
     this.prop('ro', 'readyState', () => this.ws.readyState);
+    this.prop('ro', 'readyStateHuman', () => readyStateHuman[this.ws.readyState]);
     this.prop('rw', 'keepaliveInterval', 10000);
     this.prop('rw', 'keepaliveMessage', {});
     this.prop('rw', 'online', true);

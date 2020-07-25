@@ -9,7 +9,6 @@ const user = getContext('user');
 const messages = {
   'loading': 'Loading',
   'not_found': 'Not Found',
-  'offline': 'Oops! You appear to be offline',
 };
 
 $: status = calculateStatus($route, $user);
@@ -17,11 +16,7 @@ $: route.update({title: l(messages[status])});
 
 function calculateStatus(route, user) {
   const override = route.path.match(/\/err\/(\w+)/);
-
-  return override ? override[1]
-       : !route.component || user.is('loading') ? 'loading'
-       : user.is('offline') ? 'offline'
-       : 'not_found';
+  return override ? override[1] : !route.component || user.is('loading') ? 'loading' : 'not_found';
 }
 </script>
 
@@ -35,9 +30,6 @@ function calculateStatus(route, user) {
 {:else if status == 'not_found'}
   <p>{l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
   <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
-{:else if status == 'offline'}
-  <p><i class="fas fa-exclamation-triangle"></i> {l('Unable to connect to Convos. Please try again later or check your network connection.')}</p>
-  <p><a href="{location.href}" target="_self" class="btn"><Icon name="sync-alt"/> {l('Retry')}</a></p>
 {:else}
   <p>{@html lmd('Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away.', 'https://github.com/nordaaker/convos/issues')}</p>
   <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>

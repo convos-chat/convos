@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.29 Not Released
  - Fix copy invite/recover link to clipboard
+ - Fix showing that you are offline (was removed by accident in 4.24)
 
 4.28 2020-07-24T18:05:00+0900
  - Fix detecting if Convos has focus, which again enables notifications

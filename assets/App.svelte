@@ -23,6 +23,7 @@ const user = new User({themes: process.env.themes});
 const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
+let readyStateNotification = {closed: true};
 
 setContext('api', api('/api').update({url: process.env.api_url}).toFunction());
 setContext('rtc', rtc);
@@ -33,6 +34,7 @@ route.update({baseUrl: process.env.base_url});
 registerServiceWorker();
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
+socket('/events').on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 
@@ -69,8 +71,23 @@ async function registerServiceWorker() {
 }
 
 function replaceBodyClassName(route, user) {
-  const appMode = route.component && route.requireLogin && user.is('authenticated') && !user.is('offline');
+  const appMode = route.component && route.requireLogin && user.is('authenticated');
   replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
+}
+
+function socketChanged(socket) {
+  if (socket.is('open')) {
+    return readyStateNotification.close && readyStateNotification.close();
+  }
+
+  const message
+    = socket.is('offline')    ? l('You seem to be offline.')
+    : socket.is('connecting') ? l('Connecting to Convos...')
+    :                           l('Connection to Convos is %1.', l(socket.readyStateHuman));
+
+  if (readyStateNotification.body == message) return;
+  if (readyStateNotification.close) readyStateNotification.close();
+  readyStateNotification = notify.showInApp(message, {closeAfter: -1, title: l('Status')});
 }
 
 function onGlobalKeydown(e) {
