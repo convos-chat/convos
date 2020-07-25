@@ -1,0 +1,45 @@
+.notify-notification {
+  background: var(--notify-bg);
+  color: var(--notify-color);
+  padding: 0.8rem;
+  border-radius: var(--notify-border-radius);
+  box-shadow: var(--notify-box-shadow);
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 340px;
+  max-width: 90vw;
+  z-index: 1000;
+
+  &,
+  > * {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.notify-notification__close {
+  font-size: 1.1rem;
+  color: var(--notify-color);
+  display: block;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.5rem;
+
+  &:after {
+    @extend .fas;
+    content: fa-content($fa-var-times-circle);
+  }
+}
+
+.notify-notification__title {
+  font-size: 1rem;
+  padding-right: 2rem;
+  margin: 0;
+  margin-bottom: 0.3rem;
+}
+
+.notify-notification__content {
+  font-size: 0.9rem;
+  margin: 0;
+}

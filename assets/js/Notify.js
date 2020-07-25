@@ -19,14 +19,42 @@ export default class Notify extends Reactive {
 
   show(message, params = {}) {
     if (!params.title) params.title = document.title;
-    const cannotShowOnDesktop = this._cannotShowOnDesktop(params);
-    return cannotShowOnDesktop ? this._showInConsole(message, {...params, cannotShowOnDesktop}) : this._showOnDesktop(message, params);
+    if (!this.wantNotifications) return this._showInConsole(message, params);
+    if (this.desktopAccess != 'granted') return this.showInApp(message, params);
+
+    const notification = new Notification(params.title, {...params, body: message});
+    notification.onclick = (e) => this._onClick(e, notification, params);
+    setTimeout(() => notification.close(), this.notificationCloseDelay);
+    return notification;
   }
 
-  _cannotShowOnDesktop(params = {}) {
-    if (this.desktopAccess != 'granted') return this.Notification.permission || 'unknown';
-    if (!this.wantNotifications) return '!wantNotifications';
-    return '';
+  showInApp(message, params = {}) {
+    if (!params.title) params.title = document.title;
+
+    const el = document.createElement('div');
+    const notification = {
+      ...params,
+      body: message,
+      close: () => { el.remove(); notification.closed = true },
+      target: 'app',
+    };
+
+    el.className = 'notify-notification fade-in';
+    el.innerHTML = '<a href="#close" class="notify-notification__close"></a><h6 class="notify-notification__title"></h6><div class="notify-notification__content"></div>';
+    el.querySelector('a').addEventListener('click', (e) => { e.preventDefault(); notification.close() });
+    el.querySelector('h6').textContent = params.title;
+    el.querySelector('div').textContent = message;
+
+    if (params.closeAfter == -1) {
+      el.querySelector('a').remove();
+    }
+    else {
+      setTimeout(() => notification.close(), params.closeAfter || this.notificationCloseDelay);
+    }
+
+    setTimeout(() => el.classList.add('is-visible'), 1);
+    document.body.insertBefore(el, document.body.querySelector('.notify-notification'));
+    return notification;
   }
 
   _onClick(e, notification, params) {
@@ -37,14 +65,7 @@ export default class Notify extends Reactive {
 
   _showInConsole(message, params) {
     console.info('[Notify]', message, params);
-    return {...params, body: message, close: () => {}};
-  }
-
-  _showOnDesktop(message, params) {
-    const notification = new Notification(params.title, {...params, body: message});
-    notification.onclick = (e) => this._onClick(e, notification, params);
-    setTimeout(() => notification.close(), this.notificationCloseDelay);
-    return notification;
+    return {...params, body: message, close: () => {}, target: 'console'};
   }
 }
 

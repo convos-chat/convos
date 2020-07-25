@@ -40,7 +40,7 @@ onMount(async () => {
 
 function copyInviteLink(e) {
   const copied = copyToClipboard(e.target);
-  if (copied) notify.show(copied, {title: l('Invite link copied')});
+  if (copied) notify.showInApp(copied, {title: l('Invite link copied')});
 }
 
 async function deleteUserFromForm(e) {
