@@ -108,18 +108,26 @@ test('addMessage private', () => {
   const d = new Dialog({connection_id: 'irc-localhost', dialog_id: 'supergirl'});
   expect(d.unread).toBe(0);
 
-  d.addMessage({from: 'supergirl', message: 'n1', type: 'private', yourself: true});
+  // Do not increase unread when sent by yourself
+  d.addMessage({from: 'superwoman', message: 'n1', type: 'private', yourself: true});
   expect(d.unread).toBe(0);
 
+  // Show notification
   d.addMessage({from: 'supergirl', message: 'n2', type: 'private'});
   expect(d.unread).toBe(1);
   expect(d.lastNotification.title).toBe('supergirl');
   expect(d.lastNotification.body).toBe('n2');
 
+  // Do not show notification when document has focus
   document.hasFocus = () => true;
   d.addMessage({from: 'supergirl', message: 'n3', type: 'private'});
+  expect(d.unread).toBe(2);
   expect(d.lastNotification.body).toBe('n2');
   document.hasFocus = () => false;
+
+  // Do not increase unread on "notice"
+  d.addMessage({from: 'Convos', message: 'n3', type: 'notice'});
+  expect(d.unread).toBe(2);
 });
 
 function mockMessagesOpPerform(res) {

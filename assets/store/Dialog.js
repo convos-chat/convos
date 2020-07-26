@@ -62,7 +62,7 @@ export default class Dialog extends Reactive {
   }
 
   addMessage(msg) {
-    if (!msg.yourself) this.update({unread: this.unread + 1});
+    this._maybeIncreaseUnread(msg);
     this._maybeNotify(msg);
     return this.addMessages('push', [msg]);
   }
@@ -293,6 +293,12 @@ export default class Dialog extends Reactive {
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
     return this.is_private ? this.send('/ison') : this.send('/names').then(this._updateParticipants.bind(this));
+  }
+
+  _maybeIncreaseUnread(msg) {
+    if (!msg.from || msg.yourself) return;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+    this.update({unread: this.unread + 1});
   }
 
   _maybeNotify(msg) {
