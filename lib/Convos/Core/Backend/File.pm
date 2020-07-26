@@ -110,8 +110,10 @@ sub messages_p {
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
+    my $future = gmtime->add_months(1);
     $args{after}             = tp $query->{after};
     $args{before}            = $args{after}->add_months(12);
+    $args{before}            = $future if $args{before} > $future;
     @args{qw(cursor inc_by)} = ($args{after}, 1);
   }
 
