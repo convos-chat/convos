@@ -73,6 +73,7 @@ async function registerServiceWorker() {
 function replaceBodyClassName(route, user) {
   const appMode = route.component && route.requireLogin && user.is('authenticated');
   replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
+  replaceClassName('body', /(notify-)(disabled)/, !route.component || route.component == Fallback ? 'disabled' : 'enabled');
 }
 
 function socketChanged(socket) {

@@ -43,3 +43,7 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+.notify-disabled .notify-notification {
+  display: none !important;
+}

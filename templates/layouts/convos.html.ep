@@ -49,7 +49,7 @@
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css';
     %= include 'partial/process_js';
   </head>
-  <body class="no-js <%= stash('for_cms') ? 'for-cms' : 'for-app' %>">
+  <body class="no-js notify-disabled <%= stash('for_cms') ? 'for-cms' : 'for-app' %>">
     %= content
     %= asset 'convos.js' unless stash 'exception';
   </body>
