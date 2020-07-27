@@ -50,11 +50,11 @@ test('load', async () => {
     body: {end: true, messages: [{from: 'supergirl', message: 'Something new', type: 'private', ts: '2020-01-20T09:02:50.001Z'}]},
     status: 200,
   });
-  d.update({endOfHistory: false, status: 'pending'});
+  d.update({historyStopAt: false, status: 'pending'});
   await d.load({after: 'maybe'});
   expect(d.messagesOp.performed).toEqual({after: '2020-01-20T09:01:50.001Z', limit: 200, connection_id: 'irc-freenode', dialog_id: '#convos'});
   expect(d.status).toBe('success');
-  expect(d.startOfHistory).toBe(null);
+  expect(d.historyStartAt).toBe(null);
   expect(socket.queue.length).toBe(2);
   expect(socket.queue[1]).toEqual({id: '2', method: 'send', connection_id: 'irc-freenode', dialog_id: '#convos', message: '/names'});
 
@@ -78,7 +78,7 @@ test('load', async () => {
     return m;
   });
 
-  expect(d.startOfHistory && d.startOfHistory.toISOString()).toBe('2020-01-20T09:00:50.001Z');
+  expect(d.historyStartAt && d.historyStopAt.toISOString()).toBe('2020-01-20T09:00:50.001Z');
   expect(messages).toEqual([
     {fromId: 'supergirl', id: 'msg_3', markdown: 'Something old', type: 'action'},
     {fromId: 'supergirl', id: 'msg_1', markdown: 'Cool beans', type: 'private'},

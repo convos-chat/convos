@@ -2,8 +2,8 @@ import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
 import {api} from '../js/Api';
+import {camelize, isType, str2color} from '../js/util';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
-import {isType, str2color} from '../js/util';
 import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {notify} from '../js/Notify';
@@ -25,21 +25,20 @@ export default class Dialog extends Reactive {
     super();
 
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
-    this.prop('ro', 'chunkSize', 60);
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
     this.prop('ro', 'path', route.dialogPath(params));
 
-    this.prop('rw', 'endOfHistory', null);
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'first_time', false);
+    this.prop('rw', 'historyStartAt', null);
+    this.prop('rw', 'historyStopAt', null);
     this.prop('rw', 'last_active', new Time(params.last_active));
     this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || params.dialog_id || params.connection_id || 'ERR');
-    this.prop('rw', 'startOfHistory', null);
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
@@ -116,32 +115,30 @@ export default class Dialog extends Reactive {
 
   async load(params = {}) {
     if (!this.messagesOp || this.is('loading')) return this;
-
-    const maybe = params.after == 'maybe' ? 'after' : params.before == 'maybe' ? 'before' : '';
-    if (maybe && this.is('success')) return this;
-    if (maybe == 'after') delete this.participantsLoaded;
+    if (this._hasEndOfStream(params)) return this;
 
     const internalMessages = [];
-    const opParams = this._loadOpParams(params);
-    if (this._hasEndOfStream(opParams)) return this;
-    if (this._shouldClearMessages(opParams)) {
+    if (this._shouldClearMessages(params)) {
       internalMessages.push.apply(internalMessages, this.messages.filter(msg => msg.internal));
       this.update({messages: []});
     }
 
     // Load messages
     this.update({status: 'loading'});
-    await this.messagesOp.perform(opParams);
+    if (!params.limit) params.limit = params.around ? 30 : 40;
+    await this.messagesOp.perform({...params, connection_id: this.connection_id, dialog_id: this.dialog_id});
     const body = this.messagesOp.res.body;
-    this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
+    this.addMessages(params.before ? 'unshift' : 'push', body.messages || []);
     this.addMessages('push', internalMessages);
     this.update({status: this.messagesOp.status});
+    this._setEndOfStream(params, body);
     if (this.messages.length <= 10) this.update({first_time: true});
 
-    // End of history
-    const hasMessages = this.messages.length;
-    if (hasMessages && opParams.before && body.end) this.update({startOfHistory: this.messages[0].ts});
-    if (hasMessages && !opParams.before && body.end) this.update({endOfHistory: this.messages.slice(-1)[0].ts});
+    [0, -1].forEach(index => {
+      const msg = this.messages.slice(index)[0];
+      const bodyKey = index ? 'history_stop' : 'history_start';
+      if (msg && msg.ts.toISOString() == body[bodyKey]) this.update({[camelize(bodyKey)]: msg.ts});
+    });
 
     return this;
   }
@@ -267,26 +264,8 @@ export default class Dialog extends Reactive {
   }
 
   _hasEndOfStream(opParams) {
-    if (!this.messages.length) return false;
-    return (opParams.before && this.startOfHistory) || (!opParams.before && this.endOfHistory);
-  }
-
-  _loadOpParams(params) {
-    const opParams = {connection_id: this.connection_id, dialog_id: this.dialog_id};
-
-    // Try to load as much as possible into the future
-    opParams.limit = params.after == 'maybe' && !params.limit ? 200 : this.chunkSize;
-
-    // Normalize "after" and "before"
-    ['after', 'before'].forEach(k => {
-      if (params.hasOwnProperty(k)) opParams[k] = params[k];
-      if (opParams[k] == 'maybe') opParams[k] = this._realMessage(k == 'before' ? 0 : -1);
-      if (typeof opParams[k] == 'number') opParams[k] = this._realMessage(opParams[k]);
-      if (isType(opParams[k], 'object')) opParams[k] = opParams[k].ts.toISOString();
-      if (isType(opParams[k], 'undef')) return delete opParams[k];
-    });
-
-    return opParams;
+    if (!this.messages.length) return this.is('success');
+    return (opParams.before && this.historyStartAt) || (opParams.after && this.historyStopAt);
   }
 
   _loadParticipants() {
@@ -347,14 +326,33 @@ export default class Dialog extends Reactive {
     return null;
   }
 
+  _setEndOfStream(params, body) {
+    if (!params.before && !body.after) {
+      const msg = this.messages.slice(-1)[0];
+      this.update({historyStopAt: new Time(msg && msg.ts)});
+    }
+    if (!params.after && !body.before) {
+      const msg = this.messages[0];
+      this.update({historyStartAt: new Time(msg && msg.ts)});
+    }
+    if (body.messages && body.messages.length <= 1) {
+      this.update({historyStartAt: new Time(), historyStopAt: new Time()});
+    }
+  }
+
   _shouldClearMessages(opParams) {
+    // before=...
     const firstMessage = this.messages[0];
     if (!firstMessage) return false;
     if (opParams.before && opParams.before != firstMessage.ts.toISOString()) return true;
 
+    // after=...
     const lastMessage = this.messages.slice(-1)[0];
     if (opParams.after && opParams.after != lastMessage.ts.toISOString()) return true;
-    if (!opParams.after && !opParams.before && !this.endOfHistory) return true;
+    if (!opParams.after && !opParams.before && !this.historyStopAt) return true;
+
+    // around=...
+    if (opParams.around) return this.messages.includes(msg => msg.ts.toISOString() == opParams.around);
 
     return false;
   }

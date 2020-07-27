@@ -80,6 +80,19 @@ sub messages_p {
   my ($self, $obj, $query) = @_;
   my ($re, %args);
 
+  if ($query->{around}) {
+    my %query_before = (%$query, around => undef, before => $query->{around});
+    my %query_after  = (%$query, around => undef, after  => $query->{around}, include => 1);
+
+    return Mojo::Promise->all(
+      $self->messages_p($obj, \%query_before),
+      $self->messages_p($obj, \%query_after),
+    )->then(sub {
+      my ($before, $after) = map { $_->[0] } @_;
+      return {%$before, %$after, messages => [map { @{$_->{messages}} } ($before, $after)]};
+    });
+  }
+
   $re       = $query->{match} || qr{.};
   $re       = qr{\Q$re\E}i unless ref $re;
   $re       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
@@ -88,8 +101,9 @@ sub messages_p {
   $re = $query->{from};
   $args{from} = qr/$re/i if $re;
 
-  $args{limit}    = $query->{limit} || 60;
-  $args{match}    = $query->{match};
+  $args{include} = $query->{include} || 0;
+  $args{limit}   = $query->{limit}   || 60;
+  $args{match}   = $query->{match};
   $args{messages} = [];
 
   # If both "before" and "after" are provided
@@ -122,7 +136,7 @@ sub messages_p {
   else {
     $args{before} = 10 + dt;    # make sure we get the message sent right now as well
     $args{after} = $args{before}->add_months(-12);
-    @args{qw(cursor inc_by force_end)} = ($args{before}, -1, 1);
+    @args{qw(cursor inc_by)} = ($args{before}, -1);
   }
 
   # Do not search if the difference between "before" and "after" is more than 12 months
@@ -131,17 +145,13 @@ sub messages_p {
   return Mojo::Promise->reject('"before" - "after" is longer than 12 months.')
     if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
 
-  $args{end} = true;
-
   warn sprintf "[%s] Getting messages from %s to %s (i=%s, l=%s, c=%s)\n", $obj->id,
     $args{after}->datetime, $args{before}->datetime, @args{qw(inc_by limit)},
     $args{cursor}->datetime,
     if DEBUG;
 
-  return Mojo::IOLoop->subprocess->run_p(sub {
-    my $res = $self->_messages($obj, \%args);
-    return {end => $res->{end}, limit => $res->{limit}, messages => $res->{messages}};
-  });
+  return Mojo::IOLoop->subprocess->run_p(
+    sub { $self->_messages_response($self->_messages($obj, \%args)) });
 }
 
 sub notifications_p {
@@ -153,7 +163,7 @@ sub notifications_p {
 
   unless ($FH = File::ReadBackwards->new($file)) {
     warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG >= 3;
-    return Mojo::Promise->resolve({end => true, messages => []});
+    return Mojo::Promise->resolve({messages => []});
   }
 
   $re = $query->{match} || qr{.};
@@ -171,7 +181,7 @@ sub notifications_p {
     last if @notifications == $query->{limit};
   }
 
-  return Mojo::Promise->resolve({end => true, messages => \@notifications});
+  return Mojo::Promise->resolve({messages => \@notifications});
 }
 
 sub save_object_p {
@@ -324,7 +334,8 @@ sub _messages {
     # my $x       = $ts >= $args->{before} || $ts <= $args->{after} ? '-' : '+';
     # Test::More::note("($x) $args->{after} <> $1 <> $args->{before} - $3\n");
     # Not within time boundaries
-    next if $ts >= $args->{before} or $ts <= $args->{after};
+    next if !$args->{include} and ($ts >= $args->{before} or $ts <= $args->{after});
+    next if $args->{include}  and ($ts > $args->{before}  or $ts < $args->{after});
 
     # Found message
     $self->_message_type_from($message);
@@ -337,13 +348,30 @@ sub _messages {
     # Get more messages
     next unless @{$args->{messages}} > $args->{limit};
 
-    # Found more than we searched for
-    $args->{end} = false if !$args->{force_end} or $args->{match};
-    $args->{inc_by} < 0 ? shift @{$args->{messages}} : pop @{$args->{messages}};
+    # Got enough messages
     return $args;
   }
 
   return $self->_messages($obj, $args);
+}
+
+sub _messages_response {
+  my ($self, $args) = @_;
+  delete $args->{$_} for qw(after before);
+
+  if (@{$args->{messages}} > $args->{limit}) {
+    if ($args->{inc_by} > 0) {
+      pop @{$args->{messages}};
+      $args->{after} = $args->{messages}[-1]{ts};
+    }
+    else {
+      shift @{$args->{messages}};
+      $args->{before} = $args->{messages}[0]{ts};
+    }
+  }
+
+  delete $args->{$_} for qw(cursor inc_by include match re);
+  return $args;
 }
 
 sub _notifications_file {

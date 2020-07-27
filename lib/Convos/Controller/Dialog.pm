@@ -50,7 +50,7 @@ sub messages {
   }
 
   $query{$_} = $self->param($_)
-    for grep { defined $self->param($_) } qw(after before level limit match);
+    for grep { defined $self->param($_) } qw(after around before level limit match);
   $query{limit} ||= $query{after} && $query{before} ? 200 : 60;
   $query{limit} = 200 if $query{limit} > 200;
 
@@ -62,17 +62,7 @@ sub messages {
       if abs(dt($query{after}) - dt($query{before})) > 86400 * 365;
   }
 
-  return $dialog->messages_p(\%query)->then(sub {
-    my $res = shift;
-    $self->render(
-      openapi => {
-        end         => $res->{end} // true,
-        messages    => $res->{messages},
-        n_messages  => int(@{$res->{messages}}),
-        n_requested => $res->{limit},
-      }
-    );
-  });
+  $dialog->messages_p(\%query)->then(sub { $self->render(openapi => shift) });
 }
 
 1;

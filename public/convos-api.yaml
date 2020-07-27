@@ -70,16 +70,9 @@ paths:
       parameters:
       - $ref: '#/parameters/connection_id'
       - $ref: '#/parameters/dialog_id'
-      - description: Find messages after a given ISO 8601 timestamp
-        format: date-time
-        in: query
-        name: after
-        type: string
-      - description: Find messages before a given ISO 8601 timestamp
-        format: date-time
-        in: query
-        name: before
-        type: string
+      - $ref: '#/parameters/after'
+      - $ref: '#/parameters/around'
+      - $ref: '#/parameters/before'
       - description: Max number of messages to retrieve
         in: query
         name: limit
@@ -94,9 +87,12 @@ paths:
           schema:
             type: object
             properties:
-              end:
-                description: Indicates if historic messages can be received.
-                type: boolean
+              after:
+                type: string
+                format: date-time
+              before:
+                type: string
+                format: date-time
               messages:
                 items:
                   $ref: '#/definitions/Message'
@@ -128,16 +124,9 @@ paths:
       x-mojo-to: dialog#messages
       parameters:
       - $ref: '#/parameters/connection_id'
-      - description: Find messages after a given ISO 8601 timestamp
-        format: date-time
-        in: query
-        name: after
-        type: string
-      - description: Find messages before a given ISO 8601 timestamp
-        format: date-time
-        in: query
-        name: before
-        type: string
+      - $ref: '#/parameters/after'
+      - $ref: '#/parameters/around'
+      - $ref: '#/parameters/before'
       - description: Max number of messages to retrieve
         in: query
         name: limit
@@ -152,9 +141,12 @@ paths:
           schema:
             type: object
             properties:
-              end:
-                description: Indicates if historic messages can be received.
-                type: boolean
+              after:
+                type: string
+                format: date-time
+              before:
+                type: string
+                format: date-time
               messages:
                 items:
                   $ref: '#/definitions/Message'
@@ -391,9 +383,12 @@ paths:
           schema:
             type: object
             properties:
-              end:
-                description: Indicates if historic messages can be received.
-                type: boolean
+              after:
+                type: string
+                format: date-time
+              before:
+                type: string
+                format: date-time
               messages:
                 items:
                   $ref: '#/definitions/Message'
@@ -608,6 +603,24 @@ paths:
                   $ref: '#/definitions/User'
 
 parameters:
+  after:
+    name: after
+    description: Find messages after a given ISO 8601 timestamp
+    format: date-time
+    in: query
+    type: string
+  around:
+    name: around
+    description: Find messages around a given ISO 8601 timestamp
+    format: date-time
+    in: query
+    type: string
+  before:
+    name: before
+    description: Find messages before a given ISO 8601 timestamp
+    format: date-time
+    in: query
+    type: string
   connection_id:
     description: A unique connection identifier
     in: path

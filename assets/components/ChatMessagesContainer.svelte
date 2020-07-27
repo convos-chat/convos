@@ -21,8 +21,8 @@ $: connection = $user.findDialog({connection_id: dialog.connection_id}) || {};
       <ChatMessagesStatusLine class="for-loading" icon="spinner" animation="spin">{l('Loading...')}</ChatMessagesStatusLine>
     {/if}
 
-    {#if $dialog.startOfHistory}
-      <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', $dialog.startOfHistory.getHumanDate())}</ChatMessagesStatusLine>
+    {#if $dialog.historyStartAt}
+      <ChatMessagesStatusLine class="for-start-of-history" icon="calendar-alt">{l('Started chatting on %1', $dialog.historyStartAt.getHumanDate())}</ChatMessagesStatusLine>
     {/if}
 
     <slot/>
