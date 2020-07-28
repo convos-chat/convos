@@ -26,7 +26,6 @@ has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
-  Scalar::Util::weaken($attrs->{user} = $self);
   my $class = 'Convos::Core::Connection';
 
   if ($attrs->{protocol}) {
@@ -36,6 +35,7 @@ has_many connections => 'Convos::Core::Connection' => sub {
   }
 
   my $connection = $class->new($attrs);
+  Scalar::Util::weaken($connection->{user} = $self);
   warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
   $self->core->backend->emit(connection => $connection);
   return $connection;
@@ -90,7 +90,7 @@ sub notifications_p {
 sub remove_connection_p {
   my ($self, $id) = @_;
 
-  my $connection = $self->{connections}{$id};
+  my $connection = Scalar::Util::blessed($id) ? $id : $self->{connections}{$id};
   return Mojo::Promise->resolve(undef) unless $connection;
 
   return $connection->disconnect_p->then(sub {
@@ -268,10 +268,11 @@ L<Convos::Core::Backend/notifications>.
 
 =head2 remove_connection_p
 
+  $p = $user->remove_connection_p($connection)->then(sub { my $connection = shift });
   $p = $user->remove_connection_p($id)->then(sub { my $connection = shift });
 
 Will remove a connection created by L</connection>. Removing a connection that
-does not exist is perfectly valid, and will not set C<$err>.
+does not exist is perfectly valid, and will not result in a rejected promise.
 
 =head2 registered
 

@@ -1,8 +1,11 @@
 #!perl
 use lib '.';
 use t::Helper;
+use t::Server::Irc;
 
-$ENV{CONVOS_OPEN_TO_PUBLIC} = 1;
+my $server = t::Server::Irc->new->start;
+$ENV{CONVOS_DEFAULT_CONNECTION} = $server->url;
+$ENV{CONVOS_OPEN_TO_PUBLIC}     = 1;
 
 my $t = t::Helper->t;
 
@@ -44,6 +47,9 @@ $t->post_ok('/api/user/superman@example.com', json => {})->status_is(403)
 
 note 'Logout second user';
 $t->get_ok('/api/user/logout')->status_is(200);
+$server->client($t->app->core->get_user('superwoman@example.com')->connections->[0])
+  ->server_event_ok('_irc_event_nick')->process_ok;
+delete $server->{client};
 
 note 'First user again';
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => '1234567890'})
@@ -60,7 +66,9 @@ $t->get_ok('/api/users')->status_is(200)->json_is('/users/0/email', 'superman@ex
 
 note 'Delete user';
 is $t->app->core->n_users, 2, 'got two users left';
+is $server->n_connections, 2, 'has two connections';
 $t->delete_ok('/api/user/superwoman@example.com')->status_is(200)->json_is('/message', 'Deleted.');
 is $t->app->core->n_users, 1, 'only one user left';
+is $server->n_connections, 1, 'only one connection left';
 
 done_testing;

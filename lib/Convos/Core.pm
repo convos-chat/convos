@@ -34,6 +34,7 @@ sub connect {
   }
   elsif ($self->{connect_queue}{$host}) {
     push @{$self->{connect_queue}{$host}}, $connection;
+    Scalar::Util::weaken($self->{connect_queue}{$host}[-1]);
   }
   else {
     $self->{connect_queue}{$host} = [];
@@ -149,7 +150,7 @@ sub _dequeue {
   my $self = shift;
 
   for my $host (keys %{$self->{connect_queue} || {}}) {
-    my $connection = shift @{$self->{connect_queue}{$host}};
+    next unless my $connection = shift @{$self->{connect_queue}{$host}};
     $connection->connect if $connection and $connection->wanted_state eq 'connected';
   }
 }

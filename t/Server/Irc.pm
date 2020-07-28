@@ -42,6 +42,10 @@ sub close_connections {
   return $self;
 }
 
+sub n_connections {
+  return int keys %{shift->{connections} || {}};
+}
+
 sub process_ok {
   my ($self, $desc) = @_;
   my $tid = Mojo::IOLoop->timer(5 => sub { $self->_handle_process_timeout($desc) });
