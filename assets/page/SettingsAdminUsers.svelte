@@ -138,7 +138,7 @@ function updateUserFromForm(e) {
       <OperationStatus op="{inviteLinkOp}"/>
     </form>
 
-    <h2>{l('Users')}</h2>
+    <h2>{l('Users')} <small>({users.length})</small></h2>
     <OperationStatus op="{getUsersOp}" progress="{true}"/>
     <table>
       <thead>
