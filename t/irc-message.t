@@ -200,6 +200,6 @@ $connection->send_p('#convos' => "c\no\nn\nv\no\ns\n 2h 46m 55s\n")
 done_testing;
 
 sub slurp_log {
-  my @date = split '-', Time::Piece->new->strftime('%Y-%m');
+  my @date = split '-', Convos::Date->gmtime->strftime('%Y-%m');
   return path($user_home, 'irc-localhost', @date, "$_[0].log")->slurp;
 }

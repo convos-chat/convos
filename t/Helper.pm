@@ -2,6 +2,7 @@ package t::Helper;
 use Mojo::Base -strict;
 
 use Convos;
+use Convos::Date 'dt';
 use File::Basename 'basename';
 use File::Path ();
 use FindBin;
@@ -35,7 +36,7 @@ sub messages {
   my @messages = split /\n/, data_section qw(t::Helper messages.txt);
   $ts -= $ts % 10;
   $ts -= $interval * @messages;
-  $ts = Time::Piece->gmtime($ts);
+  $ts = dt $ts;
 
   my $i = 0;
   for my $entry (@messages) {

@@ -1,7 +1,7 @@
 package Convos::Plugin::Cms;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util 'tp';
+use Convos::Date 'dt';
 use Mojo::ByteStream;
 use Mojo::Cache;
 use Mojo::Collection;
@@ -111,14 +111,13 @@ sub _parse_document {
   $self->_extract_excerpt($body, $doc);
   $self->_extract_heading($body, $doc);
 
-  my $tp
-    = $file->basename =~ m!(\d{4}-\d{2}-\d{2})! ? tp "${1}T00:00:00" : Time::Piece->new($mtime);
-  $doc->{ts} = $tp->epoch;
+  my $dt = dt $file->basename =~ m!(\d{4}-\d{2}-\d{2})! ? "${1}T00:00:00" : $mtime;
+  $doc->{ts} = $dt->epoch;
   $doc->{meta}{name} = $file->basename;
   $doc->{meta}{name} =~ s!^\d{4}-\d{2}-\d{2}-!!;
   $doc->{meta}{name} =~ s!\.md$!!;
-  $doc->{meta}{$_} ||= $tp->$_ for qw(mday mon year);
-  $doc->{meta}{date}  ||= sprintf '%s. %s, %s', $tp->mday, $tp->month, $tp->year;
+  $doc->{meta}{$_} ||= $dt->$_ for qw(mday mon year);
+  $doc->{meta}{date}  ||= sprintf '%s. %s, %s', $dt->mday, $dt->month, $dt->year;
   $doc->{meta}{title} ||= $file->basename;
   $doc->{path} = "$file";
   $self->_cache->set("$file" => $doc);

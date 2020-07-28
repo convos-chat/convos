@@ -45,7 +45,7 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1')->s
   ->json_is('/messages/0/message', '80 bead')->json_is('/messages/1', undef)
   ->json_is('/n_messages', 1, 'one message')->json_is('/n_requested', 1, 'requested 1');
 
-my $before = Time::Piece->gmtime(time - 86400 * 180);
+my $before = Convos::Date->gmtime(time - 86400 * 180);
 note "before=@{[$before->datetime]}";
 $connection->emit(message => $dialog => $_)
   for t::Helper->messages($before->add_months(1)->epoch, 3600 * 11);
@@ -57,7 +57,7 @@ $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?before=@{[$b
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2018-01-01T00:39:00')
   ->status_is(200)->json_is('/end', true, 'end')->json_is('/n_messages', 0, 'zero messages');
 
-$before = Time::Piece->gmtime(time - 1700);
+$before = Convos::Date->gmtime(time - 1700);
 note "before=@{[$before->datetime]}, limit=40";
 $t->get_ok(
   "/api/connection/irc-localhost/dialog/%23convos/messages?before=@{[$before->datetime]}&limit=40")
@@ -65,7 +65,7 @@ $t->get_ok(
   ->json_is('/messages/0/message',  '80 bead')->json_is('/messages/39/from', 'verse')
   ->json_is('/messages/39/message', '38 hobbies')->json_is('/n_messages', 40);
 
-my $after = Time::Piece->gmtime(time - 86400 * 170);
+my $after = Convos::Date->gmtime(time - 86400 * 170);
 note "after=@{[$after->datetime]}";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?after=@{[$after->datetime]}")
   ->status_is(200)->json_is('/end', false, 'more')->json_is('/messages/0/from', 'verse')
@@ -89,8 +89,8 @@ $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=2&matc
   ->status_is(200)->json_is('/end', true, 'end')->json_is('/messages/0/message', '16 playground')
   ->json_is('/messages/1/message', '16 playground');
 
-$after  = Time::Piece->gmtime(time - 86400 * 200);
-$before = Time::Piece->gmtime(time);
+$after  = Convos::Date->gmtime(time - 86400 * 200);
+$before = Convos::Date->gmtime(time);
 note "after=@{[$after->datetime]}, before=@{[$before->datetime]} (all messages)";
 $t->get_ok(
   "/api/connection/irc-localhost/dialog/%23convos/messages?after=@{[$after->datetime]}&before=@{[$before->datetime]}"

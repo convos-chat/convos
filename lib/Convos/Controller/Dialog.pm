@@ -1,7 +1,7 @@
 package Convos::Controller::Dialog;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'tp';
+use Convos::Date 'dt';
 use Mojo::JSON qw(false true);
 
 sub last_read {
@@ -57,9 +57,9 @@ sub messages {
   # Input check
   if ($query{after} and $query{before}) {
     return $self->reply->errors([['Must be before "/after".', '/before']], 400)
-      if tp($query{after}) > tp($query{before});
+      if dt($query{after}) > dt($query{before});
     return $self->reply->errors([['Must be less than "/after" - 12 months.', '/before']], 400)
-      if abs(tp($query{after}) - tp($query{before})) > 86400 * 365;
+      if abs(dt($query{after}) - dt($query{before})) > 86400 * 365;
   }
 
   return $dialog->messages_p(\%query)->then(sub {

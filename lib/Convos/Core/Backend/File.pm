@@ -1,14 +1,14 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Util qw(DEBUG tp);
+use Convos::Date 'dt';
+use Convos::Util 'DEBUG';
 use Fcntl ':flock';
 use File::ReadBackwards;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(encode decode);
 use Symbol;
-use Time::Piece 'gmtime';
 use Time::Seconds;
 
 use constant FLAG_OFFSET    => 48;    # chr 48 == "0"
@@ -94,15 +94,15 @@ sub messages_p {
 
   # If both "before" and "after" are provided
   if ($query->{before} and $query->{after}) {
-    $args{before}            = tp $query->{before};
-    $args{after}             = tp $query->{after};
+    $args{before}            = dt $query->{before};
+    $args{after}             = dt $query->{after};
     @args{qw(cursor inc_by)} = ($args{after}, 1);
   }
 
   # If "before" is provided but not "after"
   # Set "after" to 12 months before "before"
   elsif ($query->{before} and !$query->{after}) {
-    $args{before}            = tp $query->{before};
+    $args{before}            = dt $query->{before};
     $args{after}             = $args{before}->add_months(-12);
     @args{qw(cursor inc_by)} = ($args{before}, -1);
   }
@@ -110,8 +110,8 @@ sub messages_p {
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    my $future = gmtime->add_months(1);
-    $args{after}             = tp $query->{after};
+    my $future = dt->add_months(1);
+    $args{after}             = dt $query->{after};
     $args{before}            = $args{after}->add_months(12);
     $args{before}            = $future if $args{before} > $future;
     @args{qw(cursor inc_by)} = ($args{after}, 1);
@@ -120,7 +120,7 @@ sub messages_p {
   # If neither "before" nor "after" are provided
   # Set "before" to now and "after" to 12 months before "before"
   else {
-    $args{before} = 10 + gmtime;    # make sure we get the message sent right now as well
+    $args{before} = 10 + dt;    # make sure we get the message sent right now as well
     $args{after} = $args{before}->add_months(-12);
     @args{qw(cursor inc_by force_end)} = ($args{before}, -1, 1);
   }
@@ -165,7 +165,7 @@ sub notifications_p {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
-    my $ts      = tp $message->{ts};
+    my $ts      = dt $message->{ts};
     $self->_message_type_from($message);
     unshift @notifications, $message;
     last if @notifications == $query->{limit};
@@ -250,7 +250,7 @@ sub _format {
 
 sub _log {
   my ($self, $obj, $ts, $message) = @_;
-  my $t    = gmtime $ts;
+  my $t    = dt $ts;
   my $ym   = sprintf '%s/%02s', $t->year, $t->mon;
   my $file = $self->_log_file($obj, $ym);
   my $dir  = $file->dirname;
@@ -319,7 +319,7 @@ sub _messages {
 
     my $flag    = $2 || '0';
     my $message = {message => $3, ts => $1};
-    my $ts      = tp $message->{ts};
+    my $ts      = dt $message->{ts};
 
     # my $x       = $ts >= $args->{before} || $ts <= $args->{after} ? '-' : '+';
     # Test::More::note("($x) $args->{after} <> $1 <> $args->{before} - $3\n");
@@ -358,7 +358,7 @@ sub _open {
 sub _save_notification {
   my ($self, $obj, $ts, $message) = @_;
   my $file = $self->_notifications_file($obj->connection->user);
-  my $t    = gmtime $ts;
+  my $t    = dt $ts;
 
   open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
   warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;

@@ -5,14 +5,13 @@ use Mojo::Collection 'c';
 use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
-use Time::Piece   ();
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE DEBUG disk_usage generate_secret has_many pretty_connection_name),
-  qw(require_module sdp_decode sdp_encode short_checksum tp),
+  qw(require_module sdp_decode sdp_encode short_checksum),
 );
 
 sub disk_usage {
@@ -147,13 +146,6 @@ sub short_checksum {
   return substr $short, 0, 16;
 }
 
-sub tp {
-  local $_ = shift;
-  $_ =~ s!Z$!!;
-  $_ =~ s!\.\d*$!!;
-  Time::Piece->strptime($_, '%Y-%m-%dT%H:%M:%S');
-}
-
 sub _generate_secret_fallback {
   return sha1_sum join ':', rand(), $$, $<, Sys::Hostname::hostname(), Time::HiRes::time();
 }
@@ -270,14 +262,6 @@ Used to decode the C<$sdp> created by L</sdp_encode>.
   $sdp = sdp_encode "v=0\r\n...";
 
 Will filter and compress a SDP message.
-
-=head2 tp
-
-  $tp = tp "2020-06-09T02:39:51";
-  $tp = tp "2020-06-09T02:39:51Z";
-  $tp = tp "2020-06-09T02:39:51.001Z";
-
-Used to create a L<Time::Piece> object from a date-time string.
 
 =head2 short_checksum
 
