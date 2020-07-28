@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.29 Not Released
+4.29 2020-07-29T07:57:00+0900
  - Fix memory leak where connections would not be cleaned up when user was deleted
  - Fix copy invite/recover link to clipboard
  - Fix showing that you are offline (was removed by accident in 4.24)
