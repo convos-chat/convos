@@ -65,7 +65,7 @@ $connection->send_p('', '/nick superduper')->$wait_success('nick');
 is $connection->url->query->param('nick'), 'superduper', 'change nick offline';
 
 ok !$connection->get_dialog('superwoman'), 'superwoman does not exist';
-$connection->send_p('', '/query superwoman')->$wait_success('query');
+$connection->send_p('', '/query superwoman ')->$wait_success('query');
 ok $connection->get_dialog('superwoman'), 'superwoman exist';
 
 cmp_deeply(
@@ -285,7 +285,7 @@ ok $res->{done}, 'list done';
 
 note 'whois';
 $server->server_event_ok('_irc_event_whois')->server_write_ok(['whois-superwoman.irc']);
-$res = $connection->send_p('', '/whois superwoman')->$wait_success;
+$res = $connection->send_p('', '/whois superwoman ')->$wait_success;
 $server->processed_ok;
 is_deeply(
   $res,

@@ -477,9 +477,11 @@ sub _make_invalid_target_p {
   my ($self, $target) = @_;
 
   # err_norecipient and err_notexttosend
-  return Mojo::Promise->reject('Cannot send without target.') unless $target;
+  return Mojo::Promise->reject('Cannot send without target.')
+    if !$$target
+    or !($$target = trim $$target);
   return Mojo::Promise->reject('Cannot send message to target with spaces or comma.')
-    if $target =~ /[,\s]/;
+    if $$target =~ /[,\s]/;
   return;
 }
 
@@ -707,7 +709,7 @@ sub _send_kick_p {
   my ($nick, $reason) = split /\s/, $command, 2;
 
   for my $t ($target, $nick) {
-    my $invalid_target_p = $self->_make_invalid_target_p($t);
+    my $invalid_target_p = $self->_make_invalid_target_p(\$t);
     return $invalid_target_p if $invalid_target_p;
   }
 
@@ -774,7 +776,7 @@ sub _send_message_p {
   my $target  = shift;
   my $message = shift // '';
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
   my $messages = $self->_split_message($message);
@@ -813,7 +815,7 @@ sub _send_mode_p {
 
   $target ||= shift @args // '';
   $target = shift @args if $args[0] and $args[0] =~ $CHANNEL_RE;
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
   my $res = {};
@@ -845,7 +847,7 @@ sub _send_mode_p {
 sub _send_names_p {
   my ($self, $target) = @_;
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
   return $self->_write_and_wait_p(
     "NAMES $target", {dialog_id => lc $target},
@@ -884,7 +886,7 @@ sub _send_oper_p {
 sub _send_part_p {
   my ($self, $target) = @_;
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
   my $dialog = $self->get_dialog($target);
@@ -908,7 +910,7 @@ sub _send_query_p {
   my ($self, $target) = @_;
   my $p = Mojo::Promise->new;
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
   # Already in the dialog
@@ -926,7 +928,7 @@ sub _send_query_p {
 sub _send_topic_p {
   my ($self, $target, $topic) = @_;
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
   my $cmd = "TOPIC $target";
@@ -946,7 +948,7 @@ sub _send_topic_p {
 sub _send_whois_p {
   my ($self, $target) = @_;
 
-  my $invalid_target_p = $self->_make_invalid_target_p($target);
+  my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
   return $self->_write_and_wait_p(
     "WHOIS $target",

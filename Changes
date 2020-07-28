@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.30 Not Released
+ - Will trim target when sending commands
+   * This fixes commands like "/whois nick " with trailing spaces
+
 4.29 2020-07-29T07:57:00+0900
  - Fix memory leak where connections would not be cleaned up when user was deleted
  - Fix copy invite/recover link to clipboard
