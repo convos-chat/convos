@@ -34,6 +34,7 @@ export default class Socket extends Reactive {
 
     this.prop('ro', 'readyState', () => this.ws.readyState);
     this.prop('ro', 'readyStateHuman', () => readyStateHuman[this.ws.readyState]);
+    this.prop('rw', 'error', '');
     this.prop('rw', 'keepaliveInterval', 10000);
     this.prop('rw', 'keepaliveMessage', {});
     this.prop('rw', 'online', true);
@@ -130,14 +131,19 @@ export default class Socket extends Reactive {
    * @returns {Object} The invocant
    */
   open() {
-    if (!this.url) throw '[Socket] Can\'t open connection without URL.';
     if (this.ws.close) return this;
 
-    this.ws = new WebSocket(this.url);
-    this.ws.onclose = (e) => this._onClose(e);
-    this.ws.onerror = (e) => console.log('TODO', e);
-    this.ws.onmessage = (e) => this._onMessage(e);
-    this.ws.onopen = (e) => this._onOpen(e);
+    try {
+      if (!this.url) throw '[Socket] Can\'t open connection without URL.';
+      this.ws = new WebSocket(this.url);
+      this.ws.onclose = (e) => this._onClose(e);
+      this.ws.onerror = (e) => this._onError(e);
+      this.ws.onmessage = (e) => this._onMessage(e);
+      this.ws.onopen = (e) => this._onOpen(e);
+      this.update({error: ''});
+    } catch(err) {
+      this._onError(err.message ? err : {message: String(err)});
+    }
 
     this._clearTimers();
     this._keepalive();
@@ -177,20 +183,6 @@ export default class Socket extends Reactive {
     return this.on('message_' + id);
   }
 
-  /**
-   * Turns the object into a function.
-   *
-   * @example
-   * const api = new Api().toFunction();
-   * api('getUser', {}) == api().operation('getUser', {});
-   *
-   * @memberof Api
-   * @returns {Function}
-   */
-  toFunction() {
-    return (msg) => msg ? this.send(msg) : this;
-  }
-
   _clearTimers() {
     if (this.keepaliveTid) clearTimeout(this.keepaliveTid);
     delete this.keepaliveTid;
@@ -224,6 +216,10 @@ export default class Socket extends Reactive {
     this.reconnectTid = setTimeout(() => this.open(), delay);
   }
 
+  _onError(e) {
+    this.update({error: e.message || String(e)});
+  }
+
   _onMessage(e) {
     const msg = this.inflateMessage(e.data);
 
@@ -252,7 +248,7 @@ export default class Socket extends Reactive {
   }
 
   _onOpen(e) {
-    this.update({readyState: true});
+    this.update({error: '', readyState: true});
     this._dequeue();
   }
 

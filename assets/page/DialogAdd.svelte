@@ -35,7 +35,7 @@ async function loadConversations(e) {
   if (e.type == 'click' && availableDialogs.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
-  const res = await socket({connection_id: connectionId, message, method: 'send'});
+  const res = await socket.send({connection_id: connectionId, message, method: 'send'});
   const error = extractErrorMessage(res);
   availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : res;
 

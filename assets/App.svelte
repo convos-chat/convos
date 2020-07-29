@@ -27,7 +27,7 @@ let readyStateNotification = {closed: true};
 
 setContext('api', api('/api').update({url: process.env.api_url}).toFunction());
 setContext('rtc', rtc);
-setContext('socket', socket('/events').update({url: process.env.ws_url}).toFunction());
+setContext('socket', socket('/events').update({url: process.env.ws_url}));
 setContext('user', user);
 
 route.update({baseUrl: process.env.base_url});
@@ -83,6 +83,7 @@ function socketChanged(socket) {
 
   const message
     = socket.is('offline')    ? l('You seem to be offline.')
+    : socket.error            ? l(socket.error)
     : socket.is('connecting') ? l('Connecting to Convos...')
     :                           l('Connection to Convos is %1.', l(socket.readyStateHuman));
 

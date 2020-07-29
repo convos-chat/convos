@@ -32,18 +32,18 @@ function calculateIsOperator(dialog) {
 }
 
 function partDialog(e) {
-  socket({method: 'send', message: '/part', connection_id: dialog.connection_id, dialog_id: dialog.dialog_id});
+  socket.send({method: 'send', message: '/part', connection_id: dialog.connection_id, dialog_id: dialog.dialog_id});
 }
 
 function saveDialogSettings(e) {
   if (dialogPassword) {
     const message = isOperator ? '/mode +k ' + dialogPassword : '/join ' + dialog.name + ' ' + dialogPassword;
-    socket({method: 'send', message, dialog});
+    socket.send({method: 'send', message, dialog});
     dialogPassword = '';
   }
 
   if (isOperator && dialogTopic != dialog.topic) {
-    socket({method: 'send', message: '/topic ' + dialogTopic, dialog});
+    socket.send({method: 'send', message: '/topic ' + dialogTopic, dialog});
   }
 }
 </script>

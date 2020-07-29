@@ -111,20 +111,6 @@ test('reconnectIn', async () => {
   expect(socket.reconnectTid).toBe(undefined);
 });
 
-test('toFunction', async () => {
-  const socket = new Socket().update({keepaliveInterval: 5, url: 'wss://example.convos.chat'}).toFunction();
-  expect(socket().is('closed')).toBe(true);
-
-  later(
-    () => (socket().ws.readyState = WebSocket.OPEN),
-    () => socket().ws.onopen({}),
-    () => socket().ws.onmessage({data: '{"id":"1","sent":true}'}),
-  );
-
-  const res = await socket({});
-  expect(res).toEqual({id: '1', sent: true});
-});
-
 test('socket', () => {
   const sock_a = socket('sock_a');
   expect(socket('sock_a')).toEqual(sock_a);
