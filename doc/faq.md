@@ -64,18 +64,20 @@ Start convos behind a reverse proxy:
 Example nginx config:
 
     # Host and port where convos is running
-    upstream convos { server 127.0.0.1:8080; }
+    upstream convos_upstream { server 127.0.0.1:8080; }
 
     server {
       listen 80;
       server_name your-domain.com;
 
       # Mount convos under http://your-domain.com/whatever/convos
+      # Replace all occurrences of "/whatever/convos" with just "/",
+      # and remove the "rewrite" rule if Convos is mounted directly on "/".
       location /whatever/convos {
 
         # Pass requests on to the upstream defined above
         rewrite ^/whatever/convos/?(.*)$ /$1 break;
-        proxy_pass http://convos;
+        proxy_pass http://convos_upstream;
 
         # Instruct Convos to do the right thing regarding
         # HTTP and WebSockets
