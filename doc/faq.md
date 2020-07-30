@@ -136,6 +136,28 @@ plugins.
 Look at the [configuration](/doc/config) guide to see which configuration
 parameters that have to be set to load a plugin.
 
+## Can I rename my connection names?
+
+Currently it is not possible to rename the connection names from the web
+interface, so you have to do it manually from the command line. You can do so
+by following these steps:
+
+1. Make sure Convos is stopped.
+2. Find the `connection.json` file you want to edit in your
+   [$CONVOS_HOME](./config#convos_home) directory.
+3. Use your favorite editor and edit the file. Example:
+
+        $EDITOR $CONVOS_HOME/you@example.com/irc-whatever/connection.json
+
+4. Look for all occurances of "irc-whatever" and "whatever" and replace the
+   "whatever" part with the name you want.
+5. Rename the `$CONVOS_HOME/you@example.com/irc-whatever` directory to what
+   you used as the new name above. Do not forget to keep the "irc-" prefix.
+6. Start Convos again and you should see your new connection names after
+   reloading the web page.
+
+Make sure you use lower-case for "name" and "connection_id".
+
 ## Is Convos supported on my flavor of Linux?
 
 Yes, Convos runs on all flavors of Linux, but Redhat based (Centos, Fedora)
