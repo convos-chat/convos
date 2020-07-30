@@ -107,7 +107,7 @@ async function submitForm(e) {
   <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{process.env.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
     <p class="help" slot="help">
-      {@html lmd(process.env.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'irc://chat.freenode.net:6697')}
+      {@html lmd(process.env.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
     </p>
   </TextField>
 
