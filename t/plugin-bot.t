@@ -36,7 +36,7 @@ Mojo::Promise->timer(0.05)->wait;
 ok $bot->action($_), "$_ present" for qw(core karma);
 ok !$bot->action('hailo'), "Convos::Plugin::Bot::Action::Hailo not present";
 
-my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url->host);
+my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url);
 my $connection    = $bot->user->get_connection($connection_id);
 ok $connection, 'bot connection';
 

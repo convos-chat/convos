@@ -91,7 +91,7 @@ sub _ensure_connection {
 
   my $url           = Mojo::URL->new($config->{url});
   my $user          = $self->user;
-  my %attrs         = (name => pretty_connection_name($url->host), protocol => $url->scheme);
+  my %attrs         = (name => pretty_connection_name($url), protocol => $url->scheme);
   my $connection_id = join '-', @attrs{qw(protocol name)};
   $self->config->data->{connection}{$connection_id} = $config;
 

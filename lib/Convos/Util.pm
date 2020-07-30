@@ -5,6 +5,7 @@ use Mojo::Collection 'c';
 use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
+use Scalar::Util 'blessed';
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
@@ -88,19 +89,27 @@ sub has_many {
 }
 
 sub pretty_connection_name {
-  my $name = shift;
+  my $url = shift // '';
+  $url = "irc://$url" unless blessed $url or $url =~ m!^\w+:!;
+  $url = Mojo::URL->new($url);
 
+  # Support ZNC style logins: <user>@<useragent>/<network>
+  return $1 if +($url->username // '') =~ /^[a-z0-9_\+-]+@[a-z0-9_\+-]+\/([a-z0-9_\+-]+)/i;
+
+  # Normalize hostname
+  my $name = $url->host;
   return '' unless defined $name;
-  return 'magnet' if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
-  return 'efnet'  if $name =~ /\befnet\b/i;
+  return 'efnet'     if $name =~ /\befnet\b/i;
+  return 'localhost' if $name eq '127.0.0.1';
+  return 'magnet'    if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
 
-  $name = 'localhost' if $name eq '127.0.0.1';
-  $name =~ s!^(irc|chat)\.!!;                           # remove common prefixes from server name
-  $name =~ s!:\d+$!!;                                   # remove port
-  $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
+  $name =~ s!^(irc|chat)\.!!;                              # remove common prefixes from server name
+  $name =~ s!:\d+$!!;                                      # remove port
+  $name =~ s!\.\w{2,3}$!!;                                 # remove .com, .no, ...
   $name =~ s!\.chat$!!;
-  $name =~ s![\W_]+!-!g;                                # make pretty url
-  $name;
+  $name =~ s![\W_]+!-!g;                                   # make pretty url
+
+  return $name;
 }
 
 sub require_module {
@@ -241,9 +250,9 @@ The definition above results in the following methods:
 
 =head2 pretty_connection_name
 
-  $str = pretty_connection_name($hostname);
+  $str = pretty_connection_name($url);
 
-Will turn a given hostname into a nicer connection name.
+Will turn a connection URL into a nicer connection name.
 
 =head2 require_module
 

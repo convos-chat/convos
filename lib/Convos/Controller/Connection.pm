@@ -99,34 +99,6 @@ sub update {
   });
 }
 
-sub _pretty_connection_name {
-  my ($self, $url) = @_;
-
-  my $name = $url->host;
-  my ($username) = split(':', $url->userinfo || '');
-
-  # Support ZNC style logins
-  # <user>@<useragent>/<network>
-  if (
-    defined($username)
-    && ($username
-      =~ /^(?<name>[a-z0-9_\+-]+)@(?<useragent>[a-z0-9_\+-]+)\/(?<network>[a-z0-9_\+-]+)/i)
-    )
-  {
-    return $+{network} if ($+{network});
-  }
-
-  return '' unless defined $name;
-  return 'magnet' if $name =~ /\birc\.perl\.org\b/i;    # also match ssl.irc.perl.org
-  return 'efnet'  if $name =~ /\befnet\b/i;
-
-  $name =~ s!^(irc|chat)\.!!;                           # remove common prefixes from server name
-  $name =~ s!:\d+$!!;                                   # remove port
-  $name =~ s!\.\w{2,3}$!!;                              # remove .com, .no, ...
-  $name =~ s![\W_]+!-!g;                                # make pretty url
-  $name;
-}
-
 sub _same_url {
   my ($u1, $u2) = @_;
 

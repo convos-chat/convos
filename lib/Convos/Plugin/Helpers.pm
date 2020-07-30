@@ -75,7 +75,7 @@ sub _backend_connection_create_p {
   my $user = $c->backend->user;
 
   return Mojo::Promise->reject('URL need a valid host.')
-    unless my $name = pretty_connection_name($url->host);
+    unless my $name = pretty_connection_name($url);
 
   return Mojo::Promise->reject('Connection already exists.')
     if $user->get_connection({protocol => $url->scheme, name => $name});
