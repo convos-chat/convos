@@ -169,9 +169,8 @@ sub _run_actions_with_message {
   my $connection = $self->user->get_connection($event->{connection_id});
   return if lc $event->{from} eq lc $connection->nick;
 
-  my $command = $event->{message};
   local $event->{is_private} = $event->{dialog_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
-  local $event->{command} = $command =~ s/^\!// ? $command : $event->{is_private} ? $command : '';
+  local $event->{command} = $event->{message};
 
   my $reply;
   for my $config (@{$self->config->get('/actions')}) {
