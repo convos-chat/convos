@@ -1,4 +1,4 @@
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import cssnano from 'cssnano';
 import postcss from 'rollup-plugin-postcss'
@@ -38,7 +38,7 @@ plugins.push(babel({
   //exclude: 'node_modules/**',
   extensions: ['.html', '.js', '.mjs', '.svelte'],
   presets: [['@babel/preset-env', {corejs: 3, debug: false, useBuiltIns: 'entry'}]],
-  runtimeHelpers: true,
+  babelHelpers: 'runtime',
   plugins: ['@babel/plugin-transform-runtime'],
 }));
 
