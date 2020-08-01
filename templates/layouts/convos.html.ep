@@ -1,7 +1,7 @@
 % use Mojo::JSON 'to_json';
 % my $social = $c->social;
 <!DOCTYPE html>
-<html class="theme-default" lang="en">
+<html lang="en">
   <head>
     % if (settings('organization_name') eq 'Convos') {
       <title><%=l '%1 - Convos', title %></title>
@@ -44,8 +44,12 @@
     <meta name="theme-color" content="#00451D">
     %= tag 'link', rel => 'canonical', href => $social->{canonical} if $social->{canonical};
     %= asset 'convos.css'
-    % my $theme_url = $c->themes->url_for(js_session('theme'), js_session('colorScheme')) || $c->themes->url_for('convos');
-    <link rel="stylesheet" type="text/css" href="<%= $theme_url %>" id="link_selected_theme">
+
+    % my $theme = $c->themes->get(js_session('theme'), js_session('colorScheme'));
+    %= tag 'link', rel => 'stylesheet', type => 'text/css', id => "theme_primary", href => url_for($theme->{url}), title => $theme->{title}
+    % for my $theme (@{$c->themes->list}) {
+      %= tag 'link', rel => 'alternate stylesheet', type => 'text/css', id => "theme_alt__$theme->{id}", href => url_for($theme->{url}), title => $theme->{title}
+    % }
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css';
     %= include 'partial/process_js';
   </head>

@@ -10,46 +10,31 @@ import {embedMaker} from '../js/EmbedMaker';
 import {l} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
-const themes = Object.keys(user.themes).map(id => {
-  let name = user.themes[id].name;
-  const colorSchemes = Object.keys(user.themes[id].variants || {}).filter(cs => cs != 'default');
-  if (colorSchemes.length) name += ' (' + colorSchemes.sort().join('/') + ')';
-  return [id, name];
-});
-
 let formEl;
-let colorSchemeOptions = [];
-let colorScheme = user.colorScheme;
 let expandUrlToMedia = embedMaker.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
-let theme = user.theme;
+let selectedColorScheme = viewport.colorScheme;
+let selectedTheme = viewport.theme;
 let wantNotifications = notify.wantNotifications;
+
+$: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
 
 route.update({title: l('Account')});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;
   req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
-  user.update({colorScheme, theme, highlightKeywords: req.body.highlight_keywords});
+  user.update({highlightKeywords: req.body.highlight_keywords});
 });
 
+
 onDestroy(notify.on('update', notifyWantNotificationsChanged));
-
-$: calculateColorSchemeOptions(theme);
-
-function calculateColorSchemeOptions(id) {
-  const options = [['auto', 'Auto']];
-  const theme = user.themes[id] || {variants: {}};
-  if (theme.variants.dark) options.push(['dark', 'Dark']);
-  if (theme.variants.light) options.push(['light', 'Light']);
-  colorSchemeOptions = options;
-  colorScheme = 'auto';
-}
 
 function notifyWantNotificationsChanged(notify, changed) {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
@@ -70,6 +55,7 @@ function updateUserFromForm(e) {
 
   embedMaker.update({expandUrlToMedia});
   notify.update({wantNotifications});
+  viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
   updateUserOp.perform(e.target);
 }
 </script>
@@ -96,17 +82,18 @@ function updateUserFromForm(e) {
       <span slot="label">{l('Expand URL to media')}</span>
     </Checkbox>
 
-    <SelectField name="theme" options="{themes}" bind:value="{theme}">
+    <SelectField name="theme" options="{viewport.themeOptions}" bind:value="{selectedTheme}">
       <span slot="label">{l('Theme')}</span>
     </SelectField>
 
-    <SelectField name="color_scheme" options="{colorSchemeOptions}" bind:value="{colorScheme}">
+    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{viewport.colorSchemeOptions}" bind:value="{selectedColorScheme}">
       <span slot="label">{l('Color scheme')}</span>
     </SelectField>
 
     <TextField type="password" name="password" autocomplete="new-password">
       <span slot="label">{l('Password')}</span>
     </TextField>
+
     <TextField type="password" name="password_again" autocomplete="new-password">
       <span slot="label">{l('Repeat password')}</span>
     </TextField>

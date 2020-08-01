@@ -3,15 +3,16 @@ use Mojo::Base 'Mojolicious::Plugin';
 
 use Mojo::File 'path';
 
-has _themes => sub { +{} };
+has _themes_list => sub { +[] };
+has _themes_map  => sub { +{} };
 
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('themes.detect'  => sub { $self->_detect(shift->app) });
-  $app->helper('themes.get'     => sub { $self->_get(@_) });
-  $app->helper('themes.serve'   => sub { $self->_serve(shift) });
-  $app->helper('themes.url_for' => sub { $self->_url_for(@_) });
+  $app->helper('themes.detect' => sub { $self->_detect(shift->app) });
+  $app->helper('themes.get'    => sub { $self->_get(@_) });
+  $app->helper('themes.list'   => sub { $self->_themes_list });
+  $app->helper('themes.serve'  => sub { $self->_serve(shift) });
   $app->routes->get('/themes/:theme')->to(cb => sub { $_[0]->themes->serve(@_) });
 
   Mojo::IOLoop->recurring($ENV{CONVOS_DETECT_THEMES_INTERVAL} || 10, sub { $app->themes->detect });
@@ -20,7 +21,7 @@ sub register {
 
 sub _detect {
   my ($self, $app) = @_;
-  my $themes = {};
+  my (@list, %map);
 
   my $read_theme = sub {
     return unless $_[0] =~ m!\.css$!;
@@ -40,12 +41,23 @@ sub _detect {
       $name =~ s!\.css$!!;
     }
 
-    $id                      ||= lc $name;
-    $color_scheme            ||= 'default';
-    $themes->{$id}{variants} ||= {};
-    $themes->{$id}{variants}{$color_scheme} = sprintf '/themes/%s?v=%s', $file->basename,
-      $app->VERSION;
-    $themes->{$id}{name} = $name;
+    $id           ||= lc $name;
+    $color_scheme ||= 'normal';
+    $map{$id}{name}  = $name;
+    $map{$id}{title} = $name;
+    $map{$id}{title} .= " ($color_scheme)" unless $color_scheme eq 'normal';
+    $map{$id}{urls}{$color_scheme} = sprintf '/themes/%s?v=%s', $file->basename, $app->VERSION;
+
+    push @{$map{$id}{variants}}, $color_scheme;
+    push @list,
+      {
+      id       => "${color_scheme}-${id}",
+      name     => $name,
+      scheme   => $color_scheme,
+      title    => $map{$id}{title},
+      variants => $map{$id}{variants},
+      url      => $map{$id}{urls}{$color_scheme},
+      };
   };
 
   $read_theme->($_) for map { path($_, 'themes')->list->each } @{$app->static->paths};
@@ -54,17 +66,28 @@ sub _detect {
   $user_themes->make_path unless -d $user_themes;
   $read_theme->($_) for $user_themes->list->each;
 
-  for my $theme (values %$themes) {
-    next if $theme->{variants}{default};
-    $theme->{variants}{default} = +(sort { $b cmp $a } values %{$theme->{variants}})[0];
+  for my $theme (values %map) {
+    next if $theme->{urls}{normal};
+    $theme->{urls}{normal} = +(sort { $b cmp $a } values %{$theme->{urls}})[0];
   }
 
-  $self->_themes($themes);
+  $self->_themes_list(\@list)->_themes_map(\%map);
 }
 
 sub _get {
-  my ($self, $c, $name) = @_;
-  return @_ == 2 ? $self->_themes : $self->_themes->{$name};
+  my ($self, $c) = (shift, shift);
+
+  my $id    = shift                     || 'convos';
+  my $theme = $self->_themes_map->{$id} || $self->_themes_map->{convos};
+  my $scheme = shift;
+  $scheme = (keys %{$theme->{urls}})[0] if !$scheme or $scheme eq 'auto';
+
+  return {
+    %$theme,
+    id    => "$scheme-$id",
+    url   => $scheme && $theme->{urls}{$scheme} || $theme->{urls}{normal},
+    title => "$theme->{name} ($scheme)",
+  };
 }
 
 sub _serve {
@@ -77,13 +100,6 @@ sub _serve {
   }
 
   return $c->render(text => "/* $theme.css not found */\n", status => 404);
-}
-
-sub _url_for {
-  my ($self, $c, $name, $color_scheme) = @_;
-  return undef unless my $theme = $self->_get($c, $name || '');
-  $color_scheme ||= 'default';
-  return $c->url_for($theme->{variants}{$color_scheme} || $theme->{variants}{default});
 }
 
 1;
@@ -164,10 +180,11 @@ C<CONVOS_DETECT_THEMES_INTERVAL> seconds, which defaults to 10.
 
 =head2 themes.get
 
-  $single = $c->themes->get("my-theme");
-  $all    = $c->themes->get;
+  $theme = $c->themes->get("my-theme");
+  $theme = $c->themes->get("my-theme", "dark");
+  $theme = $c->themes->get("my-theme", "light");
 
-Used to get information about a single theme or all the themes.
+Used to get information about a single theme.
 
 =head2 themes.serve
 
@@ -175,17 +192,6 @@ Used to get information about a single theme or all the themes.
 
 This method can serve a given theme by path. Will probably get redesigned to
 take C<$name>, C<$color_scheme> instead.
-
-=head2 themes.url_for
-
-  $path = $c->themes->url_for($name, $color_scheme);
-  $path = $c->themes->url_for("my-theme");
-  $path = $c->themes->url_for("my-theme", "light");
-
-Returns a relative path for the URL, with a version number to avoid cache
-issues. Example:
-
-  /themes/convos_color-scheme-light.css?v=4.03
 
 =head1 METHODS
 

@@ -19,7 +19,7 @@ import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 
-const user = new User({themes: process.env.themes});
+const user = new User({});
 const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
@@ -37,6 +37,7 @@ notify.on('click', (params) => (params.path && route.go(params.path)));
 socket('/events').on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
+viewport.activateTheme();
 
 $: calculateTitle($route, $user);
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;

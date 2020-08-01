@@ -16,7 +16,6 @@ export default class User extends Reactive {
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
-    this.prop('ro', 'themes', params.themes || {});
     this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('rw', 'activeDialog', this.notifications);
@@ -28,27 +27,8 @@ export default class User extends Reactive {
     this.prop('persist', 'assetVersion', 0);
     this.prop('persist', 'showGrid', false);
 
-    this.prop('cookie', 'colorScheme', 'auto');
-    this.prop('cookie', 'theme', 'convos');
-
     socket('/events').on('message', (msg) => this._dispatchMessage(msg));
     socket('/events').on('update', (socket) => this._onConnectionChange(socket));
-
-    const matchMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : {addListener: function() {}};
-    if (matchMedia.matches) this._osColorScheme = 'dark';
-    matchMedia.addListener(e => { this._osColorScheme = e.matches ? 'dark' : 'light' });
-  }
-
-  activateTheme() {
-    const colorScheme = this.colorScheme == 'auto' ? this._osColorScheme : this.colorScheme;
-    const theme = this.themes[this.theme];
-    if (!theme) return console.error('[Convos] Invalid theme: ' + this.theme);
-
-    const path = theme.variants[colorScheme] || theme.variants.default;
-    document.getElementById('link_selected_theme').setAttribute('href', route.urlFor(path));
-
-    const htmlEl = document.documentElement;
-    htmlEl.className = htmlEl.className.replace(/theme-\S+/, () => 'theme-' + theme.id);
   }
 
   dialogs(cb) {
@@ -147,12 +127,6 @@ export default class User extends Reactive {
     const props = {...params, connection_id: params.connection_id || '', frozen: 'Not found.'};
     ['dialog_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
     return this.update({activeDialog: props.dialog_id ? new Dialog(props) : new Connection(props)});
-  }
-
-  update(params) {
-    super.update(params);
-    if (params.colorScheme || params.theme) this.activateTheme();
-    return this;
   }
 
   _calculateUnread() {
