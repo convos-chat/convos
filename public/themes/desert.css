@@ -12,8 +12,9 @@
   --code-bg: #dfd8c1;
   --button-bg: #62534a;
   --button-border: #62534a;
-  --button-disabled-bg: #95867d ;
+  --button-disabled-bg: #95867d;
   --button-focus-outline: 1px solid #95867d;
+  --input-disabled-bg: #dbd5c3;
   --autocomplete-focus-bg: #ddd4bc;
   --chat-input-bg: #e8e1cd;
   --sidebar-left-bg: #eee8d5;

@@ -302,6 +302,12 @@ textarea {
   &.is-open:after {
     content: fa-content($fa-var-caret-up);
   }
+
+  &.is-readonly:after {
+    content: '-';
+    text-align: center;
+    width: 0.6em;
+  }
 }
 
 .inputs-side-by-side .select-field:after {

@@ -105,6 +105,7 @@ function renderHuman(needle) {
 }
 
 function toggle(e) {
+  if (readonly) return;
   const optionEl = e && e.target && closestEl(e.target, '.select-field__option');
 
   if (!open) {
@@ -116,7 +117,7 @@ function toggle(e) {
 }
 </script>
 
-<div class="select-field text-field" class:is-open="{open}" hidden="{hidden}" bind:this="{wrapperEl}">
+<div class="select-field text-field" class:is-open="{open}" class:is-readonly="{readonly}" hidden="{hidden}" bind:this="{wrapperEl}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="hidden" {name} bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
   <input type="text" {placeholder} {id} {readonly} autocomplete="off" bind:this="{humanEl}" on:keydown="{keydown}" on:keyup="{keyup}" on:click|preventDefault="{toggle}">
