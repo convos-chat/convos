@@ -9,12 +9,12 @@ import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {q} from '../js/util';
 import {route} from '../store/Route';
+import {settings} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
 
 const emailFromParams = location.href.indexOf('email=') != -1;
-const isFirst = process.env.first_user;
 const scrollspy = new Scrollspy();
 const loginOp = api('loginUser');
 const registerOp = api('registerUser');
@@ -51,17 +51,17 @@ function registered() {
 </script>
 
 <section id="signup">
-  {#if process.env.status >= 400}
+  {#if settings('status') >= 400}
     <h2>{l('Invalid invite/recover URL')}</h2>
-    <p>{l(process.env.status == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
+    <p>{l(settings('status') == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
     <p>{l('Please ask your Convos admin for a new link.')}</p>
     <p>
-      <a class="btn" href="{process.env.contact}">{l('Contact admin')}</a>
+      <a class="btn" href="{settings('contact')}">{l('Contact admin')}</a>
     </p>
-  {:else if emailFromParams || process.env.open_to_public || isFirst}
+  {:else if emailFromParams || settings('open_to_public') || settings('first_user')}
     <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
-      <h2>{l(process.env.existing_user ? 'Recover account' : 'Sign up')}</h2>
-      {#if isFirst}
+      <h2>{l(settings('existing_user') ? 'Recover account' : 'Sign up')}</h2>
+      {#if settings('first_user')}
         <p>{l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
       {/if}
       <input type="hidden" name="exp">
@@ -84,7 +84,7 @@ function registered() {
       </TextField>
 
       <div class="form-actions">
-        <Button icon="save" op="{registerOp}"><span>{l(process.env.existing_user ? 'Set new password' : 'Sign up')}</span></Button>
+        <Button icon="save" op="{registerOp}"><span>{l(settings('existing_user') ? 'Set new password' : 'Sign up')}</span></Button>
       </div>
 
       <OperationStatus op="{registerOp}"/>
@@ -94,12 +94,12 @@ function registered() {
     <p>{l('Convos is not open for public registration.')}</p>
     <p on:click="{scrollspy.scrollTo}">{l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
     <div class="form-actions">
-      <a class="btn" href="{process.env.contact}"><Icon name="paper-plane"/> {l('Contact admin')}</a>
+      <a class="btn" href="{settings('contact')}"><Icon name="paper-plane"/> {l('Contact admin')}</a>
     </div>
   {/if}
 </section>
 
-{#if !isFirst}
+{#if !settings('first_user')}
   <section id="signin">
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{l('Sign in')}</h2>
@@ -109,7 +109,7 @@ function registered() {
 
       <TextField type="password" name="password" autocomplete="current-password">
         <span slot="label">{l('Password')}</span>
-        <p class="help" slot="help">{@html lmd('Contact your [Convos admin](%1) if you have forgotten your password.', process.env.contact)}</p>
+        <p class="help" slot="help">{@html lmd('Contact your [Convos admin](%1) if you have forgotten your password.', settings('contact'))}</p>
       </TextField>
 
       <div class="form-actions">

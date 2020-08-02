@@ -8,6 +8,7 @@ import {getContext, onMount} from 'svelte';
 import {humanReadableNumber} from '../js/util';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
+import {settings} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -23,6 +24,11 @@ updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
   req.body.forced_connection = req.body.forced_connection ? true : false;
   req.body.open_to_public = req.body.open_to_public ? true : false;
+  settings('contact', req.body.contact);
+  settings('open_to_public', req.body.open_to_public);
+  settings('organization_name', req.body.organization_name);
+  settings('organization_url', req.body.organization_url);
+  user.update({default_connection: req.body.default_connection, forced_connection: req.body.forced_connection});
 });
 
 route.update({title: l('Global settings')});
@@ -60,7 +66,7 @@ function updateSettingsFromForm(e) {
 <main class="main">
   <form id="convos-settings" method="post" on:submit|preventDefault="{updateSettingsFromForm}">
     <h2>{l('Convos settings')}</h2>
-    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', process.env.base_url)}</p>
+    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
     <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
       <span slot="label">{l('Organization name')}</span>

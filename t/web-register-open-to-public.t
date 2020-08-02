@@ -12,27 +12,21 @@ $t->app->core->settings->default_connection(Mojo::URL->new($default_connection))
 $t->app->core->settings->open_to_public(true);
 
 $t->get_ok('/register')->status_is(200);
-$t->get_ok('/register?uri=' . url_escape 'irc://irc.example.com:6123/%23convos')->status_is(200)
-  ->content_like(qr{"conn_url":"irc:\\/\\/irc.example.com:6123\\/%23convos"});
+$t->get_ok('/register?uri=' . url_escape 'irc://irc.example.com:6123/%23convos')->status_is(200);
 
 $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
-$t->get_ok('/chat')->status_is(200);
+$t->get_ok('/chat')->status_is(200)
+  ->element_exists(qq(meta[name="convos:base_url"][content^="http://"]))
+  ->element_exists(qq(meta[name="convos:existing_user"][content="no"]))
+  ->element_exists(qq(meta[name="convos:first_user"][content="no"]))
+  ->element_exists(qq(meta[name="convos:open_to_public"][content="yes"]))
+  ->element_exists(qq(meta[name="convos:status"][content="200"]))
+  ->element_exists(qq(meta[name="description"][content^="A chat application"]));
 
-my $json = decode_json($t->tx->res->text =~ m!const settings\s*=\s*([^;]+)!m ? $1 : '{}');
-is $json->{api_url}, '/api',                  'settings.api_url';
-is $json->{contact}, 'mailto:root@localhost', 'settings.contact';
-is $json->{open_to_public}, true, 'open_to_public';
-is $json->{organization_name}, 'Convos',              'settings.organization_name';
-is $json->{organization_url},  'https://convos.chat', 'settings.organization_url';
-ok $json->{base_url},          'settings.base_url';
-ok $json->{default_connection}, 'settings.default_connection';
-ok $json->{version},            'settings.version';
-ok $json->{ws_url},             'settings.ws_url';
-ok !$json->{user}, 'the user should not be part of the settings';
-
-my $url = url_escape $default_connection;
+my $url = url_escape($t->get_ok('/api/user')->status_is(200)->tx->res->json->{default_connection});
+note "uri=$url";
 $t->get_ok("/register?uri=$url")->status_is(302)
   ->header_is(Location => '/chat/irc-localhost/%23convos');
 

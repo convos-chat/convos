@@ -24,11 +24,3 @@
 </main>
 
 %= include 'partial/app_footer'
-
-<script>
-document.addEventListener('DOMContentLoaded', function(e) {
-  document.querySelectorAll('pre').forEach(el => {
-    hljs.lineNumbersBlock(el);
-  })
-});
-</script>

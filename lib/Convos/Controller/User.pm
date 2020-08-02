@@ -44,7 +44,9 @@ sub get {
 
   return $user->get_p($self->req->url->query->to_hash)->then(sub {
     my $user = shift;
-    $user->{rtc} = $self->app->core->settings->rtc;
+    $user->{rtc}                = $self->app->core->settings->rtc;
+    $user->{default_connection} = $self->settings('default_connection')->to_string;
+    $user->{forced_connection}  = $self->settings('forced_connection');
     $self->render(openapi => $user);
   });
 }
@@ -122,10 +124,8 @@ sub register {
 sub register_html {
   my $self = shift;
 
-  if (my $conn_url = $self->param('uri')) {
-    return if $self->_register_html_conn_url_redirect($conn_url);
-    $self->settings(conn_url => $conn_url);
-  }
+  my $conn_url = $self->param('uri');
+  return if $conn_url and $self->_register_html_conn_url_redirect($conn_url);
 
   $self->_register_html_handle_invite_url;
   $self->render('index');
@@ -270,7 +270,7 @@ sub _register_html_handle_invite_url {
   my $user = $self->app->core->get_user($params->{email});
   return $self->stash(status => 400) unless $self->_is_valid_invite_token($user, $params);
 
-  $self->settings(existing_user => $user ? true : false);
+  $self->stash(existing_user => $user ? 1 : 0);
 }
 
 sub _update_user {

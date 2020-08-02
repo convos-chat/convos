@@ -6,8 +6,10 @@ import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
+import {settings} from '../store/Viewport';
 
 const scrollspy = new Scrollspy();
+
 let mainEl;
 
 $: scrollspy.wrapper = mainEl;
@@ -22,7 +24,7 @@ route.update({title: l('Help')});
 
 <main class="main" bind:this="{mainEl}">
   <p>
-    {@html lmd('Current version: [v%1](%2).', process.env.version, 'https://github.com/Nordaaker/convos/blob/master/Changes#L1')}
+    {@html lmd('Current version: [v%1](%2).', settings('version'), 'https://github.com/Nordaaker/convos/blob/master/Changes#L1')}
   </p>
   <p on:click="{scrollspy.scrollTo}">
     {l('Jump to:')}
@@ -85,11 +87,11 @@ route.update({title: l('Help')});
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos" target="_blank">{l('Source code')}</a></li>
 
-    {#if process.env.organization_name != 'Convos' && process.env.organization_url != 'https://convos.chat'}
-      <li><a href="{process.env.organization_url}" target="_blank">{process.env.organization_name}</a></li>
+    {#if settings('organization_name') != 'Convos' && settings('organization_url') != 'https://convos.chat'}
+      <li><a href="{settings('organization_url')}" target="_blank">{settings('organization_name')}</a></li>
     {/if}
 
-    <li><a href="{process.env.contact}" target="_blank">{l('Contact admin')}</a></li>
+    <li><a href="{settings('contact')}" target="_blank">{l('Contact admin')}</a></li>
   </ul>
 
   <h2 id="fallback">{l('Demo error pages')}</h2>

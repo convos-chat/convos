@@ -14,7 +14,7 @@ $t->tx->res->dom->at('head')->find('[content^="/"], [content^="http"], [href]')-
   $n++;
 });
 
-is $n, 31, 'expected number of head [href]';
+is $n, 32, 'expected number of head [href]';
 
 done_testing;
 

@@ -14,13 +14,15 @@ $t->post_ok('/api/user/superman@example.com/invite', {'X-Local-Secret' => 'abc'}
   ->json_is('/errors/0/message', 'Need to log in first.');
 
 note 'first user does not need invite link';
-$t->get_ok('/register')->status_is(200)->content_like(qr{"first_user":true});
+$t->get_ok('/register')->status_is(200)
+  ->element_exists(qq(meta[name="convos:first_user"][content="yes"]));
 my %register = (email => 'first@convos.chat', password => 'firstpassword');
 $t->post_ok('/api/user/register', json => \%register)->status_is(200);
 $t->get_ok('/api/user/logout.html')->status_is(302)->header_is(Location => '/login');
 
 note 'second user needs invite link';
-$t->get_ok('/register')->status_is(200)->content_unlike(qr{"first_user"});
+$t->get_ok('/register')->status_is(200)
+  ->element_exists(qq(meta[name="convos:first_user"][content="no"]));
 $t->get_ok(
   "/register?email=superman\@example.com&exp=1572900000&token=27c4e74740ce492d24ff843f7e788baab010d24"
 )->status_is(410);
@@ -41,12 +43,13 @@ ok $url->query->param('exp'),   'register url exp';
 ok $url->query->param('token'), 'register url token';
 
 note "url=$url";
-$t->get_ok(substr $url, 0, -1)->status_is(400)->content_like(qr{"status":400})
-  ->content_unlike(qr{"password"}, 'password is not part of window.__convos');
+$t->get_ok(substr $url, 0, -1)->status_is(400)
+  ->element_exists(qq(meta[name="convos:status"][content="400"]));
 
-$t->get_ok($url)->status_is(200)->content_like(qr{"existing_user":false})
-  ->content_like(qr{"status":200})->content_like(qr{"open_to_public":false})
-  ->content_unlike(qr{"password"}, 'password is not part of window.__convos');
+$t->get_ok($url)->status_is(200)
+  ->element_exists(qq(meta[name="convos:existing_user"][content="no"]))
+  ->element_exists(qq(meta[name="convos:open_to_public"][content="no"]))
+  ->element_exists(qq(meta[name="convos:status"][content="200"]));
 
 %register = (email => $url->query->param('email'), password => 'tooshort0');
 $t->post_ok('/api/user/register', json => \%register)->status_is(400)

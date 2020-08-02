@@ -15,7 +15,6 @@ sub register {
 
   $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
-  $app->helper('asset_version'               => \&_asset_version);
   $app->helper('backend.dialog'              => \&_backend_dialog);
   $app->helper('backend.user'                => \&_backend_user);
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
@@ -30,26 +29,6 @@ sub register {
 
   $app->linkembedder->ua->insecure(1) if $ENV{LINK_EMBEDDER_ALLOW_INSECURE_SSL};
   $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
-}
-
-sub _asset_version {
-  my $app = shift->app;
-  return $app->config->{asset_version} if $app->config->{asset_version};
-
-  my $mode  = $app->mode eq 'development' ? 'development' : 'production';
-  my @paths = (
-    $app->static->file("asset/webpack.$mode.html")->path,
-    $app->renderer->template_path({template => 'sw', format => 'js', handler => 'ep'}),
-  );
-
-  my $version = 0;
-  for my $path (@paths) {
-    my $mtime = (stat $path)[9];
-    $version = $mtime if $mtime > $version;
-  }
-
-  return $version if $mode eq 'development';
-  return $app->config->{asset_version} = $version;
 }
 
 sub _backend_dialog {
@@ -137,45 +116,10 @@ sub _reply_errors {
 }
 
 sub _settings {
-  my $c        = shift;
-  my $settings = $c->stash->{'convos.settings'} ||= _setup_settings($c);
-
-  # Set
-  if (@_ == 2) {
-    $settings->{$_[0]} = $_[1];
-    return $c;
-  }
-
-  # Get single key
-  if (@_ == 1) {
-    my $key = shift;
-    return exists $settings->{$key} ? $settings->{$key} : $c->app->core->settings->$key;
-  }
-
-  # Get all public settings
-  $settings->{load_user} = $c->stash('load_user') ? true : false;
-  $settings->{status}    = int($c->stash('status') || 200);
-
-  return $settings;
-}
-
-sub _setup_settings {
-  my $c        = shift;
-  my $app      = $c->app;
-  my $settings = $app->core->settings;
-
-  my $defaults = $settings->defaults;
-  my $defined  = $settings->TO_JSON;
-  $defined->{$_} ||= $defaults->{$_} for keys %$defaults;
-
-  $defined->{api_url}       = $c->url_for('api');
-  $defined->{asset_version} = $c->asset_version;
-  $defined->{base_url}      = $app->core->base_url->to_string;
-  $defined->{mode}          = $app->mode;
-  $defined->{version}       = $app->VERSION;
-  $defined->{ws_url}        = $c->url_for('events')->to_abs->userinfo(undef)->to_string;
-
-  return $defined;
+  my ($c, $key) = @_;
+  my $settings = $c->app->core->settings;
+  return $settings->$key if $settings->can($key);
+  return $settings->defaults->{$key};
 }
 
 sub _social {

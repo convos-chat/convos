@@ -21,11 +21,14 @@ note 'Log out admin';
 $t->get_ok('/api/user/logout')->status_is(200);
 
 note 'Let recover user do the rest';
-$t->get_ok(substr $recover_url, 0, -1)->status_is(400)->content_like(qr{"status":400});
+$t->get_ok(substr $recover_url, 0, -1)->status_is(400)
+  ->element_exists(qq(meta[name="convos:status"][content="400"]));
 
 note $recover_url;
-$t->get_ok($recover_url)->status_is(200)->content_like(qr{"existing_user":true})
-  ->content_like(qr{"status":200});
+$t->get_ok($recover_url)->status_is(200)
+  ->element_exists(qq(meta[name="convos:existing_user"][content="yes"]))
+  ->element_exists(qq(meta[name="convos:status"][content="200"]));
+
 
 my %register = (email => $recover_url->query->param('email'), password => 'tooshort0');
 $t->post_ok('/api/user/register', json => \%register)->status_is(400)

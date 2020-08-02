@@ -9,6 +9,7 @@ import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount, tick} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
+import {settings} from '../store/Viewport';
 
 export let dialog = {};
 
@@ -41,7 +42,7 @@ onMount(async () => {
 });
 
 function defaultsToForm() {
-  if (process.env.forced_connection) formEl.server.value = process.env.default_connection;
+  if (user.forced_connection) formEl.server.value = user.default_connection;
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   useTls = true;
   wantToBeConnected = true;
@@ -104,10 +105,10 @@ async function submitForm(e) {
   <input type="hidden" name="url">
   <input type="hidden" name="wanted_state">
 
-  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{process.env.forced_connection}">
+  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
     <p class="help" slot="help">
-      {@html lmd(process.env.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
+      {@html lmd(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
     </p>
   </TextField>
 

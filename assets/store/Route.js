@@ -152,6 +152,11 @@ export default class Route extends Reactive {
     });
   }
 
+  wsUrlFor(url) {
+    const wsUrl = url.match(/^\w+:/) ? url : this.baseUrl + url;
+    return wsUrl.replace(/^http/, 'ws');
+  }
+
   _onClick(e) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
 

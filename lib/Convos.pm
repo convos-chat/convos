@@ -56,7 +56,7 @@ sub startup {
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Chat resources
-  my $user_r = $r->under('/')->to(template => 'index', load_user => 1);
+  my $user_r = $r->under('/')->to(template => 'index');
   $user_r->get('/help')->to(template => 'index');
   $user_r->get('/chat/*rest', {rest => ''});
   $user_r->get('/login');
@@ -126,7 +126,7 @@ sub _before_dispatch {
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 
   # Used when registering the first user
-  $c->settings(first_user => true) if !$c->session('email') and !$c->app->core->n_users;
+  $c->stash(first_user => 1) if !$c->session('email') and !$c->app->core->n_users;
 }
 
 sub _config {

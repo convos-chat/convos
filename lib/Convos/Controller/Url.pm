@@ -6,7 +6,7 @@ sub err {
   my $code = $self->stash('code') || '404';
 
   return $self->reply->not_found if $code eq '404';
-  return $self->render('index', load_user => 1, status => $code =~ m!^\d+$! ? $code : 200);
+  return $self->render('index', status => $code =~ m!^\d+$! ? $code : 200);
 }
 
 sub info {

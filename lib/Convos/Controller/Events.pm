@@ -69,7 +69,9 @@ sub _event_load {
 
   $self->backend->user->get_p($data->{params} || {})->then(sub {
     my $user = shift;
-    $user->{rtc} = $self->app->core->settings->rtc;
+    $user->{rtc}                = $self->app->core->settings->rtc;
+    $user->{default_connection} = $self->settings('default_connection')->to_string;
+    $user->{forced_connection}  = $self->settings('forced_connection');
     $self->send({json => {event => 'load', id => $id, user => $user}});
   });
 }

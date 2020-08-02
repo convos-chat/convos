@@ -1,11 +1,12 @@
 import Reactive from '../js/Reactive';
-import {q} from '../js/util';
+import {q, replaceClassName} from '../js/util';
 
 export default class Viewport extends Reactive {
   constructor() {
     super();
     this.prop('cookie', 'colorScheme', 'auto');
     this.prop('cookie', 'theme', 'convos');
+    this.prop('persist', 'version', '');
     this.prop('ro', 'colorSchemeOptions', ['Auto', 'Light', 'Dark'].map(o => [o.toLowerCase(), o]));
     this.prop('ro', 'isWide', () => this.width > 800);
     this.prop('ro', 'themeOptions', () => Array.from(this._themeMap.entries()));
@@ -55,6 +56,42 @@ export default class Viewport extends Reactive {
       this.update({osColorScheme: this._matchMedia.matches ? 'dark' : 'light'});
     }
   }
+
+  settings(key, value) {
+    return arguments.length == 2 ? this._settingsSet(key, value) : this._settingsGet(key);
+  }
+
+  _settingsGet(key) {
+    if (key == 'app_mode') return document.body.classList.contains('app-mode');
+    if (key == 'notify_enabled') return document.body.classList.contains('notify-enabled');
+    if (key == 'organization_name') key = 'contactorganization';
+    if (key == 'organization_url') key = 'contactnetworkaddress';
+
+    const el = this._settingsEl(key);
+    if (!el) throw 'Cannot get settings for "' + key + '".';
+
+    const bool = {no: false, yes: true};
+    return key == 'contact' ? atob(el.content || '') : bool.hasOwnProperty(el.content) ? bool[el.content] : el.content;
+  }
+
+  _settingsEl(key) {
+    return document.querySelector('meta[name="convos:' + key + '"]')
+      || document.querySelector('meta[name="' + key + '"]');
+  }
+
+  _settingsSet(key, value) {
+    if (key == 'app_mode') return replaceClassName('body', /(for-)(app|cms)/, value ? 'app' : 'cms');
+    if (key == 'notify_enabled') return replaceClassName('body', /(notify-)(disabled)/, value ? 'enabled' : 'disabled');
+    if (key == 'organization_name') key = 'contactorganization';
+    if (key == 'organization_url') key = 'contactnetworkaddress';
+
+    const el = this._settingsEl(key);
+    if (!el) return;
+    if (key == 'contact') value = btoa(value);
+    if (typeof value == 'boolean') value = value ? 'yes' : 'no';
+    el.content = value;
+  }
 }
 
 export const viewport = new Viewport();
+export const settings = (...params) => viewport.settings(...params);

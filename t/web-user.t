@@ -30,6 +30,8 @@ is_deeply(
   $t->tx->res->json,
   {
     email              => 'superman@example.com',
+    forced_connection  => false,
+    default_connection => 'irc://localhost:6123/%23convos',
     highlight_keywords => [],
     registered         => $registered,
     roles              => ['admin'],

@@ -1,12 +1,12 @@
 const APP_MODE = '<%= $c->app->mode %>';
-const CACHE_NAME = 'convos-<%= $c->asset_version %>';
+const CACHE_NAME = 'convos-<%= $c->app->VERSION %>';
 const BASE_PATH = '<%= url_for("/")->path->to_string %>';
 
 // Cache strategies
 const CACHE_FUNCTIONS = {};
 const STRATEGY_DEFAULT = 'default';
 const STRATEGY_BYPASS = 'bypass';
-const STRATEGY_CACHE_FIRST = 'cache_first';
+const STRATEGY_CACHE_FIRST = APP_MODE == 'development' ? 'network_first' : 'cache_first';
 const STRATEGY_NETWORK_FIRST = 'network_first';
 const STRATEGY_PAGE = 'page';
 

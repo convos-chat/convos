@@ -59,7 +59,7 @@ sub index {
   return $self->cms->document_p(['index'])->then(sub {
     my $doc = shift;
     return $self->_render_doc(cms => $doc) if $doc->{body};
-    return $self->stash(load_user => 1)->render('index');
+    return $self->render('index');
   });
 }
 

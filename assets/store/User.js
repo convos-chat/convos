@@ -20,12 +20,11 @@ export default class User extends Reactive {
 
     this.prop('rw', 'activeDialog', this.notifications);
     this.prop('rw', 'email', '');
+    this.prop('rw', 'forced_connection', false);
+    this.prop('rw', 'default_connection', 'irc://chat.freenode.net:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
-
-    this.prop('persist', 'assetVersion', 0);
-    this.prop('persist', 'showGrid', false);
 
     socket('/events').on('message', (msg) => this._dispatchMessage(msg));
     socket('/events').on('update', (socket) => this._onConnectionChange(socket));
@@ -77,13 +76,7 @@ export default class User extends Reactive {
     return this.status == statusOrRole;
   }
 
-  async load(load) {
-    if (load === false) {
-      this.roles.add('anonymous');
-      this.update({roles: true});
-      return this;
-    }
-
+  async load() {
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
@@ -101,6 +94,8 @@ export default class User extends Reactive {
 
     return this.update({
       email: data.email || '',
+      default_connection: data.default_connection || '',
+      forced_connection: data.forced_connection || false,
       highlightKeywords: data.highlight_keywords || [],
       roles: true,
       rtc: data.rtc || {},

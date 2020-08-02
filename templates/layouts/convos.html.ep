@@ -1,28 +1,29 @@
 % use Mojo::JSON 'to_json';
+% use Mojo::Util 'b64_encode';
 % my $social = $c->social;
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- social + seo -->
     % if (settings('organization_name') eq 'Convos') {
-      <title><%=l '%1 - Convos', title %></title>
+    <title><%=l '%1 - Convos', title %></title>
     % } else {
-      <title><%=l '%1 - Convos for %2', title, settings('organization_name') %></title>
+    <title><%=l '%1 - Convos for %2', title, settings('organization_name') %></title>
     % }
+    %= tag 'meta', name => 'description', content => $social->{description}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@convosby">
+    <meta property="og:type" content="object">
+    %= tag 'meta', property => 'og:site_name', content => settings('organization_name')
+    %= tag 'meta', property => 'og:url', content => $social->{url}
+    %= tag 'meta', name => 'twitter:description', property => 'og:description', content => $social->{description}
+    %= tag 'meta', name => 'twitter:image:src', property => 'og:image', content => $social->{image}
+    %= tag 'meta', name => 'twitter:title', property => 'og:title', content => title
+    %= tag 'link', rel => 'canonical', href => $social->{canonical} if $social->{canonical}
+
+    <!-- pwa -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="description" content="<%= $social->{description} %>">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:description" content="<%= $social->{description} %>">
-    <meta name="twitter:image:src" content="<%= $social->{image} %>">
-    <meta name="twitter:site" content="@convosby">
-    <meta name="twitter:title" content="<%= title %>">
-    <meta property="og:type" content="object">
-    <meta property="og:description" content="<%= $social->{description} %>">
-    <meta property="og:image" content="<%= $social->{image} %>">
-    <meta property="og:site_name" content="<%= settings 'organization_name' %>">
-    <meta property="og:title" content="<%= title %>">
-    <meta property="og:url" content="<%= $social->{url} %>">
-    <noscript><style>.has-js { display: none; }</style></noscript>
     <link rel="apple-touch-icon" sizes="57x57" href="<%= url_for '/asset/apple-touch-icon-57x57.e024a83e.png' %>">
     <link rel="apple-touch-icon" sizes="60x60" href="<%= url_for '/asset/apple-touch-icon-60x60.51c5a95b.png' %>">
     <link rel="apple-touch-icon" sizes="72x72" href="<%= url_for '/asset/apple-touch-icon-72x72.231a66c9.png' %>">
@@ -42,19 +43,30 @@
     <meta name="msapplication-config" content="<%= url_for '/asset/browserconfig.f80fd3df.xml' %>">
     <meta name="msapplication-TileColor" content="#00451D">
     <meta name="theme-color" content="#00451D">
-    %= tag 'link', rel => 'canonical', href => $social->{canonical} if $social->{canonical};
-    %= asset 'convos.css'
 
+    <!-- convos settings -->
+    %= tag 'meta', name => 'contactorganization', content => settings('organization_name')
+    %= tag 'meta', name => 'contactnetworkaddress', content => settings('organization_url')
+    %= tag 'meta', name => 'convos:base_url', content => app->core->base_url
+    %= tag 'meta', name => 'convos:contact', content => b64_encode(settings('contact'), '')
+    %= tag 'meta', name => 'convos:existing_user', content => (stash('existing_user') ? 'yes' : 'no')
+    %= tag 'meta', name => 'convos:first_user', content => (stash('first_user') ? 'yes' : 'no')
+    %= tag 'meta', name => 'convos:open_to_public', content => (settings('open_to_public') ? 'yes' : 'no')
+    %= tag 'meta', name => 'convos:status', content => stash('status') || 200
+    %= tag 'meta', name => 'version', content => Convos->VERSION
+
+    <!-- base style + themes -->
+    <noscript><style>.has-js { display: none; }</style></noscript>
+    %= asset 'convos.css'
     % my $theme = $c->themes->get(js_session('theme'), js_session('colorScheme'));
     %= tag 'link', rel => 'stylesheet', type => 'text/css', id => "theme_primary", href => url_for($theme->{url}), title => $theme->{title}
     % for my $theme (@{$c->themes->list}) {
-      %= tag 'link', rel => 'alternate stylesheet', type => 'text/css', id => "theme_alt__$theme->{id}", href => url_for($theme->{url}), title => $theme->{title}
+    %= tag 'link', rel => 'alternate stylesheet', type => 'text/css', id => "theme_alt__$theme->{id}", href => url_for($theme->{url}), title => $theme->{title}
     % }
-    %= tag style => sub { stash 'custom_css' } if stash 'custom_css';
-    %= include 'partial/process_js';
+    %= tag style => sub { stash 'custom_css' } if stash 'custom_css'
   </head>
   <body class="no-js notify-disabled <%= stash('for_cms') ? 'for-cms' : 'for-app' %>">
     %= content
-    %= asset 'convos.js' unless stash 'exception';
+    %= asset 'convos.js' unless stash 'exception'
   </body>
 </html>

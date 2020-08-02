@@ -2,15 +2,15 @@
 import User from './store/User';
 import WebRTC from './store/WebRTC';
 import {api} from './js/Api';
-import {focusMainInputElements, loadScript, q, replaceClassName} from './js/util';
+import {focusMainInputElements, loadScript, q} from './js/util';
 import {fade} from 'svelte/transition';
 import {onMount, setContext} from 'svelte';
 import {l} from './js/i18n';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
 import {socket} from './js/Socket';
+import {settings, viewport} from './store/Viewport';
 import {setupRouting} from './routes';
-import {viewport} from './store/Viewport';
 
 // Page components
 import ConnectionSettings from './components/ConnectionSettings.svelte';
@@ -25,56 +25,46 @@ const rtc = new WebRTC({});
 let [innerHeight, innerWidth] = [0, 0];
 let readyStateNotification = {closed: true};
 
-setContext('api', api('/api').update({url: process.env.api_url}).toFunction());
-setContext('rtc', rtc);
-setContext('socket', socket('/events').update({url: process.env.ws_url}));
-setContext('user', user);
+route.update({baseUrl: settings('base_url')});
+registerServiceWorker().catch(err => console.log('[registerServiceWorker]', err));
+setupRouting(route, user);
+loadScript(route.urlFor('/images/emojis.js'));
 
-route.update({baseUrl: process.env.base_url});
-registerServiceWorker();
+setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
+setContext('rtc', rtc);
+setContext('socket', socket('/events').update({url: route.wsUrlFor('/events')}));
+setContext('user', user);
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
 socket('/events').on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
+user.load();
 viewport.activateTheme();
 
-$: calculateTitle($route, $user);
+$: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
 $: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
-$: replaceBodyClassName($route, $user);
-
-onMount(() => {
-  const body = document.querySelector('body');
-  loadScript(route.urlFor('/images/emojis.js'));
-  q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
-  if (user.showGrid) body.classList.add('with-grid');
-  if (process.env.load_user) setupRouting(route, user);
-  user.load(process.env.load_user);
-});
+$: settings('app_mode', loggedInRoute);
+$: settings('notify_enabled', loggedInRoute);
+$: calculateTitle($route, $user);
 
 function calculateTitle(route, user) {
   if (!document) return;
-  const organizationName = process.env.organization_name;
+  const organizationName = settings('organization_name');
   const title = user.unread ? '(' + user.unread + ') ' + route.title : route.title;
 
   document.title
     = organizationName == 'Convos' ? l('%1 - Convos', title) : l('%1 - Convos for %2', title, organizationName);
 }
 
-async function registerServiceWorker() {
-  if (!navigator.serviceWorker) return;
-  const reg = await navigator.serviceWorker.register(route.urlFor('/sw.js'));
-  const assetVersion = process.env.asset_version;
-  if (user.assetVersion == assetVersion) return;
-  user.update({assetVersion});
-  reg.update();
-}
-
-function replaceBodyClassName(route, user) {
-  const appMode = route.component && route.requireLogin && user.is('authenticated');
-  replaceClassName('body', /(for-)(app|cms)/, appMode ? 'app' : 'cms');
-  replaceClassName('body', /(notify-)(disabled)/, !route.component || route.component == Fallback ? 'disabled' : 'enabled');
+function registerServiceWorker() {
+  if (!navigator.serviceWorker) return Promise.resolve({});
+  return navigator.serviceWorker.register(route.urlFor('/sw.js')).then(reg => {
+    if (viewport.version == settings('version')) return;
+    viewport.update({version: settings('version')});
+    reg.update();
+  });
 }
 
 function socketChanged(socket) {
@@ -114,7 +104,7 @@ function onGlobalKeydown(e) {
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>
 
-{#if $route.component && $route.requireLogin && $user.is('authenticated')}
+{#if loggedInRoute}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
     and a lot of $route updates prevents the <SidebarChat/> and/or

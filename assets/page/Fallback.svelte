@@ -3,6 +3,7 @@ import Icon from '../components/Icon.svelte';
 import {getContext} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
+import {settings} from '../store/Viewport';
 
 const socket = getContext('socket');
 const user = getContext('user');
@@ -31,7 +32,7 @@ function calculateStatus(route, user) {
   {:else}
     <p><Icon name="spinner fa-spin"/> {l('Loading user data...')}</p>
   {/if}
-  <p><a class="btn" href="{process.env.contact}"><Icon name="paper-plane"/> {l('Contact admin')}</a></p>
+  <p><a class="btn" href="{settings('contact')}"><Icon name="paper-plane"/> {l('Contact admin')}</a></p>
 {:else if status == 'not_found'}
   <p>{l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
   <p><a href="{$route.baseUrl}" target="_self" class="btn"><Icon name="play"/> {l('Go to start page')}</a></p>
