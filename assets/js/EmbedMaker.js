@@ -83,7 +83,7 @@ export default class EmbedMaker extends Reactive {
 
     const details = {...(message.sent || message)};
     [
-      'bubbles', 'color', 'command', 'dispatchTo', 'embeds',
+      'bubbles', 'color', 'command', 'connection', 'dialog', 'dispatchTo', 'embeds',
       'event', 'fromId', 'id', 'markdown', 'method', 'stopPropagation',
     ].forEach(k => delete details[k]);
 
