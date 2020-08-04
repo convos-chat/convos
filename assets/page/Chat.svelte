@@ -17,11 +17,13 @@ import {isISOTimeString} from '../js/Time';
 import {l, topicOrStatus} from '../js/i18n';
 import {route} from '../store/Route';
 
+const rtc = getContext('rtc');
+const socket = getContext('socket');
+const user = getContext('user');
+
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
-const rtc = getContext('rtc');
 const scrollspy = new Scrollspy();
-const user = getContext('user');
 const track = {}; // Holds values so we can compare before/after changes
 
 let chatInput;
@@ -35,7 +37,7 @@ let unsubscribe = {};
 $: maybeReloadMessages($route);
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
-$: messages = chatMessages.merge($dialog.messages);
+$: messages = chatMessages.merge($dialog.messages, $socket.getWaitingMessages());
 $: notConnected = $dialog.frozen ? true : false;
 $: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 
@@ -98,9 +100,26 @@ function maybeReloadMessages(route) {
   track.hasHash = route.hash ? true : false;
 }
 
-function toggleDetails(e) {
+function onMessageClick(e) {
+  const aEl = e.target.closest('a.onclick');
+  if (!aEl) return;
+  e.preventDefault();
+
   const messageEl = e.target.closest('.message');
-  embedMaker.toggleDetails(messageEl, messages[messageEl.dataset.index]);
+  const message = messageEl && messages[messageEl.dataset.index];
+  const action = aEl.href.split('#')[1];
+  if (action == 'toggleDetails') {
+    embedMaker.toggleDetails(messageEl, message);
+  }
+  else if (action.indexOf('input:') == 0) {
+    chatInput.add(message.from);
+  }
+  else if (action == 'remove') {
+    socket.deleteWaitingMessage(message.id);
+  }
+  else if (action == 'resend') {
+    socket.send(socket.getWaitingMessages([message.id])[0]);
+  }
 }
 
 function setDialogFromRoute(route) {
@@ -159,13 +178,16 @@ async function setDialogFromUser(user) {
         <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
       {/if}
 
-      <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}">
+      <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
         <div class="message__ts has-tooltip" data-content="{message.ts.getHM()}"><div>{message.ts.toLocaleString()}</div></div>
-        <a href="#input:{message.from}" on:click|preventDefault="{() => chatInput.add(message.from)}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+        <a href="#input:{message.from}" class="message__from onclick" style="color:{message.color}" tabindex="-1">{message.from}</a>
         <div class="message__text">
-          {#if chatMessages.canToggleDetails(message)}
-            <Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}" on:click="{toggleDetails}"/>
+          {#if message.waitingForResponse === false}
+            <a href="#remove" class="pull-right has-tooltip onclick" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
+            <a href="#resend" class="pull-right has-tooltip onclick" data-tooltip="{l('Resend')}"><Icon name="sync-alt"/></a>
+          {:else if !message.waitingForResponse && chatMessages.canToggleDetails(message)}
+            <a href="#toggleDetails" class="onclick"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
           {/if}
           {@html message.markdown}
         </div>

@@ -61,6 +61,14 @@
     cursor: pointer;
   }
 
+  &.is-waiting.is-type-notice {
+    opacity: 0.7;
+  }
+
+  &.is-waiting.has-same-from .message__ts {
+    display: none;
+  }
+
   &.is-type-action {
     .message__from,
     .message__text {
@@ -94,6 +102,16 @@
   &.has-focus .message__ts {
     font-weight: bold;
     opacity: 1;
+  }
+
+  a.pull-right {
+    padding-left: 0.3rem;
+    position: relative;
+
+    &.has-tooltip[data-tooltip]:after {
+      position: absolute;
+      right: 0;
+    }
   }
 }
 

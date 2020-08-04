@@ -16,15 +16,23 @@ export default class ChatMessages {
   classNames(messages, i) {
     const dialog = this.dialog;
     const message = messages[i];
-    const classes = ['message', 'is-type-' + message.type];
-
-    if (message.from == this.connection.nick) classes.push('is-sent-by-you');
-    if (message.highlight) classes.push('is-highlighted');
+    const classes = ['message'];
 
     const dayChanged = this.dayChanged(messages, i);
     const isSameSender = i == 0 ? false : messages[i].fromId == messages[i - 1].fromId;
     if (!dayChanged && isSameSender) classes.push('has-same-from');
     if (!dayChanged && !isSameSender) classes.push('has-not-same-from');
+
+    if (message.hasOwnProperty('waitingForResponse')) {
+      classes.push('is-sent-by-you');
+      classes.push('is-waiting');
+      classes.push(message.waitingForResponse ? 'is-type-notice' : 'is-type-error');
+      return classes.join(' ');
+    }
+
+    if (message.type) classes.push('is-type-' + message.type);
+    if (message.from == this.connection.nick) classes.push('is-sent-by-you');
+    if (message.highlight) classes.push('is-highlighted');
 
     const isOnline = this.isOnline(message);
     if (!isOnline) classes.push('is-not-present');
@@ -60,9 +68,9 @@ export default class ChatMessages {
   fillIn(message) {
     return {
       color: 'inherit',
-      from: 'Convos',
-      fromId: 'Convos',
-      markdown: lmd(message.message, ...message.vars),
+      from: message.waitingForResponse ? this.connection.nick : 'Convos',
+      fromId: message.waitingForResponse ? this.connection.nick.toLowerCase() : 'Convos',
+      markdown: lmd(message.message, ...(message.vars || [])),
       ts: new Time(),
       type: 'error',
       ...message,
@@ -145,7 +153,12 @@ export default class ChatMessages {
     return messages;
   }
 
-  merge(messages) {
-    return this.emptySearch().concat(this.firstTime()).concat(messages).concat(this.connectionDialogStatus());
+  merge(messages, waiting) {
+    const waitingMessages = waiting.filter(msg => msg.method == 'send' && msg.message).map(msg => {
+      msg = this.fillIn(msg);
+      if (!msg.waitingForResponse) msg.markdown = lmd('Could not send message "%1".', msg.markdown);
+      return msg;
+    });
+    return this.emptySearch().concat(this.firstTime()).concat(messages).concat(waitingMessages).concat(this.connectionDialogStatus());
   }
 }
