@@ -168,12 +168,11 @@ export default class User extends Reactive {
   }
 
   _onConnectionChange(socket) {
+    if (this.is('loading')) return;
+    if (socket.is('open') && this.is('pending')) return this.load();
     if (socket.is('close')) {
       this.connections.forEach(conn => conn.update({state: 'unreachable'}));
       this.update({status: 'pending'});
-    }
-    else if (socket.is('open')) {
-      this.load();
     }
   }
 }

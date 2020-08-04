@@ -40,6 +40,7 @@ export default class Socket extends Reactive {
     this.prop('rw', 'online', true);
     this.prop('rw', 'url', '');
 
+    this.debug = true; // Setting this to true for now, since it might help debugging the "close" issue
     this.id = 0;
     this.queue = [];
     this.keepClosed = true;
@@ -206,6 +207,7 @@ export default class Socket extends Reactive {
   }
 
   _onClose(e) {
+    if (this.debug) console.log('[Socket:close]', new Time().toISOString(), e);
     this._clearTimers();
     this._resetWebSocket();
     this.update({readyState: true});
@@ -217,6 +219,7 @@ export default class Socket extends Reactive {
   }
 
   _onError(e) {
+    if (this.debug) console.log('[Socket:error]', new Time().toISOString(), e);
     this.update({error: e.message || String(e)});
   }
 
@@ -236,18 +239,21 @@ export default class Socket extends Reactive {
   }
 
   _onOffline(e) {
+    if (this.debug) console.log('[Socket:offline]', new Time().toISOString(), e);
     this.update({online: false});
     this._clearTimers();
-    if (this.ws.close) this.ws.close(1000);
   }
 
   _onOnline(e) {
+    if (this.debug) console.log('[Socket:online]', new Time().toISOString(), e);
     this.update({online: true});
     if (this.keepClosed) return;
+    this._keepalive();
     this.open();
   }
 
   _onOpen(e) {
+    if (this.debug) console.log('[Socket:open]', new Time().toISOString(), e);
     this.update({error: '', readyState: true});
     this._dequeue();
   }
