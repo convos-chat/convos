@@ -19,24 +19,30 @@ import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
 
+const socket = getSocket('/events');
 const user = new User({});
 const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
 let readyStateNotification = {closed: true};
 
+// This section is to help debugging the WebSocket issue in production
+socket.update({debug: 'WebSocket'});
+window.convosWebSockeet = socket;
+
 route.update({baseUrl: settings('base_url')});
+socket.update({url: route.wsUrlFor('/events')});
 registerServiceWorker().catch(err => console.log('[registerServiceWorker]', err));
 setupRouting(route, user);
 loadScript(route.urlFor('/images/emojis.js'));
 
 setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
 setContext('rtc', rtc);
-setContext('socket', socket('/events').update({url: route.wsUrlFor('/events')}));
+setContext('socket', socket);
 setContext('user', user);
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
-socket('/events').on('update', socketChanged);
+socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 user.load();
@@ -73,10 +79,10 @@ function socketChanged(socket) {
   }
 
   const message
-    = socket.is('offline')    ? l('You seem to be offline.')
-    : socket.error            ? l(socket.error)
-    : socket.is('connecting') ? l('Connecting to Convos...')
-    :                           l('Connection to Convos is %1.', l(socket.readyStateHuman));
+    = navigator.onLine === false ? l('You seem to be offline.')
+    : socket.error               ? l(socket.error)
+    : socket.is('connecting')    ? l('Connecting to Convos...')
+    :                              l('Connection to Convos is %1.', l(socket.readyStateHuman));
 
   if (readyStateNotification.body == message) return;
   if (readyStateNotification.close) readyStateNotification.close();
@@ -99,7 +105,7 @@ function onGlobalKeydown(e) {
 </script>
 
 <svelte:window
-  on:focus="{() => user.email && socket('/events', {})}"
+  on:focus="{() => user.email && socket.open()}"
   on:keydown="{onGlobalKeydown}"
   bind:innerHeight="{innerHeight}"
   bind:innerWidth="{innerWidth}"/>

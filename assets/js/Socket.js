@@ -27,28 +27,22 @@ readyStateHuman[WebSocket.CLOSING] = 'closing';
 readyStateHuman[WebSocket.CLOSED] = 'closed';
 
 export default class Socket extends Reactive {
-  constructor() {
+  constructor(params) {
     super();
 
+    this.prop('persist', 'debug', '');
     this.prop('ro', 'readyState', () => this.ws.readyState);
     this.prop('ro', 'readyStateHuman', () => readyStateHuman[this.ws.readyState]);
     this.prop('ro', 'waiting', new Map());
+    this.prop('rw', 'closed', 0);
     this.prop('rw', 'error', '');
     this.prop('rw', 'keepaliveInterval', 10000);
-    this.prop('rw', 'keepaliveMessage', {});
-    this.prop('rw', 'online', true);
     this.prop('rw', 'url', '');
 
-    this.debug = true; // Setting this to true for now, since it might help debugging the "close" issue
     this.id = 0;
     this.queue = [];
     this.keepClosed = true;
     this._resetWebSocket();
-
-    this._onOffline = this._onOffline.bind(this);
-    this._onOnline = this._onOnline.bind(this);
-    window.addEventListener('offline', this._onOffline);
-    window.addEventListener('online', this._onOnline);
   }
 
   /**
@@ -62,8 +56,10 @@ export default class Socket extends Reactive {
    */
   close(code, reason) {
     if (typeof code != 'number') [code, reason] = [1000, code];
+    if (this.ws.close) this.ws.close(code, reason);
     this.keepClosed = true;
-    this._clearTimers();
+    this._keepAliveStop();
+    this._reconnectStop();
     this._resetWebSocket();
     return this;
   }
@@ -84,11 +80,25 @@ export default class Socket extends Reactive {
     return JSON.stringify(msg);
   }
 
+  /**
+   * Remove a waiting message by "id". "id" can be retrieved from
+   * getWaitingMessages().
+   *
+   * @memberof Socket
+   * @param {String} id A message id.
+   */
   deleteWaitingMessage(id) {
     this.waiting.delete(id);
     this.update({waiting: true});
   }
 
+  /**
+   * Get messages that have been sent to the WebSocket, but have not gotten
+   * a reply. Not specifying a list of IDs will return all waiting messages.
+   *
+   * @param {Array} A list of message id.
+   * @returns {Array} A list of messages
+   */
   getWaitingMessages(ids) {
     if (arguments.length == 0) return Array.from(this.waiting.values());
     return ids.map(id => this.waiting.get(id));
@@ -117,18 +127,13 @@ export default class Socket extends Reactive {
    * api.is('open');       // Checks if the WebSocket is open
    * api.is('closing');    // Checks if the WebSocket is closing
    * api.is('closed');     // Checks if the WebSocket is closed
-   * api.is('online');     // Checks if the browser is connected to the internet
-   * api.is('offline');    // Checks if the browser is not connected to the internet
    *
    * @memberof Socket
    * @param {Sring} state See the examples above
    * @returns {Boolean} True if the object is in the given state
    */
   is(state) {
-    if (this.ws.readyState == WebSocket[state.toUpperCase()]) return true;
-    if (state == 'online') return this.online;
-    if (state == 'offline') return !this.online;
-    return false;
+    return this.ws.readyState == WebSocket[state.toUpperCase()];
   }
 
   /**
@@ -142,21 +147,19 @@ export default class Socket extends Reactive {
     if (this.ws.close) return this;
 
     try {
-      if (!this.url) throw '[Socket] Can\'t open connection without URL.';
+      if (!this.url) throw 'Can\'t open WebSocket connection without URL.';
       this.ws = new WebSocket(this.url);
       this.ws.onclose = (e) => this._onClose(e);
       this.ws.onerror = (e) => this._onError(e);
       this.ws.onmessage = (e) => this._onMessage(e);
       this.ws.onopen = (e) => this._onOpen(e);
-      this.update({error: ''});
+      this.keepClosed = false;
+      this._keepAliveStart();
+      this._reconnectStop();
+      this.update({error: '', readyState: true});
     } catch(err) {
       this._onError(err.message ? err : {message: String(err)});
     }
-
-    this._clearTimers();
-    this._keepalive();
-    this.keepClosed = false;
-    this.update({readyState: true});
 
     return this;
   }
@@ -173,7 +176,7 @@ export default class Socket extends Reactive {
    */
   reconnectIn(e) {
     if (e.code === 1008 || e.code === 1011) return false;
-    return 1000;
+    return this.closed <= 1 ? 1000 : this.closed > 5 ? 10000 : 1000 * (this.closed * 2);
   }
 
   /**
@@ -191,13 +194,6 @@ export default class Socket extends Reactive {
     return this.on('message_' + id);
   }
 
-  _clearTimers() {
-    if (this.keepaliveTid) clearTimeout(this.keepaliveTid);
-    delete this.keepaliveTid;
-    if (this.reconnectTid) clearTimeout(this.reconnectTid);
-    delete this.reconnectTid;
-  }
-
   _dequeue() {
     const queue = this.queue;
     if (queue.length) this.update({waiting: true});
@@ -211,31 +207,35 @@ export default class Socket extends Reactive {
     }
   }
 
-  _keepalive() {
-    if (!this.keepaliveTid) return (this.keepaliveTid = setInterval(() => this._keepalive(), this.keepaliveInterval));
-    if (this.ws.readyState == WebSocket.OPEN) this.ws.send(this.deflateMessage(this.keepaliveMessage));
+  _keepAliveStart() {
+    this._keepAliveStop();
+    this.keepaliveTid = setInterval(() => this.ws.readyState == WebSocket.OPEN && this.ws.send('{}'), this.keepaliveInterval);
+  }
+
+  _keepAliveStop() {
+    if (this.keepaliveTid) clearTimeout(this.keepaliveTid);
+    delete this.keepaliveTid;
   }
 
   _onClose(e) {
     if (this.debug) console.log('[Socket:close]', new Time().toISOString(), e);
-    this._clearTimers();
-    this._resetWebSocket();
-    this.update({readyState: true, waiting: true});
 
     for (let [id, msg] of this.waiting) {
       if (Object.keys(msg).length <= 1) this.waiting.delete(id);
       msg.waitingForResponse = false;
     }
 
-    const delay = this.reconnectIn(e);
-    if (delay === true) return this.open();
-    if (typeof delay != 'number') return (this.keepClosed = true);
-    this.reconnectTid = setTimeout(() => this.open(), delay);
+    this._keepAliveStop();
+    this._resetWebSocket();
+    this.update({closed: this.closed + 1, readyState: true, waiting: true});
+    this._reconnectStart(this.reconnectIn(e));
   }
 
   _onError(e) {
-    if (this.debug) console.log('[Socket:error]', new Time().toISOString(), e);
-    this.update({error: e.message || String(e)});
+    let error = String(e.message || e);
+    if (!error || error.indexOf('[') == 0) error = 'Unknown error.';
+    if (this.debug) console.log('[Socket:error]', new Time().toISOString(), error, e);
+    this.update({error});
   }
 
   _onMessage(e) {
@@ -254,24 +254,23 @@ export default class Socket extends Reactive {
     this.waiting.clear();
   }
 
-  _onOffline(e) {
-    if (this.debug) console.log('[Socket:offline]', new Time().toISOString(), e);
-    this.update({online: false});
-    this._clearTimers();
-  }
-
-  _onOnline(e) {
-    if (this.debug) console.log('[Socket:online]', new Time().toISOString(), e);
-    this.update({online: true});
-    if (this.keepClosed) return;
-    this._keepalive();
-    this.open();
-  }
-
   _onOpen(e) {
     if (this.debug) console.log('[Socket:open]', new Time().toISOString(), e);
-    this.update({error: '', readyState: true});
+    this.update({closed: 0, error: '', readyState: true});
     this._dequeue();
+  }
+
+  _reconnectStart(delay) {
+    this._reconnectStop();
+    if (this.debug) console.log('[Socket:reconnect]', new Time().toISOString(), delay);
+    if (delay === true) return this.open();
+    if (typeof delay != 'number') return (this.keepClosed = true);
+    this.reconnectTid = setTimeout(() => this.open(), delay);
+  }
+
+  _reconnectStop() {
+    if (this.reconnectTid) clearTimeout(this.reconnectTid);
+    delete this.reconnectTid;
   }
 
   _resetWebSocket() {

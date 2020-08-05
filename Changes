@@ -1,5 +1,11 @@
 Revision history for perl distribution Convos
 
+4.31 Not Released
+ - Add backoff reconnect logic to the WebSocket
+ - Fix issue where the WebSocket would not reconnect after being disconnected
+ - Waiting for "online" and "offline" events in the browser does not seem to
+   work as expected.
+
 4.30 2020-08-05T09:29:00+0900
  - Will trim target when sending commands
    * This fixes commands like "/whois nick " with trailing spaces
