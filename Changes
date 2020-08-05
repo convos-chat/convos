@@ -1,8 +1,19 @@
 Revision history for perl distribution Convos
 
-4.30 Not Released
+4.30 2020-08-05T09:29:00+0900
  - Will trim target when sending commands
    * This fixes commands like "/whois nick " with trailing spaces
+ - User can resend messages when WebSocket reopens
+ - Trying to fix WebSocket closing unexpectedly
+ - Improved rendering of message details
+ - Fix settings "secure" for client side "convos_js" cookie
+ - Fix "Content-Security-Policy: unsafe-inline" header is no longer required #508
+ - Fix issues with generating pretty connection names #507
+ - Changed to base64 encoded email in markup to make it harder for bots
+ - Changed to using "alternate stylesheet" to represent theme options
+ - Removed invalid help in ConnectionForm #507
+ - Removed "!" prefix from public bot commands #509
+ - Updated JavaScript dependencies
 
 4.29 2020-07-29T07:57:00+0900
  - Fix memory leak where connections would not be cleaned up when user was deleted
