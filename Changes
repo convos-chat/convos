@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Add backoff reconnect logic to the WebSocket
  - Fix issue where the WebSocket would not reconnect after being disconnected
  - Fix reloading user object on reconnect
+ - Fix showing error messages in current dialog
  - Waiting for "online" and "offline" events in the browser does not seem to
    work as expected.
 

@@ -78,6 +78,12 @@ function focusAutocompleteItem(e, moveBy) {
   fillinAutocompeteOption({space: ''});
 }
 
+function handleMessageResponse(msg) {
+  if (!msg.errors) return;
+  if (!dialog || msg.dialog_id == dialog.dialog_id) return;
+  dialog.addMessage({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
+}
+
 function selectOption(e) {
   activeAutocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
   fillinAutocompeteOption({space: ' '});
@@ -94,7 +100,7 @@ export function sendMessage(e) {
   msg.message = msg.message.replace(/^\/j\b/i, '/join');
   msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
-  if (msg.message.length) dialog.send(msg);
+  if (msg.message.length) dialog.send(msg).then(handleMessageResponse);
   if (!dialog.is('search')) inputEl.value = '';
 
   pos = 0;
