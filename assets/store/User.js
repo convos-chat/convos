@@ -82,8 +82,11 @@ export default class User extends Reactive {
 
     this.update({status: 'loading'});
     const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, dialogs: true}});
-    const data = res.user || {};
 
+    // TODO: Improve error handling
+    if (res.errors) return this.update({status: res.errors ? 'error' : 'success'});
+
+    const data = res.user || {};
     this.connections.clear();
     (data.connections || []).forEach(conn => this.ensureDialog({...conn, status: 'pending'}));
     (data.dialogs || []).forEach(dialog => this.ensureDialog({...dialog, status: 'pending'}));
@@ -169,11 +172,10 @@ export default class User extends Reactive {
   }
 
   _onConnectionChange(socket) {
-    if (this.is('loading')) return;
     if (socket.is('open') && this.is('pending')) return this.load();
-    if (socket.is('close')) {
+    if (socket.is('closed')) {
       this.connections.forEach(conn => conn.update({state: 'unreachable'}));
-      this.update({status: 'pending'});
+      if (!this.is('loading')) this.update({status: 'pending'});
     }
   }
 }
