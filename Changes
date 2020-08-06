@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.32 2020-08-06T19:03:00+0900
+ - Fix loading login page for new users
+
 4.31 2020-08-06T12:59:00+0900
  - Add backoff reconnect logic to the WebSocket
  - Fix issue where the WebSocket would not reconnect after being disconnected

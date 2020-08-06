@@ -84,7 +84,10 @@ export default class User extends Reactive {
     const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, dialogs: true}});
 
     // TODO: Improve error handling
-    if (res.errors) return this.update({status: res.errors ? 'error' : 'success'});
+    if (res.errors) {
+      this.roles.add('anonymous');
+      return this.update({roles: true, status: res.errors ? 'error' : 'success'});
+    }
 
     const data = res.user || {};
     this.connections.clear();
