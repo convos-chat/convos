@@ -8,7 +8,7 @@ import {onMount, setContext} from 'svelte';
 import {l} from './js/i18n';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
-import {socket} from './js/Socket';
+import {getSocket} from './js/Socket';
 import {settings, viewport} from './store/Viewport';
 import {setupRouting} from './routes';
 

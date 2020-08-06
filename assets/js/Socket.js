@@ -2,26 +2,23 @@
  * Socket is a wrapper around the standard WebSocket.
  *
  * @module Socket
- * @exports socket
+ * @exports geteSocket
  */
 
 import Reactive from './Reactive';
 import Time from './Time';
 
 /**
- * socket() can be used to create global socket objects.
+ * getSocket() can be used to create global socket objects.
  *
  * @param {String} id A global identifier for this Socket object.
- * @param {Object} msg A message to send to the server.
  * @returns {Object} A Socket object if no "msg" is specified.
- * @returns {Promise} A promise if "msg" is specified.
  */
-export const socket = (id, msg) => {
-  const singleton = socket.singletons[id] || (socket.singletons[id] = new Socket());
-  return msg ? singleton.send(msg) : singleton;
+export const getSocket = (id) => {
+  return getSocket.singletons[id] || (getSocket.singletons[id] = new Socket());
 };
 
-socket.singletons = {};
+getSocket.singletons = {};
 
 const readyStateHuman = [];
 readyStateHuman[WebSocket.CONNECTING] = 'connecting';

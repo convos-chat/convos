@@ -1,5 +1,5 @@
 import Dialog from '../../assets/store/Dialog';
-import {socket as getSocket} from '../../assets/js/Socket';
+import {getSocket} from '../../assets/js/Socket';
 
 const socket = getSocket('/events').update({url: 'wss://example.convos.chat'});
 

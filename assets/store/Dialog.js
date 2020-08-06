@@ -8,7 +8,7 @@ import {l} from '../js/i18n';
 import {md} from '../js/md';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
-import {socket} from '../js/Socket';
+import {getSocket} from '../js/Socket';
 
 const channelRe = new RegExp('^[#&]');
 
@@ -58,6 +58,7 @@ export default class Dialog extends Reactive {
       this.prop('persist', 'wantNotifications', false, {key: params.dialog_id +  ':wantNotifications', lazy: true});
     }
 
+    this.socket = params.socket || getSocket('/events');
     this._addOperations();
   }
 
@@ -173,7 +174,7 @@ export default class Dialog extends Reactive {
 
   send(message) {
     if (typeof message == 'string') message = {message};
-    return socket('/events', {method: 'send', connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message});
+    return this.socket.send({method: 'send', connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message});
   }
 
   async setLastRead() {

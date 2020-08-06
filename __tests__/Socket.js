@@ -1,5 +1,5 @@
 import Socket from '../assets/js/Socket';
-import {socket} from '../assets/js/Socket';
+import {getSocket} from '../assets/js/Socket';
 import {timer} from '../assets/js/util';
 
 const WebSocket = global.WebSocket = window.WebSocket = function(url) {
@@ -112,13 +112,9 @@ test('reconnectIn', async () => {
 });
 
 test('socket', () => {
-  const sock_a = socket('sock_a');
-  expect(socket('sock_a')).toEqual(sock_a);
-  expect(socket('sock_b')).not.toEqual(sock_a);
-
-  socket('sock_a').update({url: 'wss://example.convos.chat'});
-  const p = socket('sock_a', 'method_x');
-  expect(Promise.resolve(p)).toEqual(p);
+  const sock_a = getSocket('sock_a');
+  expect(getSocket('sock_a')).toEqual(sock_a);
+  expect(getSocket('sock_b')).not.toEqual(sock_a);
 });
 
 function later(...cb) {

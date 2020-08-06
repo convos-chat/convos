@@ -6,7 +6,7 @@ import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {camelize, extractErrorMessage} from '../js/util';
 import {route} from './Route';
-import {socket} from './../js/Socket';
+import {getSocket} from './../js/Socket';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -26,8 +26,9 @@ export default class User extends Reactive {
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
 
-    socket('/events').on('message', (msg) => this._dispatchMessage(msg));
-    socket('/events').on('update', (socket) => this._onConnectionChange(socket));
+    this.socket = params.socket || getSocket('/events');
+    this.socket.on('message', (msg) => this._dispatchMessage(msg));
+    this.socket.on('update', (socket) => this._onConnectionChange(socket));
   }
 
   dialogs(cb) {
@@ -80,7 +81,7 @@ export default class User extends Reactive {
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
-    const res = await socket('/events', {method: 'load', object: 'user', params: {connections: true, dialogs: true}});
+    const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, dialogs: true}});
     const data = res.user || {};
 
     this.connections.clear();
