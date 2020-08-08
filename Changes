@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.33 Not Released
+4.33 2020-08-08T17:32:00+0900
  - Prevent frontend from sending the whole dialog object, which results in
    WebSocket close clode "1009"
 
