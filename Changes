@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.33 Not Released
+ - Prevent frontend from sending the whole dialog object, which results in
+   WebSocket close clode "1009"
+
 4.32 2020-08-06T19:09:00+0900
  - Fix loading login page for new users
 

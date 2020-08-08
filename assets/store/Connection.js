@@ -56,10 +56,10 @@ export default class Connection extends Dialog {
     return this.update({dialogs: true});
   }
 
-  send(message, methodName) {
+  send(message) {
     if (typeof message == 'string') message = {message};
     if (message.message.indexOf('/') != 0) message.message = '/quote ' + message.message;
-    return super.send(message, methodName);
+    return super.send(message);
   }
 
   update(params) {

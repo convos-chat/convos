@@ -92,7 +92,7 @@ function selectOption(e) {
 
 export function sendMessage(e) {
   if (e.preventDefault) e.preventDefault();
-  const msg = {method: 'send', dialog};
+  const msg = {method: 'send'};
   msg.message = e.preventDefault ? inputEl.value : e.message;
 
   // Aliases
