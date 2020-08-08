@@ -7,7 +7,6 @@ global.WebSocket = window.WebSocket = WebSocket;
 
 test('constructor', () => {
   const socket = new Socket();
-
   expect(socket.keepaliveInterval).toBe(10000);
   expect(socket.readyState).toBe(WebSocket.CLOSED);
   expect(socket.url).toBe('');
@@ -17,26 +16,27 @@ test('open', async () => {
   const before = WebSocket.constructed;
   const socket = new Socket().update({keepaliveInterval: 5});
 
-  socket.reconnectTid = 42; // This should not be changed on a failed open()
+  socket.reconnectTid = 42;
   socket.open();
   expect(socket.error).toBe('Can\'t open WebSocket connection without URL.');
   expect(socket.keepClosed).toBe(true);
   expect(socket.keepaliveTid).toBe(undefined);
-  expect(socket.reconnectTid).toBe(42);
+  expect(socket.reconnectTid).not.toBe(42);
+  expect(socket.reconnectTid).toBeTruthy();
   expect(socket.ws.url).toBe(undefined);
 
-  delete socket.reconnectTid;
   socket.update({url: 'wss://example.convos.chat'});
   expect(socket.keepClosed).toBe(true);
   expect(socket.keepaliveTid).toBe(undefined);
   expect(socket.ws.url).toBe(undefined);
 
   socket.open();
+  const keepaliveTid = socket.keepaliveTid;
   socket.open();
   socket.open();
   await socket.on('update');
   expect(socket.ws.url).toBe('wss://example.convos.chat');
-  expect(socket.keepaliveTid).not.toBe(undefined);
+  expect(socket.keepaliveTid).toBe(keepaliveTid);
   expect(socket.keepClosed).toBe(false);
 
   socket.close();
@@ -158,6 +158,23 @@ test('socket', () => {
   const sock_a = getSocket('sock_a');
   expect(getSocket('sock_a')).toEqual(sock_a);
   expect(getSocket('sock_b')).not.toEqual(sock_a);
+});
+
+test('open() cancels reconnect', async () => {
+  const socket = new Socket().update({keepaliveInterval: 5, url: 'wss://example.convos.chat'});
+
+  socket.open();
+  await socket.on('update');
+  expect(socket.is('connecting')).toBe(true);
+
+  socket.ws.close();
+  expect(socket.is('reconnecting')).toBe(true);
+  expect(socket.ws.close).toBe(undefined);
+
+  socket.open();
+  await socket.on('update');
+  expect(socket.is('connecting')).toBe(true);
+  expect(socket.reconnectTid).toBe(undefined);
 });
 
 function later(...cb) {

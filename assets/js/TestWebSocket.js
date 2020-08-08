@@ -5,7 +5,7 @@ function TestWebSocket(url) {
   this.readyState = TestWebSocket.CONNECTING;
   this.sent = [];
   this.send = (msg) => this.sent.push(JSON.parse(msg));
-  this.close = (code, reason) => (this.closed = [code, reason]);
+  this.close = (code, message) => this.dispatchEvent('close', {code, message});
 
   this.dispatchEvent = (name, e = {}) => {
     if (e.data) e.data = JSON.stringify(e.data);

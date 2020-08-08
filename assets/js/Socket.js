@@ -133,7 +133,9 @@ export default class Socket extends Reactive {
    * @returns {Boolean} True if the object is in the given state
    */
   is(state) {
-    return this.ws.readyState == WebSocket[state.toUpperCase()];
+    if (state == 'reconnecting') return this.reconnectTid ? true : false;
+    const wsIs = this.ws.readyState == WebSocket[state.toUpperCase()];
+    return wsIs && !this.reconnectTid;
   }
 
   /**
@@ -144,7 +146,8 @@ export default class Socket extends Reactive {
    * @returns {Object} The invocant
    */
   open() {
-    if (this.ws.close) return this;
+    const reconnecting = this.is('reconnecting');
+    if (!this.is('closed') && !reconnecting) return this;
 
     try {
       if (!this.url) throw 'Can\'t open WebSocket connection without URL.';
@@ -158,7 +161,9 @@ export default class Socket extends Reactive {
       this._reconnectStop();
       this.update({error: '', readyState: true});
     } catch(err) {
+      this._resetWebSocket();
       this._onError(err.message ? err : {message: String(err)});
+      if (reconnecting) this._reconnectStart(this.reconnectIn({}));
     }
 
     return this;
