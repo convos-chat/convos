@@ -1,40 +1,21 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
-import Scrollspy from '../js/Scrollspy';
 import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 import {settings} from '../store/Viewport';
 
-const scrollspy = new Scrollspy();
-
-let mainEl;
-
-$: scrollspy.wrapper = mainEl;
-$: scrollspy.scrollTo($route.hash ? '#' + $route.hash : 0);
-
+const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('version') + '/Changes#L3';
 route.update({title: l('Help')});
 </script>
 
 <ChatHeader>
-  <h1>{l('Help')}</h1>
+  <h1>{l('Help')} <small><a href="{changelogUrl}" target="_blank">v{settings('version')}</a></small></h1>
 </ChatHeader>
 
-<main class="main" bind:this="{mainEl}">
-  <p>
-    {@html lmd('Current version: [v%1](%2).', settings('version'), 'https://github.com/Nordaaker/convos/blob/master/Changes#L1')}
-  </p>
-  <p on:click="{scrollspy.scrollTo}">
-    {l('Jump to:')}
-    <a href="#shortcuts">{l('Shortcuts')}</a>,
-    <a href="#autocomplete">{l('Autocomplete')}</a>,
-    <a href="#formatting">{l('Text formatting')}</a>,
-    <a href="#commands">{l('Available commands')}</a>,
-    <a href="#resources">{l('Other resources')}</a>.
-  </p>
-
+<main class="main">
   <p>
     {@html lmd('Got any questions? Come and talk to us in the "#convos" channel on https://freenode.net.')}
     {@html lmd('More information can also be found on https://convos.chat.')}
@@ -83,6 +64,7 @@ route.update({title: l('Help')});
 
   <h2 id="resources">{l('Other resources')}</h2>
   <ul>
+    <li><a href="{changelogUrl}" target="_blank">{l('Changelog for v%1', settings('version'))}</a></li>
     <li><a href="https://convos.chat" target="_blank">{l('Project homepage')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{l('Bug/issue tracker')}</a></li>
     <li><a href="https://github.com/Nordaaker/convos" target="_blank">{l('Source code')}</a></li>

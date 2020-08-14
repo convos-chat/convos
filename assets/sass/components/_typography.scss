@@ -26,6 +26,11 @@ h1 {
   @include if_screen(">two-columns") {
     font-size: var(--h1-font-size);
   }
+
+  small {
+    font-size: 0.5em;
+    opacity: 0.8;
+  }
 }
 
 h2 {
