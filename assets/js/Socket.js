@@ -233,7 +233,7 @@ export default class Socket extends Reactive {
 
   _onError(e) {
     let error = String(e.message || e);
-    if (!error || error.indexOf('[') == 0) error = 'Unknown error.';
+    if (!error || error.indexOf('[') == 0) error = 'Could not connect.';
     if (this.debug) console.log('[Socket:error]', new Time().toISOString(), error, e);
     this.update({error});
   }
