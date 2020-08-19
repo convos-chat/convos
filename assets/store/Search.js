@@ -49,8 +49,10 @@ export default class Search extends Dialog {
     return this.update({status: this.messagesOp.status});
   }
 
-  send(msg) {
-    return this.emit('search', msg);
+  send(message) {
+    if (typeof message == 'string') message = {message};
+    this.emit('send', message);
+    return Promise.resolve(message);
   }
 
   _addOperations() {

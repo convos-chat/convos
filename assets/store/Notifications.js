@@ -28,7 +28,7 @@ export default class Notifications extends Dialog {
   }
 
   // Disabled
-  send() { }
+  send() { return Promise.resolve({}) }
 
   _addOperations() {
     this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
