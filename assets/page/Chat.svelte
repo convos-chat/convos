@@ -8,7 +8,6 @@ import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte'
 import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
-import Scrollspy from '../js/Scrollspy';
 import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
 import {focusMainInputElements, q} from '../js/util';
@@ -22,7 +21,6 @@ const user = getContext('user');
 
 const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
-const scrollspy = new Scrollspy();
 const track = {}; // Holds values so we can compare before/after changes
 
 let chatInput;
@@ -54,10 +52,6 @@ afterUpdate(() => {
   track.chatFirstTs = firstTs;
 
   // Make sure we observe all message elements
-  scrollspy.wrapper = mainEl;
-  scrollspy.observe('.message');
-  if (messagesHeight != track.messagesHeight) scrollspy.keepPos(messagesHeight);
-  track.messagesHeight = messagesHeight;
   q(mainEl, '.message', el => el.classList[el.dataset.ts == $route.hash ? 'add' : 'remove']('has-focus'));
 });
 
@@ -66,30 +60,6 @@ onDestroy(() => {
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
   rtc.hangup();
-});
-
-unsubscribe.observed = scrollspy.on('observed', (entry) => {
-  if (!entry.isIntersecting) return;
-  const message = messages[entry.target.dataset.index] || {};
-});
-
-unsubscribe.scroll = scrollspy.on('scroll', () => {
-  if (!dialog.messages.length || dialog.is('loading')) return;
-
-  if (scrollspy.pos == 'top') {
-    const before = dialog.messages[0].ts.toISOString();
-    route.go(dialog.path + '#' + before, {replace: true});
-    if (!dialog.historyStartAt) dialog.load({before});
-  }
-  else if (scrollspy.pos == 'bottom') {
-    const after = dialog.messages.slice(-1)[0].ts.toISOString();
-    route.go(dialog.path + '#' + after, {replace: true});
-    if (!dialog.historyStopAt) dialog.load({after});
-  }
-  else {
-    const els = scrollspy.findVisibleElements('.message[data-ts]', 1);
-    route.go(dialog.path + '#' + els[0].dataset.ts, {replace: true});
-  }
 });
 
 function maybeReloadMessages(route) {
@@ -157,7 +127,7 @@ function setDialogFromUser(user) {
   <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 
-<main class="main has-chat" bind:this="{mainEl}"  on:scroll="{scrollspy.onScroll}">
+<main class="main has-chat" bind:this="{mainEl}">
   <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
     {#each messages as message, i}
       {#if chatMessages.dayChanged(messages, i)}

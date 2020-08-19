@@ -6,7 +6,6 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../js/ChatMessages';
 import Icon from '../components/Icon.svelte';
-import Scrollspy from '../js/Scrollspy';
 import Time from '../js/Time';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
@@ -14,18 +13,15 @@ import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
 const chatMessages = new ChatMessages();
-const scrollspy = new Scrollspy();
 const user = getContext('user');
 
 let chatInput;
 let dialog = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
-let mainEl;
 let messagesHeight = 0;
 
 $: chatMessages.attach({connection: {}, dialog, user});
 $: messages = $dialog.messages;
-$: if (mainEl) setDialogFromRoute($route);
-$: if (mainEl) scrollspy.scrollTo(messagesHeight);
+$: setDialogFromRoute($route);
 
 onMount(() => user.search.on('search', (msg) => search(route, msg)));
 
@@ -62,7 +58,6 @@ function search(route, msg) {
 function setDialogFromRoute(route) {
   const d = route.path.indexOf('search') != -1 ? user.search : user.notifications;
   if (d != dialog) dialog = d;
-  scrollspy.wrapper = mainEl;
   return dialog.is('search') ? search(route) : loadNotifications(route);
 }
 </script>
@@ -72,7 +67,7 @@ function setDialogFromRoute(route) {
   <a href="{$dialog.is('search') ? '/search': '/settings/account'}" class="btn has-tooltip" data-tooltip="{l('Account')}"><Icon name="{dialog.is('search') ? 'search' : 'bell'}"/></a>
 </ChatHeader>
 
-<main class="main has-search-results" bind:this="{mainEl}">
+<main class="main" class:has-results="{messages.length}">
   <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
     {#if messages.length == 0 && !dialog.is('loading')}
       {#if dialog.is('notifications')}
