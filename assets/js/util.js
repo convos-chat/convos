@@ -9,8 +9,9 @@
  * @exports debounce
  * @exports ensureChildNode
  * @exports extractErrorMessage
+ * @exports findVisibleElements
  * @exports hsvToRgb
- * @export humanReadableNumber
+ * @exports humanReadableNumber
  * @exports isType
  * @exports loadScript
  * @exports modeClassNames
@@ -150,6 +151,58 @@ export function focusMainInputElements(id) {
     const el = document.querySelector(selectors[i]);
     if (el) return el.focus();
   }
+}
+
+/**
+ * This function will find visible elements.
+ *
+ * @param {HTMLElement} containerEl A node containing zero or more child nodes.
+ * @param {HTMLElement} scrollEl A scrollable element
+ * @returns {Array} An array of visible child nodes.
+ */
+export function findVisibleElements(containerEl, scrollEl = document) {
+  const els = [...containerEl.childNodes]; // Convert to array
+  const haystack = [];
+
+  // Filter out comments, text nodes, ...
+  let i = 0;
+  while (i < els.length) {
+    if (els[i].nodeType == Node.ELEMENT_NODE) {
+      haystack.push([i, els[i]]);
+      i++;
+    }
+    else {
+      els.splice(i, 1);
+    }
+  }
+
+  // No child nodes
+  if (!els.length) return [];
+
+  // Find fist visible element
+  const scrollTop = scrollEl.scrollTop;
+  while (haystack.length > 1) {
+    const index = Math.floor(haystack.length / 2);
+    if (haystack[index][1].offsetTop <= scrollTop) {
+      haystack.splice(0, index);
+    }
+    else {
+      haystack.splice(index);
+    }
+  }
+
+  if (!haystack.length) haystack.push([0, els[0]]);
+
+  // Figure out the first and last visible element
+  const offsetHeight = scrollEl.offsetHeight;
+  const first = haystack[0][0];
+  let last = first;
+  while (last < els.length) {
+    if (els[last].offsetTop > scrollTop + offsetHeight) break;
+    last++;
+  }
+
+  return els.slice(first, last).filter(el => !el.getAttribute('aria-hidden'));
 }
 
 /**
