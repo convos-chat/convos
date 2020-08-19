@@ -1,5 +1,5 @@
 import Time from '../js/Time';
-import {lmd, topicOrStatus} from '../js/i18n';
+import {lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
 export default class ChatMessages {
@@ -38,25 +38,6 @@ export default class ChatMessages {
     if (!isOnline) classes.push('is-not-present');
 
     return classes.join(' ');
-  }
-
-  connectionDialogStatus() {
-    const connection = this.connection;
-    const dialog = this.dialog;
-    if (!connection.is || connection.is('unreachable')) return [];
-
-    const messages = [];
-    if (connection.frozen) {
-      messages.push(this.fillIn({
-        message: 'Disconnected. Your connection %1 can be edited in [settings](%2).',
-        vars: [connection.name, route.urlFor(connection.path + '#activeMenu:settings')],
-      }));
-    }
-    else if (dialog.frozen && !dialog.is('locked')) {
-      messages.push(this.fillIn({message: topicOrStatus(connection, dialog).replace(/\.$/, ''), vars: []}));
-    }
-
-    return messages;
   }
 
   dayChanged(messages, i) {
@@ -112,53 +93,12 @@ export default class ChatMessages {
     return messages;
   }
 
-  firstTime() {
-    const dialog = this.dialog;
-    const firstTime = dialog && dialog.is && dialog.is('conversation') && dialog.first_time;
-    if (!firstTime) return [];
-
-    const messages = [];
-    if (!dialog.is_private) {
-      messages.push(this.fillIn({
-        message: dialog.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.',
-        type: 'notice',
-        vars: [dialog.name, dialog.topic],
-      }));
-    }
-
-    if (dialog.is_private) {
-      messages.push(this.fillIn({
-        message: 'This is a private conversation with %1.',
-        type: 'notice',
-        vars: [dialog.name],
-      }));
-    }
-    else {
-      const nParticipants = dialog.participants().length;
-      messages.push(this.fillIn({
-        message: nParticipants == 1 ? 'You are the only participant in this conversation.' : 'There are %1 [participants](%2) in this conversation.',
-        type: 'notice',
-        vars: [nParticipants, route.urlFor(dialog.path + '#activeMenu:settings')],
-      }));
-    }
-
-    if (this.user.dialogs().length <= 3) {
-      messages.push(this.fillIn({
-        message: 'Start chatting by writing a message in the input field, or click on the conversation name ([%1](%2)) to get more information.',
-        type: 'notice',
-        vars: [dialog.name, route.urlFor(dialog.path + '#activeMenu:settings')],
-      }));
-    }
-
-    return messages;
-  }
-
   merge(messages, waiting) {
     const waitingMessages = waiting.filter(msg => msg.method == 'send' && msg.message).map(msg => {
       msg = this.fillIn(msg);
       if (!msg.waitingForResponse) msg.markdown = lmd('Could not send message "%1".', msg.markdown);
       return msg;
     });
-    return this.emptySearch().concat(this.firstTime()).concat(messages).concat(waitingMessages).concat(this.connectionDialogStatus());
+    return this.emptySearch().concat(messages).concat(waitingMessages);
   }
 }

@@ -1,18 +1,18 @@
 <script>
 import Button from '../components/form/Button.svelte';
+import ChatMessage from '../components/ChatMessage.svelte';
 import ChatMessages from '../js/ChatMessages';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatMessagesContainer from '../components/ChatMessagesContainer.svelte';
-import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte';
 import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
+import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
 import {focusMainInputElements, q} from '../js/util';
 import {isISOTimeString} from '../js/Time';
-import {l, topicOrStatus} from '../js/i18n';
+import {l, lmd, topicOrStatus} from '../js/i18n';
 import {route} from '../store/Route';
 
 const rtc = getContext('rtc');
@@ -24,10 +24,9 @@ const dragAndDrop = new DragAndDrop();
 const track = {}; // Holds values so we can compare before/after changes
 
 let chatInput;
-let connection = {};
+let connection = user.notifications;
 let dialog = user.notifications;
 let mainEl;
-let messagesHeight = 0;
 let now = new Time();
 let unsubscribe = {};
 
@@ -63,7 +62,6 @@ onDestroy(() => {
 });
 
 function maybeReloadMessages(route) {
-  if (track.hasHash && !route.hash) scrollspy.scrollTo(messagesHeight);
   if (track.hasHash && !route.hash && !dialog.endOfHistory) dialog.load({});
   track.hasHash = route.hash ? true : false;
 }
@@ -102,7 +100,7 @@ function setDialogFromUser(user) {
   if (unsubscribe.setLastRead) unsubscribe.setLastRead();
 
   dialog = user.activeDialog;
-  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+  connection = user.findDialog({connection_id: dialog.connection_id}) || dialog;
   now = new Time();
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
   unsubscribe.setLastRead = dialog.setLastRead.bind(dialog);
@@ -128,14 +126,37 @@ function setDialogFromUser(user) {
 </ChatHeader>
 
 <main class="main has-chat" bind:this="{mainEl}">
-  <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
+  <div>
+    <!-- status -->
+    {#if $dialog.is('loading')}
+      <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    {/if}
+    {#if $dialog.historyStartAt && !$dialog.is('not_found')}
+      <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{l('Started chatting on %1', $dialog.historyStartAt.getHumanDate())}</i></span></div>
+    {/if}
+
+    <!-- welcome message -->
+    {#if $dialog.messages.length < 10 && !$dialog.is('not_found')}
+      {#if $dialog.is_private}
+        <ChatMessage>{@html lmd('This is a private conversation with "%1".', $dialog.name)}</ChatMessage>
+      {:else}
+        <ChatMessage>{@html lmd($dialog.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $dialog.name, $dialog.topic)}</ChatMessage>
+        {#if $dialog.nParticipants == 1}
+          <ChatMessage same="{true}">{l('You are the only participant in this conversation.')}</ChatMessage>
+        {:else}
+          <ChatMessage same="{true}">{@html lmd('There are %1 [participants](%2) in this conversation.', $dialog.nParticipants, $dialog.path + '#activeMenu:settings')}</ChatMessage>
+        {/if}
+      {/if}
+    {/if}
+
+    <!-- messages -->
     {#each messages as message, i}
       {#if chatMessages.dayChanged(messages, i)}
-        <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
+        <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
       {/if}
 
-      {#if i && i == messages.length - $dialog.unread}
-        <ChatMessagesStatusLine class="for-last-read" icon="comments">{l('New messages')}</ChatMessagesStatusLine>
+      {#if i && i == $dialog.messages.length - $dialog.unread}
+        <div class="message__status-line for-last-read"><span><Icon name="comments"/> {l('New messages')}</span></div>
       {/if}
 
       <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
@@ -153,12 +174,35 @@ function setDialogFromUser(user) {
         </div>
       </div>
     {/each}
-  </ChatMessagesContainer>
-</main>
 
-{#if !dialog.historyStopAt && dialog.messages.length}
-  <ChatMessagesStatusLine class="for-jump-to-now" icon="external-link-alt"><a href="{dialog.path}">{l('Jump to %1', now.toLocaleString())}</a></ChatMessagesStatusLine>
-{/if}
+    <!-- status -->
+    {#if $connection.is('not_found') && !$dialog.dialog_id}
+      <h2>{l('Connection does not exist.')}</h2>
+      <p>{l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
+      <p>
+        <Link href="/settings/connection?server={encodeURIComponent($dialog.connection_id)}&dialog={encodeURIComponent($dialog.dialog_id)}" class="btn"><Icon name="thumbs-up"/> {l('Yes')}</Link>
+        <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {l('No')}</Link>
+      </p>
+    {:else if $dialog.is('not_found')}
+      <h2>{l('You are not part of this conversation.')}</h2>
+      <p>{l('Do you want to chat with "%1"?', $dialog.dialog_id)}</p>
+      <p>
+        <Button type="button" icon="thumbs-up" on:click="{() => dialog.send('/join ' + $dialog.dialog_id)}"><span>{l('Yes')}</span></Button>
+        <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
+      </p>
+    {:else if !$connection.is('unreachable') && $connection.frozen}
+      <ChatMessage type="error">{@html lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, $connection.path + '#activeMenu:settings')}</ChatMessage>
+    {:else if $dialog.frozen && !$dialog.is('locked')}
+      <ChatMessage type="error">{topicOrStatus($connection, $dialog).replace(/\.$/, '') || l($dialog.frozen)}</ChatMessage>
+    {/if}
+    {#if $dialog.is('loading')}
+      <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    {/if}
+    {#if !$dialog.historyStopAt && $dialog.messages.length}
+      <div class="message__status-line for-jump-to-now"><a href="{dialog.path}"><Icon name="external-link-alt"/> {l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
+    {/if}
+  </div>
+</main>
 
 <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
 <ChatParticipants dialog="{dialog}"/>

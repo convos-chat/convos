@@ -1,7 +1,5 @@
 <script>
 import ChatMessage from '../components/ChatMessage.svelte';
-import ChatMessagesContainer from '../components/ChatMessagesContainer.svelte';
-import ChatMessagesStatusLine from '../components/ChatMessagesStatusLine.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatMessages from '../js/ChatMessages';
@@ -17,7 +15,6 @@ const user = getContext('user');
 
 let chatInput;
 let dialog = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
-let messagesHeight = 0;
 
 $: chatMessages.attach({connection: {}, dialog, user});
 $: messages = $dialog.messages;
@@ -64,11 +61,16 @@ function setDialogFromRoute(route) {
 
 <ChatHeader>
   <h1><a href="#activeMenu:nav" tabindex="-1"><span>{l(dialog.name)}</span></a></h1>
-  <a href="{$dialog.is('search') ? '/search': '/settings/account'}" class="btn has-tooltip" data-tooltip="{l('Account')}"><Icon name="{dialog.is('search') ? 'search' : 'bell'}"/></a>
+  {#if $dialog.is('search')}
+    <a href="/search" class="btn"><Icon name="search"/></a>
+  {:else}
+    <a href="/settings/account" class="btn"><Icon name="bell"/></a>
+  {/if}
 </ChatHeader>
 
 <main class="main" class:has-results="{messages.length}">
-  <ChatMessagesContainer dialog="{dialog}" bind:messagesHeight="{messagesHeight}">
+  <div>
+    <!-- welcome messages / status -->
     {#if messages.length == 0 && !dialog.is('loading')}
       {#if dialog.is('notifications')}
         <h2>{l('No notifications.')}</h2>
@@ -83,9 +85,10 @@ function setDialogFromRoute(route) {
       {/if}
     {/if}
 
+    <!-- notifications or search results -->
     {#each messages as message, i}
       {#if chatMessages.dayChanged(messages, i)}
-        <ChatMessagesStatusLine class="for-day-changed" icon="calendar-alt">{message.ts.getHumanDate()}</ChatMessagesStatusLine>
+        <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> {message.ts.getHumanDate()}</span></div>
       {/if}
 
       <div class="{chatMessages.classNames(messages, i)}" on:click="{gotoDialog}">
@@ -95,7 +98,12 @@ function setDialogFromRoute(route) {
         <div class="message__text">{@html message.markdown}</div>
       </div>
     {/each}
-  </ChatMessagesContainer>
+
+    <!-- status -->
+    {#if $dialog.is('loading')}
+      <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    {/if}
+  </div>
 </main>
 
 {#if dialog.is('search')}

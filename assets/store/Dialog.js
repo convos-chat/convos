@@ -28,10 +28,10 @@ export default class Dialog extends Reactive {
     this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
+    this.prop('ro', 'nParticipants', () => this.participants().length);
     this.prop('ro', 'path', route.dialogPath(params));
 
     this.prop('rw', 'errors', 0);
-    this.prop('rw', 'first_time', false);
     this.prop('rw', 'historyStartAt', null);
     this.prop('rw', 'historyStopAt', null);
     this.prop('rw', 'last_active', new Time(params.last_active));
@@ -106,6 +106,7 @@ export default class Dialog extends Reactive {
     if (status == 'conversation') return this.dialog_id && !this.is('notifications');
     if (status == 'frozen') return this.frozen && true;
     if (status == 'locked') return this.frozen == 'Invalid password.';
+    if (status == 'not_found') return this.frozen == 'Not found.';
     if (status == 'notifications') return false;
     if (status == 'private') return this.is_private;
     if (status == 'search') return false;
@@ -132,7 +133,6 @@ export default class Dialog extends Reactive {
     this.addMessages('push', internalMessages);
     this.update({status: this.messagesOp.status});
     this._setEndOfStream(params, body);
-    if (this.messages.length <= 10) this.update({first_time: true});
 
     [0, -1].forEach(index => {
       const msg = this.messages.slice(index)[0];

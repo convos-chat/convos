@@ -60,7 +60,7 @@ export function lmd(str, ...vars) {
  * @returns {String} Example: "Private conversation."
  */
 export function topicOrStatus(connection, dialog) {
-  if (dialog.frozen == 'Not found.') return '';
+  if (dialog.is('not_found')) return '';
   if (connection.frozen) return l(connection.frozen);
   if (connection == dialog) return l('Connection messages.');
   const str = dialog.frozen ? l(dialog.frozen) : dialog.topic;
