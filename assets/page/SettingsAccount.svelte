@@ -6,7 +6,6 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
-import {embedMaker} from '../js/EmbedMaker';
 import {l} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
@@ -17,7 +16,7 @@ const user = getContext('user');
 const updateUserOp = api('updateUser');
 
 let formEl;
-let expandUrlToMedia = embedMaker.expandUrlToMedia;
+let expandUrlToMedia = viewport.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
 let selectedColorScheme = viewport.colorScheme;
 let selectedTheme = viewport.theme;
@@ -53,8 +52,8 @@ function updateUserFromForm(e) {
     return updateUserOp.error('Passwords does not match.');
   }
 
-  embedMaker.update({expandUrlToMedia});
   notify.update({wantNotifications});
+  viewport.update({expandUrlToMedia});
   viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
   updateUserOp.perform(e.target);
 }

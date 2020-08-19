@@ -11,7 +11,6 @@ import Icon from '../components/Icon.svelte';
 import Scrollspy from '../js/Scrollspy';
 import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
-import {embedMaker} from '../js/EmbedMaker';
 import {focusMainInputElements, q} from '../js/util';
 import {isISOTimeString} from '../js/Time';
 import {l, topicOrStatus} from '../js/i18n';
@@ -72,7 +71,6 @@ onDestroy(() => {
 unsubscribe.observed = scrollspy.on('observed', (entry) => {
   if (!entry.isIntersecting) return;
   const message = messages[entry.target.dataset.index] || {};
-  if (message.embeds && message.embeds.length) embedMaker.render(entry.target, message.embeds);
 });
 
 unsubscribe.scroll = scrollspy.on('scroll', () => {
@@ -109,7 +107,7 @@ function onMessageClick(e) {
   const message = messageEl && messages[messageEl.dataset.index];
   const action = aEl.href.split('#')[1];
   if (action == 'toggleDetails') {
-    embedMaker.toggleDetails(messageEl, message);
+    console.log('TODO');
   }
   else if (action.indexOf('input:') == 0) {
     chatInput.add(message.from);

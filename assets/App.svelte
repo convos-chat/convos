@@ -93,7 +93,7 @@ function onGlobalKeydown(e) {
   // Esc
   if (e.keyCode == 27) {
     focusMainInputElements('chat_input');
-    q(document, '.fullscreen-media-wrapper', el => el.click());
+    q(document, '.fullscreen-wrapper', el => el.click());
     return;
   }
 

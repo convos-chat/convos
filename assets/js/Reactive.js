@@ -5,7 +5,6 @@
  * @exports Reactive
  * @class Reactive
  * @see Dialog
- * @see EmbedMaker
  * @see Events
  * @see Operation
  * @see User

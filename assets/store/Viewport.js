@@ -1,11 +1,12 @@
 import Reactive from '../js/Reactive';
-import {q, replaceClassName} from '../js/util';
+import {ensureChildNode, q, removeChildNodes, replaceClassName} from '../js/util';
 
 export default class Viewport extends Reactive {
   constructor() {
     super();
     this.prop('cookie', 'colorScheme', 'auto');
     this.prop('cookie', 'theme', 'convos');
+    this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'version', '');
     this.prop('ro', 'colorSchemeOptions', ['Auto', 'Light', 'Dark'].map(o => [o.toLowerCase(), o]));
     this.prop('ro', 'isWide', () => this.width > 800);
@@ -59,6 +60,23 @@ export default class Viewport extends Reactive {
 
   settings(key, value) {
     return arguments.length == 2 ? this._settingsSet(key, value) : this._settingsGet(key);
+  }
+
+  showFullscreen(contentEl) {
+    const mediaWrapper = ensureChildNode(document.body, 'fullscreen-wrapper', (el) => {
+      el.addEventListener('click', (e) => e.target == el && el.hide());
+      el.hide = () => {
+        mediaWrapper.classList.add('hidden');
+        this.emit('hidemediawrapper', mediaWrapper);
+      };
+    });
+
+    removeChildNodes(mediaWrapper);
+    if (!contentEl) return mediaWrapper.hide();
+
+    mediaWrapper.classList.remove('hidden');
+    mediaWrapper.appendChild(contentEl.cloneNode(true));
+    return mediaWrapper;
   }
 
   _settingsGet(key) {
