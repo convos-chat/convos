@@ -10,7 +10,7 @@ dependencies:
   jest: 25.1.0
   js-cookie: 2.2.1
   jsdoc: 3.6.5
-  jsonhtmlify: 0.0.1
+  jsonhtmlify: 0.1.0
   querystring: 0.2.0
   twemoji: 12.1.5
   webrtc-adapter: 7.6.0
@@ -1175,7 +1175,6 @@ packages:
     resolution:
       integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
   /@types/estree/0.0.44:
-    dev: true
     resolution:
       integrity: sha512-iaIVzr+w2ZJ5HkidlZ3EJM8VTZb2MJLCjw3V+505yVts0gRC4UMvjw0d1HPtGqI/HQC/KdsYtayfzl+AXY2R8g==
   /@types/istanbul-lib-coverage/2.0.1:
@@ -4138,10 +4137,10 @@ packages:
       graceful-fs: 4.2.3
     resolution:
       integrity: sha512-NQRZ5CRo74MhMMC3/3r5g2k4fjodJ/wh8MxjFbCViWKFjxrnudWSY5vomh+23ZaXzAS7J3fBZIR2dV6WbmfM0w==
-  /jsonhtmlify/0.0.1:
+  /jsonhtmlify/0.1.0:
     dev: false
     resolution:
-      integrity: sha512-KW5eYE/c5/N36MxGQtaB1DrvRCUpIZhzJmuldhv6TLWMh05apZzCJph6bGGI8hyZxk7iELExFGmk+/2nT4CDcA==
+      integrity: sha512-bhXvmnab2uT/zrZWiFubDWTZxg2AQizohEQ/H4lenUTxnIXfFS+CqF7cSX5rf+GBNMZ+69eerIffiuScVd/HrA==
   /jsprim/1.4.1:
     dependencies:
       assert-plus: 1.0.0
@@ -6214,7 +6213,6 @@ packages:
       '@types/estree': 0.0.44
       '@types/node': 13.9.3
       acorn: 7.1.1
-    dev: true
     hasBin: true
     resolution:
       integrity: sha512-/2HA0Ec70TvQnXdzynFffkjA6XN+1e2pEv/uKS5Ulca40g2L7KuOE3riasHoNVHOsFD5KKZgDsMk1CP3Tw9s+A==
@@ -7402,7 +7400,7 @@ specifiers:
   jest: ^25.1.0
   js-cookie: ^2.2.1
   jsdoc: ^3.6.5
-  jsonhtmlify: ^0.0.1
+  jsonhtmlify: ^0.1.0
   node-sass: ^4.13.1
   postcss: ^7.0.27
   postcss-preset-env: ^6.7.0
