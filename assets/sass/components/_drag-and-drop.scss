@@ -1,25 +1,17 @@
-.is-dragover:after,
-.is-dragover:before {
-  z-index: 1000;
-  display: block;
-  position: fixed;
-  left: var(--sidebar-left-width);
-  right: var(--sidebar-right-width);
-  pointer-events: none;
-}
-
-.is-dragover:before {
-  content: '';
+.drop-area {
   background-color: var(--body-bg);
   opacity: 0.8;
-  top: 0;
-  bottom: 0;
-}
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
 
-.is-dragover:after {
-  @extend .fas;
-  content: fa-content($fa-var-cloud-upload-alt);
-  font-size: 5rem;
-  text-align: center;
-  top: 50%;
+  &:after {
+    @extend .fas;
+    content: fa-content($fa-var-cloud-upload-alt);
+    font-size: 5rem;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    top: calc(50% - 2rem);
+  }
 }

@@ -38,11 +38,11 @@ $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
 $: messages = chatMessages.merge($dialog.messages, $socket.getWaitingMessages());
 $: notConnected = $dialog.frozen ? true : false;
-$: dragAndDrop.attach(document, mainEl, chatInput && chatInput.getUploadEl());
 
 chatMessages.attach({connection, dialog, user});
 
 onMount(() => {
+  dragAndDrop.attach(document.querySelector('.main'), chatInput);
   focusMainInputElements('chat_input');
 });
 

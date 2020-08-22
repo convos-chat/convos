@@ -16,12 +16,12 @@ export default class dragAndDrop {
       paste: this.paste.bind(this),
     };
 
+    this.dropIndicatorEl = document.createElement('div');
+    this.dropIndicatorEl.className = 'drop-area hidden';
     this.removeDragOverDebounced = debounce(() => this._removeDragOver(), 100);
   }
 
-  attach(targetEl, dropEl, uploadEl) {
-    if (this.targetEl) this.detach();
-
+  attach(dropEl, uploadEl, targetEl = document) {
     this.dropEl = dropEl;
     this.uploadEl = uploadEl;
     this.targetEl = targetEl;
@@ -65,8 +65,15 @@ export default class dragAndDrop {
   }
 
   start(e) {
+    if (!this.dropEl) return;
     this._preventDefault(e);
-    if (this.dropEl) this.dropEl.classList.add('is-dragover');
+    const style = this.dropIndicatorEl.style;
+    style.height = this.dropEl.offsetHeight + 'px';
+    style.width = this.dropEl.offsetWidth + 'px';
+    style.top = this.dropEl.offsetTop + 'px';
+    style.left = this.dropEl.offsetLeft + 'px';
+    this.dropIndicatorEl.classList.remove('hidden');
+    this.dropEl.parentNode.appendChild(this.dropIndicatorEl);
   }
 
   _preventDefault(e) {
@@ -75,6 +82,6 @@ export default class dragAndDrop {
   }
 
   _removeDragOver() {
-    if (this.dropEl) this.dropEl.classList.remove('is-dragover');
+    this.dropIndicatorEl.classList.add('hidden');
   }
 }

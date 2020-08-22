@@ -1,10 +1,11 @@
 <script>
 import autocomplete from '../js/autocomplete';
 import Icon from '../components/Icon.svelte';
-import {getContext, onMount} from 'svelte';
+import {getContext} from 'svelte';
 import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
 
+export const uploader = uploadFiles;
 export let dialog = {};
 export function getUploadEl() { return uploadEl }
 export function setValue(val) { inputEl.value = val }
@@ -24,10 +25,6 @@ $: inputParts = calculateInputParts(pos);
 $: nick = connection && connection.nick;
 $: placeholder = dialog.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
 $: sendIcon = dialog.is('search') ? 'search' : 'paper-plane';
-
-onMount(() => {
-  uploadEl.uploader = uploadFiles;
-});
 
 export function add(str, params = {}) {
   const space = params.space || '';
