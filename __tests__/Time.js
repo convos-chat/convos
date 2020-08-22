@@ -17,9 +17,10 @@ test('constructor', () => {
   expect(tz.toEpoch()).toBe(1582551060);
 });
 
-test('getHM', () => {
+test('format', () => {
   const t0 = new Time('2021-02-24T13:31:00');
-  expect(t0.getHM()).toBe(t0.getHours() + ':31');
+  expect(t0.format('%H:%M')).toBe(t0.getHours() + ':31');
+  expect(t0.format('%Y %b %e %H:%M')).toBe('2021 Feb 24 ' + t0.getHours() + ':31');
 });
 
 test('getHumanDate', () => {
@@ -32,13 +33,13 @@ test('getHumanDate', () => {
   expect(t1.getHumanDate()).toBe('Feb 24, ' + (year - 1));
 });
 
-test('getMonthAbbr', () => {
+test('format %b', () => {
   const expected = ['Jan', 'Feb', 'March', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 
   for (let i = 1; i <= 12; i++) {
     const m = i < 10 ? '0' + i : i;
     const t0 = new Time('2009-' + m + '-24T13:31:00');
-    expect(t0.getMonthAbbr()).toBe(expected.shift());
+    expect(t0.format('%b')).toBe(expected.shift());
   }
 });
 

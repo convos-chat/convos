@@ -6,13 +6,13 @@ import {l} from '../js/i18n';
 export let same = false;
 export let type = 'notice';
 
-const hm = new Time().getHM();
+const now = new Time();
 </script>
 
 <div class="message is-type-{type}">
   {#if !same}
     <Icon name="pick:Convos" color="inherit"/>
-    <b class="message__ts">{hm}</b>
+    <b class="message__ts">{now.format('%H:%M')}</b>
     <a href="/settings/account" class="message__from" color="inherit">{l('Convos')}</a>
   {/if}
   <div class="message__text"><slot/></div>

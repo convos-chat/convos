@@ -20,6 +20,14 @@ const MONTH_ABBR = {
 };
 
 const ONE_DAY = 60 * 60 * 24;
+const STRFTIME = {
+  H: '_getPaddedHours',
+  M: '_getPaddedMinutes',
+  S: '_getPaddedSeconds',
+  b: '_getMonthAbbr',
+  e: 'getDate',
+  Y: 'getFullYear',
+};
 
 export const isISOTimeString = str => !!String(str || '').match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 
@@ -30,37 +38,29 @@ export default class Time extends Date {
   }
 
   /**
+   * Used to format a strftime string. Note that this method is not compatible
+   * with the full specification of strftime.
+   *
+   * @memberof Time
+   * @param {String} format A strftime format string
+   * @returns {String} Example "Sept 15"
+   */
+  format(format) {
+    return format.replace(/%(\w)/g, (a, p) => STRFTIME[p] ? this[STRFTIME[p]]() : p);
+  }
+
+  /**
    * getHumanDate() will return the date and month.
    *
    * @memberof Time
    * @returns {String} Example "Sept 15"
    */
   getHumanDate(params = {}) {
-    let str = this.getMonthAbbr() + ' ' + this.getDate();
+    let str = this.format('%b %e');
     const now = new Time();
     const sameYear = this.getYear() == now.getYear();
     if (!sameYear || params.year) str += ', ' + this.getFullYear();
     return str;
-  }
-
-  /**
-   * getHM() will return padded hours and minutes
-   *
-   * @memberof Time
-   * @returns {String} Example: "09:05"
-   */
-  getHM() {
-    return [this.getHours(), this.getMinutes()].map(v => v < 10 ? '0' + v : v).join(':');
-  }
-
-  /**
-   * Used to turn getMonth() into a named month.
-   *
-   * @memberof Time
-   * @returns {String} Jan, Feb, March, Apr, May, Jun, July, Aug, Sept, Oct, Nov or Dec.
-   */
-  getMonthAbbr() {
-    return MONTH_ABBR[this.getMonth()] || '';
   }
 
   setDate(param, setUTC) { return [setUTC ? super.setUTCDate(param) : super.setDate(param), this][1] }
@@ -81,5 +81,21 @@ export default class Time extends Date {
    */
   toEpoch() {
     return this.getTime() / 1000;
+  }
+
+  _getMonthAbbr() {
+    return MONTH_ABBR[this.getMonth()] || '';
+  }
+
+  _getPaddedHours() {
+    return String(this.getHours()).padStart(2, '0');
+  }
+
+  _getPaddedMinutes() {
+    return String(this.getMinutes()).padStart(2, '0');
+  }
+
+  _getPaddedSeconds() {
+    return String(this.getSeconds()).padStart(2, '0');
   }
 }

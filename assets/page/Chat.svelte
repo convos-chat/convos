@@ -161,7 +161,7 @@ function setDialogFromUser(user) {
 
       <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
-        <div class="message__ts has-tooltip" data-content="{message.ts.getHM()}"><div>{message.ts.toLocaleString()}</div></div>
+        <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
         <a href="#input:{message.from}" class="message__from onclick" style="color:{message.color}" tabindex="-1">{message.from}</a>
         <div class="message__text">
           {#if message.waitingForResponse === false}

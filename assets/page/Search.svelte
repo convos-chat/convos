@@ -93,7 +93,7 @@ function setDialogFromRoute(route) {
 
       <div class="{chatMessages.classNames(messages, i)}" on:click="{gotoDialog}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
-        <div class="message__ts has-tooltip" data-content="{message.ts.getHM()}"><div>{message.ts.toLocaleString()}</div></div>
+        <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
         <a href="{dialogUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
         <div class="message__text">{@html message.markdown}</div>
       </div>
