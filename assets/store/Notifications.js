@@ -16,13 +16,6 @@ export default class Notifications extends Dialog {
     return status == 'notifications' ? true : super.is(status);
   }
 
-  async load(params = {}) {
-    if (!this.messagesOp || this.is('loading')) return this;
-    this.messagesOp.update({status: 'pending'});
-    this.update({messages: []});
-    await super.load();
-  }
-
   // Disabled
   send() { return Promise.resolve({}) }
 
