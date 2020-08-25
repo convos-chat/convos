@@ -3,6 +3,7 @@ import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
+import InfinityScroll from '../components/InfinityScroll.svelte';
 import Time from '../js/Time';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
@@ -37,6 +38,10 @@ function loadNotifications(route) {
   dialog.setLastRead();
 }
 
+function onRendered(e) {
+  e.detail.scrollTo(-1);
+}
+
 function search(route, msg) {
   const match = msg ? msg.message : route.param('q');
 
@@ -67,43 +72,42 @@ function setDialogFromRoute(route) {
   {/if}
 </ChatHeader>
 
-<main class="main" class:has-results="{messages.length}">
-  <div>
-    <!-- welcome messages / status -->
-    {#if messages.length == 0 && !dialog.is('loading')}
-      {#if dialog.is('notifications')}
-        <h2>{l('No notifications.')}</h2>
-      {:else if $route.param('q')}
-        <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
-      {:else if dialog.is('search')}
-        <ChatMessage>
-          {@html lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
-          {@html lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
-          {@html lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
-        </ChatMessage>
-      {/if}
+<InfinityScroll class="{classNames.join(' ')}" on:rendered="{onRendered}">
+
+  <!-- welcome messages / status -->
+  {#if messages.length == 0 && !dialog.is('loading')}
+    {#if dialog.is('notifications')}
+      <h2>{l('No notifications.')}</h2>
+    {:else if $route.param('q')}
+      <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
+    {:else if dialog.is('search')}
+      <ChatMessage>
+        {@html lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
+        {@html lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
+        {@html lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
+      </ChatMessage>
+    {/if}
+  {/if}
+
+  <!-- notifications or search results -->
+  {#each messages as message, i}
+    {#if !i || message.dayChanged}
+      <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    <!-- notifications or search results -->
-    {#each messages as message, i}
-      {#if !i || message.dayChanged}
-        <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
-      {/if}
+    <div class="{message.className}" on:click="{gotoDialog}">
+      <Icon name="pick:{message.fromId}" color="{message.color}"/>
+      <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
+      <a href="{dialogUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
+      <div class="message__text">{@html message.markdown}</div>
+    </div>
+  {/each}
 
-      <div class="{message.className}" on:click="{gotoDialog}">
-        <Icon name="pick:{message.fromId}" color="{message.color}"/>
-        <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-        <a href="{dialogUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>
-        <div class="message__text">{@html message.markdown}</div>
-      </div>
-    {/each}
-
-    <!-- status -->
-    {#if $dialog.is('loading')}
-      <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
-    {/if}
-  </div>
-</main>
+  <!-- status -->
+  {#if $dialog.is('loading')}
+    <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+  {/if}
+</InfinityScroll>
 
 {#if dialog.is('search')}
   <ChatInput dialog="{dialog}" bind:this="{chatInput}"/>

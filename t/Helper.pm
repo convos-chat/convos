@@ -83,7 +83,7 @@ sub t_selenium_register {
   my ($class, $t) = @_;
   $t->wait_for('#signup')->send_keys_ok('#signup [name=email]', 'jhthorsen@cpan.org')
     ->send_keys_ok('#signup [name=password]', 'superduper')->click_ok('#signup .btn.for-save')
-    ->wait_for(0.2)->wait_for('.messages-container');
+    ->wait_for(0.2)->wait_for('.main.is-above-chat-input');
 }
 
 sub wait_reject {

@@ -17,7 +17,7 @@ $t->click_ok($signup_btn)->wait_for(0.2)->wait_for('#signup .error')
   ->live_text_like('#signup .error', qr{password}i);
 
 $t->send_keys_ok('#signup [name=password]', 'superduper');
-$t->click_ok($signup_btn)->wait_for(0.2)->wait_for('.messages-container');
+$t->click_ok($signup_btn)->wait_for(0.2)->wait_for('.main.is-above-chat-input');
 
 note 'showing the correct chat after login';
 $t->live_element_exists('a.for-dialog.has-path');
@@ -42,7 +42,7 @@ $t->click_ok($signin_btn)->wait_for(0.2)->wait_for('#signin .error')
 
 $t->send_keys_ok('#signin [name=password]', [(\'backspace') x 10]);
 $t->send_keys_ok('#signin [name=password]', 'superduper');
-$t->click_ok($signin_btn)->wait_for(0.2)->wait_for('.messages-container');
+$t->click_ok($signin_btn)->wait_for(0.2)->wait_for('.main.is-above-chat-input');
 
 note 'change settings';
 my $settings_link  = '.sidebar-left a[href$="/settings"]';

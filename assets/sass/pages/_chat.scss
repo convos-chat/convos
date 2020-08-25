@@ -1,9 +1,17 @@
-.main.has-chat {
+.main.is-above-chat-input {
   bottom: 3.5rem;
 
   &:after {
     height: 1rem;
   }
+}
+
+.main.has-pos-top .message__status-line.has-pos-bottom {
+  display: none;
+}
+
+.main.has-pos-bottom .message__status-line.has-pos-top {
+  display: none;
 }
 
 .fa-contributor {

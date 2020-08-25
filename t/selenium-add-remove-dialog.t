@@ -6,10 +6,10 @@ my $t = t::Helper->t_selenium;
 t::Helper->t_selenium_register($t);
 
 note 'Go to unknown conversation';
-my $join_btn      = '.messages-container .btn';
+my $join_btn      = '.main.is-above-chat-input .btn';
 my $too_cool_path = '/chat/irc-convos/%23too%2Fcool';
-$t->navigate_ok($too_cool_path)->wait_for('.messages-container')->live_text_is($join_btn, 'Yes')
-  ->live_text_is('.messages-container a[href="/chat"]', 'No');
+$t->navigate_ok($too_cool_path)->wait_for('.main.is-above-chat-input')
+  ->live_text_is($join_btn, 'Yes')->live_text_is('.main.is-above-chat-input a[href="/chat"]', 'No');
 
 note 'Join #too/cool';
 $t->click_ok($join_btn)->wait_for('a.message__from');
