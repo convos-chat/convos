@@ -1,7 +1,6 @@
 <script>
 import Button from '../components/form/Button.svelte';
 import ChatMessage from '../components/ChatMessage.svelte';
-import ChatMessages from '../js/ChatMessages';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatParticipants from '../components/ChatParticipants.svelte';
@@ -10,16 +9,17 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {afterUpdate, getContext, onDestroy, onMount} from 'svelte';
-import {focusMainInputElements, q} from '../js/util';
+import {focusMainInputElements, q, tagNameIs} from '../js/util';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd, topicOrStatus} from '../js/i18n';
+import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 const rtc = getContext('rtc');
 const socket = getContext('socket');
 const user = getContext('user');
 
-const chatMessages = new ChatMessages();
 const dragAndDrop = new DragAndDrop();
 const track = {}; // Holds values so we can compare before/after changes
 
@@ -33,10 +33,8 @@ let unsubscribe = {};
 $: maybeReloadMessages($route);
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
-$: messages = chatMessages.merge($dialog.messages, $socket.getWaitingMessages());
+$: messages = renderMessages({dialog: $dialog, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $dialog.frozen ? true : false;
-
-chatMessages.attach({connection, dialog, user});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), chatInput);
@@ -55,7 +53,6 @@ afterUpdate(() => {
 });
 
 onDestroy(() => {
-  if (dialog.setLastRead) dialog.setLastRead();
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
   rtc.hangup();
@@ -67,25 +64,24 @@ function maybeReloadMessages(route) {
 }
 
 function onMessageClick(e) {
-  const aEl = e.target.closest('a.onclick');
+  const aEl = e.target.closest('a');
+  if (aEl && !aEl.classList.contains('le-thumbnail') && !aEl.classList.contains('onclick')) return;
+
+  const pasteMetaEl = e.target.closest('.le-meta');
+  if (pasteMetaEl) return pasteMetaEl.parentNode.classList.toggle('is-expanded');
+  if (tagNameIs(e.target, 'img')) return viewport.showFullscreen(e.target);
   if (!aEl) return;
+
   e.preventDefault();
+  if (aEl.classList.contains('le-thumbnail')) return viewport.showFullscreen(aEl.querySelector('img'));
 
   const messageEl = e.target.closest('.message');
   const message = messageEl && messages[messageEl.dataset.index];
   const action = aEl.href.split('#')[1];
-  if (action == 'toggleDetails') {
-    console.log('TODO');
-  }
-  else if (action.indexOf('input:') == 0) {
-    chatInput.add(message.from);
-  }
-  else if (action == 'remove') {
-    socket.deleteWaitingMessage(message.id);
-  }
-  else if (action == 'resend') {
-    socket.send(socket.getWaitingMessages([message.id])[0]);
-  }
+  if (action.indexOf('input:') == 0) return chatInput.add(message.from);
+  if (action == 'remove') return socket.deleteWaitingMessage(message.id);
+  if (action == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
+  if (action == 'toggleDetails') return q(messageEl, '.embed.for-jsonhtmlify', el => el.classList.toggle('hidden'));
 }
 
 function setDialogFromRoute(route) {
@@ -104,7 +100,6 @@ function setDialogFromUser(user) {
   now = new Time();
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
   unsubscribe.setLastRead = dialog.setLastRead.bind(dialog);
-  chatMessages.attach({connection, dialog, user});
   route.update({title: dialog.title});
   rtc.hangup();
   Object.keys(track).forEach(k => delete track[k]);
@@ -151,7 +146,7 @@ function setDialogFromUser(user) {
 
     <!-- messages -->
     {#each messages as message, i}
-      {#if chatMessages.dayChanged(messages, i)}
+      {#if message.dayChanged}
         <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
       {/if}
 
@@ -159,7 +154,7 @@ function setDialogFromUser(user) {
         <div class="message__status-line for-last-read"><span><Icon name="comments"/> {l('New messages')}</span></div>
       {/if}
 
-      <div class="{chatMessages.classNames(messages, i)}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
+      <div class="{message.className}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
         <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
         <a href="#input:{message.from}" class="message__from onclick" style="color:{message.color}" tabindex="-1">{message.from}</a>
@@ -167,11 +162,18 @@ function setDialogFromUser(user) {
           {#if message.waitingForResponse === false}
             <a href="#remove" class="pull-right has-tooltip onclick" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
             <a href="#resend" class="pull-right has-tooltip onclick" data-tooltip="{l('Resend')}"><Icon name="sync-alt"/></a>
-          {:else if !message.waitingForResponse && chatMessages.canToggleDetails(message)}
+          {:else if !message.waitingForResponse && message.canToggleDetails}
             <a href="#toggleDetails" class="onclick"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
           {/if}
           {@html message.markdown}
         </div>
+        {#each message.embeds as embedPromise}
+          {#await embedPromise}
+            <!-- loading embed -->
+          {:then embed}
+            <div class="embed {embed.className}">{@html embed.html}</div>
+          {/await}
+        {/each}
       </div>
     {/each}
 

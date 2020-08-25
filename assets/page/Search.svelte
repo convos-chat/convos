@@ -2,22 +2,21 @@
 import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatMessages from '../js/ChatMessages';
 import Icon from '../components/Icon.svelte';
 import Time from '../js/Time';
 import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
+import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
 
-const chatMessages = new ChatMessages();
 const user = getContext('user');
 
 let chatInput;
 let dialog = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
 
-$: chatMessages.attach({connection: {}, dialog, user});
-$: messages = $dialog.messages;
+$: messages = renderMessages({dialog: $dialog});
+$: classNames = ['main', messages.length && 'has-results', $dialog.is('search') && 'is-above-chat-input'].filter(i => i);
 $: setDialogFromRoute($route);
 
 onMount(() => user.search.on('search', (msg) => search(route, msg)));
@@ -87,11 +86,11 @@ function setDialogFromRoute(route) {
 
     <!-- notifications or search results -->
     {#each messages as message, i}
-      {#if chatMessages.dayChanged(messages, i)}
-        <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> {message.ts.getHumanDate()}</span></div>
+      {#if !i || message.dayChanged}
+        <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
       {/if}
 
-      <div class="{chatMessages.classNames(messages, i)}" on:click="{gotoDialog}">
+      <div class="{message.className}" on:click="{gotoDialog}">
         <Icon name="pick:{message.fromId}" color="{message.color}"/>
         <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
         <a href="{dialogUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.dialog_id)}</a>

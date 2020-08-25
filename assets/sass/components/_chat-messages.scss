@@ -62,7 +62,7 @@
   }
 
   &.is-waiting.is-type-notice {
-    opacity: 0.7;
+    animation: pulse-suddle 2s infinite;
   }
 
   &.is-waiting.has-same-from .message__ts {
@@ -99,9 +99,10 @@
     margin-top: 0.5rem;
   }
 
-  &.has-focus .message__ts {
-    font-weight: bold;
-    opacity: 1;
+  &.has-focus {
+    background-color: var(--highlight-color-bg);
+    outline: 3px solid var(--highlight-color-bg);
+    outline-offset: 0;
   }
 
   a.pull-right {
@@ -226,9 +227,13 @@
 
   &.for-jump-to-now {
     @extend %next-to-sidebar;
-    bottom: 3.5rem;
-    border-bottom: 1.5rem solid var(--body-bg);
+    line-height: 2em;
+    border-bottom: 2rem solid var(--body-bg);
+    height: 2em;
+    position: fixed;
+    bottom: 3.2rem;
     z-index: 3;
+    opacity: 0.9;
   }
 }
 
