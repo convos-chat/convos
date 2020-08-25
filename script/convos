@@ -230,6 +230,7 @@ sub _cmd_with_secure_listen {
 
 sub _dependencies {
   my $script = shift;
+  $script->_setup_inc;
 
   my @dependencies;
   my $load = sub {
