@@ -12,7 +12,7 @@
     </label>
 
     <div class="cms-navbar__links">
-      <a href="<%= url_for '/doc/' %>"><i class="fas fa-book visible-sm"></i>Documentation</a>
+      <a href="<%= url_for '/doc/' %>" class="is-primary-menu-item"><i class="fas fa-book visible-sm"></i>Documentation</a>
     </div>
   </nav>
 </div>

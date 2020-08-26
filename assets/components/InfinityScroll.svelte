@@ -60,6 +60,6 @@ function scrollTo(pos) {
 }
 </script>
 
-<div class="{classNames.join(' ')}" use:onReady="{{scrollHeight}}">
+<main class="{classNames.join(' ')}" use:onReady="{{scrollHeight}}">
   <div bind:offsetHeight="{scrollHeight}"><slot/></div>
-</div>
+</main>

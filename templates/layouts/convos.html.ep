@@ -52,6 +52,7 @@
     %= tag 'meta', name => 'convos:existing_user', content => (stash('existing_user') ? 'yes' : 'no')
     %= tag 'meta', name => 'convos:first_user', content => (stash('first_user') ? 'yes' : 'no')
     %= tag 'meta', name => 'convos:open_to_public', content => (settings('open_to_public') ? 'yes' : 'no')
+    %= tag 'meta', name => 'convos:start_app', content => stash('start_app') ? 'yes' : 'no'
     %= tag 'meta', name => 'convos:status', content => stash('status') || 200
     %= tag 'meta', name => 'version', content => Convos->VERSION
 
@@ -65,7 +66,7 @@
     % }
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css'
   </head>
-  <body class="no-js notify-disabled <%= stash('for_cms') ? 'for-cms' : 'for-app' %>">
+  <body class="no-js notify-disabled for-cms">
     %= content
     %= asset 'convos.js' unless stash 'exception'
   </body>

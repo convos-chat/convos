@@ -142,7 +142,7 @@ const keys = {
 </script>
 
 <form class="chat-input" on:submit|preventDefault>
-  <textarea id="chat_input"
+  <textarea class="is-primary-input"
     placeholder="{placeholder}"
     bind:this="{inputEl}"
     on:change="{e => {pos = inputEl.selectionStart}}"

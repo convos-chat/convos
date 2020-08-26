@@ -9,10 +9,10 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {focusMainInputElements, q, tagNameIs} from '../js/util';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd, topicOrStatus} from '../js/i18n';
+import {q, tagNameIs} from '../js/util';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
 import {viewport} from '../store/Viewport';
@@ -37,7 +37,6 @@ $: if (!$route.hash && !$dialog.historyStopAt) dialog.load({});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), chatInput);
-  focusMainInputElements('chat_input');
 });
 
 onDestroy(() => {

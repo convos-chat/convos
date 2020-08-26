@@ -45,7 +45,7 @@ function registered() {
 }
 </script>
 
-<section id="signup">
+<main id="signup">
   {#if settings('status') >= 400}
     <h2>{l('Invalid invite/recover URL')}</h2>
     <p>{l(settings('status') == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
@@ -92,10 +92,10 @@ function registered() {
       <a class="btn" href="{settings('contact')}"><Icon name="paper-plane"/> {l('Contact admin')}</a>
     </div>
   {/if}
-</section>
+</main>
 
 {#if !settings('first_user')}
-  <section id="signin">
+  <main id="signin">
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{l('Sign in')}</h2>
       <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
@@ -113,5 +113,5 @@ function registered() {
 
       <OperationStatus op="{loginOp}"/>
     </form>
-  </section>
+  </main>
 {/if}

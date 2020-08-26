@@ -134,25 +134,6 @@ export function extractErrorMessage(params, from = 'message') {
   return errors && errors[0] ? errors[0][from] || 'Unknown error.' : '';
 }
 
-export function focusMainInputElements(id) {
-  if (id && 'ontouchstart' in window) return;
-
-  if (id) {
-    const el = document.getElementById(id);
-    return el && el.focus();
-  }
-
-  const searchInput = document.getElementById('search_input');
-  const targetEl = document.activeElement;
-  if (targetEl != searchInput && !tagNameIs(targetEl, 'body')) return searchInput.focus();
-
-  const selectors = ['#chat_input', '.main input[type="text"]', '.main a', '#search_input'];
-  for (let i = 0; i < selectors.length; i++) {
-    const el = document.querySelector(selectors[i]);
-    if (el) return el.focus();
-  }
-}
-
 /**
  * This function will find visible elements.
  *
@@ -311,7 +292,7 @@ export function modeClassNames(modes) {
  * @param {Function} cb Optional callback to call on each found DOM node.
  */
 export function q(parentEl, sel, cb) {
-  const els = parentEl.querySelectorAll(sel);
+  const els = sel == ':children' ? parentEl.children : parentEl.querySelectorAll(sel);
   if (!cb) return [].slice.call(els, 0);
   if (Array.isArray(cb)) return [].forEach.call(els, el => el.addEventListener(cb[0], cb[1]));
   const res = [];
@@ -416,6 +397,7 @@ export function str2color(str, nColors = 100) {
  * @returns {Boolean} True if the tag name matches.
  */
 export function tagNameIs(el, tagName) {
+  if (isType(tagName, 'array')) return tagName.find(name => tagNameIs(el, name)) || false;
   return el && el.tagName && el.tagName.toLowerCase() === tagName || false;
 }
 

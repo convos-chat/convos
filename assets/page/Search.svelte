@@ -5,7 +5,6 @@ import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Time from '../js/Time';
-import {focusMainInputElements} from '../js/util';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {renderMessages} from '../js/renderMessages';
@@ -45,13 +44,8 @@ function onRendered(e) {
 function search(route, msg) {
   const match = msg ? msg.message : route.param('q');
 
-  if (chatInput) {
-    if (!msg) chatInput.setValue(match || '');
-    focusMainInputElements('chat_input');
-  }
-  if (route.param('q') != match) {
-    route.go('/search?q=' + encodeURIComponent(match), {replace: true});
-  }
+  if (chatInput && !msg) chatInput.setValue(match || '');
+  if (route.param('q') != match) route.go('/search?q=' + encodeURIComponent(match), {replace: true});
 
   return match ? dialog.load({match}) : dialog.update({messages: []});
 }

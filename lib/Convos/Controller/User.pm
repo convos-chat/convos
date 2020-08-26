@@ -128,7 +128,7 @@ sub register_html {
   return if $conn_url and $self->_register_html_conn_url_redirect($conn_url);
 
   $self->_register_html_handle_invite_url;
-  $self->render('index');
+  $self->render('app');
 }
 
 sub remove {

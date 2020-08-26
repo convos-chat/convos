@@ -80,7 +80,7 @@ export default class Viewport extends Reactive {
   }
 
   _settingsGet(key) {
-    if (key == 'app_mode') return document.body.classList.contains('app-mode');
+    if (key == 'app_mode') return document.body.classList.contains('for-app');
     if (key == 'notify_enabled') return document.body.classList.contains('notify-enabled');
     if (key == 'organization_name') key = 'contactorganization';
     if (key == 'organization_url') key = 'contactnetworkaddress';

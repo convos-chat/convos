@@ -2,7 +2,6 @@
 % my $more_url = '';
 % layout 'convos';
 % title join ' ', l($message), "($status)";
-% stash for_cms => 1;
 
 %= include 'partial/app_header'
 

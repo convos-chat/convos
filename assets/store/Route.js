@@ -88,6 +88,11 @@ export default class Route extends Reactive {
 
       this.update({activeMenu: '', match: route.path, state});
       route.cb(this);
+
+      const e = document.createEvent('CustomEvent');
+      e.initCustomEvent('routerender', false, false, {});
+      setTimeout(() => document.dispatchEvent(e), 1);
+
       return this;
     }
 

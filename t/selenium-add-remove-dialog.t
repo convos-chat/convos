@@ -30,8 +30,9 @@ $t->send_keys_ok('main [name="dialog_id"]', '#too/cool')->click_ok('main .btn.fo
   ->wait_for($too_cool_link);
 
 note 'Part with command';
-$t->click_ok($too_cool_link)->wait_for('#chat_input')->send_keys_ok('#chat_input', '/part ')
-  ->click_ok('.chat-input__send')->wait_for(qq(a[href="/settings/conversation"].has-path));
+$t->click_ok($too_cool_link)->wait_for('.is-primary-input')
+  ->send_keys_ok('.is-primary-input', '/part ')->click_ok('.chat-input__send')
+  ->wait_for(qq(a[href="/settings/conversation"].has-path));
 
 note 'Close connection';
 my $delete_btn = '.sidebar-left .form-actions .btn.for-trash';

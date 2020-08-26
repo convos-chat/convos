@@ -56,8 +56,8 @@ sub startup {
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Chat resources
-  my $user_r = $r->under('/')->to(template => 'index');
-  $user_r->get('/help')->to(template => 'index');
+  my $user_r = $r->under('/')->to(template => 'app');
+  $user_r->get('/help');
   $user_r->get('/chat/*rest', {rest => ''});
   $user_r->get('/login');
   $user_r->get('/register')->to('user#register_html');

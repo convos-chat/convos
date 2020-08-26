@@ -5,7 +5,7 @@ sub get {
   my $self = shift;
 
   # Make sure we don't get 501 Not implemented if this is an API request
-  $self->stash(for_cms => 1, handler => 'ep', openapi => 'Should never be rendered.');
+  $self->stash(handler => 'ep', openapi => 'Should never be rendered.');
 
   return $self->files->serve({
     fid    => $self->stash('fid'),

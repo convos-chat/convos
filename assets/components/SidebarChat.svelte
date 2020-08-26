@@ -24,7 +24,6 @@ $: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
 
 function clearFilter() {
-  searchHasFocus = false;
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
 
   setTimeout(() => {
@@ -32,6 +31,7 @@ function clearFilter() {
     filter = '';
     const el = document.activeElement;
     if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
+    searchHasFocus = false;
   }, 100);
 }
 
@@ -132,7 +132,7 @@ function renderUnread(dialog) {
 
 <div class="sidebar-left" transition:fly="{transition}">
   <form class="sidebar__header has-tooltip is-below" data-tooltip="{l('Search for conversations or messages')}" on:submit="{e => e.preventDefault()}">
-    <input type="text" id="search_input"
+    <input type="text" id="search_input" class="is-primary-menu-item"
       placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
       bind:value="{filter}"
       on:blur="{clearFilter}"

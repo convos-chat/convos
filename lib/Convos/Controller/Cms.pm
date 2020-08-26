@@ -25,7 +25,7 @@ sub blog_list {
     my $blogs = shift;
     $_->{meta}{url} = $self->url_for('blog_entry', $_->{meta})->to_abs for @$blogs;
     $self->res->headers->remove('X-Provider-Name');
-    $self->render('blog_list', blogs => $blogs, for_cms => 1);
+    $self->render('blog_list', blogs => $blogs);
   });
 }
 
@@ -59,7 +59,7 @@ sub index {
   return $self->cms->document_p(['index'])->then(sub {
     my $doc = shift;
     return $self->_render_doc(cms => $doc) if $doc->{body};
-    return $self->render('index');
+    return $self->render('app');
   });
 }
 
@@ -75,7 +75,7 @@ sub _render_doc {
   my ($self, $template, $doc) = @_;
   $self->_meta_to_social($doc->{meta});
   $self->res->headers->remove('X-Provider-Name');
-  $self->render($template, custom_css => $doc->{custom_css}, doc => $doc, for_cms => 1);
+  $self->render($template, custom_css => $doc->{custom_css}, doc => $doc);
 }
 
 sub _render_perldoc {
@@ -90,7 +90,7 @@ sub _render_perldoc {
       $self->res->headers->remove('X-Provider-Name');
       $self->title($meta->{title});
       $self->social(description => $meta->{description}) if $meta->{description};
-      $self->render('perldoc', doc => $doc, for_cms => 1);
+      $self->render('perldoc', doc => $doc);
     }
   );
 }

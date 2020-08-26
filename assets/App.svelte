@@ -2,13 +2,13 @@
 import User from './store/User';
 import WebRTC from './store/WebRTC';
 import {api} from './js/Api';
-import {focusMainInputElements, loadScript, q} from './js/util';
 import {fade} from 'svelte/transition';
-import {onMount, setContext} from 'svelte';
 import {l} from './js/i18n';
+import {loadScript, q} from './js/util';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
 import {getSocket} from './js/Socket';
+import {setContext} from 'svelte';
 import {settings, viewport} from './store/Viewport';
 import {setupRouting} from './routes';
 
@@ -88,27 +88,9 @@ function socketChanged(socket) {
   if (readyStateNotification.close) readyStateNotification.close();
   readyStateNotification = notify.showInApp(message, {closeAfter: -1, title: l('Status')});
 }
-
-function onGlobalKeydown(e) {
-  // Esc
-  if (e.keyCode == 27) {
-    focusMainInputElements('chat_input');
-    q(document, '.fullscreen-wrapper', el => el.click());
-    return;
-  }
-
-  // Shift+Enter
-  if (!(e.shiftKey && e.keyCode == 13)) return;
-  e.preventDefault();
-  focusMainInputElements();
-}
 </script>
 
-<svelte:window
-  on:focus="{() => user.email && socket.open()}"
-  on:keydown="{onGlobalKeydown}"
-  bind:innerHeight="{innerHeight}"
-  bind:innerWidth="{innerWidth}"/>
+<svelte:window on:focus="{() => user.email && socket.open()}" bind:innerHeight="{innerHeight}" bind:innerWidth="{innerWidth}"/>
 
 {#if loggedInRoute}
   <!--

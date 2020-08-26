@@ -1,6 +1,6 @@
 % layout 'convos';
 % title 'Better group chat';
-% stash for_cms => 1;
+% stash start_app => 1;
 
 %= include 'partial/app_header'
 
@@ -20,7 +20,7 @@
   </header>
 </div>
 
-<main class="app-container has-js">
+<main class="has-js">
   <h2><%=l 'Loading' %></h2>
   <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
   <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting Convos...' %></p>
@@ -32,7 +32,7 @@
 </main>
 
 <noscript>
-  <article>
+  <div>
     <h2><%=l 'Javascript is disabled' %></h2>
     <p class="error">
       %=l 'Javascript is disabled so Convos cannot start.'
@@ -46,7 +46,7 @@
         <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
       % end
     </p>
-  </article>
+  </div>
 </noscript>
 
 %= include 'partial/app_footer'
