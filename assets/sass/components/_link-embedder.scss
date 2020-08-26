@@ -1,3 +1,8 @@
+.embed.for-youtube iframe {
+  max-width: 90vw;
+  max-height: (344 / 459 * 90vw);
+}
+
 .le-photo img {
   cursor: zoom-in;
 }
