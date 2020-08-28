@@ -100,9 +100,13 @@
   }
 
   &.has-focus {
-    background-color: var(--highlight-color-bg);
-    outline: 3px solid var(--highlight-color-bg);
-    outline-offset: 0;
+    background: var(--highlight-color-bg);
+    box-shadow: 0 0 0 2px var(--highlight-color-bg);
+    border-radius: 3px;
+
+    .message__ts {
+      opacity: 1;
+    }
   }
 
   a.pull-right {
