@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 4.35 Not Released
  - Fix not following link when clicking on a thumbnail
  - Fix not focusing "search" input on load/routerender
+ - Fix searching for messages
  - Changed styling for message that has focus
 
 4.34 2020-08-28T11:35:00+0900

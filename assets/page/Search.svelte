@@ -19,7 +19,7 @@ $: messages = renderMessages({dialog: $dialog});
 $: classNames = ['main', messages.length && 'has-results', $dialog.is('search') && 'is-above-chat-input'].filter(i => i);
 $: setDialogFromRoute($route);
 
-onMount(() => user.search.on('search', (msg) => search(route, msg)));
+onMount(() => user.search.on('send', search));
 
 function dialogUrl(message) {
   const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
@@ -32,28 +32,24 @@ function gotoDialog(e) {
   route.go(e.target.closest('.message').querySelector('a').href);
 }
 
-function loadNotifications(route) {
-  if (!dialog.is('success') || dialog.last_read <= new Time() - 10000) dialog.load();
-  dialog.setLastRead();
-}
-
-function onRendered(e) {
-  e.detail.scrollTo(-1);
-}
-
-function search(route, msg) {
-  const match = msg ? msg.message : route.param('q');
-
-  if (chatInput && !msg) chatInput.setValue(match || '');
-  if (route.param('q') != match) route.go('/search?q=' + encodeURIComponent(match), {replace: true});
-
+function search(msg) {
+  const match = msg.message;
+  if (chatInput) chatInput.setValue(match);
+  route.go('/search?q=' + encodeURIComponent(match), {replace: true});
   return match ? dialog.load({match}) : dialog.update({messages: []});
 }
 
 function setDialogFromRoute(route) {
-  const d = route.path.indexOf('search') != -1 ? user.search : user.notifications;
-  if (d != dialog) dialog = d;
-  return dialog.is('search') ? search(route) : loadNotifications(route);
+  const d = route.path.indexOf('search') == -1 ? user.notifications : user.search;
+  if (d != dialog) dialog = d.update({dialog_id: true});
+
+  if (dialog.is('search')) {
+    search({message: route.param('q')});
+  }
+  else if (!dialog.is('success') || dialog.last_read <= new Time() - 10000) {
+    dialog.load();
+    dialog.setLastRead();
+  }
 }
 </script>
 
@@ -66,7 +62,7 @@ function setDialogFromRoute(route) {
   {/if}
 </ChatHeader>
 
-<InfinityScroll class="{classNames.join(' ')}" on:rendered="{onRendered}">
+<InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
 
   <!-- welcome messages / status -->
   {#if messages.length == 0 && !dialog.is('loading')}
