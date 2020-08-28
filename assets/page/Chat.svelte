@@ -50,12 +50,11 @@ function onMessageClick(e) {
   if (aEl && !aEl.classList.contains('le-thumbnail') && !aEl.classList.contains('onclick')) return;
 
   const pasteMetaEl = e.target.closest('.le-meta');
+  if (aEl) e.preventDefault();
   if (pasteMetaEl) return pasteMetaEl.parentNode.classList.toggle('is-expanded');
   if (tagNameIs(e.target, 'img')) return viewport.showFullscreen(e.target);
+  if (aEl && aEl.classList.contains('le-thumbnail')) return viewport.showFullscreen(aEl.querySelector('img'));
   if (!aEl) return;
-
-  e.preventDefault();
-  if (aEl.classList.contains('le-thumbnail')) return viewport.showFullscreen(aEl.querySelector('img'));
 
   const messageEl = e.target.closest('.message');
   const message = messageEl && messages[messageEl.dataset.index];

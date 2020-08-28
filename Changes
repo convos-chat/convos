@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.35 Not Released
+ - Fix not following link when clicking on a thumbnail
+
 4.34 2020-08-28T11:35:00+0900
  - Add support for "around" which will load messages faster
  - Improved "keep scroll position" logic with <InfinityScroll/> component
