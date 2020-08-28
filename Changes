@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.35 Not Released
+4.35 2020-08-28T12:27:00+0900
  - Fix not following link when clicking on a thumbnail
  - Fix not focusing "search" input on load/routerender
  - Fix searching for messages
