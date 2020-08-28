@@ -29,14 +29,14 @@ document.addEventListener('keydown', function(e) {
   // Shift+Enter
   if (e.keyCode == 13 && e.shiftKey) {
     e.preventDefault();
-    moveFocus();
+    moveFocus('toggle');
   }
 });
 
 // Like "load", but from ./store/Route.js
-document.addEventListener('routerender', moveFocus);
+document.addEventListener('routerender', () => moveFocus());
 
-function moveFocus() {
+function moveFocus(toggle) {
   if ('ontouchstart' in window) return;
 
   const firstEl = (sel) => {
@@ -48,7 +48,7 @@ function moveFocus() {
   };
 
   // Switch to menu item if main area item has focus
-  const menuItem = firstEl(['input.is-primary-menu-item', 'a.is-primary-menu-item']);
+  const menuItem = toggle && firstEl(['input.is-primary-menu-item', 'a.is-primary-menu-item']);
   const targetEl = document.activeElement;
   if (tagNameIs(targetEl, ['a', 'input', 'textarea']) && menuItem && targetEl != menuItem) {
     return menuItem.focus();
