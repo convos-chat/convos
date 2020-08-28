@@ -12,7 +12,7 @@
     </label>
 
     <div class="cms-navbar__links">
-      <a href="<%= url_for '/' %>"><%= image '/images/convos-icon-light.png', alt => '' %>About</a>
+      <a href="<%= url_for '/' %>" class="is-primary-menu-item"><%= image '/images/convos-icon-light.png', alt => '' %>About</a>
       <a href="<%= url_for '/doc/start' %>"><i class="fas fa-running visible-sm"></i>Get started</a>
       <a href="<%= url_for '/doc/' %>"><i class="fas fa-book visible-sm"></i>Documentation</a>
       <a href="<%= url_for '/blog' %>"><i class="fas fa-glasses visible-sm"></i>Blog</a>
