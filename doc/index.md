@@ -53,13 +53,13 @@ and [Svelte](https://svelte.dev/).
     <tr><th>Language</th><th>Files</th><th>Lines</th></tr>
   </thead>
   <tbody>
-    <tr><td>Perl</td><td>26</td><td>3310</td></tr>
-    <tr><td>Svelte</td><td>29</td><td>2041</td></tr>
-    <tr><td>JavaScript</td><td>29</td><td>2041</td></tr>
-    <tr><td>Sass</td><td>30</td><td>2839</td></tr>
+    <tr><td>Perl</td><td>26</td><td>4071</td></tr>
+    <tr><td>Svelte</td><td>29</td><td>2148</td></tr>
+    <tr><td>JavaScript</td><td>29</td><td>2868</td></tr>
+    <tr><td>Sass</td><td>30</td><td>2768</td></tr>
     <tr><td>SVG</td><td>1</td><td>11</td></tr>
-    <tr><td>Total</td><td>117</td><td>10624</td></tr>
+    <tr><td>Total</td><td>117</td><td>12188</td></tr>
   </tbody>
 </table>
 
-Updated after 4.12 release, using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`
+Updated after 4.35 release, using `cloc assets/ lib/ --force-lang=CoffeeScript,svelte`
