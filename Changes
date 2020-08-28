@@ -1,5 +1,19 @@
 Revision history for perl distribution Convos
 
+4.34 2020-08-28T11:35:00+0900
+ - Add support for "around" which will load messages faster
+ - Improved "keep scroll position" logic with <InfinityScroll/> component
+ - Improved WebSocket error messages
+ - Fix loading relevant messages when clicking on a notification or search result #511
+ - Fix focus logic on Shift+Enter and Esc
+ - Fix max-width for YouTube iframe on small screens
+ - Fix reloading Notifications
+ - Fix drag&drop effect when uploading files
+ - Fix reporting installed versions after "convos install" has run the first time
+ - Changed default websocket error message
+ - Removed loading of external Instagram JavaScript library
+ - Removed loading of external Twitter JavaScript library
+
 4.33 2020-08-08T17:32:00+0900
  - Prevent frontend from sending the whole dialog object, which results in
    WebSocket close clode "1009"
