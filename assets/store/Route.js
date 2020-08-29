@@ -71,11 +71,7 @@ export default class Route extends Reactive {
     if (!abs) abs = this._location.href;
     if (!state) state = this.state;
 
-    const pathname = abs.substr(this.baseUrl.length);
-    const url = pathname.split('#')[0].split('?');
-    this._query = url.length == 2 ? qs.parse(url.pop()) : {};
-    this._path = url[0];
-
+    this._urlToProps(abs);
     this._params = {};
     for (let ri = 0; ri < this._routes.length; ri++) {
       const route = this._routes[ri];
@@ -96,7 +92,7 @@ export default class Route extends Reactive {
       return this;
     }
 
-    console.log({abs, pathname, routes: this._routes, url});
+    console.log({abs, routes: this._routes});
     throw '[Route] No route for "' + abs + '".';
   }
 
@@ -133,7 +129,9 @@ export default class Route extends Reactive {
       this._basePath = new URL(params.baseUrl).pathname.replace(/\/+$/, '');
     }
 
-    return super.update(params);
+    super.update(params);
+    if (params.baseUrl) this._urlToProps(location.href);
+    return this;
   }
 
   urlFor(url) {
@@ -198,6 +196,13 @@ export default class Route extends Reactive {
 
   _pathWithoutPrefix(path) {
     return path.indexOf(this.basePath) == 0 ? path.substr(this.basePath.length) : path;
+  }
+
+  _urlToProps(abs) {
+    const pathname = abs.substr(this.baseUrl.length);
+    const url = pathname.split('#')[0].split('?');
+    this._query = url.length == 2 ? qs.parse(url.pop()) : {};
+    this._path = url[0];
   }
 }
 
