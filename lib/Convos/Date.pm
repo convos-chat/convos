@@ -15,22 +15,25 @@ use overload (
 
 our @EXPORT_OK = qw(dt);
 
-sub dt {
+sub dt { __PACKAGE__->parse(@_) }
+
+sub parse {
+  my $class = shift;
 
   # Now
-  return scalar __PACKAGE__->gmtime(time) unless @_;
+  return scalar $class->gmtime(time) unless @_;
 
   # Already a Convos::Date object
-  return $_[0]->gmtime($_[0]->epoch) if blessed $_[0] and $_[0]->isa('Convos::Date');
+  return $_[0]->gmtime($_[0]->epoch) if blessed $_[0] and $_[0]->isa('Time::Piece');
 
   # Epoch
   local $_ = shift;
-  return scalar __PACKAGE__->gmtime($_) if /^\d+$|^\d+\.\d+$/;
+  return scalar $class->gmtime($_) if /^\d+$|^\d+\.\d+$/;
 
   # RFC 3339
   $_ =~ s!Z$!!;
   $_ =~ s!\.\d*$!!;
-  scalar __PACKAGE__->strptime($_, '%Y-%m-%dT%H:%M:%S');
+  scalar $class->strptime($_, '%Y-%m-%dT%H:%M:%S');
 }
 
 sub TO_JSON { shift->datetime }
@@ -41,11 +44,12 @@ sub TO_JSON { shift->datetime }
 
 =head1 NAME
 
-Convos::Date - Convenient wrapper around Time::Piece
+Convos::Date - Convenient subclass of Time::Piece
 
 =head1 SYNOPSIS
 
   use Convos::Date "dt";
+  my $dt = dt;
   my $dt = dt "784111777";
   my $dt = dt "784111777.001";
   my $dt = dt "1994-11-06T08:49:37";
@@ -63,8 +67,24 @@ L<Time::Piece/datetime>, instead of L<Time::Piece/cdate>.
 =head2 dt
 
   $dt = dt;
-  $dt = dt $int;
-  $dt = dt $str;
+  $dt = dt $parse_param;
+
+Calls L</parse> on the input value, and returns a new C<Convos::Date> object.
+
+=head1 METHODS
+
+=head2 parse
+
+  $dt = Convos::Date->parse;
+  $dt = Convos::Date->parse(Convos::Date->new);
+  $dt = Convos::Date->parse(Time::Piece->new);
+  $dt = Convos::Date->parse(1598913750);
+  $dt = Convos::Date->parse("2020-08-31T22:26:10");
+
+Used to create a new L<Convos::Date> object from the input given. Called
+without any arguments is the same as calling with C<time()>. Passing in a
+L<Convos::Date> object willl return a new instance, with the same time.
+This method can also parse epoch and RFC-3339 strings.
 
 =head1 SEE ALSO
 

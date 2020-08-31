@@ -34,10 +34,10 @@ sub messages {
   my $interval = shift || 40;
 
   my @messages = split /\n/, data_section qw(t::Helper messages.txt);
-  $ts -= $ts % 10;
-  $ts -= $interval * @messages;
+  $ts -= $interval * @messages - $interval;
   $ts = dt $ts;
 
+  Test::More::note("Adding messages ts=$ts, interval=$interval\n");
   my $i = 0;
   for my $entry (@messages) {
     my ($from, $msg) = split /\s/, $entry, 2;
@@ -48,9 +48,12 @@ sub messages {
       from      => $from,
       highlight => $msg =~ /superman/i ? Mojo::JSON->true : Mojo::JSON->false,
       message   => $msg,
-      ts        => $ts,
+      ts        => "$ts",
       type      => $event,
     };
+
+    Test::More::diag("$ts <$from> $msg\n") if $ENV{CONVOS_DEBUG};
+
     $ts += $interval;
   }
 
@@ -169,7 +172,7 @@ bag 18 class
 trip 19 governor
 regret 20 men
 industry 21 bed
-name 22 sky
+shoe 22 sky
 *coach 23 kittens
 rake 24 wound
 copper 25 card
