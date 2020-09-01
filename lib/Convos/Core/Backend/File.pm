@@ -371,7 +371,7 @@ sub _messages_response {
     }
   }
 
-  delete $args->{$_} for qw(cursor inc_by include match re);
+  delete $args->{$_} for qw(cursor inc_by include limit match re);
   return $args;
 }
 

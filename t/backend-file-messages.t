@@ -31,22 +31,24 @@ note 'no messages';
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(200)
-  ->json_is('/messages', []);
+  ->json_is('', {messages => []});
 
 my $t0 = Convos::Date->parse(time - (time % 60));
 $connection->emit(message => $dialog => $_) for t::Helper->messages($t0->epoch);
 
 note 'limit=1';
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?limit=1')->status_is(200)
+  ->json_is('/after',           undef)->json_is('/before', $t->tx->res->json->{messages}[0]{ts})
   ->json_is('/messages/0/from', 'toad')->json_is('/messages/0/message', '80 bead');
 num_messages_is($t, 1, 'limit=1');
 
 note "before=2018-01-01T00:39:00";
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages?before=2018-01-01T00:39:00')
-  ->status_is(200)->json_is('/messages', [], 'zero messages');
+  ->status_is(200)->json_is('', {messages => []}, 'zero messages');
 
 note 'before=now';
 $t->get_ok('/api/connection/irc-localhost/dialog/%23convos/messages')->status_is(200)
+  ->json_is('/after', undef)->json_is('/before', $t->tx->res->json->{messages}[0]{ts})
   ->json_like('/messages/0/ts', $ts_re)->json_is('/messages/0/highlight', false)
   ->json_is('/messages/0/type',     'private')->json_is('/messages/0/from', 'industry')
   ->json_is('/messages/0/message',  '21 bed')->json_is('/messages/59/from', 'toad')
@@ -60,27 +62,32 @@ my $after  = Convos::Date->parse($t->tx->res->json('/messages/13/ts'));
 my $before = Convos::Date->parse($t->tx->res->json('/messages/15/ts'));
 note "before=$before";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?before=$before")
-  ->status_is(200)->json_is('/messages/0/from', 'river')
-  ->json_is('/messages/0/message',  '0 pencil')->json_is('/messages/14/from', 'anger')
-  ->json_is('/messages/14/message', '14 fowl');
+  ->json_is('/after', undef)->json_is('/before', undef)->status_is(200)
+  ->json_is('/messages/0/from',  'river')->json_is('/messages/0/message',  '0 pencil')
+  ->json_is('/messages/14/from', 'anger')->json_is('/messages/14/message', '14 fowl');
 num_messages_is($t, 15, "before=$before");
 
 note "before=$before, limit=10";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?before=$before&limit=9")
-  ->status_is(200)->json_is('/messages/0/from', 'insect')->json_is('/messages/0/message', '6 cap')
-  ->json_is('/messages/8/from', 'anger')->json_is('/messages/8/message', '14 fowl');
+  ->status_is(200)->json_is('/after', undef)
+  ->json_is('/before', $t->tx->res->json->{messages}[0]{ts})->json_is('/messages/0/from', 'insect')
+  ->json_is('/messages/0/message', '6 cap')->json_is('/messages/8/from', 'anger')
+  ->json_is('/messages/8/message', '14 fowl');
 num_messages_is($t, 9, "before=$before");
 
 note "after=$after";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?after=$after")->status_is(200)
+  ->json_is('/after',            $t->tx->res->json->{messages}[-1]{ts})->json_is('/before', undef)
   ->json_is('/messages/0/from',  'anger')->json_is('/messages/0/message', '14 fowl')
   ->json_is('/messages/59/from', 'boundary')->json_is('/messages/59/message', '73 boot');
 num_messages_is($t, 60, "after=$after");
 
 note "after=$after, limit=29";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?after=$after&limit=29")
-  ->status_is(200)->json_is('/messages/0/from', 'anger')->json_is('/messages/0/message', '14 fowl')
-  ->json_is('/messages/28/from', 'blade')->json_is('/messages/28/message', '42 level');
+  ->status_is(200)->json_is('/after', $t->tx->res->json->{messages}[-1]{ts})
+  ->json_is('/before',              undef)->json_is('/messages/0/from', 'anger')
+  ->json_is('/messages/0/message',  '14 fowl')->json_is('/messages/28/from', 'blade')
+  ->json_is('/messages/28/message', '42 level');
 num_messages_is($t, 29, "after=$after, limit=29");
 
 note 'match';
@@ -106,18 +113,19 @@ num_messages_is($t, 73, "around=$around");
 
 note "around=$after, limit=10";
 $t->get_ok("/api/connection/irc-localhost/dialog/%23convos/messages?around=$around&limit=10")
-  ->status_is(200)->json_is('/messages/0/from', 'teaching')
-  ->json_is('/messages/0/message',  '3 trade')->json_is('/messages/19/from', 'shoe')
-  ->json_is('/messages/19/message', '22 sky');
+  ->status_is(200)->json_is('/after', $t->tx->res->json->{messages}[-1]{ts})
+  ->json_is('/before',           $t->tx->res->json->{messages}[0]{ts})
+  ->json_is('/messages/0/from',  'teaching')->json_is('/messages/0/message', '3 trade')
+  ->json_is('/messages/19/from', 'shoe')->json_is('/messages/19/message', '22 sky');
 num_messages_is($t, 20, "around=$around, limit=10");
 
 note "around=$after, few messages";
 my $pm = $connection->dialog({name => 'superwoman'});
 $connection->emit(message => $pm => $_) for (t::Helper->messages($t0->epoch))[11 .. 20];
 $t->get_ok("/api/connection/irc-localhost/dialog/superwoman/messages?around=$around")
-  ->status_is(200)->json_is('/messages/0/from', 'machine')
-  ->json_is('/messages/0/message', '11 dog')->json_is('/messages/9/from', 'regret')
-  ->json_is('/messages/9/message', '20 men');
+  ->status_is(200)->json_is('/after', undef)->json_is('/before', undef)
+  ->json_is('/messages/0/from', 'machine')->json_is('/messages/0/message', '11 dog')
+  ->json_is('/messages/9/from', 'regret')->json_is('/messages/9/message', '20 men');
 num_messages_is($t, 10, "around=$around, few messages");
 
 note 'match unicode';
