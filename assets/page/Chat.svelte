@@ -87,7 +87,7 @@ function onScrolled(e) {
     route.go(dialog.path + (dialog.historyStopAt ? '' : '#' + lastVisibleEl.dataset.ts), {replace: true});
     if (!dialog.historyStopAt) dialog.load({after});
   }
-  else if (firstVisibleEl) {
+  else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
     route.go(dialog.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
   }
 
