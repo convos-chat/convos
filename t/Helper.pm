@@ -52,7 +52,7 @@ sub messages {
       type      => $event,
     };
 
-    Test::More::diag("$ts <$from> $msg\n") if $ENV{CONVOS_DEBUG};
+    Test::More::diag("$ts <$from> $msg\n") if $ENV{CONVOS_DEBUG} and $ENV{CONVOS_DEBUG} > 1;
 
     $ts += $interval;
   }

@@ -84,6 +84,8 @@ sub messages_p {
     my %query_before = (%$query, around => undef, before => $query->{around});
     my %query_after  = (%$query, around => undef, after  => $query->{around}, include => 1);
 
+    warn sprintf "[%s] Getting messages around %s\n", $obj->id, $query->{around} if DEBUG;
+
     return Mojo::Promise->all(
       $self->messages_p($obj, \%query_before),
       $self->messages_p($obj, \%query_after),
@@ -124,7 +126,7 @@ sub messages_p {
   # If "after" is provided but not "before"
   # Set "before" to 12 months after "after"
   elsif (!$query->{before} and $query->{after}) {
-    my $future = dt->add_months(1);
+    my $future = dt->inc_month(1);
     $args{after}             = dt $query->{after};
     $args{before}            = $args{after}->add_months(12);
     $args{before}            = $future if $args{before} > $future;
@@ -308,8 +310,7 @@ sub _messages {
   return $args if $cursor < $args->{after} || $cursor > $args->{before}->add_months(1);
 
   # Prepare cursor for next time _messages() will be called
-  my $mon = $args->{cursor}->mon;
-  $args->{cursor} = $args->{cursor}->add_months($args->{inc_by}) while $args->{cursor}->mon == $mon;
+  $args->{cursor} = $args->{cursor}->inc_month($args->{inc_by});
 
   my $FH;
   eval {

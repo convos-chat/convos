@@ -3,6 +3,13 @@ use lib '.';
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
+use Convos::Date;
+
+BEGIN {
+  # CONVOS_TIME=2020-08-31T23:54:00 prove -vl t/backend-file-messages.t
+  my $time = Convos::Date->parse($ENV{CONVOS_TIME} || time)->epoch;
+  *CORE::GLOBAL::time = sub () {$time};
+}
 
 t::Helper->subprocess_in_main_process;
 

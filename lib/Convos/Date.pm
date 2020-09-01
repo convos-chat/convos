@@ -17,6 +17,15 @@ our @EXPORT_OK = qw(dt);
 
 sub dt { __PACKAGE__->parse(@_) }
 
+sub inc_month {
+  my $self   = shift;
+  my $offset = shift || 1;
+  my $next   = $self->parse($self);
+
+  $next = $next + (86400 * $offset) while $next->mon == $self->mon;
+  return $next;
+}
+
 sub parse {
   my $class = shift;
 
@@ -72,6 +81,14 @@ L<Time::Piece/datetime>, instead of L<Time::Piece/cdate>.
 Calls L</parse> on the input value, and returns a new C<Convos::Date> object.
 
 =head1 METHODS
+
+=head2 inc_month
+
+  $dt = $dt->inc_month;
+  $dt = $dt->inc_month($inc_by);
+
+Used to go to the next or previous month using +1 or -1. Defaults to going to
+the next month.
 
 =head2 parse
 

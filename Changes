@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix clearing dialog messages when loading overlapping messages
  - Fix not loading messages when a dialog already has messages
  - Fix not having #undefined in location when scrolling to "date change" marker
+ - Fix not skipping a month when fething messages at end of month
 
 4.35 2020-08-28T12:27:00+0900
  - Fix not following link when clicking on a thumbnail
