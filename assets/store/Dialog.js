@@ -116,29 +116,25 @@ export default class Dialog extends Reactive {
 
   async load(params = {}) {
     if (!this.messagesOp || this.is('loading')) return this;
-    if (this._hasEndOfStream(params)) return this;
-
-    const internalMessages = [];
-    if (this._shouldClearMessages(params)) {
-      internalMessages.push.apply(internalMessages, this.messages.filter(msg => msg.internal));
-      this.update({messages: []});
-    }
+    if (this._skipLoad(params)) return this;
 
     // Load messages
     this.update({status: 'loading'});
     if (!params.limit) params.limit = params.around ? 30 : 40;
     await this.messagesOp.perform({...params, connection_id: this.connection_id, dialog_id: this.dialog_id});
+
+    this.update({status: this.messagesOp.status});
+
     const body = this.messagesOp.res.body;
+    const internalMessages = [];
+    if (params.around || (!params.after && !params.before)) {
+      internalMessages.push.apply(internalMessages, this.messages.filter(msg => msg.internal));
+      this.update({messages: []});
+    }
+
     this.addMessages(params.before ? 'unshift' : 'push', body.messages || []);
     this.addMessages('push', internalMessages);
-    this.update({status: this.messagesOp.status});
     this._setEndOfStream(params, body);
-
-    [0, -1].forEach(index => {
-      const msg = this.messages.slice(index)[0];
-      const bodyKey = index ? 'history_stop' : 'history_start';
-      if (msg && msg.ts.toISOString() == body[bodyKey]) this.update({[camelize(bodyKey)]: msg.ts});
-    });
 
     return this;
   }
@@ -263,11 +259,6 @@ export default class Dialog extends Reactive {
     return '';
   }
 
-  _hasEndOfStream(opParams) {
-    if (!this.messages.length) return this.is('success');
-    return (opParams.before && this.historyStartAt) || (opParams.after && this.historyStopAt);
-  }
-
   _loadParticipants() {
     if (this.participantsLoaded || !this.dialog_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
@@ -340,21 +331,10 @@ export default class Dialog extends Reactive {
     }
   }
 
-  _shouldClearMessages(opParams) {
-    // before=...
-    const firstMessage = this.messages[0];
-    if (!firstMessage) return false;
-    if (opParams.before && opParams.before != firstMessage.ts.toISOString()) return true;
-
-    // after=...
-    const lastMessage = this.messages.slice(-1)[0];
-    if (opParams.after && opParams.after != lastMessage.ts.toISOString()) return true;
-    if (!opParams.after && !opParams.before && !this.historyStopAt) return true;
-
-    // around=...
-    if (opParams.around) return this.messages.includes(msg => msg.ts.toISOString() == opParams.around);
-
-    return false;
+  _skipLoad(opParams) {
+    if (!this.messages.length) return this.is('success');
+    if (opParams.around) return !!this.messages.find(msg => msg.ts.toISOString() == opParams.around);
+    return (opParams.before && this.historyStartAt) || (opParams.after && this.historyStopAt);
   }
 
   _updateParticipants(params) {

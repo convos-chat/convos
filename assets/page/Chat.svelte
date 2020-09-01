@@ -118,7 +118,9 @@ function setDialogFromUser(user) {
   unsubscribe.setLastRead = dialog.setLastRead.bind(dialog);
   route.update({title: dialog.title});
   rtc.hangup();
-  dialog.load({around: isISOTimeString(route.hash) ? route.hash : now.toISOString()});
+
+  if (isISOTimeString(route.hash)) return dialog.load({around: route.hash});
+  if (!dialog.historyStopAt) return dialog.load({around: now.toISOString()});
 }
 </script>
 
