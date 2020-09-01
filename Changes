@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.36 Not Released
+4.36 2020-09-01T11:12:00+0900
  - Fix clearing dialog messages when loading overlapping messages
  - Fix not loading messages when a dialog already has messages
  - Fix not having #undefined in location when scrolling to "date change" marker
