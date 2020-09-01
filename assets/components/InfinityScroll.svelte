@@ -3,7 +3,7 @@ import {createEventDispatcher} from 'svelte';
 import {findVisibleElements, isType} from '../js/util';
 
 const dispatch = createEventDispatcher();
-const state = {scrollDelay: 80, scrollOffset: 80};
+const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0};
 
 let className = '';
 let isManuallyScrolled = true;
@@ -34,11 +34,15 @@ function onReady(infinityEl, params) {
 
 function onScroll(infinityEl) {
   if (state.scrollTid) clearTimeout(state.scrollTid);
-  state.scrollTid = setTimeout(() => {
-    if (isManuallyScrolled) return (isManuallyScrolled = false);
-    calculateDetails(infinityEl);
-    dispatch('scrolled', state);
-  }, state.scrollDelay);
+  if (Math.abs(state.scrollTop - state.infinityEl.scrollTop) > 600) onScrolled(infinityEl); // 600 is a more or less randomly picked number
+  state.scrollTid = setTimeout(() => onScrolled(infinityEl), state.scrollDelay);
+}
+
+function onScrolled(infinityEl) {
+  if (isManuallyScrolled) return (isManuallyScrolled = false);
+  state.scrollTop = infinityEl.scrollTop;
+  calculateDetails(infinityEl);
+  dispatch('scrolled', state);
 }
 
 function onUpdate(infinityEl, {scrollHeight}) {
