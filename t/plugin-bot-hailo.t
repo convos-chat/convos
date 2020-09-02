@@ -16,13 +16,15 @@ $hailo->emit(message => {message => '!'});
 $hailo->emit(message => {message => ''});
 $hailo->emit(message => {message => 'Hi'});
 $hailo->emit(message => {message => 'Superman rocks!'});
-is $hailo->hailo->stats, 2, 'learnt two things';
+$hailo->emit(message => {message => 'Superman: too cool for school'});
+is tokens(), 7, 'learned tokens';
 
 is $hailo->reply({message => 'Superman?'}), undef, 'reply is disabled';
 
 my $config = $hailo->config->data->{action}{'Convos::Plugin::Bot::Action::Hailo'} = {};
 $config->{free_speak_ratio} = 1;
-is $hailo->reply({message => 'Superman?'}), 'Superman rocks!', 'free_speak_ratio';
+is $hailo->reply({message => 'Superman?'}), 'Superman rocks!',      'free_speak_ratio';
+is $hailo->reply({message => 'school'}),    'Too cool for school.', 'without prefix';
 
 $config->{free_speak_ratio}   = 0;
 $config->{reply_on_highlight} = 1;
@@ -31,3 +33,5 @@ is $hailo->reply({message => 'bot: Superman?', highlight => 1}), 'Superman rocks
   'reply_on_highlight and highlighted';
 
 done_testing;
+
+sub tokens { +($hailo->hailo->stats)[0] }

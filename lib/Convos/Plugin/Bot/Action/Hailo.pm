@@ -2,6 +2,7 @@ package Convos::Plugin::Bot::Action::Hailo;
 use Mojo::Base 'Convos::Plugin::Bot::Action';
 
 use Convos::Util 'require_module';
+use Mojo::Util 'trim';
 
 has description => 'Natural language conversation simulator.';
 has hailo       => undef;
@@ -26,21 +27,32 @@ sub reply {
   my ($self, $event) = @_;
 
   my $reply_on_highlight = $self->event_config($event, 'reply_on_highlight');
-  return $self->hailo->reply($event->{message}) if $event->{highlight} and $reply_on_highlight;
+  return $self->_reply($event) if $event->{highlight} and $reply_on_highlight;
 
   my $free_speak_ratio = $self->event_config($event, 'free_speak_ratio');
-  return $self->hailo->reply($event->{message}) if $free_speak_ratio and $free_speak_ratio > rand;
+  return $self->_reply($event) if $free_speak_ratio and $free_speak_ratio > rand;
 
   return undef;
 }
 
 sub _learn {
   my ($self, $event) = @_;
-  return unless $event->{message} =~ m!\S!;
+
+  my $message = $event->{message} // '';
+  $message =~ s!^\S+:!!;    # Remove reply to prefix
+  $message = trim $message;
+  return unless $message =~ m!\w!;
 
   my $hailo = $self->hailo;
-  $hailo->learn($event->{message});
+  $hailo->learn($message);
   $hailo->save;
+}
+
+sub _reply {
+  my ($self, $event) = @_;
+  my $reply = $self->hailo->reply($event->{message});
+  $reply =~ s!^\S+:\s*!!;
+  return $reply;
 }
 
 1;
