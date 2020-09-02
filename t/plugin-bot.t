@@ -35,6 +35,7 @@ $config_file->spurt(config('two_actions.yaml'));
 Mojo::Promise->timer(0.05)->wait;
 ok $bot->action($_), "$_ present" for qw(core karma);
 ok !$bot->action('hailo'), "Convos::Plugin::Bot::Action::Hailo not present";
+ok !$bot->user->validate_password('supersecret'), 'generated password';
 
 my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url);
 my $connection    = $bot->user->get_connection($connection_id);
@@ -70,6 +71,9 @@ for my $name (qw(two_actions.yaml all_actions.yaml all_actions.yaml)) {
   Mojo::Promise->timer(0.1)->wait;
 }
 
+note 'custom password';
+ok $bot->user->validate_password('supersecret'), 'password from config file';
+
 my $replied = 0;
 Mojo::Util::monkey_patch('Convos::Plugin::Bot::Action::Core',
   reply => sub { $replied++; 'Some help' });
@@ -103,6 +107,7 @@ connections:
 
 @@ all_actions.yaml
 generic:
+  password: supersecret
   reply_delay: 0.1
 actions:
 - class: Convos::Plugin::Bot::Action::Core

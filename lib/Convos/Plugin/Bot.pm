@@ -30,6 +30,7 @@ sub register {
   return unless $config->{email} ||= $ENV{CONVOS_BOT_EMAIL};
   require_module 'YAML::XS';
   $app->helper(bot => sub {$self});
+  $self->_load_config;
   $self->_register_user($app->core, $config);
 }
 
@@ -115,7 +116,7 @@ sub _ensure_connection {
 
 sub _load_config {
   my $self = shift;
-  return unless -s $self->_config_file;
+  return unless $self->_config_file and -s $self->_config_file;
 
   my $ts = $self->_config_file->stat->mtime;
   return if $self->config->data->{ts} and $ts == $self->config->data->{ts};
@@ -124,8 +125,11 @@ sub _load_config {
   my $config = YAML::XS::Load($self->_config_file->slurp);
   @$config{qw(action connection ts)} = ({}, {}, $ts);
   $config->{$_} ||= [] for qw(actions connections);
+  my $old_password = $self->config->get('/generic/password') || '';
   $self->config->data($config);
 
+  my $password = $self->config->get('/generic/password');
+  $self->user->set_password($password) if $self->user and $password and $old_password ne $password;
   $self->_ensure_action($_)     for @{$self->config->get('/actions')};
   $self->_ensure_connection($_) for @{$self->config->get('/connections')};
 }
@@ -147,14 +151,18 @@ sub _register_user {
     unless $core->n_users or $ENV{CONVOS_BOT_ALLOW_STANDALONE};
 
   # Bot account exists
-  my $user = $core->get_user($config->{email});
+  my $user     = $core->get_user($config->{email});
+  my $password = $self->config->get('/generic/password');
+  $user->set_password($password) if $password;
+
   return $self->user($user)->_user_is_registered if $user;
 
   # Register bot account
-  my $password = generate_secret;
+  $password ||= generate_secret;
   $user = $core->user({email => $config->{email}})->role(give => 'bot')->set_password($password);
   $user->save_p->then(sub {
-    $core->log->info(qq(Created bot account $config->{email} with password "$password".));
+    $core->log->info(qq(Created bot account $config->{email} with password "$password".))
+      unless $self->config->get('/generic/password');
     $self->user($user)->_user_is_registered;
   })->catch(sub {
     my $err = shift;
@@ -201,7 +209,6 @@ sub _user_is_registered {
   );
 
   $self->_config_file($core->home->child($self->user->email, 'bot.yaml'));
-  $self->_load_config;
   Mojo::IOLoop->recurring(LOAD_INTERVAL, sub { $self and $self->_load_config });
 }
 
@@ -231,7 +238,8 @@ using chat commands, if you are a convos admin.
 
   ---
   generic:
-    reply_delay: 1 # Wait one second before posting reply
+    password: supersecret # Set bot login password
+    reply_delay: 1        # Wait one second before posting reply
 
   # The order of actions is significant, since the first action
   # that generates a reply wins.
