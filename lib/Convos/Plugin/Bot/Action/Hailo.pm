@@ -13,8 +13,12 @@ sub register {
 
   require_module 'DBD::SQLite';
   require_module 'Hailo';
-  $self->hailo(
-    Hailo->new(brain => $user->core->home->child($user->email, 'hailo.sqlite')->to_string));
+  my %hailo;
+  $hailo{brain}
+    = $config->{brain} || $user->core->home->child($user->email, 'hailo.sqlite')->to_string;
+  $hailo{engine_class} = $config->{engine_class} || 'Scored';
+  $hailo{engine_args}  = $config->{engine_args}  || {};
+  $self->hailo(Hailo->new(%hailo));
   $self->on(message => sub { shift->_learn(@_) });
 }
 
@@ -66,6 +70,9 @@ in a conversation.
   ---
   actions:
   - class: Convos::Plugin::Bot::Action::Hailo
+    engine_class: Scored
+    engine_args:
+      interval: 0.5
 
 =head1 DESCRIPTION
 
