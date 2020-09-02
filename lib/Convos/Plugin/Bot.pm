@@ -170,7 +170,7 @@ sub _run_actions_with_message {
   return if lc $event->{from} eq lc $connection->nick;
 
   local $event->{is_private} = $event->{dialog_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
-  local $event->{command} = $event->{message};
+  local $event->{command}    = $event->{message};
 
   my $reply;
   for my $config (@{$self->config->get('/actions')}) {
@@ -180,7 +180,11 @@ sub _run_actions_with_message {
     next if $reply or !defined($reply = $action->reply($event));
   }
 
-  $connection->send_p($event->{dialog_id}, $reply) if $reply;
+  return unless $reply;
+  my $delay = $self->config->get('/generic/reply_delay') || 1;
+  Scalar::Util::weaken($connection);
+  Mojo::IOLoop->timer(
+    $delay => sub { $connection and $connection->send_p($event->{dialog_id}, $reply) });
 }
 
 sub _user_is_registered {
@@ -226,6 +230,9 @@ using chat commands, if you are a convos admin.
 =head2 Example config file
 
   ---
+  generic:
+    reply_delay: 1 # Wait one second before posting reply
+
   # The order of actions is significant, since the first action
   # that generates a reply wins.
   actions:

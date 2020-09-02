@@ -102,6 +102,8 @@ connections:
   wanted_state: disconnected
 
 @@ all_actions.yaml
+generic:
+  reply_delay: 0.1
 actions:
 - class: Convos::Plugin::Bot::Action::Core
 - class: Convos::Plugin::Bot::Action::Karma
