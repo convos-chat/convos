@@ -31,7 +31,7 @@ let unsubscribe = {};
 
 $: setDialogFromRoute($route);
 $: setDialogFromUser($user);
-$: messages = renderMessages({dialog: $dialog, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
+$: messages = renderMessages({dialog: $dialog, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $dialog.frozen ? true : false;
 $: if (!$route.hash && !$dialog.historyStopAt) dialog.load({});
 

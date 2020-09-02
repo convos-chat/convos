@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 4.37 Not Released
  - Add suppport for custom bot password
  - Fix bot Hailo action will not store "nick: ..." prefix
+ - Fix using "expandUrlToMedia" setting from user account
  - Change bot to wait one second before replying
  - Change default Hailo engine class to Hailo::Engine::Scored
 

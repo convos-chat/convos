@@ -6,7 +6,7 @@ import {jsonhtmlify} from 'jsonhtmlify';
 
 export const EMBED_CACHE = {};
 
-export const renderMessages = ({dialog, from = 'Convos', groupBy = ['fromId'], waiting = []}) => {
+export const renderMessages = ({dialog, expandUrlToMedia = false, from = 'Convos', groupBy = ['fromId'], waiting = []}) => {
   const ts = new Time();
 
   let prev = {};
@@ -17,7 +17,7 @@ export const renderMessages = ({dialog, from = 'Convos', groupBy = ['fromId'], w
     msg.index = i;
     msg.isOnline = messageIsOnline(msg, dialog);
     msg.dayChanged = messageDayChanged(msg, prev);
-    msg.embeds = messageEmbeds(msg, dialog);
+    msg.embeds = messageEmbeds(msg, dialog, expandUrlToMedia);
     msg.className = messageClassName(msg, prev);
     prev = msg;
     return msg;
@@ -60,8 +60,8 @@ function messageDayChanged(msg, prev) {
   return prev.ts && msg.ts.getDate() != prev.ts.getDate();
 }
 
-function messageEmbeds(msg, dialog) {
-  const embeds = (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url))));
+function messageEmbeds(msg, dialog, expandUrlToMedia) {
+  const embeds = !expandUrlToMedia ? [] : (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url))));
 
   if (msg.canToggleDetails) {
     const cacheKey = ['details', dialog.path, msg.ts.valueOf()].join(':');
@@ -96,7 +96,7 @@ function renderWaitingMessages({dialog, from, waiting}) {
     msg.index = i;
     msg.isOnline = true;
     msg.type = msg.waitingForResponse ? 'notice' : 'error';
-    msg.embeds = messageEmbeds(msg, dialog);
+    msg.embeds = messageEmbeds(msg, dialog, false);
     msg.className = messageClassName(msg, prev) + ' is-waiting';
     msg.markdown = msg.waitingForResponse ? msg.message : lmd('Could not send message "%1".', msg.message);
     prev = msg;
