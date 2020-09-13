@@ -144,6 +144,8 @@ export default class User extends Reactive {
     msg.stopPropagation = () => { msg.bubbles = false };
     this.emit(msg.dispatchTo, msg);
 
+    if (msg.highlight) this.notifications.addMessage(msg);
+
     const conn = this.findDialog({connection_id: msg.connection_id});
     if (!conn) return;
     if (conn[msg.dispatchTo]) conn[msg.dispatchTo](msg);

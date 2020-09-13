@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 4.37 Not Released
+ - Add notification icon on the top of the <SidebarChat/>
  - Add suppport for custom bot password
  - Fix joining dialog when creating connection #512
  - Fix bot Hailo action will not store "nick: ..." prefix

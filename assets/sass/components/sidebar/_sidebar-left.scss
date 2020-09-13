@@ -37,6 +37,31 @@
   .sidebar__header {
     background: var(--sidebar-left-bg);
   }
+
+  .sidebar__header__notification {
+    font-size: 1.8rem;
+    text-align: center;
+    width: 1em;
+    display: block;
+    position: absolute;
+    top: calc(var(--gutter) + 0.1rem);
+    right: 1.3em;
+
+    i {
+      font-size: 1.5rem;
+      position: static;
+    }
+  }
+
+  .chat-header__unread {
+    font-weight: bold;
+    right: -0.2rem;
+    top: -0.3rem;
+  }
+
+  .sidebar__header.has-focus .sidebar__header__notification {
+    display: none;
+  }
 }
 
 .sidebar-left__nav a {

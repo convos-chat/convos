@@ -125,19 +125,25 @@ function onSearchKeydown(e) {
   if (activeLinkIndex >= visibleLinks.length) activeLinkIndex = 0;
 }
 
-function renderUnread(dialog) {
-  return dialog.unread > 60 ? '60+' : dialog.unread || 0;
+function renderUnread(dialog, max = 60) {
+  return dialog.unread > max ? '60+' : dialog.unread || 0;
 }
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <form class="sidebar__header has-tooltip is-below" data-tooltip="{l('Search for conversations or messages')}" on:submit="{e => e.preventDefault()}">
+  <form class="sidebar__header has-tooltip is-below" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
     <input type="text" id="search_input" class="is-primary-menu-item"
       placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
       bind:value="{filter}"
       on:blur="{clearFilter}"
       on:focus="{filterNav}"
       on:keydown="{onSearchKeydown}">
+
+    <Link href="/chat" class="sidebar__header__notification">
+      <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
+      <small class="chat-header__unread" hidden="{!$notifications.unread}">{renderUnread($notifications, 10)}</small>
+    </Link>
+
     <label for="search_input"><Icon name="search"/></label>
   </form>
 

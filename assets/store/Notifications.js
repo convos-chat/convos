@@ -12,6 +12,11 @@ export default class Notifications extends Dialog {
     });
   }
 
+  addMessage(msg) {
+    this.update({unread: this.unread + 1});
+    return this.addMessages('push', [msg]);
+  }
+
   is(status) {
     return status == 'notifications' ? true : super.is(status);
   }

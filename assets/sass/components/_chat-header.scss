@@ -91,14 +91,14 @@
 }
 
 .chat-header__unread {
-  background: var(--sidebar-left-bg);
+  background: var(--error-color);
   font-size: 0.85rem;
   text-align: center;
-  line-height: 1.4em;
+  line-height: 1.3rem;
   border-radius: 50%;
   box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
-  width: 1.2em;
-  height: 1.2em;
+  width: 1.3rem;
+  height: 1.3rem;
   display: block;
   position: absolute;
   top: 1.5em;
