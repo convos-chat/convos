@@ -197,6 +197,9 @@ paths:
           required: [ url ]
           type: object
           properties:
+            dialog_id:
+              description: 'Example: #convos'
+              type: string
             on_connect_commands:
               description: Commands to be run after the connection is established
               items:
@@ -222,7 +225,7 @@ paths:
       x-mojo-to: dialog#list
       responses:
         '200':
-          description: List of messages.
+          description: List of dialogs.
           schema:
             type: object
             properties:

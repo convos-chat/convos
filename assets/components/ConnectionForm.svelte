@@ -3,13 +3,11 @@ import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnURL from '../js/ConnURL';
 import OperationStatus from '../components/OperationStatus.svelte';
-import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount, tick} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
-import {settings} from '../store/Viewport';
 
 export let dialog = {};
 
@@ -121,7 +119,7 @@ async function submitForm(e) {
       <span slot="label">{l('Want to be connected')}</span>
     </Checkbox>
   {:else}
-    <TextField name="dialog" placeholder="{l('Ex: #convos')}">
+    <TextField name="dialog_id" placeholder="{l('Ex: #convos')}">
       <span slot="label">{l('Conversation name')}</span>
     </TextField>
   {/if}

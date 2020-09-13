@@ -99,4 +99,11 @@ $t->get_ok('/api/connections')->status_is(200)->json_is('/connections/1/on_conne
 $t->delete_ok('/api/connection/irc-doesnotexist')->status_is(200);
 $t->delete_ok('/api/connection/irc-localhost')->status_is(200);
 
+note 'test that "dialog_id" will create a connection and dialog';
+$t->get_ok('/api/dialogs')->status_is(200)->json_is('/dialogs', []);
+$t->post_ok('/api/connections',
+  json => {dialog_id => '#convos', url => "irc://localhost", wanted_state => 'disconnected'})
+  ->status_is(200);
+$t->get_ok('/api/dialogs')->status_is(200)->json_is('/dialogs/0/dialog_id', '#convos');
+
 done_testing;

@@ -7,7 +7,9 @@ sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my $json = $self->req->json;
-  my $url  = Mojo::URL->new($json->{url} || '');
+
+  my $url = Mojo::URL->new($json->{url} || '');
+  $url->path("/$json->{dialog_id}") if $json->{dialog_id};
 
   if ($self->settings('forced_connection')) {
     my $default_connection = Mojo::URL->new($self->settings('default_connection'));

@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 4.37 Not Released
  - Add suppport for custom bot password
+ - Fix joining dialog when creating connection #512
  - Fix bot Hailo action will not store "nick: ..." prefix
  - Fix using "expandUrlToMedia" setting from user account
  - Change bot to wait one second before replying
