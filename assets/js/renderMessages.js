@@ -3,6 +3,7 @@ import Time from './Time';
 import {api} from './Api';
 import {lmd} from './i18n';
 import {jsonhtmlify} from 'jsonhtmlify';
+import {q} from './util';
 
 export const EMBED_CACHE = {};
 
@@ -45,7 +46,7 @@ async function loadEmbed(url) {
   embed.className = embed.provider_name ? 'for-' + embed.provider_name.toLowerCase() : embed.html ? 'for-unknown' : 'hidden';
 
   const embedEl = document.createRange().createContextualFragment(embed.html).firstChild;
-  q(embedEl, 'img', ['error', (e) => (e.target.style.display = 'none')]);
+  q(embedEl, 'img', [['error', (e) => (e.target.style.display = 'none')]]);
   const types = (embedEl && embedEl.className || '').split(/\s+/);
   if (types.indexOf('le-paste') != -1) renderPaste(embed, embedEl);
 

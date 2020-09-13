@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.38 2020-09-13T18:31:00+0900
+ - Fix typo in renderMessages.js
+
 4.37 2020-09-13T18:22:00+0900
  - Add notification icon on the top of the <SidebarChat/>
  - Add suppport for custom bot password
