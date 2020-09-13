@@ -32,7 +32,6 @@ async function loadDetails(url, msg) {
 }
 
 async function loadEmbed(url) {
-  // TODO: if (!expandUrlToMedia) return;
   const op = await api('/api', 'embed', {url}).perform();
   const embed = op.res.body;
 
@@ -40,6 +39,7 @@ async function loadEmbed(url) {
   embed.className = embed.provider_name ? 'for-' + embed.provider_name.toLowerCase() : embed.html ? 'for-unknown' : 'hidden';
 
   const embedEl = document.createRange().createContextualFragment(embed.html).firstChild;
+  q(embedEl, 'img', ['error', (e) => (e.target.style.display = 'none')]);
   const types = (embedEl && embedEl.className || '').split(/\s+/);
   if (types.indexOf('le-paste') != -1) renderPaste(embed, embedEl);
 
@@ -61,7 +61,7 @@ function messageDayChanged(msg, prev) {
 }
 
 function messageEmbeds(msg, dialog, expandUrlToMedia) {
-  const embeds = !expandUrlToMedia ? [] : (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url))));
+  const embeds = expandUrlToMedia ? (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url)))) : [];
 
   if (msg.canToggleDetails) {
     const cacheKey = ['details', dialog.path, msg.ts.valueOf()].join(':');
