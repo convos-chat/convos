@@ -26,8 +26,14 @@ export const renderMessages = ({dialog, expandUrlToMedia = false, from = 'Convos
 
 async function loadDetails(url, msg) {
   const details = {...(msg.sent || msg)};
-  ['bubbles', 'color', 'connection', 'dialog', 'dialog_id', 'event', 'fromId', 'id', 'markdown', 'message', 'method', 'stopPropagation']
-    .forEach(k => delete details[k]);
+
+  [
+    'bubbles',   'canToggleDetails',  'className',   'color',
+    'command',   'connection_id',     'dayChanged',  'embeds',
+    'event',     'groupBy',           'id',          'index',
+    'isOnline',  'markdown',          'method',      'stopPropagation',
+  ].forEach(k => delete details[k]);
+
   return {className: 'for-jsonhtmlify hidden', html: jsonhtmlify(details).outerHTML};
 }
 
