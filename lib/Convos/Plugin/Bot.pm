@@ -189,7 +189,7 @@ sub _run_actions_with_message {
   }
 
   return unless $reply;
-  my $delay = $self->config->get('/generic/reply_delay') || 1;
+  my $delay = $self->config->get('/generic/reply_delay') || 0.5;
   Scalar::Util::weaken($connection);
   Mojo::IOLoop->timer(
     $delay => sub { $connection and $connection->send_p($event->{dialog_id}, $reply) });
