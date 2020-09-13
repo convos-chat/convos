@@ -27,6 +27,7 @@ let chatInput;
 let connection = user.notifications;
 let dialog = user.notifications;
 let now = new Time();
+let onLoadHash = '';
 let unsubscribe = {};
 
 $: setDialogFromRoute($route);
@@ -68,7 +69,7 @@ function onMessageClick(e) {
 function onRendered(e) {
   const {infinityEl, scrollTo} = e.detail;
   scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-  renderFocusedEl(infinityEl, true);
+  renderFocusedEl(infinityEl, onLoadHash == route.hash);
 }
 
 function onScrolled(e) {
@@ -90,8 +91,6 @@ function onScrolled(e) {
   else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
     route.go(dialog.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
   }
-
-  renderFocusedEl(infinityEl, false);
 }
 
 function renderFocusedEl(infinityEl, add) {
@@ -119,7 +118,8 @@ function setDialogFromUser(user) {
   route.update({title: dialog.title});
   rtc.hangup();
 
-  if (isISOTimeString(route.hash)) return dialog.load({around: route.hash});
+  onLoadHash = isISOTimeString(route.hash) && route.hash || '';
+  if (onLoadHash) return dialog.load({around: onLoadHash});
   if (!dialog.historyStopAt) return dialog.load({around: now.toISOString()});
 }
 </script>

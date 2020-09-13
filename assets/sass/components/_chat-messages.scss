@@ -104,7 +104,9 @@
     box-shadow: 0 0 0 2px var(--highlight-color-bg);
     border-radius: 3px;
 
+    .message__text,
     .message__ts {
+      font-weight: bold;
       opacity: 1;
     }
   }

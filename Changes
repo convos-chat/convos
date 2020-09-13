@@ -6,6 +6,7 @@ Revision history for perl distribution Convos
  - Fix using "expandUrlToMedia" setting from user account
  - Change bot to wait one second before replying
  - Change default Hailo engine class to Hailo::Engine::Scored
+ - Will only add "has-focus" to message when coming from search or notifications
 
 4.36 2020-09-01T11:12:00+0900
  - Fix clearing dialog messages when loading overlapping messages
