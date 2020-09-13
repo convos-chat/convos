@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.37 Not Released
+4.37 2020-09-13T18:22:00+0900
  - Add notification icon on the top of the <SidebarChat/>
  - Add suppport for custom bot password
  - Fix joining dialog when creating connection #512
