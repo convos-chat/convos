@@ -4,7 +4,7 @@
 #
 # BUILD: docker build --no-cache --rm -t nordaaker/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data nordaaker/convos
-FROM alpine:3.11
+FROM alpine:3.12
 LABEL maintainer="jhthorsen@cpan.org"
 
 RUN mkdir /app
