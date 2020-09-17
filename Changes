@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.39 Not Released
+4.39 2020-09-17T20:19:00+0900
  - Depend on LinkEmbedder v1.13
  - Removed the slash over the notification bell
 
