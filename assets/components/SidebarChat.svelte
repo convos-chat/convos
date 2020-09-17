@@ -140,7 +140,7 @@ function renderUnread(dialog, max = 60) {
       on:keydown="{onSearchKeydown}">
 
     <Link href="/chat" class="sidebar__header__notification">
-      <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
+      <Icon name="bell"/>
       <small class="chat-header__unread" hidden="{!$notifications.unread}">{renderUnread($notifications, 10)}</small>
     </Link>
 
@@ -172,7 +172,7 @@ function renderUnread(dialog, max = 60) {
 
     <h3>{$user.email || l('Account')}</h3>
     <Link href="/chat">
-      <Icon name="{$notifications.unread ? 'bell' : 'bell-slash'}"/>
+      <Icon name="bell"/>
       <span>{l('Notifications')}</span>
       <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
     </Link>

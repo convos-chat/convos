@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+4.39 Not Released
+ - Depend on LinkEmbedder v1.13
+ - Removed the slash over the notification bell
+
 4.38 2020-09-13T18:31:00+0900
  - Fix typo in renderMessages.js
 
