@@ -1,8 +1,11 @@
 Revision history for perl distribution Convos
 
 4.40 Not Released
- - Upgrade Docker Alpine version to 3.12
+ - Upgrade Docker Alpine version to 3.12 #513
    Contributor: Derzsi Dániel
+ - Fix Docker on Windows #514
+   Contributor: Derzsi Dániel
+ - Bumped LinkEmbedder to v1.14
 
 4.39 2020-09-17T20:19:00+0900
  - Depend on LinkEmbedder v1.13
