@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.40 Not Released
+4.40 2020-09-22T10:06:00+0900
  - Fix line numbers in embedded paste
  - Fix opening links inside embeds in new tab/window
  - Fix Docker on Windows #514
