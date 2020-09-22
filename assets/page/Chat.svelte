@@ -48,6 +48,7 @@ onDestroy(() => {
 
 function onMessageClick(e) {
   const aEl = e.target.closest('a');
+  if (aEl && e.target.closest('.embed')) aEl.target = '_blank';
   if (aEl && !aEl.classList.contains('le-thumbnail') && !aEl.classList.contains('onclick')) return;
 
   const pasteMetaEl = e.target.closest('.le-meta');
