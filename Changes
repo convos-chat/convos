@@ -1,9 +1,10 @@
 Revision history for perl distribution Convos
 
 4.40 Not Released
- - Upgrade Docker Alpine version to 3.12 #513
-   Contributor: Derzsi Dániel
+ - Fix line numbers in embedded paste
  - Fix Docker on Windows #514
+   Contributor: Derzsi Dániel
+ - Upgrade Docker Alpine version to 3.12 #513
    Contributor: Derzsi Dániel
  - Bumped LinkEmbedder to v1.14
 

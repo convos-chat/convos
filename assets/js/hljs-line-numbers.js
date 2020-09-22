@@ -11,7 +11,7 @@ export default function(hljs) {
     }
 
     hljs.highlightBlock(element, options);
-    setTimeout(() => (element.innerHTML = lineNumbersInternal(element, options)), 0);
+    element.innerHTML = lineNumbersInternal(element, options);
   };
 }
 
