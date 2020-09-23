@@ -99,10 +99,10 @@ paths:
 
   /connection/{connection_id}/dialog/{dialog_id}/read:
     post:
-      operationId: setDialogLastRead
-      summary: Set 'last_read' for a dialog.
+      operationId: markDialogAsRead
+      summary: Clears unread for a dialog.
       tags: [ dialog ]
-      x-mojo-to: dialog#last_read
+      x-mojo-to: dialog#mark_as_read
       parameters:
       - $ref: '#/parameters/connection_id'
       - $ref: '#/parameters/dialog_id'
@@ -111,10 +111,6 @@ paths:
           description: Successful response.
           schema:
             type: object
-            properties:
-              last_read:
-                format: date-time
-                type: string
 
   /connection/{connection_id}/messages:
     get:
@@ -153,10 +149,10 @@ paths:
 
   /connection/{connection_id}/read:
     post:
-      operationId: setConnectionLastRead
-      summary: Set 'last_read' for a connection dialog.
+      operationId: markConnectionAsRead
+      summary: Clears unread for a connection.
       tags: [ connection ]
-      x-mojo-to: dialog#last_read
+      x-mojo-to: dialog#mark_as_read
       parameters:
       - $ref: '#/parameters/connection_id'
       responses:
@@ -164,10 +160,6 @@ paths:
           description: Successful response.
           schema:
             type: object
-            properties:
-              last_read:
-                format: date-time
-                type: string
 
   /connections:
     get:
@@ -332,7 +324,7 @@ paths:
 
   /notifications/read:
     post:
-      operationId: readNotifications
+      operationId: markNotificationsAsRead
       summary: Mark notications as read.
       tags: [ chat ]
       x-mojo-to: notifications#read
@@ -683,19 +675,13 @@ definitions:
 
   Dialog:
     type: object
-    required: [ connection_id, dialog_id, last_read, name, unread ]
+    required: [ connection_id, dialog_id, name, unread ]
     properties:
       connection_id:
         description: Unique identifier for the connection this dialog is part of
         type: string
       dialog_id:
         description: Unique identifier for the dialog
-        type: string
-      last_active:
-        format: date-time
-        type: string
-      last_read:
-        format: date-time
         type: string
       name:
         description: Name of the room or person

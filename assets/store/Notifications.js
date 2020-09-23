@@ -26,6 +26,6 @@ export default class Notifications extends Dialog {
 
   _addOperations() {
     this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
-    this.prop('ro', 'setLastReadOp', api('/api', 'readNotifications'));
+    this.prop('ro', 'markAsReadOp', api('/api', 'markNotificationsAsRead'));
   }
 }

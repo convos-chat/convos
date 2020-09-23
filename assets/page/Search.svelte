@@ -4,8 +4,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
-import Time from '../js/Time';
-import {getContext, onMount} from 'svelte';
+import {getContext, onDestroy, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
@@ -20,6 +19,7 @@ $: classNames = ['main', messages.length && 'has-results', $dialog.is('search') 
 $: setDialogFromRoute($route);
 
 onMount(() => user.search.on('send', search));
+onDestroy(() => dialog.markAsRead());
 
 function dialogUrl(message) {
   const url = ['', 'chat', message.connection_id, message.dialog_id].map(encodeURIComponent).join('/');
@@ -42,14 +42,8 @@ function search(msg) {
 function setDialogFromRoute(route) {
   const d = route.path.indexOf('search') == -1 ? user.notifications : user.search;
   if (d != dialog) dialog = d.update({dialog_id: true});
-
-  if (dialog.is('search')) {
-    search({message: route.param('q')});
-  }
-  else if (!dialog.is('success') || dialog.last_read <= new Time() - 10000) {
-    dialog.load();
-    dialog.setLastRead();
-  }
+  if (dialog.is('search')) return search({message: route.param('q')});
+  if (!dialog.is('success')) dialog.load();
 }
 </script>
 

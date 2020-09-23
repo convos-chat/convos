@@ -109,13 +109,13 @@ function setDialogFromRoute(route) {
 function setDialogFromUser(user) {
   if (user.activeDialog == dialog) return;
   if (unsubscribe.dialog) unsubscribe.dialog();
-  if (unsubscribe.setLastRead) unsubscribe.setLastRead();
+  if (unsubscribe.markAsRead) unsubscribe.markAsRead();
 
   dialog = user.activeDialog;
   connection = user.findDialog({connection_id: dialog.connection_id}) || dialog;
   now = new Time();
   unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
-  unsubscribe.setLastRead = dialog.setLastRead.bind(dialog);
+  unsubscribe.markAsRead = dialog.markAsRead.bind(dialog);
   route.update({title: dialog.title});
   rtc.hangup();
 

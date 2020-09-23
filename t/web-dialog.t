@@ -11,16 +11,13 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 
 $user->connection({name => 'localhost', protocol => 'irc'})->state(connected => '');
 
-my $last_active = Mojo::Date->new(1471623050)->to_datetime;
-my $last_read   = Mojo::Date->new(1471623058)->to_datetime;
-my $connection  = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
 $connection->_irc_event_privmsg({
   command => 'privmsg',
   prefix  => 'Supergirl!super.girl@i.love.debian.org',
   params  => ['#Convos', 'not a superdupersuperman?']
 });
-$connection->dialog({name => '#Convos', frozen => ''})->last_read($last_read)
-  ->last_active($last_active);
+$connection->dialog({name => '#Convos', frozen => ''})->unread(42);
 $t->get_ok('/api/dialogs')->status_is(200)->json_is(
   '/dialogs' => [
     {
@@ -28,17 +25,14 @@ $t->get_ok('/api/dialogs')->status_is(200)->json_is(
       dialog_id     => '#convos',
       frozen        => '',
       name          => '#Convos',
-      last_active   => '2016-08-19T16:10:50Z',
-      last_read     => '2016-08-19T16:10:58Z',
       topic         => '',
-      unread        => 0,
+      unread        => 42,
     },
   ]
 );
 
 $user->connection({name => 'example', protocol => 'irc'})
-  ->dialog({name => '#superheroes', frozen => ''})->last_read($last_read)
-  ->last_active($last_active);
+  ->dialog({name => '#superheroes', frozen => ''})->unread(34);
 $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
   '/connections',
   [
@@ -72,26 +66,21 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
       dialog_id     => '#convos',
       frozen        => '',
       name          => '#Convos',
-      last_active   => '2016-08-19T16:10:50Z',
-      last_read     => '2016-08-19T16:10:58Z',
       topic         => '',
-      unread        => 0,
+      unread        => 42,
     },
     {
       connection_id => 'irc-example',
       dialog_id     => '#superheroes',
       frozen        => '',
-      last_active   => '2016-08-19T16:10:50Z',
-      last_read     => '2016-08-19T16:10:58Z',
       name          => '#superheroes',
       topic         => '',
-      unread        => 0,
+      unread        => 34,
     }
   ],
   'user dialogs'
 )->json_hasnt('/notifications', 'user notifications');
 
-$t->post_ok('/api/connection/irc-localhost/dialog/%23convos/read')->status_is(200)
-  ->json_like('/last_read', qr{^\d+-\d+-\d+});
+$t->post_ok('/api/connection/irc-localhost/dialog/%23convos/read')->status_is(200);
 
 done_testing;

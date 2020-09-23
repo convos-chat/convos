@@ -68,10 +68,8 @@ $t->get_ok('/api/user')->status_is(200)->json_is('/email', 'superman@example.com
 my $user = $t->app->core->get_user('superman@example.com');
 $user->unread(4);
 
-my $last_active = Mojo::Date->new(1471623050)->to_datetime;
-my $last_read   = Mojo::Date->new(1471623058)->to_datetime;
 $user->connection({name => 'localhost', protocol => 'irc'})->dialog({name => '#convos'})
-  ->last_read($last_read)->last_active($last_active);
+  ->unread(42);
 $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)
   ->json_is('/email', 'superman@example.com')->json_is(
   '/connections',
@@ -91,11 +89,9 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)
     connection_id => 'irc-localhost',
     dialog_id     => '#convos',
     frozen        => 'Not connected.',
-    last_active   => '2016-08-19T16:10:50Z',
-    last_read     => '2016-08-19T16:10:58Z',
     name          => '#convos',
     topic         => '',
-    unread        => 0,
+    unread        => 42,
   }]
 );
 

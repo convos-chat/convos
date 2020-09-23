@@ -112,8 +112,6 @@ cmp_deeply(
         connection_id => 'irc-localhost',
         dialog_id     => '#convos',
         frozen        => '',
-        last_active   => re(qr{^\d+-\d+-\d+}),
-        last_read     => re(qr{^\d+-\d+-\d+}),
         name          => '#convos',
         topic         => 'Too cool!',
         unread        => 0,

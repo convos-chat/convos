@@ -8,36 +8,38 @@ has frozen   => '';
 has name     => sub { Carp::confess('name required in constructor') };
 has password => '';
 has topic    => '';
+has unread   => 0;
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
 sub id         { my $from = $_[1] || $_[0]; lc($from->{id} // $from->{name}) }
-
-has last_active => sub { Mojo::Date->new->to_datetime };
-has last_read   => sub { Mojo::Date->new->to_datetime };
-
 sub is_private { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 }
+
+sub inc_unread_p {
+  my $self = shift;
+  $self->{unread}++;
+  return Mojo::Promise->resolve($self);
+}
 
 sub messages_p {
   my ($self, $query) = @_;
   return $self->connection->user->core->backend->messages_p($self, $query);
 }
 
-sub calculate_unread_p {
+# back compat - will be removed in future version
+sub _calculate_unread_p {
   my $self = shift;
-
-  return $self->messages_p({after => $self->last_read, limit => 61})->then(sub {
-    my $res = shift;
-    return $self->{unread} = int @{$res->{messages}};
-  });
+  return unless my $last_read = delete $self->{last_read};
+  return $self->messages_p({after => $last_read, limit => 61})
+    ->then(sub { $self->unread(int @{shift->{messages}}) });
 }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen name last_active last_read topic);
+  my %json = map { ($_, $self->$_) } qw(frozen name topic unread);
   $json{connection_id} = $self->connection->id;
   $json{dialog_id}     = $self->id;
+  $json{last_read}     = $self->{last_read} if $self->{last_read};    # back compat
   $json{password}      = $self->password if $persist;
-  $json{unread}        = $self->{unread} || 0;
   return \%json;
 }
 
@@ -80,20 +82,6 @@ Returns a unique identifier for a dialog.
 
 The name of this dialog.
 
-=head2 last_active
-
-  $datetime = $dialog->last_active;
-  $dialog = $dialog->last_active($datetime);
-
-Holds an datetime timestring of last time this dialog received a message.
-
-=head2 last_read
-
-  $datetime = $dialog->last_read;
-  $dialog = $dialog->last_read($datetime);
-
-Holds an datetime timestring of last time this dialog was active in frontend.
-
 =head2 password
 
   $str = $dialog->password;
@@ -106,7 +94,19 @@ The password used to join this dialog.
 
 The topic (subject) of the dialog.
 
+=head2 unread
+
+  $int = $dialog->unread;
+
+Holds the number of unread messages.
+
 =head1 METHODS
+
+=head2 inc_unread_p
+
+  $p = $dialog->inc_unread_p;
+
+Used to increase the unread count.
 
 =head2 is_private
 
@@ -122,14 +122,6 @@ participants can join the dialog.
 Will fetch messages from persistent backend.
 
 See also L<Convos::Core::Backend/messages>.
-
-=head2 calculate_unread_p
-
-  $p = $dialog->calculate_unread_p;
-
-Used to find the number of unread messages after L</last_read>.
-
-This method is EXPERIMENTAL.
 
 =head1 SEE ALSO
 

@@ -364,7 +364,8 @@ sub _irc_event_privmsg {
       @{$self->user->highlight_keywords};
   }
 
-  $target->last_active(Mojo::Date->new->to_datetime);
+  # The unread count will be saved periodically by _periodic_events()
+  $target->inc_unread_p->catch(sub { $self->_debug('inc_unread %s FAIL %s', $target->id, shift) });
 
   # server message or message without a dialog
   $self->emit(
@@ -634,6 +635,9 @@ sub _periodic_events {
     PERIDOC_INTERVAL,
     sub {
       return shift->remove($tid) unless $self;
+
+      # Save unread count and other potential changes
+      $self->save_p;
 
       # Try to get the nick you want
       my $nick = $self->url->query->param('nick');

@@ -4,19 +4,18 @@ use Mojo::Base 'Mojolicious::Controller';
 use Convos::Date 'dt';
 use Mojo::JSON qw(false true);
 
-sub last_read {
-  my $self      = shift->openapi->valid_input or return;
-  my $dialog    = $self->backend->dialog({});
-  my $last_read = Mojo::Date->new->to_datetime;
+sub mark_as_read {
+  my $self   = shift->openapi->valid_input or return;
+  my $dialog = $self->backend->dialog({});
 
   unless ($dialog) {
     return $self->reply->errors([],                  401) unless $self->backend->user;
     return $self->reply->errors('Dialog not found.', 404);
   }
 
-  $dialog->last_read($last_read);
+  $dialog->unread(0);
   $self->stash('connection')->save_p->then(sub {
-    $self->render(openapi => {last_read => $last_read});
+    $self->render(openapi => {});
   });
 }
 
@@ -25,18 +24,13 @@ sub list {
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my @dialogs;
 
-  my @p;
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
     for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
       push @dialogs, $dialog;
-      push @p,       $dialog->calculate_unread_p;
     }
   }
 
-  push @p, Mojo::Promise->resolve unless @p;
-  Mojo::Promise->all(@p)->then(sub {
-    $self->render(openapi => {dialogs => \@dialogs});
-  });
+  $self->render(openapi => {dialogs => \@dialogs});
 }
 
 sub messages {
@@ -80,13 +74,13 @@ dialog related actions.
 
 =head1 METHODS
 
-=head2 last_read
-
-See L<https://convos.chat/api.html#op-post--connection--connection_id--dialog--dialog_id--read>
-
 =head2 list
 
 See L<https://convos.chat/api.html#op-get--dialogs>
+
+=head2 mark_as_read
+
+See L<https://convos.chat/api.html#op-post--connection--connection_id--dialog--dialog_id--read>
 
 =head2 messages
 

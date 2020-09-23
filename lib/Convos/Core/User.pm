@@ -55,7 +55,9 @@ sub get_p {
     $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
   }
 
-  my @p = map { $_->calculate_unread_p } @{$res->{dialogs} || []};
+  # back compat - will be removed in future version
+  my @p = map { $_->_calculate_unread_p } @{$res->{dialogs} || []};
+
   return @p ? Mojo::Promise->all(@p)->then(sub {$res}) : Mojo::Promise->resolve($res);
 }
 

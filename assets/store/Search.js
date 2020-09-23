@@ -57,7 +57,7 @@ export default class Search extends Dialog {
 
   _addOperations() {
     this.prop('ro', 'messagesOp', api('/api', 'searchMessages'));
-    this.prop('ro', 'setLastReadOp', null);
+    this.prop('ro', 'markAsReadOp', null);
   }
 
   _loadParticipants() { }

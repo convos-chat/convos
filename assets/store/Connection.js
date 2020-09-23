@@ -223,7 +223,7 @@ export default class Connection extends Dialog {
   }
 
   _addOperations() {
-    this.prop('ro', 'setLastReadOp', api('/api', 'setConnectionLastRead'));
+    this.prop('ro', 'markAsReadOp', api('/api', 'markConnectionAsRead'));
     this.prop('ro', 'messagesOp', api('/api', 'connectionMessages'));
   }
 

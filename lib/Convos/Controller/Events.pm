@@ -411,18 +411,6 @@ A human readable message with details of this event.
 
 This key is only present in certain cases. See L</type> below.
 
-=item * last_active
-
-See L<Convos::Core::Dialog/last_active>.
-
-This key is only present in certain cases. See L</type> below.
-
-=item * last_read
-
-See L<Convos::Core::Dialog/last_read>.
-
-This key is only present in certain cases. See L</type> below.
-
 =item * topic
 
 See L<Convos::Core::Dialog/topic>.
@@ -434,9 +422,9 @@ This key is only present in certain cases. See L</type> below.
 Can be...
 
   Type         | Extra keys
-  -------------|---------------------------------------------------------------
+  -------------|---------------------------------------
   me           | nick, ...
-  frozen       | dialog_id, frozen, name, last_active, last_read, topic, unread
+  frozen       | dialog_id, frozen, name, topic, unread
   join         | dialog_id, nick
   quit         | dialog_id, nick, message
   part         | dialog_id, nick, message

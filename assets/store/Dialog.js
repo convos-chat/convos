@@ -34,8 +34,6 @@ export default class Dialog extends Reactive {
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'historyStartAt', null);
     this.prop('rw', 'historyStopAt', null);
-    this.prop('rw', 'last_active', new Time(params.last_active));
-    this.prop('rw', 'last_read', new Time(params.last_read));
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || params.dialog_id || params.connection_id || 'ERR');
@@ -170,11 +168,11 @@ export default class Dialog extends Reactive {
     return this.socket.send({method: 'send', connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message});
   }
 
-  async setLastRead() {
-    if (!this.setLastReadOp) return;
+  async markAsRead() {
+    if (!this.markAsReadOp) return;
     this.update({errors: 0, unread: 0});
-    await this.setLastReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
-    return this.update({last_read: new Time()});
+    await this.markAsReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
+    return this.update({unread: 0});
   }
 
   update(params) {
@@ -245,7 +243,7 @@ export default class Dialog extends Reactive {
 
   _addOperations() {
     this.prop('ro', 'messagesOp', api('/api', 'dialogMessages'));
-    this.prop('ro', 'setLastReadOp', api('/api', 'setDialogLastRead'));
+    this.prop('ro', 'markAsReadOp', api('/api', 'markDialogAsRead'));
   }
 
   _calculateModes(modeMap, modeStr, target) {
