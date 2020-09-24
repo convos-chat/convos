@@ -74,7 +74,7 @@ export default class Operation extends Reactive {
     // this._promise is used as a locking mechanism so you can only call perform() once
     return this._promise || (this._promise = new Promise(resolve => {
       this.api.spec(this.id).then(opSpec => {
-        if (!opSpec) return resolve(this.error('Invalid operationId "' + this.id + '".', 'spec'));
+        if (!opSpec) throw 'Unknown operationId "' + this.id + '".';
 
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
         if (!url) throw req;
