@@ -640,7 +640,7 @@ sub _periodic_events {
       $self->_write("NICK $nick\r\n") if $nick and !$self->_is_current_nick($nick);
 
       # Keep the connection alive
-      $self->_write("PING => $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
+      $self->_write("PING $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
     }
   );
 }
