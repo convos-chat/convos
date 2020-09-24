@@ -62,7 +62,9 @@ sub messages {
 
 sub t {
   require Test::Mojo;
-  return Test::Mojo->new($_[1] || 'Convos');
+  my $t = Test::Mojo->new($_[1] || 'Convos');
+  Mojo::IOLoop->one_tick until $t->app->core->ready;
+  return $t;
 }
 
 sub t_selenium {

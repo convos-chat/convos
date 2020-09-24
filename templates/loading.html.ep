@@ -1,0 +1,1 @@
+%= include 'partial/error', message => 'Backend is starting';

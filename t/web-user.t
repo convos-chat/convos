@@ -11,6 +11,7 @@ $ENV{CONVOS_STUN}
 $ENV{CONVOS_TURN} = 'turn://superman:k2@turn.example.com:3478';
 
 my $t = t::Helper->t;
+is $t->app->core->ready, 1, 'ready';
 
 $t->get_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');
 $t->delete_ok('/api/user/superman@example.com')->status_is(401)
@@ -102,5 +103,12 @@ $t->delete_ok('/api/user/superman@example.com')->status_is(400)
 
 $t->get_ok('/api/user/logout')->status_is(200);
 $t->get_ok('/api/user')->status_is(401);
+
+$t->app->core->ready(0);
+$t->get_ok('/api/user')->status_is(503)->json_is('/errors/0/message', 'Backend is starting.');
+
+$t->get_ok('/chat')->status_is(503)->element_exists('a.btn[href="/"]')
+  ->text_is('a.btn[href="/"]', 'Try again')->text_is('title', 'Backend is starting (503) - Convos')
+  ->text_is('h1',              'Backend is starting (503)');
 
 done_testing;

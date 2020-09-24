@@ -15,8 +15,8 @@ my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 note 'trim and lower case';
 my $user          = $core->user({email => ' JhtHorsen@cpan.org  '});
 my $settings_file = File::Spec->catfile($ENV{CONVOS_HOME}, 'jhthorsen@cpan.org', 'user.json');
-is $user->email, 'jhthorsen@cpan.org', 'email';
-is $user->password, '', 'password';
+is $user->email,    'jhthorsen@cpan.org', 'email';
+is $user->password, '',                   'password';
 
 ok !-e $settings_file, 'no storage file';
 $user->save_p->$wait_success('save_p');
@@ -74,6 +74,7 @@ $user->roles([])->save_p->$wait_success('save_p');
 undef $core;    # Fresh start
 $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 $core->start;
+Mojo::IOLoop->one_tick until $core->ready;
 is_deeply(
   {map { ($_->email => $_->roles) } @{$core->users}},
   {

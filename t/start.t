@@ -57,6 +57,7 @@ Mojo::Util::monkey_patch(
 
 $ENV{CONVOS_CONNECT_DELAY} //= 0.05;
 $core->start for 0 .. 4;    # calling start() multiple times result in no-op
+Mojo::IOLoop->one_tick until $core->ready;
 cmp_deeply $core->{connect_queue},
   {'chat.freenode.net' => [], 'irc.perl.org' => [(obj_isa('Convos::Core::Connection::Irc')) x 2],},
   'connect_queue';

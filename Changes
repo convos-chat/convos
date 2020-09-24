@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 4.41 Not Released
  - Fix keepalive PING message
  - Fix "Unknown operationId" errors in Operation.js
+ - Add "loading" page which will be shown if the backend is not ready
  - Removed last_active and last_read from Dialog
  - Renamed "read" operationIds in OpenAPI spec
  - Mark notifications as read when leaving the "Notifications" page

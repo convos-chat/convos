@@ -36,7 +36,9 @@ sub startup {
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Autogenerate routes from the OpenAPI specification
-  $self->plugin(OpenAPI => {url => $self->static->file('convos-api.yaml')->path});
+  my $api_route = $self->routes->under('/')->to('user#check_if_ready', openapi => 1);
+  $self->plugin(
+    OpenAPI => {route => $api_route, url => $self->static->file('convos-api.yaml')->path});
 
   # Add basic routes
   my $r = $self->routes;
@@ -56,7 +58,7 @@ sub startup {
   $r->websocket('/events')->to('events#start')->name('events');
 
   # Chat resources
-  my $user_r = $r->under('/')->to(template => 'app');
+  my $user_r = $r->under('/')->to('user#check_if_ready');
   $user_r->get('/help');
   $user_r->get('/chat/*rest', {rest => ''});
   $user_r->get('/login');

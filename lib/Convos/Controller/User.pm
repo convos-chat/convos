@@ -14,6 +14,15 @@ has _email => sub {
   return trim $email;
 };
 
+sub check_if_ready {
+  my $self = shift;
+  return $self->stash(template => 'app') if $self->app->core->ready;
+  $self->stash('openapi')
+    ? $self->render(json => {errors => [{message => 'Backend is starting.'}]}, status => 503)
+    : $self->render('loading', status => 503);
+  return 0;
+}
+
 sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
   return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
@@ -300,6 +309,11 @@ L<Convos::Controller::User> is a L<Mojolicious::Controller> with
 user related actions.
 
 =head1 METHODS
+
+=head2 check_if_ready
+
+Will render the "loading" template if L<Convos::Core/ready> is false or set
+"app" to be rendered if core is ready.
 
 =head2 generate_invite_link
 

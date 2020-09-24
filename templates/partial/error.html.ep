@@ -1,4 +1,4 @@
-% my $message = Mojo::Message::Response->new->default_message($status);
+% my $message = stash('message') || Mojo::Message::Response->new->default_message($status);
 % my $more_url = '';
 % layout 'convos';
 % title join ' ', l($message), "($status)";
@@ -9,6 +9,8 @@
   <h1><%=l $message %> (<%= $status %>)</h1>
   % if ($status == 404) {
     <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>
+  % } elsif ($status == 503) {
+    <p><%=l 'The backend is starting up. Please try again later.' %></p>
   % } elsif ($c->req->headers->header('X-Request-Base')) {
     % $more_url = 'https://convos.chat/doc/faq.html#can-convos-run-behind-behind-my-favorite-web-server';
     <p><%=l 'Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?' %></p>
@@ -21,7 +23,7 @@
   % }
   <p>
     %= link_to l('Read more'), $more_url, class => 'btn' if $more_url;
-    %= link_to l('Go to landing page'), 'index', class => 'btn'
+    %= link_to l($status == 503 ? 'Try again' : 'Go to landing page'), 'index', class => 'btn'
   </p>
 </article>
 

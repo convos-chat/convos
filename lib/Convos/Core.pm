@@ -15,6 +15,7 @@ has backend  => sub { Convos::Core::Backend->new };
 has base_url => sub { Mojo::URL->new };
 has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
 has log      => sub { Mojo::Log->new };
+has ready    => 0;
 
 has settings => sub {
   my $self     = shift;
@@ -81,8 +82,6 @@ sub start {
   my $self = shift;
   return $self if !@_ and $self->{started}++;
 
-  # Want this method to be blocking to make sure everything is ready
-  # before processing web requests.
   my ($first_user, $has_admin, $uid) = (undef, 0, 0);
   $self->backend->users_p->then(sub {
     my $users = shift;
@@ -112,9 +111,10 @@ sub start {
 
     # Upgrade the first registered user (back compat)
     $first_user->role(give => 'admin') if $first_user and !$has_admin;
+    $self->ready(1);
   })->catch(sub {
     warn "start() FAILED $_[0]\n";
-  })->wait;
+  });
 
   Scalar::Util::weaken($self);
   $self->{connect_tid}
@@ -248,6 +248,12 @@ Holds a L<Mojo::File> object pointing to where Convos store data.
   $core = $core->log(Mojo::Log->new);
 
 Holds a L<Mojo::Log> object.
+
+=head2 ready
+
+  $bool = $core->ready;
+
+Will be true if the backend has loaded initial data.
 
 =head1 METHODS
 

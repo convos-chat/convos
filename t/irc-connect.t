@@ -7,7 +7,7 @@ use Convos::Core;
 use Convos::Core::Backend::File;
 
 my $server = t::Server::Irc->new->start;
-my $core   = core();
+my $core   = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user   = $core->user({email => 'test.user@example.com'});
 $user->save_p->$wait_success;
 
@@ -115,8 +115,10 @@ mock_connect(
   }
 );
 
+my $core2 = Convos::Core->new(backend => 'Convos::Core::Backend::File')->start;
+Mojo::IOLoop->one_tick until $core2->ready;
 is_deeply [map { $_->frozen }
-    @{core()->start->get_user('test.user@example.com')->get_connection('irc-example')->dialogs}],
+    @{$core2->get_user('test.user@example.com')->get_connection('irc-example')->dialogs}],
   ['', ''], 'did not save frozen state on accident';
 
 done_testing;
