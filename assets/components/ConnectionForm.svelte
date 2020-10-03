@@ -141,7 +141,7 @@ async function submitForm(e) {
   <TextField type="password" name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
   </TextField>
-  <TextArea name="on_connect_commands" hidden="{!showAdvancedSettings}">
+  <TextArea name="on_connect_commands" placeholder="{l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('On-connect commands')}</span>
   </TextArea>
   <div class="form-actions">
