@@ -5,19 +5,9 @@ toc: true
 
 ## Introduction
 
-Most of the configuration is available from ["Settings"](/blog/2019/11/24/convos-one-point-two)
-after you have logged in as an admin user. Even so, there are some settings
-that can be tweaked when starting Convos.
-
-    CONVOS_HOME=/var/convos ./script/convos daemon
-
-New to shell environment variables? Remember to set them before the "convos" command.
-
-    # Right
-    CONVOS_STUN="stun://stun.services.mozilla.com:3478" ./script/convos daemon
-
-    # Wrong
-    ./script/convos daemon CONVOS_STUN="stun://stun.services.mozilla.com:3478"
+Convos wants to have as little configuration as possible, since we believe that
+good defaults are much better for the end user. Even so, there things you can
+change to set up Convos to behave the way you want.
 
 ## Listen
 
@@ -48,42 +38,19 @@ You can make convos listen to a variety of addresses:
 See [CONVOS_REVERSE_PROXY](#mojoreverseproxy) for more details about setting
 up Convos behind a reverse proxy.
 
-## Automatic startup with systemd
+## Environment variables
 
-Here is an example systemd file, that can be placed in
-`/etc/systemd/system/convos.service`.
+The following settings need to be set before starting Convos. New to shell
+environment variables? Remember to set them before the "convos" command.
 
-Note that the [Environment](#environment) variables should be review and
-changed to suit your needs.
+    # Right
+    CONVOS_HOME=/var/convos ./script/convos daemon;
+    CONVOS_STUN="stun://stun.services.mozilla.com:3478" ./script/convos daemon;
 
-    [Unit]
-    Description=Convos service
-    After=network.target
-    
-    [Service]
-    Environment=CONVOS_HOME=/var/convos
-    Environment=CONVOS_REVERSE_PROXY=1
-    User=www
-    ExecStart=/path/to/convos/script/convos daemon --listen http://*:8081
-    KillMode=process
-    Restart=on-failure
-    SyslogIdentifier=convos
-    
-    [Install]
-    WantedBy=multi-user.target
-
-After creating the file, you can run the following commands to start the
-service:
-
-    systemctl daemon-reload
-    systemctl enable convos.service
-    systemctl start convos.service
-    systemctl status convos.service
-
-Running Convos under systemd without a custom `CONVOS_LOG_FILE` will send all
-the log messages to syslog, which normally logs to `/var/log/syslog`.
-
-## Configuration parameters
+    # Wrong
+    CONVOS_HOME=/var/convos;
+    ./script/convos daemon;
+    ./script/convos daemon CONVOS_STUN="stun://stun.services.mozilla.com:3478";
 
 ### CONVOS_BACKEND
 
@@ -198,3 +165,122 @@ for more information.
 Example:
 
     CONVOS_TURN="turn://user:pass@coturn.example.com:5349"
+
+## Global config settings
+
+The global config settings are available for Convos admins from within the
+[Convos UI](/blog/2019/11/24/convos-one-point-two).
+
+### Organization name
+
+Can be set if you want to add a touch of your organization. It will be used on
+the login and on the help page, to name some.
+
+### Organization URL
+
+Used together with "Organization name" to add a link to your organization on
+the login screen.
+
+### Admin email
+
+This email can be used by users to get in touch with the Convos admin. It will
+be displayed on login, error and help pages.
+
+### Default connection URL
+
+This is the default connection *new* users will connect to. The path part is
+the default channel to join. "%23convos" means "#convos".
+
+Changing this setting will not affect users who already registered.
+
+### Force default connection
+
+Tick this box if you want to prevent users from creating connections to other
+than what "Default connection URL" is set to.
+
+### Registration is open to public
+
+Tick this box if you want users to be able to register without an invite URL.
+If this box is *not* ticked then a Convos admin must go to "Users" in the web
+UI and generate an [invite URL](/blog/2019/11/24/convos-one-point-two).
+
+## User settings
+
+These settings are available from the Convos UI, and are specific per user
+account or per browser session.
+
+### Notification keywords
+
+Can be set to a list of words that you want to get notifications about. You
+will always be notified if someone mention your active nick, but you can also
+add "milk, bread, butter" if that are your interests.
+
+### Enable notifications
+
+Tick this checkbox if you want to get desktop notifications.
+
+This settings is only remembered in your current browser, since it also require
+a browser action.
+
+### Expand URL to media
+
+Tick this checkbox if you want images, videos and other previews inside the
+chat. Unticking this will require you to click on the posted link to understand
+what is on that page.
+
+This settings is only remembered in your current browser.
+
+### Theme
+
+Choose a theme for your chat.
+
+This setting is only remembered inside the current browser. This is considered
+a feature, since you might want one theme on your cell phone and another on
+your desktop computer.
+
+### Color scheme
+
+Some themes support dark and light color schemes. The default is to follow your
+desktop settings, but you can also force a dark/light scheme.
+
+This settings is only remembered in your current browser.
+
+### Password
+
+Use this to change your login password. Keeping the field empty will *not*
+change your password.
+
+## Automatic startup with systemd
+
+Here is an example systemd file, that can be placed in
+`/etc/systemd/system/convos.service`.
+
+Note that the [Environment](#environment) variables should be review and
+changed to suit your needs.
+
+    [Unit]
+    Description=Convos service
+    After=network.target
+    
+    [Service]
+    Environment=CONVOS_HOME=/var/convos
+    Environment=CONVOS_REVERSE_PROXY=1
+    User=www
+    ExecStart=/path/to/convos/script/convos daemon --listen http://*:8081
+    KillMode=process
+    Restart=on-failure
+    SyslogIdentifier=convos
+    
+    [Install]
+    WantedBy=multi-user.target
+
+After creating the file, you can run the following commands to start the
+service:
+
+    systemctl daemon-reload
+    systemctl enable convos.service
+    systemctl start convos.service
+    systemctl status convos.service
+
+Running Convos under systemd without a custom `CONVOS_LOG_FILE` will send all
+the log messages to syslog, which normally logs to `/var/log/syslog`.
