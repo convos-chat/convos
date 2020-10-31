@@ -232,7 +232,11 @@ This settings is only remembered in your current browser.
 
 ### Theme
 
-Choose a theme for your chat.
+Choose a theme for your chat. You can also create your own themes. Look at
+"[Theming support in Convos
+4.00](/blog/2020/5/14/theming-support-in-4-point-oh)" or
+"[Create your own theme in minutes!](/blog/2020/6/14/create-your-own-theme-detailed-walkthrough)"
+for more details.
 
 This setting is only remembered inside the current browser. This is considered
 a feature, since you might want one theme on your cell phone and another on
