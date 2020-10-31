@@ -52,6 +52,12 @@ environment variables? Remember to set them before the "convos" command.
     ./script/convos daemon;
     ./script/convos daemon CONVOS_STUN="stun://stun.services.mozilla.com:3478";
 
+The environment variables can also be specified when you run Convos inside
+[Docker](https://docs.docker.com/compose/environment-variables/).
+
+Changing an environment variable require Convos to be restarted before they
+take effect.
+
 ### CONVOS_BACKEND
 
 Can be set to any class name that inherit from
@@ -97,6 +103,17 @@ many hours the link will be valid for. Not however that when a link is used
 instantly become invalid.
 
 Default: `24`.
+
+### CONVOS_LOCAL_SECRET
+
+This variable is used when generating invite links, but also useful for Convos
+admins who have forgotten their password. Look at "Forgotten password and
+invitation links" in
+"[Convos is more user-friendly than ever](https://convos.chat/blog/2019/11/24/convos-one-point-two)"
+for more details.
+
+Default value is auto generated and available in the log output when Convos is
+started the first time.
 
 ### CONVOS_LOG_FILE
 
