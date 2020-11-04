@@ -444,7 +444,13 @@ sub _irc_event_rpl_welcome {
 
   Scalar::Util::weaken($self);
   my $write;
-  $write = sub { $self->send_p('', shift @commands)->finally($write) if $self and @commands };
+  $write = sub {
+    return unless $self and @commands;
+    my $command = shift @commands;
+    $command =~ m!^/sleep\s+(\d+\.?\d*)!i
+      ? Mojo::IOLoop->timer($1, $write)
+      : $self->send_p('', $command)->finally($write);
+  };
   $self->$write;
 }
 

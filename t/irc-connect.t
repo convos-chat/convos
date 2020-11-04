@@ -28,7 +28,8 @@ $connection->on(
 is $connection->url->query->param('tls'), undef, 'initial tls value';
 
 note 'on_connect_commands';
-my @on_connect_commands = ('/msg NickServ identify s3cret', '/msg superwoman you are too cool');
+my @on_connect_commands
+  = ('/msg NickServ identify s3cret', '/SleeP  0.1 ', '/msg superwoman you are too cool');
 $connection->on_connect_commands([@on_connect_commands]);
 
 $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])

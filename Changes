@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix "Unknown operationId" errors in Operation.js
  - Add "Notify me on new messages" to private conversations
  - Add "loading" page which will be shown if the backend is not ready
+ - Add support for "/sleep 4.2" in on_connect_commands #517
  - Removed last_active and last_read from Dialog
  - Renamed "read" operationIds in OpenAPI spec
  - Mark notifications as read when leaving the "Notifications" page
