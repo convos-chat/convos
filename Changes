@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.41 Not Released
+4.41 2020-11-04T11:20:00+0900
  - Fix keepalive PING message
  - Fix "Unknown operationId" errors in Operation.js
  - Add "Notify me on new messages" to private conversations
