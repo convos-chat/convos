@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import Reactive from '../assets/js/Reactive';
 
 test('prop', () => {
@@ -14,11 +15,45 @@ test('prop', () => {
   });
 });
 
+test('prop cookie', () => {
+  const r = reactive('SuperCookie');
+  r.cookieName = 'supercookie';
+
+  const cookieVal = () => {
+    const cookieString = Cookies.get('supercookie');
+    return JSON.parse(cookieString ? atob(cookieString) : '{}');
+  };
+
+  r.prop('cookie', 'bar', false, {key: 'foo'});
+  expect(cookieVal()).toEqual({});
+  r.update({bar: true})._delayedUpdate();
+  expect(cookieVal()).toEqual({foo: true});
+  r.update({bar: false})._delayedUpdate();
+  expect(cookieVal()).toEqual({});
+
+  r.prop('cookie', 'num', undefined);
+  expect(cookieVal()).toEqual({});
+
+  r.update({num: 42})._delayedUpdate();
+  expect(r.num).toBe(42);
+  expect(cookieVal()).toEqual({num: 42});
+
+  r.update({num: '42'})._delayedUpdate();
+  expect(cookieVal()).toEqual({num: '42'});
+});
+
 test('prop persist', () => {
-  const r = reactive('Superman');
+  const r = reactive('SuperPersist');
+
+  r.prop('persist', 'bar', false, {key: 'foo'});
+  expect(localStorage.getItem('convos:foo')).toBe(null);
+  r.update({bar: true})._delayedUpdate();
+  expect(localStorage.getItem('convos:foo')).toBe('true');
+  r.update({bar: false})._delayedUpdate();
+  expect(localStorage.getItem('convos:foo')).toBe(null);
 
   r.prop('persist', 'num', undefined);
-  expect(localStorage.getItem('convos:num')).toBe('undefined');
+  expect(localStorage.getItem('convos:num')).toBe(null);
 
   r.update({num: 42})._delayedUpdate();
   expect(r.num).toBe(42);

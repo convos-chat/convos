@@ -76,7 +76,7 @@ export default class Reactive {
    * @param {Object} params Extra property instructions.
    */
   prop(type, name, value, params = {}) {
-    const prop = {...params, name, type, value};
+    const prop = {...params, defaultValue: value, name, type, value};
     this._props[name] = prop; // this._props must not be set anywhere else!
 
     prop.updateable = ['cookie', 'persist', 'rw'].indexOf(type) != -1;
@@ -144,7 +144,9 @@ export default class Reactive {
     const cookie = store[this.cookieName] || {};
     if (arguments.length == 1) return cookie[name];
 
-    cookie[name] = value;
+    const prop = this._props[name];
+    const key = prop.key || name;
+    value === prop.defaultValue ? delete cookie[key] : (cookie[key] = value);
     const secure = location.href.indexOf('https:') == 0;
     Cookies.set(this.cookieName, btoa(JSON.stringify(cookie)), {expires: 365, SameSite: 'Lax', secure});
   }
@@ -152,7 +154,7 @@ export default class Reactive {
   _cookieProp(prop) {
     const fromStorage = this._cookie(prop.name);
     if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef') && !prop.lazy) this._cookie(prop.name, prop.value);
+    if (isType(fromStorage, 'undef')) this._cookie(prop.name, prop.value);
     this._updateableProp(prop);
   }
 
@@ -175,8 +177,12 @@ export default class Reactive {
   }
 
   _localStorage(name, value) {
-    const key = 'convos:' + (this._props[name].key || name);
-    if (arguments.length == 2) return localStorage.setItem(key, JSON.stringify(value));
+    const prop = this._props[name];
+    const key = 'convos:' + (prop.key || name);
+
+    if (arguments.length == 2) {
+      return value === prop.defaultValue ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(value));
+    }
 
     try {
       return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
@@ -189,7 +195,7 @@ export default class Reactive {
   _localStorageProp(prop) {
     const fromStorage = this._localStorage(prop.name);
     if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef') && !prop.lazy) this._localStorage(prop.name, prop.value);
+    if (isType(fromStorage, 'undef')) this._localStorage(prop.name, prop.value);
     this._updateableProp(prop);
   }
 

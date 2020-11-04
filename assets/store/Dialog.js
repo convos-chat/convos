@@ -52,7 +52,7 @@ export default class Dialog extends Reactive {
     }
 
     if (params.dialog_id) {
-      this.prop('persist', 'wantNotifications', false, {key: params.dialog_id +  ':wantNotifications', lazy: true});
+      this.prop('persist', 'wantNotifications', false, {key: params.dialog_id +  ':wantNotifications'});
     }
 
     this.socket = params.socket || getSocket('/events');
