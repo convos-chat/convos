@@ -52,7 +52,7 @@ export default class Dialog extends Reactive {
     }
 
     if (params.dialog_id) {
-      this.prop('persist', 'wantNotifications', false, {key: params.dialog_id +  ':wantNotifications'});
+      this.prop('persist', 'wantNotifications', this.is_private, {key: params.dialog_id +  ':wantNotifications'});
     }
 
     this.socket = params.socket || getSocket('/events');
@@ -272,7 +272,7 @@ export default class Dialog extends Reactive {
 
   _maybeNotify(msg) {
     if (!msg.from || msg.yourself) return;
-    if (!msg.highlight && !this.is_private && !this.wantNotifications) return;
+    if (!msg.highlight && !this.wantNotifications) return;
     if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
     if (notify.appHasFocus) return;
 

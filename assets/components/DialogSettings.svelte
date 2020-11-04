@@ -13,7 +13,6 @@ import {modeClassNames} from '../js/util';
 export let dialog;
 export let transition;
 
-const socket = getContext('socket');
 const user = getContext('user');
 
 let dialogPassword = '';
@@ -81,12 +80,12 @@ function saveDialogSettings(e) {
       <TextField type="password" name="password" bind:value="{dialogPassword}" readonly="{!dialog.is('locked') && !isOperator}">
         <span slot="label">{l('Password')}</span>
       </TextField>
+    {/if}
 
-      {#if dialog.hasOwnProperty('wantNotifications')}
-        <Checkbox bind:checked="{wantNotifications}">
-          <span slot="label">{l('Send me notifications')}</span>
-        </Checkbox>
-      {/if}
+    {#if dialog.hasOwnProperty('wantNotifications')}
+      <Checkbox bind:checked="{wantNotifications}">
+        <span slot="label">{l('Notify me on new messages')}</span>
+      </Checkbox>
     {/if}
 
     <div class="form-actions">
