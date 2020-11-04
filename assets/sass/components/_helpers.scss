@@ -51,15 +51,17 @@ body.with-grid::after {
   opacity: 0;
   display: block;
   position: absolute;
-  left: -1000px;
+  width: 1px;
+  overflow: hidden;
   transition: opacity 250ms ease-in-out;
+  pointer-events: none;
 }
 
 %tooltip-popup-visible {
   background: var(--tooltip-background);
   color: var(--tooltip-color);
   opacity: 0.85;
-  left: auto;
+  width: auto;
   z-index: 1000;
 }
 

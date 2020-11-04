@@ -131,7 +131,7 @@ function renderUnread(dialog, max = 60) {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <form class="sidebar__header has-tooltip is-below" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
+  <form class="sidebar__header is-below" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
     <input type="text" id="search_input" class="is-primary-menu-item"
       placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
       bind:value="{filter}"
