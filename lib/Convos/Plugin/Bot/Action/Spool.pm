@@ -2,7 +2,6 @@ package Convos::Plugin::Bot::Action::Spool;
 use Mojo::Base 'Convos::Plugin::Bot::Action';
 
 use Mojo::File 'path';
-use YAML::XS ();
 
 has description => 'Send messages from spool directory on server.';
 has _dir        => undef;
@@ -25,7 +24,7 @@ sub _check_for_message {
   my $files = $self->_dir->list->sort;
   my $guard = 50;
   while (my $file = pop @$files) {
-    my $message    = YAML::XS::Load($file->slurp);
+    my $message    = Convos::Plugin::Bot->load_config_file($file);
     my $connection = $user->get_connection($message->{connection_id});
     next unless $connection and $connection->state eq 'connected';
     $connection->send_p(@$message{qw(dialog_id message)})->catch(sub {

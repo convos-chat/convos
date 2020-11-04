@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+4.42 Not Released
+ - YAML::XS is an optional module
+
 4.41 2020-11-04T11:20:00+0900
  - Fix keepalive PING message
  - Fix "Unknown operationId" errors in Operation.js

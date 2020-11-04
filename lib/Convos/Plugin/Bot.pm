@@ -25,10 +25,18 @@ sub action {
   return $actions->{$name} if $actions->{$name};
 }
 
+if (eval 'use YAML::XS 0.67;1') {
+  *load_config_file = sub { local $YAML::XS::Boolean = 'JSON::PP'; YAML::XS::LoadFile("$_[1]") };
+}
+else {
+  require YAML::PP;
+  my $pp = YAML::PP->new(boolean => 'JSON::PP');
+  *load_config_file = sub { $pp->load_file("$_[1]") };
+}
+
 sub register {
   my ($self, $app, $config) = @_;
   return unless $config->{email} ||= $ENV{CONVOS_BOT_EMAIL};
-  require_module 'YAML::XS';
   $app->helper(bot => sub {$self});
   $self->_load_config;
   $self->_register_user($app->core, $config);
@@ -122,7 +130,7 @@ sub _load_config {
   return if $self->config->data->{ts} and $ts == $self->config->data->{ts};
 
   $self->_log->debug("Reloading @{[$self->_config_file]}");
-  my $config = YAML::XS::Load($self->_config_file->slurp);
+  my $config = $self->load_config_file($self->_config_file);
   @$config{qw(action connection ts)} = ({}, {}, $ts);
   $config->{$_} ||= [] for qw(actions connections);
   my $old_password = $self->config->get('/generic/password') || '';
@@ -329,6 +337,12 @@ Returns an action object by C<$moniker> or C<$class_name>. Example:
   $karma_action = $bot->action("karma");
   $karma_action = $bot->action("Karma");
   $karma_action = $bot->action("Convos::Plugin::Bot::Action::Karma");
+
+=head2 load_config_file
+
+  $hash_ref = $self->load_config_file($path);
+
+Used to load YAML config file and return it as a data structure.
 
 =head2 register
 
