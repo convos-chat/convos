@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-4.42 Not Released
+4.42 2020-11-05T09:54:00+0900
  - YAML::XS is an optional module
  - Fix selecting text in chat
 
