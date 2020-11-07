@@ -10,7 +10,7 @@ use Mojo::URL;
 use Mojo::Util qw(term_escape url_escape);
 use Unicode::UTF8;
 
-use constant GENERATE_CERT => $ENV{CONVOS_GENERATE_CERT} // 0;
+use constant GENERATE_CERT => $ENV{CONVOS_GENERATE_CERT} // 1;
 
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_TLS_DEBUG} if $ENV{CONVOS_TLS_DEBUG};
 

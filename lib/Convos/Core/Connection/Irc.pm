@@ -91,17 +91,25 @@ sub _connect_args_p {
   return $self->SUPER::_connect_args_p;
 }
 
+sub _irc_event_903 {
+  my ($self, $msg) = @_;
+  $self->_irc_event_fallback($msg);
+  $self->_write("CAP END\r\n");
+}
+
 sub _irc_event_cap {
   my ($self, $msg) = @_;
   $self->_irc_event_fallback($msg);
 
   if ($msg->{raw_line} =~ m!\s(?:LIST|LS)[^:]+:(.*)!) {
     $self->{myinfo}{capabilities}{$_} = true for split /\s/, $1;
-    my @cap_req;    # TODO
+    my @cap_req;
+    push @cap_req, 'sasl' if $self->{myinfo}{capabilities}{sasl} and $self->_sasl_mechanism;
     $self->_write(@cap_req ? sprintf "CAP REQ :%s\r\n", join ' ', @cap_req : "CAP END\r\n");
   }
   elsif ($msg->{raw_line} =~ m!\sACK\s:(.+)!) {
-    $self->_write("CAP END\r\n");
+    my ($capabilities, $mech) = ($1, $self->_sasl_mechanism);
+    $self->_write("AUTHENTICATE $mech\r\n") if $capabilities =~ m!\bsasl\b!;
   }
   elsif ($msg->{raw_line} =~ m!\sNAC!) {
     $self->_write("CAP END\r\n");
@@ -358,6 +366,22 @@ sub _irc_event_rpl_myinfo {
   $self->emit(state => me => $self->{myinfo});
 }
 
+sub _irc_event_authenticate {
+  my ($self, $msg) = @_;
+  $self->_irc_event_fallback($msg);
+  return unless $msg->{raw_line} =~ m!AUTHENTICATE \+$!;
+
+  my ($mech, $url) = ($self->_sasl_mechanism, $self->url);
+  if ($mech eq 'EXTERNAL') {
+    $self->_write(sprintf "AUTHENTICATE %s\r\n", $url->username || $self->user->email);
+  }
+  elsif ($mech eq 'PLAIN') {
+    my @auth = grep {length} $url->query->param('authname') || $url->username, $url->username,
+      $url->password;
+    $self->_write(sprintf "AUTHENTICATE %s\r\n", b64_encode join "\0", @auth) if @auth == 3;
+  }
+}
+
 sub _irc_event_rpl_notopic {
   my ($self, $msg) = @_;
   $self->_irc_event_rpl_topic({%$msg, params => [$msg->{params}[0], $msg->{params}[0], '']});
@@ -545,6 +569,10 @@ sub _make_whois_response {
   return @$res{qw(nick user host name)} = @{$msg->{params}}[1, 2, 3, 5]
     if $msg->{command} eq 'rpl_whoisuser';
 
+  if ($msg->{command} eq '276') {
+    $res->{fingerprint} = $1 if $msg->{raw_line} =~ m!fingerprint\s(\S+)!;
+    $res->{secure}      = true;
+  }
   if ($msg->{command} eq 'rpl_whoischannels') {
     for (split /\s+/, $msg->{params}[2] || '') {
       my ($mode, $channel) = $self->_parse_mode($_);
@@ -599,6 +627,12 @@ sub _periodic_events {
       $self->_write("PING $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
     }
   );
+}
+
+sub _sasl_mechanism {
+  my $self = shift;
+  my $mech = uc($self->url->query->param('sasl') || '');
+  return $mech =~ m!^(EXTERNAL|PLAIN)$! ? $mech : '';
 }
 
 sub _send_clear_p {
@@ -910,6 +944,7 @@ sub _send_whois_p {
   return $self->_write_and_wait_p(
     "WHOIS $target",
     {away => false, channels => {}, name => '', nick => $target, server => '', user => ''},
+    276               => {1 => $target},
     err_nosuchnick    => {1 => $target},
     err_nosuchserver  => {1 => $target},
     rpl_away          => {1 => $target},
@@ -987,7 +1022,8 @@ sub _stream {
   $user =~ s/^[^a-zA-Z0-9]/x/;
   my $mode = $url->query->param('mode') || 0;
   $self->_write("CAP LS\r\n");
-  $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
+  $self->_write(sprintf "PASS %s\r\n", $url->password)
+    if length $url->password and !$self->_sasl_mechanism;
   $self->_write("NICK $nick\r\n");
 
   my $convos   = "https://convos.chat";

@@ -55,9 +55,9 @@ sub remove {
 }
 
 sub update {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
-  my $json = $self->req->json;
+  my $self         = shift->openapi->valid_input or return;
+  my $user         = $self->backend->user        or return $self->reply->errors([], 401);
+  my $json         = $self->req->json;
   my $wanted_state = $json->{wanted_state} || '';
   my $connection;
 
@@ -105,7 +105,8 @@ sub _same_url {
   my ($u1, $u2) = @_;
 
   return 0 unless $u1->host_port eq $u2->host_port;
-  return 0 unless +($u1->query->param('tls') || '0') eq +($u2->query->param('tls') || '0');
+  return 0 unless +($u1->query->param('sasl') || '') eq +($u2->query->param('sasl') || '');
+  return 0 unless +($u1->query->param('tls')  || '0') eq +($u2->query->param('tls') || '0');
   return 0 unless +($u1->userinfo // '') eq +($u2->userinfo // '');
   return 1;
 }
