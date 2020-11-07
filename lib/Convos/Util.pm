@@ -2,6 +2,8 @@ package Convos::Util;
 use Mojo::Base 'Exporter';
 
 use Mojo::Collection 'c';
+use Mojo::File 'path';
+use Mojo::IOLoop;
 use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
@@ -9,9 +11,11 @@ use Scalar::Util 'blessed';
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 
+$ENV{OPENSSL_BIN} ||= 'openssl';
+
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG disk_usage generate_secret has_many pretty_connection_name),
+  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p generate_secret has_many pretty_connection_name),
   qw(require_module sdp_decode sdp_encode short_checksum),
 );
 
@@ -43,6 +47,30 @@ sub disk_usage {
   $usage{inodes_total} ||= $usage{inodes_used} + $usage{inodes_free};
   $usage{$_} = int $usage{$_} for grep { $_ ne 'dev' } keys %usage;
   return \%usage;
+}
+
+sub generate_cert_p {
+  my %params = %{$_[0]};
+  _openssl_detect() unless 3 == grep { $ENV{"OPENSSL_$_"} } qw(BITS COUNTRY DAYS ORGANIZATION);
+  $params{$_} ||= $ENV{uc("OPENSSL_$_")} for qw(bits country days organization state);
+  $params{common_name} ||= $params{email} =~ m!^([^@]+)! ? $1 : $params{email};
+
+  my @openssl = (qw(req -x509 -new -newkey));
+  push @openssl, sprintf 'rsa:%s', $params{bits};
+  push @openssl, qw(-sha256 -nodes);
+  push @openssl, -days => $params{days}, -out => $params{cert}, -keyout => $params{key};
+  push @openssl,
+    -subj => sprintf '/C=%s/ST=%s/O=%s/CN=%s/emailAddress=%s',
+    @params{qw(country state organization common_name email)};
+
+  warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
+  return Mojo::IOLoop->subprocess->run_p(sub {
+    open STDERR, '>', File::Spec->devnull;
+    local $!;
+    system $ENV{OPENSSL_BIN} => @openssl;
+    die "Could not generate $params{cert} and $params{key}: $? / $!" if $? or $!;
+    return \%params;
+  });
 }
 
 sub generate_secret {
@@ -167,6 +195,31 @@ sub _generate_secret_urandom {
   die qq{Could not read $len bytes from "/dev/urandom": $!};
 }
 
+sub _openssl_detect {
+  warn "\$ $ENV{OPENSSL_BIN} version -a\n" if DEBUG;
+  if (!$ENV{OPENSSL_CONF} and open my $OPENSSL, '-|', $ENV{OPENSSL_BIN} => qw(version -a)) {
+    while (<$OPENSSL>) {
+      $ENV{OPENSSL_CONF} = path($1, 'openssl.cnf')->realpath if /OPENSSLDIR:?\s*"?([^"]+)/;
+    }
+  }
+  if ($ENV{OPENSSL_CONF}) {
+    open my $CONFIG, '<', $ENV{OPENSSL_CONF} or die "Read $ENV{OPENSSL_CONF}: $!";
+    while (<$CONFIG>) {
+      next if /^\s*#/;
+      $ENV{OPENSSL_BITS}         ||= $1 if /default_bits\s*=\s*(\d+)/ and $1 > 2048;
+      $ENV{OPENSSL_COUNTRY}      ||= $1 if /countryName_default\s*=\s*(.+)/;
+      $ENV{OPENSSL_ORGANIZATION} ||= $1 if /organizationName_default\s*=\s*(.+)/;
+      $ENV{OPENSSL_STATE}        ||= $1 if /stateOrProvinceName_default\s*=\s*(.+)/;
+    }
+  }
+
+  $ENV{OPENSSL_BITS}         ||= 4096;
+  $ENV{OPENSSL_COUNTRY}      ||= 'US';
+  $ENV{OPENSSL_DAYS}         ||= 3650;       # Do not read from config file
+  $ENV{OPENSSL_ORGANIZATION} ||= 'Convos';
+  $ENV{OPENSSL_STATE}        ||= '';
+}
+
 1;
 
 =encoding utf8
@@ -204,6 +257,66 @@ exception if C<df> is not available. Example C<$usage>:
     inodes_total => 4882452880,
     inodes_used  => 487871,
   }
+
+=head2 generate_cert_p
+
+  $p = generate_cert_p(\%params);
+
+Used to generate an SSL cert and key file. Will use environment variables or
+C<$OPENSSL_CONF> file for default values. C<%params> can contain:
+
+=over 2
+
+=item * bits
+
+Default to C<$OPENSSL_BITS>, "default_bits" in C<$OPENSSL_CONF>, or 4096.
+
+"default_bits" from C<$OPENSSL_CONF> must be higher than 2048 to be accepted.
+
+=item * cert
+
+Path to generated certificate file.
+
+No default value.
+
+=item * country
+
+Default to C<$OPENSSL_COUNTRY>, "countryName_default" in C<$OPENSSL_CONF>, or
+"US".
+
+=item * common_name
+
+Default to the part before "@" in C<email>.
+
+=item * days
+
+Default to C<$OPENSSL_DAYS> or "3650".
+
+=item * email
+
+"emailAddress" in certificate subject.
+
+No default value.
+
+=item * key
+
+Path to generated key file.
+
+No default value.
+
+=item * organization
+
+Default to C<$OPENSSL_ORGANIZATION>, "organizationName_default" in
+C<$OPENSSL_CONF>, or "Convos".
+
+=item * state
+
+Default to C<$OPENSSL_STATE>, "stateOrProvinceName_default" in
+C<$OPENSSL_CONF>, or empty string.
+
+=back
+
+C<$OPENSSL_CONF> will default to system wide openssl config file.
 
 =head2 generate_secret
 
