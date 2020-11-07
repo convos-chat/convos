@@ -123,7 +123,7 @@ sub send_p {
   return Mojo::Promise->reject('Unknown command.');
 }
 
-sub _connect_args {
+sub _connect_args_p {
   my $self   = shift;
   my $url    = $self->url;
   my $params = $self->url->query;
@@ -133,7 +133,7 @@ sub _connect_args {
   $params->param(nick => $self->nick)             unless $params->param('nick');
   $self->{myinfo}{nick} = $params->param('nick');
 
-  return $self->SUPER::_connect_args;
+  return $self->SUPER::_connect_args_p;
 }
 
 sub _irc_event_cap {

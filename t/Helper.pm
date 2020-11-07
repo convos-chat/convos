@@ -13,9 +13,11 @@ use Mojo::Util 'term_escape';
 
 our $CONVOS_HOME;
 
+$ENV{CONVOS_GENERATE_CERT} //= 0;
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
 $ENV{MOJO_MODE} ||= 'test';
+$ENV{OPENSSL_BITS} //= 1024;
 
 sub subprocess_in_main_process {
   require Mojo::IOLoop::Subprocess;
