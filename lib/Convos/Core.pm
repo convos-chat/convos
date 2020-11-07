@@ -31,7 +31,7 @@ sub connect {
   $connection->state(queued => $reason || 'Connecting soon...');
 
   if ($host eq 'localhost') {
-    $connection->connect;
+    $connection->connect_p;
   }
   elsif ($self->{connect_queue}{$host}) {
     push @{$self->{connect_queue}{$host}}, $connection;
@@ -39,7 +39,7 @@ sub connect {
   }
   else {
     $self->{connect_queue}{$host} = [];
-    $connection->connect;
+    $connection->connect_p;
   }
 
   return $self;
@@ -151,7 +151,7 @@ sub _dequeue {
 
   for my $host (keys %{$self->{connect_queue} || {}}) {
     next unless my $connection = shift @{$self->{connect_queue}{$host}};
-    $connection->connect if $connection and $connection->wanted_state eq 'connected';
+    $connection->connect_p if $connection and $connection->wanted_state eq 'connected';
   }
 }
 

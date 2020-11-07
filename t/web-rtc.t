@@ -88,8 +88,7 @@ sub setup {
   my $connection = $user->connection(
     {name => 'localhost', protocol => 'irc', url => "irc://$ENV{TEST_IRC_SERVER}?tls=0"});
   $connection->conversation({name => '#ct_web_rtc', frozen => ''});
-  $connection->connect;
-
+  $connection->connect_p->wait;
   $t->websocket_ok('/events');
 }
 

@@ -5,6 +5,7 @@ use t::Helper;
 use t::Server::Irc;
 use Convos::Core;
 use Convos::Core::Backend::File;
+use Test::Deep;
 
 my $server = t::Server::Irc->new->start;
 my $core   = Convos::Core->new(backend => 'Convos::Core::Backend::File');
@@ -74,10 +75,10 @@ mock_connect(
   ],
   sub {
     my $connect_args = shift;
-    $connection->connect;
+    $connection->connect_p->wait;
     Mojo::IOLoop->one_tick until @connection_state == 2;
 
-    is_deeply $connect_args->[0],
+    cmp_deeply $connect_args->[0],
       {address => 'irc.example.com', port => 6667, timeout => 20, tls => 1, tls_verify => 0x00},
       'connect args first';
     is_deeply $connect_args->[1], {address => 'irc.example.com', port => 6667, timeout => 20},
@@ -90,7 +91,7 @@ mock_connect(
   errors => ['IO::Socket::SSL 1.94+ required for TLS support'],
   sub {
     $connection->url->query->remove('tls');
-    $connection->connect;
+    $connection->connect_p->wait;
     Mojo::IOLoop->one_tick until @connection_state == 3;
 
     is $connection->url->query->param('tls'), 0, 'tls off after missing module';

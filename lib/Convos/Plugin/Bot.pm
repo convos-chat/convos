@@ -120,7 +120,7 @@ sub _ensure_connection {
     $self->$conversation_method($connection, $conversations->{$conversation_id});
   }
 
-  my $state_method = $connection->wanted_state eq 'connected' ? 'connect' : 'disconnect_p';
+  my $state_method = $connection->wanted_state eq 'connected' ? 'connect_p' : 'disconnect_p';
   $connection->$state_method unless $connection->state eq $connection->wanted_state;
 }
 

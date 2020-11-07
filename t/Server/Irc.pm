@@ -145,7 +145,7 @@ sub _find_server_conn {
 
 sub _handle_client_connect {
   my ($self, $c_conn) = @_;
-  $c_conn->url($self->url)->connect unless $c_conn->state eq 'connected';
+  $c_conn->url($self->url)->connect_p unless $c_conn->state eq 'connected';
   $self->_dequeue;
 }
 

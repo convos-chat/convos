@@ -47,7 +47,7 @@ $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my %connect;
 Mojo::Util::monkey_patch(
   'Convos::Core::Connection::Irc',
-  connect => sub {
+  connect_p => sub {
     my $host_port = $_[0]->url->host_port;
     $connect{$host_port}++;
     note "@{[time]} monkey_patch connect to $host_port\n" if $ENV{HARNESS_IS_VERBOSE};
