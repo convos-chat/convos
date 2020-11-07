@@ -1,5 +1,8 @@
 #!perl
-BEGIN { $ENV{CONVOS_SKIP_CONNECT} = 1 }
+BEGIN {
+  $ENV{CONVOS_GENERATE_CERT} = 1;
+  $ENV{CONVOS_SKIP_CONNECT}  = 1;
+}
 use lib '.';
 use t::Helper;
 use t::Server::Irc;
@@ -84,10 +87,21 @@ mock_connect(
     Mojo::IOLoop->one_tick until @connection_state == 2;
 
     cmp_deeply $connect_args->[0],
-      {address => 'irc.example.com', port => 6667, timeout => 20, tls => 1, tls_verify => 0x00},
+      {
+      address    => 'irc.example.com',
+      port       => 6667,
+      timeout    => 20,
+      tls        => 1,
+      tls_cert   => re(qr{\.cert}),
+      tls_key    => re(qr{\.key}),
+      tls_verify => 0x00
+      },
       'connect args first';
     is_deeply $connect_args->[1], {address => 'irc.example.com', port => 6667, timeout => 20},
       'connect args second';
+
+    ok -s $connect_args->[0]{tls_cert}, 'tls_cert generated';
+    ok -s $connect_args->[0]{tls_key},  'tls_key generated';
   },
 );
 
