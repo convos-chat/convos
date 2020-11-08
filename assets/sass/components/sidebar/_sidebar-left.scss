@@ -9,6 +9,10 @@
     color: var(--sidebar-left-text);
   }
 
+  .select-field__options a {
+    color: var(--input-color);
+  }
+
   @include if_screen(">two-columns") {
     padding-right: calc(var(--gutter) * 2);
   }
