@@ -19,9 +19,9 @@ following information:
   other bugs/components/features.
 * Other relevant information you can think of.
 
-Because of timezones, there won't be any fixed schedule, but we might do
-ad-hoc video conference using [Google Hangouts](https://hangouts.google.com/),
-[Zoom](https://zoom.us/) or [Whereby](https://whereby.com/convos-hack).
+Because of timezones, there won't be any fixed schedule, but we might do ad-hoc
+video conference using [Jitsi](https://meet.jit.si/) or
+[Google Hangouts](https://hangouts.google.com/),
 
 Please have a look at the following resources before joining:
 
