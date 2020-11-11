@@ -1,5 +1,5 @@
 ---
-title: Convos hackathon on 21st of November, 2020
+title: Convos hackathon on November 21, 2020
 author: Jan Henning Thorsen
 ---
 
