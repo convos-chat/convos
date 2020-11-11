@@ -3,20 +3,22 @@ title: Convos hackathon on 21st of November, 2020
 author: Jan Henning Thorsen
 ---
 
-Interested in hacking on Convos and learning more about the design?
+Interested in hacking on Convos and learning more about the design?  We will
+have a hackathon on the 21st of November 00:00 CET, until 15:00 CET.
 
-We will have a hackathon on 21st of November 07:00 JST, until 21:00 JST. Jan
-Henning Thorsen (batman) will be active in the #convos channel on
+Since this is a world-wide hackathon people might join and leave during the
+timeframe, but the core developers will be active in the #convos channel on
 irc.freenode.net, answering questions and teaming up on different components
 that *you* want to build.
 
-Please [contact](mailto:contact@convos.chat) us if you want to attend with the
+If you are interested in attending, please contact us at
+[contact@convos.chat](mailto:contact@convos.chat) and provide the
 following information:
 
 * Your nickname on irc.freenode.net.
-* At what time you can join, including timezone information.
+* What time you can join, including timezone.
 * Which part of Convos do you want to hack on: Frontend, backend, plugins or
-  other bugs/components/features.
+  other bugs, components or features.
 * Other relevant information you can think of.
 
 Because of timezones, there won't be any fixed schedule, but we might do ad-hoc
@@ -31,17 +33,15 @@ Please have a look at the following resources before joining:
 * [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 * [Perl](https://docs.mojolicious.org/#BASICS)
 
-Don't know what to hack on, but interested in helping anyways? Maybe you can
-improve the documentation for either on the official website or inside the
-Convos application. Discuss how onboarding (creating a new account) could be
-more user friendly. Creating new
-[themes](https://convos.chat/blog/2020/6/14/create-your-own-theme-detailed-walkthrough)
-are also welcome, or extending the set of variables to make your theme possible
-to build.
+Don't know what to hack on, but interested in helping anyway? Maybe you can:
+
+* Improve the documentation on the official website or the Convos application.
+* Discuss how onboarding (creating a new account) could be more user friendly.
+* Create new
+  [themes](https://convos.chat/blog/2020/6/14/create-your-own-theme-detailed-walkthrough),
+  or extend the set of variables to enable your theme to be built.
 
 We also have open [issues](https://github.com/Nordaaker/convos/issues) and
-there are also some ideas put into the
-[fridge](https://github.com/Nordaaker/convos/issues?q=milestone%3AFridge) which
-would be cool to get done.
+ideas in the [fridge](https://github.com/Nordaaker/convos/issues?q=milestone%3AFridge).
 
 Looking forward to talking to you on the 21st!
