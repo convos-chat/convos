@@ -28,62 +28,83 @@ test('load', async () => {
   expect(d.status).toBe('pending');
 
   d.messagesOp.perform = mockMessagesOpPerform({
-    body: {end: true, messages: [{from: 'supergirl', message: 'Cool beans', type: 'private', ts: '2020-01-20T09:01:50.001Z'}]},
+    body: {end: true, messages: [{from: 'supergirl', message: 'm one', type: 'private', ts: '2020-01-20T09:01:50.001Z'}]},
     status: 200,
   })
   await d.load();
-  expect(d.messagesOp.performed).toEqual({connection_id: 'irc-freenode', conversation_id: '#convos', limit: 60});
+  expect(d.messagesOp.performed).toEqual({connection_id: 'irc-freenode', conversation_id: '#convos', limit: 40});
   expect(d.status).toBe('success');
   expect(socket.queue.length).toBe(1);
   expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names'});
 
-  d.messagesOp.perform = mockMessagesOpPerform({status: 500});
+  d.messagesOp.perform = mockMessagesOpPerform({
+    body: {end: true, messages: [{from: 'superman', message: 'm two', type: 'private', ts: '2020-01-20T09:01:50.001Z'}]},
+    status: 200,
+  })
   delete d.messagesOp.performed;
-  await d.load({before: 'maybe'});
-  expect(d.messagesOp.performed).toBe(undefined);
-  expect(d.status).toBe('success');
-  await d.load({after: 'maybe'});
-  expect(d.messagesOp.performed).toBe(undefined);
-  expect(d.status).toBe('success');
+  await d.load({around: '2020-01-10T09:01:50.001Z'});
+  expect(d.messagesOp.performed).toEqual({around: '2020-01-10T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 30});
+});
 
-  d.messagesOp.perform = mockMessagesOpPerform({
-    body: {end: true, messages: [{from: 'supergirl', message: 'Something new', type: 'private', ts: '2020-01-20T09:02:50.001Z'}]},
-    status: 200,
-  });
-  d.update({historyStopAt: false, status: 'pending'});
-  await d.load({after: 'maybe'});
-  expect(d.messagesOp.performed).toEqual({after: '2020-01-20T09:01:50.001Z', limit: 200, connection_id: 'irc-freenode', conversation_id: '#convos'});
-  expect(d.status).toBe('success');
+test('load start/end history', () => {
+  const d = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+  const messages = [1, 2, 3].map(i => ({ts: '2020-01-01T09:01:01.001Z'.replace(/1/g, i)}));
+
+  const reset = () => d.update({historyStartAt: null, historyStopAt: null});
+
+  reset();
+  d._setEndOfStream({}, {after: '2020-02-10T09:00:01.001Z', before: '2020-02-10T09:00:00.001Z'});
   expect(d.historyStartAt).toBe(null);
-  expect(socket.queue.length).toBe(2);
-  expect(socket.queue[1]).toEqual({id: '2', method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names'});
+  expect(d.historyStopAt).toBe(null);
 
-  d.messagesOp.perform = mockMessagesOpPerform({
-    body: {end: true, messages: [{from: 'Supergirl', message: 'Something old', type: 'action', ts: '2020-01-20T09:00:50.001Z'}]},
-    status: 200,
-  });
-  d.update({status: 'pending'});
-  await d.load({before: 'maybe'});
-  expect(d.messagesOp.performed).toEqual({before: '2020-01-20T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 60});
-  expect(d.status).toBe('success');
-  expect(socket.queue.length).toBe(2);
+  reset();
+  d._setEndOfStream({after: '2020-02-10T09:00:02.002Z', before: '2020-02-10T09:00:00.002Z'}, {});
+  expect(d.historyStartAt).toBe(null);
+  expect(d.historyStopAt).toBe(null);
 
-  const messages = d.messages.map(_m => {
-    const m = {..._m};
-    delete m.color;
-    delete m.embeds;
-    delete m.from;
-    delete m.message;
-    delete m.ts;
-    return m;
-  });
+  reset();
+  d._setEndOfStream({after: '2020-02-10T09:00:03.003Z'}, {messages, before: '2020-02-10T09:00:00.003Z'});
+  expect(d.historyStartAt).toBe(null);
+  expect(d.historyStopAt.toISOString()).toBe('2020-03-03T09:03:03.003Z');
 
-  expect(d.historyStartAt && d.historyStopAt.toISOString()).toBe('2020-01-20T09:00:50.001Z');
-  expect(messages).toEqual([
-    {fromId: 'supergirl', id: 'msg_3', markdown: 'Something old', type: 'action'},
-    {fromId: 'supergirl', id: 'msg_1', markdown: 'Cool beans', type: 'private'},
-    {fromId: 'supergirl', id: 'msg_2', markdown: 'Something new', type: 'private'},
-  ]);
+  reset();
+  d._setEndOfStream({before: '2020-02-10T09:00:03.003Z'}, {messages, after: '2020-02-10T09:00:00.003Z'});
+  expect(d.historyStartAt.toISOString()).toBe('2020-01-01T09:01:01.001Z');
+  expect(d.historyStopAt).toBe(null);
+
+  messages.pop();
+  messages.pop();
+  expect(messages.length).toBe(1);
+  reset();
+  const t0 = new Date().valueOf();
+  d._setEndOfStream({after: '2000-01-01T00:00:00.000Z', before: '2100-12-31T00:00:00.000Z'}, {messages});
+  expect(d.historyStartAt.valueOf()).toBeGreaterThanOrEqual(t0);
+  expect(d.historyStopAt.valueOf()).toBeGreaterThanOrEqual(t0);
+});
+
+test('load skip', () => {
+  const d = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+
+  // Prevent loading multiple times
+  d.update({status: 'loading'});
+  expect(d._skipLoad({})).toBe(true);
+
+  // Skip load if no messages and success (already loaded)
+  d.update({status: 'success'});
+  expect(d._skipLoad({})).toBe(true);
+  d.update({messages: [{ts: new Date('2020-01-20T09:00:00.001Z')}]});
+  expect(d._skipLoad({})).toBe(false);
+
+  // Skip at start/end of history
+  expect(d._skipLoad({before: '2020-01-20T09:01:50.001Z'})).toBe(false);
+  expect(d._skipLoad({after: '2020-01-20T09:01:50.001Z'})).toBe(false);
+  d.update({historyStartAt: new Date(), historyStopAt: new Date()});
+  expect(d._skipLoad({before: '2020-01-20T09:01:50.001Z'})).toBe(true);
+  expect(d._skipLoad({after: '2020-01-20T09:01:50.001Z'})).toBe(true);
+
+  // Skip around if alread loaded
+  expect(d._skipLoad({around: '2020-01-20T09:00:00.001Z'})).toBe(true);
+  expect(d._skipLoad({around: '2020-01-20T09:01:01.001Z'})).toBe(false);
 });
 
 test('addMessage channel', () => {
