@@ -38,7 +38,7 @@ msgstr "A line starting with \">\" will be converted into a quote."
 msgid "A link was generated"
 msgstr "A link was generated"
 
-#: assets/components/SidebarChat.svelte:187
+#: assets/components/ChatSidebar.svelte:187
 msgid "Account"
 msgstr "Account"
 
@@ -46,11 +46,11 @@ msgstr "Account"
 msgid "Add"
 msgstr "Add"
 
-#: assets/components/SidebarChat.svelte:183
+#: assets/components/ChatSidebar.svelte:183
 msgid "Add connection"
 msgstr "Add connection"
 
-#: assets/components/SidebarChat.svelte:179
+#: assets/components/ChatSidebar.svelte:179
 msgid "Add conversation"
 msgstr "Add conversation"
 
@@ -118,7 +118,7 @@ msgstr "Conversation name"
 msgid "Conversation with %1 is frozen. Reason: %2"
 msgstr "Conversation with %1 is frozen. Reason: %2"
 
-#: assets/components/SidebarChat.svelte:145
+#: assets/components/ChatSidebar.svelte:145
 msgid "Conversations"
 msgstr "Conversations"
 
@@ -250,7 +250,7 @@ msgstr "Go to start page"
 msgid "Hangup"
 msgstr "Hangup"
 
-#: assets/components/SidebarChat.svelte:191
+#: assets/components/ChatSidebar.svelte:191
 msgid "Help"
 msgstr "Help"
 
@@ -302,7 +302,7 @@ msgstr "Loading user data..."
 msgid "Loading..."
 msgstr "Loading..."
 
-#: assets/components/SidebarChat.svelte:201
+#: assets/components/ChatSidebar.svelte:201
 msgid "Log out"
 msgstr "Log out"
 
@@ -318,7 +318,7 @@ msgstr "Nickname"
 msgid "No"
 msgstr "No"
 
-#: assets/components/SidebarChat.svelte:149
+#: assets/components/ChatSidebar.svelte:149
 msgid "No conversations"
 msgstr "No conversations"
 
@@ -342,7 +342,7 @@ msgstr "Nordaaker"
 msgid "Notification keywords"
 msgstr "Notification keywords"
 
-#: assets/components/SidebarChat.svelte:170
+#: assets/components/ChatSidebar.svelte:170
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -418,15 +418,15 @@ msgstr "Retry"
 msgid "Save settings"
 msgstr "Save settings"
 
-#: assets/components/SidebarChat.svelte:175
+#: assets/components/ChatSidebar.svelte:175
 msgid "Search"
 msgstr "Search"
 
-#: assets/components/SidebarChat.svelte:205
+#: assets/components/ChatSidebar.svelte:205
 msgid "Search for \"%1\""
 msgstr "Search for \"%1\""
 
-#: assets/components/SidebarChat.svelte:134
+#: assets/components/ChatSidebar.svelte:134
 msgid "Search for conversations or messages"
 msgstr "Search for conversations or messages"
 
@@ -446,7 +446,7 @@ msgstr "Send me notifications"
 msgid "Set new password"
 msgstr "Set new password"
 
-#: assets/components/SidebarChat.svelte:196
+#: assets/components/ChatSidebar.svelte:196
 msgid "Settings"
 msgstr "Settings"
 

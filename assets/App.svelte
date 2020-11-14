@@ -17,7 +17,7 @@ import ConnectionSettings from './components/ConnectionSettings.svelte';
 import ConversationSettings from './components/ConversationSettings.svelte';
 import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
-import SidebarChat from './components/SidebarChat.svelte';
+import ChatSidebar from './components/ChatSidebar.svelte';
 
 const socket = getSocket('/events');
 const user = new User({});
@@ -95,7 +95,7 @@ function socketChanged(socket) {
 {#if loggedInRoute}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
-    and a lot of $route updates prevents the <SidebarChat/> and/or
+    and a lot of $route updates prevents the <ChatSidebar/> and/or
     $route.component from being destroyed.
     I (jhthorsen) really wanted to move the sidebars into the components,
     but it does not seem to be possible at this point.
@@ -104,7 +104,7 @@ function socketChanged(socket) {
   -->
 
   {#if ($route.activeMenu == 'nav' || $viewport.isWide) && $route.activeMenu != 'default'}
-    <SidebarChat transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
+    <ChatSidebar transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
   {/if}
 
   {#if $route.activeMenu == 'settings'}
