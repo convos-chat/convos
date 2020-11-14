@@ -1,4 +1,4 @@
-import ConnURL from '../js/ConnURL';
+import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
@@ -17,7 +17,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
-    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnURL(params.url) : params.url || new ConnURL('convos://loopback'));
+    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('convos://loopback'));
 
     const me = params.me || {};
     const nick = me.nick || this.url.searchParams.get('nick') || '';
@@ -63,7 +63,7 @@ export default class Connection extends Conversation {
   }
 
   update(params) {
-    if (params.url && typeof params.url == 'string') params.url = new ConnURL(params.url);
+    if (params.url && typeof params.url == 'string') params.url = new ConnectionURL(params.url);
     return super.update(params);
   }
 

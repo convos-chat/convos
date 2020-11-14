@@ -1,15 +1,15 @@
-import ConnURL from '../assets/js/ConnURL';
+import ConnectionURL from '../assets/js/ConnectionURL';
 
-test('ConnURL http', () => {
-  const url = new ConnURL('http://convos.chat/');
+test('ConnectionURL http', () => {
+  const url = new ConnectionURL('http://convos.chat/');
   expect(url.toString()).toBe('http://convos.chat/');
 
   url.href = 'https://convos.chat/';
   expect(url.toString()).toBe('https://convos.chat/');
 });
 
-test('ConnURL irc', () => {
-  const url = new ConnURL('irc://irc.example.com/%23convos?nick=supergirl');
+test('ConnectionURL irc', () => {
+  const url = new ConnectionURL('irc://irc.example.com/%23convos?nick=supergirl');
   expect(url.toString()).toBe('irc://irc.example.com/%23convos?nick=supergirl');
 
   url.href = 'irc://irc.example.com:6667/%23convos?nick=superduper';

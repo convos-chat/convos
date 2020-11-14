@@ -1,12 +1,12 @@
 /**
- * ConnURL can be used to represent an URL that does not start with "http" or
+ * ConnectionURL can be used to represent an URL that does not start with "http" or
  * "https".
  *
- * @exports ConnURL
- * @class ConnURL
+ * @exports ConnectionURL
+ * @class ConnectionURL
  */
 
-export default class ConnURL {
+export default class ConnectionURL {
   constructor(href) {
     this._url = new URL('http://localhost');
 
@@ -31,7 +31,7 @@ export default class ConnURL {
   /**
    * fromForm() can be used to copy connection parameters from a form to the URL.
    *
-   * @memberof ConnURL
+   * @memberof ConnectionURL
    * @param {HTMLFormElement} form A form element, with input fields.
    * @return {this}
    */
@@ -49,7 +49,7 @@ export default class ConnURL {
   /**
    * Will return a string with the custom protocol.
    *
-   * @memberof ConnURL
+   * @memberof ConnectionURL
    */
   toString() {
     return this.href.replace(/^http:/, this.protocol);

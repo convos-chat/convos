@@ -1,7 +1,7 @@
 <script>
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
-import ConnURL from '../js/ConnURL';
+import ConnectionURL from '../js/ConnectionURL';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
@@ -47,7 +47,7 @@ function defaultsToForm() {
 
   if (!route.query.uri) return route.urlToForm(formEl);
 
-  const connURL = new ConnURL(route.query.uri);
+  const connURL = new ConnectionURL(route.query.uri);
   const connParams = connURL.searchParams;
 
   if (connURL.host) formEl.server.value = connURL.host;
@@ -81,7 +81,7 @@ async function removeConnection(e) {
 async function submitForm(e) {
   if (!formEl.server.value) return; // TODO: Inform that it is required
 
-  formEl.url.value = new ConnURL('irc://localhost:6667').fromForm(e.target).toString();
+  formEl.url.value = new ConnectionURL('irc://localhost:6667').fromForm(e.target).toString();
 
   if (connection.connection_id) {
     await updateConnectionOp.perform(e.target);

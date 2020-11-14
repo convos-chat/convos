@@ -113,7 +113,6 @@ export default class Conversation extends Reactive {
   }
 
   async load(params = {}) {
-    if (!this.messagesOp || this.is('loading')) return this;
     if (this._skipLoad(params)) return this;
 
     // Load messages
@@ -317,11 +316,11 @@ export default class Conversation extends Reactive {
 
   _setEndOfStream(params, body) {
     if (!params.before && !body.after) {
-      const msg = this.messages.slice(-1)[0];
+      const msg = body.messages.slice(-1)[0];
       this.update({historyStopAt: new Time(msg && msg.ts)});
     }
     if (!params.after && !body.before) {
-      const msg = this.messages[0];
+      const msg = body.messages[0];
       this.update({historyStartAt: new Time(msg && msg.ts)});
     }
     if (body.messages && body.messages.length <= 1) {
@@ -330,9 +329,12 @@ export default class Conversation extends Reactive {
   }
 
   _skipLoad(opParams) {
+    if (!this.messagesOp || this.is('loading')) return true;
     if (!this.messages.length) return this.is('success');
     if (opParams.around) return !!this.messages.find(msg => msg.ts.toISOString() == opParams.around);
-    return (opParams.before && this.historyStartAt) || (opParams.after && this.historyStopAt);
+    if (opParams.before && this.historyStartAt) return true;
+    if (opParams.after && this.historyStopAt) return true;
+    return false;
   }
 
   _updateParticipants(params) {
