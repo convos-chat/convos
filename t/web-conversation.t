@@ -17,23 +17,23 @@ $connection->_irc_event_privmsg({
   prefix  => 'Supergirl!super.girl@i.love.debian.org',
   params  => ['#Convos', 'not a superdupersuperman?']
 });
-$connection->dialog({name => '#Convos', frozen => ''})->unread(42);
-$t->get_ok('/api/dialogs')->status_is(200)->json_is(
-  '/dialogs' => [
+$connection->conversation({name => '#Convos', frozen => ''})->unread(42);
+$t->get_ok('/api/conversations')->status_is(200)->json_is(
+  '/conversations' => [
     {
-      connection_id => 'irc-localhost',
-      dialog_id     => '#convos',
-      frozen        => '',
-      name          => '#Convos',
-      topic         => '',
-      unread        => 42,
+      connection_id   => 'irc-localhost',
+      conversation_id => '#convos',
+      frozen          => '',
+      name            => '#Convos',
+      topic           => '',
+      unread          => 42,
     },
   ]
 );
 
 $user->connection({name => 'example', protocol => 'irc'})
-  ->dialog({name => '#superheroes', frozen => ''})->unread(34);
-$t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
+  ->conversation({name => '#superheroes', frozen => ''})->unread(34);
+$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->json_is(
   '/connections',
   [
     {
@@ -59,28 +59,28 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)->json_is(
   ],
   'user connections'
 )->json_is(
-  '/dialogs',
+  '/conversations',
   [
     {
-      connection_id => 'irc-localhost',
-      dialog_id     => '#convos',
-      frozen        => '',
-      name          => '#Convos',
-      topic         => '',
-      unread        => 42,
+      connection_id   => 'irc-localhost',
+      conversation_id => '#convos',
+      frozen          => '',
+      name            => '#Convos',
+      topic           => '',
+      unread          => 42,
     },
     {
-      connection_id => 'irc-example',
-      dialog_id     => '#superheroes',
-      frozen        => '',
-      name          => '#superheroes',
-      topic         => '',
-      unread        => 34,
+      connection_id   => 'irc-example',
+      conversation_id => '#superheroes',
+      frozen          => '',
+      name            => '#superheroes',
+      topic           => '',
+      unread          => 34,
     }
   ],
-  'user dialogs'
+  'user conversations'
 )->json_hasnt('/notifications', 'user notifications');
 
-$t->post_ok('/api/connection/irc-localhost/dialog/%23convos/read')->status_is(200);
+$t->post_ok('/api/connection/irc-localhost/conversation/%23convos/read')->status_is(200);
 
 done_testing;

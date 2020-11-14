@@ -69,9 +69,9 @@ $t->get_ok('/api/user')->status_is(200)->json_is('/email', 'superman@example.com
 my $user = $t->app->core->get_user('superman@example.com');
 $user->unread(4);
 
-$user->connection({name => 'localhost', protocol => 'irc'})->dialog({name => '#convos'})
+$user->connection({name => 'localhost', protocol => 'irc'})->conversation({name => '#convos'})
   ->unread(42);
-$t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)
+$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
   ->json_is('/email', 'superman@example.com')->json_is(
   '/connections',
   [{
@@ -85,14 +85,14 @@ $t->get_ok('/api/user?connections=true&dialogs=true')->status_is(200)
     wanted_state        => 'connected',
   }]
 )->json_is(
-  '/dialogs',
+  '/conversations',
   [{
-    connection_id => 'irc-localhost',
-    dialog_id     => '#convos',
-    frozen        => 'Not connected.',
-    name          => '#convos',
-    topic         => '',
-    unread        => 42,
+    connection_id   => 'irc-localhost',
+    conversation_id => '#convos',
+    frozen          => 'Not connected.',
+    name            => '#convos',
+    topic           => '',
+    unread          => 42,
   }]
 );
 

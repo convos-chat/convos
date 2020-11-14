@@ -1,19 +1,19 @@
-package Convos::Controller::Dialog;
+package Convos::Controller::Conversation;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Convos::Date 'dt';
 use Mojo::JSON qw(false true);
 
 sub mark_as_read {
-  my $self   = shift->openapi->valid_input or return;
-  my $dialog = $self->backend->dialog({});
+  my $self         = shift->openapi->valid_input or return;
+  my $conversation = $self->backend->conversation({});
 
-  unless ($dialog) {
-    return $self->reply->errors([],                  401) unless $self->backend->user;
-    return $self->reply->errors('Dialog not found.', 404);
+  unless ($conversation) {
+    return $self->reply->errors([],                        401) unless $self->backend->user;
+    return $self->reply->errors('Conversation not found.', 404);
   }
 
-  $dialog->unread(0);
+  $conversation->unread(0);
   $self->stash('connection')->save_p->then(sub {
     $self->render(openapi => {});
   });
@@ -22,23 +22,23 @@ sub mark_as_read {
 sub list {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
-  my @dialogs;
+  my @conversations;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
-    for my $dialog (sort { $a->id cmp $b->id } @{$connection->dialogs}) {
-      push @dialogs, $dialog;
+    for my $conversation (sort { $a->id cmp $b->id } @{$connection->conversations}) {
+      push @conversations, $conversation;
     }
   }
 
-  $self->render(openapi => {dialogs => \@dialogs});
+  $self->render(openapi => {conversations => \@conversations});
 }
 
 sub messages {
-  my $self   = shift->openapi->valid_input or return;
-  my $dialog = $self->backend->dialog({});
+  my $self         = shift->openapi->valid_input or return;
+  my $conversation = $self->backend->conversation({});
   my %query;
 
-  unless ($dialog) {
+  unless ($conversation) {
     return $self->reply->errors([], 401) unless $self->backend->user;
     return $self->render(openapi => {messages => [], end => true});
   }
@@ -56,7 +56,7 @@ sub messages {
       if abs(dt($query{after}) - dt($query{before})) > 86400 * 365;
   }
 
-  $dialog->messages_p(\%query)->then(sub { $self->render(openapi => shift) });
+  $conversation->messages_p(\%query)->then(sub { $self->render(openapi => shift) });
 }
 
 1;
@@ -65,26 +65,26 @@ sub messages {
 
 =head1 NAME
 
-Convos::Controller::Dialog - Convos dialogs
+Convos::Controller::Conversation - Convos conversations
 
 =head1 DESCRIPTION
 
-L<Convos::Controller::Dialog> is a L<Mojolicious::Controller> with
-dialog related actions.
+L<Convos::Controller::Conversation> is a L<Mojolicious::Controller> with
+conversation related actions.
 
 =head1 METHODS
 
 =head2 list
 
-See L<https://convos.chat/api.html#op-get--dialogs>
+See L<https://convos.chat/api.html#op-get--conversations>
 
 =head2 mark_as_read
 
-See L<https://convos.chat/api.html#op-post--connection--connection_id--dialog--dialog_id--read>
+See L<https://convos.chat/api.html#op-post--connection--connection_id--conversation--conversation_id--read>
 
 =head2 messages
 
-See L<https://convos.chat/api.html#op-get--connection--connection_id--dialog--dialog_id--messages>
+See L<https://convos.chat/api.html#op-get--connection--connection_id--conversation--conversation_id--messages>
 
 =head1 SEE ALSO
 

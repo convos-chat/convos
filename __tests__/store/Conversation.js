@@ -1,16 +1,16 @@
-import Dialog from '../../assets/store/Dialog';
+import Conversation from '../../assets/store/Conversation';
 import {getSocket} from '../../assets/js/Socket';
 
 const socket = getSocket('/events').update({url: 'wss://example.convos.chat'});
 
 test('constructor', () => {
-  let d = new Dialog({});
+  let d = new Conversation({});
   expect(d.name).toBe('ERR');
 
-  d = new Dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
+  d = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
   expect(d.color).toBe('#6bafb2');
   expect(d.connection_id).toBe('irc-freenode');
-  expect(d.dialog_id).toBe('#convos');
+  expect(d.conversation_id).toBe('#convos');
   expect(d.errors).toBe(0);
   expect(d.frozen).toBe('');
   expect(d.is_private).toBe(false);
@@ -24,7 +24,7 @@ test('constructor', () => {
 });
 
 test('load', async () => {
-  const d = new Dialog({connection_id: 'irc-freenode', dialog_id: '#convos'});
+  const d = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
   expect(d.status).toBe('pending');
 
   d.messagesOp.perform = mockMessagesOpPerform({
@@ -32,10 +32,10 @@ test('load', async () => {
     status: 200,
   })
   await d.load();
-  expect(d.messagesOp.performed).toEqual({connection_id: 'irc-freenode', dialog_id: '#convos', limit: 60});
+  expect(d.messagesOp.performed).toEqual({connection_id: 'irc-freenode', conversation_id: '#convos', limit: 60});
   expect(d.status).toBe('success');
   expect(socket.queue.length).toBe(1);
-  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', dialog_id: '#convos', message: '/names'});
+  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names'});
 
   d.messagesOp.perform = mockMessagesOpPerform({status: 500});
   delete d.messagesOp.performed;
@@ -52,11 +52,11 @@ test('load', async () => {
   });
   d.update({historyStopAt: false, status: 'pending'});
   await d.load({after: 'maybe'});
-  expect(d.messagesOp.performed).toEqual({after: '2020-01-20T09:01:50.001Z', limit: 200, connection_id: 'irc-freenode', dialog_id: '#convos'});
+  expect(d.messagesOp.performed).toEqual({after: '2020-01-20T09:01:50.001Z', limit: 200, connection_id: 'irc-freenode', conversation_id: '#convos'});
   expect(d.status).toBe('success');
   expect(d.historyStartAt).toBe(null);
   expect(socket.queue.length).toBe(2);
-  expect(socket.queue[1]).toEqual({id: '2', method: 'send', connection_id: 'irc-freenode', dialog_id: '#convos', message: '/names'});
+  expect(socket.queue[1]).toEqual({id: '2', method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names'});
 
   d.messagesOp.perform = mockMessagesOpPerform({
     body: {end: true, messages: [{from: 'Supergirl', message: 'Something old', type: 'action', ts: '2020-01-20T09:00:50.001Z'}]},
@@ -64,7 +64,7 @@ test('load', async () => {
   });
   d.update({status: 'pending'});
   await d.load({before: 'maybe'});
-  expect(d.messagesOp.performed).toEqual({before: '2020-01-20T09:01:50.001Z', connection_id: 'irc-freenode', dialog_id: '#convos', limit: 60});
+  expect(d.messagesOp.performed).toEqual({before: '2020-01-20T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 60});
   expect(d.status).toBe('success');
   expect(socket.queue.length).toBe(2);
 
@@ -87,7 +87,7 @@ test('load', async () => {
 });
 
 test('addMessage channel', () => {
-  const d = new Dialog({connection_id: 'irc-localhost', dialog_id: '#test'});
+  const d = new Conversation({connection_id: 'irc-localhost', conversation_id: '#test'});
   expect(d.unread).toBe(0);
 
   d.addMessage({from: 'supergirl', highlight: true, message: 'n1', type: 'private', yourself: true});
@@ -105,7 +105,7 @@ test('addMessage channel', () => {
 });
 
 test('addMessage private', () => {
-  const d = new Dialog({connection_id: 'irc-localhost', dialog_id: 'supergirl'});
+  const d = new Conversation({connection_id: 'irc-localhost', conversation_id: 'supergirl'});
   expect(d.unread).toBe(0);
 
   // Do not increase unread when sent by yourself

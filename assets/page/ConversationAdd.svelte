@@ -12,9 +12,9 @@ import {route} from '../store/Route';
 const socket = getContext('socket');
 const user = getContext('user');
 
-let availableDialogs = {dialogs: [], done: null, n_dialogs: 0};
+let availableConversations = {conversations: [], done: null, n_conversations: 0};
 let connectionId = '';
-let dialogId = '';
+let conversationId = '';
 let formEl;
 let loadConversationsTid;
 
@@ -24,20 +24,20 @@ $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0]
 route.update({title: l('Add conversation')});
 onMount(() => route.urlToForm(formEl));
 
-function addDialog(e) {
+function addConversation(e) {
   const aEl = e && e.target && e.target.closest('a');
-  if (aEl && aEl.href) dialogId = aEl.href.replace(/.*#add:/, '');
-  if (connectionId && dialogId) user.findDialog({connection_id: connectionId}).send('/join ' + dialogId);
+  if (aEl && aEl.href) conversationId = aEl.href.replace(/.*#add:/, '');
+  if (connectionId && conversationId) user.findConversation({connection_id: connectionId}).send('/join ' + conversationId);
 }
 
 async function loadConversations(e) {
-  let message = '/list' + (dialogId.length ? ' /' + dialogId + '/' : '');
-  if (e.type == 'click' && availableDialogs.done) message += ' refresh';
+  let message = '/list' + (conversationId.length ? ' /' + conversationId + '/' : '');
+  if (e.type == 'click' && availableConversations.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
   const res = await socket.send({connection_id: connectionId, message, method: 'send'});
   const error = extractErrorMessage(res);
-  availableDialogs = error ? {dialogs: [], done: true, n_dialogs: 0, error} : res;
+  availableConversations = error ? {conversations: [], done: true, n_conversations: 0, error} : res;
 
   let interval = e.interval ? e.interval + 500 : 500;
   if (interval > 2000) interval = 2000;
@@ -57,46 +57,46 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
     {l('It is also possible to load in all existing conversations for a given connection.')}
   </p>
 
-  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{addDialog}">
+  <form method="post" bind:this="{formEl}" on:submit|preventDefault="{addConversation}">
     <div class="inputs-side-by-side">
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{l('Connection')}</span>
       </SelectField>
       <div class="has-remaining-space">
-        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableDialogs.done === false}"><span>{l(availableDialogs.dialogs.length ? 'Refresh' : 'Load')}</span></Button>
+        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableConversations.done === false}"><span>{l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
       </div>
     </div>
 
     <div class="inputs-side-by-side">
-      <TextField name="dialog_id" placeholder="{l('#room or nick')}" autocomplete="off"
-        bind:value="{dialogId}"
+      <TextField name="conversation_id" placeholder="{l('#room or nick')}" autocomplete="off"
+        bind:value="{conversationId}"
         on:keyup="{debouncedLoadConversations}">
         <span slot="label">{l('Conversation name')}</span>
       </TextField>
       <div class="has-remaining-space">
-        <Button icon="comment" disabled="{!connectionId || !dialogId}"><span>{l('Add')}</span></Button>
+        <Button icon="comment" disabled="{!connectionId || !conversationId}"><span>{l('Add')}</span></Button>
       </div>
     </div>
 
-    {#if availableDialogs.error}
-      <p class="error">{connectionId}: {availableDialogs.error}</p>
+    {#if availableConversations.error}
+      <p class="error">{connectionId}: {availableConversations.error}</p>
     {/if}
 
-    {#if availableDialogs.done !== null}
+    {#if availableConversations.done !== null}
       <p>
-        {#if availableDialogs.done}
-          {l('Showing %1 of %2 conversations.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
+        {#if availableConversations.done}
+          {l('Showing %1 of %2 conversations.', availableConversations.conversations.length, availableConversations.n_conversations)}
         {:else}
-          {l('Showing %1 of %2 conversations, but the list is still loading.', availableDialogs.dialogs.length, availableDialogs.n_dialogs)}
+          {l('Showing %1 of %2 conversations, but the list is still loading.', availableConversations.conversations.length, availableConversations.n_conversations)}
         {/if}
       </p>
 
-      <div class="dialog-add-list">
-        {#each availableDialogs.dialogs as dialog}
-          <a href="#add:{dialog.name}" on:click|preventDefault="{addDialog}">
-            <span class="dialog-add-list__n-users">{dialog.n_users}</span>
-            <b class="dialog-add-list__name">{dialog.name}</b>
-            <i class="dialog-add-list__title">{dialog.topic || 'No topic.'}</i>
+      <div class="conversation-add-list">
+        {#each availableConversations.conversations as conversation}
+          <a href="#add:{conversation.name}" on:click|preventDefault="{addConversation}">
+            <span class="conversation-add-list__n-users">{conversation.n_users}</span>
+            <b class="conversation-add-list__name">{conversation.name}</b>
+            <i class="conversation-add-list__title">{conversation.topic || 'No topic.'}</i>
           </a>
         {/each}
       </div>

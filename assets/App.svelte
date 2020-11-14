@@ -14,7 +14,7 @@ import {setupRouting} from './routes';
 
 // Page components
 import ConnectionSettings from './components/ConnectionSettings.svelte';
-import DialogSettings from './components/DialogSettings.svelte';
+import ConversationSettings from './components/ConversationSettings.svelte';
 import Fallback from './page/Fallback.svelte';
 import Login from './page/Login.svelte';
 import SidebarChat from './components/SidebarChat.svelte';
@@ -49,7 +49,7 @@ user.load();
 viewport.activateTheme();
 
 $: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
-$: settingsComponent = !$user.activeDialog.connection_id ? null : $user.activeDialog.dialog_id ? DialogSettings : ConnectionSettings;
+$: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
 $: viewport.update({height: innerHeight, width: innerWidth});
 $: settings('app_mode', loggedInRoute);
 $: settings('notify_enabled', loggedInRoute);
@@ -108,7 +108,7 @@ function socketChanged(socket) {
   {/if}
 
   {#if $route.activeMenu == 'settings'}
-    <svelte:component this="{settingsComponent}" dialog="{$user.activeDialog}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
+    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
   {/if}
 
   <svelte:component this="{$route.component}"/>

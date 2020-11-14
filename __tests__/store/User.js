@@ -4,71 +4,71 @@ import User from '../../assets/store/User';
 
 global.WebSocket = window.WebSocket = TestWebSocket;
 
-test('ensureDialog connection', () => {
+test('ensureConversation connection', () => {
   const user = new User({});
 
-  const conn = user.ensureDialog({connection_id: 'irc-foo'});
+  const conn = user.ensureConversation({connection_id: 'irc-foo'});
   expect(conn.connection_id).toBe('irc-foo');
-  expect(user.activeDialog.connection_id).toBe('');
+  expect(user.activeConversation.connection_id).toBe('');
 
-  // Upgrade activeDialog
-  user.setActiveDialog({connection_id: 'irc-bar'});
-  user.ensureDialog({connection_id: 'irc-bar'});
-  expect(user.activeDialog.connection_id).toBe('irc-bar');
-  expect(user.activeDialog.dialog_id).toBe(undefined);
+  // Upgrade activeConversation
+  user.setActiveConversation({connection_id: 'irc-bar'});
+  user.ensureConversation({connection_id: 'irc-bar'});
+  expect(user.activeConversation.connection_id).toBe('irc-bar');
+  expect(user.activeConversation.conversation_id).toBe(undefined);
 
-  // Upgrade activeDialog from connection
-  user.setActiveDialog({connection_id: 'irc-foo', dialog_id: '#cf'});
-  expect(user.activeDialog.frozen).toBe('Not found.');
-  conn.ensureDialog({dialog_id: '#cf'});
-  expect(user.activeDialog.dialog_id).toBe('#cf');
-  expect(user.activeDialog.frozen).toBe('');
+  // Upgrade activeConversation from connection
+  user.setActiveConversation({connection_id: 'irc-foo', conversation_id: '#cf'});
+  expect(user.activeConversation.frozen).toBe('Not found.');
+  conn.ensureConversation({conversation_id: '#cf'});
+  expect(user.activeConversation.conversation_id).toBe('#cf');
+  expect(user.activeConversation.frozen).toBe('');
 });
 
-test('ensureDialog dialog', () => {
+test('ensureConversation conversation', () => {
   const user = new User({});
 
-  const dialog = user.ensureDialog({connection_id: 'irc-foo', dialog_id: '#cf'});
-  expect(dialog.connection_id).toBe('irc-foo');
-  expect(user.activeDialog.connection_id).toBe('');
-  expect(user.activeDialog.dialog_id).toBe('notifications');
+  const conversation = user.ensureConversation({connection_id: 'irc-foo', conversation_id: '#cf'});
+  expect(conversation.connection_id).toBe('irc-foo');
+  expect(user.activeConversation.connection_id).toBe('');
+  expect(user.activeConversation.conversation_id).toBe('notifications');
 
-  // Upgrade activeDialog
-  user.setActiveDialog({connection_id: 'irc-bar', dialog_id: '#cr'});
-  expect(user.findDialog({connection_id: 'irc-bar', dialog_id: '#cr'})).toBe(null);
-  user.ensureDialog({connection_id: 'irc-bar', dialog_id: '#cr'});
-  expect(user.activeDialog.connection_id).toBe('irc-bar');
-  expect(user.activeDialog.dialog_id).toBe('#cr');
+  // Upgrade activeConversation
+  user.setActiveConversation({connection_id: 'irc-bar', conversation_id: '#cr'});
+  expect(user.findConversation({connection_id: 'irc-bar', conversation_id: '#cr'})).toBe(null);
+  user.ensureConversation({connection_id: 'irc-bar', conversation_id: '#cr'});
+  expect(user.activeConversation.connection_id).toBe('irc-bar');
+  expect(user.activeConversation.conversation_id).toBe('#cr');
 });
 
-test('removeDialog connection', () => {
+test('removeConversation connection', () => {
   const user = new User({});
 
-  const conn = user.ensureDialog({connection_id: 'irc-baz'});
-  user.update({activeDialog: conn});
-  expect(user.activeDialog == conn).toBe(true);
+  const conn = user.ensureConversation({connection_id: 'irc-baz'});
+  user.update({activeConversation: conn});
+  expect(user.activeConversation == conn).toBe(true);
 
-  user.removeDialog(conn);
-  expect(user.activeDialog != conn).toBe(true);
-  expect(user.activeDialog.connection_id).toBe('irc-baz');
+  user.removeConversation(conn);
+  expect(user.activeConversation != conn).toBe(true);
+  expect(user.activeConversation.connection_id).toBe('irc-baz');
   expect(user.connections.size).toBe(0);
 });
 
-test('removeDialog dialog', () => {
+test('removeConversation conversation', () => {
   const user = new User({});
 
-  const conn = user.ensureDialog({connection_id: 'irc-bax'});
-  const dialog = user.ensureDialog({connection_id: 'irc-bax', dialog_id: '#cx'});
+  const conn = user.ensureConversation({connection_id: 'irc-bax'});
+  const conversation = user.ensureConversation({connection_id: 'irc-bax', conversation_id: '#cx'});
 
-  user.update({activeDialog: dialog});
-  expect(user.activeDialog == dialog).toBe(true);
+  user.update({activeConversation: conversation});
+  expect(user.activeConversation == conversation).toBe(true);
 
-  user.removeDialog(dialog);
-  expect(user.activeDialog != dialog).toBe(true);
-  expect(user.activeDialog.connection_id).toBe('irc-bax');
-  expect(user.activeDialog.dialog_id).toBe('#cx');
+  user.removeConversation(conversation);
+  expect(user.activeConversation != conversation).toBe(true);
+  expect(user.activeConversation.connection_id).toBe('irc-bax');
+  expect(user.activeConversation.conversation_id).toBe('#cx');
   expect(user.connections.size).toBe(1);
-  expect(user.dialogs().length).toBe(0);
+  expect(user.conversations().length).toBe(0);
 });
 
 test('load success', async () => {
@@ -88,7 +88,7 @@ test('load success', async () => {
     id: '1',
     method: 'load',
     object: 'user',
-    params: {connections: true, dialogs: true},
+    params: {connections: true, conversations: true},
     ts: true,
     waitingForResponse: true
   }]);

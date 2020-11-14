@@ -17,11 +17,11 @@ my @rtc_events;
 $connection->on(rtc => sub { shift; push @rtc_events, [@_] });
 
 note 'call #convos';
-my %msg = (connection_id => 'irc-localhost', dialog_id => '#convos', event => 'call');
+my %msg = (connection_id => 'irc-localhost', conversation_id => '#convos', event => 'call');
 my ($err, $res, $msg);
-$connection->rtc_p({%msg})->$wait_reject('Dialog not found.');
+$connection->rtc_p({%msg})->$wait_reject('Conversation not found.');
 
-$connection->dialog({name => '#convos'});
+$connection->conversation({name => '#convos'});
 $connection->rtc_p({%msg})->$wait_reject('Not connected.');
 
 $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
@@ -33,9 +33,9 @@ is_deeply $res, {}, 'called #convos';
 is $msg->{raw_line}, "NOTICE #convos :\x01RTCZ CALL\x01", 'rtcz';
 
 note 'hangup superwoman';
-@msg{qw(dialog_id event)} = qw(superwoman hangup);
-$connection->rtc_p({%msg})->$wait_reject('Dialog not found.');
-$connection->dialog({name => 'superwoman'});
+@msg{qw(conversation_id event)} = qw(superwoman hangup);
+$connection->rtc_p({%msg})->$wait_reject('Conversation not found.');
+$connection->conversation({name => 'superwoman'});
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $res = $connection->rtc_p({%msg})->$wait_success('call superwoman');
 is_deeply $res, {}, 'called superwoman';
@@ -43,7 +43,7 @@ $server->process_ok;
 is $msg->{raw_line}, "NOTICE superwoman :\x01RTCZ HANGUP\x01", 'rtcz';
 
 note 'signalling #convos';
-@msg{qw(dialog_id event ice)} = ('#convos', 'signal', "0\r\n-\r\n" x 200);
+@msg{qw(conversation_id event ice)} = ('#convos', 'signal', "0\r\n-\r\n" x 200);
 $connection->rtc_p({%msg})->$wait_reject('Missing property: target.');
 $msg{target} = 'superwoman';
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
@@ -54,7 +54,7 @@ like $msg->{raw_line}, qr{NOTICE superwoman :\x01RTCZ ICE 0/0 \#convos \S+==\x01
 
 note 'signalling superwoman';
 delete $msg{ice};
-@msg{qw(dialog_id event answer)} = ('superwoman', 'signal', "0\r\n-\r\n" x 200);
+@msg{qw(conversation_id event answer)} = ('superwoman', 'signal', "0\r\n-\r\n" x 200);
 $msg{target} = 'superwoman';
 $server->server_event_ok('_irc_event_ctcpreply_rtcz', sub { $msg = pop });
 $connection->rtc_p({%msg})->$wait_success('event answer superwoman');
@@ -67,7 +67,7 @@ $server->server_write_ok(":superwoman!sg\@example.com NOTICE #convos :\x01RTCZ C
   ->client_event_ok('_irc_event_ctcpreply_rtcz')->process_ok;
 is_deeply(
   \@rtc_events,
-  [[call => $connection->get_dialog('#convos'), {from => 'superwoman'}]],
+  [[call => $connection->get_conversation('#convos'), {from => 'superwoman'}]],
   'got incoming call'
 );
 
@@ -79,7 +79,7 @@ $server->server_write_ok(
 is_deeply(
   \@rtc_events,
   [[
-    signal => $connection->get_dialog('superwoman'),
+    signal => $connection->get_conversation('superwoman'),
     {from => 'superwoman', ice => "0\r\n-\r\n" x 200}
   ]],
   'got incoming signal'
@@ -89,7 +89,8 @@ note 'hangup in superwoman';
 @rtc_events = ();
 $server->server_write_ok(":superwoman!sg\@example.com NOTICE superman :\x01RTCZ HANGUP\x01\r\n")
   ->client_event_ok('_irc_event_ctcpreply_rtcz')->process_ok;
-is_deeply(\@rtc_events, [[hangup => $connection->get_dialog('superwoman'), {from => 'superwoman'}]],
+is_deeply(\@rtc_events,
+  [[hangup => $connection->get_conversation('superwoman'), {from => 'superwoman'}]],
   'got hangup');
 
 done_testing;

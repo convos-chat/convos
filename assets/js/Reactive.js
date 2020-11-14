@@ -4,7 +4,7 @@
  *
  * @exports Reactive
  * @class Reactive
- * @see Dialog
+ * @see Conversation
  * @see Events
  * @see Operation
  * @see User

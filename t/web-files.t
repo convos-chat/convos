@@ -44,11 +44,12 @@ $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_o
   ->client_event_ok('_irc_event_rpl_welcome')->process_ok;
 
 note 'handle_message_to_paste_p';
-my %send = (connection_id => $connection->id, dialog_id => 'superwoman', method => 'send');
+my %send = (connection_id => $connection->id, conversation_id => 'superwoman', method => 'send');
 $send{message} = 'x' x (512 * 3);
 $t->websocket_ok('/events')->send_ok({json => \%send})
-  ->message_ok->json_message_is('/dialog_id', 'superwoman')->json_message_is('/event', 'message')
-  ->json_message_like('/message', qr{^http.*/file/1/$fid_re})->finish_ok;
+  ->message_ok->json_message_is('/conversation_id', 'superwoman')
+  ->json_message_is('/event', 'message')->json_message_like('/message', qr{^http.*/file/1/$fid_re})
+  ->finish_ok;
 
 my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});

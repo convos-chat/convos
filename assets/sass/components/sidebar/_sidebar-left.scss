@@ -68,13 +68,13 @@
   position: relative;
 
   &.for-connection,
-  &.for-dialog {
+  &.for-conversation {
     .fas:hover:before {
       content: fa-content($fa-var-tools);
     }
   }
 
-  &.for-dialog {
+  &.for-conversation {
     padding-left: 0.6em;
   }
 

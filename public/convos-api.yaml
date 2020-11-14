@@ -61,15 +61,15 @@ paths:
           schema:
             $ref: '#/definitions/Connection'
 
-  /connection/{connection_id}/dialog/{dialog_id}/messages:
+  /connection/{connection_id}/conversation/{conversation_id}/messages:
     get:
-      operationId: dialogMessages
+      operationId: conversationMessages
       summary: 'Get a list of messages. Note: this resource require the user to be authenticated first.'
-      tags: [ dialog ]
-      x-mojo-to: dialog#messages
+      tags: [ conversation ]
+      x-mojo-to: conversation#messages
       parameters:
       - $ref: '#/parameters/connection_id'
-      - $ref: '#/parameters/dialog_id'
+      - $ref: '#/parameters/conversation_id'
       - $ref: '#/parameters/after'
       - $ref: '#/parameters/around'
       - $ref: '#/parameters/before'
@@ -97,15 +97,15 @@ paths:
                 items:
                   $ref: '#/definitions/Message'
 
-  /connection/{connection_id}/dialog/{dialog_id}/read:
+  /connection/{connection_id}/conversation/{conversation_id}/read:
     post:
-      operationId: markDialogAsRead
-      summary: Clears unread for a dialog.
-      tags: [ dialog ]
-      x-mojo-to: dialog#mark_as_read
+      operationId: markConversationAsRead
+      summary: Clears unread for a conversation.
+      tags: [ conversation ]
+      x-mojo-to: conversation#mark_as_read
       parameters:
       - $ref: '#/parameters/connection_id'
-      - $ref: '#/parameters/dialog_id'
+      - $ref: '#/parameters/conversation_id'
       responses:
         '200':
           description: Successful response.
@@ -116,8 +116,8 @@ paths:
     get:
       operationId: connectionMessages
       summary: 'Get a list of messages. Note: this resource require the user to be authenticated first.'
-      tags: [ dialog ]
-      x-mojo-to: dialog#messages
+      tags: [ conversation ]
+      x-mojo-to: conversation#messages
       parameters:
       - $ref: '#/parameters/connection_id'
       - $ref: '#/parameters/after'
@@ -152,7 +152,7 @@ paths:
       operationId: markConnectionAsRead
       summary: Clears unread for a connection.
       tags: [ connection ]
-      x-mojo-to: dialog#mark_as_read
+      x-mojo-to: conversation#mark_as_read
       parameters:
       - $ref: '#/parameters/connection_id'
       responses:
@@ -189,7 +189,7 @@ paths:
           required: [ url ]
           type: object
           properties:
-            dialog_id:
+            conversation_id:
               description: 'Example: #convos'
               type: string
             on_connect_commands:
@@ -209,21 +209,21 @@ paths:
           schema:
             $ref: '#/definitions/Connection'
 
-  /dialogs:
+  /conversations:
     get:
-      operationId: listDialogs
-      summary: Get a list of all dialogs.
-      tags: [ dialog ]
-      x-mojo-to: dialog#list
+      operationId: listConversations
+      summary: Get a list of all conversations.
+      tags: [ conversation ]
+      x-mojo-to: conversation#list
       responses:
         '200':
-          description: List of dialogs.
+          description: List of conversations.
           schema:
             type: object
             properties:
-              dialogs:
+              conversations:
                 items:
-                  $ref: '#/definitions/Dialog'
+                  $ref: '#/definitions/Conversation'
 
   /embed:
     get:
@@ -346,9 +346,9 @@ paths:
         in: query
         name: connection_id
         type: string
-      - description: An ID for a dialog
+      - description: An ID for a conversation
         in: query
-        name: dialog_id
+        name: conversation_id
         type: string
       - description: Find messages after a given ISO 8601 timestamp
         format: date-time
@@ -427,9 +427,9 @@ paths:
         in: query
         name: connections
         type: boolean
-      - description: Retrieve dialog list.
+      - description: Retrieve conversation list.
         in: query
-        name: dialogs
+        name: conversations
         type: boolean
       responses:
         '200':
@@ -622,11 +622,11 @@ parameters:
     name: connection_id
     required: true
     type: string
-  dialog_id:
+  conversation_id:
     default: ''
     description: The name of the person or room
     in: path
-    name: dialog_id
+    name: conversation_id
     required: true
     type: string
     x-mojo-placeholder: '#'
@@ -673,15 +673,15 @@ definitions:
         enum: [ connected, disconnected ]
         type: string
 
-  Dialog:
+  Conversation:
     type: object
-    required: [ connection_id, dialog_id, name, unread ]
+    required: [ connection_id, conversation_id, name, unread ]
     properties:
       connection_id:
-        description: Unique identifier for the connection this dialog is part of
+        description: Unique identifier for the connection this conversation is part of
         type: string
-      dialog_id:
-        description: Unique identifier for the dialog
+      conversation_id:
+        description: Unique identifier for the conversation
         type: string
       name:
         description: Name of the room or person
@@ -715,8 +715,8 @@ definitions:
       connection_id:
         description: Unique identifier for the connection this notification came from
         type: string
-      dialog_id:
-        description: Dialog ID
+      conversation_id:
+        description: Conversation ID
         type: string
       from:
         description: Identifier for who sent this message
@@ -783,9 +783,9 @@ definitions:
       connections:
         items:
           $ref: '#/definitions/Connection'
-      dialogs:
+      conversations:
         items:
-          $ref: '#/definitions/Dialog'
+          $ref: '#/definitions/Conversation'
       default_connection:
         type: string
         readOnly: true

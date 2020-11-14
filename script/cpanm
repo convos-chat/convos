@@ -497,15 +497,13 @@ VERSION_VPP
       if (my $fat = $_[0]{$_[1]}) {
         my $pos  = 0;
         my $last = length $fat;
-        return (
-          sub {
-            return 0 if $pos == $last;
-            my $next = (1 + index $fat, "\n", $pos) || $last;
-            $_ .= substr $fat, $pos, $next - $pos;
-            $pos = $next;
-            return 1;
-          }
-        );
+        return (sub {
+          return 0 if $pos == $last;
+          my $next = (1 + index $fat, "\n", $pos) || $last;
+          $_ .= substr $fat, $pos, $next - $pos;
+          $pos = $next;
+          return 1;
+        });
       }
     };
   }

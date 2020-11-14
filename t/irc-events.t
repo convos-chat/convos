@@ -65,7 +65,7 @@ $server->server_write_ok(
 is_deeply \@state, [], 'basic commands does not cause events';
 
 @state = ();
-$connection->dialog({name => '#convos'});
+$connection->conversation({name => '#convos'});
 $server->server_write_ok(":localhost 004 superman hybrid8.debian.local hybrid-")
   ->server_write_ok(
   "1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh\r\n")
@@ -86,10 +86,12 @@ $server->server_write_ok(":localhost 004 superman hybrid8.debian.local hybrid-")
 cmp_deeply(
   \@state,
   bag(
-    [join => {dialog_id => '#convos', nick => 'superwoman'}],
-    [mode => {dialog_id => '#convos', from => 'superman', mode => '+i', nick => 'superwoman'}],
-    [nick_change => {new_nick  => 'superduper', old_nick => 'supergirl'}],
-    [part        => {dialog_id => '#convos',    message  => 'I\'m out', nick => 'superduper'}],
+    [join => {conversation_id => '#convos', nick => 'superwoman'}],
+    [
+      mode => {conversation_id => '#convos', from => 'superman', mode => '+i', nick => 'superwoman'}
+    ],
+    [nick_change => {new_nick => 'superduper', old_nick => 'supergirl'}],
+    [part => {conversation_id => '#convos', message => 'I\'m out', nick => 'superduper'}],
     [
       me => {
         available_channel_modes => 'bciklmnoprstveIMORS',
@@ -101,20 +103,20 @@ cmp_deeply(
     ],
     [
       part => {
-        dialog_id => '#convos',
-        kicker    => 'superwoman',
-        message   => 'superman',
-        nick      => 'superwoman',
+        conversation_id => '#convos',
+        kicker          => 'superwoman',
+        message         => 'superman',
+        nick            => 'superwoman',
       }
     ],
     [
       frozen => {
-        connection_id => 'irc-localhost',
-        dialog_id     => '#convos',
-        frozen        => '',
-        name          => '#convos',
-        topic         => 'Too cool!',
-        unread        => 0,
+        connection_id   => 'irc-localhost',
+        conversation_id => '#convos',
+        frozen          => '',
+        name            => '#convos',
+        topic           => 'Too cool!',
+        unread          => 0,
       }
     ]
   ),

@@ -15,7 +15,7 @@ sub register {
 
   $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
-  $app->helper('backend.dialog'              => \&_backend_dialog);
+  $app->helper('backend.conversation'        => \&_backend_conversation);
   $app->helper('backend.user'                => \&_backend_user);
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
   $app->helper('js_session'                  => \&_js_session);
@@ -31,16 +31,17 @@ sub register {
   $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
 }
 
-sub _backend_dialog {
+sub _backend_conversation {
   my ($c, $args) = @_;
-  my $user      = $c->backend->user($args->{email}) or return;
-  my $dialog_id = url_unescape $args->{dialog_id} || $c->stash('dialog_id') || '';
+  my $user            = $c->backend->user($args->{email}) or return;
+  my $conversation_id = url_unescape $args->{conversation_id} || $c->stash('conversation_id') || '';
 
   my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
   return unless $connection;
 
-  my $dialog = $dialog_id ? $connection->get_dialog($dialog_id) : $connection->messages;
-  return $c->stash(connection => $connection, dialog => $dialog)->stash('dialog');
+  my $conversation
+    = $conversation_id ? $connection->get_conversation($conversation_id) : $connection->messages;
+  return $c->stash(connection => $connection, conversation => $conversation)->stash('conversation');
 }
 
 sub _backend_user {
@@ -61,7 +62,7 @@ sub _backend_connection_create_p {
 
   eval {
     my $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
-    $connection->dialog({name => $url->path->[0]}) if $url->path->[0];
+    $connection->conversation({name => $url->path->[0]}) if $url->path->[0];
     return $connection->save_p;
   } or do {
     return Mojo::Promise->reject($@);
@@ -171,18 +172,18 @@ This L<Convos::Plugin> contains default helpers for L<Convos>.
 
 =head1 HELPERS
 
-=head2 backend.dialog
+=head2 backend.conversation
 
-  $dialog = $c->backend->dialog(\%args);
+  $conversation = $c->backend->conversation(\%args);
 
-Helper to retrieve a L<Convos::Core::Dialog> object. Will use
+Helper to retrieve a L<Convos::Core::Conversation> object. Will use
 data from C<%args> or fall back to L<stash|Mojolicious/stash>. Example
 C<%args>:
 
   {
     # Key         => Example value        # Default value
     connection_id => "irc-localhost",     # $c->stash("connection_id")
-    dialog_id     => "#superheroes",      # $c->stash("connection_id")
+    conversation_id     => "#superheroes",      # $c->stash("connection_id")
     email         => "superwoman@dc.com", # $c->session('email')
   }
 

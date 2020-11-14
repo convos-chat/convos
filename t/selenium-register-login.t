@@ -20,7 +20,7 @@ $t->send_keys_ok('#signup [name=password]', 'superduper');
 $t->click_ok($signup_btn)->wait_for(0.2)->wait_for('.main.is-above-chat-input');
 
 note 'showing the correct chat after login';
-$t->live_element_exists('a.for-dialog.has-path');
+$t->live_element_exists('a.for-conversation.has-path');
 
 note 'logout';
 my $logout_link = '.sidebar-left a[href*="logout"]';

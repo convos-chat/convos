@@ -1,5 +1,5 @@
 import Connection from './Connection';
-import Dialog from './Dialog';
+import Conversation from './Conversation';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
@@ -18,7 +18,7 @@ export default class User extends Reactive {
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'unread', () => this._calculateUnread());
 
-    this.prop('rw', 'activeDialog', this.notifications);
+    this.prop('rw', 'activeConversation', this.notifications);
     this.prop('rw', 'email', '');
     this.prop('rw', 'forced_connection', false);
     this.prop('rw', 'default_connection', 'irc://chat.freenode.net:6697/%23convos');
@@ -31,44 +31,44 @@ export default class User extends Reactive {
     this.socket.on('update', (socket) => this._onConnectionChange(socket));
   }
 
-  dialogs(cb) {
-    const dialogs = [];
+  conversations(cb) {
+    const conversations = [];
 
     this.connections.toArray().forEach(conn => {
-      conn.dialogs.toArray().forEach(dialog => {
-        if (!cb || cb(dialog)) dialogs.push(dialog);
+      conn.conversations.toArray().forEach(conversation => {
+        if (!cb || cb(conversation)) conversations.push(conversation);
       });
     });
 
-    return dialogs;
+    return conversations;
   }
 
-  ensureDialog(params, _lock) {
-    // Ensure channel or private dialog
-    if (params.dialog_id) {
-      const conn = this.ensureDialog({connection_id: params.connection_id}, true);
-      return this._maybeUpgradeActiveDialog(conn.ensureDialog(params));
+  ensureConversation(params, _lock) {
+    // Ensure channel or private conversation
+    if (params.conversation_id) {
+      const conn = this.ensureConversation({connection_id: params.connection_id}, true);
+      return this._maybeUpgradeActiveConversation(conn.ensureConversation(params));
     }
 
     // Find connection
-    let conn = this.findDialog(params);
+    let conn = this.findConversation(params);
     if (conn) return conn.update(params);
 
     // Create connection
     conn = new Connection({...params});
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
-    conn.on('dialogadd', (dialog) => this._maybeUpgradeActiveDialog(dialog));
-    conn.on('dialogremove', (dialog) => (dialog == this.activeDialog && this.setActiveDialog(dialog)));
+    conn.on('conversationadd', (conversation) => this._maybeUpgradeActiveConversation(conversation));
+    conn.on('conversationremove', (conversation) => (conversation == this.activeConversation && this.setActiveConversation(conversation)));
     conn.on('update', (conn) => this.update({connections: true}));
     this.connections.set(conn.connection_id, conn);
     this.update({connections: true});
-    return _lock ? conn : this._maybeUpgradeActiveDialog(conn);
+    return _lock ? conn : this._maybeUpgradeActiveConversation(conn);
   }
 
-  findDialog(params) {
+  findConversation(params) {
     const conn = this.connections.get(params.connection_id);
-    return !params.dialog_id ? conn : conn && conn.findDialog(params) || null;
+    return !params.conversation_id ? conn : conn && conn.findConversation(params) || null;
   }
 
   is(statusOrRole) {
@@ -81,7 +81,7 @@ export default class User extends Reactive {
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
-    const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, dialogs: true}});
+    const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, conversations: true}});
 
     // TODO: Improve error handling
     if (res.errors) {
@@ -91,8 +91,8 @@ export default class User extends Reactive {
 
     const data = res.user || {};
     this.connections.clear();
-    (data.connections || []).forEach(conn => this.ensureDialog({...conn, status: 'pending'}));
-    (data.dialogs || []).forEach(dialog => this.ensureDialog({...dialog, status: 'pending'}));
+    (data.connections || []).forEach(conn => this.ensureConversation({...conn, status: 'pending'}));
+    (data.conversations || []).forEach(conversation => this.ensureConversation({...conversation, status: 'pending'}));
 
     this.notifications.update({unread: data.unread || 0});
     this.roles.clear();
@@ -110,32 +110,32 @@ export default class User extends Reactive {
     });
   }
 
-  removeDialog(params) {
-    const conn = this.findDialog({connection_id: params.connection_id});
-    if (params.dialog_id) return conn && conn.removeDialog(params);
+  removeConversation(params) {
+    const conn = this.findConversation({connection_id: params.connection_id});
+    if (params.conversation_id) return conn && conn.removeConversation(params);
     this.connections.delete(params.connection_id);
-    if (conn == this.activeDialog) this.setActiveDialog(conn);
+    if (conn == this.activeConversation) this.setActiveConversation(conn);
     this.update({connections: true});
   }
 
-  setActiveDialog(params) {
-    let activeDialog = !params.connection_id && !params.dialog_id && this.notifications;
-    if (activeDialog) return this.update({activeDialog});
+  setActiveConversation(params) {
+    let activeConversation = !params.connection_id && !params.conversation_id && this.notifications;
+    if (activeConversation) return this.update({activeConversation});
 
-    activeDialog = this.findDialog(params);
-    if (activeDialog) return this.update({activeDialog});
+    activeConversation = this.findConversation(params);
+    if (activeConversation) return this.update({activeConversation});
 
     // Need to expand params manually, in case we are passing in a reactive object
     const props = {...params, connection_id: params.connection_id || '', frozen: 'Not found.'};
-    ['dialog_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
-    return this.update({activeDialog: props.dialog_id ? new Dialog(props) : new Connection(props)});
+    ['conversation_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
+    return this.update({activeConversation: props.conversation_id ? new Conversation(props) : new Connection(props)});
   }
 
   _calculateUnread() {
-    const activeDialog = this.activeDialog;
+    const activeConversation = this.activeConversation;
     return this.notifications.unread
-      + this.dialogs(dialog => dialog.is_private)
-          .reduce((t, d) => { return t + (d == activeDialog ? 0 : d.unread) }, 0);
+      + this.conversations(conversation => conversation.is_private)
+          .reduce((t, d) => { return t + (d == activeConversation ? 0 : d.unread) }, 0);
   }
 
   _dispatchMessage(msg) {
@@ -146,13 +146,13 @@ export default class User extends Reactive {
 
     if (msg.highlight) this.notifications.addMessage(msg);
 
-    const conn = this.findDialog({connection_id: msg.connection_id});
+    const conn = this.findConversation({connection_id: msg.connection_id});
     if (!conn) return;
     if (conn[msg.dispatchTo]) conn[msg.dispatchTo](msg);
     if (!msg.bubbles) return;
 
-    const dialog = conn.findDialog(msg);
-    if (dialog && dialog[msg.dispatchTo]) dialog[msg.dispatchTo](msg);
+    const conversation = conn.findConversation(msg);
+    if (conversation && conversation[msg.dispatchTo]) conversation[msg.dispatchTo](msg);
   }
 
   _getEventNameFromMessage(msg) {
@@ -168,12 +168,12 @@ export default class User extends Reactive {
     return msg.event;
   }
 
-  _maybeUpgradeActiveDialog(dialog) {
-    const active = this.activeDialog;
-    if (dialog.connection_id && dialog.connection_id != active.connection_id) return dialog;
-    if (dialog.dialog_id && dialog.dialog_id != active.dialog_id) return dialog;
-    this.update({activeDialog: dialog});
-    return dialog;
+  _maybeUpgradeActiveConversation(conversation) {
+    const active = this.activeConversation;
+    if (conversation.connection_id && conversation.connection_id != active.connection_id) return conversation;
+    if (conversation.conversation_id && conversation.conversation_id != active.conversation_id) return conversation;
+    this.update({activeConversation: conversation});
+    return conversation;
   }
 
   _onConnectionChange(socket) {

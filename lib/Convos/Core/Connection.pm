@@ -1,7 +1,7 @@
 package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 
-use Convos::Core::Dialog;
+use Convos::Core::Conversation;
 use Convos::Util qw(DEBUG has_many);
 use Mojo::JSON qw(false true);
 use Mojo::Loader 'load_class';
@@ -13,10 +13,10 @@ use Unicode::UTF8;
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_TLS_DEBUG} if $ENV{CONVOS_TLS_DEBUG};
 
 has messages => sub {
-  my $self   = shift;
-  my $dialog = Convos::Core::Dialog->new(id => '', name => $self->name);
-  Scalar::Util::weaken($dialog->{connection} = $self);
-  return $dialog;
+  my $self         = shift;
+  my $conversation = Convos::Core::Conversation->new(id => '', name => $self->name);
+  Scalar::Util::weaken($conversation->{connection} = $self);
+  return $conversation;
 };
 
 sub name { shift->{name} }
@@ -53,7 +53,7 @@ sub connect {
 
   delete $self->{disconnecting};
   $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
-    for grep { !$_->frozen } @{$self->dialogs};
+    for grep { !$_->frozen } @{$self->conversations};
 
   # Connect
   Scalar::Util::weaken($self);
@@ -62,11 +62,11 @@ sub connect {
   $self->{host_port} = $self->url->host_port;    # must be done after _connect_args() is called
 }
 
-has_many dialogs => 'Convos::Core::Dialog' => sub {
+has_many conversations => 'Convos::Core::Conversation' => sub {
   my ($self, $attrs) = @_;
-  my $dialog = Convos::Core::Dialog->new($attrs);
-  Scalar::Util::weaken($dialog->{connection} = $self);
-  return $dialog;
+  my $conversation = Convos::Core::Conversation->new($attrs);
+  Scalar::Util::weaken($conversation->{connection} = $self);
+  return $conversation;
 };
 
 sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
@@ -75,7 +75,7 @@ sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
 
 sub new {
   my $self = shift->SUPER::new(@_);
-  $self->dialog($_) for @{delete($self->{dialogs}) || []};
+  $self->conversation($_) for @{delete($self->{conversations}) || []};
   $self;
 }
 
@@ -93,8 +93,9 @@ sub rtc_p {
   my ($self, $msg) = @_;
   return Mojo::Promise->reject('Missing property: event.')   unless $msg->{event};
   return Mojo::Promise->reject('Missing property: call_id.') unless $msg->{call_id};
-  return Mojo::Promise->reject('Dialog not found.')
-    unless $msg->{dialog_id} and my $dialog = $self->get_dialog($msg->{dialog_id});
+  return Mojo::Promise->reject('Conversation not found.')
+    unless $msg->{conversation_id}
+    and my $conversation = $self->get_conversation($msg->{conversation_id});
 
   $msg->{from} = $self->nick;
 
@@ -105,8 +106,9 @@ sub rtc_p {
   $self->user->core->connections_by_id($self->id)->each(sub {
     my $other = shift;
     return if $other eq $self;
-    my $dialog = $other->get_dialog($msg->{dialog_id});
-    $other->emit(rtc => $msg->{event}, $dialog => $msg) if $dialog and !$dialog->frozen;
+    my $conversation = $other->get_conversation($msg->{conversation_id});
+    $other->emit(rtc => $msg->{event}, $conversation => $msg)
+      if $conversation and !$conversation->frozen;
   });
 
   return Mojo::Promise->resolve($msg);
@@ -182,10 +184,10 @@ sub _notice {
   );
 }
 
-sub _remove_dialog {
+sub _remove_conversation {
   my ($self, $name) = @_;
-  my $dialog = $self->remove_dialog($name);
-  $self->emit(state => part => {dialog_id => lc $name, nick => $self->nick});
+  my $conversation = $self->remove_conversation($name);
+  $self->emit(state => part => {conversation_id => lc $name, nick => $self->nick});
   return $self;
 }
 
@@ -196,8 +198,9 @@ sub _rtc_signal_p {
   $self->user->core->connections_by_id($self->id)->each(sub {
     my $other = shift;
     return if $other eq $self or $other->nick ne $msg->{target};
-    my $dialog = $other->get_dialog($msg->{dialog_id});
-    $other->emit(rtc => signal => $dialog => $msg) if $dialog and !$dialog->frozen;
+    my $conversation = $other->get_conversation($msg->{conversation_id});
+    $other->emit(rtc => signal => $conversation => $msg)
+      if $conversation and !$conversation->frozen;
   });
 
   return Mojo::Promise->resolve({});
@@ -319,7 +322,7 @@ sub TO_JSON {
   }
 
   if ($persist) {
-    $json{dialogs} = [map { $_->TO_JSON($persist) } @{$self->dialogs}];
+    $json{conversations} = [map { $_->TO_JSON($persist) } @{$self->conversations}];
   }
   else {
     $json{state} = $self->state;
@@ -344,11 +347,11 @@ See also L<Convos::Core::Connection::Irc>.
 
 =head1 EVENTS
 
-=head2 dialog
+=head2 conversation
 
-  $conn->on(dialog => sub { my ($conn, $dialog) = @_; });
+  $conn->on(conversation => sub { my ($conn, $conversation) = @_; });
 
-Emitted when a new L<$dialog|Convos::Core::Dialog> is created.
+Emitted when a new L<$conversation|Convos::Core::Conversation> is created.
 
 =head2 me
 
@@ -370,9 +373,9 @@ Note that this hash is L<Convos::Core::Connection::Irc> specific.
 =head2 message
 
   $conn->on(message => sub { my ($conn, $conn, $msg) = @_; });
-  $conn->on(message => sub { my ($conn, $dialog, $msg) = @_; });
+  $conn->on(message => sub { my ($conn, $conversation, $msg) = @_; });
 
-Emitted when a connection or dialog receives a new message. C<$msg>
+Emitted when a connection or conversation receives a new message. C<$msg>
 will contain:
 
   {
@@ -387,11 +390,11 @@ will contain:
 
 Emitted when the connection state change.
 
-=head2 dialog
+=head2 conversation
 
-  $conn->on(dialog => sub { my ($conn, $dialog, $info) = @_; });
+  $conn->on(conversation => sub { my ($conn, $conversation, $info) = @_; });
 
-Emitted when the dialog change state. C<$info> will contain information about
+Emitted when the conversation change state. C<$info> will contain information about
 the change:
 
   {join => $nick}
@@ -416,7 +419,7 @@ Returns a unique identifier for a connection.
 
   $obj = $conn->messages;
 
-Holds a L<Convos::Core::Dialog> object with the conversation to the server.
+Holds a L<Convos::Core::Conversation> object with the conversation to the server.
 
 =head2 name
 
@@ -463,17 +466,17 @@ the following new ones.
 
 Used to connect to L</url>. Meant to be overloaded in a subclass.
 
-=head2 dialog
+=head2 conversation
 
-  $dialog = $conn->dialog(\%attrs);
+  $conversation = $conn->conversation(\%attrs);
 
-Returns a new L<Convos::Core::Dialog> object or updates an existing object.
+Returns a new L<Convos::Core::Conversation> object or updates an existing object.
 
-=head2 dialogs
+=head2 conversations
 
-  $objs = $conn->dialogs;
+  $objs = $conn->conversations;
 
-Returns an array-ref of of L<Convos::Core::Dialog> objects.
+Returns an array-ref of of L<Convos::Core::Conversation> objects.
 
 =head2 disconnect_p
 
@@ -481,12 +484,12 @@ Returns an array-ref of of L<Convos::Core::Dialog> objects.
 
 Used to disconnect from server. Meant to be overloaded in a subclass.
 
-=head2 get_dialog
+=head2 get_conversation
 
-  $dialog = $conn->get_dialog($id);
-  $dialog = $conn->get_dialog(\%attrs);
+  $conversation = $conn->get_conversation($id);
+  $conversation = $conn->get_conversation(\%attrs);
 
-Returns a L<Convos::Core::Dialog> object or undef.
+Returns a L<Convos::Core::Conversation> object or undef.
 
 =head2 new
 

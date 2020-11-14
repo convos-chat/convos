@@ -18,7 +18,7 @@ my @state;
 $connection->url($server->url);
 $connection->on(state => sub { push @state, [@_[1, 2]] });
 
-ok !$connection->get_dialog('#convos'), 'convos channel does not exist';
+ok !$connection->get_conversation('#convos'), 'convos channel does not exist';
 
 note 'invalid input';
 for my $cmd (
@@ -35,8 +35,8 @@ for my $cmd (
   like $err, qr{Cannot send without target.}, "$cmd->[1] - missing target";
 }
 
-# /join #convos below will create the #convos dialog
-ok !$connection->get_dialog('#convos'), 'convos dialog does not exist';
+# /join #convos below will create the #convos conversation
+ok !$connection->get_conversation('#convos'), 'convos conversation does not exist';
 
 note 'not connected';
 for my $cmd (
@@ -59,21 +59,21 @@ for my $cmd (
   like $err, qr{Not connected.}, "$cmd->[1] - not connected";
 }
 
-is $connection->get_dialog('#convos')->password, 's3cret', 'password is set';
+is $connection->get_conversation('#convos')->password, 's3cret', 'password is set';
 
 $connection->send_p('', '/nick superduper')->$wait_success('nick');
 is $connection->url->query->param('nick'), 'superduper', 'change nick offline';
 
-ok !$connection->get_dialog('superwoman'), 'superwoman does not exist';
+ok !$connection->get_conversation('superwoman'), 'superwoman does not exist';
 $connection->send_p('', '/query superwoman ')->$wait_success('query');
-ok $connection->get_dialog('superwoman'), 'superwoman exist';
+ok $connection->get_conversation('superwoman'), 'superwoman exist';
 
 cmp_deeply(
   \@state,
   [
-    [frozen => superhashof({dialog_id => '#convos', frozen => 'Not active in this room.'})],
+    [frozen => superhashof({conversation_id => '#convos', frozen => 'Not active in this room.'})],
     [me     => {nick => 'superduper'}],
-    [frozen => superhashof({dialog_id => 'superwoman', frozen => ''})],
+    [frozen => superhashof({conversation_id => 'superwoman', frozen => ''})],
   ],
   'nick and frozen event so far'
 ) or diag explain \@state;
@@ -122,7 +122,7 @@ $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
 $res = $connection->send_p('', '/mode #otherchan +k secret')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {}, 'mode +k response - with no dialog_id');
+is_deeply($res, {}, 'mode +k response - with no conversation_id');
 
 $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
@@ -157,8 +157,8 @@ $server->processed_ok;
 is_deeply(
   $res,
   {
-    dialog_id    => '#convos',
-    participants => [
+    conversation_id => '#convos',
+    participants    => [
       {nick => 'superwoman', mode => ''},
       {nick => 'superman',   mode => 'q'},
       {nick => 'robin',      mode => 'a'},
@@ -176,19 +176,19 @@ $server->server_event_ok('_irc_event_topic')
   ->server_write_ok(":localhost 331 superman #convos :No topic is set\r\n");
 $res = $connection->send_p('#convos', '/topic')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {dialog_id => '#convos', topic => ''}, 'topic');
+is_deeply($res, {conversation_id => '#convos', topic => ''}, 'topic');
 
 $server->server_event_ok('_irc_event_topic')
   ->server_write_ok(":localhost 332 superman #convos :cool topic\r\n");
 $res = $connection->send_p('#convos', '/topic')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {dialog_id => '#convos', topic => 'cool topic'}, 'topic');
+is_deeply($res, {conversation_id => '#convos', topic => 'cool topic'}, 'topic');
 
 $server->server_event_ok('_irc_event_topic')
   ->server_write_ok(":localhost TOPIC #convos :Some cool\r\n");
 $res = $connection->send_p('#convos', '/topic Some cool stuff')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {dialog_id => '#convos', topic => 'Some cool'}, 'set topic');
+is_deeply($res, {conversation_id => '#convos', topic => 'Some cool'}, 'set topic');
 
 cmp_deeply(
   \@state,
@@ -223,9 +223,9 @@ $server->processed_ok;
 is_deeply $res, {nick => 'Superduper', online => true}, 'ison';
 
 note 'join';
-is $connection->n_dialogs, 2, 'number of dialogs before list join';
+is $connection->n_conversations, 2, 'number of conversations before list join';
 $connection->send_p('', '/join #foo,#bar,#baz')->$wait_success;
-is $connection->n_dialogs, 2, 'number of dialogs did not change';
+is $connection->n_conversations, 2, 'number of conversations did not change';
 
 note 'join redirected';
 $server->server_event_ok('_irc_event_join')->server_write_ok(['join-redirected-1.irc'])
@@ -234,7 +234,7 @@ $res = $connection->send_p('', '/join #redirected')->$wait_success;
 $server->processed_ok;
 is_deeply(
   $res,
-  {dialog_id => '##redirected', topic => '', topic_by => '', users => {}},
+  {conversation_id => '##redirected', topic => '', topic_by => '', users => {}},
   'join redirected'
 );
 
@@ -244,12 +244,12 @@ $res = $connection->send_p('', '/join #protected S3cret')->$wait_success;
 $server->processed_ok;
 is_deeply(
   $res,
-  {dialog_id => '#protected', topic => '', topic_by => '', users => {}},
+  {conversation_id => '#protected', topic => '', topic_by => '', users => {}},
   'join protected'
 );
 
 $res = $connection->send_p('', '/join some_user')->$wait_success;
-is $res->{dialog_id}, 'some_user', 'join alias for query';
+is $res->{conversation_id}, 'some_user', 'join alias for query';
 $connection->send_p('', '/part some_user')->$wait_success('clean up for state test later on');
 
 note 'list';
@@ -258,7 +258,7 @@ $server->server_event_ok('_irc_event_list')
   ->server_write_ok(":localhost 321 superman Channel :Users  Name\r\n")
   ->client_event_ok('_irc_event_rpl_liststart')->process_ok;
 $res = $p->$wait_success;
-is_deeply($res, {n_dialogs => 0, dialogs => [], done => false}, 'list empty');
+is_deeply($res, {n_conversations => 0, conversations => [], done => false}, 'list empty');
 
 $server->server_write_ok(":localhost 322 superman #Test123 1 :[+nt]\r\n")
   ->client_event_ok('_irc_event_rpl_list')
@@ -268,14 +268,14 @@ $res = $connection->send_p('', '/list')->$wait_success;
 is_deeply(
   $res,
   {
-    done      => false,
-    n_dialogs => 2,
-    dialogs   => [
-      {dialog_id => '#convos',  name => '#convos',  n_users => 42, topic => 'some cool topic'},
-      {dialog_id => '#test123', name => '#Test123', n_users => 1,  topic => ''},
+    done            => false,
+    n_conversations => 2,
+    conversations   => [
+      {conversation_id => '#convos', name => '#convos', n_users => 42, topic => 'some cool topic'},
+      {conversation_id => '#test123', name => '#Test123', n_users => 1, topic => ''},
     ],
   },
-  'list dialogs',
+  'list conversations',
 );
 
 $server->server_write_ok(":localhost 323 superman :End of /LIST\r\n")
@@ -312,13 +312,13 @@ $server->server_event_ok('_irc_event_part')
 $connection->send_p('#convos', '/close #foo')->catch(sub { $err = shift })->$wait_success;
 is $err, 'You are not on that channel', 'close #foo';
 
-$connection->dialog({name => '#convos'});
-ok $connection->get_dialog('#convos'), 'has convos dialog';
+$connection->conversation({name => '#convos'});
+ok $connection->get_conversation('#convos'), 'has convos conversation';
 $server->server_event_ok('_irc_event_part')->server_write_ok(":localhost PART #convos\r\n");
 $res = $connection->send_p('#convos', '/part')->$wait_success;
 $server->processed_ok;
 is_deeply($res, {}, 'part #convos');
-ok !$connection->get_dialog('#convos'), 'convos dialog was removed';
+ok !$connection->get_conversation('#convos'), 'convos conversation was removed';
 
 note 'unknown commands';
 $connection->send_p('', '/foo')->catch(sub { $err = shift })->$wait_success;
@@ -353,10 +353,10 @@ ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 cmp_deeply(
   \@state,
   [
-    [connection => superhashof({state     => 'queued'})],
-    [connection => superhashof({state     => 'connected'})],
-    [me         => superhashof({nick      => 'superman'})],
-    [frozen     => superhashof({dialog_id => '##redirected'})],
+    [connection => superhashof({state           => 'queued'})],
+    [connection => superhashof({state           => 'connected'})],
+    [me         => superhashof({nick            => 'superman'})],
+    [frozen     => superhashof({conversation_id => '##redirected'})],
   ],
   'connection states'
 ) or diag explain \@state;

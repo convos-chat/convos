@@ -25,8 +25,8 @@ note 'Open up settings for #convos and leave conversation';
 $t->click_ok(qq($convos_link i))->wait_for($leave_btn);
 $t->click_ok($leave_btn)->wait_for(qq(a[href="/settings/conversation"].has-path));
 
-note 'Add conversation dialog';
-$t->send_keys_ok('main [name="dialog_id"]', '#too/cool')->click_ok('main .btn.for-comment')
+note 'Add conversation conversation';
+$t->send_keys_ok('main [name="conversation_id"]', '#too/cool')->click_ok('main .btn.for-comment')
   ->wait_for($too_cool_link);
 
 note 'Part with command';

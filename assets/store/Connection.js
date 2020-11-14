@@ -1,19 +1,19 @@
 import ConnURL from '../js/ConnURL';
-import Dialog from './Dialog';
+import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
 import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
 
-const sortDialogs = (a, b) => {
+const sortConversations = (a, b) => {
   return (a.is_private || 0) - (b.is_private || 0) || a.name.localeCompare(b.name);
 };
 
-export default class Connection extends Dialog {
+export default class Connection extends Conversation {
   constructor(params) {
     super(params);
 
-    this.prop('ro', 'dialogs', new SortedMap([], {sorter: sortDialogs}));
+    this.prop('ro', 'conversations', new SortedMap([], {sorter: sortConversations}));
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
@@ -27,33 +27,33 @@ export default class Connection extends Dialog {
     this.participants([{nick}]);
   }
 
-  ensureDialog(params) {
-    let dialog = this.dialogs.get(params.dialog_id);
-    if (dialog) return dialog.update(params);
+  ensureConversation(params) {
+    let conversation = this.conversations.get(params.conversation_id);
+    if (conversation) return conversation.update(params);
 
-    dialog = new Dialog({...params, connection_id: this.connection_id});
-    dialog.on('message', params => this.emit('message', params));
-    dialog.on('update', () => this.update({dialogs: true}));
-    this._addDefaultParticipants(dialog);
-    this.dialogs.set(dialog.dialog_id, dialog);
-    this.update({dialogs: true});
-    this.emit('dialogadd', dialog);
-    return dialog;
+    conversation = new Conversation({...params, connection_id: this.connection_id});
+    conversation.on('message', params => this.emit('message', params));
+    conversation.on('update', () => this.update({conversations: true}));
+    this._addDefaultParticipants(conversation);
+    this.conversations.set(conversation.conversation_id, conversation);
+    this.update({conversations: true});
+    this.emit('conversationadd', conversation);
+    return conversation;
   }
 
-  findDialog(params) {
-    return this.dialogs.get(params.dialog_id) || null;
+  findConversation(params) {
+    return this.conversations.get(params.conversation_id) || null;
   }
 
   is(status) {
     return this.state == status || super.is(status);
   }
 
-  removeDialog(params) {
-    const dialog = this.findDialog(params) || params;
-    this.dialogs.delete(dialog.dialog_id);
-    this.emit('dialogremove', dialog);
-    return this.update({dialogs: true});
+  removeConversation(params) {
+    const conversation = this.findConversation(params) || params;
+    this.conversations.delete(conversation.conversation_id);
+    this.emit('conversationremove', conversation);
+    return this.update({conversations: true});
   }
 
   send(message) {
@@ -76,9 +76,9 @@ export default class Connection extends Dialog {
   }
 
   wsEventFrozen(params) {
-    const existing = this.findDialog(params);
+    const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
-    this.ensureDialog(params).participants([{nick: this.nick, me: true}]);
+    this.ensureConversation(params).participants([{nick: this.nick, me: true}]);
     if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
     if (wasFrozen && !params.frozen) existing.addMessage({message: 'Connected.', vars: []});
   }
@@ -91,14 +91,14 @@ export default class Connection extends Dialog {
 
   wsEventMessage(params) {
     params.yourself = params.from == this.nick;
-    return params.dialog_id ? this.ensureDialog(params).addMessage(params) : this.addMessage(params);
+    return params.conversation_id ? this.ensureConversation(params).addMessage(params) : this.addMessage(params);
   }
 
   wsEventNickChange(params) {
     const nickChangeParams = {old_nick: params.old_nick || this.nick, new_nick: params.new_nick || params.nick, type: params.type};
     if (params.old_nick == this.nick) nickChangeParams.me = true;
     super.wsEventNickChange(nickChangeParams);
-    this.dialogs.forEach(dialog => dialog.wsEventNickChange(nickChangeParams));
+    this.conversations.forEach(conversation => conversation.wsEventNickChange(nickChangeParams));
   }
 
   wsEventError(params) {
@@ -111,25 +111,25 @@ export default class Connection extends Dialog {
 
     // Could not join
     const joinCommand = (params.message || '').match(/^\/j(oin)? (\S+)/);
-    if (joinCommand) return this.ensureDialog({...params, dialog_id: joinCommand[2]});
+    if (joinCommand) return this.ensureConversation({...params, conversation_id: joinCommand[2]});
 
     // Generic errors
-    const dialog = (params.dialog_id && params.frozen) ? this.ensureDialog(params) : (this.findDialog(params) || this);
-    dialog.update({errors: this.errors + 1});
-    dialog.addMessage(msg);
+    const conversation = (params.conversation_id && params.frozen) ? this.ensureConversation(params) : (this.findConversation(params) || this);
+    conversation.update({errors: this.errors + 1});
+    conversation.addMessage(msg);
   }
 
   wsEventJoin(params) {
-    const dialog = this.ensureDialog(params);
+    const conversation = this.ensureConversation(params);
     const nick = params.nick || this.nick;
-    if (nick != this.nick) dialog.addMessage({message: '%1 joined.', vars: [nick]});
-    dialog.participants([{nick}]);
+    if (nick != this.nick) conversation.addMessage({message: '%1 joined.', vars: [nick]});
+    conversation.participants([{nick}]);
   }
 
   wsEventPart(params) {
-    if (params.nick == this.nick) return this.removeDialog(params);
-    if (params.dialog_id) return;
-    this.dialogs.forEach(dialog => dialog.wsEventPart(params));
+    if (params.nick == this.nick) return this.removeConversation(params);
+    if (params.conversation_id) return;
+    this.conversations.forEach(conversation => conversation.wsEventPart(params));
   }
 
   wsEventQuit(params) {
@@ -146,13 +146,13 @@ export default class Connection extends Dialog {
   wsEventSentList(params) {
     const args = params.args || '/*/';
     this.addMessage(params.done
-      ? {message: 'Found %1 of %2 dialogs from %3.', vars: [params.dialogs.length, params.n_dialogs, args]}
-      : {message: 'Found %1 of %2 dialogs from %3, but dialogs are still loading.', vars: [params.dialogs.length, params.n_dialogs, args]}
+      ? {message: 'Found %1 of %2 conversations from %3.', vars: [params.conversations.length, params.n_conversations, args]}
+      : {message: 'Found %1 of %2 conversations from %3, but conversations are still loading.', vars: [params.conversations.length, params.n_conversations, args]}
     );
   }
 
   wsEventSentMode(params) {
-    const dialog = this.findDialog(params) || this;
+    const conversation = this.findConversation(params) || this;
 
     const modeSent = (params.command[1] || '').match(/(\W*)(\w)$/);
     if (!modeSent) return console.log('[wsEventSentMode] Unable to handle message:', params);
@@ -160,34 +160,34 @@ export default class Connection extends Dialog {
 
     switch (modeSent[1]) {
       case '':
-        return dialog.addMessage({message: '%s has mode %s', vars: [params.dialog_id, params.mode]});
+        return conversation.addMessage({message: '%s has mode %s', vars: [params.conversation_id, params.mode]});
       case 'k':
-        return dialog.addMessage({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
+        return conversation.addMessage({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
       case 'b':
         return this._wsEventSentModeB(params, modeSent);
     }
   }
 
   _wsEventSentModeB(params, modeSent) {
-    const dialog = this.findDialog(params) || this;
+    const conversation = this.findConversation(params) || this;
 
     if (params.banlist) {
-      if (!params.banlist.length) dialog.addMessage({message: 'Ban list is empty.'});
+      if (!params.banlist.length) conversation.addMessage({message: 'Ban list is empty.'});
       params.banlist.forEach(ban => {
-        dialog.addMessage({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
+        conversation.addMessage({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
       });
     }
     else {
       const action = modeSent[0] == '+' ? 'set' : 'removed';
-      dialog.addMessage({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
+      conversation.addMessage({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
     }
   }
 
   wsEventSentQuery(params) {
-    this.ensureDialog(params);
+    this.ensureConversation(params);
   }
 
-  // TODO: Reply should be shown in the active dialog instead
+  // TODO: Reply should be shown in the active conversation instead
   wsEventSentWhois(params) {
     let message = '%1 (%2)';
     let vars = [params.nick, params.host];
@@ -212,14 +212,14 @@ export default class Connection extends Dialog {
       message += ' is not in any channels.';
     }
 
-    const dialog = this.findDialog(params) || this;
-    dialog.addMessage({message, vars, sent: params});
+    const conversation = this.findConversation(params) || this;
+    conversation.addMessage({message, vars, sent: params});
   }
 
-  _addDefaultParticipants(dialog) {
+  _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];
-    if (dialog.is_private) participants.push({nick: dialog.name});
-    dialog.participants(participants);
+    if (conversation.is_private) participants.push({nick: conversation.name});
+    conversation.participants(participants);
   }
 
   _addOperations() {

@@ -64,22 +64,22 @@ subtest 'send_p - no target' => sub {
 };
 
 subtest 'send_p - kick' => sub {
-  $send{dialog_id} = '#convos';
-  $send{id}        = '42';
+  $send{conversation_id} = '#convos';
+  $send{id}              = '42';
   $ws->send_ok({json => \%send});
   $server->server_write_ok(":superman!sm\@localhost KICK #convos superduper :So long...\r\n");
   $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
-    ->json_message_is('/dialog_id', '#convos')->json_message_is('/event', 'state')
-    ->json_message_is('/kicker',    'superman')->json_message_is('/message', 'So long...')
-    ->json_message_is('/nick',      'superduper')->json_message_is('/type', 'part')
+    ->json_message_is('/conversation_id', '#convos')->json_message_is('/event', 'state')
+    ->json_message_is('/kicker',          'superman')->json_message_is('/message', 'So long...')
+    ->json_message_is('/nick',            'superduper')->json_message_is('/type', 'part')
     ->json_message_like('/ts', qr{^\d+-\d+-\d+});
 };
 
 subtest 'send_p - response' => sub {
   $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
-    ->json_message_is('/dialog_id', '#convos')->json_message_is('/event', 'sent')
-    ->json_message_is('/id',        '42')->json_message_is('/message', '/kick superduper')
-    ->json_message_is('/method',    'send');
+    ->json_message_is('/conversation_id', '#convos')->json_message_is('/event', 'sent')
+    ->json_message_is('/id',              '42')->json_message_is('/message', '/kick superduper')
+    ->json_message_is('/method',          'send');
 };
 
 done_testing;

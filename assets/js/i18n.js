@@ -52,17 +52,17 @@ export function lmd(str, ...vars) {
 }
 
 /**
- * topicOrStatus() will look at the Connection and Dialog objects to see what
+ * topicOrStatus() will look at the Connection and Conversation objects to see what
  * string represents the state.
  *
  * @param {Connection} connection
- * @param {Dialog} dialog
+ * @param {Conversation} conversation
  * @returns {String} Example: "Private conversation."
  */
-export function topicOrStatus(connection, dialog) {
-  if (dialog.is('not_found')) return '';
+export function topicOrStatus(connection, conversation) {
+  if (conversation.is('not_found')) return '';
   if (connection.frozen) return l(connection.frozen);
-  if (connection == dialog) return l('Connection messages.');
-  const str = dialog.frozen ? l(dialog.frozen) : dialog.topic;
-  return str || (dialog.is_private && l('Private conversation.')) || l('No topic is set.');
+  if (connection == conversation) return l('Connection messages.');
+  const str = conversation.frozen ? l(conversation.frozen) : conversation.topic;
+  return str || (conversation.is_private && l('Private conversation.')) || l('No topic is set.');
 }

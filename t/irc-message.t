@@ -56,11 +56,11 @@ is $user->unread, 1, 'One unread messages';
 is_deeply(
   $notifications->{messages},
   [{
-    connection_id => 'irc-localhost',
-    dialog_id     => '#convos',
-    from          => 'Supergirl',
-    message       => 'But... SUPERMAN, what about in a channel?',
-    type          => 'private'
+    connection_id   => 'irc-localhost',
+    conversation_id => '#convos',
+    from            => 'Supergirl',
+    message         => 'But... SUPERMAN, what about in a channel?',
+    type            => 'private'
   }],
   'notifications'
 );
@@ -86,11 +86,11 @@ is_deeply(
   [
     map {
       +{
-        connection_id => 'irc-localhost',
-        dialog_id     => '#convos',
-        from          => 'Supergirl',
-        message       => $_,
-        type          => 'private'
+        connection_id   => 'irc-localhost',
+        conversation_id => '#convos',
+        from            => 'Supergirl',
+        message         => $_,
+        type            => 'private'
       }
     } 'But... SUPERMAN, what about in a channel?',
     'Yikes! yikes:/',

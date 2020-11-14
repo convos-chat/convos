@@ -23,8 +23,8 @@ $: if ($loginOp.is('success')) redirectAfterLogin(loginOp);
 $: if ($registerOp.is('success')) registered();
 
 function redirect(user) {
-  const dialog = user.dialogs()[0];
-  const url = route.lastUrl ? route.lastUrl : dialog ? dialog.path : '/settings/connection';
+  const conversation = user.conversations()[0];
+  const url = route.lastUrl ? route.lastUrl : conversation ? conversation.path : '/settings/connection';
   if (user.is('loading') || !user.is('authenticated')) return;
   route.go(url);
 }

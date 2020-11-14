@@ -21,7 +21,7 @@ our $VERSION = Convos->VERSION;
 our %CTCP_QUOTE = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
 
 my %CLASS_DATA;
-sub _available_dialogs { $CLASS_DATA{dialogs}{$_[0]->url->host} ||= {} }
+sub _available_conversations { $CLASS_DATA{conversations}{$_[0]->url->host} ||= {} }
 
 sub disconnect_p {
   my $self = shift;
@@ -36,19 +36,20 @@ sub disconnect_p {
 sub rtc_p {
   my ($self, $msg) = @_;
   return Mojo::Promise->reject('Missing property: event.') unless $msg->{event};
-  return Mojo::Promise->reject('Dialog not found.')
-    unless $msg->{dialog_id} and my $dialog = $self->get_dialog($msg->{dialog_id});
+  return Mojo::Promise->reject('Conversation not found.')
+    unless $msg->{conversation_id}
+    and my $conversation = $self->get_conversation($msg->{conversation_id});
 
   # "signal" messages should only be sent to a single user
-  return $self->_rtc_signal_p($dialog, $msg) if $msg->{event} eq 'signal';
+  return $self->_rtc_signal_p($conversation, $msg) if $msg->{event} eq 'signal';
 
   # Every other message (call, hangup) should be broadcast to all other users
   return $self->_write_p(sprintf "NOTICE %s %s\r\n",
-    $dialog->name, $self->_make_ctcp_string(RTCZ => uc $msg->{event}));
+    $conversation->name, $self->_make_ctcp_string(RTCZ => uc $msg->{event}));
 }
 
 sub _rtc_signal_p {
-  my ($self, $dialog, $msg) = @_;
+  my ($self, $conversation, $msg) = @_;
   return Mojo::Promise->reject('Missing property: target.') unless $msg->{target};
 
   my @p;
@@ -60,7 +61,8 @@ sub _rtc_signal_p {
     my $n = @chunks - 1;
     push @p,
       $self->_write_p(sprintf "NOTICE %s %s\r\n",
-      $msg->{target}, $self->_make_ctcp_string(RTCZ => $type, "$_/$n", $dialog->name, $chunks[$_]))
+      $msg->{target},
+      $self->_make_ctcp_string(RTCZ => $type, "$_/$n", $conversation->name, $chunks[$_]))
       for 0 .. $n;
   };
 
@@ -139,20 +141,20 @@ sub _irc_event_ctcpreply_rtcz {
   my ($nick) = IRC::Utils::parse_user($msg->{prefix});
 
   if ($msg->{params}[1] =~ m!^(ANS|ICE|OFR)\s(\d+)/(\d+)\s(\S+)\s(.+)!) {
-    my ($type, $i, $n, $dialog_name, $payload) = ($1, $2, $3, $4, $5);
+    my ($type, $i, $n, $conversation_name, $payload) = ($1, $2, $3, $4, $5);
     return if $i > 20;    # Should never need this long message
 
-    $dialog_name = $nick if $self->_is_current_nick($dialog_name);
-    my $dialog    = $self->dialog({name => $dialog_name});
-    my $dialog_id = $dialog->id;
+    $conversation_name = $nick if $self->_is_current_nick($conversation_name);
+    my $conversation    = $self->conversation({name => $conversation_name});
+    my $conversation_id = $conversation->id;
 
-    $dialog_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
-    $self->{rtc_signal_buf}{$dialog_id}{$type} = [] if $i == 0;
-    $self->{rtc_signal_buf}{$dialog_id}{$type}[$i] = $payload;
+    $conversation_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
+    $self->{rtc_signal_buf}{$conversation_id}{$type} = [] if $i == 0;
+    $self->{rtc_signal_buf}{$conversation_id}{$type}[$i] = $payload;
     return if $i != $n;    # Waiting for more messages
 
-    $payload = gunzip b64_decode join '', @{$self->{rtc_signal_buf}{$dialog_id}{$type}};
-    delete $self->{rtc_signal_buf}{$dialog_id}{$type};
+    $payload = gunzip b64_decode join '', @{$self->{rtc_signal_buf}{$conversation_id}{$type}};
+    delete $self->{rtc_signal_buf}{$conversation_id}{$type};
 
     my $event
       = $type eq 'ANS' ? {answer => sdp_decode $payload}
@@ -160,12 +162,12 @@ sub _irc_event_ctcpreply_rtcz {
       :                  Mojo::Parameters->new($payload)->to_hash;
 
     $event->{from} = $nick;
-    $self->emit(rtc => signal => $dialog => $event);
+    $self->emit(rtc => signal => $conversation => $event);
   }
   elsif ($msg->{params}[1] =~ m!^(\w+)$!) {
-    my $dialog_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
-    my $dialog      = $self->dialog({name => $dialog_name});
-    $self->emit(rtc => lc $1, $dialog => {from => $nick});
+    my $conversation_name = $self->_is_current_nick($msg->{params}[0]) ? $nick : $msg->{params}[0];
+    my $conversation      = $self->conversation({name => $conversation_name});
+    $self->emit(rtc => lc $1, $conversation => {from => $nick});
   }
 }
 
@@ -253,24 +255,24 @@ sub _irc_event_join {
   my $channel = $msg->{params}[0];
 
   if ($self->_is_current_nick($nick)) {
-    my $dialog = $self->dialog({name => $channel, frozen => ''});
-    $self->emit(state => frozen => $dialog->TO_JSON);
+    my $conversation = $self->conversation({name => $channel, frozen => ''});
+    $self->emit(state => frozen => $conversation->TO_JSON);
     $self->_write("TOPIC $channel\r\n");    # Topic is not part of the join response
   }
-  elsif (my $dialog = $self->get_dialog($channel)) {
-    $self->emit(state => join => {dialog_id => $dialog->id, nick => $nick});
+  elsif (my $conversation = $self->get_conversation($channel)) {
+    $self->emit(state => join => {conversation_id => $conversation->id, nick => $nick});
   }
 }
 
 sub _irc_event_kick {
   my ($self, $msg) = @_;
-  my ($kicker) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog   = $self->dialog({name => $msg->{params}[0]});
-  my $nick     = $msg->{params}[1];
-  my $reason   = $msg->{params}[2] || '';
+  my ($kicker)     = IRC::Utils::parse_user($msg->{prefix});
+  my $conversation = $self->conversation({name => $msg->{params}[0]});
+  my $nick         = $msg->{params}[1];
+  my $reason       = $msg->{params}[2] || '';
 
   $self->emit(state => part =>
-      {dialog_id => $dialog->id, kicker => $kicker, nick => $nick, message => $reason});
+      {conversation_id => $conversation->id, kicker => $kicker, nick => $nick, message => $reason});
 }
 
 # :superman!superman@i.love.debian.org MODE superman :+i
@@ -282,12 +284,12 @@ sub _irc_event_mode {
   my $mode = $msg->{params}[1] || '';
   return if $mode =~ /(b|k)$/;    # set key or change ban mask
 
-  return unless my $nick   = $msg->{params}[2];
-  return unless my $dialog = $self->get_dialog({name => $msg->{params}[0]});
+  return unless my $nick         = $msg->{params}[2];
+  return unless my $conversation = $self->get_conversation({name => $msg->{params}[0]});
 
   my ($from) = IRC::Utils::parse_user($msg->{prefix});
-  $self->emit(
-    state => mode => {dialog_id => $dialog->id, from => $from, mode => $mode, nick => $nick});
+  $self->emit(state => mode =>
+      {conversation_id => $conversation->id, from => $from, mode => $mode, nick => $nick});
 }
 
 # :Superman12923!superman@i.love.debian.org NICK :Supermanx
@@ -313,11 +315,12 @@ sub _irc_event_nick {
 sub _irc_event_part {
   my ($self, $msg) = @_;
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
-  my $dialog = $self->get_dialog($msg->{params}[0]);
-  my $reason = $msg->{params}[1] || '';
+  my $conversation = $self->get_conversation($msg->{params}[0]);
+  my $reason       = $msg->{params}[1] || '';
 
-  if ($dialog and !$self->_is_current_nick($nick)) {
-    $self->emit(state => part => {dialog_id => $dialog->id, nick => $nick, message => $reason});
+  if ($conversation and !$self->_is_current_nick($nick)) {
+    $self->emit(
+      state => part => {conversation_id => $conversation->id, nick => $nick, message => $reason});
   }
 }
 
@@ -343,7 +346,7 @@ sub _irc_event_privmsg {
   my ($nick, $user, $host) = IRC::Utils::parse_user($msg->{prefix});
   my ($from, $highlight, $target);
 
-  my ($dialog_id, @message) = @{$msg->{params}};
+  my ($conversation_id, @message) = @{$msg->{params}};
   $message[0] = join ' ', @message;
 
   # http://www.mirc.com/colors.html
@@ -351,8 +354,8 @@ sub _irc_event_privmsg {
   $message[0] =~ s/[\x00-\x1f]//g;
 
   if ($user) {
-    $target = $self->_is_current_nick($dialog_id) ? $nick : $dialog_id,
-      $target = $self->get_dialog($target) || $self->dialog({name => $target});
+    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id,
+      $target = $self->get_conversation($target) || $self->conversation({name => $target});
     $from = $nick;
   }
 
@@ -367,7 +370,7 @@ sub _irc_event_privmsg {
   # The unread count will be saved periodically by _periodic_events()
   $target->inc_unread_p->catch(sub { $self->_debug('inc_unread %s FAIL %s', $target->id, shift) });
 
-  # server message or message without a dialog
+  # server message or message without a conversation
   $self->emit(
     message => $target,
     {
@@ -389,17 +392,17 @@ sub _irc_event_quit {
 
 sub _irc_event_rpl_list {
   my ($self, $msg) = @_;
-  my $dialog = {n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
+  my $conversation = {n_users => 0 + $msg->{params}[2], topic => $msg->{params}[3]};
 
-  $dialog->{name}      = $msg->{params}[1];
-  $dialog->{dialog_id} = lc $dialog->{name};
-  $dialog->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
-  $self->_available_dialogs->{dialogs}{$dialog->{name}} = $dialog;
+  $conversation->{name}            = $msg->{params}[1];
+  $conversation->{conversation_id} = lc $conversation->{name};
+  $conversation->{topic} =~ s!^(\[\+[a-z]+\])\s?!!;    # remove mode from topic, such as [+nt]
+  $self->_available_conversations->{conversations}{$conversation->{name}} = $conversation;
 }
 
 sub _irc_event_rpl_listend {
   my ($self, $msg) = @_;
-  $self->_available_dialogs->{done} = true;
+  $self->_available_conversations->{done} = true;
 }
 
 # :hybrid8.debian.local 004 superman hybrid8.debian.local hybrid-1:8.2.0+dfsg.1-2 DFGHRSWabcdefgijklnopqrsuwxy bciklmnoprstveIMORS bkloveIh
@@ -419,9 +422,9 @@ sub _irc_event_rpl_notopic {
 
 sub _irc_event_rpl_topic {
   my ($self, $msg) = @_;
-  return unless my $dialog = $self->get_dialog($msg->{params}[1]);
-  return if $dialog->topic eq $msg->{params}[2];
-  $self->emit(state => frozen => $dialog->topic($msg->{params}[2])->TO_JSON);
+  return unless my $conversation = $self->get_conversation($msg->{params}[1]);
+  return if $conversation->topic eq $msg->{params}[2];
+  $self->emit(state => frozen => $conversation->topic($msg->{params}[2])->TO_JSON);
 }
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
@@ -439,7 +442,7 @@ sub _irc_event_rpl_welcome {
           $_->is_private ? "/ISON $_->{name}"
         : $_->password   ? "/JOIN $_->{name} $_->{password}"
         : "/JOIN $_->{name}"
-    } sort { $a->id cmp $b->id } @{$self->dialogs}
+    } sort { $a->id cmp $b->id } @{$self->conversations}
   );
 
   Scalar::Util::weaken($self);
@@ -497,8 +500,8 @@ sub _make_ison_response {
   $msg->{ison} ||= {map { (lc($_) => $_) } split /\s+/, +($msg->{params}[1] || '')};
   $res->{online} = $msg->{ison}{lc($res->{nick})} ? true : false;
 
-  my $dialog = $self->get_dialog($res->{nick});
-  $self->emit(state => frozen => $dialog->frozen('')->TO_JSON) if $dialog;
+  my $conversation = $self->get_conversation($res->{nick});
+  $self->emit(state => frozen => $conversation->frozen('')->TO_JSON) if $conversation;
 
   $p->resolve($res);
 }
@@ -512,8 +515,8 @@ sub _make_join_response {
   }
 
   if ($msg->{command} eq 'err_badchannelkey') {
-    my $dialog = $self->dialog({name => $msg->{params}[1]});
-    $self->emit(state => frozen => $dialog->frozen('Invalid password.')->TO_JSON);
+    my $conversation = $self->conversation({name => $msg->{params}[1]});
+    $self->emit(state => frozen => $conversation->frozen('Invalid password.')->TO_JSON);
     return $p->reject($msg->{params}[2]);
   }
 
@@ -567,7 +570,7 @@ sub _make_oper_response {
 
 sub _make_part_response {
   my ($self, $msg, $res, $p) = @_;
-  $self->_remove_dialog(delete $res->{target})->save_p if $res->{target};
+  $self->_remove_conversation(delete $res->{target})->save_p if $res->{target};
 
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
   return $p->resolve($res);
@@ -582,9 +585,9 @@ sub _make_topic_response {
   $res->{topic} = $msg->{params}[1] // '' if $msg->{command} eq 'topic';
   $p->resolve($res);
 
-  my $dialog = $self->get_dialog($msg->{params}[0]);
-  $self->emit(state => frozen => $dialog->topic($res->{topic})->TO_JSON)
-    if $dialog and $dialog->topic ne $res->{topic};
+  my $conversation = $self->get_conversation($msg->{params}[0]);
+  $self->emit(state => frozen => $conversation->topic($res->{topic})->TO_JSON)
+    if $conversation and $conversation->topic ne $res->{topic};
 }
 
 sub _make_whois_response {
@@ -663,9 +666,9 @@ sub _send_clear_p {
       'WARNING! /clear history [name] will delete all messages in the backend!');
   }
 
-  my $dialog = $self->get_dialog($target);
+  my $conversation = $self->get_conversation($target);
   return $target
-    ? $self->user->core->backend->delete_messages_p($dialog)
+    ? $self->user->core->backend->delete_messages_p($conversation)
     : Mojo::Promise->reject('Unknown conversation.');
 }
 
@@ -680,31 +683,31 @@ sub _send_ison_p {
 }
 
 sub _send_join_p {
-  my ($self,      $command)  = @_;
-  my ($dialog_id, $password) = (split(/\s/, ($command || ''), 2), '', '');
+  my ($self,            $command)  = @_;
+  my ($conversation_id, $password) = (split(/\s/, ($command || ''), 2), '', '');
 
-  return $self->_send_query_p($dialog_id)->then(
+  return $self->_send_query_p($conversation_id)->then(
     sub {
-      my $dialog = shift;
-      $dialog->password($password) if $dialog and length $password;
-      return $dialog->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
-      return !$dialog->frozen ? $dialog->TO_JSON : $self->_write_and_wait_p(
-        "JOIN $command", {dialog_id => lc $dialog_id},
-        470                 => {1 => $dialog_id},       # Link channel
-        479                 => {1 => $dialog_id},       # Illegal channel name
-        err_badchanmask     => {1 => $dialog_id},
-        err_badchannelkey   => {1 => $dialog_id},
-        err_bannedfromchan  => {1 => $dialog_id},
-        err_channelisfull   => {1 => $dialog_id},
-        err_inviteonlychan  => {1 => $dialog_id},
-        err_nosuchchannel   => {1 => $dialog_id},
-        err_toomanychannels => {1 => $dialog_id},
-        err_toomanytargets  => {1 => $dialog_id},
-        err_unavailresource => {1 => $dialog_id},
-        rpl_endofnames      => {1 => $dialog_id},
-        rpl_namreply        => {1 => $dialog_id},
-        rpl_topic           => {2 => $dialog_id},
-        rpl_topicwhotime    => {1 => $dialog_id},
+      my $conversation = shift;
+      $conversation->password($password) if $conversation and length $password;
+      return $conversation->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
+      return !$conversation->frozen ? $conversation->TO_JSON : $self->_write_and_wait_p(
+        "JOIN $command", {conversation_id => lc $conversation_id},
+        470                 => {1 => $conversation_id},       # Link channel
+        479                 => {1 => $conversation_id},       # Illegal channel name
+        err_badchanmask     => {1 => $conversation_id},
+        err_badchannelkey   => {1 => $conversation_id},
+        err_bannedfromchan  => {1 => $conversation_id},
+        err_channelisfull   => {1 => $conversation_id},
+        err_inviteonlychan  => {1 => $conversation_id},
+        err_nosuchchannel   => {1 => $conversation_id},
+        err_toomanychannels => {1 => $conversation_id},
+        err_toomanytargets  => {1 => $conversation_id},
+        err_unavailresource => {1 => $conversation_id},
+        rpl_endofnames      => {1 => $conversation_id},
+        rpl_namreply        => {1 => $conversation_id},
+        rpl_topic           => {2 => $conversation_id},
+        rpl_topicwhotime    => {1 => $conversation_id},
         '_make_join_response',
       );
     },
@@ -743,14 +746,14 @@ sub _send_list_p {
   my ($self, $extra) = @_;
   return Mojo::Promise->reject('Not connected.') if $self->state ne 'connected';
 
-  my $store = $self->_available_dialogs;
+  my $store = $self->_available_conversations;
   my @found;
 
-  # Refresh dialog list
+  # Refresh conversation list
   if ($extra =~ m!\brefresh\b! or !$store->{ts}) {
-    $store->{dialogs} = {};
-    $store->{done}    = false;
-    $store->{ts}      = time;
+    $store->{conversations} = {};
+    $store->{done}          = false;
+    $store->{ts}            = time;
     $self->_write("LIST\r\n");
   }
 
@@ -763,21 +766,21 @@ sub _send_list_p {
     $by           = $re_modifiers =~ s!([nt])!! ? $1 : 'nt';    # name or topic
     $filter       = qr{(?$re_modifiers:$filter)} if $filter;    # (?i:foo_bar)
 
-    for my $dialog (sort { $a->{name} cmp $b->{name} } values %{$store->{dialogs}}) {
-      push @by_name,  $dialog and next if $dialog->{name}  =~ $filter;
-      push @by_topic, $dialog and next if $dialog->{topic} =~ $filter;
+    for my $conversation (sort { $a->{name} cmp $b->{name} } values %{$store->{conversations}}) {
+      push @by_name,  $conversation and next if $conversation->{name}  =~ $filter;
+      push @by_topic, $conversation and next if $conversation->{topic} =~ $filter;
     }
 
     @found = ($by =~ /n/ ? @by_name : (), $by =~ /t/ ? @by_topic : ());
   }
   else {
-    @found = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{dialogs}};
+    @found = sort { $b->{n_users} <=> $a->{n_users} } values %{$store->{conversations}};
   }
 
   return Mojo::Promise->resolve({
-    n_dialogs => int(keys %{$store->{dialogs}}),
-    dialogs   => [splice @found, 0, 200],
-    done      => $store->{done},
+    n_conversations => int(keys %{$store->{conversations}}),
+    conversations   => [splice @found, 0, 200],
+    done            => $store->{done},
   });
 }
 
@@ -860,7 +863,7 @@ sub _send_names_p {
   my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
   return $self->_write_and_wait_p(
-    "NAMES $target", {dialog_id => lc $target},
+    "NAMES $target", {conversation_id => lc $target},
     err_toomanymatches => {1 => $target},
     rpl_endofnames     => {1 => $target},
     rpl_namreply       => {2 => $target},
@@ -899,11 +902,11 @@ sub _send_part_p {
   my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
-  my $dialog = $self->get_dialog($target);
-  return $self->_remove_dialog($target)->save_p->then(sub { +{} })
-    if $dialog and $dialog->is_private;
+  my $conversation = $self->get_conversation($target);
+  return $self->_remove_conversation($target)->save_p->then(sub { +{} })
+    if $conversation and $conversation->is_private;
 
-  return $self->_remove_dialog($target)->save_p->then(sub { +{} })
+  return $self->_remove_conversation($target)->save_p->then(sub { +{} })
     if $self->state eq 'disconnected';
 
   return $self->_write_and_wait_p(
@@ -923,16 +926,17 @@ sub _send_query_p {
   my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
-  # Already in the dialog
+  # Already in the conversation
   ($target) = split /\s/, $target, 2;
-  my $dialog = $self->get_dialog($target);
-  return $p->resolve($dialog) if $dialog and !$dialog->frozen;
+  my $conversation = $self->get_conversation($target);
+  return $p->resolve($conversation) if $conversation and !$conversation->frozen;
 
-  # New dialog. Note that it needs to be frozen, so join_channel will be issued
-  $dialog ||= $self->dialog({name => $target});
-  $dialog->frozen('Not active in this room.') if !$dialog->is_private and !$dialog->frozen;
-  $self->emit(state => frozen => $dialog->TO_JSON);
-  return $p->resolve($dialog);
+  # New conversation. Note that it needs to be frozen, so join_channel will be issued
+  $conversation ||= $self->conversation({name => $target});
+  $conversation->frozen('Not active in this room.')
+    if !$conversation->is_private and !$conversation->frozen;
+  $self->emit(state => frozen => $conversation->TO_JSON);
+  return $p->resolve($conversation);
 }
 
 sub _send_topic_p {
@@ -944,7 +948,7 @@ sub _send_topic_p {
   my $cmd = "TOPIC $target";
   $cmd .= " :$topic" if length $topic;
   return $self->_write_and_wait_p(
-    $cmd, {dialog_id => $target, topic => $topic // ''},
+    $cmd, {conversation_id => $target, topic => $topic // ''},
     err_chanoprivsneeded => {1 => $target},
     err_nochanmodes      => {1 => $target},
     err_notonchannel     => {1 => $target},

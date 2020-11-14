@@ -28,7 +28,7 @@ done_testing;
 sub test_file {
   return <<'HERE';
 connection_id: irc-localhost
-dialog_id: "#convos"
+conversation_id: "#convos"
 message: too cool!
 HERE
 }

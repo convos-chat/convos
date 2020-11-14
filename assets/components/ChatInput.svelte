@@ -6,7 +6,7 @@ import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
 
 export const uploader = uploadFiles;
-export let dialog = {};
+export let conversation = {};
 export function getUploadEl() { return uploadEl }
 export function setValue(val) { inputEl.value = val }
 
@@ -20,11 +20,11 @@ const api = getContext('api');
 const user = getContext('user');
 
 $: autocompleteOptions = calculateAutocompleteOptions(inputParts) || [];
-$: connection = user.findDialog({connection_id: dialog.connection_id});
+$: connection = user.findConversation({connection_id: conversation.connection_id});
 $: inputParts = calculateInputParts(pos);
 $: nick = connection && connection.nick;
-$: placeholder = dialog.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
-$: sendIcon = dialog.is('search') ? 'search' : 'paper-plane';
+$: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
+$: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 
 export function add(str, params = {}) {
   const space = params.space || '';
@@ -38,11 +38,11 @@ function calculateAutocompleteOptions([before, key, afterKey, after]) {
       key == ':' && afterKey.length ? 'emojis'
     : key == '/' && !before.length  ? 'commands'
     : key == '@' && afterKey.length ? 'nicks'
-    : key == '#' || key == '&'      ? 'dialogs'
+    : key == '#' || key == '&'      ? 'conversations'
     :                                 'none';
 
   activeAutocompleteIndex = 0;
-  const opts = autocomplete(autocompleteCategory, {dialog, query: key + afterKey, user});
+  const opts = autocomplete(autocompleteCategory, {conversation, query: key + afterKey, user});
   if (opts.length) opts.unshift({val: key + afterKey});
   return opts;
 }
@@ -77,8 +77,8 @@ function focusAutocompleteItem(e, moveBy) {
 
 function handleMessageResponse(msg) {
   if (!msg.errors) return;
-  if (!dialog || msg.dialog_id == dialog.dialog_id) return;
-  dialog.addMessage({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
+  if (!conversation || msg.conversation_id == conversation.conversation_id) return;
+  conversation.addMessage({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
 }
 
 function selectOption(e) {
@@ -97,8 +97,8 @@ export function sendMessage(e) {
   msg.message = msg.message.replace(/^\/j\b/i, '/join');
   msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
-  if (msg.message.length) dialog.send(msg).then(handleMessageResponse);
-  if (!dialog.is('search')) inputEl.value = '';
+  if (msg.message.length) conversation.send(msg).then(handleMessageResponse);
+  if (!conversation.is('search')) inputEl.value = '';
 
   pos = 0;
 }
@@ -113,7 +113,7 @@ function uploadFiles(e) {
   api('uploadFile').perform({formData}).then(op => {
     const res = op.res.body;
     if (res.files && res.files.length) return add(res.files[0].url);
-    if (res.errors) dialog.addMessage({message: 'Could not upload file: %1', vars: [l(extractErrorMessage(res.errors))], type: 'error'});
+    if (res.errors) conversation.addMessage({message: 'Could not upload file: %1', vars: [l(extractErrorMessage(res.errors))], type: 'error'});
   });
 }
 
@@ -149,7 +149,7 @@ const keys = {
     on:keydown="{e => (keys[e.key] || keys.Fallback)(e)}"
     on:keyup="{e => keys.Release(e)}"></textarea>
 
-  <label class="upload is-hallow" hidden="{!dialog.is('conversation')}">
+  <label class="upload is-hallow" hidden="{!conversation.is('conversation')}">
     <input type="file" on:change="{uploadFiles}" bind:this="{uploadEl}">
     <Icon name="cloud-upload-alt"/>
   </label>

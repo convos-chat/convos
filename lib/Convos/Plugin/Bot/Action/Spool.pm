@@ -27,9 +27,9 @@ sub _check_for_message {
     my $message    = Convos::Plugin::Bot->load_config_file($file);
     my $connection = $user->get_connection($message->{connection_id});
     next unless $connection and $connection->state eq 'connected';
-    $connection->send_p(@$message{qw(dialog_id message)})->catch(sub {
+    $connection->send_p(@$message{qw(conversation_id message)})->catch(sub {
       $user->core->log->warn(sprintf 'Bot send "%s" to "%s/%s": %s',
-        @$message{qw(message connection_id dialog_id)}, pop);
+        @$message{qw(message connection_id conversation_id)}, pop);
     });
     unlink $file;
     return unless --$guard;    # Make sure we do not block for too long
@@ -59,7 +59,7 @@ The file must be a valid YAML file. Example message file:
 
   ---
   connection_id: irc-freenode
-  dialog_id: "#convos"
+  conversation_id: "#convos"
   message: Some message
 
 =head1 ATTRIBUTES

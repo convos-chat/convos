@@ -25,16 +25,16 @@ const dragAndDrop = new DragAndDrop();
 
 let chatInput;
 let connection = user.notifications;
-let dialog = user.notifications;
+let conversation = user.notifications;
 let now = new Time();
 let onLoadHash = '';
 let unsubscribe = {};
 
-$: setDialogFromRoute($route);
-$: setDialogFromUser($user);
-$: messages = renderMessages({dialog: $dialog, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
-$: notConnected = $dialog.frozen ? true : false;
-$: if (!$route.hash && !$dialog.historyStopAt) dialog.load({});
+$: setConversationFromRoute($route);
+$: setConversationFromUser($user);
+$: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
+$: notConnected = $conversation.frozen ? true : false;
+$: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), chatInput);
@@ -74,23 +74,23 @@ function onRendered(e) {
 }
 
 function onScrolled(e) {
-  if (!dialog.messages.length) return;
+  if (!conversation.messages.length) return;
   const {infinityEl, pos, visibleEls} = e.detail;
   const firstVisibleEl = visibleEls[0];
   const lastVisibleEl = visibleEls.slice(-1)[0];
 
   if (pos == 'top') {
-    const before = dialog.messages[0].ts.toISOString();
-    route.go(dialog.path + '#' + before, {replace: true});
-    if (!dialog.historyStartAt) dialog.load({before});
+    const before = conversation.messages[0].ts.toISOString();
+    route.go(conversation.path + '#' + before, {replace: true});
+    if (!conversation.historyStartAt) conversation.load({before});
   }
   else if (pos == 'bottom') {
-    const after = dialog.messages.slice(-1)[0].ts.toISOString();
-    route.go(dialog.path + (dialog.historyStopAt ? '' : '#' + lastVisibleEl.dataset.ts), {replace: true});
-    if (!dialog.historyStopAt) dialog.load({after});
+    const after = conversation.messages.slice(-1)[0].ts.toISOString();
+    route.go(conversation.path + (conversation.historyStopAt ? '' : '#' + lastVisibleEl.dataset.ts), {replace: true});
+    if (!conversation.historyStopAt) conversation.load({after});
   }
   else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
-    route.go(dialog.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
+    route.go(conversation.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
   }
 }
 
@@ -100,63 +100,63 @@ function renderFocusedEl(infinityEl, add) {
   if (focusEl) focusEl.classList.add('has-focus');
 }
 
-function setDialogFromRoute(route) {
-  const [connection_id, dialog_id] = ['connection_id', 'dialog_id'].map(k => route.param(k));
-  if (dialog.connection_id == connection_id && dialog.dialog_id == dialog_id) return;
-  user.setActiveDialog({connection_id, dialog_id}); // Triggers setDialogFromUser()
+function setConversationFromRoute(route) {
+  const [connection_id, conversation_id] = ['connection_id', 'conversation_id'].map(k => route.param(k));
+  if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
+  user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
 }
 
-function setDialogFromUser(user) {
-  if (user.activeDialog == dialog) return;
-  if (unsubscribe.dialog) unsubscribe.dialog();
+function setConversationFromUser(user) {
+  if (user.activeConversation == conversation) return;
+  if (unsubscribe.conversation) unsubscribe.conversation();
   if (unsubscribe.markAsRead) unsubscribe.markAsRead();
 
-  dialog = user.activeDialog;
-  connection = user.findDialog({connection_id: dialog.connection_id}) || dialog;
+  conversation = user.activeConversation;
+  connection = user.findConversation({connection_id: conversation.connection_id}) || conversation;
   now = new Time();
-  unsubscribe.dialog = dialog.subscribe(d => { dialog = d });
-  unsubscribe.markAsRead = dialog.markAsRead.bind(dialog);
-  route.update({title: dialog.title});
+  unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
+  unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
+  route.update({title: conversation.title});
   rtc.hangup();
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
-  if (onLoadHash) return dialog.load({around: onLoadHash});
-  if (!dialog.historyStopAt) return dialog.load({around: now.toISOString()});
+  if (onLoadHash) return conversation.load({around: onLoadHash});
+  if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
 }
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(dialog.name)}</a></h1>
-  <span class="chat-header__topic">{topicOrStatus(connection, dialog)}</span>
-  {#if $rtc.enabled && $dialog.dialog_id}
+  <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(conversation.name)}</a></h1>
+  <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
+  {#if $rtc.enabled && $conversation.conversation_id}
     {#if $rtc.localStream.id && $rtc.constraints.video}
       <Button icon="video-slash" tooltip="{l('Hangup')}" disabled="{notConnected}" on:click="{e => rtc.hangup()}"/>
     {:else}
-      <Button icon="video" tooltip="{l('Call')}" disabled="{notConnected}" on:click="{e => rtc.call(dialog, {audio: true, video: true})}"/>
+      <Button icon="video" tooltip="{l('Call')}" disabled="{notConnected}" on:click="{e => rtc.call(conversation, {audio: true, video: true})}"/>
     {/if}
   {/if}
-  <a href="#activeMenu:{dialog.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
+  <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 
 <InfinityScroll class="main is-above-chat-input" on:rendered="{onRendered}" on:scrolled="{onScrolled}">
   <!-- status -->
-  {#if $dialog.is('loading')}
+  {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
   {/if}
-  {#if $dialog.historyStartAt && !$dialog.is('not_found')}
-    <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{l('Started chatting on %1', $dialog.historyStartAt.getHumanDate())}</i></span></div>
+  {#if $conversation.historyStartAt && !$conversation.is('not_found')}
+    <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{l('Started chatting on %1', $conversation.historyStartAt.getHumanDate())}</i></span></div>
   {/if}
 
   <!-- welcome message -->
-  {#if $dialog.messages.length < 10 && !$dialog.is('not_found')}
-    {#if $dialog.is_private}
-      <ChatMessage>{@html lmd('This is a private conversation with "%1".', $dialog.name)}</ChatMessage>
+  {#if $conversation.messages.length < 10 && !$conversation.is('not_found')}
+    {#if $conversation.is_private}
+      <ChatMessage>{@html lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
-      <ChatMessage>{@html lmd($dialog.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $dialog.name, $dialog.topic)}</ChatMessage>
-      {#if $dialog.nParticipants == 1}
+      <ChatMessage>{@html lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
+      {#if $conversation.nParticipants == 1}
         <ChatMessage same="{true}">{l('You are the only participant in this conversation.')}</ChatMessage>
       {:else}
-        <ChatMessage same="{true}">{@html lmd('There are %1 [participants](%2) in this conversation.', $dialog.nParticipants, $dialog.path + '#activeMenu:settings')}</ChatMessage>
+        <ChatMessage same="{true}">{@html lmd('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
       {/if}
     {/if}
   {/if}
@@ -167,7 +167,7 @@ function setDialogFromUser(user) {
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    {#if i && i == $dialog.messages.length - $dialog.unread}
+    {#if i && i == $conversation.messages.length - $conversation.unread}
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {l('New messages')}</span></div>
     {/if}
 
@@ -195,32 +195,32 @@ function setDialogFromUser(user) {
   {/each}
 
   <!-- status -->
-  {#if $connection.is('not_found') && !$dialog.dialog_id}
+  {#if $connection.is('not_found') && !$conversation.conversation_id}
     <h2>{l('Connection does not exist.')}</h2>
     <p>{l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
     <p>
-      <Link href="/settings/connection?server={encodeURIComponent($dialog.connection_id)}&dialog={encodeURIComponent($dialog.dialog_id)}" class="btn"><Icon name="thumbs-up"/> {l('Yes')}</Link>
+      <Link href="/settings/connection?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {l('Yes')}</Link>
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {l('No')}</Link>
     </p>
-  {:else if $dialog.is('not_found')}
+  {:else if $conversation.is('not_found')}
     <h2>{l('You are not part of this conversation.')}</h2>
-    <p>{l('Do you want to chat with "%1"?', $dialog.dialog_id)}</p>
+    <p>{l('Do you want to chat with "%1"?', $conversation.conversation_id)}</p>
     <p>
-      <Button type="button" icon="thumbs-up" on:click="{() => dialog.send('/join ' + $dialog.dialog_id)}"><span>{l('Yes')}</span></Button>
+      <Button type="button" icon="thumbs-up" on:click="{() => conversation.send('/join ' + $conversation.conversation_id)}"><span>{l('Yes')}</span></Button>
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <ChatMessage type="error">{@html lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, $connection.path + '#activeMenu:settings')}</ChatMessage>
-  {:else if $dialog.frozen && !$dialog.is('locked')}
-    <ChatMessage type="error">{topicOrStatus($connection, $dialog).replace(/\.$/, '') || l($dialog.frozen)}</ChatMessage>
+  {:else if $conversation.frozen && !$conversation.is('locked')}
+    <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || l($conversation.frozen)}</ChatMessage>
   {/if}
-  {#if $dialog.is('loading')}
+  {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
   {/if}
-  {#if !$dialog.historyStopAt && $dialog.messages.length}
-    <div class="message__status-line for-jump-to-now"><a href="{dialog.path}"><Icon name="external-link-alt"/> {l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
+  {#if !$conversation.historyStopAt && $conversation.messages.length}
+    <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
   {/if}
 </InfinityScroll>
 
-<ChatInput dialog="{dialog}" bind:this="{chatInput}"/>
-<ChatParticipants dialog="{dialog}"/>
+<ChatInput conversation="{conversation}" bind:this="{chatInput}"/>
+<ChatParticipants conversation="{conversation}"/>

@@ -1,4 +1,4 @@
-import Dialog from '../assets/store/Dialog';
+import Conversation from '../assets/store/Conversation';
 import WebRTC from '../assets/store/WebRTC';
 import TestMediaDevices from '../assets/js/TestMediaDevices';
 import TestRTCPeerConnection from '../assets/js/TestRTCPeerConnection';
@@ -23,11 +23,11 @@ test('id', () => {
 });
 
 test('mute', async () => {
-  const dialog = mockedDialog();
+  const conversation = mockedConversation();
   const webrtc = new WebRTC({});
   expect(webrtc.isMuted()).toBe(true);
 
-  await webrtc.call(dialog);
+  await webrtc.call(conversation);
   expect(webrtc.isMuted()).toBe(true);
 
   const audioTracks = [{enabled: false}];
@@ -49,13 +49,13 @@ test('mute', async () => {
 });
 
 test('call', async () => {
-  const dialog = mockedDialog();
+  const conversation = mockedConversation();
   const webrtc = new WebRTC({});
 
-  await webrtc.call(dialog);
+  await webrtc.call(conversation);
   expect(webrtc.localStream.id).toBeTruthy();
   expect(webrtc.constraints).toEqual(webrtc.localStream.constraints);
-  expect(webrtc.dialog.name).toBe(dialog.name);
+  expect(webrtc.conversation.name).toBe(conversation.name);
 
   expect(webrtc.cameras).toEqual([{id: 2, name: 'Cam1'}]);
   expect(webrtc.microphones).toEqual([{id: 1, name: 'Mic1'}]);
@@ -63,24 +63,24 @@ test('call', async () => {
 });
 
 test('hangup', async () => {
-  const dialog = mockedDialog();
+  const conversation = mockedConversation();
   const webrtc = new WebRTC({});
 
   await webrtc.hangup(); // noop
-  await webrtc.call(dialog);
+  await webrtc.call(conversation);
   expect(webrtc.localStream.id).toBeTruthy();
 
-  dialog.emit('rtc', {type: 'call', from: 'superwoman'});
+  conversation.emit('rtc', {type: 'call', from: 'superwoman'});
   expect(getConn(webrtc, 'superwoman').localStream).toBe(webrtc.localStream);
   expect(getConn(webrtc, 'superwoman').role).toBe('caller');
   expect(getConn(webrtc, 'superwoman').target).toBe('superwoman');
 
-  dialog.emit('rtc', {type: 'call', from: 'superman'});
+  conversation.emit('rtc', {type: 'call', from: 'superman'});
   expect(getConn(webrtc, 'superman').localStream).toBe(webrtc.localStream);
   expect(getConn(webrtc, 'superman').target).toBe('superman');
 
   let conn = getConn(webrtc, 'superwoman');
-  dialog.emit('rtc', {type: 'call', from: 'superwoman'});
+  conversation.emit('rtc', {type: 'call', from: 'superwoman'});
   expect(getConn(webrtc, 'superwoman').localStream).toBe(webrtc.localStream);
   expect(getConn(webrtc, 'superwoman').target).toBe('superwoman');
   expect(getConn(webrtc, 'superwoman').id).not.toBe(conn.id);
@@ -94,7 +94,7 @@ test('hangup', async () => {
   expect(tracks[0].stopped).toBe(true);
 
   // Does nothing after hangup
-  dialog.emit('rtc', {type: 'call', from: 'superwoman'});
+  conversation.emit('rtc', {type: 'call', from: 'superwoman'});
   expect(webrtc.peerConnections({})).toEqual([]);
 });
 
@@ -109,13 +109,13 @@ test('peerConfig', async () => {
     ],
   };
 
-  const dialog = mockedDialog();
+  const conversation = mockedConversation();
   const webrtc = new WebRTC({});
   webrtc.update({peerConfig});
   expect(webrtc.enabled).toBe(true);
 
-  await webrtc.call(dialog);
-  dialog.emit('rtc', {type: 'call', from: 'superwoman'});
+  await webrtc.call(conversation);
+  conversation.emit('rtc', {type: 'call', from: 'superwoman'});
   expect(getConn(webrtc, 'superwoman').peerConfig).toEqual({
     bundlePolicy: 'balanced',
     iceTransportPolicy: 'all',
@@ -128,10 +128,10 @@ test('peerConfig', async () => {
 });
 
 // test('signal', async () => {
-//   const dialog = mockedDialog();
+//   const conversation = mockedConversation();
 //   const webrtc = new WebRTC({});
 // 
-//   await webrtc.call(dialog);
+//   await webrtc.call(conversation);
 // 
 //   const pc = await webrtc.on('pc');
 // });
@@ -140,12 +140,12 @@ function getConn(webrtc, target) {
   return webrtc.peerConnections({target})[0];
 }
 
-function mockedDialog() {
-  const dialog = new Dialog({api: {operation() { return false }}, name: '#dummy'});
+function mockedConversation() {
+  const conversation = new Conversation({api: {operation() { return false }}, name: '#dummy'});
 
-  dialog.send = (msg) => {
-    if (msg.event == 'call') return setTimeout(() => dialog.emit('rtc', {from: 'superwoman', type: 'call'}));
+  conversation.send = (msg) => {
+    if (msg.event == 'call') return setTimeout(() => conversation.emit('rtc', {from: 'superwoman', type: 'call'}));
   };
 
-  return dialog;
+  return conversation;
 }

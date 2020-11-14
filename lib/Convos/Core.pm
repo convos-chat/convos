@@ -203,9 +203,9 @@ L<IRC|Convos::Core::Connection::Irc> server.
 
 =over 2
 
-=item * Has many L<Convos::Core::Dialog> objects.
+=item * Has many L<Convos::Core::Conversation> objects.
 
-This represents a dialog with zero or more users.
+This represents a conversation with zero or more users.
 
 =back
 

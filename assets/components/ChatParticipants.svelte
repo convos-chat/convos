@@ -8,9 +8,9 @@ import {modeClassNames, q} from '../js/util';
 const rtc = getContext('rtc');
 const user = getContext('user');
 
-export let dialog;
+export let conversation;
 
-$: connection = user.findDialog({connection_id: dialog.connection_id});
+$: connection = user.findConversation({connection_id: conversation.connection_id});
 
 afterUpdate(() => rtc.render());
 </script>
@@ -70,12 +70,12 @@ Audio:
   </div>
 {/if}
 
-{#if dialog.participants().length}
+{#if conversation.participants().length}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav">
-      <h3>{l('Participants (%1)', dialog.participants().length)}</h3>
-      {#each dialog.participants() as participant}
-        <Link href="/chat/{dialog.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
+      <h3>{l('Participants (%1)', conversation.participants().length)}</h3>
+      {#each conversation.participants() as participant}
+        <Link href="/chat/{conversation.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
           <span>{participant.nick}</span>
         </Link>

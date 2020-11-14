@@ -24,7 +24,7 @@ export default class WebRTC extends Reactive {
 
     this.prop('ro', 'enabled', () => !!(this.peerConfig.ice_servers || []).length);
 
-    this.prop('rw', 'dialog', null);
+    this.prop('rw', 'conversation', null);
     this.prop('rw', 'localStream', {id: ''});
     this.prop('rw', 'peerConfig', {});
 
@@ -50,12 +50,12 @@ export default class WebRTC extends Reactive {
     window.addEventListener('beforeunload', this.hangup);
   }
 
-  async call(dialog, constraints) {
+  async call(conversation, constraints) {
     if (this.localStream.id) await this.hangup();
     if (!constraints) constraints = this.constraints;
 
-    this.unsubscribe.dialogRtc = dialog.on('rtc', msg => this._onSignal(msg));
-    this.update({constraints, dialog});
+    this.unsubscribe.conversationRtc = conversation.on('rtc', msg => this._onSignal(msg));
+    this.update({constraints, conversation});
 
     const localStream = await navigator.mediaDevices.getUserMedia(constraints);
     this.update({localStream});
@@ -68,7 +68,7 @@ export default class WebRTC extends Reactive {
     this._send('hangup', {});
     this._mapPc(pc => pc.hangup());
     if (this.localStream.getTracks) this.localStream.getTracks().forEach(track => track.stop());
-    if (this.unsubscribe.dialogRtc) this.unsubscribe.dialogRtc();
+    if (this.unsubscribe.conversationRtc) this.unsubscribe.conversationRtc();
     this.update({localStream: {id: ''}});
   }
 
@@ -207,7 +207,7 @@ export default class WebRTC extends Reactive {
   }
 
   _send(event, msg) {
-    if (this.dialog) this.dialog.send({...msg, method: 'rtc', event});
+    if (this.conversation) this.conversation.send({...msg, method: 'rtc', event});
   }
 
   _toggleInfo(e) {

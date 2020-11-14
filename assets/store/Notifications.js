@@ -1,12 +1,12 @@
-import Dialog from './Dialog';
+import Conversation from './Conversation';
 import {api} from '../js/Api';
 
-export default class Notifications extends Dialog {
+export default class Notifications extends Conversation {
   constructor(params) {
     super({
       ...params,
       connection_id: '',
-      dialog_id: 'notifications',
+      conversation_id: 'notifications',
       is_private: true,
       name: 'Notifications',
     });

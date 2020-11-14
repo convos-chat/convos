@@ -20,29 +20,29 @@ const sortParticipants = (a, b) => {
 
 let nMessages = 0;
 
-export default class Dialog extends Reactive {
+export default class Conversation extends Reactive {
   constructor(params) {
     super();
 
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
-    this.prop('ro', 'color', str2color(params.dialog_id || params.connection_id || ''));
+    this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
-    this.prop('ro', 'is_private', () => this.dialog_id && !channelRe.test(this.name));
+    this.prop('ro', 'is_private', () => this.conversation_id && !channelRe.test(this.name));
     this.prop('ro', 'nParticipants', () => this.participants().length);
-    this.prop('ro', 'path', route.dialogPath(params));
+    this.prop('ro', 'path', route.conversationPath(params));
 
     this.prop('rw', 'errors', 0);
     this.prop('rw', 'historyStartAt', null);
     this.prop('rw', 'historyStopAt', null);
     this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
-    this.prop('rw', 'name', params.name || params.dialog_id || params.connection_id || 'ERR');
+    this.prop('rw', 'name', params.name || params.conversation_id || params.connection_id || 'ERR');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
 
-    if (params.hasOwnProperty('dialog_id')) {
-      this.prop('ro', 'dialog_id', params.dialog_id);
+    if (params.hasOwnProperty('conversation_id')) {
+      this.prop('ro', 'conversation_id', params.conversation_id);
       this.prop('ro', 'title', () => [this.name, this.connection_id].join(' - '));
       this.prop('rw', 'frozen', params.frozen || '');
     }
@@ -51,8 +51,8 @@ export default class Dialog extends Reactive {
       this.prop('ro', 'title', () => this.name);
     }
 
-    if (params.dialog_id) {
-      this.prop('persist', 'wantNotifications', this.is_private, {key: params.dialog_id +  ':wantNotifications'});
+    if (params.conversation_id) {
+      this.prop('persist', 'wantNotifications', this.is_private, {key: params.conversation_id +  ':wantNotifications'});
     }
 
     this.socket = params.socket || getSocket('/events');
@@ -100,8 +100,8 @@ export default class Dialog extends Reactive {
   }
 
   is(status) {
-    if (status == 'connection') return !this.dialog_id;
-    if (status == 'conversation') return this.dialog_id && !this.is('notifications');
+    if (status == 'connection') return !this.conversation_id;
+    if (status == 'conversation') return this.conversation_id && !this.is('notifications');
     if (status == 'frozen') return this.frozen && true;
     if (status == 'locked') return this.frozen == 'Invalid password.';
     if (status == 'not_found') return this.frozen == 'Not found.';
@@ -119,7 +119,7 @@ export default class Dialog extends Reactive {
     // Load messages
     this.update({status: 'loading'});
     if (!params.limit) params.limit = params.around ? 30 : 40;
-    await this.messagesOp.perform({...params, connection_id: this.connection_id, dialog_id: this.dialog_id});
+    await this.messagesOp.perform({...params, connection_id: this.connection_id, conversation_id: this.conversation_id});
 
     this.update({status: this.messagesOp.status});
 
@@ -165,13 +165,13 @@ export default class Dialog extends Reactive {
 
   send(message) {
     if (typeof message == 'string') message = {message};
-    return this.socket.send({method: 'send', connection_id: this.connection_id, dialog_id: this.dialog_id || '', ...message});
+    return this.socket.send({method: 'send', connection_id: this.connection_id, conversation_id: this.conversation_id || '', ...message});
   }
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
     this.update({errors: 0, unread: 0});
-    await this.markAsReadOp.perform({connection_id: this.connection_id, dialog_id: this.dialog_id});
+    await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
     return this.update({unread: 0});
   }
 
@@ -242,8 +242,8 @@ export default class Dialog extends Reactive {
   }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', api('/api', 'dialogMessages'));
-    this.prop('ro', 'markAsReadOp', api('/api', 'markDialogAsRead'));
+    this.prop('ro', 'messagesOp', api('/api', 'conversationMessages'));
+    this.prop('ro', 'markAsReadOp', api('/api', 'markConversationAsRead'));
   }
 
   _calculateModes(modeMap, modeStr, target) {
@@ -258,7 +258,7 @@ export default class Dialog extends Reactive {
   }
 
   _loadParticipants() {
-    if (this.participantsLoaded || !this.dialog_id || !this.messagesOp) return;
+    if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
     return this.is_private ? this.send('/ison') : this.send('/names').then(this._updateParticipants.bind(this));

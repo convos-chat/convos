@@ -46,17 +46,17 @@ sub get_p {
   my $res = $self->TO_JSON;
 
   my @connections;
-  if ($args->{connections} or $args->{dialogs}) {
+  if ($args->{connections} or $args->{conversations}) {
     @connections = sort { $a->name cmp $b->name } @{$self->connections};
     $res->{connections} = \@connections;
   }
 
-  if ($args->{dialogs}) {
-    $res->{dialogs} = [sort { $a->id cmp $b->id } map { @{$_->dialogs} } @connections];
+  if ($args->{conversations}) {
+    $res->{conversations} = [sort { $a->id cmp $b->id } map { @{$_->conversations} } @connections];
   }
 
   # back compat - will be removed in future version
-  my @p = map { $_->_calculate_unread_p } @{$res->{dialogs} || []};
+  my @p = map { $_->_calculate_unread_p } @{$res->{conversations} || []};
 
   return @p ? Mojo::Promise->all(@p)->then(sub {$res}) : Mojo::Promise->resolve($res);
 }

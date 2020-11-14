@@ -80,14 +80,15 @@ sub _setup {
 
           $self->emit("user:$uid",
             message =>
-              {connection_id => $cid, dialog_id => $target->id, name => $target->name, %$msg});
+              {connection_id => $cid, conversation_id => $target->id, name => $target->name, %$msg}
+          );
         }
       );
       $connection->on(
         rtc => sub {
           my ($connection, $type, $target, $msg) = @_;
           $self->emit("user:$uid",
-            rtc => {connection_id => $cid, dialog_id => $target->id, %$msg, type => $type});
+            rtc => {connection_id => $cid, conversation_id => $target->id, %$msg, type => $type});
         }
       );
       $connection->on(
@@ -133,7 +134,7 @@ Used to find a list of connection names for a given L<$user|Convos::Core::User>.
 
   $p = $backend->delete_object_p($obj)->then(sub { my $obj = shift });
 
-This method will delete all messages for a given dialog.
+This method will delete all messages for a given conversation.
 
 =head2 delete_object_p
 

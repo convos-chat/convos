@@ -9,7 +9,7 @@ sub create {
   my $json = $self->req->json;
 
   my $url = Mojo::URL->new($json->{url} || '');
-  $url->path("/$json->{dialog_id}") if $json->{dialog_id};
+  $url->path("/$json->{conversation_id}") if $json->{conversation_id};
 
   if ($self->settings('forced_connection')) {
     my $default_connection = Mojo::URL->new($self->settings('default_connection'));

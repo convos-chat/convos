@@ -34,10 +34,10 @@ export default class Route extends Reactive {
     this._routes = [];
   }
 
-  dialogPath(params) {
+  conversationPath(params) {
     const path = ['', 'chat'];
     if (params.connection_id) path.push(params.connection_id);
-    if (params.dialog_id) path.push(params.dialog_id);
+    if (params.conversation_id) path.push(params.conversation_id);
 
     return path.map(p => encodeURIComponent(p)).join('/');
   }

@@ -244,7 +244,7 @@ This is the module and documentation structure of L<Convos>:
 
 =back
 
-=item * L<Convos::Core::Dialog>
+=item * L<Convos::Core::Conversation>
 
 =item * L<Convos::Core::User>
 
@@ -256,7 +256,7 @@ This is the module and documentation structure of L<Convos>:
 
 =item * L<Convos::Controller::Connection>
 
-=item * L<Convos::Controller::Dialog>
+=item * L<Convos::Controller::Conversation>
 
 =item * L<Convos::Controller::Events>
 

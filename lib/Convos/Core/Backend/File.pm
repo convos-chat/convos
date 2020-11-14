@@ -57,7 +57,7 @@ sub delete_object_p {
   my ($self, $obj) = @_;
 
   if ($obj->isa('Convos::Core::Connection')) {
-    $obj->unsubscribe($_) for qw(dialog message state);
+    $obj->unsubscribe($_) for qw(conversation message state);
   }
 
   return Mojo::IOLoop->subprocess->run_p(sub { $self->_delete_object($obj) })->then(sub {$obj});
@@ -176,7 +176,7 @@ sub notifications_p {
   while (my $line = $FH->getline) {
     $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
-    my $message = {connection_id => $2, dialog_id => $3, message => $4, ts => $1};
+    my $message = {connection_id => $2, conversation_id => $3, message => $4, ts => $1};
     my $ts      = dt $message->{ts};
     $self->_message_type_from($message);
     unshift @notifications, $message;
@@ -459,8 +459,8 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
   $CONVOS_HOME/joe@example.com/user.json                        # user settings
   $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
   $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # dialog log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # dialog log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # conversation log
 
 Notes about the structure:
 
@@ -472,7 +472,7 @@ Notes about the structure:
 
 =item * One log file per month should not cause too big files.
 
-=item * Hard to delete a dialog thread. Ex: all dialogs with "marcus".
+=item * Hard to delete a conversation thread. Ex: all conversations with "marcus".
 
 =item * Hard to search for messages between connections for a given date.
 

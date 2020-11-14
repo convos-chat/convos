@@ -52,26 +52,26 @@ sub _construct_action {
   return $action;
 }
 
-sub _dialog_join {
-  my ($self, $connection, $dialog_config) = @_;
-  my $dialog = $connection->dialog({name => $dialog_config->{dialog_id}});
+sub _conversation_join {
+  my ($self, $connection, $conversation_config) = @_;
+  my $conversation = $connection->conversation({name => $conversation_config->{conversation_id}});
 
-  $dialog->password($dialog_config->{password}) if $dialog_config->{password};
-  return $dialog->frozen('Not connected.') unless $connection->state eq 'connected';
+  $conversation->password($conversation_config->{password}) if $conversation_config->{password};
+  return $conversation->frozen('Not connected.') unless $connection->state eq 'connected';
 
-  my $command = sprintf '/join %s', $dialog->name;
-  $command .= ' ' . $dialog->password if $dialog->password;
+  my $command = sprintf '/join %s', $conversation->name;
+  $command .= ' ' . $conversation->password if $conversation->password;
   $connection->send_p('', $command)->catch(sub {
     $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
   });
 }
 
-sub _dialog_part {
-  my ($self, $connection, $dialog_config) = @_;
-  my $dialog = $connection->dialog_remove(lc $dialog_config->{dialog_id});
+sub _conversation_part {
+  my ($self, $connection, $conversation_config) = @_;
+  my $conversation = $connection->conversation_remove(lc $conversation_config->{conversation_id});
   return unless $connection->state eq 'connected';
 
-  my $command = sprintf '/part %s', $dialog->name;
+  my $command = sprintf '/part %s', $conversation->name;
   $connection->send_p('', $command)->catch(sub {
     $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
   });
@@ -110,12 +110,14 @@ sub _ensure_connection {
   $connection->url($url);
   $connection->wanted_state($config->{wanted_state} || 'connected');
 
-  my $dialogs = $config->{dialogs} || {};
-  for my $dialog_id (keys %$dialogs) {
-    my $dialog_method
-      = ($dialogs->{$dialog_id}{state} || '') eq 'part' ? '_dialog_part' : '_dialog_join';
-    local $dialogs->{$dialog_id}{dialog_id} = $dialog_id;
-    $self->$dialog_method($connection, $dialogs->{$dialog_id});
+  my $conversations = $config->{conversations} || {};
+  for my $conversation_id (keys %$conversations) {
+    my $conversation_method
+      = ($conversations->{$conversation_id}{state} || '') eq 'part'
+      ? '_conversation_part'
+      : '_conversation_join';
+    local $conversations->{$conversation_id}{conversation_id} = $conversation_id;
+    $self->$conversation_method($connection, $conversations->{$conversation_id});
   }
 
   my $state_method = $connection->wanted_state eq 'connected' ? 'connect' : 'disconnect_p';
@@ -180,12 +182,12 @@ sub _register_user {
 
 sub _run_actions_with_message {
   my ($self, $event) = @_;
-  return unless $event->{dialog_id} and $event->{from};
+  return unless $event->{conversation_id} and $event->{from};
 
   my $connection = $self->user->get_connection($event->{connection_id});
   return if lc $event->{from} eq lc $connection->nick;
 
-  local $event->{is_private} = $event->{dialog_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
+  local $event->{is_private} = $event->{conversation_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
   local $event->{command}    = $event->{message};
 
   my $reply;
@@ -200,7 +202,7 @@ sub _run_actions_with_message {
   my $delay = $self->config->get('/generic/reply_delay') || 0.5;
   Scalar::Util::weaken($connection);
   Mojo::IOLoop->timer(
-    $delay => sub { $connection and $connection->send_p($event->{dialog_id}, $reply) });
+    $delay => sub { $connection and $connection->send_p($event->{conversation_id}, $reply) });
 }
 
 sub _user_is_registered {
@@ -269,7 +271,7 @@ using chat commands, if you are a convos admin.
     actions:
       Convos::Plugin::Bot::Action::Hailo:
         free_speak_ratio: 0.001      # override "free_speak_ratio" for any conversation on freenode
-    dialogs:
+    conversations:
       "#convos":
         password: s3cret             # optional
         state: join                  # join (default), part

@@ -1,4 +1,4 @@
-package Convos::Core::Dialog;
+package Convos::Core::Conversation;
 use Mojo::Base -base;
 
 use Convos::Util '$CHANNEL_RE';
@@ -36,10 +36,10 @@ sub _calculate_unread_p {
 sub TO_JSON {
   my ($self, $persist) = @_;
   my %json = map { ($_, $self->$_) } qw(frozen name topic unread);
-  $json{connection_id} = $self->connection->id;
-  $json{dialog_id}     = $self->id;
-  $json{last_read}     = $self->{last_read} if $self->{last_read};    # back compat
-  $json{password}      = $self->password if $persist;
+  $json{connection_id}   = $self->connection->id;
+  $json{conversation_id} = $self->id;
+  $json{last_read}       = $self->{last_read} if $self->{last_read};    # back compat
+  $json{password}        = $self->password if $persist;
   return \%json;
 }
 
@@ -49,11 +49,11 @@ sub TO_JSON {
 
 =head1 NAME
 
-Convos::Core::Dialog - A convos dialog base class
+Convos::Core::Conversation - A convos conversation base class
 
 =head1 DESCRIPTION
 
-L<Convos::Core::Dialog> represents a dialog (conversation) with one or
+L<Convos::Core::Conversation> represents a conversation (conversation) with one or
 more participants.
 
 =head1 ATTRIBUTES
@@ -64,39 +64,39 @@ Holds a L<Convos::Core::Connection> object.
 
 =head2 frozen
 
-  $str = $dialog->frozen;
+  $str = $conversation->frozen;
 
-Will be set to a description if the dialog is "frozen", which means you are
+Will be set to a description if the conversation is "frozen", which means you are
 no longer part of it.
 
 =head2 id
 
-  $str = $dialog->id;
+  $str = $conversation->id;
   $str = $class->id(\%attr);
 
-Returns a unique identifier for a dialog.
+Returns a unique identifier for a conversation.
 
 =head2 name
 
-  $str = $dialog->name;
+  $str = $conversation->name;
 
-The name of this dialog.
+The name of this conversation.
 
 =head2 password
 
-  $str = $dialog->password;
+  $str = $conversation->password;
 
-The password used to join this dialog.
+The password used to join this conversation.
 
 =head2 topic
 
-  $str = $dialog->topic;
+  $str = $conversation->topic;
 
-The topic (subject) of the dialog.
+The topic (subject) of the conversation.
 
 =head2 unread
 
-  $int = $dialog->unread;
+  $int = $conversation->unread;
 
 Holds the number of unread messages.
 
@@ -104,20 +104,20 @@ Holds the number of unread messages.
 
 =head2 inc_unread_p
 
-  $p = $dialog->inc_unread_p;
+  $p = $conversation->inc_unread_p;
 
 Used to increase the unread count.
 
 =head2 is_private
 
-  $bool = $dialog->is_private;
+  $bool = $conversation->is_private;
 
 Returns true if you are only talking to a single user and no other
-participants can join the dialog.
+participants can join the conversation.
 
 =head2 messages_p
 
-  $p = $dialog->messages_p(\%query)->then(sub { my $messages = shift; });
+  $p = $conversation->messages_p(\%query)->then(sub { my $messages = shift; });
 
 Will fetch messages from persistent backend.
 

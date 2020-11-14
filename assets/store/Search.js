@@ -1,12 +1,12 @@
-import Dialog from './Dialog';
+import Conversation from './Conversation';
 import {api} from '../js/Api';
 
-export default class Search extends Dialog {
+export default class Search extends Conversation {
   constructor(params) {
     super({
       ...params,
       connection_id: '',
-      dialog_id: 'search',
+      conversation_id: 'search',
       is_private: true,
       name: 'Search',
     });
@@ -29,11 +29,11 @@ export default class Search extends Dialog {
     opParams.match = params.match || params.message;
     if (opParams.match == undefined) opParams.match = '';
 
-    // Find dialog
+    // Find conversation
     opParams.match = opParams.match
-      .replace(/\s*conversation:(\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0])
+      .replace(/\s*conversation:(\S+)\s*/, (all, conversation_id) => [' ', (opParams.conversation_id = conversation_id)][0])
       .replace(/\s*from:(\S+)\s*/, (all, from) => [' ', (opParams.from = from)][0])
-      .replace(/\s*([&#]\S+)\s*/, (all, dialog_id) => [' ', (opParams.dialog_id = dialog_id)][0]);
+      .replace(/\s*([&#]\S+)\s*/, (all, conversation_id) => [' ', (opParams.conversation_id = conversation_id)][0]);
 
     opParams.match = opParams.match.trim();
     if (!opParams.match.match(/\S/)) {

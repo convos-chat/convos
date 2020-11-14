@@ -205,10 +205,10 @@ sub _existing_connection {
   return undef;
 }
 
-sub _existing_dialog {
+sub _existing_conversation {
   my ($self, $url, $conn) = @_;
-  return undef unless my $dialog_name = $url->path->[0];
-  return $conn->get_dialog(lc $dialog_name);
+  return undef unless my $conversation_name = $url->path->[0];
+  return $conn->get_conversation(lc $conversation_name);
 }
 
 sub _get_user_from_param {
@@ -244,19 +244,19 @@ sub _register_html_conn_url_redirect {
   my $user     = $self->backend->user or return;
 
   my $existing_connection = $self->_existing_connection($conn_url, $user);
-  my $existing_dialog
-    = $existing_connection && $self->_existing_dialog($conn_url, $existing_connection);
+  my $existing_conversation
+    = $existing_connection && $self->_existing_conversation($conn_url, $existing_connection);
 
-  if ($existing_connection and $existing_dialog) {
+  if ($existing_connection and $existing_conversation) {
     my $redirect_url = $self->url_for('/chat');
-    push @{$redirect_url->path}, $existing_connection->id if $existing_connection;
-    push @{$redirect_url->path}, $existing_dialog->id     if $existing_dialog;
+    push @{$redirect_url->path}, $existing_connection->id   if $existing_connection;
+    push @{$redirect_url->path}, $existing_conversation->id if $existing_conversation;
     return $self->redirect_to($redirect_url);
   }
   elsif ($existing_connection) {
     my $redirect_url = $self->url_for('/settings/conversation');
-    $redirect_url->query->param(connection_id => $existing_connection->id);
-    $redirect_url->query->param(dialog_id     => $conn_url->path->[0] || '');
+    $redirect_url->query->param(connection_id   => $existing_connection->id);
+    $redirect_url->query->param(conversation_id => $conn_url->path->[0] || '');
     return $self->redirect_to($redirect_url);
   }
   else {

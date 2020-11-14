@@ -7,22 +7,22 @@ import {q} from './util';
 
 export const EMBED_CACHE = {};
 
-export const renderMessages = ({dialog, expandUrlToMedia = false, from = 'Convos', groupBy = ['fromId'], waiting = []}) => {
+export const renderMessages = ({conversation, expandUrlToMedia = false, from = 'Convos', groupBy = ['fromId'], waiting = []}) => {
   const ts = new Time();
 
   let prev = {};
-  return dialog.messages.map((msg, i) => {
+  return conversation.messages.map((msg, i) => {
     msg = {color: 'inherit', from: 'Convos', fromId: 'Convos', type: 'notice', ts, ...msg};
     msg.canToggleDetails = msg.type == 'error' || msg.type == 'notice';
     msg.groupBy = groupBy.map(k => msg[k] || '').join(':');
     msg.index = i;
-    msg.isOnline = messageIsOnline(msg, dialog);
+    msg.isOnline = messageIsOnline(msg, conversation);
     msg.dayChanged = messageDayChanged(msg, prev);
-    msg.embeds = messageEmbeds(msg, dialog, expandUrlToMedia);
+    msg.embeds = messageEmbeds(msg, conversation, expandUrlToMedia);
     msg.className = messageClassName(msg, prev);
     prev = msg;
     return msg;
-  }).concat(renderWaitingMessages({dialog, from, waiting}));
+  }).concat(renderWaitingMessages({conversation, from, waiting}));
 };
 
 async function loadDetails(url, msg) {
@@ -67,22 +67,22 @@ function messageDayChanged(msg, prev) {
   return prev.ts && msg.ts.getDate() != prev.ts.getDate();
 }
 
-function messageEmbeds(msg, dialog, expandUrlToMedia) {
+function messageEmbeds(msg, conversation, expandUrlToMedia) {
   const embeds = expandUrlToMedia ? (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url)))) : [];
 
   if (msg.canToggleDetails) {
-    const cacheKey = ['details', dialog.path, msg.ts.valueOf()].join(':');
+    const cacheKey = ['details', conversation.path, msg.ts.valueOf()].join(':');
     embeds.unshift(EMBED_CACHE[cacheKey] || (EMBED_CACHE[cacheKey] = loadDetails(cacheKey, msg)));
   }
 
   return embeds.filter(p => p);
 }
 
-function messageIsOnline(msg, dialog) {
-  if (!dialog.connection_id) return true;
+function messageIsOnline(msg, conversation) {
+  if (!conversation.connection_id) return true;
   if (msg.fromId == 'Convos') return true;
-  if (msg.fromId == dialog.connection_id) return true;
-  return dialog.findParticipant(msg.fromId) ? true : false;
+  if (msg.fromId == conversation.connection_id) return true;
+  return conversation.findParticipant(msg.fromId) ? true : false;
 }
 
 function renderPaste(embed, embedEl) {
@@ -92,7 +92,7 @@ function renderPaste(embed, embedEl) {
   embed.html = embedEl.outerHTML;
 }
 
-function renderWaitingMessages({dialog, from, waiting}) {
+function renderWaitingMessages({conversation, from, waiting}) {
   let prev = {};
 
   return waiting.filter(msg => msg.method == 'send' && msg.message).map((msg, i) => {
@@ -103,7 +103,7 @@ function renderWaitingMessages({dialog, from, waiting}) {
     msg.index = i;
     msg.isOnline = true;
     msg.type = msg.waitingForResponse ? 'notice' : 'error';
-    msg.embeds = messageEmbeds(msg, dialog, false);
+    msg.embeds = messageEmbeds(msg, conversation, false);
     msg.className = messageClassName(msg, prev) + ' is-waiting';
     msg.markdown = msg.waitingForResponse ? msg.message : lmd('Could not send message "%1".', msg.message);
     prev = msg;

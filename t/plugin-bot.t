@@ -58,11 +58,11 @@ like $msg->{raw_line}, qr{MODE botman \+B}, 'mode +B';
 my $hailo = $bot->action('hailo');
 my $event = {};
 is $hailo->event_config($event, 'superduper'), undef, 'default superduper';
-$event->{connection_id} = $connection_id;
-$event->{dialog_id}     = '#superduper';
+$event->{connection_id}   = $connection_id;
+$event->{conversation_id} = '#superduper';
 is $hailo->event_config($event, 'free_speak_ratio'), 0.001, 'connection free_speak_ratio';
-$event->{dialog_id} = '#convos';
-is $hailo->event_config($event, 'free_speak_ratio'), 0.5, 'dialog free_speak_ratio';
+$event->{conversation_id} = '#convos';
+is $hailo->event_config($event, 'free_speak_ratio'), 0.5, 'conversation free_speak_ratio';
 
 note 'make sure we do not reply multiple times when reloading config';
 for my $name (qw(two_actions.yaml all_actions.yaml all_actions.yaml)) {
@@ -127,7 +127,7 @@ connections:
   actions:
     Convos::Plugin::Bot::Action::Hailo:
       free_speak_ratio: 0.001
-  dialogs:
+  conversations:
     "#convos":
       actions:
         Convos::Plugin::Bot::Action::Hailo:

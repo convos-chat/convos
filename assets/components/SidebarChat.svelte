@@ -35,10 +35,10 @@ function clearFilter() {
   }, 100);
 }
 
-function dialogClassNames(connection, dialog) {
-  const cn = [dialog.dialog_id ? 'for-dialog' : 'for-connection'];
-  if (dialog.frozen || connection.state != 'connected') cn.push('is-frozen');
-  if (dialog.errors) cn.push('has-errors');
+function conversationClassNames(connection, conversation) {
+  const cn = [conversation.conversation_id ? 'for-conversation' : 'for-connection'];
+  if (conversation.frozen || connection.state != 'connected') cn.push('is-frozen');
+  if (conversation.errors) cn.push('has-errors');
   return cn.join(' ');
 }
 
@@ -74,7 +74,7 @@ function filterNav() {
   q(navEl, '.for-connection', connEl => {
     let el = connEl;
     while ((el = el.nextElementSibling)) {
-      if (!el.classList.contains('for-dialog')) break;
+      if (!el.classList.contains('for-conversation')) break;
       if (!el.classList.contains('hidden')) return connEl.classList.remove('hidden');
     }
   });
@@ -125,8 +125,8 @@ function onSearchKeydown(e) {
   if (activeLinkIndex >= visibleLinks.length) activeLinkIndex = 0;
 }
 
-function renderUnread(dialog, max = 60) {
-  return dialog.unread > max ? '60+' : dialog.unread || 0;
+function renderUnread(conversation, max = 60) {
+  return conversation.unread > max ? '60+' : conversation.unread || 0;
 }
 </script>
 
@@ -156,16 +156,16 @@ function renderUnread(dialog, max = 60) {
       </Link>
     {/if}
     {#each $user.connections.toArray() as connection}
-      <Link href="{connection.path}" class="{dialogClassNames(connection, connection)}">
+      <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}">
         <Icon name="network-wired"/>
         <span>{connection.name || connection.connection_id}</span>
         <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
-      {#each connection.dialogs.toArray() as dialog}
-        <Link href="{dialog.path}" class="{dialogClassNames(connection, dialog)}">
-          <Icon name="{dialog.is_private ? 'user' : 'user-friends'}"/>
-          <span>{dialog.name}</span>
-          <b class="unread" hidden="{!dialog.unread}">{renderUnread(dialog)}</b>
+      {#each connection.conversations.toArray() as conversation}
+        <Link href="{conversation.path}" class="{conversationClassNames(connection, conversation)}">
+          <Icon name="{conversation.is_private ? 'user' : 'user-friends'}"/>
+          <span>{conversation.name}</span>
+          <b class="unread" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
         </Link>
       {/each}
     {/each}

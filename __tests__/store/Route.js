@@ -35,13 +35,13 @@ test('routing', () => {
   const cb = (route) => matched.push({...route.params, ...route.query, hash: route.hash});
 
   r.to('/chat/:connection_id', cb);
-  r.to('/chat/:connection_id/:dialog_id', cb);
+  r.to('/chat/:connection_id/:conversation_id', cb);
   r.to('/help', cb);
   r.to('*', cb);
 
   expect(r._routes).toEqual([
     {re: /^\/chat\/([^/]+)$/, names: ['connection_id'], path: '/chat/:connection_id', cb},
-    {re: /^\/chat\/([^/]+)\/([^/]+)$/, names: ['connection_id', 'dialog_id'], path: '/chat/:connection_id/:dialog_id', cb},
+    {re: /^\/chat\/([^/]+)\/([^/]+)$/, names: ['connection_id', 'conversation_id'], path: '/chat/:connection_id/:conversation_id', cb},
     {re: /^\/help$/, names: [], path: '/help', cb},
     {re: /^(.*)$/, names: ['0'], path: '*', cb},
   ]);
@@ -65,7 +65,7 @@ test('routing', () => {
   expect(matched).toEqual([
     {hash: '0', '0': '/', x: '2', y: '3'},
     {hash: '', connection_id: 'irc-foo', ts: '2020'},
-    {hash: 'cool_beans', connection_id: 'irc-foo', dialog_id: '#x/bar'},
+    {hash: 'cool_beans', connection_id: 'irc-foo', conversation_id: '#x/bar'},
     {hash: '', '0': '/not/found'},
     {hash: '', },
   ]);

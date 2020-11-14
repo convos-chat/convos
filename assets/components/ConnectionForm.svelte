@@ -9,7 +9,7 @@ import {getContext, onMount, tick} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
-export let dialog = {};
+export let conversation = {};
 
 const api = getContext('api');
 const user = getContext('user');
@@ -35,7 +35,7 @@ $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'di
 
 onMount(async () => {
   if (!formEl) return; // if unMounted while loading user data
-  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+  connection = user.findConversation({connection_id: conversation.connection_id}) || {};
   return connection.url ? connectionToForm() : defaultsToForm();
 });
 
@@ -54,7 +54,7 @@ function defaultsToForm() {
   if (connURL.password) formEl.password.value = connURL.password;
   if (connURL.username) formEl.username.value = connURL.username;
   if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
-  if (connURL.pathname && formEl.dialog) formEl.dialog.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
+  if (connURL.pathname && formEl.conversation) formEl.conversation.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
   if (Number(connParams.get('tls') || 0)) useTls = true;
   if (Number(connParams.get('tls_verify') || 0)) verifyTls = true;
 }
@@ -74,7 +74,7 @@ function connectionToForm() {
 
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
-  user.removeDialog(connection);
+  user.removeConversation(connection);
   route.go('/settings/connection');
 }
 
@@ -85,12 +85,12 @@ async function submitForm(e) {
 
   if (connection.connection_id) {
     await updateConnectionOp.perform(e.target);
-    connection = user.ensureDialog(updateConnectionOp.res.body);
+    connection = user.ensureConversation(updateConnectionOp.res.body);
     connectionToForm();
   }
   else {
     await createConnectionOp.perform(e.target);
-    const conn = user.ensureDialog(createConnectionOp.res.body);
+    const conn = user.ensureConversation(createConnectionOp.res.body);
     route.go(conn.path);
   }
 }
@@ -119,7 +119,7 @@ async function submitForm(e) {
       <span slot="label">{l('Want to be connected')}</span>
     </Checkbox>
   {:else}
-    <TextField name="dialog_id" placeholder="{l('Ex: #convos')}">
+    <TextField name="conversation_id" placeholder="{l('Ex: #convos')}">
       <span slot="label">{l('Conversation name')}</span>
     </TextField>
   {/if}

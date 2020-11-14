@@ -18,20 +18,25 @@ sub messages {
   my @connections = grep $_, $cid ? ($user->get_connection($cid)) : @{$user->connections};
   return $self->reply->errors('Connection not found.', 404) if $cid and !@connections;
 
-  my $did     = url_unescape $self->param('dialog_id') || '';
-  my @dialogs = grep $_, map { $did ? ($_->get_dialog($did)) : @{$_->dialogs} } @connections;
-  return $self->reply->errors('Dialog not found.', 404) if $did and !@dialogs;
-  return $self->render(openapi => {messages => [], end => true}) unless @dialogs;
+  my $did           = url_unescape $self->param('conversation_id') || '';
+  my @conversations = grep $_,
+    map { $did ? ($_->get_conversation($did)) : @{$_->conversations} } @connections;
+  return $self->reply->errors('Conversation not found.', 404) if $did and !@conversations;
+  return $self->render(openapi => {messages => [], end => true}) unless @conversations;
 
-  my @p = map { (Mojo::Promise->resolve($_), $_->messages_p(\%query)) } @dialogs;
+  my @p = map { (Mojo::Promise->resolve($_), $_->messages_p(\%query)) } @conversations;
   return Mojo::Promise->all(@p)->then(sub {
     my @messages;
 
     while (@_) {
-      my ($dialog, $res) = map { $_->[0] } shift @_, shift @_;
-      push @messages,
-        map { +{%$_, connection_id => $dialog->connection->id, dialog_id => $dialog->id} }
-        @{$res->{messages}};
+      my ($conversation, $res) = map { $_->[0] } shift @_, shift @_;
+      push @messages, map {
+        +{
+          %$_,
+          connection_id   => $conversation->connection->id,
+          conversation_id => $conversation->id
+        }
+      } @{$res->{messages}};
     }
 
     @messages = sort { $a->{ts} cmp $b->{ts} } @messages;

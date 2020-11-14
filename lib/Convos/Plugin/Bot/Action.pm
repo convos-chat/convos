@@ -23,14 +23,16 @@ sub event_config {
 
   my $action_config = $global->{action}{$action_class};
   my $conn_config   = $event->{connection_id} && $global->{connection}{$event->{connection_id}};
-  my $dialog_config
-    = $event->{dialog_id} && $conn_config && $conn_config->{dialogs}{$event->{dialog_id}};
+  my $conversation_config
+    = $event->{conversation_id}
+    && $conn_config
+    && $conn_config->{conversations}{$event->{conversation_id}};
 
-  for my $section ($conn_config, $dialog_config) {
+  for my $section ($conn_config, $conversation_config) {
     $section = $section && $section->{actions} && $section->{actions}{$action_class};
   }
 
-  for my $section ($dialog_config, $conn_config, $action_config) {
+  for my $section ($conversation_config, $conn_config, $action_config) {
     return $section->{$key} if defined $section->{$key};
   }
 
@@ -106,7 +108,7 @@ conversation with the bot.
   $any = $action->event_config(\%event, $config_key);
 
 Used to get a L</config> parameter for the current C<$action> and an event with
-C<connection_id> and C<dialog_id>.
+C<connection_id> and C<conversation_id>.
 
 =head2 register
 

@@ -12,8 +12,8 @@ my $user   = $core->user({email => 'test.user@example.com'});
 $user->save_p->$wait_success;
 
 my $connection = $user->connection({name => 'example', protocol => 'irc'});
-$connection->dialog({name => '#convos'});
-$connection->dialog({name => 'private_ryan'});
+$connection->conversation({name => '#convos'});
+$connection->conversation({name => 'private_ryan'});
 $connection->save_p->$wait_success;
 
 my (@connection_state, @state);
@@ -47,8 +47,8 @@ is_deeply($connection->on_connect_commands,
 cmp_deeply(
   [shift @state, shift @state],
   superbagof(
-    [frozen => superhashof({dialog_id => '#convos',      frozen => 'Not connected.'})],
-    [frozen => superhashof({dialog_id => 'private_ryan', frozen => 'Not connected.'})],
+    [frozen => superhashof({conversation_id => '#convos',      frozen => 'Not connected.'})],
+    [frozen => superhashof({conversation_id => 'private_ryan', frozen => 'Not connected.'})],
   ),
   'frozen'
 );
@@ -56,8 +56,8 @@ cmp_deeply(
 cmp_deeply(
   [pop @state, pop @state],
   superbagof(
-    [frozen => superhashof({dialog_id => '#convos',      frozen => ''})],
-    [frozen => superhashof({dialog_id => 'private_ryan', frozen => ''})],
+    [frozen => superhashof({conversation_id => '#convos',      frozen => ''})],
+    [frozen => superhashof({conversation_id => 'private_ryan', frozen => ''})],
   ),
   'unfroze'
 );
@@ -119,7 +119,7 @@ mock_connect(
 my $core2 = Convos::Core->new(backend => 'Convos::Core::Backend::File')->start;
 Mojo::IOLoop->one_tick until $core2->ready;
 is_deeply [map { $_->frozen }
-    @{$core2->get_user('test.user@example.com')->get_connection('irc-example')->dialogs}],
+    @{$core2->get_user('test.user@example.com')->get_connection('irc-example')->conversations}],
   ['', ''], 'did not save frozen state on accident';
 
 done_testing;

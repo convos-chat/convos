@@ -21,14 +21,14 @@ autocomplete.commands = ({query}) => {
   return opts;
 };
 
-autocomplete.dialogs = ({dialog, query, user}) => {
-  const connection = user.findDialog({connection_id: dialog.connection_id});
-  const dialogs = connection ? connection.dialogs.toArray() : user.dialogs();
+autocomplete.conversations = ({conversation, query, user}) => {
+  const connection = user.findConversation({connection_id: conversation.connection_id});
+  const conversations = connection ? connection.conversations.toArray() : user.conversations();
   const opts = [];
 
-  for (let i = 0; i < dialogs.length; i++) {
-    if (dialogs[i].name.toLowerCase().indexOf(query) == -1) continue;
-    opts.push({text: dialogs[i].name, val: dialogs[i].dialog_id});
+  for (let i = 0; i < conversations.length; i++) {
+    if (conversations[i].name.toLowerCase().indexOf(query) == -1) continue;
+    opts.push({text: conversations[i].name, val: conversations[i].conversation_id});
     if (opts.length >= maxNumMatches) break;
   }
 
@@ -49,8 +49,8 @@ autocomplete.emojis = ({query}) => {
   return opts;
 };
 
-autocomplete.nicks = ({dialog, query}) => {
-  const participants = dialog.participants();
+autocomplete.nicks = ({conversation, query}) => {
+  const participants = conversation.participants();
   const re = new RegExp('^' + regexpEscape(query.slice(1)), 'i');
   const opts = [];
 

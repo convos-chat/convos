@@ -12,27 +12,27 @@ $t_jane->{nick} = "t_jane_$$";
 $t_joe->{nick}  = "t_joe_$$";
 
 note 'setup';
-setup($_)                                              for $t_jane, $t_joe;
-wait_for_message_ok($_, qr{"dialog_id":".ct_web_rtc"}) for $t_jane, $t_joe;
+setup($_)                                                    for $t_jane, $t_joe;
+wait_for_message_ok($_, qr{"conversation_id":".ct_web_rtc"}) for $t_jane, $t_joe;
 
 note 'input check';
 my $offer = Mojo::Loader::data_section(qw(main sdp-offer-original.data));
 my %msg   = (
-  connection_id => 'irc-localhost',
-  dialog_id     => '#ct_web_rtc',
-  event         => 'signal',
-  target        => $t_joe->{nick},
-  offer         => $offer,
+  connection_id   => 'irc-localhost',
+  conversation_id => '#ct_web_rtc',
+  event           => 'signal',
+  target          => $t_joe->{nick},
+  offer           => $offer,
 );
 $t_jane->send_ok({json => {method => 'rtc', %msg}});
 wait_for_message_ok($t_jane, qr{"event":"rtc"});
 
-for my $key (qw(target dialog_id event connection_id)) {
+for my $key (qw(target conversation_id event connection_id)) {
   delete $msg{$key};
   my $msg
-    = $key eq 'dialog_id'     ? 'Dialog not found.'
-    : $key eq 'connection_id' ? 'Connection not found.'
-    :                           'Missing property.';
+    = $key eq 'conversation_id' ? 'Conversation not found.'
+    : $key eq 'connection_id'   ? 'Connection not found.'
+    :                             'Missing property.';
 
   $t_jane->send_ok({json => {method => 'rtc', %msg}});
   wait_for_message_ok($t_jane, qr{"errors"})->json_message_is('/errors/0/message', $msg, $msg);
@@ -40,18 +40,18 @@ for my $key (qw(target dialog_id event connection_id)) {
 
 note 'jane signal joe';
 wait_for_message_ok($t_joe, qr{"event":"rtc"})->json_message_is('/connection_id', 'irc-localhost')
-  ->json_message_is('/dialog_id', '#ct_web_rtc')->json_message_is('/from', $t_jane->{nick})
-  ->json_message_is('/event',     'rtc')
-  ->json_message_is('/offer',     nl(Mojo::Loader::data_section(qw(main sdp-from-irc.data))))
-  ->json_message_is('/type',      'signal');
+  ->json_message_is('/conversation_id', '#ct_web_rtc')->json_message_is('/from', $t_jane->{nick})
+  ->json_message_is('/event',           'rtc')
+  ->json_message_is('/offer',           nl(Mojo::Loader::data_section(qw(main sdp-from-irc.data))))
+  ->json_message_is('/type',            'signal');
 
 note 'robin joins';
 my $t_robin = t::Helper->t($t_jane->app);
 $t_robin->{nick} = "t_robin_$$";
 setup($t_robin);
-wait_for_message_ok($t_robin, qr{"dialog_id":".ct_web_rtc"});
+wait_for_message_ok($t_robin, qr{"conversation_id":".ct_web_rtc"});
 
-%msg = (connection_id => 'irc-localhost', dialog_id => '#ct_web_rtc', event => 'call');
+%msg = (connection_id => 'irc-localhost', conversation_id => '#ct_web_rtc', event => 'call');
 $t_robin->send_ok({json => {method => 'rtc', %msg}});
 wait_for_message_ok($t_robin, qr{"event":"rtc"});
 
@@ -62,8 +62,9 @@ wait_for_message_ok($t_robin, qr{"event":"rtc"});
 note 'robin signal jane and joe';
 for my $t ($t_jane, $t_joe) {
   wait_for_message_ok($t, qr{"type":"call"})->json_message_is('/connection_id', 'irc-localhost')
-    ->json_message_is('/dialog_id', '#ct_web_rtc')->json_message_is('/from', $t_robin->{nick})
-    ->json_message_is('/event',     'rtc')->json_message_is('/type', 'call');
+    ->json_message_is('/conversation_id', '#ct_web_rtc')
+    ->json_message_is('/from',            $t_robin->{nick})->json_message_is('/event', 'rtc')
+    ->json_message_is('/type',            'call');
   wait_for_message_ok($t, qr{"type":"hangup"})->json_message_is('/from', $t_robin->{nick})
     ->json_message_is('/type', 'hangup');
 }
@@ -86,7 +87,7 @@ sub setup {
 
   my $connection = $user->connection(
     {name => 'localhost', protocol => 'irc', url => "irc://$ENV{TEST_IRC_SERVER}?tls=0"});
-  $connection->dialog({name => '#ct_web_rtc', frozen => ''});
+  $connection->conversation({name => '#ct_web_rtc', frozen => ''});
   $connection->connect;
 
   $t->websocket_ok('/events');

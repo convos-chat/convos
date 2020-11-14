@@ -5,7 +5,7 @@ import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
 import {l} from '../js/i18n';
 
-export let dialog = {};
+export let conversation = {};
 export let transition;
 
 const user = getContext('user');
@@ -15,12 +15,12 @@ let connection = {};
 $: connectionHost = connection.real_host || connection.url && connection.url.host;
 
 onMount(async () => {
-  connection = user.findDialog({connection_id: dialog.connection_id}) || {};
+  connection = user.findConversation({connection_id: conversation.connection_id}) || {};
 });
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <SettingsHeader {dialog}/>
+  <SettingsHeader {conversation}/>
 
   {#if !connection.url}
     <p>{l('Connection not found.')}</p>
@@ -32,5 +32,5 @@ onMount(async () => {
     <p>{l('Currently connecting to %1.', connectionHost)}</p>
   {/if}
 
-  <ConnectionForm {dialog}/>
+  <ConnectionForm {conversation}/>
 </div>

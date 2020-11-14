@@ -14,7 +14,7 @@ msgstr "\":\" followed by a character will show matching emojis."
 msgid "\"@\" followed by a character will show matching nicks in the current conversation."
 msgstr "\"@\" followed by a character will show matching nicks in the current conversation."
 
-#: assets/page/DialogAdd.svelte:71
+#: assets/page/ConversationAdd.svelte:71
 msgid "#room or nick"
 msgstr "#room or nick"
 
@@ -42,7 +42,7 @@ msgstr "A link was generated"
 msgid "Account"
 msgstr "Account"
 
-#: assets/page/DialogAdd.svelte:77
+#: assets/page/ConversationAdd.svelte:77
 msgid "Add"
 msgstr "Add"
 
@@ -94,7 +94,7 @@ msgstr "Color scheme"
 msgid "Connection"
 msgstr "Connection"
 
-#: assets/components/ChatDialogAdd.svelte:14
+#: assets/components/ChatConversationAdd.svelte:14
 msgid "Connection does not exist."
 msgstr "Connection does not exist."
 
@@ -114,7 +114,7 @@ msgstr "Conversation"
 msgid "Conversation name"
 msgstr "Conversation name"
 
-#: assets/components/DialogSettings.svelte:55
+#: assets/components/ConversationSettings.svelte:55
 msgid "Conversation with %1 is frozen. Reason: %2"
 msgstr "Conversation with %1 is frozen. Reason: %2"
 
@@ -178,11 +178,11 @@ msgstr "Do you want %1 to handle \"irc://\" links?"
 msgid "Do you want to be notified when someone sends you a private message?"
 msgstr "Do you want to be notified when someone sends you a private message?"
 
-#: assets/components/ChatDialogAdd.svelte:22
+#: assets/components/ChatConversationAdd.svelte:22
 msgid "Do you want to chat with \"%1\"?"
 msgstr "Do you want to chat with \"%1\"?"
 
-#: assets/components/ChatDialogAdd.svelte:15
+#: assets/components/ChatConversationAdd.svelte:15
 msgid "Do you want to create the connection \"%1\"?"
 msgstr "Do you want to create the connection \"%1\"?"
 
@@ -202,7 +202,7 @@ msgstr "Email"
 msgid "Enable notifications"
 msgstr "Enable notifications"
 
-#: assets/page/DialogAdd.svelte:56
+#: assets/page/ConversationAdd.svelte:56
 msgid "Enter the name of an exising conversation, or create a new conversation."
 msgstr "Enter the name of an exising conversation, or create a new conversation."
 
@@ -270,7 +270,7 @@ msgstr "Inode usage"
 msgid "Invalid invite/recover URL"
 msgstr "Invalid invite/recover URL"
 
-#: assets/page/DialogAdd.svelte:57
+#: assets/page/ConversationAdd.svelte:57
 msgid "It is also possible to load in all existing conversations for a given connection."
 msgstr "It is also possible to load in all existing conversations for a given connection."
 
@@ -282,7 +282,7 @@ msgstr "Jump to %1"
 msgid "Jump to:"
 msgstr "Jump to:"
 
-#: assets/components/DialogSettings.svelte:96
+#: assets/components/ConversationSettings.svelte:96
 msgid "Leave"
 msgstr "Leave"
 
@@ -290,7 +290,7 @@ msgstr "Leave"
 msgid "Leave the password fields empty to keep the current password."
 msgstr "Leave the password fields empty to keep the current password."
 
-#: assets/page/DialogAdd.svelte:66
+#: assets/page/ConversationAdd.svelte:66
 msgid "Load"
 msgstr "Load"
 
@@ -330,7 +330,7 @@ msgstr "No notifications."
 msgid "No search results for \"%1\"."
 msgstr "No search results for \"%1\"."
 
-#: assets/components/DialogSettings.svelte:71
+#: assets/components/ConversationSettings.svelte:71
 msgid "No topic is set."
 msgstr "No topic is set."
 
@@ -370,7 +370,7 @@ msgstr "Other resources"
 msgid "Participants (%1)"
 msgstr "Participants (%1)"
 
-#: assets/components/DialogSettings.svelte:82
+#: assets/components/ConversationSettings.svelte:82
 msgid "Password"
 msgstr "Password"
 
@@ -382,7 +382,7 @@ msgstr "Please ask your Convos admin for a new link."
 msgid "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
 msgstr "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
 
-#: assets/components/DialogSettings.svelte:57
+#: assets/components/ConversationSettings.svelte:57
 msgid "Private conversation with %1."
 msgstr "Private conversation with %1."
 
@@ -398,7 +398,7 @@ msgstr "Recover account"
 msgid "Recover or invite"
 msgstr "Recover or invite"
 
-#: assets/page/DialogAdd.svelte:66
+#: assets/page/ConversationAdd.svelte:66
 msgid "Refresh"
 msgstr "Refresh"
 
@@ -434,11 +434,11 @@ msgstr "Search for conversations or messages"
 msgid "Secure connection (TLS)"
 msgstr "Secure connection (TLS)"
 
-#: assets/page/DialogAdd.svelte:62
+#: assets/page/ConversationAdd.svelte:62
 msgid "Select..."
 msgstr "Select..."
 
-#: assets/components/DialogSettings.svelte:87
+#: assets/components/ConversationSettings.svelte:87
 msgid "Send me notifications"
 msgstr "Send me notifications"
 
@@ -462,11 +462,11 @@ msgstr "Shortcuts"
 msgid "Show advanced settings"
 msgstr "Show advanced settings"
 
-#: assets/page/DialogAdd.svelte:90
+#: assets/page/ConversationAdd.svelte:90
 msgid "Showing %1 of %2 conversations, but the list is still loading."
 msgstr "Showing %1 of %2 conversations, but the list is still loading."
 
-#: assets/page/DialogAdd.svelte:88
+#: assets/page/ConversationAdd.svelte:88
 msgid "Showing %1 of %2 conversations."
 msgstr "Showing %1 of %2 conversations."
 
@@ -538,7 +538,7 @@ msgstr "Tick this box if you want users to be able to register without an invite
 msgid "Tip: Clicking on the link will copy it to your clipboard."
 msgstr "Tip: Clicking on the link will copy it to your clipboard."
 
-#: assets/components/DialogSettings.svelte:76
+#: assets/components/ConversationSettings.svelte:76
 msgid "Topic"
 msgstr "Topic"
 
@@ -550,7 +550,7 @@ msgstr "URLs will be converted to links, and might be embedded in the chat."
 msgid "Unable to connect to Convos. Please try again later or check your network connection."
 msgstr "Unable to connect to Convos. Please try again later or check your network connection."
 
-#: assets/components/DialogSettings.svelte:94
+#: assets/components/ConversationSettings.svelte:94
 msgid "Update"
 msgstr "Update"
 
@@ -586,15 +586,15 @@ msgstr "Will be automatically converted into emojis."
 msgid "Yes"
 msgstr "Yes"
 
-#: assets/components/DialogSettings.svelte:59
+#: assets/components/ConversationSettings.svelte:59
 msgid "You are channel operator in %1."
 msgstr "You are channel operator in %1."
 
-#: assets/components/DialogSettings.svelte:61
+#: assets/components/ConversationSettings.svelte:61
 msgid "You are not a channel operator in %1."
 msgstr "You are not a channel operator in %1."
 
-#: assets/components/ChatDialogAdd.svelte:21
+#: assets/components/ChatConversationAdd.svelte:21
 msgid "You are not part of this conversation."
 msgstr "You are not part of this conversation."
 

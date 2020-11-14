@@ -17,12 +17,12 @@ $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', true)
   ->json_is('/messages', []);
 
 note 'search everything';
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
-my $dialog     = $connection->dialog({name => '#convos'});
+my $connection   = $user->connection({name => 'localhost', protocol => 'irc'});
+my $conversation = $connection->conversation({name => '#convos'});
 $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', false)
   ->json_is('/messages', []);
 
-$connection->emit(message => $dialog => $_) for t::Helper->messages(time - 3600);
+$connection->emit(message => $conversation => $_) for t::Helper->messages(time - 3600);
 $t->get_ok('/api/search?match=secretary')->status_is(200)->json_is('/end', false)
   ->json_is('/messages/0/from', 'shade')->json_is('/messages/0/message', '52 secretary');
 

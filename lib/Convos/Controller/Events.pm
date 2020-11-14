@@ -105,7 +105,7 @@ sub _event_send {
   return $self->_err('Connection not found.', $data)
     unless my $connection = $self->backend->user->get_connection($data->{connection_id});
 
-  return $connection->send_p($data->{dialog_id} // '', $data->{message})->then(sub {
+  return $connection->send_p($data->{conversation_id} // '', $data->{message})->then(sub {
     my $res = shift;
     $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
     $res ||= {};
@@ -207,7 +207,7 @@ keys you can use:
 Must be present and must be a known "connection_id". Will result in an error if
 the "connection_id" is invalid.
 
-=item * dialog_id
+=item * conversation_id
 
 This key is optional, but must be present if you want to send a message to
 specific channel or private conversation.
@@ -221,7 +221,7 @@ a message you can use the instruction "/say". Example:
   {
     method: "send",
     connection_id: "irc-freenode",
-    dialog_id: "#convos",
+    conversation_id: "#convos",
     message: "/say /part is a command you can use to leave a conversation"
   }
 
@@ -241,7 +241,7 @@ Here is an example on how to use the "send" method:
   ws.send(JSON.stringify({
     method: "send",
     connection_id: "irc-whatever",
-    dialog_id: "#dialog_name",
+    conversation_id: "#conversation_name",
     id: 42,
     message: "some message"
   });
@@ -280,7 +280,7 @@ will result in a "messsage" event. Example:
 
   {
     connection_id: "irc-whatever",
-    dialog_id: "superwoman",
+    conversation_id: "superwoman",
     from: "Superwoman",
     highlight: false,
     messsage: "Some message",
@@ -296,7 +296,7 @@ Details:
 
 Identities from which connection the message originates from.
 
-=item * dialog_id
+=item * conversation_id
 
 An unique ID that identifies the conversation on a given connection.
 
@@ -348,7 +348,7 @@ changes or join events. Example structure:
 
   {
     connection_id: "irc-whatever",
-    dialog_id: "#dialog_name"
+    conversation_id: "#conversation_name"
     nick: "Superwoman",
     type: "join",
   }
@@ -361,7 +361,7 @@ Details:
 
 Identities from which connection the message originates from.
 
-=item * dialog_id
+=item * conversation_id
 
 An unique ID that identifies the conversation on a given connection.
 
@@ -377,7 +377,7 @@ This key is only present in certain cases. See L</type> below.
 =item * frozen
 
 Will contain a reason for why you are not enable to join/talk in a given
-dialog. Empty string if everything is ok.
+conversation. Empty string if everything is ok.
 
 This key is only present in certain cases. See L</type> below.
 
@@ -389,7 +389,7 @@ This key is only present in certain cases. See L</type> below.
 
 =item * name
 
-See L<Convos::Core::Dialog/name>.
+See L<Convos::Core::Conversation/name>.
 
 This key is only present in certain cases. See L</type> below.
 
@@ -413,7 +413,7 @@ This key is only present in certain cases. See L</type> below.
 
 =item * topic
 
-See L<Convos::Core::Dialog/topic>.
+See L<Convos::Core::Conversation/topic>.
 
 This key is only present in certain cases. See L</type> below.
 
@@ -424,12 +424,12 @@ Can be...
   Type         | Extra keys
   -------------|---------------------------------------
   me           | nick, ...
-  frozen       | dialog_id, frozen, name, topic, unread
-  join         | dialog_id, nick
-  quit         | dialog_id, nick, message
-  part         | dialog_id, nick, message
-  part         | dialog_id, kicker, nick, message
-  mode         | dialog_id, from, mode, nick
+  frozen       | conversation_id, frozen, name, topic, unread
+  join         | conversation_id, nick
+  quit         | conversation_id, nick, message
+  part         | conversation_id, nick, message
+  part         | conversation_id, kicker, nick, message
+  mode         | conversation_id, from, mode, nick
   nick_change  | new_nick, old_nick
 
 =back
