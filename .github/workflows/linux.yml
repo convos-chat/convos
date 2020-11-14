@@ -1,0 +1,44 @@
+name: Linux CI
+on: [push]
+jobs:
+  nodejs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{matrix.node-version}}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{matrix.node-version}}
+    - run: npm install --no-save pnpm
+    - run: ./node_modules/.bin/pnpm install
+    - run: ./node_modules/.bin/pnpm test
+
+  perl:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl-version:
+        - '5.26'
+        - '5.30'
+    container:
+      image: perl:${{matrix.perl-version}}
+    steps:
+    - uses: actions/checkout@v2
+    - name: perl -V
+      run: perl -V
+    - name: Install dependencies
+      run: |
+        cpanm -n EV~"!= 4.28"
+        cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz
+        cpanm -n DBD::SQLite Hailo Math::Calc::Parser
+        cpanm -n Test::Pod Test::Pod::Coverage
+        cpanm -n --installdeps .
+    - name: Run perl tests
+      run: prove -l
+      env:
+        HARNESS_OPTIONS: j4
+        TEST_BOT: 1
+        TEST_POD: 1
