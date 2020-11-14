@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+5.00 Not Released
+ - Renamed "Dialog" to "Conversation" #519
+ - Renamed "$sidebar-item-dialog-indent" css variable to "$sidebar-item-conversation-indent" #519
+ - Renamed API endpoints from "dialogs" to "conversations" #519
+
 4.42 2020-11-05T09:54:00+0900
  - YAML::XS is an optional module
  - Fix selecting text in chat
