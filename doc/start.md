@@ -37,11 +37,12 @@ for how to run Convos behind your favorite web server.
 
 ## Upgrading
 
-Upgrading Convos is as simple as installing it. Just need to stop Convos
-before fetching the latest version:
+Upgrading Convos is as simple as installing it. It is suggested to stop Convos
+before fetching the latest version, but either way a restart is required to
+load in the new version.
 
     killall convos
-    curl https://convos.chat/install.sh | sh -
+    ./convos/script/convos upgrade
     ./convos/script/convos daemon
 
 See the
