@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.00 Not Released
+5.00 2020-11-17T07:24:00+0900
  - Renamed "Dialog" to "Conversation" #519
  - Renamed "$sidebar-item-dialog-indent" css variable to "$sidebar-item-conversation-indent" #519
  - Renamed API endpoints from "dialogs" to "conversations" #519
