@@ -74,8 +74,9 @@ sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
 sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
 
 sub new {
-  my $self = shift->SUPER::new(@_);
-  $self->conversation($_) for @{delete($self->{conversations}) || []};
+  my $self          = shift->SUPER::new(@_);
+  my $conversations = delete $self->{conversations} || delete $self->{dialogs} || [];  # back compat
+  $self->conversation($_) for @$conversations;
   $self;
 }
 
