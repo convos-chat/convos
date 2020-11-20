@@ -167,6 +167,11 @@ with a thin logical layer inside the controllers:
 * [Convos::Controller::Notifications](/doc/Convos/Controller/Notifications)
 * [Convos::Controller::User](/doc/Convos/Controller/User)
 
+The main layout for the Svelte powered frontend is
+[/assets/App.svelte](https://github.com/Nordaaker/convos/blob/master/assets/App.svelte)
+and the routes are set up in
+[/assets/routes.js](https://github.com/Nordaaker/convos/blob/master/assets/routes.js).
+
 ## Convos core
 
                  .---------.
