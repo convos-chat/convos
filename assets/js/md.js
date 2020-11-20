@@ -135,7 +135,7 @@ function mdEmStrong(str) {
 }
 
 function mdLink(str, state = {}) {
-  return str.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (all, text, href) => {
+  return str.replace(/\[([a-zA-Z][^\]]+)\]\(([^)]+)\)/g, (all, text, href) => {
     const scheme = href.match(/^\s*(\w+):/) || ['', ''];
     if (scheme[1] && ['http', 'https', 'mailto'].indexOf(scheme[1]) == -1) return all; // Avoid XSS links
     state.mdLinks = true;
