@@ -162,7 +162,7 @@ application gets its data from a [OpenAPI powered JSON API](/api.html powered)
 with a thin logical layer inside the controllers:
 
 * [Convos::Controller::Connection](/doc/Convos/Controller/Connection)
-* [Convos::Controller::Dialog](/doc/Convos/Controller/Dialog)
+* [Convos::Controller::Conversation](/doc/Convos/Controller/Conversation)
 * [Convos::Controller::Events](/doc/Convos/Controller/Events)
 * [Convos::Controller::Notifications](/doc/Convos/Controller/Notifications)
 * [Convos::Controller::User](/doc/Convos/Controller/User)
@@ -173,21 +173,21 @@ with a thin logical layer inside the controllers:
               ___| Backend |
     .------._/   '---------'
     | Core |
-    '------   .------.  .-------------.  .---------.
-        \_____| User |__| Connections |__| Dialogs |
-              '------'  '-------------'  '---------'
+    '------   .------.  .-------------.  .--------------.
+        \_____| User |__| Connections |__| Conversation |
+              '------'  '-------------'  '--------------'
 
 [Convos::Core](/doc/Convos/Core)
-is the heart of Convos. The core takes care of connections, dialogs can
+is the heart of Convos. The core takes care of connections, conversations can
 persist to a backend and provide hooks for plugins.
 
 The design makes Convos a multi-user application, that can persist to any
 backend (memory, file storage, redis, ...) and connect to any chat server,
-as well as keeping any number of dialogs active.
+as well as keeping any number of conversations active.
 
 The way the [backend](/doc/Convos/Core/Backend)
 is hooked into the rest of the object graph is by events. Any user, connection
-or dialog can emit new events that the Backend can choose to persist to
+or conversation can emit new events that the Backend can choose to persist to
 storage. The default backend is a file-based backend, which enables Convos to
 be started without any external database.
 
