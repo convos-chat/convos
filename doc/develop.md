@@ -76,6 +76,28 @@ The command above is the same as:
 useful to discover bugs. The `-w` switch is for watching different files and
 directories for changes and reload the web server automatically.
 
+## Running tests
+
+Convos has [GitHub workflows](https://github.com/Nordaaker/convos/actions) set
+up to run automatic tests when pushing a commit. These tests can also be run
+locally:
+
+    # Run all Perl tests (API, Core, …)
+    # (t/plugin-bot*t will be skipped without TEST_BOT=1)
+    TEST_BOT=1 prove -l
+
+    # Run a single Perl test, with verbose output
+    prove -vl t/irc-commands.t
+
+    # Run automated frontend tests in a browser
+    TEST_SELENIUM=1 prove -l t/selenium-*t
+
+    # Run all JavaScript tests
+    pnpm run test
+
+    # Run a single test and watch for changes. Useful when developing
+    pnpm run test -- --watch __tests__/md.js
+
 ## Secure connection
 
 Running `convos dev` will automatically pick up any certificated files in the
