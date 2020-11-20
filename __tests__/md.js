@@ -35,6 +35,8 @@ test('code', () => {
     .toBe('is this <code>not code</code>, or..?');
   expect(md('not a `https://link.com`'))
     .toBe('not a <code><a href="https://link.com" target="_blank">https://link.com</a></code>');
+  expect(md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
+    .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
 });
 
 function countEmojis(str) {
