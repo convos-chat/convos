@@ -42,8 +42,7 @@ function search(msg) {
 function setConversationFromRoute(route) {
   const d = route.path.indexOf('search') == -1 ? user.notifications : user.search;
   if (d != conversation) conversation = d.update({conversation_id: true});
-  if (conversation.is('search')) return search({message: route.param('q')});
-  if (!conversation.is('success')) conversation.load();
+  return conversation.is('search') ? search({message: route.param('q')}) : conversation.load();
 }
 </script>
 
