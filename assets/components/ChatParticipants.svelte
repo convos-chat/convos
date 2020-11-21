@@ -13,6 +13,11 @@ export let conversation;
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 
 afterUpdate(() => rtc.render());
+
+function joinConversation(e, participant) {
+  e.preventDefault();
+  conversation.send('/join ' + participant.id);
+}
 </script>
 
 {#if $rtc.localStream.id}
@@ -75,7 +80,7 @@ Audio:
     <nav class="sidebar-right__nav">
       <h3>{l('Participants (%1)', conversation.participants().length)}</h3>
       {#each conversation.participants() as participant}
-        <Link href="/chat/{conversation.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
+        <Link href="/chat/{conversation.connection_id}/{participant.id}" on:click="{e => joinConversation(e, participant)}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
           <span>{participant.nick}</span>
         </Link>
