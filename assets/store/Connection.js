@@ -24,7 +24,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', me.real_host || this.url.hostname);
     this.prop('rw', 'server_op', me.server_op || false);
-    this.participants([{nick}]);
+    this.participants((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
   }
 
   ensureConversation(params) {

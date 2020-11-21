@@ -26,6 +26,7 @@ cmp_deeply(
     name                => 'localhost',
     on_connect_commands => [],
     protocol            => 'irc',
+    service_accounts    => [qw(chanserv nickserv)],
     state               => 'queued',
     url                 => 'irc://127.0.0.1',
     wanted_state        => 'connected',

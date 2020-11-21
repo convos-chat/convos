@@ -128,8 +128,45 @@ $server->server_write_ok(":private_man!~pm@127.0.0.1 PRIVMSG private_man :inc un
   ->client_event_ok('_irc_event_privmsg')
   ->server_write_ok(":superman!~pm@127.0.0.1 PRIVMSG private_man :but only once\r\n")
   ->client_event_ok('_irc_event_privmsg')->process_ok('got private messages');
-Mojo::Promise->timer(0.1)->wait;
 is $conversation->unread, 1, 'only one unread';
+
+note 'service account messages to connection';
+@messages = ();
+my $record = $connection->on(message => sub { push @messages, $_[1]->{name} });
+$connection->_irc_event_privmsg({
+  command  => 'PRIVMSG',
+  params   => ['nickserv', 'test'],
+  prefix   => 'superman',
+  raw_line => ':superman PRIVMSG nickserv :test'
+});
+$server->server_write_ok(":chanserv!ChanServ@127.0.0.1 PRIVMSG superman :service stuff\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(":NickServ!NickServ\@services. NOTICE superman :Invalid command.\r\n")
+  ->client_event_ok('_irc_event_notice')->process_ok('got service messages');
+is_deeply(
+  [map { ref $_ ? $_->{from} : $_ } @messages],
+  [qw(superman localhost chanserv localhost NickServ localhost)],
+  'nickserv and chanserv messages sent to connection dialog',
+);
+is_deeply(
+  $connection->conversations->map(sub { $_->name })->sort->to_array,
+  ['#convos', 'private_man', 'superman'],
+  'conversations not created for service accounts'
+);
+
+note 'service account messages to conversation';
+@messages = ();
+$connection->conversation({name => 'nickserv'});
+$server->server_write_ok(":ChanServ!ChanServ\@services. NOTICE superman :service stuff\r\n")
+  ->client_event_ok('_irc_event_notice')
+  ->server_write_ok(":NickServ!NickServ\@1services. PRIVMSG superman :service stuff\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok('got service messages');
+is_deeply(
+  [map { ref $_ ? $_->{from} : $_ } @messages],
+  [qw(ChanServ localhost NickServ nickserv)],
+  'nickserv are sent to open conversation',
+);
+$connection->unsubscribe(message => $record);
 
 @messages = ();
 $server->server_write_ok(":localhost NOTICE AUTH :*** Found your hostname\r\n")

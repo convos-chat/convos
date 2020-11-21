@@ -21,8 +21,9 @@ has messages => sub {
 
 sub name { shift->{name} }
 has on_connect_commands => sub { +[] };
-has protocol            => 'null';
-has wanted_state        => 'connected';
+has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
+has protocol         => 'null';
+has wanted_state     => 'connected';
 
 sub url {
   my $self = shift;
@@ -321,6 +322,7 @@ sub TO_JSON {
 
   $json{connection_id}       = $self->id;
   $json{on_connect_commands} = $self->on_connect_commands;
+  $json{service_accounts}    = $self->service_accounts;
   $json{url}                 = $url->to_unsafe_string;
 
   if (!$persist and $url->query->param('forced')) {
@@ -428,6 +430,13 @@ Returns a unique identifier for a connection.
 
 Holds a L<Convos::Core::Conversation> object with the conversation to the server.
 
+=head2 on_connect_commands
+
+  $array_ref = $conn->on_connect_commands;
+  $conn = $conn->on_connect_commands([...]);
+
+Holds a list of commands to execute when first connected.
+
 =head2 name
 
   $str = $conn->name;
@@ -439,6 +448,14 @@ Holds the name of the connection.
   $str = $conn->protocol;
 
 Holds the protocol name.
+
+=head2 service_accounts
+
+  $array_ref = $conn->service_accounts;
+  $conn = $conn->service_accounts([qw(chanserv nickserv)]);
+
+A list of users that will go into the connection chat, instead of opening new
+conversations.
 
 =head2 url
 

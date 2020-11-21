@@ -370,10 +370,15 @@ sub _irc_event_privmsg {
   $message[0] =~ s/\x03\d{0,15}(,\d{0,15})?//g;
   $message[0] =~ s/[\x00-\x1f]//g;
 
-  if ($user) {
-    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id,
-      $target = $self->get_conversation($target) || $self->conversation({name => $target});
-    $from = $nick;
+  if (grep { $_ eq lc $nick || $_ eq lc $conversation_id } map {lc} @{$self->service_accounts}) {
+    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
+    $target = $self->get_conversation($target) || $self->messages;
+    $from   = $nick;
+  }
+  elsif ($user) {
+    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
+    $target = $self->get_conversation($target) || $self->conversation({name => $target});
+    $from   = $nick;
   }
 
   $target ||= $self->messages;
