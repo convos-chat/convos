@@ -136,6 +136,23 @@ sub _connect_args {
   return $self->SUPER::_connect_args;
 }
 
+sub _irc_event_cap {
+  my ($self, $msg) = @_;
+  $self->_irc_event_fallback($msg);
+
+  if ($msg->{raw_line} =~ m!\s(?:LIST|LS)[^:]+:(.*)!) {
+    $self->{myinfo}{capabilities}{$_} = true for split /\s/, $1;
+    my @cap_req;    # TODO
+    $self->_write(@cap_req ? sprintf "CAP REQ :%s\r\n", join ' ', @cap_req : "CAP END\r\n");
+  }
+  elsif ($msg->{raw_line} =~ m!\sACK\s:(.+)!) {
+    $self->_write("CAP END\r\n");
+  }
+  elsif ($msg->{raw_line} =~ m!\sNAC!) {
+    $self->_write("CAP END\r\n");
+  }
+}
+
 sub _irc_event_ctcpreply_rtcz {
   my ($self, $msg) = @_;
   my ($nick) = IRC::Utils::parse_user($msg->{prefix});
@@ -1042,6 +1059,7 @@ sub _stream {
   my $nick = $self->nick;
   my $user = $url->username || $nick;
   my $mode = $url->query->param('mode') || 0;
+  $self->_write("CAP LS\r\n");
   $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
   $self->_write("NICK $nick\r\n");
   $self->_write("USER $user $mode * :https://convos.chat/\r\n");
