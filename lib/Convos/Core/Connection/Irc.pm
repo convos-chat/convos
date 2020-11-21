@@ -1111,7 +1111,8 @@ CHUNK:
   }
 }
 
-# This method is used to write a message to the IRC server and wait for a reply.
+# This method is used to write a message to the IRC server and wait for a
+# response in the form of one or more events.
 #
 # Example:
 #
@@ -1124,19 +1125,20 @@ CHUNK:
 #   {conversation_id => "#convos"},
 #
 #   # The next arguments are key/value pairs of IRC::Utils event names and
-#   # conditions. The number refers to an item in the "params" array from
-#   # Parse::IRC::parse_irc()
-#   # Use perl ./script/parse-irc-message.pl to see an example struture
-#   err_toomanymatches => {1 => #convos},
-#   rpl_endofnames     => {1 => #convos},
-#   rpl_namreply       => {2 => #convos},
+#   # conditions to determine if the event was generated in response to this
+#   # command. The number refers to an item in the "params" array from
+#   # Parse::IRC::parse_irc(), and maps to the expected value of that param
+#   # (Use perl ./script/parse-irc-message.pl to see an example struture)
+#   err_toomanymatches => {1 => "#convos"},
+#   rpl_endofnames     => {1 => "#convos"},
+#   rpl_namreply       => {2 => "#convos"},
 #
 #   # "timeout" is the max number of seconds we should wait for a reply
-#   # before the $promise gets rejected
+#   # before rejecting the $promise
 #   timeout => 30,
 #
-#   # The last argument is the name of a method to call when on of the irc
-#   # events above match
+#   # The last argument is the name of a method to call to process an event that
+#   # matches one of those defined above
 #   '_make_names_response',
 # )->then(sub {
 #    my $res = shift; {conversation_id => "#convos", ...}
