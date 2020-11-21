@@ -46,25 +46,34 @@ onDestroy(() => {
   rtc.hangup();
 });
 
-function onMessageClick(e) {
-  const aEl = e.target.closest('a');
-  if (aEl && e.target.closest('.embed')) aEl.target = '_blank';
-  if (aEl && !aEl.classList.contains('le-thumbnail') && !aEl.classList.contains('onclick')) return;
-
-  const pasteMetaEl = e.target.closest('.le-meta');
-  if (aEl) e.preventDefault();
-  if (pasteMetaEl) return pasteMetaEl.parentNode.classList.toggle('is-expanded');
-  if (tagNameIs(e.target, 'img')) return viewport.showFullscreen(e.target);
-  if (aEl && aEl.classList.contains('le-thumbnail')) return viewport.showFullscreen(aEl.querySelector('img'));
-  if (!aEl) return;
-
+function onMessageActionClick(e, action) {
+  if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
+  e.preventDefault();
   const messageEl = e.target.closest('.message');
   const message = messageEl && messages[messageEl.dataset.index];
-  const action = aEl.href.split('#')[1];
-  if (action.indexOf('input:') == 0) return chatInput.add(message.from);
-  if (action == 'remove') return socket.deleteWaitingMessage(message.id);
-  if (action == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
-  if (action == 'toggleDetails') return q(messageEl, '.embed.for-jsonhtmlify', el => el.classList.toggle('hidden'));
+  if (action[1] == 'input') return chatInput.add(message.from);
+  if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
+  if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
+  if (action[1] == 'toggleDetails') return q(messageEl, '.embed.for-jsonhtmlify', el => el.classList.toggle('hidden'));
+}
+
+function onMessageClick(e) {
+  const aEl = e.target.closest('a');
+
+  // Make sure embed links are opened in a new tab/window
+  if (aEl && e.target.closest('.embed')) aEl.target = '_blank';
+
+  // Expand/collapse pastebin, except when clicking on a link
+  const pasteMetaEl = e.target.closest('.le-meta');
+  if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
+
+  // Special links with actions in #hash
+  const action = aEl && aEl.href.match(/#(activeMenu|action:[\w:]+)/);
+  if (action) return onMessageActionClick(e, action[1].split(':', 3));
+
+  // Show images in full screen
+  if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
+  if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(aEl.querySelector('img'));
 }
 
 function onRendered(e) {
@@ -123,6 +132,11 @@ function setConversationFromUser(user) {
   if (onLoadHash) return conversation.load({around: onLoadHash});
   if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
 }
+
+function showFullscreen(e, el) {
+  e.preventDefault();
+  viewport.showFullscreen(el);
+}
 </script>
 
 <ChatHeader>
@@ -174,13 +188,13 @@ function setConversationFromUser(user) {
     <div class="{message.className}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.fromId}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-      <a href="#input:{message.from}" class="message__from onclick" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#action:input:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
-          <a href="#remove" class="pull-right has-tooltip onclick" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
-          <a href="#resend" class="pull-right has-tooltip onclick" data-tooltip="{l('Resend')}"><Icon name="sync-alt"/></a>
+          <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
+          <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{l('Resend')}"><Icon name="sync-alt"/></a>
         {:else if !message.waitingForResponse && message.canToggleDetails}
-          <a href="#toggleDetails" class="onclick"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
+          <a href="#action:toggleDetails"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
         {/if}
         {@html message.markdown}
       </div>
@@ -210,7 +224,7 @@ function setConversationFromUser(user) {
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <ChatMessage type="error">{@html lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, $connection.path + '#activeMenu:settings')}</ChatMessage>
+    <ChatMessage type="error">{@html lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || l($conversation.frozen)}</ChatMessage>
   {/if}
