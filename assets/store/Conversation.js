@@ -53,6 +53,7 @@ export default class Conversation extends Reactive {
 
     if (params.conversation_id) {
       this.prop('persist', 'wantNotifications', this.is_private, {key: params.conversation_id +  ':wantNotifications'});
+      this.prop('rw', 'userInput', '');
     }
 
     this.socket = params.socket || getSocket('/events');

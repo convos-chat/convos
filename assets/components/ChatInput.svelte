@@ -4,6 +4,7 @@ import Icon from '../components/Icon.svelte';
 import {getContext} from 'svelte';
 import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
+import {route} from '../store/Route';
 
 export const uploader = uploadFiles;
 export let conversation = {};
@@ -25,6 +26,8 @@ $: inputParts = calculateInputParts(pos);
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
+$: pos && conversation.update({userInput: inputEl.value});
+$: $route && inputEl && conversation && (inputEl.value = (typeof conversation.userInput == 'undefined' ? '' : conversation.userInput));
 
 export function add(str, params = {}) {
   const space = params.space || '';
@@ -91,6 +94,8 @@ export function sendMessage(e) {
   if (e.preventDefault) e.preventDefault();
   const msg = {method: 'send'};
   msg.message = e.preventDefault ? inputEl.value : e.message;
+
+  conversation.update({userInput: ''});
 
   // Aliases
   msg.message = msg.message.replace(/^\/close/i, '/part');
