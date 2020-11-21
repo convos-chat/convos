@@ -211,7 +211,9 @@ export default class Conversation extends Reactive {
     if (!participant || participant.me) return;
     this._participants.delete(this._participantId(params.nick));
     this.update({_participants: true});
-    this.addMessage(this._partMessage(params));
+    if (!params.silent) {
+      this.addMessage(this._partMessage(params));
+    }
   }
 
   wsEventSentClear(params) {
