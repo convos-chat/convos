@@ -261,7 +261,7 @@ export default class Conversation extends Reactive {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is_private ? this.send('/ison') : this.send('/names').then(this._updateParticipants.bind(this));
+    return this.is_private ? this.send('/whois ' + this.conversation_id) : this.send('/names').then(this._updateParticipants.bind(this));
   }
 
   _maybeIncreaseUnread(msg) {

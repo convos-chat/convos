@@ -195,16 +195,16 @@ export default class Connection extends Conversation {
     params.channels = channels;
 
     if (params.idle_for && channels.length) {
-      message += ' has been idle for %3s in %4.';
+      message += ' has been idle for %5s in %6.';
       vars.push(params.idle_for);
       vars.push(channels.join(', '));
     }
     else if (params.idle_for && !channels.length) {
-      message += 'has been idle for %3s, and is not in any channels.';
+      message += 'has been idle for %5s, and is not in any channels.';
       vars.push(params.idle_for);
     }
     else if (channels.length) {
-      message += ' is active in %3.';
+      message += ' is active in %5.';
       vars.push(channels.join(', '));
     }
     else {

@@ -68,7 +68,7 @@ function messageDayChanged(msg, prev) {
 }
 
 function messageEmbeds(msg, conversation, expandUrlToMedia) {
-  const embeds = expandUrlToMedia ? (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url)))) : [];
+  const embeds = msg.type != 'notice' && expandUrlToMedia ? (msg.embeds || []).map(url => (EMBED_CACHE[url] || (EMBED_CACHE[url] = loadEmbed(url)))) : [];
 
   if (msg.canToggleDetails) {
     const cacheKey = ['details', conversation.path, msg.ts.valueOf()].join(':');
@@ -103,7 +103,7 @@ function renderWaitingMessages({conversation, from, waiting}) {
     msg.index = i;
     msg.isOnline = true;
     msg.type = msg.waitingForResponse ? 'notice' : 'error';
-    msg.embeds = messageEmbeds(msg, conversation, false);
+    msg.embeds = [];
     msg.className = messageClassName(msg, prev) + ' is-waiting';
     msg.markdown = msg.waitingForResponse ? msg.message : lmd('Could not send message "%1".', msg.message);
     prev = msg;

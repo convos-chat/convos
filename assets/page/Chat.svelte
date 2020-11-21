@@ -51,7 +51,7 @@ function onMessageActionClick(e, action) {
   e.preventDefault();
   const messageEl = e.target.closest('.message');
   const message = messageEl && messages[messageEl.dataset.index];
-  if (action[1] == 'input') return chatInput.add(message.from);
+  if (action[1] == 'join') return conversation.send('/join ' + message.from);
   if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
   if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
   if (action[1] == 'toggleDetails') return q(messageEl, '.embed.for-jsonhtmlify', el => el.classList.toggle('hidden'));
@@ -188,7 +188,7 @@ function showFullscreen(e, el) {
     <div class="{message.className}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.fromId}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-      <a href="#action:input:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#action:join:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
