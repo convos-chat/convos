@@ -117,7 +117,8 @@ async function submitForm(e) {
   </TextField>
 
   <TextField name="realname" placeholder="{l('Ex: Clark Kent')}">
-    <span slot="label">{l('Your name (visible in WHOIS)')}</span>
+    <span slot="label">{l('Your name')}</span>
+    <p class="help" slot="help">Visible in WHOIS response</p>
   </TextField>
 
   {#if connection.url}
