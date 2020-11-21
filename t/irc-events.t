@@ -123,6 +123,14 @@ cmp_deeply(
   'state changes',
 ) or diag explain \@state;
 
+my $conversation = $connection->conversation({name => 'private_man'});
+$server->server_write_ok(":private_man!~pm@127.0.0.1 PRIVMSG private_man :inc unread\r\n")
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(":superman!~pm@127.0.0.1 PRIVMSG private_man :but only once\r\n")
+  ->client_event_ok('_irc_event_privmsg')->process_ok('got private messages');
+Mojo::Promise->timer(0.1)->wait;
+is $conversation->unread, 1, 'only one unread';
+
 @messages = ();
 $server->server_write_ok(":localhost NOTICE AUTH :*** Found your hostname\r\n")
   ->client_event_ok('_irc_event_notice')->process_ok('notice');
