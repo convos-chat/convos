@@ -187,10 +187,9 @@ export default class Connection extends Conversation {
     this.ensureConversation(params);
   }
 
-  // TODO: Reply should be shown in the active conversation instead
   wsEventSentWhois(params) {
-    let message = '%1 (%2)';
-    let vars = [params.nick, params.host];
+    let message = '%1 (%2@%3, %4)';
+    let vars = [params.nick, params.user, params.host, params.name];
 
     const channels = Object.keys(params.channels).sort().map(name => (modeMoniker[params.channels[name].mode] || '') + name);
     params.channels = channels;
