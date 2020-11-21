@@ -35,7 +35,7 @@ $connection->on_connect_commands([@on_connect_commands]);
 
 my $test_user_command = sub {
   my ($conn, $msg) = @_;
-  is_deeply $msg->{params}, [qw(test_user 0 * https://convos.chat/)], 'got expected USER command';
+  is_deeply $msg->{params}, [qw(test_user 0 * https://convos.chat)], 'got expected USER command';
 };
 $server->client($connection)->server_event_ok('_irc_event_nick')
   ->server_event_ok('_irc_event_user', $test_user_command)->server_write_ok(['welcome.irc'])

@@ -145,7 +145,14 @@ sub _find_server_conn {
 
 sub _handle_client_connect {
   my ($self, $c_conn) = @_;
-  $c_conn->url($self->url)->connect_p unless $c_conn->state eq 'connected';
+
+  unless ($c_conn->state eq 'connected') {
+    $c_conn->url->host($self->url->host);
+    $c_conn->url->port($self->url->port);
+    $c_conn->url->query->param($_ => $self->url->query->param($_)) for @{$self->url->query->names};
+    $c_conn->connect_p;
+  }
+
   $self->_dequeue;
 }
 

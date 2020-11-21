@@ -1062,7 +1062,11 @@ sub _stream {
   $self->_write("CAP LS\r\n");
   $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
   $self->_write("NICK $nick\r\n");
-  $self->_write("USER $user $mode * :https://convos.chat/\r\n");
+
+  my $convos = "https://convos.chat";
+  my $realname = $url->query->param('realname');
+  $realname = $realname ? "$realname via $convos" : $convos;
+  $self->_write("USER $user $mode * :$realname\r\n");
 }
 
 sub _stream_on_read {

@@ -54,6 +54,7 @@ function defaultsToForm() {
   if (connURL.password) formEl.password.value = connURL.password;
   if (connURL.username) formEl.username.value = connURL.username;
   if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
+  if (connParams.get('realname')) formEl.realname.value = connParams.get('realname');
   if (connURL.pathname && formEl.conversation) formEl.conversation.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
   if (Number(connParams.get('tls') || 0)) useTls = true;
   if (Number(connParams.get('tls_verify') || 0)) verifyTls = true;
@@ -63,6 +64,7 @@ function connectionToForm() {
   if (!connection.url) return; // Could not find connection
   formEl.server.value = connection.url.host;
   formEl.nick.value = connection.url.searchParams.get('nick') || '';
+  formEl.realname.value = connection.url.searchParams.get('realname') || '';
   formEl.on_connect_commands.value = connection.on_connect_commands.join('\n');
   formEl.password.value = connection.url.password;
   formEl.username.value = connection.url.username;
@@ -110,8 +112,12 @@ async function submitForm(e) {
     </p>
   </TextField>
 
-  <TextField name="nick" placeholder="{l('Ex: your-name')}">
+  <TextField name="nick" placeholder="{l('Ex: superman')}">
     <span slot="label">{l('Nickname')}</span>
+  </TextField>
+
+  <TextField name="realname" placeholder="{l('Ex: Clark Kent')}">
+    <span slot="label">{l('Your name (visible in WHOIS)')}</span>
   </TextField>
 
   {#if connection.url}
