@@ -981,9 +981,9 @@ sub _send_whois_p {
 
 sub _set_wanted_state_p {
   my ($self, $state) = @_;
+  $self->wanted_state($state);
   $self->user->core->connect($self, '') if $state eq 'connected';
   $self->disconnect_p                   if $state eq 'disconnected';
-  $self->wanted_state($state);
   return Mojo::Promise->resolve({});
 }
 

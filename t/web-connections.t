@@ -32,17 +32,17 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
   {
     connection_id       => 'irc-example',
     name                => 'example',
-    me                  => {nick => 'superman'},
+    me                  => {},
     on_connect_commands => [],
     protocol            => 'irc',
     state               => 'disconnected',
-    url                 => 'irc://irc.example.com:6667?nick=superman&tls=1',
+    url                 => 'irc://irc.example.com:6667',
     wanted_state        => 'disconnected',
   }
 )->json_is('/connections/1/connection_id', 'irc-localhost')
   ->json_is('/connections/1/name',         'localhost')
   ->json_is('/connections/1/wanted_state', 'disconnected')
-  ->json_is('/connections/1/url',          "irc://localhost:$port?nick=superman&tls=1");
+  ->json_is('/connections/1/url',          "irc://localhost:$port");
 
 $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})
   ->status_is(404);
@@ -50,8 +50,7 @@ $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
 
 my $connection = $user->get_connection('irc-localhost');
 $t->post_ok('/api/connection/irc-localhost', json => {url => "irc://localhost:$port"})
-  ->status_is(200)->json_is('/name' => 'localhost')
-  ->json_like('/state' => qr{^(connected|queued)$});
+  ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'disconnected');
 $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:9999'})
   ->status_is(200)->json_is('/name' => 'localhost')
   ->json_like('/url' => qr{irc://example\.com:9999});
@@ -60,7 +59,7 @@ $connection->state(disconnected => '');
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://example.com:9999', wanted_state => 'connected'})->status_is(200)
   ->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
-  ->json_is('/url'  => 'irc://example.com:9999');
+  ->json_is('/url'  => 'irc://example.com:9999?nick=superman&tls=1');
 
 $connection->state(connected => '');
 $t->post_ok(
@@ -71,7 +70,7 @@ $t->post_ok(
   }
 )->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected')
   ->json_is('/on_connect_commands', ['/msg NickServ identify s3cret', '/msg too_cool 123'])
-  ->json_is('/url' => 'irc://example.com:9999');
+  ->json_is('/url' => 'irc://example.com:9999?tls=1&nick=superman');
 
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(200)

@@ -26,10 +26,11 @@ has settings => sub {
 
 sub connect {
   my ($self, $connection, $reason) = @_;
-  my $host = $connection->url->host;
+  return $self if $connection->wanted_state eq 'disconnected';
 
   $connection->state(queued => $reason || 'Connecting soon...');
 
+  my $host = $connection->url->host;
   if ($host eq 'localhost') {
     $connection->connect_p;
   }
