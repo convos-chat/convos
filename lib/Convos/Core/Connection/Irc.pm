@@ -1111,6 +1111,36 @@ CHUNK:
   }
 }
 
+# This method is used to write a message to the IRC server and wait for a reply.
+#
+# Example:
+#
+# my $promise = $self->_write_and_wait_p(
+#
+#   # First argument is the command to write to the IRC server
+#   "NAMES #convos",
+#
+#   # Second argument is the initial value of $res
+#   {conversation_id => "#convos"},
+#
+#   # The next arguments are key/value pairs of IRC::Utils event names and
+#   # conditions. The number refers to an item in the "params" array from
+#   # Parse::IRC::parse_irc()
+#   # Use perl ./script/parse-irc-message.pl to see an example struture
+#   err_toomanymatches => {1 => #convos},
+#   rpl_endofnames     => {1 => #convos},
+#   rpl_namreply       => {2 => #convos},
+#
+#   # "timeout" is the max number of seconds we should wait for a reply
+#   # before the $promise gets rejected
+#   timeout => 30,
+#
+#   # The last argument is the name of a method to call when on of the irc
+#   # events above match
+#   '_make_names_response',
+# )->then(sub {
+#    my $res = shift; {conversation_id => "#convos", ...}
+# });
 sub _write_and_wait_p {
   my $make_response_method = pop;
   my ($self, $cmd, $res, %events) = @_;
