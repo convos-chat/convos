@@ -21,6 +21,7 @@ let highlightKeywords = user.highlightKeywords.join(', ');
 let selectedColorScheme = viewport.colorScheme;
 let selectedTheme = viewport.theme;
 let wantNotifications = notify.wantNotifications;
+let ignoreStatuses = user.ignoreStatuses;
 
 $: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
 
@@ -54,6 +55,7 @@ function updateUserFromForm(e) {
 
   notify.update({wantNotifications});
   viewport.update({expandUrlToMedia});
+  user.update({ignoreStatuses});
   viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
   updateUserOp.perform(e.target);
 }
@@ -75,6 +77,10 @@ function updateUserFromForm(e) {
 
     <Checkbox name="notifications" bind:checked="{wantNotifications}">
       <span slot="label">{l('Enable notifications')}</span>
+    </Checkbox>
+    
+    <Checkbox name="statuses" bind:checked="{ignoreStatuses}">
+      <span slot="label">{l('Ignore join/part messages')}</span>
     </Checkbox>
 
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">

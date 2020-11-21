@@ -25,6 +25,7 @@ export default class User extends Reactive {
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
+    this.prop('persist', 'ignoreStatuses', false);
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));
@@ -142,6 +143,7 @@ export default class User extends Reactive {
     msg.dispatchTo = camelize('wsEvent_' + this._getEventNameFromMessage(msg));
     msg.bubbles = true;
     msg.stopPropagation = () => { msg.bubbles = false };
+    msg.silent = this.ignoreStatuses;
     this.emit(msg.dispatchTo, msg);
 
     if (msg.highlight) this.notifications.addMessage(msg);

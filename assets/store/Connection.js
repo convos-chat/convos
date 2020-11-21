@@ -122,7 +122,9 @@ export default class Connection extends Conversation {
   wsEventJoin(params) {
     const conversation = this.ensureConversation(params);
     const nick = params.nick || this.nick;
-    if (nick != this.nick) conversation.addMessage({message: '%1 joined.', vars: [nick]});
+    if (nick != this.nick && !params.silent) {
+      conversation.addMessage({message: '%1 joined.', vars: [nick]});
+    }
     conversation.participants([{nick}]);
   }
 
