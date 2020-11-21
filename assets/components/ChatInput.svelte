@@ -9,7 +9,7 @@ import {route} from '../store/Route';
 export const uploader = uploadFiles;
 export let conversation = {};
 export function getUploadEl() { return uploadEl }
-export function setValue(val) { inputEl.value = val }
+export function setValue(userInput) { conversation.update({userInput}) }
 
 let activeAutocompleteIndex = 0;
 let autocompleteCategory = 'none';
@@ -31,7 +31,7 @@ $: $route && inputEl && conversation && (inputEl.value = (typeof conversation.us
 
 export function add(str, params = {}) {
   const space = params.space || '';
-  inputEl.value = inputParts[0] + str + space + inputParts[3];
+  conversation.update({userInput: inputParts[0] + str + space + inputParts[3]});
   inputEl.selectionStart = inputEl.selectionEnd = (inputParts[0] + str + space).length;
   if (space.length) pos = inputEl.selectionStart;
 }
@@ -95,15 +95,13 @@ export function sendMessage(e) {
   const msg = {method: 'send'};
   msg.message = e.preventDefault ? inputEl.value : e.message;
 
-  conversation.update({userInput: ''});
-
   // Aliases
   msg.message = msg.message.replace(/^\/close/i, '/part');
   msg.message = msg.message.replace(/^\/j\b/i, '/join');
   msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
   if (msg.message.length) conversation.send(msg).then(handleMessageResponse);
-  if (!conversation.is('search')) inputEl.value = '';
+  if (!conversation.is('search')) conversation.update({userInput: ''});
 
   pos = 0;
 }
