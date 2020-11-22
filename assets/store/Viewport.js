@@ -6,6 +6,7 @@ export default class Viewport extends Reactive {
     super();
     this.prop('cookie', 'colorScheme', 'auto');
     this.prop('cookie', 'theme', 'convos');
+    this.prop('cookie', 'compactDisplay', false);
     this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'version', '');
     this.prop('ro', 'colorSchemeOptions', ['Auto', 'Light', 'Dark'].map(o => [o.toLowerCase(), o]));
@@ -108,6 +109,12 @@ export default class Viewport extends Reactive {
     if (key == 'contact') value = btoa(value);
     if (typeof value == 'boolean') value = value ? 'yes' : 'no';
     el.content = value;
+  }
+
+  update(params) {
+    const body = document.getElementsByTagName('body')[0];
+    body.classList[this.compactDisplay ? 'add' : 'remove']('is-compact');
+    return super.update(params);
   }
 }
 

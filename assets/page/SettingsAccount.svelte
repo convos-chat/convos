@@ -16,6 +16,7 @@ const user = getContext('user');
 const updateUserOp = api('updateUser');
 
 let formEl;
+let compactDisplay = viewport.compactDisplay;
 let expandUrlToMedia = viewport.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
 let selectedColorScheme = viewport.colorScheme;
@@ -54,7 +55,7 @@ function updateUserFromForm(e) {
   }
 
   notify.update({wantNotifications});
-  viewport.update({expandUrlToMedia});
+  viewport.update({expandUrlToMedia, compactDisplay});
   user.update({ignoreStatuses});
   viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
   updateUserOp.perform(e.target);
@@ -94,6 +95,10 @@ function updateUserFromForm(e) {
     <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{viewport.colorSchemeOptions}" bind:value="{selectedColorScheme}">
       <span slot="label">{l('Color scheme')}</span>
     </SelectField>
+
+    <Checkbox name="compact" bind:checked="{compactDisplay}">
+      <span slot="label">{l('Enable compact message display')}</span>
+    </Checkbox>
 
     <TextField type="password" name="password" autocomplete="new-password">
       <span slot="label">{l('Password')}</span>
