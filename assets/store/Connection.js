@@ -58,7 +58,12 @@ export default class Connection extends Conversation {
 
   send(message) {
     if (typeof message == 'string') message = {message};
-    if (message.message.indexOf('/') != 0) message.message = '/quote ' + message.message;
+
+    const re = new RegExp('^' + this.participants().map(p => p.id).join('|') + ':', 'i');
+    if (message.message.indexOf('/') != 0 && !message.message.match(re)) {
+      message.message = '/quote ' + message.message;
+    }
+
     return super.send(message);
   }
 

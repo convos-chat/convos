@@ -92,7 +92,12 @@ sub send_p {
   $message =~ s!^\s*/!/!s;                  # Remove space in front of command
   $message =~ s![\r\n]+$!!s;
 
-  return $self->_send_message_p($target, $message) unless $message =~ s!^/([A-Za-z]+)\s*!!;
+  unless ($message =~ s!^/([A-Za-z]+)\s*!!) {
+    my $re = join '|', @{$self->service_accounts};
+    $target = $1 if $message =~ s!^($re):\s+!!;
+    return $self->_send_message_p($target, $message);
+  }
+
   my $cmd = uc $1;
 
   return $self->_send_message_p($target, "\x{1}ACTION $message\x{1}") if $cmd eq 'ME';
