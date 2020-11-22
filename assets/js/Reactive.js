@@ -59,15 +59,18 @@ export default class Reactive {
    *
    * The following types are allowed:
    *
-   * 1. "persist" is a property that will be stored in the browser's localStorage.
+   * 1. "cookie" is a property that will be stored in the browser's cookie.
    *    It can be changed by calling update().
-   * 2. "ro" is a property that cannot be changed.
-   * 3. "rw" is a property that can be changed by the "update()" method.
+   * 2. "persist" is a property that will be stored in the browser's localStorage.
+   *    It can be changed by calling update().
+   * 3. "ro" is a property that cannot be changed.
+   * 4. "rw" is a property that can be changed by the "update()" method.
    *
    * The code below cannot be used to update any prop() property. A change must
    * go through update().
    *
-   *     this.some_property = 'new value';
+   *    this.some_property = 'new value'; // Will not work
+   *    this.update({some_property: 'new value'}); // Works
    *
    * @memberof Reactive
    * @param {String} type either "cookie", "persist", "ro" or "rw".
