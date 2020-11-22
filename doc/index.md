@@ -21,8 +21,11 @@ The [configuration](/doc/config) guide explains how to customize Convos.
 Note that there is no need to configure Convos to get it running! Convos has
 sane defaults, which makes it a breeze to start.
 
-You might also want to check out the [faq](/doc/faq) for the most common
+You might also want to check out the [FAQ](/doc/faq) for the most common
 obstacles while setting up and running Convos.
+
+Have a look at "[Running Convos behind my favorite web server](/doc/reverse-proxy)"
+if you want to run Convos behind nginx, Apache or some other reverse proxy.
 
 ## Developing
 
