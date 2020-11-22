@@ -181,7 +181,7 @@ function showFullscreen(e, el) {
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    {#if i && i == $conversation.messages.length - $conversation.unread}
+    {#if i && i == $conversation.messages.length - $conversation.realUnread}
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {l('New messages')}</span></div>
     {/if}
 

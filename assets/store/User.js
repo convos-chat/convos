@@ -26,6 +26,7 @@ export default class User extends Reactive {
     this.prop('rw', 'rtc', {});
     this.prop('rw', 'status', 'pending');
     this.prop('persist', 'ignoreStatuses', false);
+    this.prop('persist', 'gatherNotifications', false);
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));
@@ -144,6 +145,7 @@ export default class User extends Reactive {
     msg.bubbles = true;
     msg.stopPropagation = () => { msg.bubbles = false };
     msg.silent = this.ignoreStatuses;
+    msg.gather = this.gatherNotifications;
     this.emit(msg.dispatchTo, msg);
 
     if (msg.highlight) this.notifications.addMessage(msg);

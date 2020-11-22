@@ -40,6 +40,8 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
+    this.prop('rw', 'realUnread', params.unread || 0);
+    this.prop('rw', 'unreadFrom', '');
 
     if (params.hasOwnProperty('conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);
@@ -170,9 +172,9 @@ export default class Conversation extends Reactive {
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
-    this.update({errors: 0, unread: 0});
+    this.update({errors: 0, unread: 0, realUnread: 0});
     await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
-    return this.update({unread: 0});
+    return this.update({unread: 0, realUnread: 0});
   }
 
   update(params) {
@@ -267,9 +269,14 @@ export default class Conversation extends Reactive {
   }
 
   _maybeIncreaseUnread(msg) {
+    let prevmsg = this.messages[this.messages.length -1];
     if (!msg.from || msg.yourself) return;
     if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
-    this.update({unread: this.unread + 1});
+    if (msg.gather && this.conversation_id == msg.conversation_id && prevmsg && prevmsg.from == msg.from && this.unreadFrom == msg.from && this.unread > 0) {
+      this.update({realUnread: this.realUnread + 1});
+    } else {
+      this.update({realUnread: this.realUnread + 1, unread: this.unread + 1, unreadFrom : msg.from});
+    }
   }
 
   _maybeNotify(msg) {

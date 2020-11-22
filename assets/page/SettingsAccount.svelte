@@ -22,6 +22,7 @@ let selectedColorScheme = viewport.colorScheme;
 let selectedTheme = viewport.theme;
 let wantNotifications = notify.wantNotifications;
 let ignoreStatuses = user.ignoreStatuses;
+let gatherNotifications = user.gatherNotifications;
 
 $: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
 
@@ -56,6 +57,7 @@ function updateUserFromForm(e) {
   notify.update({wantNotifications});
   viewport.update({expandUrlToMedia});
   user.update({ignoreStatuses});
+  user.update({gatherNotifications});
   viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
   updateUserOp.perform(e.target);
 }
@@ -77,6 +79,10 @@ function updateUserFromForm(e) {
 
     <Checkbox name="notifications" bind:checked="{wantNotifications}">
       <span slot="label">{l('Enable notifications')}</span>
+    </Checkbox>
+
+    <Checkbox name="gather" bind:checked="{gatherNotifications}">
+      <span slot="label">{l('Notify only one time per participant')}</span>
     </Checkbox>
     
     <Checkbox name="statuses" bind:checked="{ignoreStatuses}">
