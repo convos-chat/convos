@@ -268,3 +268,19 @@
     cursor: inherit;
   }
 }
+
+body.is-compact {
+  .message {
+    &.has-not-same-from {
+      margin-top: 0.2rem;
+    }
+  }
+
+  .message__from {
+    display: inline;
+  }
+
+  .message__text {
+    display: inline;
+  }
+}
