@@ -1,5 +1,28 @@
 Revision history for perl distribution Convos
 
+5.01 2020-11-23T14:23:00+0900
+ - Add support for negotiating IRCv3 capabilities #444
+ - Add chat input text is coupled to conversation #524
+   Contributor: Thibault Duponchelle
+ - Add support for hiding join/part messages #527
+   Contributor: Thibault Duponchelle
+ - Change WHOIS reply to show more information #528
+   Contributor: Abhijit Menon-Sen
+ - Add "realname" as a new connection parameter #529
+   Contributor: Abhijit Menon-Sen
+ - Add WHOIS will be run on new private messages
+ - Changed service accounts "chanserv" and "nickserv" will show up in connection conversation #379 #532
+ - Change clicking on a nick will create a new conversation #530
+ - Fix avoid rendering regexes as markdown links #522
+ - Fix not sending username with a non-alphanumeric first character #531
+   Contributor: Abhijit Menon-Sen
+ - Fix J::V and M::P::OpeAPI dependencies
+ - Fix clicking on [settings] link in chat
+ - Fix loading notifications
+ - Fix not counting your own messages as unread
+ - Fix not queueing a connection if wanted_state is "disconnected"
+ - Fix scrolling to bottom of conversation on initial render
+
 5.00 2020-11-17T07:24:00+0900
  - Renamed "Dialog" to "Conversation" #519
  - Renamed "$sidebar-item-dialog-indent" css variable to "$sidebar-item-conversation-indent" #519
