@@ -92,7 +92,12 @@ sub send_p {
   $message =~ s!^\s*/!/!s;                  # Remove space in front of command
   $message =~ s![\r\n]+$!!s;
 
-  return $self->_send_message_p($target, $message) unless $message =~ s!^/([A-Za-z]+)\s*!!;
+  unless ($message =~ s!^/([A-Za-z]+)\s*!!) {
+    my $re = join '|', @{$self->service_accounts};
+    $target = $1 if $message =~ s!^($re):\s+!!;
+    return $self->_send_message_p($target, $message);
+  }
+
   my $cmd = uc $1;
 
   return $self->_send_message_p($target, "\x{1}ACTION $message\x{1}") if $cmd eq 'ME';
@@ -370,10 +375,15 @@ sub _irc_event_privmsg {
   $message[0] =~ s/\x03\d{0,15}(,\d{0,15})?//g;
   $message[0] =~ s/[\x00-\x1f]//g;
 
-  if ($user) {
-    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id,
-      $target = $self->get_conversation($target) || $self->conversation({name => $target});
-    $from = $nick;
+  if (grep { $_ eq lc $nick || $_ eq lc $conversation_id } map {lc} @{$self->service_accounts}) {
+    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
+    $target = $self->get_conversation($target) || $self->messages;
+    $from   = $nick;
+  }
+  elsif ($user) {
+    $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
+    $target = $self->get_conversation($target) || $self->conversation({name => $target});
+    $from   = $nick;
   }
 
   $target ||= $self->messages;

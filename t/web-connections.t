@@ -35,6 +35,7 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
     me                  => {},
     on_connect_commands => [],
     protocol            => 'irc',
+    service_accounts    => [qw(chanserv nickserv)],
     state               => 'disconnected',
     url                 => 'irc://irc.example.com:6667',
     wanted_state        => 'disconnected',

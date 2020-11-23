@@ -20,6 +20,9 @@ my $err;
 $connection->send_p('', 'whatever')->catch(sub { $err = shift })->$wait_success('send_p');
 like $err, qr{without target}, 'send: without target';
 
+$connection->send_p('', 'chanserv: whatever')->catch(sub { $err = shift })->$wait_success('send_p');
+like $err, qr{Not connected}, 'target from message';
+
 $connection->send_p('#test_convos' => '0')->catch(sub { $err = shift })->$wait_success('send_p');
 like $err, qr{Not connected}i, 'send: not connected';
 
