@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+5.02 Not Released
+ - Add user input to localStorage, so it survives refresh
+ - Fix injecting upload link to user input field
+ - Fix not dropping key pressees
+
 5.01 2020-11-23T14:23:00+0900
  - Add support for negotiating IRCv3 capabilities #444
  - Add chat input text is coupled to conversation #524

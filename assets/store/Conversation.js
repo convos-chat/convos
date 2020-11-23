@@ -24,6 +24,9 @@ export default class Conversation extends Reactive {
   constructor(params) {
     super();
 
+    const keyPrefix = [params.connection_id, params.conversation_id, ''].filter(v => typeof v != 'undefined').join(':');
+    this.prop('persist', 'userInput', '', {key: keyPrefix + 'userInput'});
+
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
@@ -53,7 +56,6 @@ export default class Conversation extends Reactive {
 
     if (params.conversation_id) {
       this.prop('persist', 'wantNotifications', this.is_private, {key: params.conversation_id +  ':wantNotifications'});
-      this.prop('rw', 'userInput', '');
     }
 
     this.socket = params.socket || getSocket('/events');

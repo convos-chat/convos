@@ -21,9 +21,9 @@ export default class dragAndDrop {
     this.removeDragOverDebounced = debounce(() => this._removeDragOver(), 100);
   }
 
-  attach(dropEl, uploadEl, targetEl = document) {
+  attach(dropEl, uploader, targetEl = document) {
     this.dropEl = dropEl;
-    this.uploadEl = uploadEl;
+    this.uploader = uploader;
     this.targetEl = targetEl;
 
     Object.keys(this.dragAndDropEvents).forEach(name => {
@@ -46,16 +46,16 @@ export default class dragAndDrop {
 
   drop(e) {
     this.stop(e);
-    if (this.uploadEl) this.uploadEl.uploader(e);
+    if (this.uploader) this.uploader(e);
   }
 
   paste(e) {
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-    if (!this.uploadEl) return;
+    if (!this.uploader) return;
 
     for (let i = 0; i < items.length; i++) {
       if (items[i].kind != 'file') continue;
-      return this.uploadEl.uploader({dataTransfer: {files: [items[i].getAsFile()]}});
+      return this.uploader({dataTransfer: {files: [items[i].getAsFile()]}});
     }
   }
 

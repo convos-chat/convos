@@ -23,11 +23,11 @@ const user = getContext('user');
 
 const dragAndDrop = new DragAndDrop();
 
-let chatInput;
 let connection = user.notifications;
 let conversation = user.notifications;
 let now = new Time();
 let onLoadHash = '';
+let uploader;
 let unsubscribe = {};
 
 $: setConversationFromRoute($route);
@@ -37,7 +37,7 @@ $: notConnected = $conversation.frozen ? true : false;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 onMount(() => {
-  dragAndDrop.attach(document.querySelector('.main'), chatInput);
+  dragAndDrop.attach(document.querySelector('.main'), uploader);
 });
 
 onDestroy(() => {
@@ -236,5 +236,5 @@ function showFullscreen(e, el) {
   {/if}
 </InfinityScroll>
 
-<ChatInput conversation="{conversation}" bind:this="{chatInput}"/>
+<ChatInput conversation="{conversation}" bind:uploader="{uploader}"/>
 <ChatParticipants conversation="{conversation}"/>
