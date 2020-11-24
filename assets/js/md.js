@@ -25,6 +25,9 @@ export const emojiAliases = {
   ':smiley:': ':D',
   ':stuck_out_tongue:': ':P',
   ':wink:': ';)',
+  ':open_mouth:' ':O',
+  ':kissing:' ':-*',
+  ':heart:' '<3',
 };
 
 const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
