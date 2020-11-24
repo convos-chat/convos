@@ -21,12 +21,12 @@ export const emojiAliases = {
   ':disappointed:': ':(',
   ':grin:': ';D',
   ':heart:': '&lt;3',
-  ':kissing:' ':-*',
-  ':open_mouth:' ':O',
+  ':kissing:': ':-*',
+  ':open_mouth:': ':O',
   ':slight_smile:': ':)',
   ':smiley:': ':D',
   ':stuck_out_tongue:': ':P',
-  ':thumbsup:' '(Y)',
+  ':thumbsup:': '(Y)',
   ':wink:': ';)',
 };
 
