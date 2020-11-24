@@ -1,7 +1,8 @@
 Revision history for perl distribution Convos
 
-5.03 Not Released
+5.04 Not Released
  - Fix pasting text into the chat input
+ - Fix updating search field value
 
 5.03 2020-11-24T21:24:00+0900
  - Fix not jumping back in the chat input when pressing shift

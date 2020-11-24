@@ -7,7 +7,6 @@ import {l} from '../js/i18n';
 
 export const uploader = uploadFiles;
 export let conversation;
-export let value = '';
 
 let autocompleteIndex = 0;
 let autocompleteOptions = [];
@@ -49,8 +48,7 @@ function handleMessageResponse(msg) {
 function onChange(inputEl) {
   autocompleteIndex = 0;
   splitValueAt = inputEl.selectionStart;
-  value = inputEl.value;
-  conversation.update({userInput: value});
+  conversation.update({userInput: inputEl.value});
 }
 
 function onReady(el) {
@@ -101,7 +99,6 @@ function selectOptionOrSendMessage(e) {
 function setValue(val) {
   if (inputEl) inputEl.value = val;
   conversation.update({userInput: val});
-  value = val;
 }
 
 function startAutocomplete(splitValueAt) {

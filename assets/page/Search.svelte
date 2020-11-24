@@ -11,7 +11,6 @@ import {route} from '../store/Route';
 
 const user = getContext('user');
 
-let chatInputValue = '';
 let conversation = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
 
 $: messages = renderMessages({conversation: $conversation});
@@ -34,7 +33,7 @@ function gotoConversation(e) {
 
 function search(msg) {
   const match = msg.message;
-  chatInputValue = match;
+  conversation.update({userInput: match});
   route.go('/search?q=' + encodeURIComponent(match), {replace: true});
   return match ? conversation.load({match}) : conversation.update({messages: []});
 }
@@ -93,5 +92,5 @@ function setConversationFromRoute(route) {
 </InfinityScroll>
 
 {#if conversation.is('search')}
-  <ChatInput conversation="{conversation}" bind:value="{chatInputValue}"/>
+  <ChatInput conversation="{conversation}"/>
 {/if}
