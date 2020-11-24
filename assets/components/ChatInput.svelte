@@ -1,6 +1,6 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import {calculateAutocompleteOptions as _calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
+import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {getContext} from 'svelte';
 import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
@@ -9,30 +9,26 @@ export const uploader = uploadFiles;
 export let conversation;
 export let value = '';
 
-let cursorPos = 0;
+let autocompleteIndex = 0;
+let autocompleteOptions = [];
+let autocompleteCategory = 'none';
+let inputEl;
 let splitValueAt = 0;
 
 const api = getContext('api');
 const user = getContext('user');
 
-$: autocompleteIndex = splitValueAt && 0; // set it to zero when splitValueAt changes
-$: autocompleteOptions = calculateAutocompleteOptions(splitValueAt);
-$: autocompleteCategory = autocompleteOptions.length && autocompleteOptions[0].autocompleteCategory || 'none';
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
+$: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
 
-function calculateAutocompleteOptions(splitValueAt) {
-  return _calculateAutocompleteOptions(value, splitValueAt, {conversation, user});
-}
-
 function fillin(str, params) {
-  const {before, middle, after} = _fillIn(str, {...params, cursorPos, value});
-  cursorPos = (before + middle).length;
-  value = before + middle + after;
-  conversation.update({userInput: value});
+  const {before, middle, after} = _fillIn(str, {...params, cursorPos: inputEl.selectionStart, value});
+  setValue(before + middle + after);
+  inputEl.selectionStart = inputEl.selectionEnd = (before + middle).length;
 }
 
 function focusAutocompleteItem(e, moveBy) {
@@ -50,13 +46,20 @@ function handleMessageResponse(msg) {
   conversation.addMessage({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
 }
 
-function onReady(inputEl, params) {
-  inputEl.addEventListener('change', () => {
-    cursorPos = splitValueAt = inputEl.selectionStart;
-    value = inputEl.value;
-    conversation.update({userInput: value});
-  });
+function onChange(inputEl) {
+  autocompleteIndex = 0;
+  splitValueAt = inputEl.selectionStart;
+  value = inputEl.value;
+  conversation.update({userInput: value});
+}
 
+function onReady(el) {
+  inputEl = el;
+  inputEl.addEventListener('focus', () => (splitValueAt = value.length + 1));
+  inputEl.addEventListener('change', () => onChange(inputEl));
+  inputEl.addEventListener('keyup', (e) => {
+    if (e.key.length == 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) != -1) onChange(inputEl);
+  });
   inputEl.addEventListener('keydown', (e) => {
     if (e.key == 'ArrowDown') return focusAutocompleteItem(e, e.shiftKey ? 4 : 1);
     if (e.key == 'ArrowUp') return focusAutocompleteItem(e, e.shiftKey ? -4 : -1);
@@ -64,34 +67,21 @@ function onReady(inputEl, params) {
     if (e.key == 'Tab') return focusAutocompleteItem(e, e.shiftKey ? -1 : 1);
   });
 
-  inputEl.addEventListener('keyup', (e) => {
-    value = inputEl.value;
-    conversation.update({userInput: value});
-    const updatePosKeys = ['ArrowLeft', 'ArrowRight', 'Backspace'];
-    if (e.key.length == 1 || updatePosKeys.indexOf(e.key) != -1) cursorPos = splitValueAt = inputEl.selectionStart;
-  });
-
-  onUpdate(inputEl, params);
-  return {update: (params) => onUpdate(inputEl, params)};
-}
-
-function onUpdate(inputEl, {cursorPos, value}) {
-  if (inputEl.value != value) inputEl.value = value; // Prevent recursion
-  if (inputEl.selectionStart == inputEl.selectionEnd) inputEl.selectionStart = inputEl.selectionEnd = cursorPos;
+  setValue(typeof conversation.userInput == 'undefined' ? '' : conversation.userInput);
 }
 
 function selectOption(e) {
   autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
   fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
-  splitValueAt = cursorPos;
+  setTimeout(() => inputEl.focus(), 1);
 }
 
-function selectOptionOrSendMessage(e = {}) {
+function selectOptionOrSendMessage(e) {
   const autocompleteOpt = autocompleteOptions[autocompleteIndex];
   if (autocompleteOpt) {
     e.preventDefault();
-    fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
-    splitValueAt = cursorPos;
+    fillin(autocompleteOptions[autocompleteIndex], {replace: true});
+    splitValueAt = inputEl.selectionStart + 1;
   }
   else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
     e.preventDefault();
@@ -104,18 +94,25 @@ function selectOptionOrSendMessage(e = {}) {
     msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
     if (msg.message.length) conversation.send(msg).then(handleMessageResponse);
-    if (!conversation.is('search')) {
-      conversation.update({userInput: ''});
-      splitValueAt = 0;
-      value = '';
-    }
+    if (!conversation.is('search')) setValue('');
   }
+}
+
+function setValue(val) {
+  if (inputEl) inputEl.value = val;
+  conversation.update({userInput: val});
+  value = val;
+}
+
+function startAutocomplete(splitValueAt) {
+  autocompleteOptions = splitValueAt > value.length ? [] : calculateAutocompleteOptions(value, splitValueAt, {conversation, user});
+  autocompleteCategory = autocompleteOptions.length && autocompleteOptions[0].autocompleteCategory || 'none';
 }
 
 function updateValueWhenConversationChanges(conversation) {
   if (updateValueWhenConversationChanges.lock == conversation.path) return;
   updateValueWhenConversationChanges.lock = conversation.path;
-  value = typeof conversation.userInput == 'undefined' ? '' : conversation.userInput;
+  setValue(typeof conversation.userInput == 'undefined' ? '' : conversation.userInput);
 }
 
 function uploadFiles(e) {
@@ -134,7 +131,7 @@ function uploadFiles(e) {
 </script>
 
 <form class="chat-input" on:submit|preventDefault>
-  <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady="{{cursorPos, value}}"></textarea>
+  <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
   <label class="upload is-hallow" hidden="{!conversation.is('conversation')}">
     <input type="file" on:change="{uploadFiles}"/>

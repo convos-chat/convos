@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.03 Not Released
+ - Fix not jumping back in the chat input when pressing shift
+
 5.02 2020-11-24T18:53:00+0900
  - Add user input to localStorage, so it survives refresh
  - Fix injecting upload link to user input field
