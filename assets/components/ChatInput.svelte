@@ -1,6 +1,6 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import {autocomplete, fillIn as _fillIn} from '../js/autocomplete';
+import {calculateAutocompleteOptions as _calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {getContext} from 'svelte';
 import {extractErrorMessage} from '../js/util';
 import {l} from '../js/i18n';
@@ -9,15 +9,15 @@ export const uploader = uploadFiles;
 export let conversation;
 export let value = '';
 
-let activeAutocompleteIndex = 0;
-let autocompleteCategory = 'none';
 let cursorPos = 0;
 let splitValueAt = 0;
 
 const api = getContext('api');
 const user = getContext('user');
 
+$: autocompleteIndex = splitValueAt && 0; // set it to zero when splitValueAt changes
 $: autocompleteOptions = calculateAutocompleteOptions(splitValueAt);
+$: autocompleteCategory = autocompleteOptions.length && autocompleteOptions[0].autocompleteCategory || 'none';
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
@@ -25,26 +25,7 @@ $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: updateValueWhenConversationChanges(conversation);
 
 function calculateAutocompleteOptions(splitValueAt) {
-  let key = '';
-  let afterKey = '';
-
-  const before = value.substring(0, splitValueAt).replace(/(\S)(\S*)$/, (a, b, c) => {
-    key = b;
-    afterKey = c;
-    return '';
-  });
-
-  autocompleteCategory =
-      key == ':' && afterKey.length ? 'emojis'
-    : key == '/' && !before.length  ? 'commands'
-    : key == '@' && afterKey.length ? 'nicks'
-    : key == '#' || key == '&'      ? 'conversations'
-    :                                 'none';
-
-  activeAutocompleteIndex = 0;
-  const opts = autocomplete(autocompleteCategory, {conversation, query: key + afterKey, user});
-  if (opts.length) opts.unshift({val: key + afterKey});
-  return opts;
+  return _calculateAutocompleteOptions(value, splitValueAt, {conversation, user});
 }
 
 function fillin(str, params) {
@@ -57,10 +38,10 @@ function fillin(str, params) {
 function focusAutocompleteItem(e, moveBy) {
   if (!autocompleteOptions.length) return;
   e.preventDefault();
-  activeAutocompleteIndex += moveBy;
-  if (activeAutocompleteIndex < 0) activeAutocompleteIndex = autocompleteOptions.length - 1;
-  if (activeAutocompleteIndex >= autocompleteOptions.length) activeAutocompleteIndex = 0;
-  fillin(autocompleteOptions[activeAutocompleteIndex], {replace: true});
+  autocompleteIndex += moveBy;
+  if (autocompleteIndex < 0) autocompleteIndex = autocompleteOptions.length - 1;
+  if (autocompleteIndex >= autocompleteOptions.length) autocompleteIndex = 0;
+  fillin(autocompleteOptions[autocompleteIndex], {replace: true});
 }
 
 function handleMessageResponse(msg) {
@@ -100,16 +81,16 @@ function onUpdate(inputEl, {cursorPos, value}) {
 }
 
 function selectOption(e) {
-  activeAutocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
-  fillin(autocompleteOptions[activeAutocompleteIndex], {padAfter: true, replace: true});
+  autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
+  fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
   splitValueAt = cursorPos;
 }
 
 function selectOptionOrSendMessage(e = {}) {
-  const autocompleteOpt = autocompleteOptions[activeAutocompleteIndex];
+  const autocompleteOpt = autocompleteOptions[autocompleteIndex];
   if (autocompleteOpt) {
     e.preventDefault();
-    fillin(autocompleteOptions[activeAutocompleteIndex], {padAfter: true, replace: true});
+    fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
     splitValueAt = cursorPos;
   }
   else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -164,7 +145,7 @@ function uploadFiles(e) {
 
   <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
     {#each autocompleteOptions as opt, i}
-      <a href="#index:{i}" class:has-focus="{i == activeAutocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
+      <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
     {/each}
   </div>
 </form>

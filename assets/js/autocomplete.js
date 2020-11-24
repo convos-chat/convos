@@ -37,6 +37,28 @@ export function fillIn(middle, params) {
   return {before, middle, after};
 }
 
+export function calculateAutocompleteOptions(str, splitValueAt, {conversation, user}) {
+  let key = '';
+  let afterKey = '';
+
+  const before = str.substring(0, splitValueAt).replace(/(\S)(\S*)$/, (a, b, c) => {
+    key = b;
+    afterKey = c;
+    return '';
+  });
+
+  const autocompleteCategory =
+      key == ':' && afterKey.length ? 'emojis'
+    : key == '/' && !before.length  ? 'commands'
+    : key == '@' && afterKey.length ? 'nicks'
+    : key == '#' || key == '&'      ? 'conversations'
+    :                                 'none';
+
+  const opts = autocomplete(autocompleteCategory, {conversation, query: key + afterKey, user});
+  if (opts.length) opts.unshift({autocompleteCategory, val: key + afterKey});
+  return opts;
+}
+
 autocomplete.commands = ({query}) => {
   const opts = [];
 
