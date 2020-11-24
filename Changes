@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.03 Not Released
+5.03 2020-11-24T21:24:00+0900
  - Fix not jumping back in the chat input when pressing shift
 
 5.02 2020-11-24T18:53:00+0900

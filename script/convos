@@ -19,7 +19,7 @@ use Cwd ();
 use File::Spec;
 use FindBin;
 
-our $VERSION = '5.02';
+our $VERSION = '5.03';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
