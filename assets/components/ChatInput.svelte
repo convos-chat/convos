@@ -26,7 +26,7 @@ $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
 
 function fillin(str, params) {
-  const {before, middle, after} = _fillIn(str, {...params, cursorPos: inputEl.selectionStart, value});
+  const {before, middle, after} = _fillIn(str, {...params, cursorPos: inputEl.selectionStart, value: inputEl.value});
   setValue(before + middle + after);
   inputEl.selectionStart = inputEl.selectionEnd = (before + middle).length;
 }
@@ -55,7 +55,7 @@ function onChange(inputEl) {
 
 function onReady(el) {
   inputEl = el;
-  inputEl.addEventListener('focus', () => (splitValueAt = value.length + 1));
+  inputEl.addEventListener('focus', () => (splitValueAt = inputEl.value.length + 1));
   inputEl.addEventListener('change', () => onChange(inputEl));
   inputEl.addEventListener('keyup', (e) => {
     if (e.key.length == 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) != -1) onChange(inputEl);
@@ -86,7 +86,7 @@ function selectOptionOrSendMessage(e) {
   else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
     e.preventDefault();
     const msg = {method: 'send'};
-    msg.message = value;
+    msg.message = inputEl.value;
 
     // Aliases
     msg.message = msg.message.replace(/^\/close/i, '/part');
@@ -105,7 +105,8 @@ function setValue(val) {
 }
 
 function startAutocomplete(splitValueAt) {
-  autocompleteOptions = splitValueAt > value.length ? [] : calculateAutocompleteOptions(value, splitValueAt, {conversation, user});
+  if (!inputEl) return;
+  autocompleteOptions = splitValueAt > inputEl.value.length ? [] : calculateAutocompleteOptions(inputEl.value, splitValueAt, {conversation, user});
   autocompleteCategory = autocompleteOptions.length && autocompleteOptions[0].autocompleteCategory || 'none';
 }
 
