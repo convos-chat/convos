@@ -65,6 +65,7 @@ export default class Conversation extends Reactive {
   addMessage(msg) {
     this._maybeIncreaseUnread(msg);
     this._maybeNotify(msg);
+    if (!this.historyStopAt && msg.type == 'private') return;
     return this.addMessages('push', [msg]);
   }
 

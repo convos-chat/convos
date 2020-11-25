@@ -161,6 +161,17 @@ test('addMessage private', () => {
   expect(d.unread).toBe(2);
 });
 
+test('addMessage without historyStopAt', () => {
+  const c = new Conversation({connection_id: 'irc-localhost', conversation_id: 'supergirl'});
+
+  c.addMessage({from: 'superwoman', message: 'dropped', type: 'private'});
+  expect(c.messages.length).toBe(0);
+
+  c.update({historyStopAt: new Date()});
+  c.addMessage({from: 'superwoman', message: 'dropped', type: 'private'});
+  expect(c.messages.length).toBe(1);
+});
+
 function mockMessagesOpPerform(res) {
   return function(params) {
     this.performed = params;
