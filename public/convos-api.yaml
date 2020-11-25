@@ -803,14 +803,6 @@ definitions:
         description: 'Example: 2015-09-06T10:47:31Z'
         format: date-time
         type: string
-      rtc:
-        description: 'WebRTC configuration'
-        type: object
-        properties:
-          ice_servers:
-            type: array
-            items:
-              type: object
       unread:
         description: Number of unread notifications
         type: integer

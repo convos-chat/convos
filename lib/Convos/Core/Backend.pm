@@ -85,13 +85,6 @@ sub _setup {
         }
       );
       $connection->on(
-        rtc => sub {
-          my ($connection, $type, $target, $msg) = @_;
-          $self->emit("user:$uid",
-            rtc => {connection_id => $cid, conversation_id => $target->id, %$msg, type => $type});
-        }
-      );
-      $connection->on(
         state => sub {
           my ($connection, $type, $args) = @_;
           $self->emit("user:$uid", state => {connection_id => $cid, %$args, type => $type});

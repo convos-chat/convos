@@ -33,7 +33,7 @@ $t->websocket_ok('/events')
   ->send_ok({json => {method => 'load', object => 'user', params => {connections => 1}}})
   ->message_ok->json_message_is('/user/email', 'superman@example.com')
   ->json_message_is('/user/default_connection', 'irc://chat.freenode.net:6697/%23convos')
-  ->json_message_is('/user/forced_connection',  false)->json_message_has('/user/rtc')->finish_ok;
+  ->json_message_is('/user/forced_connection',  false)->finish_ok;
 
 $t->get_ok('/api/user')->status_is(200);
 $t->get_ok('/login')->status_is(200);

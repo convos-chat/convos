@@ -12,7 +12,7 @@ use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE DEBUG disk_usage generate_secret has_many pretty_connection_name),
-  qw(require_module sdp_decode sdp_encode short_checksum),
+  qw(require_module short_checksum),
 );
 
 sub disk_usage {
@@ -126,28 +126,6 @@ sub require_module {
 HERE
 }
 
-sub sdp_decode {
-  return join "\r\n", map {
-    local $_ = "$_";
-    s/^F!(.+)\s(.+)/{"a=fingerprint:$1 " . join ':', map {uc sprintf '%02x', ord $_} split '', b64_decode $2}/e;
-    s/^I!/a=ice-/;
-    s/^R!/a=rtpmap:/;
-    s/^T!(\d+)/a=rtpmap:$1 telephone-event/;
-    $_;
-  } split(/\r?\n/, shift), '';
-}
-
-sub sdp_encode {
-  return join "\n", map {
-    s/a=fingerprint:(.+)\s(.+)/{"F!$1 " . b64_encode(join('', map {chr hex} split ':', $2), '')}/e;
-    local $_ = "$_";
-    s/^a=rtpmap:(\d+) telephone-event/T!$1/;
-    s/^a=rtpmap:/R!/;
-    s/^a=ice-/I!/;
-    $_;
-  } grep { !/^(?:a=ssrc|a=extmap:\d|a=fmtp:\d|a=rtcp-fb:\d)/ } split /\r?\n/, shift;
-}
-
 sub short_checksum {
   my $checksum = 40 == length $_[0] && $_[0] =~ /^[a-z0-9]{40}$/ ? shift : sha1_sum shift;
   my $short    = b64_encode pack 'H*', $checksum;
@@ -259,18 +237,6 @@ Will turn a connection URL into a nicer connection name.
   require_module "Some::Module";
 
 Will load the module or C<die()> with a message for how to install it.
-
-=head2 sdp_decode
-
-  $sdp = sdp_decode "v=0\n...";
-
-Used to decode the C<$sdp> created by L</sdp_encode>.
-
-=head2 sdp_encode
-
-  $sdp = sdp_encode "v=0\r\n...";
-
-Will filter and compress a SDP message.
 
 =head2 short_checksum
 

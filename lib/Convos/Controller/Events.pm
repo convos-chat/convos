@@ -69,7 +69,6 @@ sub _event_load {
 
   $self->backend->user->get_p($data->{params} || {})->then(sub {
     my $user = shift;
-    $user->{rtc}                = $self->app->core->settings->rtc;
     $user->{default_connection} = $self->settings('default_connection')->to_string;
     $user->{forced_connection}  = $self->settings('forced_connection');
     $self->send({json => {event => 'load', id => $id, user => $user}});
@@ -81,19 +80,6 @@ sub _event_ping {
   my $ts = time;
   my $id = $data->{id} || $ts;
   $self->send({json => {event => 'pong', id => $id, ts => $ts}});
-}
-
-sub _event_rtc {
-  my ($self, $data) = @_;
-  return $self->_err('Connection not found.', $data)
-    unless $data->{connection_id}
-    and my $connection = $self->backend->user->get_connection($data->{connection_id});
-
-  return $connection->rtc_p($data)->then(sub {
-    my $res = shift;
-    $res->{event} = 'rtc';
-    $self->send({json => $res});
-  });
 }
 
 sub _event_send {
@@ -188,11 +174,6 @@ The "ping" method is used to keep the WebSocket open. Example:
   };
 
   ws.send(JSON.stringify({method: "ping"});
-
-=head3 rtc
-
-WebRTC communication is still experimental, so no documentation is available at
-this time.
 
 =head3 send
 
@@ -334,11 +315,6 @@ The value of "type" might change in the future. Suggested values:
   error   | error
 
 =back
-
-=head3 rtc
-
-WebRTC communication is still experimental, so no documentation is available at
-this time.
 
 =head3 State changes
 

@@ -53,7 +53,6 @@ sub get {
 
   return $user->get_p($self->req->url->query->to_hash)->then(sub {
     my $user = shift;
-    $user->{rtc}                = $self->app->core->settings->rtc;
     $user->{default_connection} = $self->settings('default_connection')->to_string;
     $user->{forced_connection}  = $self->settings('forced_connection');
     $self->render(openapi => $user);

@@ -26,30 +26,6 @@ sub public_attributes {
   ];
 }
 
-has rtc => sub {
-  my $self = shift;
-  my $config;
-
-  for my $type (qw(stun turn)) {
-    my $env_key = sprintf 'CONVOS_%s', uc $type;
-    my $url     = Mojo::URL->new($ENV{$env_key} // "$type://");
-    next unless $url->host;
-
-    $config ||= $url->query->to_hash;
-    my $server = {urls => sprintf '%s:%s', $url->scheme || 'stun', $url->host_port};
-    $server->{username}   = $url->username if $url->username;
-    $server->{credential} = $url->password if $url->password;
-    $server->{credential_type} = $url->query->param('credentialType') // 'password'
-      if $url->query->param('credentialType')
-      or $url->password;
-    push @{$config->{ice_servers}}, $server;
-  }
-
-  $config ||= {};
-  delete $config->{credentialType};
-  return $config;
-};
-
 has session_secrets => \&_build_session_secrets;
 
 sub defaults {
@@ -206,51 +182,6 @@ Returns a list of L</ATTRIBUTES> that are considered open_to_public.
 Currently that is: L</contact>, L</default_connection>,
 L</forced_connection>, L</open_to_public>, L</organization_name> and
 L</organization_url>.
-
-=head2 rtc
-
-  $hash_ref = $settings->rtc;
-
-Holds information about how to set up a
-L<https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection>. For now,
-it can be configured with an environment variable. Example:
-
-  # Required for signalling
-  CONVOS_STUN=stun://superwoman:kryptonite@stun.example.com:3478?&bundlePolicy=balanced&credentialType=password&iceTransportPolicy=all&rtcpMuxPolicy=require
-
-  # Required for audio/video if NAT traversing is impossible
-  CONVOS_TURN=turn://superwoman:kryptonite@stun.example.com:3478
-
-The URL above will result in the C<RTCPeerConnection> object with the following
-parameters:
-
-  new RTCPeerConnection({
-    bundlePolicy: "balanced",   // optional
-    iceTransportPolicy: "all",  // optional
-    rtcpMuxPolicy: "require",   // optional
-    iceServers: [
-      {
-        urls: "stun:stun.example.com:3478",  // required
-        credential: "kryptonite",            // optional
-        credentialType: "password",          // optional
-        username: "superwoman",              // optional
-      },
-      {
-        urls            => 'turn:turn.example.com:3478',
-        credential      => 'k2',
-        credential_type => 'password',
-        username        => 'superman',
-      },
-    ],
-  })
-
-The simplest version of C<CONVOS_RTC> can be seen below, meaning all the query
-parameters and credentials are optional:
-
-  CONVOS_RTC=stun://stun.example.com:3478
-
-IMPORTANT! The username and password will be visible inside the browser's
-developer tools, but you have to be logged in to see it.
 
 =head2 session_secrets
 

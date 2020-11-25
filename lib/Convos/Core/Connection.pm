@@ -95,31 +95,6 @@ sub nick {
   return $nick;
 }
 
-sub rtc_p {
-  my ($self, $msg) = @_;
-  return Mojo::Promise->reject('Missing property: event.')   unless $msg->{event};
-  return Mojo::Promise->reject('Missing property: call_id.') unless $msg->{call_id};
-  return Mojo::Promise->reject('Conversation not found.')
-    unless $msg->{conversation_id}
-    and my $conversation = $self->get_conversation($msg->{conversation_id});
-
-  $msg->{from} = $self->nick;
-
-  # "signal" messages should only be sent to a single user
-  return $self->_rtc_signal_p($msg) if $msg->{event} eq 'signal';
-
-  # Every other message (call, hangup) should be broadcast to all other users
-  $self->user->core->connections_by_id($self->id)->each(sub {
-    my $other = shift;
-    return if $other eq $self;
-    my $conversation = $other->get_conversation($msg->{conversation_id});
-    $other->emit(rtc => $msg->{event}, $conversation => $msg)
-      if $conversation and !$conversation->frozen;
-  });
-
-  return Mojo::Promise->resolve($msg);
-}
-
 sub save_p {
   my $self = shift;
   return $self->user->core->backend->save_object_p($self, @_);
@@ -195,21 +170,6 @@ sub _remove_conversation {
   my $conversation = $self->remove_conversation($name);
   $self->emit(state => part => {conversation_id => lc $name, nick => $self->nick});
   return $self;
-}
-
-sub _rtc_signal_p {
-  my ($self, $msg) = @_;
-  return Mojo::Promise->reject('Missing property: target.') unless $msg->{target};
-
-  $self->user->core->connections_by_id($self->id)->each(sub {
-    my $other = shift;
-    return if $other eq $self or $other->nick ne $msg->{target};
-    my $conversation = $other->get_conversation($msg->{conversation_id});
-    $other->emit(rtc => signal => $conversation => $msg)
-      if $conversation and !$conversation->frozen;
-  });
-
-  return Mojo::Promise->resolve({});
 }
 
 sub _set_url {
@@ -526,12 +486,6 @@ Creates a new connection object.
   $str = $connection->nick;
 
 Returns the current nick.
-
-=head2 rtc_p
-
-  $p = $conn->rtc_p->then(sub { my $msg = shift });
-
-Used to handle WebRTC signalling.
 
 =head2 save_p
 

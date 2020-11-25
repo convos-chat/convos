@@ -13,7 +13,6 @@ dependencies:
   jsonhtmlify: 0.1.0
   querystring: 0.2.0
   twemoji: 12.1.5
-  webrtc-adapter: 7.6.0
 devDependencies:
   '@babel/core': 7.9.0
   '@babel/preset-env': 7.9.0_@babel+core@7.9.0
@@ -6241,15 +6240,6 @@ packages:
       node: 6.* || >= 7.*
     resolution:
       integrity: sha512-nfMOlASu9OnRJo1mbEk2cz0D56a1MBNrJ7orjRZQG10XDyuvwksKbuXNp6qa+kbn839HwjwhBzhFmdsaEAfauA==
-  /rtcpeerconnection-shim/1.2.15:
-    dependencies:
-      sdp: 2.12.0
-    dev: false
-    engines:
-      node: '>=6.0.0'
-      npm: '>=3.10.0'
-    resolution:
-      integrity: sha512-C6DxhXt7bssQ1nHb154lqeL0SXz5Dx4RczXZu2Aa/L1NJFnEVDxFwCBo3fqtuljhHIGceg5JKBV4XJ0gW5JKyw==
   /run-async/2.4.0:
     dependencies:
       is-promise: 2.1.0
@@ -6335,10 +6325,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-jrBtualyMzOCTT9VMGQRSYR85dE=
-  /sdp/2.12.0:
-    dev: false
-    resolution:
-      integrity: sha512-jhXqQAQVM+8Xj5EjJGVweuEzgtGWb3tmEEpl3CLP3cStInSbVHSg0QWOGQzNq8pSID4JkpeV2mPqlMDLrm0/Vw==
   /semver/5.3.0:
     dev: true
     hasBin: true
@@ -7226,16 +7212,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
-  /webrtc-adapter/7.6.0:
-    dependencies:
-      rtcpeerconnection-shim: 1.2.15
-      sdp: 2.12.0
-    dev: false
-    engines:
-      node: '>=6.0.0'
-      npm: '>=3.10.0'
-    resolution:
-      integrity: sha512-l/f+IEfqiupo0mUA8Ye8eFI4BmGiL+8vRXJuwc+rq1bP2oa/5s7EH+rLRD/KoMiM+EDHYdozi0RXQK8K4cu2gg==
   /whatwg-encoding/1.0.5:
     dependencies:
       iconv-lite: 0.4.24
@@ -7436,4 +7412,3 @@ specifiers:
   rollup-plugin-visualizer: ^2.7.2
   svelte: ^3.20.1
   twemoji: ^12.1.5
-  webrtc-adapter: ^7.6.0

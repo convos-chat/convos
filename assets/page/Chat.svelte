@@ -17,7 +17,6 @@ import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
 import {viewport} from '../store/Viewport';
 
-const rtc = getContext('rtc');
 const socket = getContext('socket');
 const user = getContext('user');
 
@@ -43,7 +42,6 @@ onMount(() => {
 onDestroy(() => {
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
-  rtc.hangup();
 });
 
 function onMessageActionClick(e, action) {
@@ -126,7 +124,6 @@ function setConversationFromUser(user) {
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
   unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
   route.update({title: conversation.title});
-  rtc.hangup();
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
@@ -142,13 +139,6 @@ function showFullscreen(e, el) {
 <ChatHeader>
   <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(conversation.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
-  {#if $rtc.enabled && $conversation.conversation_id}
-    {#if $rtc.localStream.id && $rtc.constraints.video}
-      <Button icon="video-slash" tooltip="{l('Hangup')}" disabled="{notConnected}" on:click="{e => rtc.hangup()}"/>
-    {:else}
-      <Button icon="video" tooltip="{l('Call')}" disabled="{notConnected}" on:click="{e => rtc.call(conversation, {audio: true, video: true})}"/>
-    {/if}
-  {/if}
   <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 

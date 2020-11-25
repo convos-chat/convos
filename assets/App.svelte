@@ -1,6 +1,5 @@
 <script>
 import User from './store/User';
-import WebRTC from './store/WebRTC';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {l} from './js/i18n';
@@ -21,7 +20,6 @@ import ChatSidebar from './components/ChatSidebar.svelte';
 
 const socket = getSocket('/events');
 const user = new User({});
-const rtc = new WebRTC({});
 
 let [innerHeight, innerWidth] = [0, 0];
 let readyStateNotification = {closed: true};
@@ -37,14 +35,12 @@ setupRouting(route, user);
 loadScript(route.urlFor('/images/emojis.js'));
 
 setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
-setContext('rtc', rtc);
 setContext('socket', socket);
 setContext('user', user);
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
 socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
-user.on('update', (user, changed) => changed.hasOwnProperty('rtc') && rtc.update({peerConfig: user.rtc}));
 user.load();
 viewport.activateTheme();
 

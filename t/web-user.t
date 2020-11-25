@@ -6,10 +6,6 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
 $ENV{CONVOS_OPEN_TO_PUBLIC} = 1;
 
-$ENV{CONVOS_STUN}
-  = 'stun://superwoman:kryptonite@stun.example.com:3478?&bundlePolicy=balanced&credentialType=password&iceTransportPolicy=all&rtcpMuxPolicy=require';
-$ENV{CONVOS_TURN} = 'turn://superman:k2@turn.example.com:3478';
-
 my $t = t::Helper->t;
 is $t->app->core->ready, 1, 'ready';
 
@@ -38,25 +34,6 @@ is_deeply(
     roles              => ['admin'],
     uid                => 1,
     unread             => 0,
-    rtc                => {
-      bundlePolicy       => 'balanced',
-      iceTransportPolicy => 'all',
-      rtcpMuxPolicy      => 'require',
-      ice_servers        => [
-        {
-          credential      => 'kryptonite',
-          credential_type => 'password',
-          urls            => 'stun:stun.example.com:3478',
-          username        => 'superwoman',
-        },
-        {
-          credential      => 'k2',
-          credential_type => 'password',
-          urls            => 'turn:turn.example.com:3478',
-          username        => 'superman',
-        },
-      ],
-    },
   },
   'user object'
 );

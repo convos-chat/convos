@@ -183,12 +183,6 @@ export default class Conversation extends Reactive {
     return super.update(params);
   }
 
-  wsEventRtc(params) {
-    if (params.type == 'call') this.addMessage({highlight: true, message: '%1 is calling.', vars: [params.from]});
-    if (params.type == 'hangup') this.addMessage({message: '%1 ended the call.', vars: [params.from]});
-    this.emit('rtc', params);
-  }
-
   wsEventMode(params) {
     if (params.nick) {
       this.participants([{nick: params.nick, mode: params.mode}]);
