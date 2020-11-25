@@ -61,6 +61,14 @@
   }
 }
 
+.le-card.le-join-request {
+  i.fas {
+    font-size: 2rem;
+    margin-right: 8px;
+    vertical-align: bottom;
+  }
+}
+
 .le-provider-link ~ .le-goto-link:before,
 .le-author-link ~ .le-goto-link:before {
   content: "\2013\00a0";

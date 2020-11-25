@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 5.05 Not Released
  - Add support for for ":-*", ":O" and "(Y)" #534
    Contributor: Megaf
+ - Add better rendering of Jitsi links
  - Fix not adding new private messages, unless historyStopAt
  - Fix resetting historyStopAt and historyStartAt when jumping back in history
 

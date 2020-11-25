@@ -43,12 +43,14 @@ async function loadEmbed(url) {
   const embed = op.res.body;
 
   if (!embed.html) embed.html = '';
-  embed.className = embed.provider_name ? 'for-' + embed.provider_name.toLowerCase() : embed.html ? 'for-unknown' : 'hidden';
+  const provider = embed.provider_name && embed.provider_name.toLowerCase() || '';
+  embed.className = provider ? 'for-' + provider : embed.html ? 'for-unknown' : 'hidden';
 
   const embedEl = document.createRange().createContextualFragment(embed.html).firstChild;
   q(embedEl, 'img', [['error', (e) => (e.target.style.display = 'none')]]);
   const types = (embedEl && embedEl.className || '').split(/\s+/);
   if (types.indexOf('le-paste') != -1) renderPaste(embed, embedEl);
+  if (provider == 'jitsi') renderJitsi(embed, embedEl);
 
   return embed;
 }
@@ -83,6 +85,23 @@ function messageIsOnline(msg, conversation) {
   if (msg.fromId == 'Convos') return true;
   if (msg.fromId == conversation.connection_id) return true;
   return conversation.findParticipant(msg.fromId) ? true : false;
+}
+
+function renderJitsi(embed, embedEl) {
+  let name = new URL(embed.url).pathname.replace(/^\//, '');
+  if (!name || name.indexOf('/') != -1) return;
+
+  // Turn "Some-Cool-convosTest" into "Some Cool Convos Test"
+  name = name.replace(/[_-]+/g, ' ')
+    .replace(/([a-z ])([A-Z])/g, (all, a, b) => a + ' ' + b.toUpperCase())
+    .replace(/([ ]\w)/g, (all) => all.toUpperCase());
+
+  embed.html
+    = '<div class="le-card le-rich le-join-request">'
+      + '<a class="le-thumbnail" href="' + embed.url + '" target="_blank"><i class="fas fa-video"></i></a>'
+      + '<h3>Do you want to join the Jitsi video conference "' + name + '"?</h3>'
+      + '<p class="le-description"><a href="' + embed.url + '" target="_blank">Yes, take me to the conference.</a></p>'
+    + '</div>';
 }
 
 function renderPaste(embed, embedEl) {
