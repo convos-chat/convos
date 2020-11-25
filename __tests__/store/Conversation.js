@@ -72,6 +72,16 @@ test('load start/end history', () => {
   expect(d.historyStartAt.toISOString()).toBe('2020-01-01T09:01:01.001Z');
   expect(d.historyStopAt).toBe(null);
 
+  d.update({historyStartAt: new Date(), historyStopAt: new Date()});
+  d._setEndOfStream({around: '2020-02-10T09:00:03.003Z'}, {messages, after: '2020-02-10T09:00:00.003Z'});
+  expect(d.historyStopAt).toBe(null);
+  expect(d.historyStartAt).toBeTruthy();
+
+  d.update({historyStartAt: new Date(), historyStopAt: new Date()});
+  d._setEndOfStream({around: '2020-02-10T09:00:03.003Z'}, {messages, before: '2020-02-10T09:00:00.003Z'});
+  expect(d.historyStartAt).toBe(null);
+  expect(d.historyStopAt).toBeTruthy();
+
   messages.pop();
   messages.pop();
   expect(messages.length).toBe(1);

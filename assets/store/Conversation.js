@@ -328,9 +328,10 @@ export default class Conversation extends Reactive {
       const msg = body.messages[0];
       this.update({historyStartAt: new Time(msg && msg.ts)});
     }
-    if (body.messages && body.messages.length <= 1) {
-      this.update({historyStartAt: new Time(), historyStopAt: new Time()});
-    }
+
+    if (body.after) this.update({historyStopAt: null});
+    if (body.before) this.update({historyStartAt: null});
+    if (body.messages && body.messages.length <= 1) this.update({historyStartAt: new Time(), historyStopAt: new Time()});
   }
 
   _skipLoad(opParams) {
