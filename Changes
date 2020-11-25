@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.05 Not Released
+5.05 2020-11-25T11:52:00+0900
  - Add support for for ":-*", ":O" and "(Y)" #534
    Contributor: Megaf
  - Add better rendering of Jitsi links
