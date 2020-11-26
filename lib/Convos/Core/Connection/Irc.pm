@@ -1069,7 +1069,7 @@ sub _stream {
   my $url  = $self->url;
   my $nick = $self->nick;
   my $user = $url->username || $nick;
-  $user =~ s/^[^a-z0-9]/x/;
+  $user =~ s/^[^a-zA-Z0-9]/x/;
   my $mode = $url->query->param('mode') || 0;
   $self->_write("CAP LS\r\n");
   $self->_write(sprintf "PASS %s\r\n", $url->password) if length $url->password;
