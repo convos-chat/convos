@@ -257,6 +257,7 @@ export function isType(val, type) {
  * with the same "src" will not reload the script.
  *
  * @param {String} src An URL to the script to load.
+ * @return {Promise} Resolved when script is loaded.
  */
 export function loadScript(src) {
   const d = document;
@@ -266,6 +267,11 @@ export function loadScript(src) {
   const el = d.createElement('script');
   [el.id, el.src] = [id, src];
   d.getElementsByTagName('head')[0].appendChild(el);
+
+  return new Promise((resolve, reject) => {
+    el.addEventListener('error', reject);
+    el.addEventListener('load', resolve);
+  });
 }
 
 /**

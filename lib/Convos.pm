@@ -53,6 +53,7 @@ sub startup {
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/err/:code')->to('url#err');
   $r->get('/sw' => [format => 'js']);
+  $r->get('/video/#domain/:name')->to(template => 'video');
 
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
@@ -60,7 +61,9 @@ sub startup {
   # Chat resources
   my $user_r = $r->under('/')->to('user#check_if_ready');
   $user_r->get('/help');
-  $user_r->get('/chat/*rest', {rest => ''});
+  $user_r->get('/chat')->name('chat');
+  $user_r->get('/chat/:connection_id')->name('chat.connection_id');
+  $user_r->get('/chat/:connection_id/:conversation_id')->name('chat.connection_id.conversation_id');
   $user_r->get('/login');
   $user_r->get('/register')->to('user#register_html');
   $user_r->get('/settings/*rest', {rest => ''});

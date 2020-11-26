@@ -22,7 +22,7 @@
       % }
       <span class="is-spacer hidden-sm">&nbsp;</span>
       % if (session 'email') {
-        %= link_to '/chat', class => 'has-js', begin
+      %= link_to 'chat', class => 'has-js js-close-window', begin
           <i class="fas fa-sign-in-alt"></i> <%=l 'Chat' %>
         % end
       % } else {

@@ -1,29 +1,19 @@
+% use Mojo::Util qw(url_escape);
 % layout 'convos';
-% title 'Better group chat';
-% stash start_app => 'chat';
+% title l('Video conference with "%1" via %2', $name, $domain);
+% stash start_app => 'jitsi';
 
 %= include 'partial/app_header'
 
-<div class="hero-wrapper is-small hidden-for-app">
-  <header class="hero">
-    <div class="hero--text">
-      <div class="hero--header hidden-sm"><%= image '/images/convos-light.png', alt => 'Convos' %></div>
-      <div class="hero--tagline">
-        % if (settings('organization_name') ne 'Convos') {
-          &mdash; <a href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
-        % } else {
-          &mdash; A better chat experience
-        % }
-      </div>
-      <div class="hero--body">Convos is the simplest way to use IRC and it is always online.</div>
-    </div>
-  </header>
-</div>
+<main
+  class="has-js video-chat-wrapper"
+  data-domain="<%= $domain %>"
+  data-nick="<%= url_escape param('nick') || 'guest' %>"
+  data-room-name="<%= url_escape $name %>">
 
-<main class="has-js">
-  <h2><%=l 'Loading' %></h2>
+  <h2><%=l 'Loading video conference with "%1" via %2', $name, $domain %></h2>
   <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
-  <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting Convos...' %></p>
+  <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting video chat...' %></p>
   <p>
     %= link_to settings('contact'), class => 'btn', begin
       <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
