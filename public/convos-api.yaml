@@ -768,6 +768,8 @@ definitions:
         type: string
       organization_url:
         type: string
+      video_service:
+        type: string
 
   Success:
     type: object
@@ -806,3 +808,5 @@ definitions:
       unread:
         description: Number of unread notifications
         type: integer
+      video_service:
+        type: string

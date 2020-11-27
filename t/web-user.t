@@ -34,6 +34,7 @@ is_deeply(
     roles              => ['admin'],
     uid                => 1,
     unread             => 0,
+    video_service      => 'https://meet.jit.si/',
   },
   'user object'
 );

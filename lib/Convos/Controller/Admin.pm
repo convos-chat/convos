@@ -1,8 +1,9 @@
 package Convos::Controller::Admin;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'disk_usage';
+use Convos::Util qw(disk_usage);
 use Mojo::JSON qw(false true);
+use Mojo::Util qw(trim);
 
 sub settings_get {
   my $self = shift->openapi->valid_input or return;
@@ -37,15 +38,19 @@ sub _clean_json {
   }
 
   if ($clean{default_connection}) {
-    $clean{default_connection} = Mojo::URL->new($clean{default_connection});
+    $clean{default_connection} = Mojo::URL->new(trim $clean{default_connection});
     push @err, ['Connection URL require a scheme and host.', '/default_connection']
       unless $clean{default_connection}->scheme eq 'irc' and $clean{default_connection}->host;
   }
 
   if ($clean{organization_url}) {
-    $clean{organization_url} = Mojo::URL->new($clean{organization_url});
+    $clean{organization_url} = Mojo::URL->new(trim $clean{organization_url});
     push @err, ['Organization URL require a scheme and host.', '/organization_url']
       unless $clean{organization_url}->scheme =~ m!^http! and $clean{organization_url}->host;
+  }
+
+  if ($clean{video_service}) {
+    $clean{video_service} = trim $clean{video_service};
   }
 
   return \@err, \%clean;

@@ -22,11 +22,12 @@ has organization_url =>
 sub public_attributes {
   return [
     qw(contact default_connection forced_connection),
-    qw(open_to_public organization_name organization_url),
+    qw(open_to_public organization_name organization_url video_service),
   ];
 }
 
 has session_secrets => \&_build_session_secrets;
+has video_service   => 'https://meet.jit.si/';
 
 sub defaults {
   return {organization_name => 'Convos', organization_url => 'https://convos.chat'};
@@ -77,7 +78,7 @@ sub _set_attributes {
 
   $self->$_($params->{$_})
     for grep { defined $params->{$_} }
-    qw(contact forced_connection open_to_public organization_name);
+    qw(contact forced_connection open_to_public organization_name video_service);
 
   $self->$_(Mojo::URL->new($params->{$_}))
     for grep { defined $params->{$_} } qw(default_connection organization_url);
@@ -196,6 +197,11 @@ L<Mojolicious/secrets> for a longer description.
 
 Holds a L<Mojo::Path> object, with the URI to where this object should be
 stored.
+
+=head2 video_service
+
+  $str = $settings->video_service;
+  $settings = $settings->video_service("https://meet.jit.si/");
 
 =head1 METHODS
 
