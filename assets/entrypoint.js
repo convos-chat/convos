@@ -7,6 +7,15 @@ import {q, tagNameIs} from './js/util';
 document.body.className = document.body.className.replace(/no-js/, 'has-js');
 q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
 
+q(document, '.js-close-window', el => {
+  el.addEventListener('click', e => {
+    if (!window.opener) return;
+    e.preventDefault();
+    setTimeout(() => window.close(), 1);
+    window.opener.focus();
+  });
+});
+
 if (document.querySelector('meta[name="convos:start_app"][content="chat"]')) {
   document.querySelector('.footer-wrapper').remove();
   document.querySelector('main').remove();
