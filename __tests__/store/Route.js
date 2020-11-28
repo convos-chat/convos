@@ -112,6 +112,7 @@ test('urlFor', () => {
   expect(r.urlFor('/foo')).toBe('/whatever/foo');
   expect(r.urlFor('https://convos.chat/blog/')).toBe('https://convos.chat/blog/');
   expect(r.urlFor('#hash')).toBe('#hash');
+  expect(r.urlFor('/bar', {n: null, u: undefined, y: 24, x: '4 2'})).toBe('/whatever/bar?x=4%202&y=24');
 });
 
 function mockHistory(r) {

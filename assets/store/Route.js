@@ -1,6 +1,6 @@
 import Reactive from '../js/Reactive';
 import qs from 'qs';
-import {closestEl} from '../js/util';
+import {closestEl, isType} from '../js/util';
 
 export default class Route extends Reactive {
   constructor() {
@@ -134,8 +134,10 @@ export default class Route extends Reactive {
     return this;
   }
 
-  urlFor(url) {
-    return url.match(/^\w+:/) ? url : url.match(/^#/) ? url : this.basePath + url;
+  urlFor(url, query = {}) {
+    const base = url.match(/^\w+:/) ? url : url.match(/^#/) ? url : this.basePath + url;
+    const queryString = Object.keys(query).sort().filter(k => !isType(query[k], 'undef')).map(k => k + '=' + encodeURIComponent(query[k])).join('&');
+    return base + (queryString ? '?' + queryString : '');
   }
 
   urlToForm(formEl) {
