@@ -73,7 +73,7 @@ function onMessageClick(e) {
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
-  if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(aEl.querySelector('img'));
+  if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
 }
 
 function onRendered(e) {
