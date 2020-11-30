@@ -1,5 +1,13 @@
 Revision history for perl distribution Convos
 
+5.06 2020-11-30T11:25:00+0900
+ - Add a "compact display" mode as Viewport option #535
+   Contributor: Abhijit Menon-Sen
+ - Add tighter integration with Jitsi video chat #536
+ - Fix leading uppercase characters in usernames #538
+   Contributor: Abhijit Menon-Sen
+ - Removed EXPERIMENTAL video support added in 4.08 #204
+
 5.05 2020-11-25T11:52:00+0900
  - Add support for for ":-*", ":O" and "(Y)" #534
    Contributor: Megaf
