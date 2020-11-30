@@ -112,8 +112,7 @@ export default class Viewport extends Reactive {
   }
 
   update(params) {
-    const body = document.getElementsByTagName('body')[0];
-    body.classList[this.compactDisplay ? 'add' : 'remove']('is-compact');
+    document.body.classList[this.compactDisplay ? 'add' : 'remove']('is-compact');
     return super.update(params);
   }
 }

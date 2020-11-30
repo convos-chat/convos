@@ -3,8 +3,7 @@ import App from './App.svelte';
 import hljs from './js/hljs';
 import {q, tagNameIs} from './js/util';
 
-const body = document.querySelector('body');
-body.classList = body.className.replace(/no-js/, 'has-js');
+document.body.className = document.body.className.replace(/no-js/, 'has-js');
 q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
 
 if (document.querySelector('meta[name="convos:start_app"][content="yes"]')) {
