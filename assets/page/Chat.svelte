@@ -33,6 +33,7 @@ $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
 $: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
+$: videoInfo = $conversation.videoInfo({nick: connection.nick, videoService: user.video_service});
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 onMount(() => {
@@ -59,7 +60,12 @@ function onMessageClick(e) {
   const aEl = e.target.closest('a');
 
   // Make sure embed links are opened in a new tab/window
-  if (aEl && e.target.closest('.embed')) aEl.target = '_blank';
+  if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
+
+  // Proxy clicks
+  const messageEl = e.target.closest('.message');
+  const proxyEl = aEl && messageEl && document.querySelector('[data-handle-link="' + aEl.href + '"]');
+  if (proxyEl) return [e.preventDefault(), proxyEl.click()];
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -82,7 +88,7 @@ function onRendered(e) {
 
 function onScrolled(e) {
   if (!conversation.messages.length) return;
-  const {infinityEl, pos, visibleEls} = e.detail;
+  const {pos, visibleEls} = e.detail;
   const firstVisibleEl = visibleEls[0];
   const lastVisibleEl = visibleEls.slice(-1)[0];
 
@@ -99,6 +105,15 @@ function onScrolled(e) {
   else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
     route.go(conversation.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
   }
+}
+
+function onVideoLinkClick(e) {
+  e.preventDefault();
+  if (conversation.window) return conversation.window.close();
+  conversation.openWindow(videoInfo.convosUrl, videoInfo.roomName);
+
+  const alreadySent = conversation.messages.slice(-30).find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
+  if (!alreadySent) conversation.send({method: 'send', message: videoInfo.realUrl});
 }
 
 function renderFocusedEl(infinityEl, add) {
@@ -139,6 +154,9 @@ function showFullscreen(e, el) {
 <ChatHeader>
   <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(conversation.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
+  {#if videoInfo.convosUrl}
+    <a href="{videoInfo.convosUrl}" on:click="{onVideoLinkClick}" target="{videoInfo.roomName}" data-handle-link="{videoInfo.realUrl}" class="btn has-tooltip" tooltip="{l('Start video conference')}"><Icon name="{videoInfo.icon}"/></a>
+  {/if}
   <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 

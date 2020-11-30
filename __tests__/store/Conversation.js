@@ -172,6 +172,50 @@ test('addMessage without historyStopAt', () => {
   expect(c.messages.length).toBe(1);
 });
 
+test('openWindow', () => {
+  const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+
+  expect(c.window).toBe(null);
+
+  let events = {};
+  let open = {};
+  const w = {addEventListener: (name, cb) => { events[name] = cb }};
+  window.open = (url, name, features) => { open = {url, name, features}; return w };
+  c.openWindow('/video/meet.jit.si/irc-freenode-%23convos');
+  expect(c.window).toBe(w);
+  expect(open).toEqual({url: '/video/meet.jit.si/irc-freenode-%23convos', name: 'chat_irc_freenode__23convos', features: ''});
+  expect(Object.keys(events).sort()).toEqual(['beforeunload', 'close']);
+
+  c.openWindow('/video/meet.jit.si/irc-freenode-%23convos', 'foo');
+  expect(open).toEqual({url: '/video/meet.jit.si/irc-freenode-%23convos', name: 'foo', features: ''});
+
+  events.beforeunload();
+  expect(c.window).toBe(null);
+});
+
+test('videoInfo', () => {
+  const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+
+  expect(c.videoInfo({})).toEqual({
+    icon: 'video',
+    roomName: 'irc-freenode-%23convos',
+  });
+
+  expect(c.videoInfo({videoService: 'https://meet.jit.si/whatever'})).toEqual({
+    convosUrl: '/video/meet.jit.si/irc-freenode-%23convos',
+    realUrl: 'https://meet.jit.si/whatever/irc-freenode-%23convos',
+    icon: 'video',
+    roomName: 'irc-freenode-%23convos',
+  });
+
+  expect(c.videoInfo({nick: 'superwoman', videoService: 'https://meet.jit.si/whatever'})).toEqual({
+    convosUrl: '/video/meet.jit.si/irc-freenode-%23convos?nick=superwoman',
+    realUrl: 'https://meet.jit.si/whatever/irc-freenode-%23convos',
+    icon: 'video',
+    roomName: 'irc-freenode-%23convos',
+  });
+});
+
 function mockMessagesOpPerform(res) {
   return function(params) {
     this.performed = params;

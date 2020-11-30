@@ -21,7 +21,8 @@ $t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
   ->json_hasnt('/session_secrets')->json_is('/contact', 'mailto:root@localhost')
   ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
-  ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat');
+  ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat')
+  ->json_is('/video_service' => 'https://meet.jit.si/');
 
 SKIP: {
   local $TODO = "Cannot test on $^O", 1 unless $^O eq 'darwin' or $^O eq 'linux';
@@ -56,19 +57,21 @@ $t->post_ok(
   '/api/settings',
   json => {
     contact            => 'mailto:jhthorsen@cpan.org',
-    default_connection => 'irc://chat.freenode.net:6697/%23mojo',
+    default_connection => 'irc://chat.freenode.net:6697/%23mojo     ',
     forced_connection  => true,
     local_secret       => 's3cret',
     open_to_public     => true,
     organization_name  => 'Superheroes',
-    organization_url   => 'https://metacpan.org',
+    organization_url   => 'https://metacpan.org  ',
     session_secrets    => ['s3cret'],
+    video_service      => ' https://video.convos.chat/',
   }
 )->status_is(200)->json_is('/contact' => 'mailto:jhthorsen@cpan.org')
   ->json_is('/default_connection' => 'irc://chat.freenode.net:6697/%23mojo')
   ->json_is('/forced_connection'  => true)->json_is('/local_secret' => undef)
   ->json_is('/open_to_public'     => true)->json_is('/organization_name' => 'Superheroes')
-  ->json_is('/organization_url'   => 'https://metacpan.org')->json_is('/session_secrets' => undef);
+  ->json_is('/organization_url'   => 'https://metacpan.org')->json_is('/session_secrets' => undef)
+  ->json_is('/video_service'      => 'https://video.convos.chat/');
 
 $t->get_ok('/')->status_is(200)->element_exists('.hero--text .hero--tagline a')
   ->element_exists('.hero--text a[href="https://metacpan.org"]')

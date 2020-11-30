@@ -17,6 +17,23 @@ body {
   &.for-cms {
     scroll-behavior: smooth;
   }
+
+  &.has-video-chat {
+    max-height: 100vh;
+    overflow: hidden;
+
+    .cms-navbar {
+      width: 100%;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    .video-chat-wrapper {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+  }
 }
 
 .main {

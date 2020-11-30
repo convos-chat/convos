@@ -43,6 +43,7 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
+    this.prop('rw', 'window', null);
 
     if (params.hasOwnProperty('conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);
@@ -144,6 +145,12 @@ export default class Conversation extends Reactive {
     return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
   }
 
+  openWindow(url, name) {
+    const w = window.open(url, name || this.path.replace(/\W/g, '_').replace(/^_+/, ''), '');
+    ['beforeunload', 'close'].forEach(name => w.addEventListener(name, () => this.update({window: null})));
+    return this.update({window: w});
+  }
+
   participants(participants = []) {
     participants.forEach(p => {
       if (!p.nick) p.nick = p.name || ''; // TODO: Just use "name"?
@@ -181,6 +188,24 @@ export default class Conversation extends Reactive {
   update(params) {
     this._loadParticipants();
     return super.update(params);
+  }
+
+  videoInfo({nick, videoService}) {
+    const roomName = encodeURIComponent([this.connection_id, this.conversation_id].join('-'));
+    const icon = this.window ? 'video-slash' : 'video';
+    const info = {icon, roomName};
+
+    if (!this.conversation_id || !videoService) return info;
+
+    try {
+      const host = new URL(videoService).host;
+      info.convosUrl = route.urlFor('/video/' + host + '/' + roomName, {'nick': nick});
+      info.realUrl = videoService.replace(/\/*$/, '/') + roomName;
+    } catch(err) {
+      console.error('videoInfo', err);
+    }
+
+    return info;
   }
 
   wsEventMode(params) {

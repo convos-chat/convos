@@ -1,15 +1,30 @@
 import './sass/convos.scss';
 import App from './App.svelte';
+import Jitsi from './js/Jitsi';
 import hljs from './js/hljs';
 import {q, tagNameIs} from './js/util';
 
 document.body.className = document.body.className.replace(/no-js/, 'has-js');
 q(document, '#hamburger_checkbox_toggle', el => { el.checked = false });
 
-if (document.querySelector('meta[name="convos:start_app"][content="yes"]')) {
+q(document, '.js-close-window', el => {
+  el.addEventListener('click', e => {
+    if (!window.opener) return;
+    e.preventDefault();
+    setTimeout(() => window.close(), 1);
+    window.opener.focus();
+  });
+});
+
+if (document.querySelector('meta[name="convos:start_app"][content="chat"]')) {
   document.querySelector('.footer-wrapper').remove();
   document.querySelector('main').remove();
   const app = new App({target: document.body});
+}
+else if (document.querySelector('meta[name="convos:start_app"][content="jitsi"]')) {
+  document.querySelector('.footer-wrapper').remove();
+  const main = document.querySelector('.video-chat-wrapper');
+  const app = new Jitsi(main.dataset).render(main);
 }
 else {
   document.addEventListener('DOMContentLoaded', function(e) {

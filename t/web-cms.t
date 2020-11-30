@@ -18,7 +18,7 @@ $t->get_ok('/doc/Convos/Core')->status_is(200)->header_is('X-Provider-Name', und
 
 note 'default index file';
 $t->get_ok('/')->status_is(200)->header_is('X-Provider-Name', 'ConvosApp')
-  ->element_exists(qq(meta[name="convos:start_app"][content="yes"]))->element_exists('.hero');
+  ->element_exists(qq(meta[name="convos:start_app"][content="chat"]))->element_exists('.hero');
 
 note 'custom index file';
 my $cms_dir = $t->app->core->home->child('content');

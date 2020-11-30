@@ -71,6 +71,7 @@ sub _event_load {
     my $user = shift;
     $user->{default_connection} = $self->settings('default_connection')->to_string;
     $user->{forced_connection}  = $self->settings('forced_connection');
+    $user->{video_service}      = $self->settings('video_service');
     $self->send({json => {event => 'load', id => $id, user => $user}});
   });
 }

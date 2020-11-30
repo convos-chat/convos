@@ -28,7 +28,12 @@ updateSettingsOp.on('start', req => {
   settings('open_to_public', req.body.open_to_public);
   settings('organization_name', req.body.organization_name);
   settings('organization_url', req.body.organization_url);
-  user.update({default_connection: req.body.default_connection, forced_connection: req.body.forced_connection});
+
+  user.update({
+    default_connection: req.body.default_connection,
+    forced_connection: req.body.forced_connection,
+    video_service: req.body.video_service,
+  });
 });
 
 route.update({title: l('Global settings')});
@@ -100,6 +105,11 @@ function updateSettingsFromForm(e) {
       <span slot="label">{l('Registration is open to public')}</span>
     </Checkbox>
     <p class="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
+
+    <TextField name="video_service" placeholder="{l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
+      <span slot="label">{l('Video service')}</span>
+      <p class="help" slot="help">{l('This should point to a %1 instance.', 'https://meet.jit.si/')}</p>
+    </TextField>
 
     <div class="form-actions">
       <Button icon="save" op="{updateSettingsOp}"><span>{l('Save settings')}</span></Button>
