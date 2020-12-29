@@ -1,6 +1,6 @@
 <script>
 import {closestEl, uuidv4} from '../../js/util';
-import {onMount, tick} from 'svelte';
+import {onMount} from 'svelte';
 import {regexpEscape} from '../../js/util';
 
 const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
@@ -16,10 +16,10 @@ let visibleOptions = [];
 export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
-export let options = []; // [["value", "label"], ...]
+export let options; // [["value", "label"], ...]
 export let placeholder = '';
 export let readonly = false;
-export let value = '';
+export let value;
 
 $: calculateVisibleOptions(options, typed);
 $: if (humanEl) renderHuman(value);

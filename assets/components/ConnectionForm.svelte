@@ -3,9 +3,10 @@ import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import ConnectionURL from '../js/ConnectionURL';
 import OperationStatus from '../components/OperationStatus.svelte';
+import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {getContext, onMount, tick} from 'svelte';
+import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
 
@@ -13,6 +14,7 @@ export let conversation = {};
 
 const api = getContext('api');
 const user = getContext('user');
+const saslMechanisms = [['none', 'None'], ['plain', 'Plain'], ['external', 'External']];
 
 const createConnectionOp = api('createConnection');
 const removeConnectionOp = api('removeConnection');
@@ -26,6 +28,7 @@ const updateConnectionOp = api('updateConnection');
 
 let connection = {};
 let formEl;
+let saslMechanism = 'none';
 let showAdvancedSettings = false;
 let useTls = false;
 let verifyTls = false;
@@ -42,6 +45,7 @@ onMount(async () => {
 function defaultsToForm() {
   if (user.forced_connection) formEl.server.value = user.default_connection;
   formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
+  saslMechanism = 'none';
   useTls = true;
   wantToBeConnected = true;
 
@@ -56,6 +60,7 @@ function defaultsToForm() {
   if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
   if (connParams.get('realname')) formEl.realname.value = connParams.get('realname');
   if (connURL.pathname && formEl.conversation) formEl.conversation.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
+  if (connParams.get('sasl')) saslMechanism = connParams.get('sasl');
   if (Number(connParams.get('tls') || 0)) useTls = true;
   if (Number(connParams.get('tls_verify') || 0)) verifyTls = true;
 }
@@ -69,6 +74,7 @@ function connectionToForm() {
   formEl.password.value = connection.url.password;
   formEl.username.value = connection.url.username;
   formEl.url.value = connection.url.toString();
+  saslMechanism = connection.url.searchParams.get('sasl') || 'none';
   useTls = connection.url.searchParams.get('tls') == '1' && true || false;
   verifyTls = connection.url.searchParams.get('tls_verify') == '1' && true || false;
   wantToBeConnected = connection.wanted_state == 'connected';
@@ -148,6 +154,9 @@ async function submitForm(e) {
   <TextField type="password" name="password" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('Password')}</span>
   </TextField>
+  <SelectField name="sasl" options="{saslMechanisms}" bind:value="{saslMechanism}" hidden="{!showAdvancedSettings}">
+    <span slot="label">{l('SASL authentication mechanism')}</span>
+  </SelectField>
   <TextArea name="on_connect_commands" placeholder="{l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
     <span slot="label">{l('On-connect commands')}</span>
   </TextArea>
