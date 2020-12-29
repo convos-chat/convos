@@ -51,8 +51,14 @@ sub disk_usage {
 
 sub generate_cert_p {
   my %params = %{$_[0]};
-  _openssl_detect() unless 3 == grep { $ENV{"OPENSSL_$_"} } qw(BITS COUNTRY DAYS ORGANIZATION);
-  $params{$_} ||= $ENV{uc("OPENSSL_$_")} for qw(bits country days organization state);
+
+  # defaults
+  $ENV{OPENSSL_BITS}         ||= 4096;
+  $ENV{OPENSSL_COUNTRY}      ||= '';
+  $ENV{OPENSSL_DAYS}         ||= 3650;
+  $ENV{OPENSSL_ORGANIZATION} ||= 'Convos';
+
+  $params{$_} ||= $ENV{uc("OPENSSL_$_")} for qw(bits country days organization);
   $params{common_name} ||= $params{email} =~ m!^([^@]+)! ? $1 : $params{email};
 
   my @openssl = (qw(req -x509 -new -newkey));
@@ -60,8 +66,8 @@ sub generate_cert_p {
   push @openssl, qw(-sha256 -nodes);
   push @openssl, -days => $params{days}, -out => $params{cert}, -keyout => $params{key};
   push @openssl,
-    -subj => sprintf '/C=%s/ST=%s/O=%s/CN=%s/emailAddress=%s',
-    @params{qw(country state organization common_name email)};
+    -subj => sprintf '/C=%s/O=%s/CN=%s/emailAddress=%s',
+    @params{qw(country organization common_name email)};
 
   warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
   return Mojo::IOLoop->subprocess->run_p(sub {
@@ -173,31 +179,6 @@ sub _generate_secret_urandom {
   die qq{Could not read $len bytes from "/dev/urandom": $!};
 }
 
-sub _openssl_detect {
-  warn "\$ $ENV{OPENSSL_BIN} version -a\n" if DEBUG;
-  if (!$ENV{OPENSSL_CONF} and open my $OPENSSL, '-|', $ENV{OPENSSL_BIN} => qw(version -a)) {
-    while (<$OPENSSL>) {
-      $ENV{OPENSSL_CONF} = path($1, 'openssl.cnf')->realpath if /OPENSSLDIR:?\s*"?([^"]+)/;
-    }
-  }
-  if ($ENV{OPENSSL_CONF}) {
-    open my $CONFIG, '<', $ENV{OPENSSL_CONF} or die "Read $ENV{OPENSSL_CONF}: $!";
-    while (<$CONFIG>) {
-      next if /^\s*#/;
-      $ENV{OPENSSL_BITS}         ||= $1 if /default_bits\s*=\s*(\d+)/ and $1 > 2048;
-      $ENV{OPENSSL_COUNTRY}      ||= $1 if /countryName_default\s*=\s*(.+)/;
-      $ENV{OPENSSL_ORGANIZATION} ||= $1 if /organizationName_default\s*=\s*(.+)/;
-      $ENV{OPENSSL_STATE}        ||= $1 if /stateOrProvinceName_default\s*=\s*(.+)/;
-    }
-  }
-
-  $ENV{OPENSSL_BITS}         ||= 4096;
-  $ENV{OPENSSL_COUNTRY}      ||= 'US';
-  $ENV{OPENSSL_DAYS}         ||= 3650;       # Do not read from config file
-  $ENV{OPENSSL_ORGANIZATION} ||= 'Convos';
-  $ENV{OPENSSL_STATE}        ||= '';
-}
-
 1;
 
 =encoding utf8
@@ -240,16 +221,14 @@ exception if C<df> is not available. Example C<$usage>:
 
   $p = generate_cert_p(\%params);
 
-Used to generate an SSL cert and key file. Will use environment variables or
-C<$OPENSSL_CONF> file for default values. C<%params> can contain:
+Used to generate an SSL cert and key file. Will use environment variables for
+default values. C<%params> can contain:
 
 =over 2
 
 =item * bits
 
-Default to C<$OPENSSL_BITS>, "default_bits" in C<$OPENSSL_CONF>, or 4096.
-
-"default_bits" from C<$OPENSSL_CONF> must be higher than 2048 to be accepted.
+Default to C<$OPENSSL_BITS> or 4096.
 
 =item * cert
 
@@ -259,8 +238,7 @@ No default value.
 
 =item * country
 
-Default to C<$OPENSSL_COUNTRY>, "countryName_default" in C<$OPENSSL_CONF>, or
-"US".
+Default to C<$OPENSSL_COUNTRY> or emptry string.
 
 =item * common_name
 
@@ -284,17 +262,9 @@ No default value.
 
 =item * organization
 
-Default to C<$OPENSSL_ORGANIZATION>, "organizationName_default" in
-C<$OPENSSL_CONF>, or "Convos".
-
-=item * state
-
-Default to C<$OPENSSL_STATE>, "stateOrProvinceName_default" in
-C<$OPENSSL_CONF>, or empty string.
+Default to C<$OPENSSL_ORGANIZATION> or "Convos".
 
 =back
-
-C<$OPENSSL_CONF> will default to system wide openssl config file.
 
 =head2 generate_secret
 
