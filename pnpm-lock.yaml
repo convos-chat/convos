@@ -12,6 +12,8 @@ dependencies:
   jsdoc: 3.6.5
   jsonhtmlify: 0.1.0
   querystring: 0.2.0
+  rollup-plugin-commonjs: 10.1.0_rollup@1.32.1
+  rollup-plugin-node-resolve: 5.2.0_rollup@1.32.1
   twemoji: 12.1.5
 devDependencies:
   '@babel/core': 7.9.0
@@ -30,7 +32,7 @@ devDependencies:
   rollup-plugin-terser: 5.3.0_rollup@1.32.1
   rollup-plugin-visualizer: 2.7.2_rollup@1.32.1
   svelte: 3.20.1
-lockfileVersion: 5.1
+lockfileVersion: 5.2
 packages:
   /@babel/code-frame/7.8.3:
     dependencies:
@@ -930,7 +932,7 @@ packages:
       jest-haste-map: 25.1.0
       jest-message-util: 25.1.0
       jest-regex-util: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       jest-resolve-dependencies: 25.1.0
       jest-runner: 25.1.0
       jest-runtime: 25.1.0
@@ -989,7 +991,7 @@ packages:
       istanbul-lib-source-maps: 4.0.0
       istanbul-reports: 3.0.0
       jest-haste-map: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       jest-runtime: 25.1.0
       jest-util: 25.1.0
       jest-worker: 25.1.0
@@ -1177,6 +1179,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-iaIVzr+w2ZJ5HkidlZ3EJM8VTZb2MJLCjw3V+505yVts0gRC4UMvjw0d1HPtGqI/HQC/KdsYtayfzl+AXY2R8g==
+  /@types/estree/0.0.45:
+    dev: false
+    resolution:
+      integrity: sha512-jnqIUKDUqJbDIUxm0Uj7bnlMnRm1T/eZ9N+AVMqhPgzrba2GhGG5o/jCTwmdPK709nEZsGoMzXEDUjcXHa3W0g==
   /@types/istanbul-lib-coverage/2.0.1:
     dev: false
     resolution:
@@ -1195,15 +1201,20 @@ packages:
     resolution:
       integrity: sha512-UpYjBi8xefVChsCoBpKShdxTllC9pwISirfoZsUa2AAdQg/Jd2KQGtSbw+ya7GPo7x/wAPlH6JBhKhAsXUEZNA==
   /@types/node/13.9.3:
+    dev: true
     resolution:
       integrity: sha512-01s+ac4qerwd6RHD+mVbOEsraDHSgUaefQlEdBbUolnQFjKwCr7luvAlEwW1RFojh67u0z4OUTjPn9LEl4zIkA==
+  /@types/node/14.14.16:
+    dev: false
+    resolution:
+      integrity: sha512-naXYePhweTi+BMv11TgioE2/FXU4fSl29HAH1ffxVciNsH3rYXjNP2yM8wqmSm7jS20gM8TIklKiTen+1iVncw==
   /@types/q/1.5.2:
     dev: true
     resolution:
       integrity: sha512-ce5d3q03Ex0sy4R14722Rmt6MT07Ua+k4FwDfdcToYJcMKNtRVQvJ6JCAPdAmAnbRb6CsX6aYb9m96NGod9uTw==
   /@types/resolve/0.0.8:
     dependencies:
-      '@types/node': 13.9.3
+      '@types/node': 14.14.16
     dev: false
     resolution:
       integrity: sha512-auApPaJf3NPfe18hSoJkp8EbZzer2ISk7o8mCC3M9he/a04+gbMF97NkpD2S8riMGvm4BMRI59/SZQSaLTKpsQ==
@@ -1634,6 +1645,12 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-k0KL0aWZuBt2lrxrcASWDfwOLMnodeQjodT/1SxEQAXsHANgo6ZC/VEaSEHCXt7aSTZ4/4H5LKa+tBXmW7Vtvw==
+  /builtin-modules/3.2.0:
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==
   /cache-base/1.0.1:
     dependencies:
       collection-visit: 1.0.0
@@ -2582,7 +2599,6 @@ packages:
     resolution:
       integrity: sha512-j3acdrMzqrxmJTNj5dbr1YbjacrYgAxVMeF0gK16E3j494mOe7xygM/ZLIguEQ0ETwAg2hlJCtHRGav+y0Ny5A==
   /estree-walker/0.6.1:
-    dev: true
     resolution:
       integrity: sha512-SqmZANLWS0mnatqbSfRP5g8OXZC12Fgg1IwNtLsyHDzJizORW4khDfjPqJZsemPWBB2uqykUah5YpQ6epsqC/w==
   /estree-walker/1.0.1:
@@ -3327,12 +3343,11 @@ packages:
     dev: true
     resolution:
       integrity: sha1-z/9HGu5N1cnhWFmPvhKWe1za00U=
-  /is-core-module/2.1.0:
+  /is-core-module/2.2.0:
     dependencies:
       has: 1.0.3
-    dev: true
     resolution:
-      integrity: sha512-YcV7BgVMRFRua2FqQzKtTDMz8iCuLEyGKjr70q8Zm1yy2qKcurbFEd79PAdHV77oL3NrAaOVQIbMmiHQCHB7ZA==
+      integrity: sha512-XRAfAdyyY5F5cOXn7hYQDqh2Xmii+DEfIcQGxK/uNwMHhIkPWO0g8msXcbzLe+MpGoR951MlqM/2iIlU4vKDdQ==
   /is-data-descriptor/0.1.4:
     dependencies:
       kind-of: 3.2.2
@@ -3468,6 +3483,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-uJA/CDPO3Tao3GTrxYn6AwkM4nUPJiGGYu5+cB8qbC7WGFlrKZbiRo7SFKxUAEpFUfiHofWCXBUNhvYJMh+6zw==
+  /is-reference/1.2.1:
+    dependencies:
+      '@types/estree': 0.0.45
+    dev: false
+    resolution:
+      integrity: sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==
   /is-regex/1.0.5:
     dependencies:
       has: 1.0.3
@@ -3647,7 +3668,7 @@ packages:
       jest-get-type: 25.1.0
       jest-jasmine2: 25.1.0
       jest-regex-util: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       jest-util: 25.1.0
       jest-validate: 25.1.0
       micromatch: 4.0.2
@@ -3808,7 +3829,7 @@ packages:
       integrity: sha512-28/u0sqS+42vIfcd1mlcg4ZVDmSUYuNvImP4X2lX5hRMLW+CN0BeiKVD4p+ujKKbSPKd3rg/zuhCF+QBLJ4vag==
   /jest-pnp-resolver/1.2.1_jest-resolve@25.1.0:
     dependencies:
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
     dev: false
     engines:
       node: '>=6'
@@ -3835,7 +3856,7 @@ packages:
       node: '>= 8.3'
     resolution:
       integrity: sha512-Cu/Je38GSsccNy4I2vL12ZnBlD170x2Oh1devzuM9TLH5rrnLW1x51lN8kpZLYTvzx9j+77Y5pqBaTqfdzVzrw==
-  /jest-resolve/25.1.0_jest-resolve@25.1.0:
+  /jest-resolve/25.1.0:
     dependencies:
       '@jest/types': 25.1.0
       browser-resolve: 1.11.3
@@ -3845,8 +3866,6 @@ packages:
     dev: false
     engines:
       node: '>= 8.3'
-    peerDependencies:
-      jest-resolve: '*'
     resolution:
       integrity: sha512-XkBQaU1SRCHj2Evz2Lu4Czs+uIgJXWypfO57L7JYccmAXv4slXA6hzNblmcRmf7P3cQ1mE7fL3ABV6jAwk4foQ==
   /jest-runner/25.1.0:
@@ -3864,7 +3883,7 @@ packages:
       jest-jasmine2: 25.1.0
       jest-leak-detector: 25.1.0
       jest-message-util: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       jest-runtime: 25.1.0
       jest-util: 25.1.0
       jest-worker: 25.1.0
@@ -3894,7 +3913,7 @@ packages:
       jest-message-util: 25.1.0
       jest-mock: 25.1.0
       jest-regex-util: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       jest-snapshot: 25.1.0
       jest-util: 25.1.0
       jest-validate: 25.1.0
@@ -3924,7 +3943,7 @@ packages:
       jest-get-type: 25.1.0
       jest-matcher-utils: 25.1.0
       jest-message-util: 25.1.0
-      jest-resolve: 25.1.0_jest-resolve@25.1.0
+      jest-resolve: 25.1.0
       mkdirp: 0.5.4
       natural-compare: 1.4.0
       pretty-format: 25.1.0
@@ -6095,9 +6114,8 @@ packages:
       integrity: sha512-84oo6ZTtoTUpjgNEr5SJyzQhzL72gaRodsSfyxC/AXRvwu0Yse9H8eF9IpGo7b8YetZhlI6v7ZQ6bKBFV/6S7w==
   /resolve/1.19.0:
     dependencies:
-      is-core-module: 2.1.0
+      is-core-module: 2.2.0
       path-parse: 1.0.6
-    dev: true
     resolution:
       integrity: sha512-rArEXAgsBG4UgRGcynxWIWKFvh/XZCcS8UJdHhwy91zwAvCZIbcs+vAbflgBnNjYMs/i/i+/Ux6IZhML1yPvxg==
   /restore-cursor/2.0.0:
@@ -6151,6 +6169,20 @@ packages:
     dev: true
     resolution:
       integrity: sha512-nK4Z/k3MVjfCcnC5T15ksHw3JyRJx110oduy3VBW0ki2qI0tu4pLlgXyltBgtd+gpiFCPqEnfy89XRPG+eCOwA==
+  /rollup-plugin-commonjs/10.1.0_rollup@1.32.1:
+    dependencies:
+      estree-walker: 0.6.1
+      is-reference: 1.2.1
+      magic-string: 0.25.7
+      resolve: 1.19.0
+      rollup: 1.32.1
+      rollup-pluginutils: 2.8.2
+    deprecated: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-commonjs.
+    dev: false
+    peerDependencies:
+      rollup: '>=1.12.0'
+    resolution:
+      integrity: sha512-jlXbjZSQg8EIeAAvepNwhJj++qJWNJw1Cl0YnOqKtP5Djx+fFGkp3WRh+W0ASCaFG5w1jhmzDxgu3SJuVxPF4Q==
   /rollup-plugin-eslint/6.0.0:
     dependencies:
       eslint: 5.16.0
@@ -6158,6 +6190,20 @@ packages:
     dev: true
     resolution:
       integrity: sha512-iNH5l1LYNPCKCwQuLWzXdE0nd8d96yXuefP6YxDsh9WCF/+IS9n1n6F3yM/AMWEyIdquDwe7upG3vEYoV4BDpA==
+  /rollup-plugin-node-resolve/5.2.0_rollup@1.32.1:
+    dependencies:
+      '@types/resolve': 0.0.8
+      builtin-modules: 3.2.0
+      is-module: 1.0.0
+      resolve: 1.19.0
+      rollup: 1.32.1
+      rollup-pluginutils: 2.8.2
+    deprecated: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-node-resolve.
+    dev: false
+    peerDependencies:
+      rollup: '>=1.11.0'
+    resolution:
+      integrity: sha512-jUlyaDXts7TW2CqQ4GaO5VJ4PwwaV8VUGA7+km3n6k6xtOEacf61u0VXwN80phY/evMcaS+9eIeJ9MOyDxt5Zw==
   /rollup-plugin-postcss/2.5.0:
     dependencies:
       chalk: 2.4.2
@@ -6222,7 +6268,6 @@ packages:
   /rollup-pluginutils/2.8.2:
     dependencies:
       estree-walker: 0.6.1
-    dev: true
     resolution:
       integrity: sha512-EEp9NhnUkwY8aif6bxgovPHMoMoNr2FulJziTndpt5H9RdwC47GSGuII9XxpSdzVGM0GWrNPHV6ie1LTNJPaLQ==
   /rollup/1.32.1:
@@ -7405,7 +7450,9 @@ specifiers:
   querystring: ^0.2.0
   rollup: ^1.32.1
   rollup-plugin-bundle-html: ^0.2.2
+  rollup-plugin-commonjs: ^10.1.0
   rollup-plugin-eslint: ^6.0.0
+  rollup-plugin-node-resolve: ^5.2.0
   rollup-plugin-postcss: ^2.5.0
   rollup-plugin-svelte: ^5.1.1
   rollup-plugin-terser: ^5.3.0
