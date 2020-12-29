@@ -19,7 +19,7 @@ use Cwd ();
 use File::Spec;
 use FindBin;
 
-our $VERSION = '5.06';
+our $VERSION = '5.07';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
@@ -249,7 +249,7 @@ sub _dependencies {
   local *main::on            = sub { local $script->{cpanfile_mode} = shift; shift->() };
   local *main::requires      = sub { $load->(requires => @_) };
   local *main::suggests      = sub { $load->(suggests => @_) };
-  local *main::test_requires = sub { $load->(test => @_) };
+  local *main::test_requires = sub { $load->(test     => @_) };
 
   local ($@, $!) = ('', 0);
   do $ENV{CONVOS_CPAN_FILE};
@@ -302,7 +302,7 @@ sub _setup_env {
   $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
   $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
   $ENV{MOJO_NPM_BINARY} = 'pnpm';
-  $ENV{PERL5LIB}        = join ':', @INC;
+  $ENV{PERL5LIB} = join ':', @INC;
 
   my $bin = path_to 'local', 'bin';
   $ENV{PATH} = join ':', grep {$_} $bin, $ENV{PATH} if -d $bin;
