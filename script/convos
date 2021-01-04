@@ -164,12 +164,11 @@ sub command_upgrade {
 
 sub command_version {
   my $script = shift;
-  my @deps
-    = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s (%s)\n", @$_[1, 3, 2]] }
+  my @deps   = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s\n", @$_[1, 3]] }
     sort { $a->[1] cmp $b->[1] } $script->_dependencies;
 
-  unshift @deps, [requires => sprintf "  %-30s %-10s (%s)\n", 'Perl',   $^V,      '5.16'];
-  unshift @deps, [requires => sprintf "  %-30s %-10s (%s)\n", 'Convos', $VERSION, $VERSION];
+  unshift @deps, [requires => sprintf "  %-30s %-10s\n", 'Perl',   $^V];
+  unshift @deps, [requires => sprintf "  %-30s %-10s\n", 'Convos', $VERSION];
 
   my $dev_deps = join '', map { $_->[1] } grep { $_->[0] eq 'develop' } @deps;
   my $req_deps = join '', map { $_->[1] } grep { $_->[0] eq 'requires' } @deps;
@@ -237,6 +236,7 @@ sub _dependencies {
     local ($@, $!) = ('', 0);
     eval "use $module $version ();1";
     my $err = $@;
+    $err = 'Not installed.' if $err =~ m!Can't locate!;
     $err =~ s! at .*!!s;
     $err =~ s! in \@INC.*!!s;
     $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
