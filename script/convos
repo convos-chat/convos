@@ -119,8 +119,7 @@ sub command_install {
   @missing = grep { $_->[0] ne 'develop' } @missing  if $mode =~ /^--?all/;
   @missing = grep { $_->[0] eq 'requires' } @missing if $mode =~ /^--?prod/;
   $script->command_cpanm(-n => $_->[1]) or die "cpanm failed: $?\n" for @missing;
-
-  $script->command_version;
+  system $0, 'version';
   print <<"HERE";
 
 All dependencies are installed for "$mode".
@@ -264,8 +263,7 @@ sub _dependencies_are_installed {
   return 1 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
   return 1 unless -e $ENV{CONVOS_CPAN_FILE};
   return 1 unless grep { $_->[0] eq 'requires' and $_->[3] } $script->_dependencies;
-
-  $script->command_version;
+  system $0, 'version';
   print <<"HERE";
 
 It is not possible to start Convos at this point, since there
