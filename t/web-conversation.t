@@ -1,6 +1,8 @@
 #!perl
 use lib '.';
 use t::Helper;
+use Mojo::Loader qw(data_section);
+use Mojo::Util qw(encode);
 
 my $t    = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
@@ -85,4 +87,24 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
 
 $t->post_ok('/api/connection/irc-localhost/conversation/%23convos/read')->status_is(200);
 
+note 'notifications';
+$t->get_ok('/api/notifications')->status_is(200)->json_is('/messages', []);
+my $backend = $t->app->core->backend;
+my $target  = $connection->get_conversation('#convos');
+for (split /\n/, data_section qw(main notifications.log)) {
+  my ($ts, $message) = split /\s/, $_, 2;
+  $backend->_add_notification($target, $ts, $message);
+}
+
+$t->get_ok('/api/notifications')->status_is(200);
+is @{$t->tx->res->json->{messages}}, 5, 'got all notifications, including utf8';
+
 done_testing;
+
+__DATA__
+@@ notifications.log
+2020-12-03T11:25:18 <superman> cool beans
+2020-12-03T11:26:39 <supergirl> even with ø and å?
+2020-12-03T12:13:34 <supergirl> not sure...
+2020-12-03T12:14:07 <superman> have to wait!
+2020-12-03T12:58:57 <supergirl> øøøøøøh!

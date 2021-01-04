@@ -103,9 +103,9 @@ sub messages_p {
   $re = $query->{from};
   $args{from} = qr/$re/i if $re;
 
-  $args{include} = $query->{include} || 0;
-  $args{limit}   = $query->{limit}   || 60;
-  $args{match}   = $query->{match};
+  $args{include}  = $query->{include} || 0;
+  $args{limit}    = $query->{limit}   || 60;
+  $args{match}    = $query->{match};
   $args{messages} = [];
 
   # If both "before" and "after" are provided
@@ -174,7 +174,7 @@ sub notifications_p {
 
   warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
-    $line = decode 'UTF-8', $line;
+    $line = decode 'UTF-8', $line if utf8::is_utf8($line);
     next unless $line =~ $re;
     my $message = {connection_id => $2, conversation_id => $3, message => $4, ts => $1};
     my $ts      = dt $message->{ts};
@@ -226,6 +226,19 @@ sub users_p {
   @users = sort { $a->{registered} cmp $b->{registered} || $a->{email} cmp $b->{email} } @users;
 
   return Mojo::Promise->resolve(\@users);
+}
+
+sub _add_notification {
+  my ($self, $obj, $ts, $message) = @_;
+  my $file = $self->_notifications_file($obj->connection->user);
+  my $t    = dt $ts;
+
+  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
+  open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
+  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;
+  flock $FH, LOCK_EX;
+  printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
+  flock $FH, LOCK_UN;
 }
 
 sub _delete_messages {
@@ -384,18 +397,6 @@ sub _open {
   return $FH;
 }
 
-sub _save_notification {
-  my ($self, $obj, $ts, $message) = @_;
-  my $file = $self->_notifications_file($obj->connection->user);
-  my $t    = dt $ts;
-
-  open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
-  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;
-  flock $FH, LOCK_EX;
-  printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
-  flock $FH, LOCK_UN;
-}
-
 sub _setup {
   my $self = shift;
 
@@ -415,7 +416,7 @@ sub _setup {
           my $flag    = FLAG_NONE;
 
           if ($msg->{highlight} and $target->id and !$target->is_private) {
-            $self->_save_notification($target, $msg->{ts}, $message);
+            $self->_add_notification($target, $msg->{ts}, $message);
             $connection->user->save_p;
             $flag |= FLAG_HIGHLIGHT;
           }

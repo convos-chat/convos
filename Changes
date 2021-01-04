@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.08 Not Released
+ - Fix reading notificatins with unicode
+
 5.07 2020-12-29T13:32:00+0900
  - Add support for EXTERNAL and PLAIN SASL authentication #356 #525
  - Add supoort for nickserv certfp authentication #380
