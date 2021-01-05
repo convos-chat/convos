@@ -59,7 +59,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
     on_connect_commands => [],
     protocol            => 'irc',
     service_accounts    => [qw(chanserv nickserv)],
-    state               => 'disconnected',
+    state               => 'queued',
     url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
     wanted_state        => 'connected',
   }]
