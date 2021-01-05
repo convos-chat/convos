@@ -43,6 +43,7 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
+    this.prop('rw', 'videoService', params.videoService || '');
     this.prop('rw', 'window', null);
 
     if (params.hasOwnProperty('conversation_id')) {
@@ -190,17 +191,18 @@ export default class Conversation extends Reactive {
     return super.update(params);
   }
 
-  videoInfo({nick, videoService}) {
+  videoInfo() {
     const roomName = encodeURIComponent([this.connection_id, this.conversation_id].join('-'));
     const icon = this.window ? 'video-slash' : 'video';
     const info = {icon, roomName};
 
-    if (!this.conversation_id || !videoService) return info;
+    if (!this.conversation_id || !this.videoService) return info;
 
     try {
-      const host = new URL(videoService).host;
-      info.convosUrl = route.urlFor('/video/' + host + '/' + roomName, {'nick': nick});
-      info.realUrl = videoService.replace(/\/*$/, '/') + roomName;
+      const me = this._participants.toArray().find(i => i.me);
+      const host = new URL(this.videoService).host;
+      info.convosUrl = route.urlFor('/video/' + host + '/' + roomName, {'nick': me && me.nick || undefined});
+      info.realUrl = this.videoService.replace(/\/*$/, '/') + roomName;
     } catch(err) {
       console.error('videoInfo', err);
     }
@@ -295,13 +297,19 @@ export default class Conversation extends Reactive {
   }
 
   _maybeNotify(msg) {
-    if (!msg.from || msg.yourself) return;
-    if (!msg.highlight && !this.wantNotifications) return;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
     if (notify.appHasFocus) return;
+    if (!msg.from || msg.yourself) return;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+
+    const isVideoLink
+       = msg.message.indexOf(this.videoInfo().realUrl) != -1
+      || msg.message.indexOf(route.urlFor('/video/')) != -1;
+
+    if (!isVideoLink && !msg.highlight && !this.wantNotifications) return;
 
     const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-    this.lastNotification = notify.show(msg.message, {path: this.path, title});
+    const message = isVideoLink ? l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', this.name) : msg.message;
+    this.lastNotification = notify.show(message, {path: this.path, title});
   }
 
   _noop() {

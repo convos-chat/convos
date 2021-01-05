@@ -32,7 +32,7 @@ updateSettingsOp.on('start', req => {
   user.update({
     default_connection: req.body.default_connection,
     forced_connection: req.body.forced_connection,
-    video_service: req.body.video_service,
+    videoService: req.body.video_service,
   });
 });
 

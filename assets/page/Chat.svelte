@@ -33,7 +33,7 @@ $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
 $: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
-$: videoInfo = $conversation.videoInfo({nick: connection.nick, videoService: user.video_service});
+$: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 onMount(() => {

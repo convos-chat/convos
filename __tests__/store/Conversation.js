@@ -196,24 +196,31 @@ test('openWindow', () => {
 test('videoInfo', () => {
   const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
 
-  expect(c.videoInfo({})).toEqual({
+  expect(c.videoInfo()).toEqual({
     icon: 'video',
     roomName: 'irc-freenode-%23convos',
   });
 
-  expect(c.videoInfo({videoService: 'https://meet.jit.si/whatever'})).toEqual({
+  c.update({videoService: 'https://meet.jit.si/whatever'});
+  expect(c.videoInfo()).toEqual({
     convosUrl: '/video/meet.jit.si/irc-freenode-%23convos',
     realUrl: 'https://meet.jit.si/whatever/irc-freenode-%23convos',
     icon: 'video',
     roomName: 'irc-freenode-%23convos',
   });
 
-  expect(c.videoInfo({nick: 'superwoman', videoService: 'https://meet.jit.si/whatever'})).toEqual({
+  c.participants([{nick: 'superwoman', me: true}]);
+  expect(c.videoInfo()).toEqual({
     convosUrl: '/video/meet.jit.si/irc-freenode-%23convos?nick=superwoman',
     realUrl: 'https://meet.jit.si/whatever/irc-freenode-%23convos',
     icon: 'video',
     roomName: 'irc-freenode-%23convos',
   });
+
+  c.addMessage({from: 'supergirl', highlight: false, message: c.videoInfo().realUrl, type: 'private'});
+  expect(c.unread).toBe(1);
+  expect(c.lastNotification.title).toBe('supergirl in #convos');
+  expect(c.lastNotification.body).toBe('Do you want to join the Jitsi video chat with "#convos"?');
 });
 
 function mockMessagesOpPerform(res) {

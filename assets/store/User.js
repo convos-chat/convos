@@ -24,7 +24,7 @@ export default class User extends Reactive {
     this.prop('rw', 'default_connection', 'irc://chat.freenode.net:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'status', 'pending');
-    this.prop('rw', 'video_service', '');
+    this.prop('rw', 'videoService', '');
     this.prop('persist', 'ignoreStatuses', false);
 
     this.socket = params.socket || getSocket('/events');
@@ -45,6 +45,7 @@ export default class User extends Reactive {
   }
 
   ensureConversation(params, _lock) {
+    params = {...params, videoService: this.videoService};
     // Ensure channel or private conversation
     if (params.conversation_id) {
       const conn = this.ensureConversation({connection_id: params.connection_id}, true);
@@ -107,7 +108,7 @@ export default class User extends Reactive {
       highlightKeywords: data.highlight_keywords || [],
       roles: true,
       status: res.errors ? 'error' : 'success',
-      video_service: data.video_service || '',
+      videoService: data.video_service || '',
     });
   }
 
@@ -130,6 +131,11 @@ export default class User extends Reactive {
     const props = {...params, connection_id: params.connection_id || '', frozen: 'Not found.'};
     ['conversation_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
     return this.update({activeConversation: props.conversation_id ? new Conversation(props) : new Connection(props)});
+  }
+
+  update(params) {
+    if (params.videoService) this.connections.forEach(conn => conn.update({videoService: params.videoService}));
+    return super.update(params);
   }
 
   _calculateUnread() {
