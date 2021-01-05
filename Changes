@@ -1,10 +1,12 @@
 Revision history for perl distribution Convos
 
-5.08 Not Released
+5.08 2021-01-29T13:32:00+0900
+ - Fix "convos version" after install/upgrade #539
  - Fix reading notificatins with unicode
  - Fix issue with some pastebin links
  - Add notification when a video link is sent #472
  - Add link to raw version of the paste
+ - Improved filename for pasted files
 
 5.07 2020-12-29T13:32:00+0900
  - Add support for EXTERNAL and PLAIN SASL authentication #356 #525
