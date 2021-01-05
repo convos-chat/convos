@@ -112,8 +112,9 @@ function onVideoLinkClick(e) {
   if (conversation.window) return conversation.window.close();
   conversation.openWindow(videoInfo.convosUrl, videoInfo.roomName);
 
-  const alreadySent = conversation.messages.slice(-30).find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
-  if (!alreadySent) conversation.send({method: 'send', message: videoInfo.realUrl});
+  const alreadySent = conversation.messages.slice(-30).reverse().find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
+  const send = !alreadySent || alreadySent.ts.toEpoch() < new Time().toEpoch() - 600;
+  if (send) conversation.send({method: 'send', message: videoInfo.realUrl});
 }
 
 function renderFocusedEl(infinityEl, add) {
