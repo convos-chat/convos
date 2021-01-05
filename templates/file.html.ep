@@ -1,4 +1,5 @@
-% use Mojo::Util 'decode';
+% use Convos::Date qw(dt);
+% use Mojo::Util qw(decode);
 % layout 'convos';
 % title $file->filename;
 
@@ -10,10 +11,16 @@
 
 <main>
   <h1><%=l $file->filename %></h1>
-  <p><small class="cms-date"><%= $file->saved %></small></p>
+  <div class="cms-meta">
+    % my $dt = dt $file->saved;
+    % my $dt_homan = sprintf '%s. %s, %s', $dt->mday, $dt->month, $dt->year;
+    %= link_to $dt_homan, $file->public_url, class => 'cms-meta__date'
+    &mdash;
+    %= link_to l('Raw'), $file->public_url(1), class => 'cms-meta__raw'
+  </div>
 
   % if ($file->mime_type =~ m!^image!) {
-    %= link_to $file->public_url(1), download => 'download', begin
+    %= link_to $file->public_url(1), begin
       %= image $file->public_url(1), alt => $file->filename
     % end
   % } else {

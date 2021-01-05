@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 5.08 Not Released
  - Fix reading notificatins with unicode
  - Fix issue with some pastebin links
+ - Add link to raw version of the paste
 
 5.07 2020-12-29T13:32:00+0900
  - Add support for EXTERNAL and PLAIN SASL authentication #356 #525

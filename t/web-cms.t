@@ -86,7 +86,7 @@ $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(200)->header_is('X-Provid
 note 'blog index';
 $t->get_ok('/blog')->status_is(200)->header_is('X-Provider-Name', undef)->element_exists('main')
   ->element_exists('main section.blog-list__item')->text_is('section h2', 'Cool heading')
-  ->text_is('section .cms-date a', '17. May, 2020')
+  ->text_is('section .cms-meta .cms-meta__date', '17. May, 2020')
   ->text_like('section .cms-excerpt', qr{This blog is about.*some cool stuff.}s)
   ->text_is('section .cms-more a', 'Read more');
 

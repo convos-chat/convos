@@ -30,7 +30,7 @@ my $fid = $t->tx->res->json('/files/0/id');
 $t->get_ok("/file/1/$fid")->status_is(200)
   ->element_exists('.le-paste > pre.paste', 'pre.paste so LinkEmbedder can do the right thing')
   ->header_is('X-Provider-Name', 'ConvosApp')->text_is('h1', 'web-files.t')
-  ->text_like('.cms-date', qr{^\d+-\d+-\d+})
+  ->text_like('.cms-meta .cms-meta__date', qr{^\d+\.\s})
   ->content_like(qr{\<pre class="paste"\>.*use t::Helper}s);
 $t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
   ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre class="paste"\>.*use t::Helper}s);
@@ -55,7 +55,8 @@ my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});
 isnt $url->path->[-1], $fid, 'paste does not have the same id as file';
 $t->get_ok($url->path->to_string)->status_is(200)->text_is('h1', 'zyxwvutsrqponmlkjihgfedcba_.txt')
-  ->text_like('.cms-date', qr{^\d+-\d+-\d+})
+  ->element_exists(sprintf 'a[href$="%s.txt"]', $url->path->to_string)
+  ->text_like('.cms-meta .cms-meta__date', qr{^\d+\.\s})
   ->content_like(qr{\<pre class="paste"\>~\}\|\{zyxwvutsrqponmlkjihgfedcba`_\^\]\\\[});
 
 note 'back compat paste route';

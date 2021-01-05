@@ -12,7 +12,9 @@
   % for my $blog (@$blogs) {
     <section class="blog-list__item">
       <h2><%= $blog->{meta}{heading} || $blog->{meta}{title} %></h2>
-      <div class="cms-date"><%= link_to $blog->{meta}{date}, $blog->{meta}{url} %></div>
+      <div class="cms-meta">
+        %= link_to $blog->{meta}{date}, $blog->{meta}{url}, class => 'cms-meta__date'
+      </div>
       <p class="cms-excerpt"><%= $blog->{excerpt} %></p>
       <div class="cms-more"><%= link_to l('Read more'), $blog->{meta}{url} %></div>
     </section>
