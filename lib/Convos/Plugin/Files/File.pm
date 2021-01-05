@@ -28,17 +28,20 @@ has path => sub {
   return $self->user->core->home->child(@uri);
 };
 
-has saved => sub { Mojo::Date->new->to_datetime };
-has types => sub { Mojolicious::Types->new };
-has user  => undef;
+has saved      => sub { Mojo::Date->new->to_datetime };
+has types      => sub { Mojolicious::Types->new };
+has user       => undef;
 has write_only => sub {false};
 
 sub handle_message_to_paste_p {
   my ($class, $backend, $connection, $message) = @_;
   my $self = $class->new(user => $connection->user);
 
+  my $filename = $message =~ m!(\w.{4,})!m ? lc substr $1, 0, 28 : 'paste';
+  $filename =~ s![^A-Za-z-]+!_!g;
+  $filename = 'paste' if 5 > length $filename;
+  $self->filename("$filename.txt");
   $self->asset->add_chunk(encode 'UTF-8', $message);
-  $self->filename('paste.txt');
 
   return $self->save_p;
 }

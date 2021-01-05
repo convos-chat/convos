@@ -45,7 +45,7 @@ $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_o
 
 note 'handle_message_to_paste_p';
 my %send = (connection_id => $connection->id, conversation_id => 'superwoman', method => 'send');
-$send{message} = 'x' x (512 * 3);
+$send{message} = substr +(join('', map {chr} reverse 20 .. 126) x 13), 0, 512 * 3;
 $t->websocket_ok('/events')->send_ok({json => \%send})
   ->message_ok->json_message_is('/conversation_id', 'superwoman')
   ->json_message_is('/event', 'message')->json_message_like('/message', qr{^http.*/file/1/$fid_re})
@@ -54,8 +54,9 @@ $t->websocket_ok('/events')->send_ok({json => \%send})
 my $msg = Mojo::JSON::decode_json($t->message->[1]);
 my $url = Mojo::URL->new($msg->{message});
 isnt $url->path->[-1], $fid, 'paste does not have the same id as file';
-$t->get_ok($url->path->to_string)->status_is(200)->text_is('h1', 'paste.txt')
-  ->text_like('.cms-date', qr{^\d+-\d+-\d+})->content_like(qr{\<pre class="paste"\>xxxxxxxx}s);
+$t->get_ok($url->path->to_string)->status_is(200)->text_is('h1', 'zyxwvutsrqponmlkjihgfedcba_.txt')
+  ->text_like('.cms-date', qr{^\d+-\d+-\d+})
+  ->content_like(qr{\<pre class="paste"\>~\}\|\{zyxwvutsrqponmlkjihgfedcba`_\^\]\\\[});
 
 note 'back compat paste route';
 my $paste = $user->core->home->child(qw(superman@example.com upload 149545306873033))
