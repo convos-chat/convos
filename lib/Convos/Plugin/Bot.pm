@@ -18,7 +18,7 @@ sub action {
   my $actions = $self->actions;
   return $actions->{$name} if $actions->{$name};
 
-  $name = camelize $name if $name =~ m!^[a-z]!;
+  $name = camelize $name   if $name =~ m!^[a-z]!;
   return $actions->{$name} if $actions->{$name};
 
   $name = join '::', 'Convos::Plugin::Bot::Action', $name;
@@ -122,6 +122,8 @@ sub _ensure_connection {
 
   my $state_method = $connection->wanted_state eq 'connected' ? 'connect_p' : 'disconnect_p';
   $connection->$state_method unless $connection->state eq $connection->wanted_state;
+  $self->_log->info(
+    "Bot connection @{[$connection->url]} has wanted state @{[$connection->wanted_state]}.");
 }
 
 sub _load_config {
@@ -131,7 +133,7 @@ sub _load_config {
   my $ts = $self->_config_file->stat->mtime;
   return if $self->config->data->{ts} and $ts == $self->config->data->{ts};
 
-  $self->_log->debug("Reloading @{[$self->_config_file]}");
+  $self->_log->info("Reloading @{[$self->_config_file]}");
   my $config = $self->load_config_file($self->_config_file);
   @$config{qw(action connection ts)} = ({}, {}, $ts);
   $config->{$_} ||= [] for qw(actions connections);
@@ -150,6 +152,7 @@ sub _log {
 
 sub _on_state {
   my ($self, $connection, $type, $event) = @_;
+  $self->_log->info("Bot connection @{[$connection->id]} got state event $type");
   $connection->_write_p("MODE $event->{nick} +B\r\n") if $type eq 'me' and $event->{nick};
 }
 
@@ -266,8 +269,8 @@ using chat commands, if you are a convos admin.
 
   # Specify which servers to connect to
   connections:
-  - url: irc://chat.freenode.net:6697
-    state: connected                 # connected (default), disconnected
+  - url: 'irc://localhost:6667?tls=0'
+    wanted_state: connected          # connected (default), disconnected
     actions:
       Convos::Plugin::Bot::Action::Hailo:
         free_speak_ratio: 0.001      # override "free_speak_ratio" for any conversation on freenode
