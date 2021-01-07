@@ -25,14 +25,15 @@ $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok
   ->server_event_ok('_irc_event_authenticate')->server_write_ok(":example AUTHENTICATE +\r\n")
   ->client_event_ok('_irc_event_authenticate')->server_event_ok('_irc_event_authenticate')
   ->server_write_ok(
-  "example 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
-)->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
-  ->process_ok('capabilities handshake');
+  ":server 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
+)->client_event_ok('_irc_event_900')->server_write_ok(['welcome.irc'])
+  ->client_event_ok('_irc_event_rpl_welcome')->process_ok('capabilities handshake');
 
 is_deeply(
   $connection->TO_JSON->{me},
   {
-    capabilities => {
+    authenticated => true,
+    capabilities  => {
       'account-notify'    => true,
       'away-notify'       => true,
       'chghost'           => true,
@@ -50,6 +51,7 @@ is_deeply(
 note 'plain';
 $connection->url->query->param(sasl => 'plain');
 $connection->disconnect_p->then(sub { $connection->connect_p })->wait;
+is $connection->TO_JSON->{me}{authenticated}, false, 'not authenticated after reconnect';
 
 $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok('_irc_event_nick')
   ->server_write_ok(":example CAP * LS * :account-notify away-notify chghost extended-join\r\n")
@@ -59,8 +61,10 @@ $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok
   ->server_event_ok('_irc_event_authenticate')->server_write_ok(":example AUTHENTICATE +\r\n")
   ->client_event_ok('_irc_event_authenticate')->server_event_ok('_irc_event_authenticate')
   ->server_write_ok(
-  "example 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
+  ":server 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
 )->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
   ->process_ok('capabilities handshake');
+
+is $connection->TO_JSON->{me}{authenticated}, true, 'authenticated';
 
 done_testing;

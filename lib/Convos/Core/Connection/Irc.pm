@@ -28,7 +28,9 @@ sub disconnect_p {
   my $p    = Mojo::Promise->new;
   return $p->resolve({}) unless $self->{stream};
 
-  $self->{disconnecting} = 1;    # Prevent getting queued
+  $self->{myinfo}{authenticated} = false;
+  $self->{myinfo}{capabilities}  = {};
+  $self->{disconnecting}         = 1;       # Prevent getting queued
   $self->_write("QUIT :https://convos.chat", sub { $self->_stream_remove($p) });
   return $p;
 }
@@ -86,14 +88,29 @@ sub _connect_args_p {
   $self->_periodic_events;
   $url->port($params->param('tls') ? 6669 : 6667) unless $url->port;
   $params->param(nick => $self->nick)             unless $params->param('nick');
-  $self->{myinfo}{nick} = $params->param('nick');
+  $self->{myinfo}{authenticated} = false;
+  $self->{myinfo}{capabilities}  = {};
+  $self->{myinfo}{nick}          = $params->param('nick');
 
   return $self->SUPER::_connect_args_p;
 }
 
-sub _irc_event_903 {
+sub _irc_event_900 { goto &_irc_event_sasl_status }    # RPL_LOGGEDIN
+sub _irc_event_901 { goto &_irc_event_sasl_status }    # RPL_LOGGEDOUT
+sub _irc_event_902 { goto &_irc_event_sasl_status }    # ERR_NICKLOCKED
+sub _irc_event_903 { goto &_irc_event_sasl_status }    # RPL_SASLSUCCESS
+sub _irc_event_904 { goto &_irc_event_sasl_status }    # ERR_SASLFAIL
+sub _irc_event_905 { goto &_irc_event_sasl_status }    # ERR_SASLTOOLONG
+sub _irc_event_906 { goto &_irc_event_sasl_status }    # ERR_SASLABORTED
+sub _irc_event_907 { goto &_irc_event_sasl_status }    # ERR_SASLALREADY
+sub _irc_event_908 { goto &_irc_event_cap }            # RPL_SASLMECHS
+
+sub _irc_event_sasl_status {
   my ($self, $msg) = @_;
+  $msg->{error} = 1 if $msg->{command} =~ m!90[14567]!;
   $self->_irc_event_fallback($msg);
+  $self->{myinfo}{authenticated} = $msg->{command} =~ m!90[03]! ? true : false;
+  $self->emit(state => me => $self->{myinfo});
   $self->_write("CAP END\r\n");
 }
 
@@ -107,11 +124,11 @@ sub _irc_event_cap {
     push @cap_req, 'sasl' if $self->{myinfo}{capabilities}{sasl} and $self->_sasl_mechanism;
     $self->_write(@cap_req ? sprintf "CAP REQ :%s\r\n", join ' ', @cap_req : "CAP END\r\n");
   }
-  elsif ($msg->{raw_line} =~ m!\sACK\s:(.+)!) {
+  elsif ($msg->{raw_line} =~ m!\sACK\W*(.+)!) {
     my ($capabilities, $mech) = ($1, $self->_sasl_mechanism);
     $self->_write("AUTHENTICATE $mech\r\n") if $capabilities =~ m!\bsasl\b!;
   }
-  elsif ($msg->{raw_line} =~ m!\sNAC!) {
+  else {
     $self->_write("CAP END\r\n");
   }
 }
@@ -189,7 +206,7 @@ sub _irc_event_fallback {
       highlight => false,
       message   => join(' ', @params),
       ts        => time,
-      type      => $msg->{command} =~ m!err! ? 'error' : 'notice',
+      type      => $msg->{error} || $msg->{command} =~ m!err! ? 'error' : 'notice',
     }
   );
 }
