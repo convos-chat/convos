@@ -15,7 +15,7 @@ $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_o
 
 my (@messages, @state);
 $connection->on(message => sub { push @messages, $_[2] });
-$connection->on(state   => sub { push @state, [@_[1, 2]] });
+$connection->on(state   => sub { push @state,    [@_[1, 2]] });
 
 note 'error handlers';
 $server->server_write_ok(":localhost 404 superman #nopechan :Cannot send to channel\r\n")
@@ -33,7 +33,7 @@ $server->server_write_ok(":localhost 404 superman #nopechan :Cannot send to chan
 
 is delete $_->{from}, 'irc-localhost', 'from irc-localhost' for @messages;
 is delete $_->{type}, 'error',         'type error'         for @messages;
-ok delete $_->{ts}, 'got timestamp' for @messages;
+ok delete $_->{ts},   'got timestamp' for @messages;
 
 is_deeply(
   [map { $_->{message} } @messages],
@@ -48,7 +48,10 @@ is_deeply(
 
 is_deeply(
   \@state,
-  [[me => {nick => 'nopeman_'}], [quit => {message => 'Gone to lunch', nick => 'superwoman'}]],
+  [
+    [me   => {authenticated => false, capabilities => {}, nick => 'nopeman_',}],
+    [quit => {message => 'Gone to lunch', nick => 'superwoman'}]
+  ],
   'got state changes',
 );
 
@@ -94,6 +97,8 @@ cmp_deeply(
     [part => {conversation_id => '#convos', message => 'I\'m out', nick => 'superduper'}],
     [
       me => {
+        authenticated           => false,
+        capabilities            => {},
         available_channel_modes => 'bciklmnoprstveIMORS',
         available_user_modes    => 'DFGHRSWabcdefgijklnopqrsuwxy',
         nick                    => 'superman',

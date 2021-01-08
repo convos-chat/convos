@@ -27,8 +27,9 @@ $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok
 
 is_deeply $connection->TO_JSON->{me},
   {
-  nick         => 'superman',
-  capabilities => {
+  authenticated => false,
+  nick          => 'superman',
+  capabilities  => {
     'account-notify'    => true,
     'away-notify'       => true,
     'chghost'           => true,

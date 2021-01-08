@@ -22,7 +22,7 @@ cmp_deeply(
   $connection->TO_JSON,
   {
     connection_id       => ignore(),
-    me                  => {},
+    me                  => {authenticated => false, capabilities => {}},
     name                => 'localhost',
     on_connect_commands => [],
     protocol            => 'irc',

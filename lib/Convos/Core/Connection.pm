@@ -85,6 +85,8 @@ sub new {
   my $self          = shift->SUPER::new(@_);
   my $conversations = delete $self->{conversations} || delete $self->{dialogs} || [];  # back compat
   $self->conversation($_) for @$conversations;
+  $self->{myinfo}{authenticated} ||= false;
+  $self->{myinfo}{capabilities}  ||= {};
   $self;
 }
 
@@ -204,7 +206,6 @@ sub _stream {
   $self->{pid} //= $$;
   $self->{buffer}  = '';
   $self->{delayed} = 0;
-  $self->{myinfo} ||= {};
   $self->state(connected => "Connected to @{[$self->url->host]}.");
 
   Scalar::Util::weaken($self);

@@ -72,7 +72,7 @@ cmp_deeply(
   \@state,
   [
     [frozen => superhashof({conversation_id => '#convos', frozen => 'Not active in this room.'})],
-    [me     => {nick => 'superduper'}],
+    [me     => {authenticated => false, capabilities => {}, nick => 'superduper'}],
     [frozen => superhashof({conversation_id => 'superwoman', frozen => ''})],
   ],
   'nick and frozen event so far'

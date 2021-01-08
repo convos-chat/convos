@@ -40,7 +40,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
   [
     {
       connection_id       => 'irc-example',
-      me                  => {},
+      me                  => {authenticated => false, capabilities => {}},
       name                => 'example',
       on_connect_commands => [],
       protocol            => 'irc',
@@ -51,7 +51,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
     },
     {
       connection_id       => 'irc-localhost',
-      me                  => {},
+      me                  => {authenticated => false, capabilities => {}},
       name                => 'localhost',
       on_connect_commands => [],
       protocol            => 'irc',
@@ -93,6 +93,7 @@ my $backend = $t->app->core->backend;
 my $target  = $connection->get_conversation('#convos');
 for (split /\n/, data_section qw(main notifications.log)) {
   my ($ts, $message) = split /\s/, $_, 2;
+  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
   $backend->_add_notification($target, $ts, $message);
 }
 
