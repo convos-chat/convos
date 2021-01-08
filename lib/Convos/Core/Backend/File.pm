@@ -174,7 +174,7 @@ sub notifications_p {
 
   warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
-    $line = decode 'UTF-8', $line if utf8::is_utf8($line);
+    $line = decode 'UTF-8', $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, conversation_id => $3, message => $4, ts => $1};
     my $ts      = dt $message->{ts};
@@ -233,7 +233,6 @@ sub _add_notification {
   my $file = $self->_notifications_file($obj->connection->user);
   my $t    = dt $ts;
 
-  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
   open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
   warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;
   flock $FH, LOCK_EX;

@@ -2,10 +2,11 @@ Revision history for perl distribution Convos
 
 5.09 Not Released
  - Fix SASL authentication process for Oragono IRCd (and others) #356
+ - Fix issue where notifications were double encoded UTF-8
 
 5.08 2021-01-05T12:21:00+0900
  - Fix "convos version" after install/upgrade #539
- - Fix reading notificatins with unicode
+ - Fix reading notifications with unicode
  - Fix issue with some pastebin links
  - Add notification when a video link is sent #472
  - Add link to raw version of the paste
