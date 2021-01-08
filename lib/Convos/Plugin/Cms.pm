@@ -99,13 +99,14 @@ sub _parse_document {
 
   my ($body, $FH) = ('', $file->open);
   while (readline $FH) {
+    $_ = decode 'UTF-8', $_;
     $body .= $_ and last if $. == 1 and !/^---/;    # meta header has to start with "---"
     last if $. > 1 and /^---/;                      # meta header stops with "----"
     $doc->{meta}{$1} = $2 if /^\s*(\w+)\s*:\s*(.+)/;
   }
 
   $body .= $_ while readline $FH;
-  $body = Mojo::DOM->new($body);
+  $body = Mojo::DOM->new(decode 'UTF-8', $body);
   $self->_parse_markdown($body, $doc);
   $self->_rewrite_document($body, $doc) unless $params->{scan};
   $self->_extract_excerpt($body, $doc);
@@ -116,7 +117,7 @@ sub _parse_document {
   $doc->{meta}{name} = $file->basename;
   $doc->{meta}{name} =~ s!^\d{4}-\d{2}-\d{2}-!!;
   $doc->{meta}{name} =~ s!\.md$!!;
-  $doc->{meta}{$_} ||= $dt->$_ for qw(mday mon year);
+  $doc->{meta}{$_}    ||= $dt->$_ for qw(mday mon year);
   $doc->{meta}{date}  ||= sprintf '%s. %s, %s', $dt->mday, $dt->month, $dt->year;
   $doc->{meta}{title} ||= $file->basename;
   $doc->{path} = "$file";
@@ -252,7 +253,7 @@ sub _rewrite_document {
 
   $doc->{custom_css} =~ s!</?\w+>!!g;    # Remove <p> tags inside <style>
   $doc->{body}           = $dom;
-  $doc->{after_content}  = $doc->{after_content} ? Mojo::DOM->new($doc->{after_content}) : undef;
+  $doc->{after_content}  = $doc->{after_content}  ? Mojo::DOM->new($doc->{after_content})  : undef;
   $doc->{before_content} = $doc->{before_content} ? Mojo::DOM->new($doc->{before_content}) : undef;
   $doc->{toc}            = \@toc;
 }
