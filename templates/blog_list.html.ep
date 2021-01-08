@@ -14,8 +14,8 @@
       <h2><%= $blog->{meta}{heading} || $blog->{meta}{title} %></h2>
       <div class="cms-meta">
         <span class="cms-meta__author"><%=l 'Posted by %1', $blog->{meta}{author} || settings('organization_name') %></span>
-        %=l 'on'
-        %= link_to $blog->{meta}{date}, $blog->{meta}{url}, class => 'cms-meta__date'
+        <%=l 'on' %>
+        <%= link_to $blog->{meta}{date}, $blog->{meta}{url}, class => 'cms-meta__date' %>.
       </div>
       <p class="cms-excerpt"><%= $blog->{excerpt} %></p>
       <div class="cms-more"><%= link_to l('Read more'), $blog->{meta}{url} %></div>
