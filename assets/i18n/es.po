@@ -64,7 +64,7 @@ msgstr "Correo del administrador"
 
 #: assets/page/Login.svelte:60
 msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
-msgstr "Ya que eres el primer usuario, no necesitas ningún enlace de invitación. Solo rellena el siguiente formulario, presiona "Registrar" para comenzar a chatear"
+msgstr "Ya que eres el primer usuario, no necesitas ningún enlace de invitación. Solo rellena el siguiente formulario, presiona \"Registrar\" para comenzar a chatear"
 
 #: assets/page/Help.svelte:32
 msgid "Autocomplete"
