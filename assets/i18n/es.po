@@ -564,7 +564,7 @@ msgstr "Tema"
 
 #: assets/page/SettingsAdmin.svelte:88
 msgid "This email can be used by users to get in touch with the Convos admin."
-msgstr "Puedes utilizar este correo electrónico para contactarte con el administrador de Convos."
+msgstr "Este correo electrónico podrá ser utilizado para contactar al administrador de Convos."
 
 #: assets/page/SettingsAdmin.svelte:94
 msgid "This is the default connection new users will connect to."
