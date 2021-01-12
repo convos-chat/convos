@@ -8,6 +8,7 @@ use Mojo::JSON qw(false true);
 use Mojo::Parameters;
 use Mojo::Util qw(b64_decode b64_encode gzip gunzip term_escape trim);
 use Parse::IRC ();
+use Socket;
 use Time::HiRes 'time';
 
 use constant IS_TESTING            => $ENV{HARNESS_ACTIVE}               || 0;
@@ -18,6 +19,7 @@ use constant PERIDOC_INTERVAL      => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}  || 60;
 require Convos;
 our $VERSION = Convos->VERSION;
 
+our $CONVOS_URL = 'https://convos.chat';
 our %CTCP_QUOTE = ("\012" => 'n', "\015" => 'r', "\0" => '0', "\cP" => "\cP");
 
 my %CLASS_DATA;
@@ -31,7 +33,7 @@ sub disconnect_p {
   $self->{myinfo}{authenticated} = false;
   $self->{myinfo}{capabilities}  = {};
   $self->{disconnecting}         = 1;       # Prevent getting queued
-  $self->_write("QUIT :https://convos.chat", sub { $self->_stream_remove($p) });
+  $self->_write("QUIT :$CONVOS_URL", sub { $self->_stream_remove($p) });
   return $p;
 }
 
@@ -1033,19 +1035,27 @@ sub _stream {
   $self->SUPER::_stream($loop, $err, $stream);
   return if $err;
 
-  my $url  = $self->url;
-  my $nick = $self->nick;
-  my $user = $url->username || $nick;
-  $user =~ s/^[^a-zA-Z0-9]/x/;
-  my $mode = $url->query->param('mode') || 0;
+  my $url = $self->url;
+  if (my $password = $self->_web_irc_password) {
+    my $remote_address  = $url->query->param('remote_address')               || '127.0.0.1';
+    my $remote_hostname = gethostbyaddr(inet_aton($remote_address), AF_INET) || $remote_address;
+    $self->_write(sprintf "WEBIRC %s %s %s %s\r\n",
+      $password, 'convos', $remote_hostname, $remote_address);
+  }
+
   $self->_write("CAP LS\r\n");
   $self->_write(sprintf "PASS %s\r\n", $url->password)
     if length $url->password and !$self->_sasl_mechanism;
+
+  my $nick = $self->nick;
   $self->_write("NICK $nick\r\n");
 
-  my $convos   = "https://convos.chat";
+  my $mode     = $url->query->param('mode') || 0;
+  my $user     = $url->username             || $nick;
   my $realname = $url->query->param('realname');
-  $realname = $realname ? "$realname via $convos" : $convos;
+  $realname = $realname ? "$realname via $CONVOS_URL" : $CONVOS_URL;
+
+  $user =~ s/^[^a-zA-Z0-9]/x/;
   $self->_write("USER $user $mode * :$realname\r\n");
 }
 
@@ -1093,6 +1103,15 @@ CHUNK:
 
     $self->emit(irc_message => $msg)->emit($method => $msg) if IS_TESTING;
   }
+}
+
+sub _web_irc_password {
+  my $name = shift->name;
+  state $pw = {};
+  return $pw->{$name} if $pw->{$name};
+  my $key = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc $name;
+  $key =~ s!\W!_!g;
+  return $pw->{$key} = Mojo::URL->new($ENV{$key} || '');
 }
 
 # This method is used to write a message to the IRC server and wait for a
