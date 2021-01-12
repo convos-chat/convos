@@ -280,7 +280,7 @@ msgstr "Ignorar mensajes de entrada/salida"
 
 #: assets/page/SettingsAdmin.svelte:131
 msgid "Inode usage"
-msgstr "Uso de ínodo"
+msgstr "Uso de inodo"
 
 #: assets/page/Login.svelte:50
 msgid "Invalid invite/recover URL"
@@ -288,7 +288,7 @@ msgstr "URL de invitación/recuperación inválida"
 
 #: assets/page/SettingsAdminUsers.svelte:118
 msgid "Invite or recover password"
-msgstr "Invite or recover password"
+msgstr "Invitar o recuperar contraseña"
 
 #: assets/page/ConversationAdd.svelte:57
 msgid "It is also possible to load in all existing conversations for a given connection."
