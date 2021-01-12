@@ -37,17 +37,6 @@ Here is a short overview of an example directory structure:
 IMPORTANT! The "json" files located in `$CONVOS_HOME` should never be edited
 while Convos is running.
 
-## Can Convos be extended and customized?
-
-Yes. Convos supports plugins, but there have not yet been any plugins
-developed. We hope to implement
-[#244](https://github.com/Nordaaker/convos/issues/244) and
-[#90](https://github.com/Nordaaker/convos/issues/90) as the first core
-plugins.
-
-Look at the [configuration](/doc/config) guide to see which configuration
-parameters that have to be set to load a plugin.
-
 ## Is Convos supported on my system?
 
 Convos runs on MacOS and all flavors of Linux, but you might have to install
@@ -117,6 +106,27 @@ re-install Convos:
     ./script/convos install
 
 Please [contact us](/doc/#get-in-touch) if the above instructions do not work.
+
+## Can Convos be extended and customized?
+
+Yes. Convos has a plugin system that allow you to extend and override most
+parts of Convos. Look at the [configuration](/doc/config) guide to see which
+configuration parameters that have to be set to load a plugin.
+
+The plugin system is used by Convos core. Here are some of the plugins that
+ship with Convos:
+
+* [Convos::Plugin::Auth](https://convos.chat/doc/Convos::Plugin::Auth) is used
+  to login, logout and register new users. The [LDAP](https://convos.chat/doc/Convos::Plugin::Auth::LDAP)
+  plugin can be loaded to override these methods to use LDAP as backend instead.
+* [Convos::Plugin::Bot](https://convos.chat/doc/Convos::Plugin::Bot) is a bot
+  system that ships with Convos.
+* [Convos::Plugin::Cms](https://convos.chat/doc/Convos::Plugin::Cms) is used to
+  render this web page, but can be customized to render *your* own content.
+
+There are [more](https://github.com/Nordaaker/convos/tree/master/lib/Convos/Plugin)
+plugins that ship with Convos. Want to write you own? Look at the [deelopment
+guide](/doc/develop) for how to get started.
 
 ## Why can't Convos do X?
 
