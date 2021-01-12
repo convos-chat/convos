@@ -37,10 +37,6 @@ Here is a short overview of an example directory structure:
 IMPORTANT! The "json" files located in `$CONVOS_HOME` should never be edited
 while Convos is running.
 
-## Can Convos run behind behind my favorite web server?
-
-Yes. See [Running Convos behind my favorite web server](/doc/reverse-proxy).
-
 ## Can Convos be extended and customized?
 
 Yes. Convos supports plugins, but there have not yet been any plugins
@@ -51,6 +47,26 @@ plugins.
 
 Look at the [configuration](/doc/config) guide to see which configuration
 parameters that have to be set to load a plugin.
+
+## Is Convos supported on my system?
+
+Convos runs on MacOS and all flavors of Linux, but you might have to install
+some dependencies:
+
+    # MacOS
+    brew install coreutils perl openssl
+
+    # Debian, Ubuntu
+    apt-get update
+    apt-get install gcc libio-socket-ssl-perl make openssl perl
+
+    # Redhat
+    yum update
+    yum install gcc make openssl-devel perl-core perl-io-socket-ssl
+
+## Can Convos run behind behind my favorite web server?
+
+Yes. See [Running Convos behind my favorite web server](/doc/reverse-proxy).
 
 ## Can I rename my connection names?
 
@@ -73,11 +89,6 @@ by following these steps:
    reloading the web page.
 
 Make sure you use lower-case for "name" and "connection_id".
-
-## Is Convos supported on my flavor of Linux?
-
-Yes, Convos runs on all flavors of Linux, but Redhat based (Centos, Fedora)
-Linux distros might need the extra "perl-core" package to be installed.
 
 ## Why does Convos stop when I close putty/xterm/some terminal?
 

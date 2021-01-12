@@ -80,10 +80,8 @@ above.
 You can use the command below to pull and run convos:
 
     docker pull nordaaker/convos:stable
- 
-    docker run -it -p 8080:3000 \
-      -v $HOME/convos/data:/data \
-      nordaaker/convos:stable
+    mkdir -p $HOME/convos/data
+    docker run -it -p 8080:3000 -v $HOME/convos/data:/data nordaaker/convos:stable
 
 The last command will make Convos available on http://localhost:8080, and
 persist data in `$HOME/convos/data`.
@@ -102,18 +100,19 @@ Git can be used to get full flexibility. The command below will only clone the
 `--single-branch --no-tags` to get everything
 
     # Get the code and install dependencies
+    cd $HOME;
     git clone https://github.com/Nordaaker/convos.git \
       --branch stable --single-branch --no-tags
-    
-    ./convos/script/convos install
+    cd $HOME/convos;
+    ./script/convos install
     
     # Start the server
-    ./convos/script/convos daemon
+    ./script/convos daemon
     
     # Update and restart
     git pull origin stable
     kill $(pgrep convos)
-    ./convos/script/convos daemon
+    ./script/convos daemon
 
 Using the git repo allows you to make changes and build your own frontend.
 See the [developement guide](/doc/develop) for more details.
