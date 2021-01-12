@@ -1,6 +1,6 @@
 #: assets/page/Help.svelte:38
 msgid "\"#\" will show the matching conversation names."
-msgstr "\"#\" mostrará los nombres de las conversaciones que coincidan."
+msgstr "\"#\" mostrará el nombre de las conversaciones que coincidan."
 
 #: assets/page/Help.svelte:37
 msgid "\"/\" will show the available commands."
@@ -276,7 +276,7 @@ msgstr "Servidor y puerto"
 
 #: assets/page/SettingsAccount.svelte:84
 msgid "Ignore join/part messages"
-msgstr "Ignorar mensajes de entra/sale"
+msgstr "Ignorar mensajes de entrada/salida"
 
 #: assets/page/SettingsAdmin.svelte:131
 msgid "Inode usage"
