@@ -564,7 +564,7 @@ msgstr "Tema"
 
 #: assets/page/SettingsAdmin.svelte:88
 msgid "This email can be used by users to get in touch with the Convos admin."
-msgstr "Este correo electrónico puede ser utilizado ppara contactarse con el administrador de Convos."
+msgstr "Puedes utilizar este correo electrónico para contactarte con el administrador de Convos."
 
 #: assets/page/SettingsAdmin.svelte:94
 msgid "This is the default connection new users will connect to."
@@ -580,7 +580,7 @@ msgstr "Esto va a eliminar permanentemente los ajustes del usuario, historial de
 
 #: assets/page/SettingsAdmin.svelte:102
 msgid "Tick this box if you want to prevent users from creating custom connections."
-msgstr "Marca esta casila si deseas prevenir que los usuarios creen conexiones personalizadas."
+msgstr "Marca esta casilla si deseas evitar que los usuarios creen conexiones personalizadas."
 
 #: assets/page/SettingsAdmin.svelte:107
 msgid "Tick this box if you want users to be able to register without an invite URL."
