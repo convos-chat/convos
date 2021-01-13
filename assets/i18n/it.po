@@ -11,12 +11,8 @@ msgid "\":\" followed by a character will show matching emojis."
 msgstr "\":\" seguito da un carattere che mostrerà le emojis corrispondenti."
 
 #: assets/page/Help.svelte:35
-msgid ""
-"\"@\" followed by a character will show matching nicks in the current "
-"conversation."
-msgstr ""
-"\"@\" seguito da un carattere mostrerà i nick corrispondenti nella "
-"conversazione in corso."
+msgid "\"@\" followed by a character will show matching nicks in the current conversation."
+msgstr "\"@\" seguito da un carattere mostrerà i nick corrispondenti nella conversazione in corso."
 
 #: assets/page/ConversationAdd.svelte:71
 msgid "#room or nick"
@@ -67,13 +63,8 @@ msgid "Admin email"
 msgstr "Email dell'amministratore"
 
 #: assets/page/Login.svelte:60
-msgid ""
-"As you are the first user, you do not need any invitation link. Just fill in "
-"the form below, hit \"Sign up\" to start chatting."
-msgstr ""
-"Siccome sei il primo utente, non avrai bisogno di alcun link per l'invito. "
-"Ti basta riempire il form sottostante e premere \"Registrati\" per iniziare "
-"a chattare. "
+msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
+msgstr "Siccome sei il primo utente, non avrai bisogno di alcun link per l'invito. Ti basta riempire il form sottostante e premere \"Registrati\" per iniziare a chattare. "
 
 #: assets/page/Help.svelte:32
 msgid "Autocomplete"
@@ -96,11 +87,8 @@ msgid "Changelog for v%1"
 msgstr "Changelog per v%1"
 
 #: assets/page/Help.svelte:29
-msgid ""
-"Clicking on the icon next to the conversation name will take you to settings."
-msgstr ""
-"Premendo l'icona vicino al nome della conversazione, andrai nelle "
-"impostazioni.\n"
+msgid "Clicking on the icon next to the conversation name will take you to settings."
+msgstr "Premendo l'icona vicino al nome della conversazione, andrai nelle impostazioni.\n"
 
 #: assets/page/SettingsAccount.svelte:96
 msgid "Color scheme"
@@ -136,8 +124,7 @@ msgstr "Nome della conversazione"
 
 #: assets/components/ConversationSettings.svelte:54
 msgid "Conversation with %1 is frozen. Reason: %2"
-msgstr ""
-"La conversazione con %1 è congelata. La ragione è la seguente: %2\n"
+msgstr "La conversazione con %1 è congelata. La ragione è la seguente: %2\n"
 
 #: assets/components/ChatSidebar.svelte:151
 msgid "Conversations"
@@ -169,13 +156,11 @@ msgstr "Attualmente connesso a %1."
 
 #: assets/components/ConnectionSettings.svelte:32
 msgid "Currently connecting to %1."
-msgstr ""
-"Attualmente in collegamento con %1.\n"
+msgstr "Attualmente in collegamento con %1.\n"
 
 #: assets/components/ConnectionSettings.svelte:28
 msgid "Currently disconnected from %1."
-msgstr ""
-"Attualmente disconnesso da %1.\n"
+msgstr "Attualmente disconnesso da %1.\n"
 
 #: assets/page/SettingsAdmin.svelte:92
 msgid "Default connection URL"
@@ -199,21 +184,15 @@ msgstr "Uso del disco"
 
 #: assets/page/Chat.svelte:230
 msgid "Do you want to chat with \"%1\"?"
-msgstr ""
-"Vuoi iniziare una conversazione con \"%1\"?\n"
+msgstr "Vuoi iniziare una conversazione con \"%1\"?"
 
 #: assets/page/Chat.svelte:223
 msgid "Do you want to create the connection \"%1\"?"
-msgstr ""
-"Vuoi creare la connessione con \"%1\"?\n"
+msgstr "Vuoi creare la connessione con \"%1\"?"
 
 #: assets/page/Fallback.svelte:28
 msgid "Downloaded Convos."
 msgstr "Convos scaricato."
-
-#: assets/page/Login.svelte:102
-msgid "E-mail"
-msgstr "E-mail"
 
 #: assets/page/SettingsAccount.svelte:72
 msgid "Email"
@@ -221,16 +200,14 @@ msgstr "Email"
 
 #: assets/page/SettingsAccount.svelte:100
 msgid "Enable compact message display"
-msgstr ""
-"Abilita la visione dei messaggi compatta.\n"
+msgstr "Abilita la visione dei messaggi compatta.\n"
 
 #: assets/page/SettingsAccount.svelte:80
 msgid "Enable notifications"
 msgstr "Abilita le notifiche"
 
 #: assets/page/ConversationAdd.svelte:56
-msgid ""
-"Enter the name of an exising conversation, or create a new conversation."
+msgid "Enter the name of an exising conversation, or create a new conversation."
 msgstr "Inserisci il nome di una conversazione esistente o creane una nuova."
 
 #: assets/components/ConnectionForm.svelte:135
@@ -310,12 +287,8 @@ msgid "Invite or recover password"
 msgstr "Invita o recupera password"
 
 #: assets/page/ConversationAdd.svelte:57
-msgid ""
-"It is also possible to load in all existing conversations for a given "
-"connection."
-msgstr ""
-"È anche possibile caricare tutte le conversazioni esistenti per una "
-"determinata connessione."
+msgid "It is also possible to load in all existing conversations for a given connection."
+msgstr "È anche possibile caricare tutte le conversazioni esistenti per una determinata connessione."
 
 #: assets/page/Chat.svelte:244
 msgid "Jump to %1"
@@ -426,12 +399,8 @@ msgid "Please ask your Convos admin for a new link."
 msgstr "Chiedi al vostro amministratore di Convos un nuovo link."
 
 #: assets/page/Login.svelte:90
-msgid ""
-"Please ask your Convos admin for an invite link to sign up, or sign in if "
-"you already have an account."
-msgstr ""
-"Chiedi al tuo amministratore di Convos un link di invito per iscriverti, "
-"oppure accedi se hai già un account."
+msgid "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
+msgstr "Chiedi al tuo amministratore di Convos un link di invito per iscriverti, oppure accedi se hai già un account."
 
 #: assets/components/ConversationSettings.svelte:56
 msgid "Private conversation with %1."
@@ -519,9 +488,7 @@ msgstr "Impostazioni"
 
 #: assets/page/Help.svelte:27
 msgid "Shift focus between chat input and search in sidebar."
-msgstr ""
-"Spostare l'attenzione tra l'input della chat e la ricerca nella barra "
-"laterale."
+msgstr "Spostare l'attenzione tra l'input della chat e la ricerca nella barra laterale."
 
 #: assets/page/Help.svelte:24
 msgid "Shortcuts"
@@ -568,12 +535,8 @@ msgid "Text formatting"
 msgstr "Formattazione del testo"
 
 #: assets/page/Fallback.svelte:37
-msgid ""
-"The Convos Team have been searching and searching, but the requested page "
-"could not be found."
-msgstr ""
-"Il Team di Convos ha cercato e cercato ancora, ma non è stato possibile "
-"trovare la pagina richiesta."
+msgid "The Convos Team have been searching and searching, but the requested page could not be found."
+msgstr "Il Team di Convos ha cercato e cercato ancora, ma non è stato possibile trovare la pagina richiesta."
 
 #: assets/page/Help.svelte:33
 msgid "The following rules apply when typing a message:"
@@ -588,12 +551,8 @@ msgid "The link is invalid."
 msgstr "Il link è invalido."
 
 #: assets/page/SettingsAdmin.svelte:95
-msgid ""
-"The path part is the default channel to join. \"%%23convos\" means "
-"\"#convos\"."
-msgstr ""
-"La parte del percorso è il canale predefinito da unire. \"%%23convos\" "
-"significa \"#convos\"."
+msgid "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
+msgstr "La parte del percorso è il canale predefinito da unire. \"%%23convos\" significa \"#convos\"."
 
 #: assets/page/SettingsAccount.svelte:92
 msgid "Theme"
@@ -601,40 +560,27 @@ msgstr "Tema"
 
 #: assets/page/SettingsAdmin.svelte:88
 msgid "This email can be used by users to get in touch with the Convos admin."
-msgstr ""
-"Questa e-mail può essere utilizzata dagli utenti per mettersi in contatto "
-"con l'amministratore di Convos."
+msgstr "Questa e-mail può essere utilizzata dagli utenti per mettersi in contatto con l'amministratore di Convos."
 
 #: assets/page/SettingsAdmin.svelte:94
 msgid "This is the default connection new users will connect to."
-msgstr ""
-"Questa è la connessione predefinita a cui si collegheranno i nuovi utenti."
+msgstr "Questa è la connessione predefinita a cui si collegheranno i nuovi utenti."
 
 #: assets/page/SettingsAdmin.svelte:111
 msgid "This should point to a %1 instance."
 msgstr "Questo dovrebbe indicare un'istanza %1."
 
 #: assets/page/SettingsAdminUsers.svelte:102
-msgid ""
-"This will permanently remove user settings, chat logs, uploaded files and "
-"other user related data."
-msgstr ""
-"Questo rimuoverà permanentemente le impostazioni dell'utente, i log della "
-"chat, i file caricati e altri dati relativi all'utente."
+msgid "This will permanently remove user settings, chat logs, uploaded files and other user related data."
+msgstr "Questo rimuoverà permanentemente le impostazioni dell'utente, i log della chat, i file caricati e altri dati relativi all'utente."
 
 #: assets/page/SettingsAdmin.svelte:102
-msgid ""
-"Tick this box if you want to prevent users from creating custom connections."
-msgstr ""
-"Spunta questa casella se si vuole impedire agli utenti di creare connessioni "
-"personalizzate."
+msgid "Tick this box if you want to prevent users from creating custom connections."
+msgstr "Spunta questa casella se si vuole impedire agli utenti di creare connessioni personalizzate."
 
 #: assets/page/SettingsAdmin.svelte:107
-msgid ""
-"Tick this box if you want users to be able to register without an invite URL."
-msgstr ""
-"Spunta questa casella se si desidera che gli utenti possano registrarsi "
-"senza un URL di invito."
+msgid "Tick this box if you want users to be able to register without an invite URL."
+msgstr "Spunta questa casella se si desidera che gli utenti possano registrarsi senza un URL di invito."
 
 #: assets/page/SettingsAdminUsers.svelte:131
 msgid "Tip: Clicking on the link will copy it to your clipboard."
@@ -646,21 +592,15 @@ msgstr "Argomento"
 
 #: assets/page/Help.svelte:53
 msgid "URLs will be converted to links, and might be embedded in the chat."
-msgstr ""
-"Gli URL saranno convertiti in link e potrebbero essere incorporati nella "
-"chat."
+msgstr "Gli URL saranno convertiti in link e potrebbero essere incorporati nella chat."
 
 #: assets/components/ConversationSettings.svelte:93
 msgid "Update"
 msgstr "Aggiornamento"
 
 #: assets/page/SettingsAdmin.svelte:83
-msgid ""
-"Used together with \"Organization name\" to add a link to your organization "
-"on the login screen."
-msgstr ""
-"Usato insieme a \"Nome dell'organizzazione\" per aggiungere un link alla "
-"vostra organizzazione nella schermata di login."
+msgid "Used together with \"Organization name\" to add a link to your organization on the login screen."
+msgstr "Usato insieme a \"Nome dell'organizzazione\" per aggiungere un link alla vostra organizzazione nella schermata di login."
 
 #: assets/page/SettingsAdminUsers.svelte:120
 msgid "User email"
@@ -675,12 +615,8 @@ msgid "Users"
 msgstr "Utenti"
 
 #: assets/page/SettingsAdminUsers.svelte:121
-msgid ""
-"Using this form, you can generate a forgotten password or invite link for a "
-"user."
-msgstr ""
-"Con questo modulo è possibile generare un link di password dimenticata o un "
-"link di invito per un utente."
+msgid "Using this form, you can generate a forgotten password or invite link for a user."
+msgstr "Con questo modulo è possibile generare un link di password dimenticata o un link di invito per un utente."
 
 #: assets/components/ConnectionForm.svelte:145
 msgid "Verify certificate (TLS)"

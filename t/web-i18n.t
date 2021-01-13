@@ -25,13 +25,17 @@ $t->get_ok('/', {'Accept-Language' => 'en;q=0.5,no'})->element_exists('html[lang
 $t->get_ok('/', {'Accept-Language' => 'no-nb,en'})->element_exists('html[lang="no"]')
   ->text_is('title', 'Better group chat - Convos test translation')->text_is('h2', 'Laster...');
 
-$t->get_ok('/api/i18n/no.json')->status_is(200)->json_is('/available_languages', [qw(en es no)])
+$t->get_ok('/api/i18n/no.json')->status_is(200)->json_is('/available_languages', [qw(en es it no)])
   ->json_is('/dictionary/Autocomplete', 'Autofullføring');
+
+note 'italian';
+$t->get_ok('/', {'Accept-Language' => 'it-ch'})->element_exists('html[lang="it"]')
+  ->text_is('h2', 'Caricamento in corso...');
+$t->get_ok('/api/i18n/it.json')->status_is(200)->json_is('/dictionary/version', 'versione');
 
 note 'spanish';
 $t->get_ok('/', {'Accept-Language' => 'es-MX,es;q=0.8,en-US;q=0.5,en;q=0.3'})
   ->element_exists('html[lang="es"]')->text_is('h2', 'Cargando...');
-
-$t->get_ok('/api/i18n/es.json')->status_is(200)->json_is('/dictionary/Email', 'Correo electrónico');
+$t->get_ok('/api/i18n/es.json')->status_is(200)->json_is('/dictionary/version', 'versión');
 
 done_testing;

@@ -56,6 +56,7 @@ sub _parse_po_file {
   my $PO    = shift->open;
   my $entry = {};
   while (<$PO>) {
+    s![\r\n]!!g;
     $_                     = decode 'UTF-8', $_;
     @$entry{qw{file line}} = ($1, $2)     if /^#:\s*([^:]+):(\d+)/;
     $entry->{$1}           = _unquote($2) if /(msgid|msgstr)\s*(['"].*)/;
