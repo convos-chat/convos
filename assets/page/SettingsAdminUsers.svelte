@@ -8,9 +8,9 @@ import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
 import {copyToClipboard} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -23,10 +23,11 @@ const updateUserOp = api('updateUser');
 let confirmEmail = '';
 let users = [];
 
-route.update({title: l('Users')});
-
+$: l = $viewport.l;
 $: editUser = findUser($route, users);
 $: invite = $inviteLinkOp.res.body || {};
+
+route.update({title: 'Users'});
 
 updateUserOp.on('start', req => {
   editUser.roles = req.body.roles.split(/[.,\s]+/).map(str => str.trim());
@@ -100,7 +101,7 @@ function updateUserFromForm(e) {
     <form id="delete" method="post" on:submit|preventDefault="{deleteUserFromForm}">
       <p>
         {l('This will permanently remove user settings, chat logs, uploaded files and other user related data.')}
-        {@html lmd('Please confirm by entering **%1** before hitting **%2**.', editUser.email, l('Delete user'))}
+        {@html l.md('Please confirm by entering **%1** before hitting **%2**.', editUser.email, l('Delete user'))}
       </p>
 
       <TextField name="email" bind:value="{confirmEmail}">
@@ -124,8 +125,8 @@ function updateUserFromForm(e) {
       {#if invite.url}
         <h3>{l('A link was generated')}</h3>
         <p>
-          {@html lmd(invite.existing ? 'Copy and send the link to your *existing* user.' : 'Copy and send the link to your *new* user.')}
-          {@html lmd('The link is valid until **%1**.', new Date(invite.expires).toLocaleString())}
+          {@html l.md(invite.existing ? 'Copy and send the link to your *existing* user.' : 'Copy and send the link to your *new* user.')}
+          {@html l.md('The link is valid until **%1**.', new Date(invite.expires).toLocaleString())}
         </p>
         <a href="{invite.url}" on:click|preventDefault="{copyInviteLink}">{invite.url}</a>
         <p><small>{l('Tip: Clicking on the link will copy it to your clipboard.')}</small></p>

@@ -4,8 +4,8 @@ import Link from './Link.svelte';
 import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 export let transition;
 
@@ -19,6 +19,7 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: l = $viewport.l;
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');

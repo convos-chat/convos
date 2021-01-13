@@ -4,9 +4,8 @@ import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
-import {settings} from '../store/Viewport';
+import {settings, viewport} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -17,8 +16,9 @@ const registerOp = api('registerUser');
 
 let formEl;
 
+$: l = $viewport.l;
 $: redirect($user);
-$: route.update({title: $route.path.match(/register/) ? l('Register') : l('Login')});
+$: route.update({title: $route.path.match(/register/) ? 'Register' : 'Login'});
 $: if ($loginOp.is('success')) redirectAfterLogin(loginOp);
 $: if ($registerOp.is('success')) registered();
 
@@ -104,7 +104,7 @@ function registered() {
 
       <TextField type="password" name="password" autocomplete="current-password">
         <span slot="label">{l('Password')}</span>
-        <p class="help" slot="help">{@html lmd('Contact your [Convos admin](%1) if you have forgotten your password.', settings('contact'))}</p>
+        <p class="help" slot="help">{@html l.md('Contact your [Convos admin](%1) if you have forgotten your password.', settings('contact'))}</p>
       </TextField>
 
       <div class="form-actions">

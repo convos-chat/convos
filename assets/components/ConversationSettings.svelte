@@ -7,8 +7,8 @@ import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import {modeClassNames} from '../js/util';
+import {viewport} from '../store/Viewport';
 
 export let conversation;
 export let transition;
@@ -22,6 +22,7 @@ let wantNotifications = conversation.wantNotifications;
 
 $: isOperator = calculateIsOperator(conversation);
 $: conversation.update({wantNotifications});
+$: l = $viewport.l;
 $: if (formEl && formEl.topic) formEl.topic.value = conversation.topic || '';
 
 function calculateIsOperator(conversation) {
@@ -73,7 +74,7 @@ function saveConversationSettings(e) {
       {:else}
         <div class="text-field">
           <label>{l('Topic')}</label>
-          <div class="input">{@html lmd(conversationTopic || 'No topic is set.')}</div>
+          <div class="input">{@html l.md(conversationTopic || 'No topic is set.')}</div>
         </div>
       {/if}
 

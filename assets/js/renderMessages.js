@@ -1,7 +1,6 @@
 import hljs from './hljs';
 import Time from './Time';
 import {api} from './Api';
-import {lmd} from './i18n';
 import {jsonhtmlify} from 'jsonhtmlify';
 import {l} from './i18n';
 import {q} from './util';
@@ -138,7 +137,7 @@ function renderWaitingMessages({conversation, from, waiting}) {
     msg.type = msg.waitingForResponse ? 'notice' : 'error';
     msg.embeds = [];
     msg.className = messageClassName(msg, prev) + ' is-waiting';
-    msg.markdown = msg.waitingForResponse ? msg.message : lmd('Could not send message "%1".', msg.message);
+    msg.markdown = msg.waitingForResponse ? msg.message : l.md('Could not send message "%1".', msg.message);
     prev = msg;
     return msg;
   });

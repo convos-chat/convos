@@ -1,8 +1,10 @@
 <script>
 import Icon from '../components/Icon.svelte';
-import {l} from '../js/i18n';
+import {viewport} from '../store/Viewport';
 
 export let conversation = {};
+
+$: l = $viewport.l;
 </script>
 
 <a href="#activeMenu:" class="sidebar__header for-settings">

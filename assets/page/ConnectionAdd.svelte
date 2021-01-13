@@ -2,10 +2,12 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import ConnectionForm from '../components/ConnectionForm.svelte';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
-route.update({title: l('Add connection')});
+$: l = $viewport.l;
+
+route.update({title: 'Add connection'});
 </script>
 
 <ChatHeader>

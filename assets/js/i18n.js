@@ -4,7 +4,6 @@
  *
  * @module i18n
  * @exports l
- * @exports lmd
  * @exports topicOrStatus
  * @see md
  */
@@ -12,7 +11,7 @@ import {md} from './md';
 
 let LANG = 'en';
 
-export const dict = {en: {'Test %1': 'Test %1'}};
+export const dictionaries = {en: {'Test %1': 'Test %1'}};
 
 /**
  * l() is used to translate strings. The strings can contain "%1", "%2", ...
@@ -25,31 +24,20 @@ export const dict = {en: {'Test %1': 'Test %1'}};
  * @param  {...String} vars A list of variables to put into the translated string.
  */
 export function l(lexicon, ...vars) {
-  const translated = String(dict[LANG][lexicon] || lexicon);
+  const translated = String(dictionaries[LANG][lexicon] || lexicon);
   return translated.replace(/(%?)%(\d+)/g, (a, escaped, i) => {
     return escaped == '%' ? escaped + i : vars[i - 1];
   });
 }
 
-/**
- * lang() can read or set the active langauge.
- */
-export function lang(val) {
+l.lang = (val, dict) => {
   if (!val) return LANG;
-  if (!dict[val]) throw 'Invalid language "' + val + '".';
+  if (dict) dictionaries[val] = dict;
+  if (!dictionaries[val]) throw 'Invalid language "' + val + '".';
   return (LANG = val);
-}
+};
 
-/**
- * lmd() is a combination of l() and md(), meaning the result might be a string
- * containing HTML tags.
- *
- * @param {*} str A string that you want to translate.
- * @param {...String} vars A list of variables to put into the translated string.
- */
-export function lmd(str, ...vars) {
-  return md(l(str, ...vars));
-}
+l.md = (str, ...vars) => md(l(str, ...vars));
 
 /**
  * topicOrStatus() will look at the Connection and Conversation objects to see what

@@ -305,6 +305,27 @@ paths:
           schema:
             type: string
 
+  /i18n/{lang}:
+    get:
+      operationId: getDictionary
+      summary: Retrieve translations.
+      tags: [ i18n ]
+      x-mojo-to: user#dictionary
+      parameters:
+      - in: path
+        name: lang
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Dictionary.
+          schema:
+            type: object
+            required: [ dictionary ]
+            properties:
+              dictionary:
+                type: object
+
   /notifications:
     get:
       description: A notification is added once your name is mentioned in a chat.

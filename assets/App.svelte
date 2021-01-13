@@ -41,7 +41,7 @@ setContext('user', user);
 notify.on('click', (params) => (params.path && route.go(params.path)));
 socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
-user.load();
+viewport.activateLanguage().then(() => user.load());
 viewport.activateTheme();
 
 $: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;

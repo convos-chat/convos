@@ -6,7 +6,6 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
-import {l} from '../js/i18n';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 import {viewport} from '../store/Viewport';
@@ -24,9 +23,10 @@ let selectedTheme = viewport.theme;
 let wantNotifications = notify.wantNotifications;
 let ignoreStatuses = user.ignoreStatuses;
 
+$: l = $viewport.l;
 $: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
 
-route.update({title: l('Account')});
+route.update({title: 'Account'});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;

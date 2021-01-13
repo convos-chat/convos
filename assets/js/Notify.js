@@ -1,5 +1,4 @@
 import Reactive from './Reactive';
-import {l} from '../js/i18n';
 
 export default class Notify extends Reactive {
   constructor() {

@@ -3,7 +3,7 @@ import ConnectionForm from '../components/ConnectionForm.svelte';
 import SettingsHeader from '../components/SettingsHeader.svelte';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
-import {l} from '../js/i18n';
+import {viewport} from '../store/Viewport';
 
 export let conversation = {};
 export let transition;
@@ -13,6 +13,7 @@ const user = getContext('user');
 let connection = {};
 
 $: connectionHost = connection.real_host || connection.url && connection.url.host;
+$: l = $viewport.l;
 
 onMount(async () => {
   connection = user.findConversation({connection_id: conversation.connection_id}) || {};

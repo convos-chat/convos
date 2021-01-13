@@ -2,14 +2,15 @@
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import {afterUpdate, getContext} from 'svelte';
-import {l} from '../js/i18n';
 import {modeClassNames, q} from '../js/util';
+import {viewport} from '../store/Viewport';
 
 const user = getContext('user');
 
 export let conversation;
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
+$: l = $viewport.l;
 
 function joinConversation(e, participant) {
   e.preventDefault();

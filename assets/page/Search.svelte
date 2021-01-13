@@ -5,14 +5,15 @@ import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import {getContext, onDestroy, onMount} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 const user = getContext('user');
 
 let conversation = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
 
+$: l = $viewport.l;
 $: messages = renderMessages({conversation: $conversation});
 $: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
 $: setConversationFromRoute($route);
@@ -64,9 +65,9 @@ function setConversationFromRoute(route) {
       <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
     {:else if conversation.is('search')}
       <ChatMessage>
-        {@html lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
-        {@html lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
-        {@html lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
+        {@html l.md('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
+        {@html l.md('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
+        {@html l.md('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
       </ChatMessage>
     {/if}
   {/if}

@@ -21,7 +21,7 @@
 </div>
 
 <main class="has-js">
-  <h2><%=l 'Loading' %></h2>
+  <h2><%=l 'Loading...' %></h2>
   <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
   <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting Convos...' %></p>
   <p>

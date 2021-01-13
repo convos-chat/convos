@@ -23,6 +23,12 @@ sub check_if_ready {
   return 0;
 }
 
+sub dictionary {
+  my $self = shift;
+  $self->res->headers->cache_control('max-age=86400');
+  $self->render(json => {dictionary => $self->i18n->dictionary($self->stash('lang'))});
+}
+
 sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
   return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
@@ -83,7 +89,7 @@ sub login {
 }
 
 sub logout {
-  my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
+  my $self   = shift;    # Not a big deal if it's ->openapi->valid_input or not
   my $format = $self->stash('format') || 'json';
 
   return $self->auth->logout_p({})->then(sub {
@@ -314,6 +320,10 @@ user related actions.
 
 Will render the "loading" template if L<Convos::Core/ready> is false or set
 "app" to be rendered if core is ready.
+
+=head2 dictionary
+
+See L<https://convos.chat/api.html#op-get--dictionary>
 
 =head2 generate_invite_link
 

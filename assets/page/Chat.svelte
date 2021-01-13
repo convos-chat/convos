@@ -11,7 +11,7 @@ import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
-import {l, lmd, topicOrStatus} from '../js/i18n';
+import {topicOrStatus} from '../js/i18n';
 import {q, tagNameIs} from '../js/util';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
@@ -31,6 +31,7 @@ let unsubscribe = {};
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
+$: l = $viewport.l;
 $: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
 $: videoInfo = $conversation.videoInfo();
@@ -173,13 +174,13 @@ function showFullscreen(e, el) {
   <!-- welcome message -->
   {#if $conversation.messages.length < 10 && !$conversation.is('not_found')}
     {#if $conversation.is_private}
-      <ChatMessage>{@html lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
+      <ChatMessage>{@html l.md('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
-      <ChatMessage>{@html lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
+      <ChatMessage>{@html l.md($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
       {#if $conversation.nParticipants == 1}
         <ChatMessage same="{true}">{l('You are the only participant in this conversation.')}</ChatMessage>
       {:else}
-        <ChatMessage same="{true}">{@html lmd('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
+        <ChatMessage same="{true}">{@html l.md('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
       {/if}
     {/if}
   {/if}
@@ -233,7 +234,7 @@ function showFullscreen(e, el) {
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <ChatMessage type="error">{@html lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
+    <ChatMessage type="error">{@html l.md('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || l($conversation.frozen)}</ChatMessage>
   {/if}

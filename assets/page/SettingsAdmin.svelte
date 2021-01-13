@@ -6,9 +6,8 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
 import {humanReadableNumber} from '../js/util';
-import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
-import {settings} from '../store/Viewport';
+import {settings, viewport} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -18,6 +17,7 @@ const updateSettingsOp = api('updateSettings');
 
 let convosSettings = {};
 
+$: l = $viewport.l;
 $: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
 
 updateSettingsOp.on('start', req => {
@@ -36,7 +36,7 @@ updateSettingsOp.on('start', req => {
   });
 });
 
-route.update({title: l('Global settings')});
+route.update({title: 'Global settings'});
 
 onMount(async () => {
   await getSettingsOp.perform();
@@ -71,7 +71,7 @@ function updateSettingsFromForm(e) {
 <main class="main">
   <form id="convos-settings" method="post" on:submit|preventDefault="{updateSettingsFromForm}">
     <h2>{l('Convos settings')}</h2>
-    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
+    <p>{@html l.md('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
     <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
       <span slot="label">{l('Organization name')}</span>

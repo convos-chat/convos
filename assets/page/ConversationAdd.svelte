@@ -6,8 +6,8 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {debounce, extractErrorMessage} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import {l} from '../js/i18n';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 const socket = getContext('socket');
 const user = getContext('user');
@@ -18,10 +18,11 @@ let conversationId = '';
 let formEl;
 let loadConversationsTid;
 
+$: l = $viewport.l;
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
-route.update({title: l('Add conversation')});
+route.update({title: 'Add conversation'});
 onMount(() => route.urlToForm(formEl));
 
 function addConversation(e) {

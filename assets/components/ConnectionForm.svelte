@@ -7,8 +7,8 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
-import {l, lmd} from '../js/i18n';
 import {route} from '../store/Route';
+import {viewport} from '../store/Viewport';
 
 export let conversation = {};
 
@@ -34,6 +34,8 @@ let useTls = false;
 let verifyTls = false;
 let wantToBeConnected = false;
 
+
+$: l = $viewport.l;
 $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
 
 onMount(async () => {
@@ -114,7 +116,7 @@ async function submitForm(e) {
   <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
     <span slot="label">{l('Host and port')}</span>
     <p class="help" slot="help">
-      {@html lmd(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
+      {@html l.md(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
     </p>
   </TextField>
 
