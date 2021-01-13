@@ -1,5 +1,5 @@
 package Convos::Plugin::Themes;
-use Mojo::Base 'Mojolicious::Plugin';
+use Mojo::Base 'Convos::Plugin';
 
 use Mojo::File 'path';
 
@@ -77,8 +77,8 @@ sub _detect {
 sub _get {
   my ($self, $c) = (shift, shift);
 
-  my $id    = shift                     || 'convos';
-  my $theme = $self->_themes_map->{$id} || $self->_themes_map->{convos};
+  my $id     = shift                     || 'convos';
+  my $theme  = $self->_themes_map->{$id} || $self->_themes_map->{convos};
   my $scheme = shift;
   $scheme = (keys %{$theme->{urls}})[0] if !$scheme or $scheme eq 'auto';
 
