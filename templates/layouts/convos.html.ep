@@ -2,7 +2,7 @@
 % use Mojo::Util 'b64_encode';
 % my $social = $c->social;
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= $lang %>">
   <head>
     <!-- social + seo -->
     % if (settings('organization_name') eq 'Convos') {

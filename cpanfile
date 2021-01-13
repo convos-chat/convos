@@ -3,6 +3,7 @@ requires "IO::Socket::SSL"                => "2.009"; # Need to installed first,
 requires "Crypt::Eksblowfish"             => "0.009";
 requires "File::HomeDir"                  => "1.00";
 requires "File::ReadBackwards"            => "1.05";
+requires "HTTP::AcceptLanguage"           => "0.02";
 requires "IRC::Utils"                     => "0.12";
 requires "JSON::Validator"                => "4.10";
 requires "LinkEmbedder"                   => "1.16";

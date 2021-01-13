@@ -179,7 +179,8 @@ sub _plugins {
 
   my @plugins = (
     qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
-    qw(Convos::Plugin::Files Convos::Plugin::Helpers Convos::Plugin::Themes)
+    qw(Convos::Plugin::Files Convos::Plugin::I18N Convos::Plugin::Helpers),
+    qw(Convos::Plugin::Themes),
   );
 
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};

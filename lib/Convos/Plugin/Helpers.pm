@@ -19,7 +19,6 @@ sub register {
   $app->helper('backend.user'                => \&_backend_user);
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
   $app->helper('js_session'                  => \&_js_session);
-  $app->helper('l'                           => \&_l);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
   $app->helper('settings'                    => \&_settings);
   $app->helper('reply.errors'                => \&_reply_errors);
@@ -89,12 +88,6 @@ sub _js_session {
   return _js_session($c, $name);
 }
 
-sub _l {
-  my ($self, $lexicon, @args) = @_;
-  $lexicon =~ s!%(\d+)!{$args[$1 - 1] // $1}!ge;
-  return $lexicon;
-}
-
 sub _reply_errors {
   my ($self, $errors, $status) = @_;
 
@@ -124,7 +117,7 @@ sub _settings {
 }
 
 sub _social {
-  my $c      = shift;
+  my $c = shift;
   my $social = $c->stash->{social} ||= {};
 
   # Defaults
@@ -152,8 +145,8 @@ sub _user_has_admin_rights {
 
   # Special request for forgotten password
   my $remote_address = $c->tx->original_remote_address;
-  my $valid          = $x_local_secret eq $c->settings('local_secret') ? 1 : 0;
-  my $valid_str      = $valid ? 'Valid' : 'Invalid';
+  my $valid          = $x_local_secret eq $c->settings('local_secret') ? 1       : 0;
+  my $valid_str      = $valid                                          ? 'Valid' : 'Invalid';
   $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
   return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';
 }
