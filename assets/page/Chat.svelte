@@ -11,7 +11,7 @@ import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
-import {topicOrStatus} from '../js/i18n';
+import {l, lmd} from '../store/I18N';
 import {q, tagNameIs} from '../js/util';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
@@ -31,7 +31,6 @@ let unsubscribe = {};
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
-$: l = $viewport.l;
 $: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
 $: videoInfo = $conversation.videoInfo();
@@ -151,36 +150,44 @@ function showFullscreen(e, el) {
   e.preventDefault();
   viewport.showFullscreen(el);
 }
+
+function topicOrStatus(connection, conversation) {
+  if (conversation.is('not_found')) return '';
+  if (connection.frozen) return $l(connection.frozen);
+  if (connection == conversation) return $l('Connection messages.');
+  const str = conversation.frozen ? $l(conversation.frozen) : conversation.topic;
+  return str || (conversation.is_private && $l('Private conversation.')) || $l('No topic is set.');
+}
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{l(conversation.name)}</a></h1>
+  <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{$l(conversation.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
   {#if videoInfo.convosUrl}
-    <a href="{videoInfo.convosUrl}" on:click="{onVideoLinkClick}" target="{videoInfo.roomName}" data-handle-link="{videoInfo.realUrl}" class="btn has-tooltip" tooltip="{l('Start video conference')}"><Icon name="{videoInfo.icon}"/></a>
+    <a href="{videoInfo.convosUrl}" on:click="{onVideoLinkClick}" target="{videoInfo.roomName}" data-handle-link="{videoInfo.realUrl}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{videoInfo.icon}"/></a>
   {/if}
-  <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
+  <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 
 <InfinityScroll class="main is-above-chat-input" on:rendered="{onRendered}" on:scrolled="{onScrolled}">
   <!-- status -->
   {#if $conversation.is('loading')}
-    <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
   {#if $conversation.historyStartAt && !$conversation.is('not_found')}
-    <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{l('Started chatting on %1', $conversation.historyStartAt.getHumanDate())}</i></span></div>
+    <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{$l('Started chatting on %1', $conversation.historyStartAt.getHumanDate())}</i></span></div>
   {/if}
 
   <!-- welcome message -->
   {#if $conversation.messages.length < 10 && !$conversation.is('not_found')}
     {#if $conversation.is_private}
-      <ChatMessage>{@html l.md('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
+      <ChatMessage>{@html $lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
-      <ChatMessage>{@html l.md($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
+      <ChatMessage>{@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
       {#if $conversation.nParticipants == 1}
-        <ChatMessage same="{true}">{l('You are the only participant in this conversation.')}</ChatMessage>
+        <ChatMessage same="{true}">{$l('You are the only participant in this conversation.')}</ChatMessage>
       {:else}
-        <ChatMessage same="{true}">{@html l.md('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
+        <ChatMessage same="{true}">{@html $lmd('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
       {/if}
     {/if}
   {/if}
@@ -192,7 +199,7 @@ function showFullscreen(e, el) {
     {/if}
 
     {#if i && i == $conversation.messages.length - $conversation.unread}
-      <div class="message__status-line for-last-read"><span><Icon name="comments"/> {l('New messages')}</span></div>
+      <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
     <div class="{message.className}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
@@ -201,8 +208,8 @@ function showFullscreen(e, el) {
       <a href="#action:join:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
-          <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{l('Remove')}"><Icon name="times-circle"/></a>
-          <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{l('Resend')}"><Icon name="sync-alt"/></a>
+          <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
+          <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{$l('Resend')}"><Icon name="sync-alt"/></a>
         {:else if !message.waitingForResponse && message.canToggleDetails}
           <a href="#action:toggleDetails"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
         {/if}
@@ -220,29 +227,29 @@ function showFullscreen(e, el) {
 
   <!-- status -->
   {#if $connection.is('not_found') && !$conversation.conversation_id}
-    <h2>{l('Connection does not exist.')}</h2>
-    <p>{l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
+    <h2>{$l('Connection does not exist.')}</h2>
+    <p>{$l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
     <p>
-      <Link href="/settings/connection?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {l('Yes')}</Link>
-      <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {l('No')}</Link>
+      <Link href="/settings/connection?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
+      <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
     </p>
   {:else if $conversation.is('not_found')}
-    <h2>{l('You are not part of this conversation.')}</h2>
-    <p>{l('Do you want to chat with "%1"?', $conversation.conversation_id)}</p>
+    <h2>{$l('You are not part of this conversation.')}</h2>
+    <p>{$l('Do you want to chat with "%1"?', $conversation.conversation_id)}</p>
     <p>
-      <Button type="button" icon="thumbs-up" on:click="{() => conversation.send('/join ' + $conversation.conversation_id)}"><span>{l('Yes')}</span></Button>
-      <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{l('No')}</span></Link>
+      <Button type="button" icon="thumbs-up" on:click="{() => conversation.send('/join ' + $conversation.conversation_id)}"><span>{$l('Yes')}</span></Button>
+      <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <ChatMessage type="error">{@html l.md('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
+    <ChatMessage type="error">{@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
   {:else if $conversation.frozen && !$conversation.is('locked')}
-    <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || l($conversation.frozen)}</ChatMessage>
+    <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</ChatMessage>
   {/if}
   {#if $conversation.is('loading')}
-    <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
   {#if !$conversation.historyStopAt && $conversation.messages.length}
-    <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
+    <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {$l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
   {/if}
 </InfinityScroll>
 

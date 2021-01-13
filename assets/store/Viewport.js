@@ -1,7 +1,6 @@
 import Reactive from '../js/Reactive';
-import {api} from '../js/Api';
 import {ensureChildNode, q, removeChildNodes, replaceClassName} from '../js/util';
-import {l} from '../js/i18n';
+import {md} from '../js/md';
 
 export default class Viewport extends Reactive {
   constructor() {
@@ -9,25 +8,21 @@ export default class Viewport extends Reactive {
     this.prop('cookie', 'colorScheme', 'auto');
     this.prop('cookie', 'theme', 'convos');
     this.prop('cookie', 'compactDisplay', false);
+
     this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'version', '');
+
     this.prop('ro', '_settings', () => ({})); // Hack to trigger updates when settings() is called
     this.prop('ro', 'colorSchemeOptions', ['Auto', 'Light', 'Dark'].map(o => [o.toLowerCase(), o]));
+    this.prop('ro', 'dictionaries', {});
     this.prop('ro', 'isWide', () => this.width > 800);
-    this.prop('ro', 'l', () => l);
     this.prop('ro', 'themeOptions', () => Array.from(this._themeMap.entries()));
+
     this.prop('rw', 'height', 0);
     this.prop('rw', 'osColorScheme', '');
     this.prop('rw', 'width', 0);
 
     this._themeMap = new Map([]);
-  }
-
-  async activateLanguage(val) {
-    if (!val) val = this.settings('lang');
-    const op = await api('/api', 'getDictionary', {lang: val}).perform();
-    l.lang(val, op.res.body.dictionary);
-    return this.settings('lang', val);
   }
 
   activateTheme(theme, colorScheme) {
@@ -93,7 +88,6 @@ export default class Viewport extends Reactive {
 
   _settingsGet(key) {
     if (key == 'app_mode') return document.body.classList.contains('for-app');
-    if (key == 'lang') return document.documentElement.getAttribute('lang');
     if (key == 'notify_enabled') return document.body.classList.contains('notify-enabled');
     if (key == 'organization_name') key = 'contactorganization';
     if (key == 'organization_url') key = 'contactnetworkaddress';
@@ -112,7 +106,6 @@ export default class Viewport extends Reactive {
 
   _settingsSet(key, value) {
     if (key == 'app_mode') return replaceClassName('body', /(for-)(app|cms)/, value ? 'app' : 'cms');
-    if (key == 'lang') return document.documentElement.setAttribute('lang', value);
     if (key == 'notify_enabled') return replaceClassName('body', /(notify-)(disabled)/, value ? 'enabled' : 'disabled');
     if (key == 'organization_name') key = 'contactorganization';
     if (key == 'organization_url') key = 'contactnetworkaddress';

@@ -2,8 +2,8 @@
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {getContext} from 'svelte';
+import {l} from '../store/I18N';
 import {extractErrorMessage} from '../js/util';
-import {viewport} from '../store/Viewport';
 
 export const uploader = uploadFiles;
 export let conversation;
@@ -18,9 +18,8 @@ const api = getContext('api');
 const user = getContext('user');
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
-$: l = $viewport.l;
 $: nick = connection && connection.nick;
-$: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? l('Connecting...') : l('What is on your mind %1?', nick);
+$: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
@@ -124,7 +123,7 @@ function uploadFiles(e) {
   api('uploadFile').perform({formData}).then(op => {
     const res = op.res.body;
     if (res.files && res.files.length) return fillin(res.files[0].url, {append: true});
-    if (res.errors) conversation.addMessage({message: 'Could not upload file: %1', vars: [l(extractErrorMessage(res.errors))], type: 'error'});
+    if (res.errors) conversation.addMessage({message: 'Could not upload file: %1', vars: [$l(extractErrorMessage(res.errors))], type: 'error'});
   });
 }
 </script>

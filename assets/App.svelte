@@ -2,7 +2,7 @@
 import User from './store/User';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
-import {l} from './js/i18n';
+import {i18n} from './store/I18N';
 import {loadScript, q} from './js/util';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
@@ -41,7 +41,7 @@ setContext('user', user);
 notify.on('click', (params) => (params.path && route.go(params.path)));
 socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
-viewport.activateLanguage().then(() => user.load());
+i18n.load().then(() => user.load());
 viewport.activateTheme();
 
 $: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
@@ -57,7 +57,7 @@ function calculateTitle(route, user) {
   const title = user.unread ? '(' + user.unread + ') ' + route.title : route.title;
 
   document.title
-    = organizationName == 'Convos' ? l('%1 - Convos', title) : l('%1 - Convos for %2', title, organizationName);
+    = organizationName == 'Convos' ? i18n.l('%1 - Convos', title) : i18n.l('%1 - Convos for %2', title, organizationName);
 }
 
 function registerServiceWorker() {
@@ -75,14 +75,14 @@ function socketChanged(socket) {
   }
 
   const message
-    = navigator.onLine === false ? l('You seem to be offline.')
-    : socket.error               ? l(socket.error)
-    : socket.is('connecting')    ? l('Connecting to Convos...')
-    :                              l('Connection to Convos is %1.', l(socket.readyStateHuman));
+    = navigator.onLine === false ? i18n.l('You seem to be offline.')
+    : socket.error               ? i18n.l(socket.error)
+    : socket.is('connecting')    ? i18n.l('Connecting to Convos...')
+    :                              i18n.l('Connection to Convos is %1.', i18n.l(socket.readyStateHuman));
 
   if (readyStateNotification.body == message) return;
   if (readyStateNotification.close) readyStateNotification.close();
-  readyStateNotification = notify.showInApp(message, {closeAfter: -1, title: l('Status')});
+  readyStateNotification = notify.showInApp(message, {closeAfter: -1, title: i18n.l('Status')});
 }
 </script>
 

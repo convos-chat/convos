@@ -6,6 +6,7 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
+import {l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 import {viewport} from '../store/Viewport';
@@ -23,7 +24,6 @@ let selectedTheme = viewport.theme;
 let wantNotifications = notify.wantNotifications;
 let ignoreStatuses = user.ignoreStatuses;
 
-$: l = $viewport.l;
 $: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
 
 route.update({title: 'Account'});
@@ -39,7 +39,7 @@ onDestroy(notify.on('update', notifyWantNotificationsChanged));
 
 function notifyWantNotificationsChanged(notify, changed) {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
-  if (notify.wantNotifications) notify.show(l('You have enabled notifications.'));
+  if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
 }
 
 function updateUserFromForm(e) {
@@ -63,55 +63,55 @@ function updateUserFromForm(e) {
 </script>
 
 <ChatHeader>
-  <h1>{l('Account')}</h1>
+  <h1>{$l('Account')}</h1>
 </ChatHeader>
 
 <main class="main">
   <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
     <TextField type="email" name="email" value="{$user.email}" readonly>
-      <span slot="label">{l('Email')}</span>
+      <span slot="label">{$l('Email')}</span>
     </TextField>
 
-    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlightKeywords}">
-      <span slot="label">{l('Notification keywords')}</span>
+    <TextField name="highlight_keywords" placeholder="{$l('whatever, keywords')}" value="{highlightKeywords}">
+      <span slot="label">{$l('Notification keywords')}</span>
     </TextField>
 
     <Checkbox name="notifications" bind:checked="{wantNotifications}">
-      <span slot="label">{l('Enable notifications')}</span>
+      <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
     
     <Checkbox name="statuses" bind:checked="{ignoreStatuses}">
-      <span slot="label">{l('Ignore join/part messages')}</span>
+      <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
 
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
-      <span slot="label">{l('Expand URL to media')}</span>
+      <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
 
     <SelectField name="theme" options="{viewport.themeOptions}" bind:value="{selectedTheme}">
-      <span slot="label">{l('Theme')}</span>
+      <span slot="label">{$l('Theme')}</span>
     </SelectField>
 
     <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{viewport.colorSchemeOptions}" bind:value="{selectedColorScheme}">
-      <span slot="label">{l('Color scheme')}</span>
+      <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
 
     <Checkbox name="compact" bind:checked="{compactDisplay}">
-      <span slot="label">{l('Enable compact message display')}</span>
+      <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
 
     <TextField type="password" name="password" autocomplete="new-password">
-      <span slot="label">{l('Password')}</span>
+      <span slot="label">{$l('Password')}</span>
     </TextField>
 
     <TextField type="password" name="password_again" autocomplete="new-password">
-      <span slot="label">{l('Repeat password')}</span>
+      <span slot="label">{$l('Repeat password')}</span>
     </TextField>
 
-    <p>{l('Leave the password fields empty to keep the current password.')}</p>
+    <p>{$l('Leave the password fields empty to keep the current password.')}</p>
 
     <div class="form-actions">
-      <Button icon="save" op="{updateUserOp}"><span>{l('Save settings')}</span></Button>
+      <Button icon="save" op="{updateUserOp}"><span>{$l('Save settings')}</span></Button>
     </div>
 
     <OperationStatus op="{updateUserOp}"/>

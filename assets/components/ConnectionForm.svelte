@@ -7,8 +7,8 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
+import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {viewport} from '../store/Viewport';
 
 export let conversation = {};
 
@@ -35,7 +35,6 @@ let verifyTls = false;
 let wantToBeConnected = false;
 
 
-$: l = $viewport.l;
 $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
 
 onMount(async () => {
@@ -113,61 +112,61 @@ async function submitForm(e) {
   <input type="hidden" name="url">
   <input type="hidden" name="wanted_state">
 
-  <TextField name="server" placeholder="{l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
-    <span slot="label">{l('Host and port')}</span>
+  <TextField name="server" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
+    <span slot="label">{$l('Host and port')}</span>
     <p class="help" slot="help">
-      {@html l.md(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
+      {@html $lmd(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
     </p>
   </TextField>
 
-  <TextField name="nick" placeholder="{l('Ex: superman')}">
-    <span slot="label">{l('Nickname')}</span>
+  <TextField name="nick" placeholder="{$l('Ex: superman')}">
+    <span slot="label">{$l('Nickname')}</span>
   </TextField>
 
-  <TextField name="realname" placeholder="{l('Ex: Clark Kent')}">
-    <span slot="label">{l('Your name')}</span>
+  <TextField name="realname" placeholder="{$l('Ex: Clark Kent')}">
+    <span slot="label">{$l('Your name')}</span>
     <p class="help" slot="help">Visible in WHOIS response</p>
   </TextField>
 
   {#if connection.url}
     <Checkbox bind:checked="{wantToBeConnected}">
-      <span slot="label">{l('Want to be connected')}</span>
+      <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
   {:else}
-    <TextField name="conversation_id" placeholder="{l('Ex: #convos')}">
-      <span slot="label">{l('Conversation name')}</span>
+    <TextField name="conversation_id" placeholder="{$l('Ex: #convos')}">
+      <span slot="label">{$l('Conversation name')}</span>
     </TextField>
   {/if}
 
   <Checkbox name="tls" bind:checked="{useTls}">
-    <span slot="label">{l('Secure connection (TLS)')}</span>
+    <span slot="label">{$l('Secure connection (TLS)')}</span>
   </Checkbox>
   {#if useTls}
     <Checkbox name="tls_verify" bind:checked="{verifyTls}">
-      <span slot="label">{l('Verify certificate (TLS)')}</span>
+      <span slot="label">{$l('Verify certificate (TLS)')}</span>
     </Checkbox>
   {/if}
   <Checkbox bind:checked="{showAdvancedSettings}">
-    <span slot="label">{l('Show advanced settings')}</span>
+    <span slot="label">{$l('Show advanced settings')}</span>
   </Checkbox>
   <TextField name="username" hidden="{!showAdvancedSettings}">
-    <span slot="label">{l('Username')}</span>
+    <span slot="label">{$l('Username')}</span>
   </TextField>
   <TextField type="password" name="password" hidden="{!showAdvancedSettings}">
-    <span slot="label">{l('Password')}</span>
+    <span slot="label">{$l('Password')}</span>
   </TextField>
   <SelectField name="sasl" options="{saslMechanisms}" bind:value="{saslMechanism}" hidden="{!showAdvancedSettings}">
-    <span slot="label">{l('SASL authentication mechanism')}</span>
+    <span slot="label">{$l('SASL authentication mechanism')}</span>
   </SelectField>
-  <TextArea name="on_connect_commands" placeholder="{l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
-    <span slot="label">{l('On-connect commands')}</span>
+  <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
+    <span slot="label">{$l('On-connect commands')}</span>
   </TextArea>
   <div class="form-actions">
     {#if connection.url}
-      <Button icon="save" op="{updateConnectionOp}"><span>{l('Update')}</span></Button>
-      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{l('Delete')}</span></Button>
+      <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
+      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}
-      <Button icon="save" op="{createConnectionOp}"><span>{l('Create')}</span></Button>
+      <Button icon="save" op="{createConnectionOp}"><span>{$l('Create')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>
