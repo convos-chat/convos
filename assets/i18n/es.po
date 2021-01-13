@@ -194,10 +194,6 @@ msgstr "¿Deseas crear la conexión \"%1\"?"
 msgid "Downloaded Convos."
 msgstr "Convos descargado."
 
-#: assets/page/Login.svelte:102
-msgid "E-mail"
-msgstr "Correo electrónico"
-
 #: assets/page/SettingsAccount.svelte:72
 msgid "Email"
 msgstr "Correo electrónico"

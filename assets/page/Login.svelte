@@ -63,7 +63,7 @@ function registered() {
       <input type="hidden" name="token">
 
       <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" readonly="{emailFromParams}" bind:value="{user.formEmail}">
-        <span slot="label">{l('E-mail')}</span>
+        <span slot="label">{l('Email')}</span>
         <p class="help" slot="help">
           {#if emailFromParams}
             {l('Your email is from the invite link.')}
@@ -99,7 +99,7 @@ function registered() {
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{l('Sign in')}</h2>
       <TextField type="email" name="email" placeholder="{l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
-        <span slot="label">{l('E-mail')}</span>
+        <span slot="label">{l('Email')}</span>
       </TextField>
 
       <TextField type="password" name="password" autocomplete="current-password">
