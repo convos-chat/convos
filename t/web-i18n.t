@@ -8,30 +8,23 @@ my $t = t::Helper->t;
 note 'defaults';
 $t->get_ok('/')->element_exists('html[lang="en"]')->text_is('title', 'Better group chat - Convos')
   ->text_is('h2', 'Loading...');
-$t->get_ok('/api/i18n/en.json')->status_is(200)
+$t->get_ok('/api/i18n/en.json')->status_is(200)->json_is('/available_languages', [qw(en es it no)])
   ->json_is('/dictionary/Autocomplete', 'Autocomplete');
 $t->get_ok('/', {'Accept-Language' => ''})->element_exists('html[lang="en"]');
 $t->get_ok('/', {'Accept-Language' => 'x,y,z'})->element_exists('html[lang="en"]');
-
-note 'dummy translation';
-my $dict = $t->app->i18n->dictionary('no');
-$dict->{lang}          = 'no';
-$dict->{Autocomplete}  = 'Autofullføring';
-$dict->{'Loading...'}  = 'Laster...';
-$dict->{'%1 - Convos'} = '%1 - Convos test translation';
-
-$t->get_ok('/', {'Accept-Language' => 'no'})->element_exists('html[lang="no"]');
-$t->get_ok('/', {'Accept-Language' => 'en;q=0.5,no'})->element_exists('html[lang="no"]');
-$t->get_ok('/', {'Accept-Language' => 'no-nb,en'})->element_exists('html[lang="no"]')
-  ->text_is('title', 'Better group chat - Convos test translation')->text_is('h2', 'Laster...');
-
-$t->get_ok('/api/i18n/no.json')->status_is(200)->json_is('/available_languages', [qw(en es it no)])
-  ->json_is('/dictionary/Autocomplete', 'Autofullføring');
 
 note 'italian';
 $t->get_ok('/', {'Accept-Language' => 'it-ch'})->element_exists('html[lang="it"]')
   ->text_is('h2', 'Caricamento in corso...');
 $t->get_ok('/api/i18n/it.json')->status_is(200)->json_is('/dictionary/version', 'versione');
+
+note 'norwegian';
+$t->get_ok('/', {'Accept-Language' => 'no'})->element_exists('html[lang="no"]');
+$t->get_ok('/', {'Accept-Language' => 'en;q=0.5,no'})->element_exists('html[lang="no"]');
+$t->get_ok('/', {'Accept-Language' => 'no-nb,en'})->element_exists('html[lang="no"]')
+  ->text_is('h2', 'Laster...');
+
+$t->get_ok('/api/i18n/no.json')->status_is(200)->json_is('/dictionary/Autocomplete', 'Autofullfør');
 
 note 'spanish';
 $t->get_ok('/', {'Accept-Language' => 'es-MX,es;q=0.8,en-US;q=0.5,en;q=0.3'})

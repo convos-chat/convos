@@ -1,12 +1,15 @@
 Revision history for perl distribution Convos
 
 5.11 Not Released
+ - Add Norwegian translations #549
+ - Add Italian translations #548
+   Contributor: SerHack
  - Fix unicode issues related to translations #422
  - Fix loading language files in production
 
 5.10 2021-01-13T14:43:00+0900
  - Add support for other languages #422
- - Add translations for Spanish #545
+ - Add Spanish translations #545
    Contributor: Iván Ávalos and José Joaquín Atria
  - Add EXPERIMENTAL support for WEBIRC #346 #444 #546
  - Add author to blog posts
