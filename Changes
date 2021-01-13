@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.11 Not Released
+ - Fix unicode issues related to translations #422
+
 5.10 2021-01-13T14:43:00+0900
  - Add support for other languages #422
  - Add translations for Spanish #545

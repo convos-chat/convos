@@ -3,6 +3,7 @@ use Mojo::Base 'Convos::Plugin';
 
 use HTTP::AcceptLanguage;
 use Mojo::File qw(path);
+use Mojo::Util qw(decode);
 
 has _dictionaries => sub { +{} };
 
@@ -54,6 +55,7 @@ sub _parse_po_file {
   my $PO    = shift->open;
   my $entry = {};
   while (<$PO>) {
+    $_                     = decode 'UTF-8', $_;
     @$entry{qw{file line}} = ($1, $2)     if /^#:\s*([^:]+):(\d+)/;
     $entry->{$1}           = _unquote($2) if /(msgid|msgstr)\s*(['"].*)/;
     next unless $entry->{msgid} and $entry->{msgstr};
