@@ -1,0 +1,779 @@
+#: assets/page/Help.svelte:38
+msgid "\"#\" will show the matching conversation names."
+msgstr "\"#\" mostrerà i nomi delle conversazioni corrispondenti."
+
+#: assets/page/Help.svelte:37
+msgid "\"/\" will show the available commands."
+msgstr "\"/\" mostrerà i comandi disponibili."
+
+#: assets/page/Help.svelte:36
+msgid "\":\" followed by a character will show matching emojis."
+msgstr "\":\" seguito da un carattere che mostrerà le emojis corrispondenti."
+
+#: assets/page/Help.svelte:35
+msgid ""
+"\"@\" followed by a character will show matching nicks in the current "
+"conversation."
+msgstr ""
+"\"@\" seguito da un carattere mostrerà i nick corrispondenti nella "
+"conversazione in corso."
+
+#: assets/page/ConversationAdd.svelte:71
+msgid "#room or nick"
+msgstr "#stanza o nickname"
+
+#: assets/page/Search.svelte:83
+msgid "%1 in %2"
+msgstr "%1 in %2"
+
+#: assets/page/Chat.svelte:244
+msgid "%b %e %H:%M"
+msgstr "%b %e %H:%M"
+
+#: assets/page/Help.svelte:48
+msgid "*some text*, **some text**, ***some text***"
+msgstr "*lorem ipsum*, **lorem ipsum**, ***lorem ipsum***"
+
+#: assets/page/Help.svelte:46
+msgid "> some text"
+msgstr "> Lorem ipsum"
+
+#: assets/page/Help.svelte:47
+msgid "A line starting with \">\" will be converted into a quote."
+msgstr "Una linea che inizia con \">\" verrà convertita in una citazione."
+
+#: assets/page/SettingsAdminUsers.svelte:125
+msgid "A link was generated"
+msgstr "È stato generato un link"
+
+#: assets/components/ChatSidebar.svelte:193
+msgid "Account"
+msgstr "Account"
+
+#: assets/page/ConversationAdd.svelte:77
+msgid "Add"
+msgstr "Aggiungi"
+
+#: assets/components/ChatSidebar.svelte:189
+msgid "Add connection"
+msgstr "Aggiungi connessione"
+
+#: assets/components/ChatSidebar.svelte:185
+msgid "Add conversation"
+msgstr "Aggiungi conversazione"
+
+#: assets/page/SettingsAdmin.svelte:87
+msgid "Admin email"
+msgstr "Email dell'amministratore"
+
+#: assets/page/Login.svelte:60
+msgid ""
+"As you are the first user, you do not need any invitation link. Just fill in "
+"the form below, hit \"Sign up\" to start chatting."
+msgstr ""
+"Siccome sei il primo utente, non avrai bisogno di alcun link per l'invito. "
+"Ti basta riempire il form sottostante e premere \"Registrati\" per iniziare "
+"a chattare. "
+
+#: assets/page/Help.svelte:32
+msgid "Autocomplete"
+msgstr "Autocompletamento"
+
+#: assets/page/Help.svelte:56
+msgid "Available commands"
+msgstr "Comandi disponibili"
+
+#: assets/page/Help.svelte:69
+msgid "Bug/issue tracker"
+msgstr "Tracker di problemi o bug"
+
+#: assets/page/SettingsAdmin.svelte:78
+msgid "Can be changed if you want to add a touch of your organization."
+msgstr "Può essere cambiato se vuoi dare un tocco alla tua organizzazione. "
+
+#: assets/page/Help.svelte:67
+msgid "Changelog for v%1"
+msgstr "Changelog per v%1"
+
+#: assets/page/Help.svelte:29
+msgid ""
+"Clicking on the icon next to the conversation name will take you to settings."
+msgstr ""
+"Premendo l'icona vicino al nome della conversazione, andrai nelle "
+"impostazioni.\n"
+
+#: assets/page/SettingsAccount.svelte:96
+msgid "Color scheme"
+msgstr "Schema dei colori"
+
+#: assets/page/SettingsAdminUsers.svelte:107
+msgid "Confirm email"
+msgstr "Conferma email"
+
+#: assets/components/SettingsHeader.svelte:9
+msgid "Connection"
+msgstr "Connessione"
+
+#: assets/page/Chat.svelte:222
+msgid "Connection does not exist."
+msgstr "Connessione non esistente."
+
+#: assets/components/ConnectionSettings.svelte:26
+msgid "Connection not found."
+msgstr "Non è stato possibile trovare la connessione."
+
+#: assets/page/Fallback.svelte:35
+msgid "Contact admin"
+msgstr "Contatta l'amministratore"
+
+#: assets/components/SettingsHeader.svelte:9
+msgid "Conversation"
+msgstr "Conversazione"
+
+#: assets/components/ConnectionForm.svelte:136
+msgid "Conversation name"
+msgstr "Nome della conversazione"
+
+#: assets/components/ConversationSettings.svelte:54
+msgid "Conversation with %1 is frozen. Reason: %2"
+msgstr ""
+"La conversazione con %1 è congelata. La ragione è la seguente: %2\n"
+
+#: assets/components/ChatSidebar.svelte:151
+msgid "Conversations"
+msgstr "Conversazioni"
+
+#: assets/components/ChatMessage.svelte:16
+msgid "Convos"
+msgstr "Convos"
+
+#: assets/page/Login.svelte:89
+msgid "Convos is not open for public registration."
+msgstr "Convos non è aperto per la registrazione pubblica."
+
+#: assets/page/SettingsAdmin.svelte:73
+msgid "Convos settings"
+msgstr "Impostazioni di Convos."
+
+#: assets/page/Help.svelte:42
+msgid "Convos supports some special way of formatting text:"
+msgstr "Convos supporta alcuni metodi per formattare il testo:"
+
+#: assets/components/ConnectionForm.svelte:168
+msgid "Create"
+msgstr "Crea"
+
+#: assets/components/ConnectionSettings.svelte:30
+msgid "Currently connected to %1."
+msgstr "Attualmente connesso a %1."
+
+#: assets/components/ConnectionSettings.svelte:32
+msgid "Currently connecting to %1."
+msgstr ""
+"Attualmente in collegamento con %1.\n"
+
+#: assets/components/ConnectionSettings.svelte:28
+msgid "Currently disconnected from %1."
+msgstr ""
+"Attualmente disconnesso da %1.\n"
+
+#: assets/page/SettingsAdmin.svelte:92
+msgid "Default connection URL"
+msgstr "URL di connessione di default"
+
+#: assets/components/ConnectionForm.svelte:166
+msgid "Delete"
+msgstr "Rimuovi"
+
+#: assets/page/SettingsAdminUsers.svelte:111
+msgid "Delete user"
+msgstr "Rimuovi utente"
+
+#: assets/page/Help.svelte:79
+msgid "Demo error pages"
+msgstr "Pagine \"demo\" degli errori "
+
+#: assets/page/SettingsAdmin.svelte:127
+msgid "Disk usage"
+msgstr "Uso del disco"
+
+#: assets/page/Chat.svelte:230
+msgid "Do you want to chat with \"%1\"?"
+msgstr ""
+"Vuoi iniziare una conversazione con \"%1\"?\n"
+
+#: assets/page/Chat.svelte:223
+msgid "Do you want to create the connection \"%1\"?"
+msgstr ""
+"Vuoi creare la connessione con \"%1\"?\n"
+
+#: assets/page/Fallback.svelte:28
+msgid "Downloaded Convos."
+msgstr "Convos scaricato."
+
+#: assets/page/Login.svelte:102
+msgid "E-mail"
+msgstr "E-mail"
+
+#: assets/page/SettingsAccount.svelte:72
+msgid "Email"
+msgstr "Email"
+
+#: assets/page/SettingsAccount.svelte:100
+msgid "Enable compact message display"
+msgstr ""
+"Abilita la visione dei messaggi compatta.\n"
+
+#: assets/page/SettingsAccount.svelte:80
+msgid "Enable notifications"
+msgstr "Abilita le notifiche"
+
+#: assets/page/ConversationAdd.svelte:56
+msgid ""
+"Enter the name of an exising conversation, or create a new conversation."
+msgstr "Inserisci il nome di una conversazione esistente o creane una nuova."
+
+#: assets/components/ConnectionForm.svelte:135
+msgid "Ex: #convos"
+msgstr "Esempio: #convos"
+
+#: assets/components/ConnectionForm.svelte:125
+msgid "Ex: Clark Kent"
+msgstr "Esempio: Clark Kent"
+
+#: assets/components/ConnectionForm.svelte:114
+msgid "Ex: chat.freenode.net:6697"
+msgstr "Esempio: chat.freenode.net:6697"
+
+#: assets/page/SettingsAdmin.svelte:109
+msgid "Ex: https://meet.jit.si/"
+msgstr "Esempio: https://meet.jit.si/"
+
+#: assets/page/SettingsAdmin.svelte:86
+msgid "Ex: jhthorsen@cpan.org"
+msgstr "Esempio: jhthorsen@cpan.org"
+
+#: assets/page/Login.svelte:101
+msgid "Ex: john@doe.com"
+msgstr "Esempio: john@doe.com"
+
+#: assets/components/ConnectionForm.svelte:121
+msgid "Ex: superman"
+msgstr "Esempio: superman"
+
+#: assets/page/SettingsAccount.svelte:88
+msgid "Expand URL to media"
+msgstr "Espandi URL con la preview dei media"
+
+#: assets/page/SettingsAdmin.svelte:100
+msgid "Force default connection"
+msgstr "Forza la connessione di default"
+
+#: assets/page/SettingsAdminUsers.svelte:135
+msgid "Generate link"
+msgstr "Genera link"
+
+#: assets/page/SettingsAdmin.svelte:68
+msgid "Global settings"
+msgstr "Impostazioni globali"
+
+#: assets/page/Fallback.svelte:41
+msgid "Go to start page"
+msgstr "Vai alla pagina iniziale"
+
+#: assets/components/ChatSidebar.svelte:197
+msgid "Help"
+msgstr "Guida"
+
+#: assets/page/Login.svelte:78
+msgid "Hint: Use a phrase from a book."
+msgstr "Suggerimento: utilizza una frase da un libro."
+
+#: assets/components/ConnectionForm.svelte:115
+msgid "Host and port"
+msgstr "Host e porta"
+
+#: assets/page/SettingsAccount.svelte:84
+msgid "Ignore join/part messages"
+msgstr "Ignora i messaggi join/part"
+
+#: assets/page/SettingsAdmin.svelte:131
+msgid "Inode usage"
+msgstr "Utilizzo Inode"
+
+#: assets/page/Login.svelte:50
+msgid "Invalid invite/recover URL"
+msgstr "URL per l'invito/recupero invalido."
+
+#: assets/page/SettingsAdminUsers.svelte:118
+msgid "Invite or recover password"
+msgstr "Invita o recupera password"
+
+#: assets/page/ConversationAdd.svelte:57
+msgid ""
+"It is also possible to load in all existing conversations for a given "
+"connection."
+msgstr ""
+"È anche possibile caricare tutte le conversazioni esistenti per una "
+"determinata connessione."
+
+#: assets/page/Chat.svelte:244
+msgid "Jump to %1"
+msgstr "Vai a %1"
+
+#: assets/components/ConversationSettings.svelte:95
+msgid "Leave"
+msgstr "Abbandona"
+
+#: assets/page/SettingsAccount.svelte:111
+msgid "Leave the password fields empty to keep the current password."
+msgstr "Lascia i campi per la password vuoti per tenere la password attuale."
+
+#: assets/page/ConversationAdd.svelte:66
+msgid "Load"
+msgstr "Carica"
+
+#: assets/page/Fallback.svelte:31
+msgid "Loading user data failed: %1"
+msgstr "Caricamento dei dati dell'utente fallita: %1"
+
+#: assets/page/Fallback.svelte:33
+msgid "Loading user data..."
+msgstr "Caricamento dei dati dell'utente"
+
+#: assets/components/OperationStatus.svelte:29
+msgid "Loading..."
+msgstr "Caricamento in corso..."
+
+#: assets/components/ChatSidebar.svelte:211
+msgid "Log out"
+msgstr "Esci"
+
+#: assets/page/Chat.svelte:194
+msgid "New messages"
+msgstr "Nuovi messaggi"
+
+#: assets/components/ConnectionForm.svelte:122
+msgid "Nickname"
+msgstr "Nickname"
+
+#: assets/page/Chat.svelte:233
+msgid "No"
+msgstr "No"
+
+#: assets/components/ChatSidebar.svelte:155
+msgid "No conversations"
+msgstr "Nessuna conversazione"
+
+#: assets/page/Search.svelte:62
+msgid "No notifications."
+msgstr "Nessuna notifica."
+
+#: assets/page/Search.svelte:64
+msgid "No search results for \"%1\"."
+msgstr "Nessun risultato di ricerca per \"%1\"."
+
+#: assets/components/ConversationSettings.svelte:70
+msgid "No topic is set."
+msgstr "Nessun topic è stato impostato"
+
+#: assets/page/SettingsAdmin.svelte:76
+msgid "Nordaaker"
+msgstr "Nordaaker"
+
+#: assets/page/SettingsAccount.svelte:76
+msgid "Notification keywords"
+msgstr "Parole per notifica"
+
+#: assets/components/ChatSidebar.svelte:176
+msgid "Notifications"
+msgstr "Notifiche"
+
+#: assets/components/ConversationSettings.svelte:87
+msgid "Notify me on new messages"
+msgstr "Avvisami sui nuovi messaggi"
+
+#: assets/components/ConnectionForm.svelte:161
+msgid "On-connect commands"
+msgstr "Comandi di connessione"
+
+#: assets/page/Help.svelte:28
+msgid "Open conversation or connection settings"
+msgstr "Apri le impostazioni di conversazione o di connessione"
+
+#: assets/page/SettingsAdmin.svelte:82
+msgid "Organization URL"
+msgstr "URL dell'organizzazione"
+
+#: assets/page/SettingsAdmin.svelte:77
+msgid "Organization name"
+msgstr "Nome dell'organizzazione"
+
+#: assets/page/Help.svelte:65
+msgid "Other resources"
+msgstr "Altre risorse"
+
+#: assets/components/ConversationSettings.svelte:101
+msgid "Participants (%1)"
+msgstr "Partecipanti (%1)"
+
+#: assets/components/ConversationSettings.svelte:81
+msgid "Password"
+msgstr "Password"
+
+#: assets/page/Login.svelte:52
+msgid "Please ask your Convos admin for a new link."
+msgstr "Chiedi al vostro amministratore di Convos un nuovo link."
+
+#: assets/page/Login.svelte:90
+msgid ""
+"Please ask your Convos admin for an invite link to sign up, or sign in if "
+"you already have an account."
+msgstr ""
+"Chiedi al tuo amministratore di Convos un link di invito per iscriverti, "
+"oppure accedi se hai già un account."
+
+#: assets/components/ConversationSettings.svelte:56
+msgid "Private conversation with %1."
+msgstr "Conversazione privata con %1."
+
+#: assets/page/Help.svelte:68
+msgid "Project homepage"
+msgstr "Pagina iniziale del progetto"
+
+#: assets/components/ConnectionForm.svelte:160
+msgid "Put each command on a new line."
+msgstr "Metti ogni comando su una nuova linea."
+
+#: assets/page/Login.svelte:58
+msgid "Recover account"
+msgstr "Recupera account"
+
+#: assets/page/ConversationAdd.svelte:66
+msgid "Refresh"
+msgstr "Aggiorna"
+
+#: assets/page/SettingsAdmin.svelte:105
+msgid "Registration is open to public"
+msgstr "La registrazione non è aperta al pubblico"
+
+#: assets/page/Chat.svelte:203
+msgid "Remove"
+msgstr "Rimuovi"
+
+#: assets/page/SettingsAccount.svelte:108
+msgid "Repeat password"
+msgstr "Ripeti la password"
+
+#: assets/page/Chat.svelte:204
+msgid "Resend"
+msgstr "Riinvia"
+
+#: assets/page/SettingsAdminUsers.svelte:88
+msgid "Roles"
+msgstr "Ruoli"
+
+#: assets/page/SettingsAdminUsers.svelte:89
+msgid "Roles must be separated by comma."
+msgstr "I ruoli devono essere separati da una virgola."
+
+#: assets/components/ConnectionForm.svelte:158
+msgid "SASL authentication mechanism"
+msgstr "Meccanismo per l'autenticazione SASL"
+
+#: assets/page/SettingsAdmin.svelte:115
+msgid "Save settings"
+msgstr "Salva impostazioni"
+
+#: assets/page/SettingsAdminUsers.svelte:93
+msgid "Save user"
+msgstr "Salva utente"
+
+#: assets/components/ChatSidebar.svelte:181
+msgid "Search"
+msgstr "Ricerca"
+
+#: assets/components/ChatSidebar.svelte:215
+msgid "Search for \"%1\""
+msgstr "Cerca per \"%1\""
+
+#: assets/components/ConnectionForm.svelte:141
+msgid "Secure connection (TLS)"
+msgstr "Connessione sicura (TLS)"
+
+#: assets/page/SettingsAdminUsers.svelte:77
+msgid "See all users"
+msgstr "Vedi tutti gli utenti"
+
+#: assets/page/ConversationAdd.svelte:62
+msgid "Select..."
+msgstr "Seleziona"
+
+#: assets/page/Login.svelte:82
+msgid "Set new password"
+msgstr "Imposta una nuova password"
+
+#: assets/components/ChatSidebar.svelte:202
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: assets/page/Help.svelte:27
+msgid "Shift focus between chat input and search in sidebar."
+msgstr ""
+"Spostare l'attenzione tra l'input della chat e la ricerca nella barra "
+"laterale."
+
+#: assets/page/Help.svelte:24
+msgid "Shortcuts"
+msgstr "Scorciatoie"
+
+#: assets/components/ConnectionForm.svelte:149
+msgid "Show advanced settings"
+msgstr "Mostra impostazioni avanzate"
+
+#: assets/page/ConversationAdd.svelte:90
+msgid "Showing %1 of %2 conversations, but the list is still loading."
+msgstr "Mostrando %1 di %2 conversazioni, ma la lista è ancora in caricamento."
+
+#: assets/page/ConversationAdd.svelte:88
+msgid "Showing %1 of %2 conversations."
+msgstr "Mostrando %1 di %2 conversazioni."
+
+#: assets/page/Login.svelte:111
+msgid "Sign in"
+msgstr "Entra"
+
+#: assets/page/Login.svelte:88
+msgid "Sign up"
+msgstr "Registrati"
+
+#: assets/page/Help.svelte:70
+msgid "Source code"
+msgstr "Codice sorgente"
+
+#: assets/page/Chat.svelte:159
+msgid "Start video conference"
+msgstr "Inizia una videoconferenza"
+
+#: assets/page/Fallback.svelte:29
+msgid "Started Convos."
+msgstr "Convos avviato."
+
+#: assets/page/Chat.svelte:170
+msgid "Started chatting on %1"
+msgstr "Hai iniziato a chattare su %1"
+
+#: assets/page/Help.svelte:41
+msgid "Text formatting"
+msgstr "Formattazione del testo"
+
+#: assets/page/Fallback.svelte:37
+msgid ""
+"The Convos Team have been searching and searching, but the requested page "
+"could not be found."
+msgstr ""
+"Il Team di Convos ha cercato e cercato ancora, ma non è stato possibile "
+"trovare la pagina richiesta."
+
+#: assets/page/Help.svelte:33
+msgid "The following rules apply when typing a message:"
+msgstr "Quando si digita un messaggio vengono applicate le seguenti regole:"
+
+#: assets/page/Login.svelte:51
+msgid "The link has expired."
+msgstr "Il link è scaduto."
+
+#: assets/page/Login.svelte:51
+msgid "The link is invalid."
+msgstr "Il link è invalido."
+
+#: assets/page/SettingsAdmin.svelte:95
+msgid ""
+"The path part is the default channel to join. \"%%23convos\" means "
+"\"#convos\"."
+msgstr ""
+"La parte del percorso è il canale predefinito da unire. \"%%23convos\" "
+"significa \"#convos\"."
+
+#: assets/page/SettingsAccount.svelte:92
+msgid "Theme"
+msgstr "Tema"
+
+#: assets/page/SettingsAdmin.svelte:88
+msgid "This email can be used by users to get in touch with the Convos admin."
+msgstr ""
+"Questa e-mail può essere utilizzata dagli utenti per mettersi in contatto "
+"con l'amministratore di Convos."
+
+#: assets/page/SettingsAdmin.svelte:94
+msgid "This is the default connection new users will connect to."
+msgstr ""
+"Questa è la connessione predefinita a cui si collegheranno i nuovi utenti."
+
+#: assets/page/SettingsAdmin.svelte:111
+msgid "This should point to a %1 instance."
+msgstr "Questo dovrebbe indicare un'istanza %1."
+
+#: assets/page/SettingsAdminUsers.svelte:102
+msgid ""
+"This will permanently remove user settings, chat logs, uploaded files and "
+"other user related data."
+msgstr ""
+"Questo rimuoverà permanentemente le impostazioni dell'utente, i log della "
+"chat, i file caricati e altri dati relativi all'utente."
+
+#: assets/page/SettingsAdmin.svelte:102
+msgid ""
+"Tick this box if you want to prevent users from creating custom connections."
+msgstr ""
+"Spunta questa casella se si vuole impedire agli utenti di creare connessioni "
+"personalizzate."
+
+#: assets/page/SettingsAdmin.svelte:107
+msgid ""
+"Tick this box if you want users to be able to register without an invite URL."
+msgstr ""
+"Spunta questa casella se si desidera che gli utenti possano registrarsi "
+"senza un URL di invito."
+
+#: assets/page/SettingsAdminUsers.svelte:131
+msgid "Tip: Clicking on the link will copy it to your clipboard."
+msgstr "Suggerimento: Cliccando sul link lo copierete negli appunti."
+
+#: assets/components/ConversationSettings.svelte:75
+msgid "Topic"
+msgstr "Argomento"
+
+#: assets/page/Help.svelte:53
+msgid "URLs will be converted to links, and might be embedded in the chat."
+msgstr ""
+"Gli URL saranno convertiti in link e potrebbero essere incorporati nella "
+"chat."
+
+#: assets/components/ConversationSettings.svelte:93
+msgid "Update"
+msgstr "Aggiornamento"
+
+#: assets/page/SettingsAdmin.svelte:83
+msgid ""
+"Used together with \"Organization name\" to add a link to your organization "
+"on the login screen."
+msgstr ""
+"Usato insieme a \"Nome dell'organizzazione\" per aggiungere un link alla "
+"vostra organizzazione nella schermata di login."
+
+#: assets/page/SettingsAdminUsers.svelte:120
+msgid "User email"
+msgstr "Email dell'utente"
+
+#: assets/components/ConnectionForm.svelte:152
+msgid "Username"
+msgstr "Nome utente"
+
+#: assets/components/ChatSidebar.svelte:206
+msgid "Users"
+msgstr "Utenti"
+
+#: assets/page/SettingsAdminUsers.svelte:121
+msgid ""
+"Using this form, you can generate a forgotten password or invite link for a "
+"user."
+msgstr ""
+"Con questo modulo è possibile generare un link di password dimenticata o un "
+"link di invito per un utente."
+
+#: assets/components/ConnectionForm.svelte:145
+msgid "Verify certificate (TLS)"
+msgstr "Verifica certificato (TLS)"
+
+#: assets/page/SettingsAdmin.svelte:110
+msgid "Video service"
+msgstr "Servizio video"
+
+#: assets/components/ConnectionForm.svelte:132
+msgid "Want to be connected"
+msgstr "Vuoi essere collegato"
+
+#: assets/page/Help.svelte:45
+msgid "Will be automatically converted into emojis."
+msgstr "Sarà automaticamente convertito in emojis."
+
+#: assets/page/Chat.svelte:232
+msgid "Yes"
+msgstr "Sì"
+
+#: assets/components/ConversationSettings.svelte:58
+msgid "You are channel operator in %1."
+msgstr "Sei un operatore di canale in %1."
+
+#: assets/components/ConversationSettings.svelte:60
+msgid "You are not a channel operator in %1."
+msgstr "Non sei un operatore di canale in %1."
+
+#: assets/page/Chat.svelte:229
+msgid "You are not part of this conversation."
+msgstr "Non fai parte di questa conversazione."
+
+#: assets/page/Chat.svelte:180
+msgid "You are the only participant in this conversation."
+msgstr "Sei l'unico partecipante in questa conversazione."
+
+#: assets/page/Login.svelte:69
+msgid "Your email is from the invite link."
+msgstr "La tua e-mail proviene dal link di invito."
+
+#: assets/page/Login.svelte:71
+msgid "Your email will be used if you forget your password."
+msgstr "Verrà utilizzata la tua email se dimentichi la tua password."
+
+#: assets/components/ConnectionForm.svelte:126
+msgid "Your name"
+msgstr "Il tuo nome"
+
+#: assets/page/Help.svelte:50
+msgid "`some fragment`"
+msgstr "`Frammento di testo`"
+
+#: assets/page/SettingsAdminUsers.svelte:87
+msgid "admin, bot, ..."
+msgstr "amministratore, bot, ..."
+
+#: assets/page/Login.svelte:82
+msgid "existing_user"
+msgstr "utente_esistente"
+
+#: assets/page/SettingsAdmin.svelte:81
+msgid "https://convos.chat"
+msgstr "https://convos.chat"
+
+#: assets/page/SettingsAdmin.svelte:111
+msgid "https://meet.jit.si/"
+msgstr "https://meet.jit.si/"
+
+#: assets/page/SettingsAdmin.svelte:91
+msgid "irc://chat.freenode.net:6697/%%23convos"
+msgstr "irc://chat.freenode.net:6697/%%23convos"
+
+#: assets/page/Search.svelte:64
+msgid "q"
+msgstr "q"
+
+#: assets/page/Help.svelte:26
+msgid "shift+enter"
+msgstr "shift+invio"
+
+#: assets/page/Login.svelte:51
+msgid "status"
+msgstr "status"
+
+#: assets/page/SettingsAdminUsers.svelte:119
+msgid "user@example.com"
+msgstr "user@example.com"
+
+#: assets/page/Help.svelte:67
+msgid "version"
+msgstr "versione"
+
+#: assets/page/SettingsAccount.svelte:75
+msgid "whatever, keywords"
+msgstr "parole chiave"
