@@ -26,7 +26,12 @@ sub check_if_ready {
 sub dictionary {
   my $self = shift;
   $self->res->headers->cache_control('max-age=86400');
-  $self->render(json => {dictionary => $self->i18n->dictionary($self->stash('lang'))});
+  $self->render(
+    json => {
+      available_languages => $self->i18n->languages,
+      dictionary          => $self->i18n->dictionary($self->stash('lang')),
+    }
+  );
 }
 
 sub generate_invite_link {

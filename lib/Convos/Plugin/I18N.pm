@@ -10,12 +10,13 @@ has _dictionaries => sub { +{} };
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('i18n.detect'     => sub { $self->_detect(shift->app) });
-  $app->helper('i18n.dictionary' => sub { $self->_dictionary(@_) });
-  $app->helper('l'               => \&_l);
+  $app->helper('i18n.dictionary'        => sub { $self->_dictionary(@_) });
+  $app->helper('i18n.languages'         => sub { [sort keys %{$self->_dictionaries}] });
+  $app->helper('i18n.load_dictionaries' => sub { $self->_load_dictionaries(shift->app) });
+  $app->helper('l'                      => \&_l);
   $app->hook(before_dispatch => sub { $self->_before_dispatch(@_) });
 
-  $app->i18n->detect;
+  $app->i18n->load_dictionaries;
 }
 
 sub _before_dispatch {
@@ -33,21 +34,21 @@ sub _before_dispatch {
   $c->stash(dictionary => $dict, lang => $dict->{lang});
 }
 
-sub _detect {
+sub _dictionary {
+  my ($self, $c, $lang) = @_;
+  return $self->_dictionaries->{$lang} ||= {lang => $lang};
+}
+
+sub _load_dictionaries {
   my ($self, $app) = @_;
   my $dictionaries = $self->_dictionaries;
 
-  for my $file (map { path($_, 'i18n')->list->each } @{$app->asset->assets_dir}) {
+  for my $file (map { path($_, 'i18n')->list->each } $app->asset->assets_dir) {
     next unless $file =~ m!([\w-]+)\.po$!;
     my $lang = $1;
     _parse_po_file($file, sub { $dictionaries->{$lang}{$_[0]->{msgid}} = $_[0]->{msgstr} });
     $dictionaries->{$lang}{lang} = $lang;
   }
-}
-
-sub _dictionary {
-  my ($self, $c, $lang) = @_;
-  return $self->_dictionaries->{$lang} ||= {lang => $lang};
 }
 
 sub _parse_po_file {
@@ -91,18 +92,17 @@ L<Convos::Plugin::I18N> is a plugin for Convos to do translations.
 
 =head1 HELPERS
 
-=head2 i18n.detect
-
-  $c->i18n->detect;
-
-Used to find available dictionaries (.po) files, parse them and build internal
-structures.
-
 =head2 i18n.dictionary
 
   $c->i18n->dictionary($lang);
 
 Used to retrieve a dictionary for a given language.
+
+=head2 i18n.languages
+
+  $array_ref = $c->i18n->languages;
+
+Used to retrieve a list of available languages.
 
 =head2 l
 
@@ -110,6 +110,13 @@ Used to retrieve a dictionary for a given language.
 
 Will translate a C<$lexicon> and replace C<$1>, C<$2>, ... variables in the
 string with C<@variables>.
+
+=head2 i18n.load_dictionaries
+
+  $c->i18n->load_dictionaries;
+
+Used to find available dictionaries (.po) files, parse them and build internal
+structures.
 
 =head1 METHODS
 
