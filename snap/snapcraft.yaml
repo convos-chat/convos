@@ -6,7 +6,7 @@ description: |
   See http://convos.chat for more details.
 icon: assets/images/convos-icon.svg
 
-base: core18
+base: core20
 type: app
 grade: stable
 confinement: strict # devmode or strict
