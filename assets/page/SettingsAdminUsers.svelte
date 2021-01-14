@@ -144,9 +144,9 @@ function updateUserFromForm(e) {
     <table>
       <thead>
         <tr>
-          <th>Email</th>
-          <th>Roles</th>
-          <th>Registered</th>
+          <th>{$l('Email')}</th>
+          <th>{$l('Roles')}</th>
+          <th>{$l('Registered')}</th>
         </tr>
       </thead>
       <tbody>
