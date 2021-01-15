@@ -72,7 +72,7 @@ sub generate_cert_p {
   warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
   return Mojo::IOLoop->subprocess->run_p(sub {
     open STDERR, '>', File::Spec->devnull;
-    local $!, $?;
+    local ($!, $?);
     system $ENV{OPENSSL_BIN} => @openssl;
     die "$ENV{OPENSSL_BIN} @openssl FAIL $? / $!" if $? or $!;
     return \%params;
