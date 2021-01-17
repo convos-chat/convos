@@ -12,10 +12,10 @@
         % if (settings('organization_name') ne 'Convos') {
           &mdash; <a href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
         % } else {
-          &mdash; A better chat experience
+        &mdash; <%=l 'A better chat experience' %>
         % }
       </div>
-      <div class="hero--body">Convos is the simplest way to use IRC and it is always online.</div>
+      <div class="hero--body"><%=l 'Convos is the simplest way to use IRC and it is always online.' %></div>
     </div>
   </header>
 </div>
@@ -35,8 +35,8 @@
   <div>
     <h2><%=l 'Javascript is disabled' %></h2>
     <p class="error">
-      %=l 'Javascript is disabled so Convos cannot start.'
-      %=l 'Please enable Javascript and try again.'
+      <%=l 'Javascript is disabled so Convos cannot start.' %>
+      <%=l 'Please enable Javascript and try again.' %>
     </p>
     <p>
       %= link_to '', class => 'btn', begin

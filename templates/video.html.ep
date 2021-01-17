@@ -25,8 +25,8 @@
   <div>
     <h2><%=l 'Javascript is disabled' %></h2>
     <p class="error">
-      %=l 'Javascript is disabled so Convos cannot start.'
-      %=l 'Please enable Javascript and try again.'
+      <%=l 'Javascript is disabled so Convos cannot start.' %>
+      <%=l 'Please enable Javascript and try again.' %>
     </p>
     <p>
       %= link_to '', class => 'btn', begin
