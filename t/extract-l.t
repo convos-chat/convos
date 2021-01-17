@@ -1,9 +1,11 @@
 use Mojo::Base -strict;
 use Mojo::File qw(path);
 use Convos::Plugin::I18N;
+use List::Util qw(uniq);
 use Test::More;
 
 BEGIN { plan skip_all => 'TEST_I18N=1'               unless $ENV{TEST_I18N} }
+BEGIN { plan skip_all => 'touch local/capture.po'    unless -r 'local/capture.po' }
 BEGIN { plan skip_all => 'Regexp::Common is missing' unless eval 'require Regexp::Common;1' }
 plan skip_all => "ack: $!" unless open my $ACK, '-|', q[ack '\b(l|lmd)\(' assets];
 
@@ -47,6 +49,16 @@ while (<$ACK>) {
   }
 }
 
+note 'Captured l() from unit tests';
+open my $CAPTURED, '<', 'local/capture.po' or die $!;
+while (<$CAPTURED>) {
+  next unless my ($file, $line, $msgid) = /^([^:]+):(\d+):(.+)/;
+  next if $blacklist{$msgid};
+  $total++ unless $lexicons{$msgid};
+  $lexicons{$msgid} ||= {comments => [], msgid => $msgid, msgstr => $msgid};
+  push @{$lexicons{$3}{comments}}, "$file:$line";
+}
+
 note 'Parse existing files in ./assets/i18n';
 for my $po_file (path(qw(assets i18n))->list->each) {
   next unless $po_file =~ m!([\w-]+)\.po$!;
@@ -72,7 +84,7 @@ for my $po_file (path(qw(assets i18n))->list->each) {
     delete $has{$entry->{msgid}} if $has{$entry->{msgid}};
 
     if (@{$entry->{comments} || []}) {
-      printf $PO qq[#: %s\n], $_ for sort @{$entry->{comments}};
+      printf $PO qq[#: %s\n], $_ for sort { $a cmp $b } uniq @{$entry->{comments}};
     }
     else {
       note "Translation ($entry->{msgid}) not found.";
@@ -96,10 +108,13 @@ sub blacklist {
     'base_url',                                   'contact',
     'existing_user',                              'https://convos.chat',
     'https://github.com/nordaaker/convos/issues', 'https://meet.jit.si/',
+    'IMG_6322.jpg',                               'IMG_6799.jpg',
     'irc://chat.freenode.net:6697/%%23convos',    'on',
-    'organization_name',                          'q',
-    'shift+enter',                                'status',
-    'user@example.com',                           'version',
+    'organization_name',                          'paste.txt',
+    'q',                                          'shift+enter',
+    'status',                                     'user@example.com',
+    'version',                                    'web-files.t',
+    'zyxwvutsrqponmlkjihgfedcba_.txt',
   );
 }
 

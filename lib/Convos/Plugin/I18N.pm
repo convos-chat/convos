@@ -6,6 +6,7 @@ use HTTP::AcceptLanguage;
 use Mojo::File qw(path);
 use Mojo::Util qw(decode);
 
+use constant CAPTURE => $ENV{CONVOS_I18N_CAPTURE_LEXICONS} || 0;
 use constant RELOAD => $ENV{CONVOS_RELOAD_DICTIONARIES} || $ENV{MOJO_WEBPACK_LAZY} || 0;
 
 has _dictionaries => sub { +{} };
@@ -79,9 +80,19 @@ sub _parse_po_file {
 
 sub _l {
   my ($c, $lexicon, @args) = @_;
+  _log($lexicon) if CAPTURE;
   $lexicon = $c->stash->{dictionary}{$lexicon} || $lexicon;
   $lexicon =~ s!%(\d+)!{$args[$1 - 1] // $1}!ge;
   return $lexicon;
+}
+
+sub _log {
+  my $lexicon = shift;
+  return unless state $file = -w 'local' && path('local/capture.po');
+  my @caller = caller(2);
+  my $FH     = $file->open('>>');
+  $caller[1] =~ s!^template\s*!!;
+  print {$FH} "$caller[1]:$caller[2]:$lexicon\n";
 }
 
 sub _unescape {

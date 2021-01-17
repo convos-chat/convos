@@ -18,10 +18,12 @@ msgstr "\"@\" seguido de un caracter mostrará los nicks que coincidan en la con
 msgid "#room or nick"
 msgstr "#sala o nick"
 
+#: layouts/convos.html.ep:9
 #: templates/layouts/convos.html.ep:9
 msgid "%1 - Convos"
 msgstr "%1 - Convos"
 
+#: layouts/convos.html.ep:11
 #: templates/layouts/convos.html.ep:11
 msgid "%1 - Convos for %2"
 msgstr "%1 - Convos for %2"
@@ -42,6 +44,7 @@ msgstr "*algo de texto*, **algo de texto**, ***algo de texto***"
 msgid "> some text"
 msgstr "> algo de texto"
 
+#: app.html.ep:15
 #: templates/app.html.ep:15
 msgid "A better chat experience"
 msgstr "A better chat experience"
@@ -53,6 +56,10 @@ msgstr "Una línea que comience con \">\" será convertida en una cita."
 #: assets/page/SettingsAdminUsers.svelte:125
 msgid "A link was generated"
 msgstr "Se generó un link"
+
+#: partial/app_header.html.ep:17
+msgid "About"
+msgstr "About"
 
 #: assets/components/ChatSidebar.svelte:173
 #: assets/components/ChatSidebar.svelte:193
@@ -95,6 +102,15 @@ msgstr "Auto-completado"
 msgid "Available commands"
 msgstr "Comandos disponibles"
 
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Backend is starting"
+msgstr "Backend is starting"
+
+#: blog_list.html.ep:7
+#: partial/app_footer.html.ep:4
+#: partial/app_header.html.ep:19
+#: partial/cms_footer.html.ep:5
 #: templates/blog_list.html.ep:7
 #: templates/partial/app_footer.html.ep:4
 #: templates/partial/app_header.html.ep:19
@@ -114,6 +130,7 @@ msgstr "Se puede cambiar si deseas darle el toque de tu organización."
 msgid "Changelog for v%1"
 msgstr "Historial de cambios para v%1"
 
+#: partial/app_header.html.ep:26
 #: templates/partial/app_header.html.ep:26
 msgid "Chat"
 msgstr "Chat"
@@ -149,6 +166,8 @@ msgstr "Connection messages."
 msgid "Connection not found."
 msgstr "No se encontró la conexión."
 
+#: app.html.ep:29
+#: app.html.ep:46
 #: assets/page/Fallback.svelte:31
 #: assets/page/Help.svelte:77
 #: assets/page/Login.svelte:54
@@ -185,6 +204,7 @@ msgstr "Conversaciones"
 msgid "Convos"
 msgstr "Convos"
 
+#: app.html.ep:18
 #: templates/app.html.ep:18
 msgid "Convos is the simplest way to use IRC and it is always online."
 msgstr "Convos is the simplest way to use IRC and it is always online."
@@ -205,6 +225,7 @@ msgstr "Copy and send the link to your *existing* user."
 msgid "Copy and send the link to your *new* user."
 msgstr "Copy and send the link to your *new* user."
 
+#: partial/error.html.ep:11
 #: templates/partial/error.html.ep:11
 msgid "Could not find the page you are looking for. Maybe you entered an invalid URL?"
 msgstr "Could not find the page you are looking for. Maybe you entered an invalid URL?"
@@ -245,6 +266,7 @@ msgstr "Eliminar usuario"
 msgid "Demo error pages"
 msgstr "Páginas de error de demostración"
 
+#: partial/error.html.ep:16
 #: templates/partial/error.html.ep:16
 msgid "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
 msgstr "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
@@ -266,6 +288,7 @@ msgstr "¿Quieres conversar con \"%1\"?"
 msgid "Do you want to create the connection \"%1\"?"
 msgstr "¿Deseas crear la conexión \"%1\"?"
 
+#: app.html.ep:25
 #: assets/page/Fallback.svelte:24
 #: templates/app.html.ep:25
 #: templates/video.html.ep:15
@@ -341,6 +364,10 @@ msgstr "Generar enlace"
 msgid "Global settings"
 msgstr "Ajustes globales"
 
+#: partial/error.html.ep:26
+msgid "Go to landing page"
+msgstr "Go to landing page"
+
 #: assets/page/Fallback.svelte:34
 #: assets/page/Fallback.svelte:37
 msgid "Go to start page"
@@ -371,6 +398,11 @@ msgstr "Ignorar mensajes de entrada/salida"
 msgid "Inode usage"
 msgstr "Uso de inodo"
 
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Internal Server Error"
+msgstr "Internal Server Error"
+
 #: assets/page/Login.svelte:50
 msgid "Invalid invite/recover URL"
 msgstr "URL de invitación/recuperación inválida"
@@ -387,11 +419,13 @@ msgstr "Invitar o recuperar contraseña"
 msgid "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
 msgstr "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
 
+#: app.html.ep:36
 #: templates/app.html.ep:36
 #: templates/video.html.ep:26
 msgid "Javascript is disabled"
 msgstr "Javascript is disabled"
 
+#: app.html.ep:38
 #: templates/app.html.ep:38
 #: templates/video.html.ep:28
 msgid "Javascript is disabled so Convos cannot start."
@@ -409,6 +443,7 @@ msgstr "Salir"
 msgid "Leave the password fields empty to keep the current password."
 msgstr "Deja los campos de contraseña vacíos para mantener la contraseña actual."
 
+#: partial/app_footer.html.ep:5
 #: templates/partial/app_footer.html.ep:5
 msgid "License"
 msgstr "License"
@@ -428,6 +463,7 @@ msgstr "Cargando datos del usuario..."
 msgid "Loading video conference with \"%1\" via %2"
 msgstr "Loading video conference with \"%1\" via %2"
 
+#: app.html.ep:24
 #: assets/components/OperationStatus.svelte:29
 #: assets/page/Chat.svelte:175
 #: assets/page/Chat.svelte:249
@@ -440,6 +476,8 @@ msgstr "Cargando..."
 msgid "Log out"
 msgstr "Cerrar sesión"
 
+#: partial/app_header.html.ep:13
+#: partial/cms_header.html.ep:11
 #: templates/partial/app_header.html.ep:13
 #: templates/partial/cms_header.html.ep:11
 msgid "Menu"
@@ -482,6 +520,11 @@ msgstr "No topic is set for %1."
 #: assets/components/ConversationSettings.svelte:76
 msgid "No topic is set."
 msgstr "No hay un tópico establecido."
+
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Not Found"
+msgstr "Not Found"
 
 #: assets/page/SettingsAccount.svelte:76
 msgid "Notification keywords"
@@ -540,11 +583,14 @@ msgstr "Por favor pide un nuevo enlace de invitación para registrarte, o inicia
 msgid "Please confirm by entering **%1** before hitting **%2**."
 msgstr "Please confirm by entering **%1** before hitting **%2**."
 
+#: app.html.ep:39
 #: templates/app.html.ep:39
 #: templates/video.html.ep:29
 msgid "Please enable Javascript and try again."
 msgstr "Please enable Javascript and try again."
 
+#: blog_entry.html.ep:12
+#: blog_list.html.ep:16
 #: templates/blog_entry.html.ep:12
 #: templates/blog_list.html.ep:16
 msgid "Posted by %1"
@@ -564,6 +610,15 @@ msgstr "Página inicial del proyecto"
 #: assets/components/ConnectionForm.svelte:161
 msgid "Put each command on a new line."
 msgstr "Pon cada comando en una nueva línea"
+
+#: file.html.ep:19
+msgid "Raw"
+msgstr "Raw"
+
+#: blog_list.html.ep:21
+#: partial/error.html.ep:25
+msgid "Read more"
+msgstr "Read more"
 
 #: assets/page/Login.svelte:58
 msgid "Recover account"
@@ -673,6 +728,7 @@ msgstr "Mostrando %1 de %2 conversaciones."
 
 #: assets/page/Login.svelte:110
 #: assets/page/Login.svelte:99
+#: partial/app_header.html.ep:33
 #: templates/partial/app_header.html.ep:33
 msgid "Sign in"
 msgstr "Iniciar sesión"
@@ -680,6 +736,7 @@ msgstr "Iniciar sesión"
 #: assets/page/Login.svelte:58
 #: assets/page/Login.svelte:82
 #: assets/page/Login.svelte:88
+#: partial/app_header.html.ep:30
 #: templates/partial/app_header.html.ep:30
 msgid "Sign up"
 msgstr "Registrar"
@@ -700,6 +757,7 @@ msgstr "Convos ha iniciado."
 msgid "Started chatting on %1"
 msgstr "Se inició conversación en %1"
 
+#: app.html.ep:26
 #: templates/app.html.ep:26
 msgid "Starting Convos..."
 msgstr "Starting Convos..."
@@ -720,6 +778,7 @@ msgstr "Formato de texto"
 msgid "The Convos Team have been searching and searching, but the requested page could not be found."
 msgstr "El Equipo de Convos ha estado buscando y buscando, pero la página solicitada no se pudo encontrar."
 
+#: partial/error.html.ep:13
 #: templates/partial/error.html.ep:13
 msgid "The backend is starting up. Please try again later."
 msgstr "The backend is starting up. Please try again later."
@@ -756,6 +815,7 @@ msgstr "There are %1 [participants](%2) in this conversation."
 msgid "These settings control what users experience when they visit [%1](%1)."
 msgstr "These settings control what users experience when they visit [%1](%1)."
 
+#: blog_list.html.ep:10
 #: templates/blog_list.html.ep:10
 msgid "This blog is empty."
 msgstr "This blog is empty."
@@ -805,6 +865,8 @@ msgstr "Tópico"
 msgid "Topic for %1 is: %2"
 msgstr "Topic for %1 is: %2"
 
+#: app.html.ep:43
+#: partial/error.html.ep:26
 #: templates/app.html.ep:43
 #: templates/video.html.ep:33
 msgid "Try again"
@@ -928,6 +990,7 @@ msgstr "admin, bot, ..."
 msgid "chat.freenode.net:6697"
 msgstr "chat.freenode.net:6697"
 
+#: app.html.ep:13
 #: templates/app.html.ep:13
 msgid "for %1"
 msgstr "for %1"

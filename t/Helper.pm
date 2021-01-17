@@ -13,6 +13,7 @@ use Mojo::Util 'term_escape';
 
 our $CONVOS_HOME;
 
+$ENV{CONVOS_I18N_CAPTURE_LEXICONS} ||= 1;
 $ENV{CONVOS_GENERATE_CERT} //= 0;
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
