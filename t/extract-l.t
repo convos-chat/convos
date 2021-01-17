@@ -4,6 +4,14 @@ use Convos::Plugin::I18N;
 use List::Util qw(uniq);
 use Test::More;
 
+# To run this test, you have to install Regexp::Common, ack and capture
+# lexicons first:
+#
+# mkdir local/                        # captured strings are stored in ./local/capture.po
+# prove -vl t/web-*t;                 # the web unit tests will capture the lexicons
+# TEST_I18N=1 prove -vl t/extract-l.t # run this test to get statistics
+# rm ./local/capture.po               # delete the capture.po file before starting over
+
 BEGIN { plan skip_all => 'TEST_I18N=1'               unless $ENV{TEST_I18N} }
 BEGIN { plan skip_all => 'touch local/capture.po'    unless -r 'local/capture.po' }
 BEGIN { plan skip_all => 'Regexp::Common is missing' unless eval 'require Regexp::Common;1' }
@@ -12,7 +20,7 @@ plan skip_all => "ack: $!" unless open my $ACK, '-|', q[ack '\b(l|lmd)\(' assets
 use Regexp::Common qw(balanced delimited);
 my $l_re = $RE{balanced}{-begin => 'l(|lmd('}{-end => ')}'};
 my $q_re = $RE{delimited}{-keep}{-delim => q{'"}};
-my ($total, %blacklist, %lexicons) = (0, blacklist());
+my ($total, %lexicons) = (0);
 
 note 'Locate translations in ./assets/';
 while (<$ACK>) {
@@ -22,7 +30,7 @@ while (<$ACK>) {
   while ($text =~ /$l_re/g) {
     my $l_exp = $1;
     while ($l_exp =~ /$q_re/g) {
-      next if $blacklist{$3};
+      next if blacklisted($3);
       $total++ unless $lexicons{$3};
       $lexicons{$3} ||= {comments => [], msgid => $3, msgstr => $3};
       push @{$lexicons{$3}{comments}}, "$file:$line";
@@ -41,7 +49,7 @@ while (<$ACK>) {
   while ($text =~ /$l_re/g) {
     my $l_exp = $1;
     while ($l_exp =~ /$q_re/g) {
-      next if $blacklist{$3};
+      next if blacklisted($3);
       $total++ unless $lexicons{$3};
       $lexicons{$3} ||= {comments => [], msgid => $3, msgstr => $3};
       push @{$lexicons{$3}{comments}}, "$file:$line";
@@ -53,7 +61,7 @@ note 'Captured l() from unit tests';
 open my $CAPTURED, '<', 'local/capture.po' or die $!;
 while (<$CAPTURED>) {
   next unless my ($file, $line, $msgid) = /^([^:]+):(\d+):(.+)/;
-  next if $blacklist{$msgid};
+  next if blacklisted($3);
   $total++ unless $lexicons{$msgid};
   $lexicons{$msgid} ||= {comments => [], msgid => $msgid, msgstr => $msgid};
   push @{$lexicons{$3}{comments}}, "$file:$line";
@@ -69,7 +77,7 @@ for my $po_file (path(qw(assets i18n))->list->each) {
     $po_file,
     sub {
       my $entry = $_[0];
-      return if $blacklist{$entry->{msgid}};
+      return if blacklisted($entry->{msgid});
       $has{$entry->{msgid}} = 1;
       $lexicons{$entry->{msgid}} ||= $entry;
       $lexicons{$entry->{msgid}}{msgstr} = $entry->{msgstr};
@@ -79,7 +87,7 @@ for my $po_file (path(qw(assets i18n))->list->each) {
 
   open my $PO, '>:encoding(UTF-8)', $po_file or die $!;
   for my $entry (sort { $a->{msgid} cmp $b->{msgid} } values %lexicons) {
-    next if $blacklist{$entry->{msgid}};
+    next if blacklisted($entry->{msgid});
     $has{$entry->{msgid}} //= 0;
     delete $has{$entry->{msgid}} if $has{$entry->{msgid}};
 
@@ -87,7 +95,7 @@ for my $po_file (path(qw(assets i18n))->list->each) {
       printf $PO qq[#: %s\n], $_ for sort { $a cmp $b } uniq @{$entry->{comments}};
     }
     else {
-      note "Translation ($entry->{msgid}) not found.";
+      note "Translation ($entry->{msgid}) not found." if $ENV{TEST_I18N} > 1;
       $translated--;
     }
     printf $PO qq[msgid "%s"\n],    escape($entry->{msgid});
@@ -102,20 +110,17 @@ for my $po_file (path(qw(assets i18n))->list->each) {
 
 done_testing;
 
-sub blacklist {
-  return map { ($_ => 1) } (
-    '#activeMenu:settings',                       'Nordaaker',
-    'base_url',                                   'contact',
-    'existing_user',                              'https://convos.chat',
-    'https://github.com/nordaaker/convos/issues', 'https://meet.jit.si/',
-    'IMG_6322.jpg',                               'IMG_6799.jpg',
-    'irc://chat.freenode.net:6697/%%23convos',    'on',
-    'organization_name',                          'paste.txt',
-    'q',                                          'shift+enter',
-    'status',                                     'user@example.com',
-    'version',                                    'web-files.t',
-    'zyxwvutsrqponmlkjihgfedcba_.txt',
-  );
+sub blacklisted {
+  return 1 if $_[0] =~ m!\.(jpe?g|t|txt)\b!;
+  return 1 if $_[0] =~ m!^#\S*$!;
+  return 1 if $_[0] =~ m!^https?:!;
+
+  $_[0] eq $_ and return 1
+    for ('Nordaaker', 'base_url', 'contact', 'existing_user',
+    'irc://chat.freenode.net:6697/%%23convos',
+    'on', 'organization_name', 'q', 'shift+enter', 'status', 'user@example.com', 'version');
+
+  return 0;
 }
 
 sub escape {
