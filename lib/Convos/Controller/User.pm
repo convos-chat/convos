@@ -20,7 +20,7 @@ sub check_if_ready {
   return $self->stash(template => 'app') if $self->app->core->ready;
   $self->stash('openapi')
     ? $self->render(json => {errors => [{message => 'Backend is starting.'}]}, status => 503)
-    : $self->render('loading', status => 503);
+    : $self->render('loading', lang => 'en', status => 503);
   return 0;
 }
 

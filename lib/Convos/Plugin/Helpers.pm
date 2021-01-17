@@ -70,6 +70,7 @@ sub _backend_connection_create_p {
 
 sub _exception {
   my ($c, $err) = @_;
+  $c->stash->{lang} ||= 'en';
   return $EXCEPTION_HELPER->($c, $err) unless $c->openapi->spec;
   $c->app->log->error($err);
   $err =~ s!\sat\s\S+.*!!s;
