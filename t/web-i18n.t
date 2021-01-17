@@ -1,4 +1,5 @@
 #!perl
+BEGIN { $ENV{CONVOS_RELOAD_DICTIONARIES} = 1 }
 use lib '.';
 use t::Helper;
 
@@ -30,5 +31,12 @@ note 'spanish';
 $t->get_ok('/', {'Accept-Language' => 'es-MX,es;q=0.8,en-US;q=0.5,en;q=0.3'})
   ->element_exists('html[lang="es"]')->text_is('h2', 'Cargando...');
 $t->get_ok('/api/i18n/es.json')->status_is(200)->json_is('/dictionary/version', 'versión');
+
+note 'reload';
+my @reloaded;
+$t->app->helper('i18n.load_dictionaries' => sub { push @reloaded, pop });
+$t->get_ok('/')->get_ok('/', {'Accept-Language' => 'no'})->get_ok('/?lang=it')
+  ->get_ok('/api/i18n/es.json');
+is_deeply \@reloaded, [qw(en no it es)], 'reloaded languages' or diag join ', ', @reloaded;
 
 done_testing;

@@ -7,6 +7,7 @@ use Mojo::Util qw(hmac_sha1_sum trim);
 use Socket qw(inet_aton AF_INET);
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
+use constant RELOAD                => $ENV{MOJO_WEBPACK_LAZY} ? 1 : 0;
 
 has _email => sub {
   my $email = shift->param('email') || '';
@@ -25,7 +26,7 @@ sub check_if_ready {
 
 sub dictionary {
   my $self = shift;
-  $self->res->headers->cache_control('max-age=86400');
+  $self->res->headers->cache_control(RELOAD ? 'no-cache' : 'max-age=86400');
   $self->render(
     json => {
       available_languages => $self->i18n->languages,

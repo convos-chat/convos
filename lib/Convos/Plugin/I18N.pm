@@ -1,9 +1,12 @@
 package Convos::Plugin::I18N;
 use Mojo::Base 'Convos::Plugin';
 
+use Convos::Util qw(DEBUG);
 use HTTP::AcceptLanguage;
 use Mojo::File qw(path);
 use Mojo::Util qw(decode);
+
+use constant RELOAD => $ENV{CONVOS_RELOAD_DICTIONARIES} || $ENV{MOJO_WEBPACK_LAZY} || 0;
 
 has _dictionaries => sub { +{} };
 
@@ -12,42 +15,50 @@ sub register {
 
   $app->helper('i18n.dictionary'        => sub { $self->_dictionary(@_) });
   $app->helper('i18n.languages'         => sub { [sort keys %{$self->_dictionaries}] });
-  $app->helper('i18n.load_dictionaries' => sub { $self->_load_dictionaries(shift->app) });
+  $app->helper('i18n.load_dictionaries' => sub { $self->_load_dictionaries(shift, @_) });
   $app->helper('l'                      => \&_l);
-  $app->hook(before_dispatch => sub { $self->_before_dispatch(@_) });
+  $app->hook(around_action => sub { $self->_around_action(@_) });
 
   $app->i18n->load_dictionaries;
 }
 
-sub _before_dispatch {
-  my ($self, $c) = @_;
+sub _around_action {
+  my ($self, $next, $c, $action, $last) = @_;
+  return $next->() unless $last;
 
   my $dictionaries = $self->_dictionaries;
-  my $lang         = HTTP::AcceptLanguage->new($c->req->headers->accept_language || 'en');
+  my $lang         = $c->param('lang') || $c->req->headers->accept_language || 'en';
   my $dict;
-  for my $lang ($lang->languages) {
-    my ($prefix) = split /-/, $lang;
-    $dict = $dictionaries->{$lang} || $dictionaries->{$prefix} and last;
+  for my $l (HTTP::AcceptLanguage->new($lang)->languages) {
+    my ($prefix) = split /-/, $l;
+    $dict = $dictionaries->{$l} || $dictionaries->{$prefix} and last;
   }
 
   $dict ||= $dictionaries->{en};
-  $c->stash(dictionary => $dict, lang => $dict->{lang});
+  $c->i18n->load_dictionaries($dict->{_l})                          if RELOAD;
+  warn qq([Convos::Plugin::I18N] Using dictionary "$dict->{_l}".\n) if DEBUG >= 2;
+  $c->stash(dictionary => $dict, lang => $dict->{_l});
+  $next->();
 }
 
 sub _dictionary {
   my ($self, $c, $lang) = @_;
-  return $self->_dictionaries->{$lang} ||= {lang => $lang};
+  return $self->_dictionaries->{$lang} ||= {_l => $lang, _n => 1};
 }
 
 sub _load_dictionaries {
-  my ($self, $app) = @_;
+  my ($self, $c, $load_lang) = @_;
   my $dictionaries = $self->_dictionaries;
 
-  for my $file (map { path($_, 'i18n')->list->each } $app->asset->assets_dir) {
+  for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->assets_dir) {
     next unless $file =~ m!([\w-]+)\.po$!;
     my $lang = $1;
-    _parse_po_file($file, sub { $dictionaries->{$lang}{$_[0]->{msgid}} = $_[0]->{msgstr} });
-    $dictionaries->{$lang}{lang} = $lang;
+    next if $load_lang and $load_lang ne $lang;
+    _parse_po_file($file->realpath,
+      sub { $dictionaries->{$lang}{$_[0]->{msgid}} = $_[0]->{msgstr} });
+    my $l = $dictionaries->{$lang}{_l} = $lang;
+    my $n = $dictionaries->{$lang}{_n} = int(keys %{$dictionaries->{$lang}}) - 1;
+    warn qq([Convos::Plugin::I18N] Loaded $n lexicons for dictionary "$l" from $file.\n) if DEBUG;
   }
 }
 
@@ -114,7 +125,8 @@ string with C<@variables>.
 
 =head2 i18n.load_dictionaries
 
-  $c->i18n->load_dictionaries;
+  $c->i18n->load_dictionaries($lang);
+  $c->i18n->load_dictionaries; # load all
 
 Used to find available dictionaries (.po) files, parse them and build internal
 structures.
