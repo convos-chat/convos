@@ -86,7 +86,6 @@ function registered() {
     </form>
   {:else}
     <h2>{$l('Sign up')}</h2>
-    <p>{$l('Convos is not open for public registration.')}</p>
     <p>{$l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
     <div class="form-actions">
       <a class="btn" href="{settings('contact')}"><Icon name="paper-plane"/> {$l('Contact admin')}</a>

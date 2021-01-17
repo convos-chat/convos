@@ -52,10 +52,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 </ChatHeader>
 
 <main class="main">
-  <p>
-    {$l('Enter the name of an exising conversation, or create a new conversation.')}
-    {$l('It is also possible to load in all existing conversations for a given connection.')}
-  </p>
+  <p>{$l('Enter the name of an exising conversation, or create a new conversation.')}</p>
 
   <form method="post" bind:this="{formEl}" on:submit|preventDefault="{addConversation}">
     <div class="inputs-side-by-side">

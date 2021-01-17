@@ -19,7 +19,7 @@ const user = getContext('user');
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 $: nick = connection && connection.nick;
-$: placeholder = conversation.is('search') ? 'What are you looking for?' : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
+$: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);

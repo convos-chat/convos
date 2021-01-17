@@ -69,8 +69,8 @@ sub _parse_po_file {
   while (<$PO>) {
     s![\r\n]!!g;
     $_                     = decode 'UTF-8', $_;
-    @$entry{qw{file line}} = ($1, $2)     if /^#:\s*([^:]+):(\d+)/;
-    $entry->{$1}           = _unquote($2) if /(msgid|msgstr)\s*(['"].*)/;
+    @$entry{qw{file line}} = ($1, $2)      if /^#:\s*([^:]+):(\d+)/;
+    $entry->{$1}           = _unescape($2) if /(msgid|msgstr)\s*(['"].*)/;
     next unless $entry->{msgid} and $entry->{msgstr};
     $cb->($entry);
     $entry = {};
@@ -84,9 +84,10 @@ sub _l {
   return $lexicon;
 }
 
-sub _unquote {
+sub _unescape {
   local $_ = $_[0];
   s!^['"]!! and s!['"]$!!;
+  s!\\"!"!g;
   return $_;
 }
 
