@@ -19,7 +19,9 @@
  * @exports regexpEscape
  * @exports removeChildNodes
  * @exports sameOrigin
+ * @exports settings
  * @exports showEl
+ * @exports showFullscreen
  * @exports str2color
  * @exports tagNameIs
  * @exports timer
@@ -354,6 +356,39 @@ export function sameOrigin(url, loc = location) {
 }
 
 /**
+ * settings() is used to get or set global settings.
+ *
+ * @param {String} key The setting name.
+ * @param {String} value A setting value. (omit to "get" the value)
+ * @return {String} The settings value on "get"
+ */
+export function settings(key, value) {
+  const getEl = (key) => document.querySelector('meta[name="convos:' + key + '"]')
+      || document.querySelector('meta[name="' + key + '"]');
+
+  // Get
+  if (arguments.length == 1) {
+    if (key == 'app_mode') return document.body.classList.contains('for-app');
+    if (key == 'notify_enabled') return document.body.classList.contains('notify-enabled');
+    if (key == 'organization_name') key = 'contactorganization';
+    if (key == 'organization_url') key = 'contactnetworkaddress';
+    const el = getEl(key);
+    if (!el) throw 'Cannot get settings for "' + key + '".';
+    const bool = {no: false, yes: true};
+    return key == 'contact' ? atob(el.content || '') : bool.hasOwnProperty(el.content) ? bool[el.content] : el.content;
+  }
+
+  // Set
+  if (key == 'app_mode') return replaceClassName('body', /(for-)(app|cms)/, value ? 'app' : 'cms');
+  if (key == 'notify_enabled') return replaceClassName('body', /(notify-)(disabled)/, value ? 'enabled' : 'disabled');
+  if (key == 'organization_name') key = 'contactorganization';
+  if (key == 'organization_url') key = 'contactnetworkaddress';
+  if (key == 'contact') value = btoa(value);
+  if (typeof value == 'boolean') value = value ? 'yes' : 'no';
+  getEl(key).content = value;
+}
+
+/**
  * Used to show/hide an element or query the state of the element.
  *
  * @example
@@ -371,6 +406,29 @@ export function showEl(el, show) {
   if (show === 'is-visible') return !el.hasAttribute('hidden');
   if (show === 'toggle') show = el.hasAttribute('hidden');
   return show ? el.removeAttribute('hidden') : el.setAttribute('hidden', '');
+}
+
+/**
+ * showFullscreen() is used put some content inside a fullscreen wrapper.
+ *
+ * @param {Event} e Ex: A click event
+ * @param {HTMLElement} contentEl A node to place inside the wrapper
+ * @return {HTMLElement} The fullscreen wrapper
+ */
+export function showFullscreen(e, contentEl) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  const mediaWrapper = ensureChildNode(document.body, 'fullscreen-wrapper', (el) => {
+    el.addEventListener('click', (e) => e.target == el && el.hide());
+    el.hide = () => mediaWrapper.classList.add('hidden');
+  });
+
+  removeChildNodes(mediaWrapper);
+  if (!contentEl) return mediaWrapper.hide();
+
+  mediaWrapper.classList.remove('hidden');
+  mediaWrapper.appendChild(contentEl.cloneNode(true));
+  return mediaWrapper;
 }
 
 /**

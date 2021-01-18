@@ -5,10 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
-import {humanReadableNumber} from '../js/util';
+import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {settings, viewport} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');

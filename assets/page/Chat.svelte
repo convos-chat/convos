@@ -12,10 +12,9 @@ import Time from '../js/Time';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
-import {q, tagNameIs} from '../js/util';
+import {q, showFullscreen, tagNameIs} from '../js/util';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
-import {viewport} from '../store/Viewport';
 
 const socket = getContext('socket');
 const user = getContext('user');
@@ -31,7 +30,7 @@ let unsubscribe = {};
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
-$: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $viewport.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
+$: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $user.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
 $: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
@@ -144,11 +143,6 @@ function setConversationFromUser(user) {
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
   if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
-}
-
-function showFullscreen(e, el) {
-  e.preventDefault();
-  viewport.showFullscreen(el);
 }
 
 function topicOrStatus(connection, conversation) {

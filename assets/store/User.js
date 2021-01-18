@@ -18,6 +18,9 @@ export default class User extends Reactive {
     this.prop('ro', 'roles', new Set());
     this.prop('ro', 'unread', () => this._calculateUnread());
 
+    this.prop('persist', 'expandUrlToMedia', true);
+    this.prop('persist', 'ignoreStatuses', false);
+
     this.prop('rw', 'activeConversation', this.notifications);
     this.prop('rw', 'email', '');
     this.prop('rw', 'forced_connection', false);
@@ -25,7 +28,6 @@ export default class User extends Reactive {
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'videoService', '');
-    this.prop('persist', 'ignoreStatuses', false);
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));

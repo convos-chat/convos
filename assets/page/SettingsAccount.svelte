@@ -9,22 +9,23 @@ import {getContext, onDestroy} from 'svelte';
 import {l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
-import {viewport} from '../store/Viewport';
+import {settings} from '../js/util';
 
 const api = getContext('api');
+const themeManager = getContext('themeManager');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
 let formEl;
-let compactDisplay = viewport.compactDisplay;
-let expandUrlToMedia = viewport.expandUrlToMedia;
+let activeTheme = themeManager.activeTheme;
+let colorScheme = themeManager.colorScheme;
+let compactDisplay = themeManager.compactDisplay;
+let expandUrlToMedia = user.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
-let selectedColorScheme = viewport.colorScheme;
-let selectedTheme = viewport.theme;
-let wantNotifications = notify.wantNotifications;
 let ignoreStatuses = user.ignoreStatuses;
+let wantNotifications = notify.wantNotifications;
 
-$: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
+$: colorSchemeReadonly = $themeManager.hasColorScheme(activeTheme) ? false : true;
 
 route.update({title: 'Account'});
 
@@ -42,22 +43,17 @@ function notifyWantNotificationsChanged(notify, changed) {
   if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
 }
 
-function updateUserFromForm(e) {
+function updateFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
-  if (wantNotifications) {
-    notify.requestDesktopAccess();
-  }
-
-  if (passwords.join('').length && passwords[0] != passwords[1]) {
-    return updateUserOp.error('Passwords does not match.');
-  }
+  if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
+  if (colorSchemeReadonly) colorScheme = 'auto';
+  if (wantNotifications) notify.requestDesktopAccess();
 
   notify.update({wantNotifications});
-  viewport.update({expandUrlToMedia, compactDisplay});
-  user.update({ignoreStatuses});
-  viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
+  themeManager.update({activeTheme, colorScheme, compactDisplay});
+  user.update({expandUrlToMedia, ignoreStatuses});
   updateUserOp.perform(e.target);
 }
 </script>
@@ -67,7 +63,7 @@ function updateUserFromForm(e) {
 </ChatHeader>
 
 <main class="main">
-  <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
+  <form method="post" on:submit|preventDefault="{updateFromForm}" bind:this="{formEl}">
     <TextField type="email" name="email" value="{$user.email}" readonly>
       <span slot="label">{$l('Email')}</span>
     </TextField>
@@ -88,11 +84,11 @@ function updateUserFromForm(e) {
       <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
 
-    <SelectField name="theme" options="{viewport.themeOptions}" bind:value="{selectedTheme}">
+    <SelectField name="theme" options="{themeManager.themeOptions}" bind:value="{activeTheme}">
       <span slot="label">{$l('Theme')}</span>
     </SelectField>
 
-    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{viewport.colorSchemeOptions}" bind:value="{selectedColorScheme}">
+    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}" bind:value="{colorScheme}">
       <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
 

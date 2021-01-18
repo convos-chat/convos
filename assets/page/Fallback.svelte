@@ -3,7 +3,7 @@ import Icon from '../components/Icon.svelte';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {settings, viewport} from '../store/Viewport';
+import {settings} from '../js/util';
 
 const messages = {'loading': 'Loading...', 'not_found': 'Not Found'};
 const socket = getContext('socket');

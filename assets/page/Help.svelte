@@ -5,7 +5,7 @@ import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {settings, viewport} from '../store/Viewport';
+import {settings} from '../js/util';
 
 const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('version') + '/Changes#L3';
 

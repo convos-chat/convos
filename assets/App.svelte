@@ -1,14 +1,14 @@
 <script>
+import ThemeManager from './store/ThemeManager';
 import User from './store/User';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {i18n} from './store/I18N';
-import {loadScript, q} from './js/util';
+import {loadScript, q, settings} from './js/util';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
 import {getSocket} from './js/Socket';
 import {setContext} from 'svelte';
-import {settings, viewport} from './store/Viewport';
 import {setupRouting} from './routes';
 
 // Page components
@@ -30,23 +30,23 @@ window.convosWebSockeet = socket;
 
 route.update({baseUrl: settings('base_url')});
 socket.update({url: route.wsUrlFor('/events')});
-registerServiceWorker().catch(err => console.log('[registerServiceWorker]', err));
+registerServiceWorker().catch(err => console.error('[serviceWorker]', err));
 setupRouting(route, user);
 loadScript(route.urlFor('/images/emojis.js'));
 
 setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
 setContext('socket', socket);
+setContext('themeManager', new ThemeManager().start());
 setContext('user', user);
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
 socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 i18n.load().then(() => user.load());
-viewport.activateTheme();
 
+$: isWide = innerWidth > 800;
 $: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
 $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
-$: viewport.update({height: innerHeight, width: innerWidth});
 $: settings('app_mode', loggedInRoute);
 $: settings('notify_enabled', loggedInRoute);
 $: calculateTitle($route, $user);
@@ -60,13 +60,14 @@ function calculateTitle(route, user) {
     = organizationName == 'Convos' ? i18n.l('%1 - Convos', title) : i18n.l('%1 - Convos for %2', title, organizationName);
 }
 
-function registerServiceWorker() {
-  if (!navigator.serviceWorker) return Promise.resolve({});
-  return navigator.serviceWorker.register(route.urlFor('/sw.js')).then(reg => {
-    if (viewport.version == settings('version')) return;
-    viewport.update({version: settings('version')});
-    reg.update();
-  });
+async function registerServiceWorker() {
+  if (!navigator.serviceWorker) return {};
+  const reg = await navigator.serviceWorker.register(route.urlFor('/sw.js'));
+  const res = await fetch(route.urlFor('/sw/info'));
+  const info = res.status == 200 && await res.json() || {mode: '', version: '0.00'};
+  if (info.version == settings('version')) return {};
+  console.info('[serviceWorker.update]', settings('version'), info);
+  reg.update();
 }
 
 function socketChanged(socket) {
@@ -99,17 +100,17 @@ function socketChanged(socket) {
     Reactive.js. Wild guess: A bad combination.
   -->
 
-  {#if ($route.activeMenu == 'nav' || $viewport.isWide) && $route.activeMenu != 'default'}
-    <ChatSidebar transition="{{duration: $viewport.isWide ? 0 : 250, x: $viewport.width}}"/>
+  {#if ($route.activeMenu == 'nav' || isWide) && $route.activeMenu != 'default'}
+    <ChatSidebar transition="{{duration: isWide ? 0 : 250, x: innerWidth}}"/>
   {/if}
 
   {#if $route.activeMenu == 'settings'}
-    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: $viewport.isWide ? 0 : $viewport.width}}"/>
+    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: isWide ? 0 : innerWidth}}"/>
   {/if}
 
   <svelte:component this="{$route.component}"/>
 
-  {#if $route.activeMenu && !$viewport.isWide}
+  {#if $route.activeMenu && !isWide}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
 {:else if $route.requireLogin}

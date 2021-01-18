@@ -6,7 +6,7 @@ import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {settings} from '../store/Viewport';
+import {settings} from '../js/util';
 
 const api = getContext('api');
 const user = getContext('user');

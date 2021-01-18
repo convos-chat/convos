@@ -38,6 +38,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.url.indexOf('/sw/info') != -1) return event.respondWith(serviceWorkerInfo());
   const cacheStrategy = calculateCacheStrategy(event);
   const cacheFunction = CACHE_FUNCTIONS[cacheStrategy];
   // console.log('[Convos] Cache strategy "' + cacheStrategy + '" for ' + event.request.url.toString());
@@ -66,6 +67,11 @@ function fetchAndCache(event, cache) {
 
 function openCache() {
   return caches.open(CACHE_NAME);
+}
+
+async function serviceWorkerInfo() {
+  const info = {mode: APP_MODE, version: '<%= $c->app->VERSION %>'};
+  return new Response(new Blob([JSON.stringify(info)]));
 }
 
 CACHE_FUNCTIONS[STRATEGY_CACHE_FIRST] = function(event, cache) {
