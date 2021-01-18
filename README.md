@@ -63,9 +63,9 @@ It's mostly stable, but might require extra tools and packages to run.
 
 [![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
 
-### gh-pages
+### www.convos.chat
 
-"[gh-pages](https://github.com/Nordaaker/convos/tree/gh-pages)" is the source
+"[www.convos.chat](https://github.com/Nordaaker/convos/tree/www.convos.chat)" is the source
 for [http://convos.chat](http://convos.chat), which is built with
 [github pages](https://pages.github.com/).
 
