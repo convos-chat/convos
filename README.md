@@ -66,8 +66,8 @@ It's mostly stable, but might require extra tools and packages to run.
 ### www.convos.chat
 
 "[www.convos.chat](https://github.com/Nordaaker/convos/tree/www.convos.chat)" is the source
-for [http://convos.chat](http://convos.chat), which is built with
-[github pages](https://pages.github.com/).
+for [http://convos.chat](http://convos.chat), which is powered by the built-in CMS
+In Convos.
 
 ### backup/convos-0.8604
 
