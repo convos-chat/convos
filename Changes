@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 5.12 Not Released
  - Allow .po files to be reloaded when developing
+ - Add "recover" command
 
 5.11 2021-01-14T08:57:00+0900
  - Add Norwegian translations #549

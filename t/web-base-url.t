@@ -12,7 +12,7 @@ my $t = t::Helper->t;
 $t->app->routes->get(
   '/t/base-url' => sub {
     my $c        = shift;
-    my $base_url = $c->app->core->base_url;
+    my $base_url = $c->app->core->settings->base_url;
     $c->render(
       json => {
         base_url    => $base_url,

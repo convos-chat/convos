@@ -9,6 +9,8 @@ use Mojo::JSON qw(false true);
 use Mojo::Util;
 use Scalar::Util 'blessed';
 
+use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
+
 our $VERSION = '5.11';
 
 $ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
@@ -125,8 +127,9 @@ sub _before_dispatch {
     $c->req->url->base($base_url);
   }
 
+  my $settings = $c->app->core->settings;
   $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
-  $c->app->core->base_url($base_url);
+  $settings->save_p({base_url => $base_url}) if !CONVOS_GET and $settings->base_url ne $base_url;
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 

@@ -50,7 +50,7 @@ sub generate_invite_link {
 
   my $invite_url = $self->url_for('register');
   $invite_url->query->param($_ => $params->{$_}) for qw(email exp token);
-  $invite_url = $invite_url->to_abs->to_string;
+  $invite_url = $self->app->core->web_url($invite_url)->to_abs->to_string;
 
   my $existing = $user ? true : false;
   my $expires  = Mojo::Date->new($exp)->to_datetime;

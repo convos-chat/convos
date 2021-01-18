@@ -6,14 +6,15 @@ use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;
 
-has contact => sub { $ENV{CONVOS_CONTACT} || 'mailto:root@localhost' };
+has base_url => sub { Mojo::URL->new('127.0.0.1:8080') };
+has contact  => sub { $ENV{CONVOS_CONTACT} || 'mailto:root@localhost' };
 sub core { shift->{core} or die 'core is required in constructor' }
 has default_connection => \&_build_default_connection;
-has forced_connection =>
+has forced_connection  =>
   sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
 sub id {'settings'}
-has local_secret   => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
-has open_to_public => sub { $ENV{CONVOS_OPEN_TO_PUBLIC} ? true : false };
+has local_secret      => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
+has open_to_public    => sub { $ENV{CONVOS_OPEN_TO_PUBLIC} ? true : false };
 has organization_name =>
   sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
 has organization_url =>
@@ -54,7 +55,7 @@ sub _build_default_connection {
     qw(forced_connection forced_irc_server default_connection default_server);
 
   for my $url (grep {$_} @urls) {
-    next unless 3 < length $url;    # skip "0", "1" and "yes"
+    next                unless 3 < length $url;      # skip "0", "1" and "yes"
     $url = "irc://$url" unless $url =~ m!^\w+://!;
     return Mojo::URL->new($url);
   }
@@ -81,7 +82,7 @@ sub _set_attributes {
     qw(contact forced_connection open_to_public organization_name video_service);
 
   $self->$_(Mojo::URL->new($params->{$_}))
-    for grep { defined $params->{$_} } qw(default_connection organization_url);
+    for grep { defined $params->{$_} } qw(base_url default_connection organization_url);
 
   if ($safe_source) {
     $self->$_($params->{$_}) for grep { $params->{$_} } qw(local_secret session_secrets);
@@ -94,7 +95,7 @@ sub TO_JSON {
   my ($self, $persist) = @_;
 
   my %json = map { ($_ => $self->$_) } @{$self->public_attributes};
-  $json{$_} = $json{$_}->to_string for qw(default_connection organization_url);
+  $json{$_} = $self->$_->to_string for qw(base_url default_connection organization_url);
 
   if ($persist) {
     $json{local_secret}    = $self->local_secret;
@@ -117,6 +118,13 @@ Convos::Core::Settings - Convos settings
 L<Convos::Core::Settings> is a class used to model Convos server settings.
 
 =head1 ATTRIBUTES
+
+=head2 base_url
+
+  $url = $settings->base_url;
+
+Holds a L<Mojo::URL> object that holds the public location of this Convos
+instance.
 
 =head2 contact
 
