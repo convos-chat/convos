@@ -1,7 +1,7 @@
 {
   "name": "Convos",
   "short_name": "Convos",
-  "start_url": "<%= app->core->base_url %>?standalone=true",
+  "start_url": "<%= app->settings('base_url') %>?standalone=true",
   "description": "<%= social->{description} %>",
   "categories": ["social"],
   "theme_color": "#00451D",

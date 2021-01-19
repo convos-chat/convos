@@ -208,7 +208,8 @@ sub _patch_connection_class {
   my $self = shift;
 
   Mojo::Util::monkey_patch(
-    $self->connection_class => can => sub {
+    $self->connection_class,
+    can => sub {
       my ($conn, $method) = @_;
       return shift->SUPER::can(@_)
         unless ref $conn and $conn->name eq 'server' && $method =~ m!^_\w+_event_!;
@@ -216,7 +217,7 @@ sub _patch_connection_class {
     }
   );
 
-  Mojo::Util::monkey_patch($self->connection_class => write => sub { shift->_write(@_) })
+  Mojo::Util::monkey_patch($self->connection_class, write => sub { shift->_write(@_) })
     unless $self->connection_class->can('write');
 }
 

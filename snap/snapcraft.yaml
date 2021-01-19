@@ -1,12 +1,12 @@
 name: convos
-version: '5.9.0'
+version: '5.11.0'
 summary: Multiuser chat application that runs in your web browser
 description: |
   The supported chat protocol is currently IRC.
   See http://convos.chat for more details.
 icon: assets/images/convos-icon.svg
 
-base: core18
+base: core20
 type: app
 grade: stable
 confinement: strict # devmode or strict

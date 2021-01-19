@@ -1,0 +1,1001 @@
+#: assets/page/Help.svelte:39
+msgid "\"#\" will show the matching conversation names."
+msgstr "\"#\" viser relevante samtalenavn."
+
+#: assets/page/Help.svelte:38
+msgid "\"/\" will show the available commands."
+msgstr "\"/\" viser tilgjengelige kommandoer."
+
+#: assets/page/Help.svelte:37
+msgid "\":\" followed by a character will show matching emojis."
+msgstr "\":\" fulgt av en bokstav viser relevante emojier."
+
+#: assets/page/Help.svelte:36
+msgid "\"@\" followed by a character will show matching nicks in the current conversation."
+msgstr "\"@\" etterfulgt av et tegn vil vise relevante kallenavn i den aktive samtalen."
+
+#: assets/page/ConversationAdd.svelte:68
+msgid "#room or nick"
+msgstr "#kanal eller kallenavn"
+
+#: layouts/convos.html.ep:9
+#: templates/layouts/convos.html.ep:9
+msgid "%1 - Convos"
+msgstr "%1 - Convos"
+
+#: layouts/convos.html.ep:11
+#: templates/layouts/convos.html.ep:11
+msgid "%1 - Convos for %2"
+msgstr "%1 - Convos for %2"
+
+#: assets/page/Search.svelte:83
+msgid "%1 in %2"
+msgstr "%1 i %2"
+
+#: assets/page/Chat.svelte:252
+msgid "%b %e %H:%M"
+msgstr "%b %e %H:%M"
+
+#: assets/page/Help.svelte:49
+msgid "*some text*, **some text**, ***some text***"
+msgstr "*en tekst*, **mer tekst**, ***enda mer tekst***"
+
+#: assets/page/Help.svelte:47
+msgid "> some text"
+msgstr "> en tekst"
+
+#: app.html.ep:15
+#: templates/app.html.ep:15
+msgid "A better chat experience"
+msgstr "A better chat experience"
+
+#: assets/page/Help.svelte:48
+msgid "A line starting with \">\" will be converted into a quote."
+msgstr "Linjer som begynner med \">\" blir omgjort til en sitatblokk."
+
+#: assets/page/SettingsAdminUsers.svelte:125
+msgid "A link was generated"
+msgstr "En lenke ble generert"
+
+#: partial/app_header.html.ep:17
+msgid "About"
+msgstr "About"
+
+#: assets/components/ChatSidebar.svelte:173
+#: assets/components/ChatSidebar.svelte:193
+#: assets/page/SettingsAccount.svelte:66
+#: assets/page/SettingsAdminUsers.svelte:76
+msgid "Account"
+msgstr "Konto"
+
+#: assets/page/ConversationAdd.svelte:74
+msgid "Add"
+msgstr "Legg til"
+
+#: assets/components/ChatSidebar.svelte:189
+#: assets/page/ConnectionAdd.svelte:12
+msgid "Add connection"
+msgstr "Legg til kobling"
+
+#: assets/components/ChatSidebar.svelte:185
+#: assets/page/ConversationAdd.svelte:51
+msgid "Add conversation"
+msgstr "Legg til samtale"
+
+#: assets/page/SettingsAdmin.svelte:87
+msgid "Admin email"
+msgstr "Admin e-post"
+
+#: assets/page/Help.svelte:58
+msgid "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
+msgstr "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
+
+#: assets/page/Login.svelte:60
+msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
+msgstr "Siden du er første bruker trenger du ikke en invitasjon. Bare fyll inn feltene under, trykk 'Registrer' og begynn å bruke Convos."
+
+#: assets/page/Help.svelte:33
+msgid "Autocomplete"
+msgstr "Autofullfør"
+
+#: assets/page/Help.svelte:57
+msgid "Available commands"
+msgstr "Tilgjengelige kommandoer"
+
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Backend is starting"
+msgstr "Backend is starting"
+
+#: blog_list.html.ep:7
+#: partial/app_footer.html.ep:4
+#: partial/app_header.html.ep:19
+#: partial/cms_footer.html.ep:5
+#: templates/blog_list.html.ep:7
+#: templates/partial/app_footer.html.ep:4
+#: templates/partial/app_header.html.ep:19
+#: templates/partial/cms_footer.html.ep:5
+msgid "Blog"
+msgstr "Blog"
+
+#: assets/page/Help.svelte:70
+msgid "Bug/issue tracker"
+msgstr "Feil-melder"
+
+#: assets/page/SettingsAdmin.svelte:78
+msgid "Can be changed if you want to add a touch of your organization."
+msgstr "Kan endres hvis du vil tilpasse Convos for din organisasjon."
+
+#: assets/page/Help.svelte:68
+msgid "Changelog for v%1"
+msgstr "Endringslogg for v%1"
+
+#: partial/app_header.html.ep:26
+#: templates/partial/app_header.html.ep:26
+msgid "Chat"
+msgstr "Chat"
+
+#: assets/page/Help.svelte:30
+msgid "Clicking on the icon next to the conversation name will take you to settings."
+msgstr "Du kommer til instillinger ved å trykke på ikonet ved siden av samtalenavnet."
+
+#: assets/page/SettingsAccount.svelte:96
+msgid "Color scheme"
+msgstr "Farge-tema"
+
+#: assets/page/SettingsAdminUsers.svelte:107
+msgid "Confirm email"
+msgstr "Bekreft e-post"
+
+msgid "Connecting..."
+msgstr "Connecting..."
+
+#: assets/components/SettingsHeader.svelte:10
+#: assets/page/ConversationAdd.svelte:60
+msgid "Connection"
+msgstr "Tilkobling"
+
+#: assets/page/Chat.svelte:230
+msgid "Connection does not exist."
+msgstr "Tilkoblingen finnes ikke."
+
+msgid "Connection messages."
+msgstr "Connection messages."
+
+#: assets/components/ConnectionSettings.svelte:26
+msgid "Connection not found."
+msgstr "Fant ikke tilkoblingen."
+
+#: app.html.ep:29
+#: app.html.ep:46
+#: assets/page/Fallback.svelte:31
+#: assets/page/Help.svelte:77
+#: assets/page/Login.svelte:54
+#: assets/page/Login.svelte:91
+#: templates/app.html.ep:29
+#: templates/app.html.ep:46
+#: templates/video.html.ep:19
+#: templates/video.html.ep:36
+msgid "Contact admin"
+msgstr "Ta kontakt med admin"
+
+#: assets/page/Login.svelte:106
+msgid "Contact your [Convos admin](%1) if you have forgotten your password."
+msgstr "Contact your [Convos admin](%1) if you have forgotten your password."
+
+#: assets/components/SettingsHeader.svelte:10
+msgid "Conversation"
+msgstr "Samtale"
+
+#: assets/components/ConnectionForm.svelte:137
+#: assets/page/ConversationAdd.svelte:71
+msgid "Conversation name"
+msgstr "Samtale-navn"
+
+msgid "Conversation with %1 is frozen. Reason: %2"
+msgstr "Samtalen med %1 er frosset. Årsak: %2"
+
+#: assets/components/ChatSidebar.svelte:151
+msgid "Conversations"
+msgstr "Samtaler"
+
+#: assets/components/ChatMessage.svelte:16
+#: assets/components/ChatSidebar.svelte:136
+msgid "Convos"
+msgstr "Convos"
+
+#: app.html.ep:18
+#: templates/app.html.ep:18
+msgid "Convos is the simplest way to use IRC and it is always online."
+msgstr "Convos is the simplest way to use IRC and it is always online."
+
+#: assets/page/SettingsAdmin.svelte:73
+msgid "Convos settings"
+msgstr "Instillinger for Convos"
+
+#: assets/page/Help.svelte:43
+msgid "Convos supports some special way of formatting text:"
+msgstr "Convos støtter noen koder for tekst-formattering:"
+
+#: assets/page/SettingsAdminUsers.svelte:127
+msgid "Copy and send the link to your *existing* user."
+msgstr "Copy and send the link to your *existing* user."
+
+#: assets/page/SettingsAdminUsers.svelte:127
+msgid "Copy and send the link to your *new* user."
+msgstr "Copy and send the link to your *new* user."
+
+#: partial/error.html.ep:11
+#: templates/partial/error.html.ep:11
+msgid "Could not find the page you are looking for. Maybe you entered an invalid URL?"
+msgstr "Could not find the page you are looking for. Maybe you entered an invalid URL?"
+
+msgid "Could not send message \"%1\"."
+msgstr "Could not send message \"%1\"."
+
+#: assets/components/ConnectionForm.svelte:169
+msgid "Create"
+msgstr "Opprett"
+
+#: assets/components/ConnectionSettings.svelte:30
+msgid "Currently connected to %1."
+msgstr "Tilkoblet til %1."
+
+#: assets/components/ConnectionSettings.svelte:32
+msgid "Currently connecting to %1."
+msgstr "Kobler til %1."
+
+#: assets/components/ConnectionSettings.svelte:28
+msgid "Currently disconnected from %1."
+msgstr "Frakoblet fra %1."
+
+#: assets/page/SettingsAdmin.svelte:92
+msgid "Default connection URL"
+msgstr "Standard tilkoblings-URL"
+
+#: assets/components/ConnectionForm.svelte:167
+msgid "Delete"
+msgstr "Slett"
+
+#: assets/page/SettingsAdminUsers.svelte:103
+#: assets/page/SettingsAdminUsers.svelte:111
+msgid "Delete user"
+msgstr "Slett bruker"
+
+#: assets/page/Help.svelte:80
+msgid "Demo error pages"
+msgstr "Eksempel på feil-sider"
+
+#: partial/error.html.ep:16
+#: templates/partial/error.html.ep:16
+msgid "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
+msgstr "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
+
+#: assets/page/Chat.svelte:244
+msgid "Disconnected. Your connection %1 can be edited in [settings](%2)."
+msgstr "Disconnected. Your connection %1 can be edited in [settings](%2)."
+
+#: assets/page/SettingsAdmin.svelte:123
+#: assets/page/SettingsAdmin.svelte:127
+msgid "Disk usage"
+msgstr "Disk-bruk"
+
+#: assets/page/Chat.svelte:238
+msgid "Do you want to chat with \"%1\"?"
+msgstr "Vil du kontakte \"%1\"?"
+
+#: assets/page/Chat.svelte:231
+msgid "Do you want to create the connection \"%1\"?"
+msgstr "Vil du opprette tilkoblingen \"%1\"?"
+
+#: app.html.ep:25
+#: assets/page/Fallback.svelte:24
+#: templates/app.html.ep:25
+#: templates/video.html.ep:15
+msgid "Downloaded Convos."
+msgstr "Lastet ned Convos."
+
+#: assets/page/Login.svelte:101
+#: assets/page/Login.svelte:66
+#: assets/page/SettingsAccount.svelte:72
+#: assets/page/SettingsAdminUsers.svelte:146
+#: assets/page/SettingsAdminUsers.svelte:84
+msgid "Email"
+msgstr "E-post"
+
+#: assets/page/SettingsAccount.svelte:100
+msgid "Enable compact message display"
+msgstr "Bruk kompakt meldingsvisning"
+
+#: assets/page/SettingsAccount.svelte:80
+msgid "Enable notifications"
+msgstr "Skru på varslinger"
+
+#: assets/page/ConversationAdd.svelte:55
+msgid "Enter the name of an exising conversation, or create a new conversation."
+msgstr "Skriv navnet på en eksisterende samtale, eller opprett en ny samtale."
+
+#: assets/components/ConnectionForm.svelte:136
+msgid "Ex: #convos"
+msgstr "F.eks: #convos"
+
+#: assets/components/ConnectionForm.svelte:126
+msgid "Ex: Clark Kent"
+msgstr "F.eks.: Clark Kent"
+
+#: assets/components/ConnectionForm.svelte:115
+msgid "Ex: chat.freenode.net:6697"
+msgstr "F.eks.: chat.freenode.net:6697"
+
+#: assets/page/SettingsAdmin.svelte:109
+msgid "Ex: https://meet.jit.si/"
+msgstr "F.eks.: https://meet.jit.si/"
+
+#: assets/page/SettingsAdmin.svelte:86
+msgid "Ex: jhthorsen@cpan.org"
+msgstr "F.eks.: jhthorsen@cpan.org"
+
+#: assets/page/Login.svelte:100
+#: assets/page/Login.svelte:65
+msgid "Ex: john@doe.com"
+msgstr "F.eks.: john@doe.com"
+
+#: assets/components/ConnectionForm.svelte:122
+msgid "Ex: superman"
+msgstr "F.eks.: superman"
+
+#: assets/components/ConnectionForm.svelte:118
+msgid "Example: %1"
+msgstr "Example: %1"
+
+#: assets/page/SettingsAccount.svelte:88
+msgid "Expand URL to media"
+msgstr "Ekspander URL til media"
+
+#: assets/page/SettingsAdmin.svelte:100
+msgid "Force default connection"
+msgstr "Tving standard-tilkobling"
+
+#: assets/page/SettingsAdminUsers.svelte:135
+msgid "Generate link"
+msgstr "Generer lenke"
+
+#: assets/page/SettingsAdmin.svelte:68
+msgid "Global settings"
+msgstr "Globale instillinger"
+
+#: partial/error.html.ep:26
+msgid "Go to landing page"
+msgstr "Go to landing page"
+
+#: assets/page/Fallback.svelte:34
+#: assets/page/Fallback.svelte:37
+msgid "Go to start page"
+msgstr "Gå til startsiden"
+
+#: assets/page/Help.svelte:21
+msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://freenode.net."
+msgstr "Got any questions? Come and talk to us in the \"#convos\" channel on https://freenode.net."
+
+#: assets/components/ChatSidebar.svelte:197
+#: assets/page/Help.svelte:16
+msgid "Help"
+msgstr "Hjelp"
+
+#: assets/page/Login.svelte:78
+msgid "Hint: Use a phrase from a book."
+msgstr "Hint: Bruk en setning fra en bok."
+
+#: assets/components/ConnectionForm.svelte:116
+msgid "Host and port"
+msgstr "Vertsnavn og port"
+
+#: assets/page/SettingsAccount.svelte:84
+msgid "Ignore join/part messages"
+msgstr "Ikke vis meldinger om brukere som kobler til og fra."
+
+#: assets/page/SettingsAdmin.svelte:131
+msgid "Inode usage"
+msgstr "Inode-bruk"
+
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Internal Server Error"
+msgstr "Internal Server Error"
+
+#: assets/page/Login.svelte:50
+msgid "Invalid invite/recover URL"
+msgstr "Ugyldig URL for invitasjon/passord-nullstilling"
+
+#: assets/page/SettingsAdminUsers.svelte:43
+msgid "Invite link copied"
+msgstr "Invite link copied"
+
+#: assets/page/SettingsAdminUsers.svelte:118
+msgid "Invite or recover password"
+msgstr "Inviter eller nullstill passord"
+
+#: assets/page/Search.svelte:69
+msgid "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
+msgstr "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
+
+#: app.html.ep:36
+#: templates/app.html.ep:36
+#: templates/video.html.ep:26
+msgid "Javascript is disabled"
+msgstr "Javascript is disabled"
+
+#: app.html.ep:38
+#: templates/app.html.ep:38
+#: templates/video.html.ep:28
+msgid "Javascript is disabled so Convos cannot start."
+msgstr "Javascript is disabled so Convos cannot start."
+
+#: assets/page/Chat.svelte:252
+msgid "Jump to %1"
+msgstr "Hopp til %1"
+
+#: assets/components/ConversationSettings.svelte:95
+msgid "Leave"
+msgstr "Forlat"
+
+#: assets/page/SettingsAccount.svelte:111
+msgid "Leave the password fields empty to keep the current password."
+msgstr "La passordet være tomt for å beholde nåværende passord."
+
+#: partial/app_footer.html.ep:5
+#: templates/partial/app_footer.html.ep:5
+msgid "License"
+msgstr "License"
+
+#: assets/page/ConversationAdd.svelte:63
+msgid "Load"
+msgstr "Last"
+
+msgid "Loading user data failed: %1"
+msgstr "Kunne ikke laste brukerdata: %1"
+
+#: assets/page/Fallback.svelte:29
+msgid "Loading user data..."
+msgstr "Laster brukerdata..."
+
+#: templates/video.html.ep:14
+msgid "Loading video conference with \"%1\" via %2"
+msgstr "Loading video conference with \"%1\" via %2"
+
+#: app.html.ep:24
+#: assets/components/OperationStatus.svelte:29
+#: assets/page/Chat.svelte:175
+#: assets/page/Chat.svelte:249
+#: assets/page/Search.svelte:90
+#: templates/app.html.ep:24
+msgid "Loading..."
+msgstr "Laster..."
+
+#: assets/components/ChatSidebar.svelte:211
+msgid "Log out"
+msgstr "Logg ut"
+
+#: partial/app_header.html.ep:13
+#: partial/cms_header.html.ep:11
+#: templates/partial/app_header.html.ep:13
+#: templates/partial/cms_header.html.ep:11
+msgid "Menu"
+msgstr "Menu"
+
+#: assets/page/Help.svelte:22
+msgid "More information can also be found on https://convos.chat."
+msgstr "More information can also be found on https://convos.chat."
+
+#: assets/page/Chat.svelte:202
+msgid "New messages"
+msgstr "Nye meldinger"
+
+#: assets/components/ConnectionForm.svelte:123
+msgid "Nickname"
+msgstr "Kallenavn"
+
+#: assets/page/Chat.svelte:234
+#: assets/page/Chat.svelte:241
+msgid "No"
+msgstr "Nei"
+
+#: assets/components/ChatSidebar.svelte:155
+msgid "No conversations"
+msgstr "Ingen samtaler"
+
+#: assets/page/Search.svelte:62
+msgid "No notifications."
+msgstr "Ingen varslinger."
+
+#: assets/page/Search.svelte:64
+msgid "No search results for \"%1\"."
+msgstr "Kunne ikke finne noen treff for \"%1\"."
+
+#: assets/page/Chat.svelte:186
+msgid "No topic is set for %1."
+msgstr "No topic is set for %1."
+
+#: assets/components/ConversationSettings.svelte:70
+#: assets/components/ConversationSettings.svelte:76
+msgid "No topic is set."
+msgstr "Kanal-emne er ikke satt."
+
+#: partial/error.html.ep:4
+#: partial/error.html.ep:9
+msgid "Not Found"
+msgstr "Not Found"
+
+#: assets/page/SettingsAccount.svelte:76
+msgid "Notification keywords"
+msgstr "Nøkkelord for varsling"
+
+#: assets/components/ChatSidebar.svelte:176
+msgid "Notifications"
+msgstr "Varslinger"
+
+#: assets/components/ConversationSettings.svelte:87
+msgid "Notify me on new messages"
+msgstr "Varsle meg om nye meldinger"
+
+#: assets/components/ConnectionForm.svelte:162
+msgid "On-connect commands"
+msgstr "Kjør kommandoer ved tilkobling"
+
+#: assets/page/Help.svelte:29
+msgid "Open conversation or connection settings"
+msgstr "Åpne samtale eller samtaleinstillinger"
+
+#: assets/page/SettingsAdmin.svelte:82
+msgid "Organization URL"
+msgstr "Organisasjons-URL"
+
+#: assets/page/SettingsAdmin.svelte:77
+msgid "Organization name"
+msgstr "Navn på organisasjon"
+
+#: assets/page/Help.svelte:66
+msgid "Other resources"
+msgstr "Andre ressurser"
+
+#: assets/components/ChatParticipants.svelte:23
+#: assets/components/ConversationSettings.svelte:101
+msgid "Participants (%1)"
+msgstr "Deltakere (%1)"
+
+#: assets/components/ConnectionForm.svelte:156
+#: assets/components/ConversationSettings.svelte:81
+#: assets/page/Login.svelte:105
+#: assets/page/Login.svelte:77
+#: assets/page/SettingsAccount.svelte:104
+msgid "Password"
+msgstr "Passord"
+
+#: assets/page/Login.svelte:52
+msgid "Please ask your Convos admin for a new link."
+msgstr "Be din Convos admin om en ny lenke."
+
+#: assets/page/Login.svelte:89
+msgid "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
+msgstr "Be din Convos admin om en invitasjons-lenke for å registrere deg, eller logg inn hvis du allerede har en konto."
+
+#: assets/page/SettingsAdminUsers.svelte:103
+msgid "Please confirm by entering **%1** before hitting **%2**."
+msgstr "Please confirm by entering **%1** before hitting **%2**."
+
+#: app.html.ep:39
+#: templates/app.html.ep:39
+#: templates/video.html.ep:29
+msgid "Please enable Javascript and try again."
+msgstr "Please enable Javascript and try again."
+
+#: blog_entry.html.ep:12
+#: blog_list.html.ep:16
+#: templates/blog_entry.html.ep:12
+#: templates/blog_list.html.ep:16
+msgid "Posted by %1"
+msgstr "Posted by %1"
+
+#: assets/components/ConversationSettings.svelte:56
+msgid "Private conversation with %1."
+msgstr "Privat samtale med %1."
+
+msgid "Private conversation."
+msgstr "Private conversation."
+
+#: assets/page/Help.svelte:69
+msgid "Project homepage"
+msgstr "Prosjekt-hjemmeside"
+
+#: assets/components/ConnectionForm.svelte:161
+msgid "Put each command on a new line."
+msgstr "Skriv hver kommando på en ny linje."
+
+#: file.html.ep:19
+msgid "Raw"
+msgstr "Raw"
+
+#: blog_list.html.ep:21
+#: partial/error.html.ep:25
+msgid "Read more"
+msgstr "Read more"
+
+#: assets/page/Login.svelte:58
+msgid "Recover account"
+msgstr "Hent tilbake konto"
+
+#: assets/page/ConversationAdd.svelte:63
+msgid "Refresh"
+msgstr "Last på nytt"
+
+#: assets/page/SettingsAdminUsers.svelte:148
+msgid "Registered"
+msgstr "Registered"
+
+#: assets/page/SettingsAdmin.svelte:105
+msgid "Registration is open to public"
+msgstr "Registrering er åpen for alle"
+
+#: assets/page/Chat.svelte:211
+msgid "Remove"
+msgstr "Fjern"
+
+#: assets/page/SettingsAccount.svelte:108
+msgid "Repeat password"
+msgstr "Gjenta passord"
+
+#: assets/page/Chat.svelte:212
+msgid "Resend"
+msgstr "Send på nytt"
+
+#: assets/page/SettingsAdminUsers.svelte:147
+#: assets/page/SettingsAdminUsers.svelte:88
+msgid "Roles"
+msgstr "Roller"
+
+#: assets/page/SettingsAdminUsers.svelte:89
+msgid "Roles must be separated by comma."
+msgstr "Roller må skilles med komma."
+
+#: assets/components/ConnectionForm.svelte:159
+msgid "SASL authentication mechanism"
+msgstr "SASL autentiseringsmekanisme"
+
+#: assets/page/SettingsAccount.svelte:114
+#: assets/page/SettingsAdmin.svelte:115
+msgid "Save settings"
+msgstr "Lagre instillinger"
+
+#: assets/page/SettingsAdminUsers.svelte:93
+msgid "Save user"
+msgstr "Lagre bruker"
+
+#: assets/components/ChatSidebar.svelte:181
+msgid "Search"
+msgstr "Søk"
+
+#: assets/components/ChatSidebar.svelte:215
+msgid "Search for \"%1\""
+msgstr "Søk etter \"%1\""
+
+#: assets/page/Search.svelte:67
+msgid "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
+msgstr "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
+
+msgid "Search..."
+msgstr "Search..."
+
+#: assets/components/ConnectionForm.svelte:142
+msgid "Secure connection (TLS)"
+msgstr "Sikker tilkobling (TLS)"
+
+#: assets/page/SettingsAdminUsers.svelte:77
+msgid "See all users"
+msgstr "Vis alle brukere"
+
+#: assets/page/ConversationAdd.svelte:59
+msgid "Select..."
+msgstr "Velg..."
+
+#: assets/page/Login.svelte:82
+msgid "Set new password"
+msgstr "Sett nytt passord"
+
+#: assets/components/ChatSidebar.svelte:202
+#: assets/page/Chat.svelte:169
+msgid "Settings"
+msgstr "Instillinger"
+
+#: assets/page/Help.svelte:28
+msgid "Shift focus between chat input and search in sidebar."
+msgstr "Bytt fokus mellom tekstfelt for meldinger og søkefeltet på siden."
+
+#: assets/page/Help.svelte:25
+msgid "Shortcuts"
+msgstr "Hurtigtaster"
+
+#: assets/components/ConnectionForm.svelte:150
+msgid "Show advanced settings"
+msgstr "Vis avanserte instillinger"
+
+#: assets/page/ConversationAdd.svelte:87
+msgid "Showing %1 of %2 conversations, but the list is still loading."
+msgstr "Viser %1 av %2 samtaler, men listen laster fortsatt."
+
+#: assets/page/ConversationAdd.svelte:85
+msgid "Showing %1 of %2 conversations."
+msgstr "Viser %1 av %2 samtaler."
+
+#: assets/page/Login.svelte:110
+#: assets/page/Login.svelte:99
+#: partial/app_header.html.ep:33
+#: templates/partial/app_header.html.ep:33
+msgid "Sign in"
+msgstr "Logg inn"
+
+#: assets/page/Login.svelte:58
+#: assets/page/Login.svelte:82
+#: assets/page/Login.svelte:88
+#: partial/app_header.html.ep:30
+#: templates/partial/app_header.html.ep:30
+msgid "Sign up"
+msgstr "Registrer"
+
+#: assets/page/Help.svelte:71
+msgid "Source code"
+msgstr "Kildekode"
+
+#: assets/page/Chat.svelte:167
+msgid "Start video conference"
+msgstr "Start videokonferanse"
+
+#: assets/page/Fallback.svelte:25
+msgid "Started Convos."
+msgstr "Startet Convos."
+
+#: assets/page/Chat.svelte:178
+msgid "Started chatting on %1"
+msgstr "Startet samtale med %1"
+
+#: app.html.ep:26
+#: templates/app.html.ep:26
+msgid "Starting Convos..."
+msgstr "Starting Convos..."
+
+#: templates/video.html.ep:16
+msgid "Starting video chat..."
+msgstr "Starting video chat..."
+
+#: assets/App.svelte:85
+msgid "Status"
+msgstr "Status"
+
+#: assets/page/Help.svelte:42
+msgid "Text formatting"
+msgstr "Tekst-formattering"
+
+#: assets/page/Fallback.svelte:33
+msgid "The Convos Team have been searching and searching, but the requested page could not be found."
+msgstr "Convos-teamet har lett og lett, men vi kunne ikke finne denne siden."
+
+#: partial/error.html.ep:13
+#: templates/partial/error.html.ep:13
+msgid "The backend is starting up. Please try again later."
+msgstr "The backend is starting up. Please try again later."
+
+#: assets/page/Help.svelte:34
+msgid "The following rules apply when typing a message:"
+msgstr "Følgende regler gjelder når man skriver en melding:"
+
+#: assets/page/Login.svelte:51
+msgid "The link has expired."
+msgstr "Lenken har utløpt."
+
+#: assets/page/Login.svelte:51
+msgid "The link is invalid."
+msgstr "Lenken er ugyldig."
+
+#: assets/page/SettingsAdminUsers.svelte:128
+msgid "The link is valid until **%1**."
+msgstr "The link is valid until **%1**."
+
+#: assets/page/SettingsAdmin.svelte:95
+msgid "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
+msgstr "Siste del av lenken er standard-kanalen man kobler til. \"%%23convos\" betyr \"#convos\"."
+
+#: assets/page/SettingsAccount.svelte:92
+msgid "Theme"
+msgstr "Fargevalg"
+
+#: assets/page/Chat.svelte:190
+msgid "There are %1 [participants](%2) in this conversation."
+msgstr "There are %1 [participants](%2) in this conversation."
+
+#: assets/page/SettingsAdmin.svelte:74
+msgid "These settings control what users experience when they visit [%1](%1)."
+msgstr "These settings control what users experience when they visit [%1](%1)."
+
+#: blog_list.html.ep:10
+#: templates/blog_list.html.ep:10
+msgid "This blog is empty."
+msgstr "This blog is empty."
+
+#: assets/page/SettingsAdmin.svelte:88
+msgid "This email can be used by users to get in touch with the Convos admin."
+msgstr "Denne e-posten kan brukes for å komme i kontakt med Convos admin."
+
+#: assets/page/Chat.svelte:184
+msgid "This is a private conversation with \"%1\"."
+msgstr "This is a private conversation with \"%1\"."
+
+#: assets/page/SettingsAdmin.svelte:94
+msgid "This is the default connection new users will connect to."
+msgstr "Dette er standard-tilkoblingen nye bruker blir koblet til."
+
+#: templates/partial/error.html.ep:19
+msgid "This should not happen."
+msgstr "This should not happen."
+
+#: assets/page/SettingsAdmin.svelte:111
+msgid "This should point to a %1 instance."
+msgstr "Dette bør peke på en %1 instans."
+
+#: assets/page/SettingsAdminUsers.svelte:102
+msgid "This will permanently remove user settings, chat logs, uploaded files and other user related data."
+msgstr "Brukerinstillinger, logger, opplastede filer og andre brukerdata vil bli varig fjernet."
+
+#: assets/page/SettingsAdmin.svelte:102
+msgid "Tick this box if you want to prevent users from creating custom connections."
+msgstr "Kryss denne boksen hvis du vil begrense brukere fra å opprette egne tilkoblinger."
+
+#: assets/page/SettingsAdmin.svelte:107
+msgid "Tick this box if you want users to be able to register without an invite URL."
+msgstr "Kryss denne boksen hvis du ønsker at brukere skal kunne registrere seg uten en invitasjon."
+
+#: assets/page/SettingsAdminUsers.svelte:131
+msgid "Tip: Clicking on the link will copy it to your clipboard."
+msgstr "Tips: Trykk på en lenke for å kopiere den til utklippstavlen."
+
+#: assets/components/ConversationSettings.svelte:71
+#: assets/components/ConversationSettings.svelte:75
+msgid "Topic"
+msgstr "Emne"
+
+#: assets/page/Chat.svelte:186
+msgid "Topic for %1 is: %2"
+msgstr "Topic for %1 is: %2"
+
+#: app.html.ep:43
+#: partial/error.html.ep:26
+#: templates/app.html.ep:43
+#: templates/video.html.ep:33
+msgid "Try again"
+msgstr "Try again"
+
+#: assets/page/Help.svelte:54
+msgid "URLs will be converted to links, and might be embedded in the chat."
+msgstr "URLer blir konvertert til lenker, og kan bli inkludert i samtalen."
+
+#: assets/components/ConnectionForm.svelte:166
+#: assets/components/ConversationSettings.svelte:93
+msgid "Update"
+msgstr "Oppdater"
+
+#: assets/page/SettingsAdmin.svelte:83
+msgid "Used together with \"Organization name\" to add a link to your organization on the login screen."
+msgstr "Brukt sammen med \"Organisasjonsnavn\" for å legge til en lenke til din organisasjon på innloggingssiden."
+
+#: assets/page/SettingsAdminUsers.svelte:120
+msgid "User email"
+msgstr "E-post"
+
+#: assets/components/ConnectionForm.svelte:153
+msgid "Username"
+msgstr "Brukernavn"
+
+#: assets/components/ChatSidebar.svelte:206
+#: assets/page/SettingsAdminUsers.svelte:141
+#: assets/page/SettingsAdminUsers.svelte:76
+msgid "Users"
+msgstr "Brukere"
+
+#: assets/page/Help.svelte:50
+msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+msgstr "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+
+#: assets/page/Help.svelte:52
+msgid "Using backticks around some text, will format it as a `code fragment`."
+msgstr "Using backticks around some text, will format it as a `code fragment`."
+
+#: assets/page/SettingsAdminUsers.svelte:121
+msgid "Using this form, you can generate a forgotten password or invite link for a user."
+msgstr "Ved hjelp av dette skjemaet kan du nullstille et passord eller sende en invitasjon til en ny bruker."
+
+#: assets/components/ConnectionForm.svelte:146
+msgid "Verify certificate (TLS)"
+msgstr "Bekreft gyldig sertifikat (TLS)"
+
+#: assets/page/SettingsAdmin.svelte:110
+msgid "Video service"
+msgstr "Video-tjeneste"
+
+#: assets/components/ConnectionForm.svelte:133
+msgid "Want to be connected"
+msgstr "Ønsker å forbli tilkoblet"
+
+msgid "What is on your mind %1?"
+msgstr "What is on your mind %1?"
+
+#: assets/page/Help.svelte:46
+msgid "Will be automatically converted into emojis."
+msgstr "Blir automatisk omgjort til emojier."
+
+#: assets/page/Chat.svelte:233
+#: assets/page/Chat.svelte:240
+msgid "Yes"
+msgstr "Ja"
+
+#: assets/page/Fallback.svelte:36
+msgid "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
+msgstr "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
+
+#: assets/components/ConversationSettings.svelte:58
+msgid "You are channel operator in %1."
+msgstr "Du er kanal-admin i %1."
+
+#: assets/components/ConversationSettings.svelte:60
+msgid "You are not a channel operator in %1."
+msgstr "Du er ikke kanal-admin i %1."
+
+#: assets/page/Chat.svelte:237
+msgid "You are not part of this conversation."
+msgstr "Du er ikke en del av denne samtalen."
+
+#: assets/page/Chat.svelte:188
+msgid "You are the only participant in this conversation."
+msgstr "Du er den eneste deltakeren i denne samtalen."
+
+#: assets/page/Search.svelte:68
+msgid "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
+msgstr "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
+
+#: assets/components/ConnectionForm.svelte:118
+msgid "You cannot create custom connections."
+msgstr "You cannot create custom connections."
+
+msgid "You have enabled notifications."
+msgstr "You have enabled notifications."
+
+#: assets/page/Login.svelte:69
+msgid "Your email is from the invite link."
+msgstr "Din e-post er hentet fra lenken til invitasjonen."
+
+#: assets/page/Login.svelte:71
+msgid "Your email will be used if you forget your password."
+msgstr "Din e-post vil bli brukt hvis du glemmer passordet ditt."
+
+#: assets/components/ConnectionForm.svelte:127
+msgid "Your name"
+msgstr "Ditt navn"
+
+#: assets/page/Help.svelte:51
+msgid "`some fragment`"
+msgstr "`et fragment`"
+
+#: assets/page/SettingsAdminUsers.svelte:87
+msgid "admin, bot, ..."
+msgstr "admin, bot, ..."
+
+#: assets/components/ConnectionForm.svelte:118
+msgid "chat.freenode.net:6697"
+msgstr "chat.freenode.net:6697"
+
+#: app.html.ep:13
+#: templates/app.html.ep:13
+msgid "for %1"
+msgstr "for %1"
+
+#: assets/page/SettingsAccount.svelte:75
+msgid "whatever, keywords"
+msgstr "valgfri, nøkkelord"
+

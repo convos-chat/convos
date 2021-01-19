@@ -1,5 +1,24 @@
 Revision history for perl distribution Convos
 
+5.12 Not Released
+ - Allow .po files to be reloaded when developing
+ - Add "recover" command
+
+5.11 2021-01-14T08:57:00+0900
+ - Add Norwegian translations #549
+ - Add Italian translations #548
+   Contributor: SerHack
+ - Fix unicode issues related to translations #422
+ - Fix loading language files in production
+
+5.10 2021-01-13T14:43:00+0900
+ - Add support for other languages #422
+ - Add Spanish translations #545
+   Contributor: Iván Ávalos and José Joaquín Atria
+ - Add EXPERIMENTAL support for WEBIRC #346 #444 #546
+ - Add author to blog posts
+ - Fix utf8 issue in blog posts
+
 5.09 2021-01-08T09:35:00+0900
  - Fix SASL authentication process for Oragono IRCd (and others) #356
  - Fix issue where notifications were double encoded UTF-8

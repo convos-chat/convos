@@ -33,7 +33,7 @@ subtest 'generate with input' => sub {
 
 subtest 'test that defaults got set' => sub {
   is $ENV{OPENSSL_BITS},         4096,     "OPENSSL_BITS=$ENV{OPENSSL_BITS}";
-  is $ENV{OPENSSL_COUNTRY},      '',       "OPENSSL_COUNTRY=$ENV{OPENSSL_COUNTRY}";
+  is $ENV{OPENSSL_COUNTRY},      'NO',     "OPENSSL_COUNTRY=$ENV{OPENSSL_COUNTRY}";
   is $ENV{OPENSSL_DAYS},         3650,     "OPENSSL_DAYS=$ENV{OPENSSL_DAYS}";
   is $ENV{OPENSSL_ORGANIZATION}, 'Convos', "OPENSSL_ORGANIZATION=$ENV{OPENSSL_ORGANIZATION}";
 };

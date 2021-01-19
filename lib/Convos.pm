@@ -9,7 +9,9 @@ use Mojo::JSON qw(false true);
 use Mojo::Util;
 use Scalar::Util 'blessed';
 
-our $VERSION = '5.09';
+use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
+
+our $VERSION = '5.11';
 
 $ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
 
@@ -125,8 +127,9 @@ sub _before_dispatch {
     $c->req->url->base($base_url);
   }
 
+  my $settings = $c->app->core->settings;
   $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
-  $c->app->core->base_url($base_url);
+  $settings->save_p({base_url => $base_url}) if !CONVOS_GET and $settings->base_url ne $base_url;
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 
@@ -179,7 +182,8 @@ sub _plugins {
 
   my @plugins = (
     qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
-    qw(Convos::Plugin::Files Convos::Plugin::Helpers Convos::Plugin::Themes)
+    qw(Convos::Plugin::Files Convos::Plugin::I18N Convos::Plugin::Helpers),
+    qw(Convos::Plugin::Themes),
   );
 
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
@@ -199,7 +203,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-5.09
+5.11
 
 =head1 DESCRIPTION
 

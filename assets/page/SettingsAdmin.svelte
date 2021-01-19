@@ -5,10 +5,9 @@ import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
-import {humanReadableNumber} from '../js/util';
-import {l, lmd} from '../js/i18n';
+import {humanReadableNumber, settings} from '../js/util';
+import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
-import {settings} from '../store/Viewport';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -36,7 +35,7 @@ updateSettingsOp.on('start', req => {
   });
 });
 
-route.update({title: l('Global settings')});
+route.update({title: 'Global settings'});
 
 onMount(async () => {
   await getSettingsOp.perform();
@@ -65,54 +64,54 @@ function updateSettingsFromForm(e) {
 </script>
 
 <ChatHeader>
-  <h1>{l('Global settings')}</h1>
+  <h1>{$l('Global settings')}</h1>
 </ChatHeader>
 
 <main class="main">
   <form id="convos-settings" method="post" on:submit|preventDefault="{updateSettingsFromForm}">
-    <h2>{l('Convos settings')}</h2>
-    <p>{@html lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
+    <h2>{$l('Convos settings')}</h2>
+    <p>{@html $lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
-    <TextField name="organization_name" placeholder="{l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
-      <span slot="label">{l('Organization name')}</span>
-      <p class="help" slot="help">{l('Can be changed if you want to add a touch of your organization.')}</p>
+    <TextField name="organization_name" placeholder="{$l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
+      <span slot="label">{$l('Organization name')}</span>
+      <p class="help" slot="help">{$l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
 
-    <TextField name="organization_url" placeholder="{l('https://convos.chat')}" bind:value="{convosSettings.organization_url}">
-      <span slot="label">{l('Organization URL')}</span>
-      <p class="help" slot="help">{l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
+    <TextField name="organization_url" placeholder="{$l('https://convos.chat')}" bind:value="{convosSettings.organization_url}">
+      <span slot="label">{$l('Organization URL')}</span>
+      <p class="help" slot="help">{$l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>
 
-    <TextField name="contact" placeholder="{l('Ex: jhthorsen@cpan.org')}" bind:value="{convosSettings.contact}">
-      <span slot="label">{l('Admin email')}</span>
-      <p class="help" slot="help">{l('This email can be used by users to get in touch with the Convos admin.')}</p>
+    <TextField name="contact" placeholder="{$l('Ex: jhthorsen@cpan.org')}" bind:value="{convosSettings.contact}">
+      <span slot="label">{$l('Admin email')}</span>
+      <p class="help" slot="help">{$l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
 
-    <TextField name="default_connection" placeholder="{l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{convosSettings.default_connection}">
-      <span slot="label">{l('Default connection URL')}</span>
+    <TextField name="default_connection" placeholder="{$l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{convosSettings.default_connection}">
+      <span slot="label">{$l('Default connection URL')}</span>
       <p class="help" slot="help">
-        {l('This is the default connection new users will connect to.')}
-        {l('The path part is the default channel to join. "%%23convos" means "#convos".')}
+        {$l('This is the default connection new users will connect to.')}
+        {$l('The path part is the default channel to join. "%%23convos" means "#convos".')}
       </p>
     </TextField>
 
     <Checkbox name="forced_connection" checked="{convosSettings.forced_connection}">
-      <span slot="label">{l('Force default connection')}</span>
+      <span slot="label">{$l('Force default connection')}</span>
     </Checkbox>
-    <p class="help">{l('Tick this box if you want to prevent users from creating custom connections.')}</p>
+    <p class="help">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
 
     <Checkbox name="open_to_public" checked="{convosSettings.open_to_public}">
-      <span slot="label">{l('Registration is open to public')}</span>
+      <span slot="label">{$l('Registration is open to public')}</span>
     </Checkbox>
-    <p class="help">{l('Tick this box if you want users to be able to register without an invite URL.')}</p>
+    <p class="help">{$l('Tick this box if you want users to be able to register without an invite URL.')}</p>
 
-    <TextField name="video_service" placeholder="{l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
-      <span slot="label">{l('Video service')}</span>
-      <p class="help" slot="help">{l('This should point to a %1 instance.', 'https://meet.jit.si/')}</p>
+    <TextField name="video_service" placeholder="{$l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
+      <span slot="label">{$l('Video service')}</span>
+      <p class="help" slot="help">{$l('This should point to a %1 instance.', 'https://meet.jit.si/')}</p>
     </TextField>
 
     <div class="form-actions">
-      <Button icon="save" op="{updateSettingsOp}"><span>{l('Save settings')}</span></Button>
+      <Button icon="save" op="{updateSettingsOp}"><span>{$l('Save settings')}</span></Button>
     </div>
 
     <OperationStatus op="{updateSettingsOp}"/>
@@ -120,15 +119,15 @@ function updateSettingsFromForm(e) {
 
   {#if diskUsage}
     <div id="disk-usage">
-      <h2>{l('Disk usage')}</h2>
+      <h2>{$l('Disk usage')}</h2>
       <div class="progress">
         <div class="progress__bar" style="width:{diskUsage.blocks_pct}%;">{diskUsage.blocks_pct}%</div>
       </div>
-      <p class="help">{l('Disk usage')}: {diskUsage.blocks_used} / {diskUsage.blocks_total}</p>
+      <p class="help">{$l('Disk usage')}: {diskUsage.blocks_used} / {diskUsage.blocks_total}</p>
        <div class="progress">
         <div class="progress__bar" style="width:{diskUsage.inodes_pct}%;">{diskUsage.inodes_pct}%</div>
       </div>
-      <p class="help">{l('Inode usage')}: {diskUsage.inodes_used} / {diskUsage.inodes_total}</p>
+      <p class="help">{$l('Inode usage')}: {diskUsage.inodes_used} / {diskUsage.inodes_total}</p>
     </div>
   {/if}
 </main>

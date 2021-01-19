@@ -4,7 +4,7 @@ import Link from './Link.svelte';
 import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l} from '../store/I18N';
 import {route} from '../store/Route';
 
 export let transition;
@@ -133,7 +133,7 @@ function renderUnread(conversation, max = 60) {
 <div class="sidebar-left" transition:fly="{transition}">
   <form class="sidebar__header is-below" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
     <input type="text" id="search_input" class="is-primary-menu-item"
-      placeholder="{searchHasFocus ? l('Search...') : l('Convos')}"
+      placeholder="{searchHasFocus ? $l('Search...') : $l('Convos')}"
       bind:value="{filter}"
       on:blur="{clearFilter}"
       on:focus="{filterNav}"
@@ -148,11 +148,11 @@ function renderUnread(conversation, max = 60) {
   </form>
 
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
-    <h3>{l('Conversations')}</h3>
+    <h3>{$l('Conversations')}</h3>
     {#if !$user.connections.size}
       <Link href="/settings/connection">
         <Icon name="exclamation-circle"/>
-        <span>{l('No conversations')}</span>
+        <span>{$l('No conversations')}</span>
       </Link>
     {/if}
     {#each $user.connections.toArray() as connection}
@@ -170,49 +170,49 @@ function renderUnread(conversation, max = 60) {
       {/each}
     {/each}
 
-    <h3>{$user.email || l('Account')}</h3>
+    <h3>{$user.email || $l('Account')}</h3>
     <Link href="/chat">
       <Icon name="bell"/>
-      <span>{l('Notifications')}</span>
+      <span>{$l('Notifications')}</span>
       <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
     </Link>
     <Link href="/search">
       <Icon name="search"/>
-      <span>{l('Search')}</span>
+      <span>{$l('Search')}</span>
     </Link>
     <Link href="/settings/conversation">
       <Icon name="comment"/>
-      <span>{l('Add conversation')}</span>
+      <span>{$l('Add conversation')}</span>
     </Link>
     <Link href="/settings/connection">
       <Icon name="network-wired"/>
-      <span>{l('Add connection')}</span>
+      <span>{$l('Add connection')}</span>
     </Link>
     <Link href="/settings/account">
       <Icon name="user-cog"/>
-      <span>{l('Account')}</span>
+      <span>{$l('Account')}</span>
     </Link>
     <Link href="/help">
       <Icon name="question-circle"/>
-      <span>{l('Help')}</span>
+      <span>{$l('Help')}</span>
     </Link>
     {#if $user.is('admin')}
       <Link href="/settings">
         <Icon name="tools"/>
-        <span>{l('Settings')}</span>
+        <span>{$l('Settings')}</span>
       </Link>
       <Link href="/settings/users">
         <Icon name="users"/>
-        <span>{l('Users')}</span>
+        <span>{$l('Users')}</span>
       </Link>
     {/if}
     <a href="{route.urlFor('/logout')}" target="_self">
       <Icon name="power-off"/>
-      <span>{l('Log out')}</span>
+      <span>{$l('Log out')}</span>
     </a>
     <Link href="/search?q={encodeURIComponent(searchQuery)}" class="for-search hidden">
       <Icon name="search"/>
-      <span>{l('Search for "%1"', searchQuery)}</span>
+      <span>{$l('Search for "%1"', searchQuery)}</span>
     </Link>
   </nav>
 </div>

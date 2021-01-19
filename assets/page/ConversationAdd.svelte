@@ -6,7 +6,7 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {debounce, extractErrorMessage} from '../js/util';
 import {getContext, onMount} from 'svelte';
-import {l} from '../js/i18n';
+import {l} from '../store/I18N';
 import {route} from '../store/Route';
 
 const socket = getContext('socket');
@@ -21,7 +21,7 @@ let loadConversationsTid;
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
-route.update({title: l('Add conversation')});
+route.update({title: 'Add conversation'});
 onMount(() => route.urlToForm(formEl));
 
 function addConversation(e) {
@@ -48,33 +48,30 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 </script>
 
 <ChatHeader>
-  <h1>{l('Add conversation')}</h1>
+  <h1>{$l('Add conversation')}</h1>
 </ChatHeader>
 
 <main class="main">
-  <p>
-    {l('Enter the name of an exising conversation, or create a new conversation.')}
-    {l('It is also possible to load in all existing conversations for a given connection.')}
-  </p>
+  <p>{$l('Enter the name of an exising conversation, or create a new conversation.')}</p>
 
   <form method="post" bind:this="{formEl}" on:submit|preventDefault="{addConversation}">
     <div class="inputs-side-by-side">
-      <SelectField name="connection_id" options="{connectionOptions}" placeholder="{l('Select...')}" bind:value="{connectionId}">
-        <span slot="label">{l('Connection')}</span>
+      <SelectField name="connection_id" options="{connectionOptions}" placeholder="{$l('Select...')}" bind:value="{connectionId}">
+        <span slot="label">{$l('Connection')}</span>
       </SelectField>
       <div class="has-remaining-space">
-        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableConversations.done === false}"><span>{l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
+        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableConversations.done === false}"><span>{$l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
       </div>
     </div>
 
     <div class="inputs-side-by-side">
-      <TextField name="conversation_id" placeholder="{l('#room or nick')}" autocomplete="off"
+      <TextField name="conversation_id" placeholder="{$l('#room or nick')}" autocomplete="off"
         bind:value="{conversationId}"
         on:keyup="{debouncedLoadConversations}">
-        <span slot="label">{l('Conversation name')}</span>
+        <span slot="label">{$l('Conversation name')}</span>
       </TextField>
       <div class="has-remaining-space">
-        <Button icon="comment" disabled="{!connectionId || !conversationId}"><span>{l('Add')}</span></Button>
+        <Button icon="comment" disabled="{!connectionId || !conversationId}"><span>{$l('Add')}</span></Button>
       </div>
     </div>
 
@@ -85,9 +82,9 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
     {#if availableConversations.done !== null}
       <p>
         {#if availableConversations.done}
-          {l('Showing %1 of %2 conversations.', availableConversations.conversations.length, availableConversations.n_conversations)}
+          {$l('Showing %1 of %2 conversations.', availableConversations.conversations.length, availableConversations.n_conversations)}
         {:else}
-          {l('Showing %1 of %2 conversations, but the list is still loading.', availableConversations.conversations.length, availableConversations.n_conversations)}
+          {$l('Showing %1 of %2 conversations, but the list is still loading.', availableConversations.conversations.length, availableConversations.n_conversations)}
         {/if}
       </p>
 

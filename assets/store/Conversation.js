@@ -4,7 +4,7 @@ import Time from '../js/Time';
 import {api} from '../js/Api';
 import {camelize, isType, str2color} from '../js/util';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
-import {l} from '../js/i18n';
+import {i18n} from '../store/I18N';
 import {md} from '../js/md';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
@@ -92,7 +92,7 @@ export default class Conversation extends Reactive {
       if (!msg.from) [msg.internal, msg.from, msg.fromId] = [true, this.connection_id || 'Convos', 'Convos'];
       if (!msg.fromId) msg.fromId = msg.from.toLowerCase();
       if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
-      if (msg.vars) msg.message = l(msg.message, ...msg.vars);
+      if (msg.vars) msg.message = i18n.l(msg.message, ...msg.vars);
 
       msg.id = 'msg_' + (++nMessages);
       msg.color = msg.fromId == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
@@ -307,8 +307,8 @@ export default class Conversation extends Reactive {
 
     if (!isVideoLink && !msg.highlight && !this.wantNotifications) return;
 
-    const title = msg.from == this.name ? msg.from : l('%1 in %2', msg.from, this.name);
-    const message = isVideoLink ? l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', this.name) : msg.message;
+    const title = msg.from == this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
+    const message = isVideoLink ? i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', this.name) : msg.message;
     this.lastNotification = notify.show(message, {path: this.path, title});
   }
 

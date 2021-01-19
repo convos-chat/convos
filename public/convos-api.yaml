@@ -2,7 +2,7 @@
 swagger: '2.0'
 info:
   title: Convos API specification
-  version: 5.9.0
+  version: 5.11.0
   description: This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.
   contact:
     name: Convos
@@ -284,7 +284,7 @@ paths:
                       format: uri
                       type: string
 
-  /file/:uid/:fid:
+  /file/{uid}/{fid}:
     get:
       operationId: getFile
       summary: Retrieve uploaded file.
@@ -304,6 +304,27 @@ paths:
           description: File found and served.
           schema:
             type: string
+
+  /i18n/{lang}:
+    get:
+      operationId: getDictionary
+      summary: Retrieve translations.
+      tags: [ i18n ]
+      x-mojo-to: user#dictionary
+      parameters:
+      - in: path
+        name: lang
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Dictionary.
+          schema:
+            type: object
+            required: [ dictionary ]
+            properties:
+              dictionary:
+                type: object
 
   /notifications:
     get:

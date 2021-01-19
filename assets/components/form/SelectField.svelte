@@ -1,7 +1,6 @@
 <script>
-import {closestEl, uuidv4} from '../../js/util';
+import {closestEl, regexpEscape, uuidv4} from '../../js/util';
 import {onMount} from 'svelte';
-import {regexpEscape} from '../../js/util';
 
 const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 

@@ -11,11 +11,10 @@ use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojolicious::Plugins;
 
-has backend  => sub { Convos::Core::Backend->new };
-has base_url => sub { Mojo::URL->new };
-has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
-has log      => sub { Mojo::Log->new };
-has ready    => 0;
+has backend => sub { Convos::Core::Backend->new };
+has home    => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+has log     => sub { Mojo::Log->new };
+has ready   => 0;
 
 has settings => sub {
   my $self     = shift;
@@ -139,7 +138,7 @@ sub web_url {
   my $self = shift;
   my $url  = Mojo::URL->new(shift);
 
-  $url->base($self->base_url->clone)->base->userinfo(undef);
+  $url->base($self->settings->base_url->clone)->base->userinfo(undef);
   my $base_path = $url->base->path;
   unshift @{$url->path->parts}, @{$base_path->parts};
   $base_path->parts([])->trailing_slash(0);
@@ -228,13 +227,6 @@ the following new ones.
   $obj = $core->backend;
 
 Holds a L<Convos::Core::Backend> object.
-
-=head2 base_url
-
-  $url = $core->base_url;
-
-Holds a L<Mojo::URL> object that holds the public location of this Convos
-instance.
 
 =head2 home
 
@@ -331,7 +323,7 @@ Returns an array-ref of of L<Convos::Core::User> objects.
 
   $url = $core->web_url($url);
 
-Takes a path, or complete URL, merges it with L</base_url> and returns a new
+Takes a path, or complete URL, merges it with L<Convos::Core::Settings/base_url> and returns a new
 L<Mojo::URL> object. Note that you need to call L</to_abs> on that object
 for an absolute URL.
 

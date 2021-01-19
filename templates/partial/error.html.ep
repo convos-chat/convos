@@ -16,7 +16,7 @@
     <p><%=l 'Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?' %></p>
   % } else {
     <p>
-      %=l 'This should not happen.'
+      <%=l 'This should not happen.' %>
       Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
       if the problem does not go away.
     </p>

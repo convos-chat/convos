@@ -132,7 +132,8 @@ export default class Reactive {
     return this;
   }
 
-  _cookie(name, value) {
+  _cookie(prop, value) {
+    const key = prop.key || prop.name;
     const store = document.decodedB64JSONCookies || (document.decodedB64JSONCookies = {});
 
     if (!store[this.cookieName]) {
@@ -140,24 +141,22 @@ export default class Reactive {
         const cookieString = Cookies.get(this.cookieName);
         store[this.cookieName] = JSON.parse(cookieString ? atob(cookieString) : '{}');
       } catch(err) {
-        console.error('[Reactive:cookie]', {[name]: err});
+        console.error('[Reactive:cookie]', {[key]: err});
       }
     }
 
     const cookie = store[this.cookieName] || {};
-    if (arguments.length == 1) return cookie[name];
+    if (arguments.length == 1) return cookie[key];
 
-    const prop = this._props[name];
-    const key = prop.key || name;
     value === prop.defaultValue ? delete cookie[key] : (cookie[key] = value);
     const secure = location.href.indexOf('https:') == 0;
     Cookies.set(this.cookieName, btoa(JSON.stringify(cookie)), {expires: 365, SameSite: 'Lax', secure});
   }
 
   _cookieProp(prop) {
-    const fromStorage = this._cookie(prop.name);
+    const fromStorage = this._cookie(prop);
     if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef')) this._cookie(prop.name, prop.value);
+    if (isType(fromStorage, 'undef')) this._cookie(prop, prop.value);
     this._updateableProp(prop);
   }
 
@@ -169,8 +168,8 @@ export default class Reactive {
       const prev = prop.prev;
       delete prop.prev;
       if (prop.value === prev) return;
-      if (prop.type == 'cookie') this._cookie(name, prop.value);
-      if (prop.type == 'persist') this._localStorage(name, prop.value);
+      if (prop.type == 'cookie') this._cookie(prop, prop.value);
+      if (prop.type == 'persist') this._localStorage(prop, prop.value);
       changed[name] = prop.type != 'ro';
     });
 
@@ -179,9 +178,8 @@ export default class Reactive {
     return changed; // Used by unit test
   }
 
-  _localStorage(name, value) {
-    const prop = this._props[name];
-    const key = 'convos:' + (prop.key || name);
+  _localStorage(prop, value) {
+    const key = 'convos:' + (prop.key || prop.name);
 
     if (arguments.length == 2) {
       return value === prop.defaultValue ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(value));
@@ -196,9 +194,9 @@ export default class Reactive {
   }
 
   _localStorageProp(prop) {
-    const fromStorage = this._localStorage(prop.name);
+    const fromStorage = this._localStorage(prop);
     if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef')) this._localStorage(prop.name, prop.value);
+    if (isType(fromStorage, 'undef')) this._localStorage(prop, prop.value);
     this._updateableProp(prop);
   }
 

@@ -54,7 +54,7 @@ sub generate_cert_p {
 
   # defaults
   $ENV{OPENSSL_BITS}         ||= 4096;
-  $ENV{OPENSSL_COUNTRY}      ||= '';
+  $ENV{OPENSSL_COUNTRY}      ||= 'NO';
   $ENV{OPENSSL_DAYS}         ||= 3650;
   $ENV{OPENSSL_ORGANIZATION} ||= 'Convos';
 
@@ -72,9 +72,9 @@ sub generate_cert_p {
   warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
   return Mojo::IOLoop->subprocess->run_p(sub {
     open STDERR, '>', File::Spec->devnull;
-    local $!;
+    local ($!, $?);
     system $ENV{OPENSSL_BIN} => @openssl;
-    die "Could not generate $params{cert} and $params{key}: $? / $!" if $? or $!;
+    die "$ENV{OPENSSL_BIN} @openssl FAIL $? / $!" if $? or $!;
     return \%params;
   });
 }

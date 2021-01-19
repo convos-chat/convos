@@ -19,7 +19,7 @@ use Cwd ();
 use File::Spec;
 use FindBin;
 
-our $VERSION = '5.09';
+our $VERSION = '5.11';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
@@ -70,6 +70,14 @@ sub command_exec {
   return system(@cmd) ? 0 : 1;
 }
 
+sub command_recover {
+  my ($script, $email) = @_;
+  require Convos;
+  my $secret = Convos->new->settings('local_secret');
+  die "Usage: $0 recover <email> --secret <secret>\n" unless $email and $secret;
+  exec $0 => qw(get -k -M POST -H) => "X-Local-Secret:$secret", "/api/user/$email/invite";
+}
+
 sub command_help {
   my $script = shift;
   print <<"HERE";
@@ -88,23 +96,20 @@ Examples:
   convos version
 
 For developers:
-  convos build
+  convos build                      # Build JavaScript and CSS assets
   convos build release
-  convos cpanm
-  convos dev
+  convos cpanm                      # Run cpanm and install to local lib
   convos dev --help
-  convos eval 'say app->core->home'
+  convos dev                        # Start the Convos development server
   convos eval --help
+  convos eval 'say app->core->home' # Run Perl code against Convos
 
 Commands:
-  build    Build JavaScript and CSS assets
-  cpanm    Run cpanm and install to local lib
   daemon   Start the Convos server
-  dev      Start the Convos development server
-  eval     Run Perl code against Convos
   exec     Run shell command with Convos environment
   get      Perform HTTP request
   install  Install dependencies
+  recover  Generate a invite/recover link for forgotten password
   upgrade  Upgrade Convos to latest version
   version  Show versions of available modules
 
@@ -194,6 +199,8 @@ sub run {
 
   my $command = shift;
   my $method  = $script->can("command_$command");
+  $ENV{CONVOS_COMMAND} = $command;
+  $ENV{CONVOS_SKIP_CONNECT} //= 1 if grep { $command eq $_ } qw(eval get);
 
   $script->_setup_inc;
   $script->_setup_env($command => @_);

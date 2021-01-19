@@ -7,6 +7,7 @@ use Mojo::Util qw(hmac_sha1_sum trim);
 use Socket qw(inet_aton AF_INET);
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
+use constant RELOAD                => $ENV{MOJO_WEBPACK_LAZY} ? 1 : 0;
 
 has _email => sub {
   my $email = shift->param('email') || '';
@@ -19,8 +20,19 @@ sub check_if_ready {
   return $self->stash(template => 'app') if $self->app->core->ready;
   $self->stash('openapi')
     ? $self->render(json => {errors => [{message => 'Backend is starting.'}]}, status => 503)
-    : $self->render('loading', status => 503);
+    : $self->render('loading', lang => 'en', status => 503);
   return 0;
+}
+
+sub dictionary {
+  my $self = shift;
+  $self->res->headers->cache_control(RELOAD ? 'no-cache' : 'max-age=86400');
+  $self->render(
+    json => {
+      available_languages => $self->i18n->languages,
+      dictionary          => $self->i18n->dictionary($self->stash('lang')),
+    }
+  );
 }
 
 sub generate_invite_link {
@@ -38,7 +50,7 @@ sub generate_invite_link {
 
   my $invite_url = $self->url_for('register');
   $invite_url->query->param($_ => $params->{$_}) for qw(email exp token);
-  $invite_url = $invite_url->to_abs->to_string;
+  $invite_url = $self->app->core->web_url($invite_url)->to_abs->to_string;
 
   my $existing = $user ? true : false;
   my $expires  = Mojo::Date->new($exp)->to_datetime;
@@ -83,7 +95,7 @@ sub login {
 }
 
 sub logout {
-  my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
+  my $self   = shift;    # Not a big deal if it's ->openapi->valid_input or not
   my $format = $self->stash('format') || 'json';
 
   return $self->auth->logout_p({})->then(sub {
@@ -314,6 +326,10 @@ user related actions.
 
 Will render the "loading" template if L<Convos::Core/ready> is false or set
 "app" to be rendered if core is ready.
+
+=head2 dictionary
+
+See L<https://convos.chat/api.html#op-get--dictionary>
 
 =head2 generate_invite_link
 

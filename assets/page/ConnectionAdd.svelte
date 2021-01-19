@@ -2,14 +2,14 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import ConnectionForm from '../components/ConnectionForm.svelte';
 import {getContext} from 'svelte';
-import {l} from '../js/i18n';
+import {l} from '../store/I18N';
 import {route} from '../store/Route';
 
-route.update({title: l('Add connection')});
+route.update({title: 'Add connection'});
 </script>
 
 <ChatHeader>
-  <h1>{l('Add connection')}</h1>
+  <h1>{$l('Add connection')}</h1>
 </ChatHeader>
 
 <main class="main">

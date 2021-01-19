@@ -5,7 +5,7 @@ import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import {getContext, onDestroy, onMount} from 'svelte';
-import {l, lmd} from '../js/i18n';
+import {l, lmd} from '../store/I18N';
 import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
 
@@ -46,7 +46,7 @@ function setConversationFromRoute(route) {
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:nav" tabindex="-1"><span>{l(conversation.name)}</span></a></h1>
+  <h1><a href="#activeMenu:nav" tabindex="-1"><span>{$l(conversation.name)}</span></a></h1>
   {#if $conversation.is('search')}
     <a href="/search" class="btn"><Icon name="search"/></a>
   {:else}
@@ -59,14 +59,14 @@ function setConversationFromRoute(route) {
   <!-- welcome messages / status -->
   {#if messages.length == 0 && !conversation.is('loading')}
     {#if conversation.is('notifications')}
-      <h2>{l('No notifications.')}</h2>
+      <h2>{$l('No notifications.')}</h2>
     {:else if $route.param('q')}
-      <ChatMessage>{l('No search results for "%1".', $route.param('q'))}</ChatMessage>
+      <ChatMessage>{$l('No search results for "%1".', $route.param('q'))}</ChatMessage>
     {:else if conversation.is('search')}
       <ChatMessage>
-        {@html lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
-        {@html lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
-        {@html lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
+        {@html $lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
+        {@html $lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
+        {@html $lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
       </ChatMessage>
     {/if}
   {/if}
@@ -80,14 +80,14 @@ function setConversationFromRoute(route) {
     <div class="{message.className}" on:click="{gotoConversation}">
       <Icon name="pick:{message.fromId}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-      <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{l('%1 in %2', message.from, message.conversation_id)}</a>
+      <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</a>
       <div class="message__text">{@html message.markdown}</div>
     </div>
   {/each}
 
   <!-- status -->
   {#if $conversation.is('loading')}
-    <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{l('Loading...')}</i></span></div>
+    <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
 </InfinityScroll>
 

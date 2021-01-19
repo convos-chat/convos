@@ -6,27 +6,28 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
-import {l} from '../js/i18n';
+import {l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
-import {viewport} from '../store/Viewport';
+import {settings} from '../js/util';
 
 const api = getContext('api');
+const themeManager = getContext('themeManager');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
 let formEl;
-let compactDisplay = viewport.compactDisplay;
-let expandUrlToMedia = viewport.expandUrlToMedia;
+let activeTheme = themeManager.activeTheme;
+let colorScheme = themeManager.colorScheme;
+let compactDisplay = themeManager.compactDisplay;
+let expandUrlToMedia = user.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
-let selectedColorScheme = viewport.colorScheme;
-let selectedTheme = viewport.theme;
-let wantNotifications = notify.wantNotifications;
 let ignoreStatuses = user.ignoreStatuses;
+let wantNotifications = notify.wantNotifications;
 
-$: colorSchemeReadonly = $viewport.hasColorSchemes(selectedTheme) ? false : true;
+$: colorSchemeReadonly = $themeManager.hasColorScheme(activeTheme) ? false : true;
 
-route.update({title: l('Account')});
+route.update({title: 'Account'});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;
@@ -39,79 +40,74 @@ onDestroy(notify.on('update', notifyWantNotificationsChanged));
 
 function notifyWantNotificationsChanged(notify, changed) {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
-  if (notify.wantNotifications) notify.show(l('You have enabled notifications.'));
+  if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
 }
 
-function updateUserFromForm(e) {
+function updateFromForm(e) {
   const form = e.target;
   const passwords = [form.password.value, form.password_again.value];
 
-  if (wantNotifications) {
-    notify.requestDesktopAccess();
-  }
-
-  if (passwords.join('').length && passwords[0] != passwords[1]) {
-    return updateUserOp.error('Passwords does not match.');
-  }
+  if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
+  if (colorSchemeReadonly) colorScheme = 'auto';
+  if (wantNotifications) notify.requestDesktopAccess();
 
   notify.update({wantNotifications});
-  viewport.update({expandUrlToMedia, compactDisplay});
-  user.update({ignoreStatuses});
-  viewport.activateTheme(selectedTheme, colorSchemeReadonly ? '' : selectedColorScheme);
+  themeManager.update({activeTheme, colorScheme, compactDisplay});
+  user.update({expandUrlToMedia, ignoreStatuses});
   updateUserOp.perform(e.target);
 }
 </script>
 
 <ChatHeader>
-  <h1>{l('Account')}</h1>
+  <h1>{$l('Account')}</h1>
 </ChatHeader>
 
 <main class="main">
-  <form method="post" on:submit|preventDefault="{updateUserFromForm}" bind:this="{formEl}">
+  <form method="post" on:submit|preventDefault="{updateFromForm}" bind:this="{formEl}">
     <TextField type="email" name="email" value="{$user.email}" readonly>
-      <span slot="label">{l('Email')}</span>
+      <span slot="label">{$l('Email')}</span>
     </TextField>
 
-    <TextField name="highlight_keywords" placeholder="{l('whatever, keywords')}" value="{highlightKeywords}">
-      <span slot="label">{l('Notification keywords')}</span>
+    <TextField name="highlight_keywords" placeholder="{$l('whatever, keywords')}" value="{highlightKeywords}">
+      <span slot="label">{$l('Notification keywords')}</span>
     </TextField>
 
     <Checkbox name="notifications" bind:checked="{wantNotifications}">
-      <span slot="label">{l('Enable notifications')}</span>
+      <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
     
     <Checkbox name="statuses" bind:checked="{ignoreStatuses}">
-      <span slot="label">{l('Ignore join/part messages')}</span>
+      <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
 
     <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
-      <span slot="label">{l('Expand URL to media')}</span>
+      <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
 
-    <SelectField name="theme" options="{viewport.themeOptions}" bind:value="{selectedTheme}">
-      <span slot="label">{l('Theme')}</span>
+    <SelectField name="theme" options="{themeManager.themeOptions}" bind:value="{activeTheme}">
+      <span slot="label">{$l('Theme')}</span>
     </SelectField>
 
-    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{viewport.colorSchemeOptions}" bind:value="{selectedColorScheme}">
-      <span slot="label">{l('Color scheme')}</span>
+    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}" bind:value="{colorScheme}">
+      <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
 
     <Checkbox name="compact" bind:checked="{compactDisplay}">
-      <span slot="label">{l('Enable compact message display')}</span>
+      <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
 
     <TextField type="password" name="password" autocomplete="new-password">
-      <span slot="label">{l('Password')}</span>
+      <span slot="label">{$l('Password')}</span>
     </TextField>
 
     <TextField type="password" name="password_again" autocomplete="new-password">
-      <span slot="label">{l('Repeat password')}</span>
+      <span slot="label">{$l('Repeat password')}</span>
     </TextField>
 
-    <p>{l('Leave the password fields empty to keep the current password.')}</p>
+    <p>{$l('Leave the password fields empty to keep the current password.')}</p>
 
     <div class="form-actions">
-      <Button icon="save" op="{updateUserOp}"><span>{l('Save settings')}</span></Button>
+      <Button icon="save" op="{updateUserOp}"><span>{$l('Save settings')}</span></Button>
     </div>
 
     <OperationStatus op="{updateUserOp}"/>
