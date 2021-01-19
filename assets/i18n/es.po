@@ -181,7 +181,7 @@ msgstr "Contacta al administrador"
 
 #: assets/page/Login.svelte:106
 msgid "Contact your [Convos admin](%1) if you have forgotten your password."
-msgstr "Contacta a tu [Convos admin](%1) si has olvidado tu contraseña."
+msgstr "Contacta a tu [administrador de Convos](%1) si has olvidado tu contraseña."
 
 #: assets/components/SettingsHeader.svelte:10
 msgid "Conversation"
@@ -273,7 +273,7 @@ msgstr "¿Olvidaste establecer CONVOS_REVERSE_PROXY=1 antes de iniciar Convos?"
 
 #: assets/page/Chat.svelte:244
 msgid "Disconnected. Your connection %1 can be edited in [settings](%2)."
-msgstr "Desconectado. Puedes editar tu conexión %1 en [settings](%2)."
+msgstr "Desconectado. Puedes editar tu conexión %1 en [ajustes](%2)."
 
 #: assets/page/SettingsAdmin.svelte:123
 #: assets/page/SettingsAdmin.svelte:127
@@ -809,7 +809,7 @@ msgstr "Tema"
 
 #: assets/page/Chat.svelte:190
 msgid "There are %1 [participants](%2) in this conversation."
-msgstr "Hay %1 [participants](%2) en esta conversación."
+msgstr "Hay %1 [participantes](%2) en esta conversación."
 
 #: assets/page/SettingsAdmin.svelte:74
 msgid "These settings control what users experience when they visit [%1](%1)."
@@ -937,7 +937,7 @@ msgstr "Sí"
 
 #: assets/page/Fallback.svelte:36
 msgid "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
-msgstr "¡Chales! Sentimos mucho las molestias. Por favor envía un [issue](%1), si el problema persiste."
+msgstr "¡Chales! Sentimos mucho las molestias. Por favor envía un [reporte](%1), si el problema persiste."
 
 #: assets/components/ConversationSettings.svelte:58
 msgid "You are channel operator in %1."
