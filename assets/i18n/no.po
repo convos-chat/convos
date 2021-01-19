@@ -47,7 +47,7 @@ msgstr "> en tekst"
 #: app.html.ep:15
 #: templates/app.html.ep:15
 msgid "A better chat experience"
-msgstr "A better chat experience"
+msgstr "Bedre tekst-chat"
 
 #: assets/page/Help.svelte:48
 msgid "A line starting with \">\" will be converted into a quote."
@@ -59,7 +59,7 @@ msgstr "En lenke ble generert"
 
 #: partial/app_header.html.ep:17
 msgid "About"
-msgstr "About"
+msgstr "Om"
 
 #: assets/components/ChatSidebar.svelte:173
 #: assets/components/ChatSidebar.svelte:193
@@ -88,7 +88,7 @@ msgstr "Admin e-post"
 
 #: assets/page/Help.svelte:58
 msgid "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
-msgstr "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
+msgstr "Alle meldinger som begynner med a-z får et \"`/quote`\" prefiks, når du sender fra tilkoblings-samtalen"
 
 #: assets/page/Login.svelte:60
 msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
@@ -133,7 +133,7 @@ msgstr "Endringslogg for v%1"
 #: partial/app_header.html.ep:26
 #: templates/partial/app_header.html.ep:26
 msgid "Chat"
-msgstr "Chat"
+msgstr "Samtale"
 
 #: assets/page/Help.svelte:30
 msgid "Clicking on the icon next to the conversation name will take you to settings."
@@ -148,7 +148,7 @@ msgid "Confirm email"
 msgstr "Bekreft e-post"
 
 msgid "Connecting..."
-msgstr "Connecting..."
+msgstr "Kobler til..."
 
 #: assets/components/SettingsHeader.svelte:10
 #: assets/page/ConversationAdd.svelte:60
@@ -160,7 +160,7 @@ msgid "Connection does not exist."
 msgstr "Tilkoblingen finnes ikke."
 
 msgid "Connection messages."
-msgstr "Connection messages."
+msgstr "Tilkoblingsmeldinger."
 
 #: assets/components/ConnectionSettings.svelte:26
 msgid "Connection not found."
@@ -181,7 +181,7 @@ msgstr "Ta kontakt med admin"
 
 #: assets/page/Login.svelte:106
 msgid "Contact your [Convos admin](%1) if you have forgotten your password."
-msgstr "Contact your [Convos admin](%1) if you have forgotten your password."
+msgstr "Kontakt din  [Convos admin](%1) hvis du har glemt passordet ditt."
 
 #: assets/components/SettingsHeader.svelte:10
 msgid "Conversation"
@@ -207,7 +207,7 @@ msgstr "Convos"
 #: app.html.ep:18
 #: templates/app.html.ep:18
 msgid "Convos is the simplest way to use IRC and it is always online."
-msgstr "Convos is the simplest way to use IRC and it is always online."
+msgstr "Convos er den enkleste måten å bruke IRC på, og den er alltid tilkoblet."
 
 #: assets/page/SettingsAdmin.svelte:73
 msgid "Convos settings"
@@ -219,19 +219,19 @@ msgstr "Convos støtter noen koder for tekst-formattering:"
 
 #: assets/page/SettingsAdminUsers.svelte:127
 msgid "Copy and send the link to your *existing* user."
-msgstr "Copy and send the link to your *existing* user."
+msgstr "Kopier og send en lenke til din *eksisterende* bruker."
 
 #: assets/page/SettingsAdminUsers.svelte:127
 msgid "Copy and send the link to your *new* user."
-msgstr "Copy and send the link to your *new* user."
+msgstr "Kopier og send en lenke til en *ny* bruker."
 
 #: partial/error.html.ep:11
 #: templates/partial/error.html.ep:11
 msgid "Could not find the page you are looking for. Maybe you entered an invalid URL?"
-msgstr "Could not find the page you are looking for. Maybe you entered an invalid URL?"
+msgstr "Kunne ikke finne siden du leter etter. Kanskje du brukte en ugyldig URL?"
 
 msgid "Could not send message \"%1\"."
-msgstr "Could not send message \"%1\"."
+msgstr "Kunne ikke sende meldingen \"%1\"."
 
 #: assets/components/ConnectionForm.svelte:169
 msgid "Create"
@@ -269,11 +269,11 @@ msgstr "Eksempel på feil-sider"
 #: partial/error.html.ep:16
 #: templates/partial/error.html.ep:16
 msgid "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
-msgstr "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
+msgstr "Glemte du å sette CONVOS_REVERSE_PROXY=1 før du startet Convos?"
 
 #: assets/page/Chat.svelte:244
 msgid "Disconnected. Your connection %1 can be edited in [settings](%2)."
-msgstr "Disconnected. Your connection %1 can be edited in [settings](%2)."
+msgstr "Frakoblet. Din tilkobling %1 kan redigeres i  [instillinger](%2)."
 
 #: assets/page/SettingsAdmin.svelte:123
 #: assets/page/SettingsAdmin.svelte:127
@@ -346,7 +346,7 @@ msgstr "F.eks.: superman"
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "Example: %1"
-msgstr "Example: %1"
+msgstr "Eksempel: %1"
 
 #: assets/page/SettingsAccount.svelte:88
 msgid "Expand URL to media"
@@ -375,7 +375,7 @@ msgstr "Gå til startsiden"
 
 #: assets/page/Help.svelte:21
 msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://freenode.net."
-msgstr "Got any questions? Come and talk to us in the \"#convos\" channel on https://freenode.net."
+msgstr "Har du spørsmål? Kom og snakk med oss i \"#convos\" kanalen på https://freenode.net."
 
 #: assets/components/ChatSidebar.svelte:197
 #: assets/page/Help.svelte:16
@@ -392,7 +392,7 @@ msgstr "Vertsnavn og port"
 
 #: assets/page/SettingsAccount.svelte:84
 msgid "Ignore join/part messages"
-msgstr "Ikke vis meldinger om brukere som kobler til og fra."
+msgstr "Ikke vis meldinger om brukere som kobler til og fra"
 
 #: assets/page/SettingsAdmin.svelte:131
 msgid "Inode usage"
@@ -401,7 +401,7 @@ msgstr "Inode-bruk"
 #: partial/error.html.ep:4
 #: partial/error.html.ep:9
 msgid "Internal Server Error"
-msgstr "Internal Server Error"
+msgstr "Intern tjerner-feil"
 
 #: assets/page/Login.svelte:50
 msgid "Invalid invite/recover URL"
@@ -409,7 +409,7 @@ msgstr "Ugyldig URL for invitasjon/passord-nullstilling"
 
 #: assets/page/SettingsAdminUsers.svelte:43
 msgid "Invite link copied"
-msgstr "Invite link copied"
+msgstr "Kopierte invitasjonslenke"
 
 #: assets/page/SettingsAdminUsers.svelte:118
 msgid "Invite or recover password"
@@ -417,19 +417,19 @@ msgstr "Inviter eller nullstill passord"
 
 #: assets/page/Search.svelte:69
 msgid "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
-msgstr "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
+msgstr "Det er også mulig å bruke `\"from:some_nick\"` for å filtrere meldinger fra en spesifikke bruker."
 
 #: app.html.ep:36
 #: templates/app.html.ep:36
 #: templates/video.html.ep:26
 msgid "Javascript is disabled"
-msgstr "Javascript is disabled"
+msgstr "Javascript er utilgjengelig"
 
 #: app.html.ep:38
 #: templates/app.html.ep:38
 #: templates/video.html.ep:28
 msgid "Javascript is disabled so Convos cannot start."
-msgstr "Javascript is disabled so Convos cannot start."
+msgstr "Javascript er utilgjengelig så Convos kan ikke starte."
 
 #: assets/page/Chat.svelte:252
 msgid "Jump to %1"
@@ -446,7 +446,7 @@ msgstr "La passordet være tomt for å beholde nåværende passord."
 #: partial/app_footer.html.ep:5
 #: templates/partial/app_footer.html.ep:5
 msgid "License"
-msgstr "License"
+msgstr "Lisens"
 
 #: assets/page/ConversationAdd.svelte:63
 msgid "Load"
@@ -461,7 +461,7 @@ msgstr "Laster brukerdata..."
 
 #: templates/video.html.ep:14
 msgid "Loading video conference with \"%1\" via %2"
-msgstr "Loading video conference with \"%1\" via %2"
+msgstr "Laster videokonferanse med \"%1\" via %2"
 
 #: app.html.ep:24
 #: assets/components/OperationStatus.svelte:29
@@ -481,11 +481,11 @@ msgstr "Logg ut"
 #: templates/partial/app_header.html.ep:13
 #: templates/partial/cms_header.html.ep:11
 msgid "Menu"
-msgstr "Menu"
+msgstr "Meny"
 
 #: assets/page/Help.svelte:22
 msgid "More information can also be found on https://convos.chat."
-msgstr "More information can also be found on https://convos.chat."
+msgstr "Du kan også finne mer info på https://convos.chat."
 
 #: assets/page/Chat.svelte:202
 msgid "New messages"
@@ -514,7 +514,7 @@ msgstr "Kunne ikke finne noen treff for \"%1\"."
 
 #: assets/page/Chat.svelte:186
 msgid "No topic is set for %1."
-msgstr "No topic is set for %1."
+msgstr "%1 har ikke et emne."
 
 #: assets/components/ConversationSettings.svelte:70
 #: assets/components/ConversationSettings.svelte:76
@@ -524,7 +524,7 @@ msgstr "Kanal-emne er ikke satt."
 #: partial/error.html.ep:4
 #: partial/error.html.ep:9
 msgid "Not Found"
-msgstr "Not Found"
+msgstr "Ikke funnet"
 
 #: assets/page/SettingsAccount.svelte:76
 msgid "Notification keywords"
@@ -581,27 +581,27 @@ msgstr "Be din Convos admin om en invitasjons-lenke for å registrere deg, eller
 
 #: assets/page/SettingsAdminUsers.svelte:103
 msgid "Please confirm by entering **%1** before hitting **%2**."
-msgstr "Please confirm by entering **%1** before hitting **%2**."
+msgstr "Bekreft ved å skrive **%1** før du trykker **%2**."
 
 #: app.html.ep:39
 #: templates/app.html.ep:39
 #: templates/video.html.ep:29
 msgid "Please enable Javascript and try again."
-msgstr "Please enable Javascript and try again."
+msgstr "Skru på Javascript og prøv på nytt."
 
 #: blog_entry.html.ep:12
 #: blog_list.html.ep:16
 #: templates/blog_entry.html.ep:12
 #: templates/blog_list.html.ep:16
 msgid "Posted by %1"
-msgstr "Posted by %1"
+msgstr "Skrevet av %1"
 
 #: assets/components/ConversationSettings.svelte:56
 msgid "Private conversation with %1."
 msgstr "Privat samtale med %1."
 
 msgid "Private conversation."
-msgstr "Private conversation."
+msgstr "Privat samtale."
 
 #: assets/page/Help.svelte:69
 msgid "Project homepage"
@@ -613,7 +613,7 @@ msgstr "Skriv hver kommando på en ny linje."
 
 #: file.html.ep:19
 msgid "Raw"
-msgstr "Raw"
+msgstr "Rå"
 
 #: blog_list.html.ep:21
 #: partial/error.html.ep:25
@@ -680,10 +680,10 @@ msgstr "Søk etter \"%1\""
 
 #: assets/page/Search.svelte:67
 msgid "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
-msgstr "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
+msgstr "Søk etter meldinger sendt av deg eller andre siste %1 dager ved å skrive en melding i feltet under."
 
 msgid "Search..."
-msgstr "Search..."
+msgstr "Søk..."
 
 #: assets/components/ConnectionForm.svelte:142
 msgid "Secure connection (TLS)"
@@ -760,11 +760,11 @@ msgstr "Startet samtale med %1"
 #: app.html.ep:26
 #: templates/app.html.ep:26
 msgid "Starting Convos..."
-msgstr "Starting Convos..."
+msgstr "Starter Convos..."
 
 #: templates/video.html.ep:16
 msgid "Starting video chat..."
-msgstr "Starting video chat..."
+msgstr "Starter videosamtaleâ..."
 
 #: assets/App.svelte:85
 msgid "Status"
@@ -781,7 +781,7 @@ msgstr "Convos-teamet har lett og lett, men vi kunne ikke finne denne siden."
 #: partial/error.html.ep:13
 #: templates/partial/error.html.ep:13
 msgid "The backend is starting up. Please try again later."
-msgstr "The backend is starting up. Please try again later."
+msgstr "Kjernen starter opp. Prøv igjen senere."
 
 #: assets/page/Help.svelte:34
 msgid "The following rules apply when typing a message:"
@@ -797,7 +797,7 @@ msgstr "Lenken er ugyldig."
 
 #: assets/page/SettingsAdminUsers.svelte:128
 msgid "The link is valid until **%1**."
-msgstr "The link is valid until **%1**."
+msgstr "Lenken er gyldig til **%1**."
 
 #: assets/page/SettingsAdmin.svelte:95
 msgid "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
@@ -809,16 +809,16 @@ msgstr "Fargevalg"
 
 #: assets/page/Chat.svelte:190
 msgid "There are %1 [participants](%2) in this conversation."
-msgstr "There are %1 [participants](%2) in this conversation."
+msgstr "Det er  %1 [deltakere](%2) i denne samtalen."
 
 #: assets/page/SettingsAdmin.svelte:74
 msgid "These settings control what users experience when they visit [%1](%1)."
-msgstr "These settings control what users experience when they visit [%1](%1)."
+msgstr "Disse innstillingene styrer hva brukerne opplever når de besøker  [%1](%1)."
 
 #: blog_list.html.ep:10
 #: templates/blog_list.html.ep:10
 msgid "This blog is empty."
-msgstr "This blog is empty."
+msgstr "Denne bloggen er tom."
 
 #: assets/page/SettingsAdmin.svelte:88
 msgid "This email can be used by users to get in touch with the Convos admin."
@@ -826,7 +826,7 @@ msgstr "Denne e-posten kan brukes for å komme i kontakt med Convos admin."
 
 #: assets/page/Chat.svelte:184
 msgid "This is a private conversation with \"%1\"."
-msgstr "This is a private conversation with \"%1\"."
+msgstr "Dette er en privat samtale med \"%1\"."
 
 #: assets/page/SettingsAdmin.svelte:94
 msgid "This is the default connection new users will connect to."
@@ -834,7 +834,7 @@ msgstr "Dette er standard-tilkoblingen nye bruker blir koblet til."
 
 #: templates/partial/error.html.ep:19
 msgid "This should not happen."
-msgstr "This should not happen."
+msgstr "Dette burde ikke skje."
 
 #: assets/page/SettingsAdmin.svelte:111
 msgid "This should point to a %1 instance."
@@ -870,7 +870,7 @@ msgstr "Topic for %1 is: %2"
 #: templates/app.html.ep:43
 #: templates/video.html.ep:33
 msgid "Try again"
-msgstr "Try again"
+msgstr "Prøv igjen"
 
 #: assets/page/Help.svelte:54
 msgid "URLs will be converted to links, and might be embedded in the chat."
@@ -900,12 +900,12 @@ msgid "Users"
 msgstr "Brukere"
 
 #: assets/page/Help.svelte:50
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+msgid "Using \"\\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+msgstr "Skriv \"\\*\" rundt tekst for å gjøre den  *kursiv*, **fet** eller ***kursiv fet***."
 
 #: assets/page/Help.svelte:52
 msgid "Using backticks around some text, will format it as a `code fragment`."
-msgstr "Using backticks around some text, will format it as a `code fragment`."
+msgstr "Skriv aksent-tegnet rundt teksten for å formattere den som et `kode-fragment`."
 
 #: assets/page/SettingsAdminUsers.svelte:121
 msgid "Using this form, you can generate a forgotten password or invite link for a user."
@@ -937,7 +937,7 @@ msgstr "Ja"
 
 #: assets/page/Fallback.svelte:36
 msgid "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
-msgstr "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
+msgstr "Beklager! Dette skulle ikke skje. Send en  [feil-rapport](%1), hvis det skjer igjen."
 
 #: assets/components/ConversationSettings.svelte:58
 msgid "You are channel operator in %1."
@@ -957,14 +957,14 @@ msgstr "Du er den eneste deltakeren i denne samtalen."
 
 #: assets/page/Search.svelte:68
 msgid "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
-msgstr "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
+msgstr "Du kan skrive et kanal-navn eller bruke `\"conversation:#kanal\" for å begrense søket."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."
-msgstr "You cannot create custom connections."
+msgstr "Du kan ikke lage egne tilkoblinger."
 
 msgid "You have enabled notifications."
-msgstr "You have enabled notifications."
+msgstr "Du har skrudd på varslinger."
 
 #: assets/page/Login.svelte:69
 msgid "Your email is from the invite link."
