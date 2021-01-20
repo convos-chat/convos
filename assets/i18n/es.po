@@ -88,7 +88,7 @@ msgstr "Correo del administrador"
 
 #: assets/page/Help.svelte:58
 msgid "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
-msgstr "Cualquier mensaje que comience con a-z se le antepone \"`/quote`\", al enviar desde una conexión de conversación."
+msgstr "A cualquier mensaje que comience con a-z se le antepone \"`/quote`\", al enviar desde una conversación de conexión."
 
 #: assets/page/Login.svelte:60
 msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
