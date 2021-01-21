@@ -1,19 +1,12 @@
 package Convos::Plugin::Bot::Action::Karma;
 use Mojo::Base 'Convos::Plugin::Bot::Action';
 
-use Convos::Util 'require_module';
-
 has description => 'Track karma of a nick or topic.';
 has usage       => 'karma <topic>, <topic>++, <topic>--.';
 
-has _brain => undef;
-
 sub register {
   my ($self, $bot, $config) = @_;
-  require_module 'DBD::SQLite';
 
-  my $user = $bot->user;
-  $self->_brain($user->core->home->child($user->email, 'karma.sqlite'));
   $self->_create_table;
   $self->on(message => sub { shift->_learn(@_) });
 }
@@ -44,7 +37,7 @@ sub reply {
 sub _create_table {
   my $self = shift;
 
-  $self->_dbh->do(<<'HERE');
+  $self->query_db(<<'HERE');
 create table if not exists karma (
   topic    varchar  not null,
   karma    int      not null,
@@ -53,14 +46,7 @@ create table if not exists karma (
 )
 HERE
 
-  $self->_dbh->do('create index if not exists karma__topic on karma (topic)');
-}
-
-sub _dbh {
-  my $self = shift;
-  return $self->{dbh} if $self->{dbh} and $self->{dbh}->ping;
-  return $self->{dbh} = DBI->connect(sprintf('dbi:SQLite:dbname=%s', $self->_brain),
-    '', '', {AutoCommit => 1, PrintError => 0, RaiseError => 1});
+  $self->query_db('create index if not exists karma__topic on karma (topic)');
 }
 
 sub _learn {
@@ -73,11 +59,11 @@ sub _learn {
   $reason =~ s!\s+$!!;
   $reason = '' unless $reason =~ m!\S!;
 
-  my $sth = $self->_dbh->prepare('insert into karma (topic, karma, reason) values (?, ?, ?)');
-  $sth->execute($topic, $karma, $reason);
+  $self->query_db('insert into karma (topic, karma, reason) values (?, ?, ?)',
+    $topic, $karma, $reason);
 }
 
-sub _select { shift->_dbh->selectrow_array(shift, {}, @_) }
+sub _select { shift->query_db(@_)->fetchrow_array }
 
 1;
 

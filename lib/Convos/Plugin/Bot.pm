@@ -46,7 +46,9 @@ sub _construct_action {
   my ($self, $action_class, $config) = @_;
 
   require_module $action_class;
-  my $action = $action_class->new(config => $self->config, enabled => $config->{enabled} // 1);
+  my $home    = $self->user->core->home->child($self->user->email);
+  my $enabled = $config->{enabled} // 1;
+  my $action  = $action_class->new(config => $self->config, enabled => $enabled, home => $home);
   $action->register($self, $config);
   $self->_log->info(qq($action_class is @{[$action->enabled ? 'enabled' : 'disabled']}.));
   return $action;

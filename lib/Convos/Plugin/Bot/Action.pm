@@ -7,6 +7,7 @@ use Mojo::Util 'decamelize';
 has config      => sub { Mojo::JSON::Pointer->new({}) };
 has description => 'No description.';
 has enabled     => 1;
+has home        => undef;
 
 has moniker => sub {
   my $moniker = ref $_[0];
@@ -39,8 +40,31 @@ sub event_config {
   return undef;
 }
 
+sub query_db {
+  my ($self, $query) = (shift, shift);
+  my $sth = $self->_dbh->prepare($query);
+  $sth->execute(@_);
+  return $sth;
+}
+
 sub register { }
 sub reply    {undef}
+
+sub _dbh {
+  my $self = shift;
+  return $self->{dbh} if $self->{dbh} and $self->{dbh}->ping;
+
+  use Convos::Util 'require_module';
+  require_module 'DBD::SQLite';
+
+  # back compat
+  my $home = $self->home;
+  $home->child('karma.sqlite')->move_to('bot_actions.sqlite') if -e $home->child('karma.sqlite');
+
+  return $self->{dbh}
+    = DBI->connect(sprintf('dbi:SQLite:dbname=%s', $home->child('bot_actions.sqlite')->to_string),
+    '', '', {AutoCommit => 1, PrintError => 0, RaiseError => 1});
+}
 
 1;
 
@@ -104,6 +128,12 @@ conversation with the bot.
 Can be set to a boolean value in the config file to enable/disable a given
 action.
 
+=head2 home
+
+  $path = $action->home;
+
+Path to where the bot/action can store files.
+
 =head2 moniker
 
   $str = $action->moniker;
@@ -127,6 +157,16 @@ Used to get a L</config> parameter for the current C<$action> and an event with
 C<connection_id> and C<conversation_id>.
 
 C<$event> should have the same structure as the L</message> event.
+
+=head2 query_db
+
+  $sth = $action->query_db($sql, @bind);
+
+Used to run SQL in SQLite database. Example:
+
+  my $sth = $action->query_db('select name from users where id = ?', 42);
+  my $user = $sth->fetchrow_hashref;
+  warn $user ? $user->{name} : 'not found';
 
 =head2 register
 
