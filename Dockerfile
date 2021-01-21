@@ -14,7 +14,7 @@ COPY lib /app/lib
 COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
-RUN apk add --no-cache perl perl-io-socket-ssl wget && \
+RUN apk add --no-cache openssl perl perl-io-socket-ssl wget && \
     apk add --no-cache --virtual builddeps build-base perl-dev && \
     /app/script/convos install --all && \
     apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
