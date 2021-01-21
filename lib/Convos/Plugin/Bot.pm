@@ -191,14 +191,13 @@ sub _run_actions_with_message {
   return if lc $event->{from} eq lc $connection->nick;
 
   local $event->{is_private} = $event->{conversation_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
-  local $event->{command}    = $event->{message};
 
   my $reply;
   for my $config (@{$self->config->get('/actions')}) {
     my $action = $self->actions->{$config->{class}};
     next unless $action and $action->enabled;
     $action->emit(message => $event);
-    next if $reply or !defined($reply = $action->reply($event));
+    $reply = $action->reply($event) unless $reply;
   }
 
   return unless $reply;

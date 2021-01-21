@@ -20,7 +20,7 @@ sub register {
 
 sub reply {
   my ($self, $event) = @_;
-  return undef unless $event->{command} =~ m/^karma\s+(.+)/i;
+  return undef unless $event->{message} =~ m/^karma\s+(.+)/i;
 
   my $topic = $1;
   $topic =~ s/[?!.]$//;

@@ -14,11 +14,11 @@ sub register {
 sub reply {
   my ($self, $event) = @_;
   return undef unless $event->{is_private};
-  return $self->usage            if $event->{command} =~ m/^\s*help\W*$/i;
-  return $self->description      if $event->{command} =~ m/^\s*about\s*$/i;
-  return $self->_reply_about($1) if $event->{command} =~ m/^\s*about\s+(\S+)\W*$/i;
-  return $self->_reply_actions   if $event->{command} =~ m/^\s*actions\W*$/i;
-  return $self->_reply_help($1)  if $event->{command} =~ m/^\s*help\s+(\S+)\W*$/i;
+  return $self->usage            if $event->{message} =~ m/^\s*help\W*$/i;
+  return $self->description      if $event->{message} =~ m/^\s*about\s*$/i;
+  return $self->_reply_about($1) if $event->{message} =~ m/^\s*about\s+(\S+)\W*$/i;
+  return $self->_reply_actions   if $event->{message} =~ m/^\s*actions\W*$/i;
+  return $self->_reply_help($1)  if $event->{message} =~ m/^\s*help\s+(\S+)\W*$/i;
   return undef;
 }
 

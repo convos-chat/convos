@@ -13,27 +13,27 @@ my $core = Convos::Plugin::Bot::Action::Core->new;
 $t->app->bot->actions->{'Convos::Plugin::Bot::Action::Core'} = $core;
 $core->register($t->app->bot, {});
 
-is $core->reply({command => 'help'}), undef, 'is_private';
+is $core->reply({message => 'help'}), undef, 'is_private';
 
-is $core->reply({is_private => 1, command => 'actions'}), 'Only core action enabled.', 'actions';
+is $core->reply({is_private => 1, message => 'actions'}), 'Only core action enabled.', 'actions';
 
-is $core->reply({is_private => 1, command => 'about'}), 'Core bot functionality.', 'about';
-is $core->reply({is_private => 1, command => 'about foo'}), qq(Couldn't find action "foo".),
+is $core->reply({is_private => 1, message => 'about'}), 'Core bot functionality.', 'about';
+is $core->reply({is_private => 1, message => 'about foo'}), qq(Couldn't find action "foo".),
   'about foo';
 
-is $core->reply({is_private => 1, command => 'help'}),
+is $core->reply({is_private => 1, message => 'help'}),
   'Commands: actions, about <action>, help <action>.', 'help';
-is $core->reply({is_private => 1, command => 'help core'}),
+is $core->reply({is_private => 1, message => 'help core'}),
   'Commands: actions, about <action>, help <action>.', 'help core';
-is $core->reply({is_private => 1, command => 'help calc'}), qq(Couldn't find action "calc".),
+is $core->reply({is_private => 1, message => 'help calc'}), qq(Couldn't find action "calc".),
   'help calc';
 
 $t->app->bot->actions->{'Convos::Plugin::Bot::Action::Foo'} = Convos::Plugin::Bot::Action->new(
   description => 'Foo bar baz.',
   usage       => 'foo before bar and maybe baz.',
 );
-is $core->reply({is_private => 1, command => 'about foo'}), qq(Foo bar baz.), 'about foo';
-is $core->reply({is_private => 1, command => 'help foo'}), qq(foo before bar and maybe baz.),
+is $core->reply({is_private => 1, message => 'about foo'}), qq(Foo bar baz.), 'about foo';
+is $core->reply({is_private => 1, message => 'help foo'}), qq(foo before bar and maybe baz.),
   'help foo';
 
 done_testing;

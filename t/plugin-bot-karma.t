@@ -21,15 +21,15 @@ $karma->emit(message => {message => ' superman--'});
 $karma->emit(message => {message => 'superman-- # not cool'});
 $karma->emit(message => {message => 'superman++ rock around the sun'});
 
-is $karma->reply({command => ''}),           undef, 'missing command';
-is $karma->reply({command => 'kkarma foo'}), undef, 'invalid command';
-is $karma->reply({command => 'karma foo?'}), '"foo" has neither negative nor positive karma.',
+is $karma->reply({message => ''}),           undef, 'missing message';
+is $karma->reply({message => 'kkarma foo'}), undef, 'invalid message';
+is $karma->reply({message => 'karma foo?'}), '"foo" has neither negative nor positive karma.',
   'karma foo';
-is $karma->reply({command => 'karma convos'}), 'Karma for convos is 2 (+2/-0) and reason "ai-ai".',
+is $karma->reply({message => 'karma convos'}), 'Karma for convos is 2 (+2/-0) and reason "ai-ai".',
   'karma convos';
 
 cmp_deeply(
-  $karma->reply({command => 'karma superman?'}),
+  $karma->reply({message => 'karma superman?'}),
   any(
     'Karma for superman is -1 (+1/-2) and reason "not cool".',
     'Karma for superman is -1 (+1/-2) and reason "rock around the sun".'
