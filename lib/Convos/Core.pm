@@ -30,7 +30,7 @@ sub connect {
   $connection->state(queued => $reason || 'Connecting soon...');
 
   my $host = $connection->url->host;
-  if ($host eq 'localhost') {
+  if ($host =~ /\blocalhost\b/) {
     $connection->connect_p;
   }
   elsif ($self->{connect_queue}{$host}) {
