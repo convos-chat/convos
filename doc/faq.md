@@ -125,7 +125,7 @@ ship with Convos:
   render this web page, but can be customized to render *your* own content.
 
 There are [more](https://github.com/Nordaaker/convos/tree/master/lib/Convos/Plugin)
-plugins that ship with Convos. Want to write you own? Look at the [deelopment
+plugins that ship with Convos. Want to write you own? Look at the [development
 guide](/doc/develop) for how to get started.
 
 ## Why can't Convos do X?
