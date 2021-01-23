@@ -1,3 +1,11 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2020-07-02 11:34:58+0900\n"
+"PO-Revision-Date: 2021-01-17 18:37:16+0900\n"
+"Last-Translator: Jan Henning Thorsen <jhthorsen@cpan.org>\n"
+"Language-Team: English <lang-en@convos.chat>\n"
+"Plural-Forms: ;\n"
+
 #: assets/page/Help.svelte:39
 msgid "\"#\" will show the matching conversation names."
 msgstr "\"#\" will show the matching conversation names."
@@ -11,8 +19,10 @@ msgid "\":\" followed by a character will show matching emojis."
 msgstr "\":\" followed by a character will show matching emojis."
 
 #: assets/page/Help.svelte:36
-msgid "\"@\" followed by a character will show matching nicks in the current conversation."
-msgstr "\"@\" followed by a character will show matching nicks in the current conversation."
+msgid "\"@\" followed by a character will show matching nicks in the current "
+"conversation."
+msgstr "\"@\" followed by a character will show matching nicks in the current "
+"conversation."
 
 #: assets/page/ConversationAdd.svelte:68
 msgid "#room or nick"
