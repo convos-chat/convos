@@ -3,7 +3,7 @@ msgstr ""
 "POT-Creation-Date: 2021-01-13 05:30:00+0000\n"
 "PO-Revision-Date: 2021-01-23 00:47:00+0000\n"
 "Last-Translator: Iván Ávalos <ivan.avalos.diaz@hotmail.com>\n"
-"Language-Team: Española <lang-es@convos.chat>\n"
+"Language-Team: Español <lang-es@convos.chat>\n"
 "Plural-Forms: ;\n"
 
 #: assets/page/Help.svelte:39

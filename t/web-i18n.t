@@ -11,8 +11,8 @@ $t->get_ok('/')->element_exists('html[lang="en"]')->text_is('title', 'Better gro
   ->text_is('h2', 'Loading...');
 $t->get_ok('/api/i18n/en.json')->status_is(200)
   ->json_is('/available_languages/en/language_team', 'English <lang-en@convos.chat>')
-  ->json_is('/available_languages/es/language_team', 'Española <lang-es@convos.chat>')
-  ->json_is('/available_languages/it/language_team', 'Italiana <lang-it@convos.chat>')
+  ->json_is('/available_languages/es/language_team', 'Español <lang-es@convos.chat>')
+  ->json_is('/available_languages/it/language_team', 'Italiano <lang-it@convos.chat>')
   ->json_is('/available_languages/no/language_team', 'Norsk <lang-no@convos.chat>')
   ->json_is('/dictionary/Autocomplete',              'Autocomplete');
 $t->get_ok('/', {'Accept-Language' => ''})->element_exists('html[lang="en"]');
