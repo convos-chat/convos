@@ -88,34 +88,42 @@ sub _load_dictionaries {
 }
 
 sub _parse_po_file {
-  my $cb      = pop;
-  my $PO      = shift->open;
-  my $entry   = {};
-  my $section = '';
+  my $cb = pop;
+  my $PO = shift->open;
+  my ($entry, $section, @comments) = ({}, '');
+
+  my $cb_maybe = sub {
+    return unless defined $entry->{msgid} and $entry->{msgstr};
+    $entry->{comments} = \@comments;
+    $cb->($entry);
+    ($entry, $section, @comments) = ({}, '');
+  };
 
   while (<$PO>) {
     s![\r\n]!!g;
-    $_       = decode 'UTF-8', $_;
-    $section = $1                       if /^\s*(msgid|msgstr)/;
-    $section = {file => $1, line => $2} if /^#:\s*([^:]+):(\d+)/;
+    $_ = decode 'UTF-8', $_;
 
-    if ($section ne 'msgstr' and defined $entry->{msgid} and $entry->{msgstr}) {
-      $cb->($entry);
-      $entry   = {};
+    if (/^\s*#/ and !$entry->{msgid}) {
+      $cb_maybe->();
       $section = '';
+      push @comments, $1 if /^\s*#:\s*(.+)/;
+    }
+    elsif (s!^\s*msgid!!) {
+      $cb_maybe->();
+      $section = 'msgid';
+    }
+    elsif (s!^\s*msgstr!!) {
+      $section = 'msgstr';
     }
 
-    if (ref $section eq 'HASH') {
-      $entry->{$_} = $section->{$_} for keys %$section;
-    }
-    elsif ($section) {
+    if ($section) {
       $entry->{$section} //= '';
       $entry->{$section} .= _unescape($1) if /(['"].*)/;
     }
   }
 
-  # handle the last entry
-  $cb->($entry) if defined $entry->{msgid} and $entry->{msgstr};
+  # process last translation
+  $cb_maybe->();
 }
 
 sub _l {
