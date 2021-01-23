@@ -4,7 +4,7 @@ import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
-import {l, lmd} from '../store/I18N';
+import {i18n, l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {settings} from '../js/util';
 
@@ -114,3 +114,12 @@ function registered() {
     </form>
   </main>
 {/if}
+
+<div class="footer-wrapper is-small">
+  <footer class="footer language-selector">
+    <Icon name="globe"/>
+    {#each $i18n.languageOptions as lang}
+      <a href="#{lang[0]}" on:click="{() => $i18n.load(lang[0])}">{lang[1]}</a>
+    {/each}
+  </footer>
+</div>

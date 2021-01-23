@@ -2,11 +2,12 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
+import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
-import {l} from '../store/I18N.js';
+import {i18n, l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 import {settings} from '../js/util';
@@ -19,6 +20,7 @@ const updateUserOp = api('updateUser');
 let formEl;
 let activeTheme = themeManager.activeTheme;
 let colorScheme = themeManager.colorScheme;
+let lang = i18n.lang;
 let compactDisplay = themeManager.compactDisplay;
 let expandUrlToMedia = user.expandUrlToMedia;
 let highlightKeywords = user.highlightKeywords.join(', ');
@@ -26,6 +28,7 @@ let ignoreStatuses = user.ignoreStatuses;
 let wantNotifications = notify.wantNotifications;
 
 $: colorSchemeReadonly = $themeManager.hasColorScheme(activeTheme) ? false : true;
+$: i18n.load(lang);
 
 route.update({title: 'Account'});
 
@@ -95,6 +98,10 @@ function updateFromForm(e) {
     <Checkbox name="compact" bind:checked="{compactDisplay}">
       <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
+
+    <SelectField name="lang" options="{$i18n.languageOptions}" bind:value="{lang}">
+      <span slot="label">{$l('Language')} <Icon name="globe"/></span>
+    </SelectField>
 
     <TextField type="password" name="password" autocomplete="new-password">
       <span slot="label">{$l('Password')}</span>

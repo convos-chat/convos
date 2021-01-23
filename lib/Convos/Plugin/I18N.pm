@@ -30,7 +30,8 @@ sub _around_action {
   return $next->() unless $last;
 
   my $dictionaries = $self->_dictionaries;
-  my $lang         = $c->param('lang') || $c->req->headers->accept_language || 'en';
+  my $lang
+    = $c->param('lang') || $c->js_session('lang') || $c->req->headers->accept_language || 'en';
   my $dict;
   for my $l (HTTP::AcceptLanguage->new($lang)->languages) {
     my ($prefix) = split /-/, $l;
