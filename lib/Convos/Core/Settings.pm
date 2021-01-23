@@ -6,7 +6,7 @@ use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;
 
-has base_url => sub { Mojo::URL->new('127.0.0.1:8080') };
+has base_url => sub { Mojo::URL->new('http://127.0.0.1:8080') };
 has contact  => sub { $ENV{CONVOS_CONTACT} || 'mailto:root@localhost' };
 sub core { shift->{core} or die 'core is required in constructor' }
 has default_connection => \&_build_default_connection;

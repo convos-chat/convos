@@ -163,7 +163,7 @@ $connection->send_p('#convos' => ' ')->$wait_success('send_p single space');
 like slurp_log('#convos'), qr{<superman>\s\s\r?\n}, 'single space in log';
 
 note 'paste';
-my $long_line            = join '', map {$_} 0 .. 150;
+my $long_line = join '', map {$_} 0 .. 150;
 my $long_line_with_space = "$long_line $long_line";
 $long_line = "$long_line$long_line";
 my @sent = (
@@ -181,9 +181,9 @@ $connection->send_p('#convos' => $sent[2])->$wait_success('many short lines past
 is_deeply(
   \@msg,
   [
-    ':superman PRIVMSG #convos :file/1/uL1Qca5fcqt7S1aU',
-    ':superman PRIVMSG #convos :file/1/V1sP00ZC8JSNhQBA',
-    ':superman PRIVMSG #convos :file/1/HHghB4hap3tVP3cB',
+    ':superman PRIVMSG #convos :http://127.0.0.1:8080/file/1/uL1Qca5fcqt7S1aU',
+    ':superman PRIVMSG #convos :http://127.0.0.1:8080/file/1/V1sP00ZC8JSNhQBA',
+    ':superman PRIVMSG #convos :http://127.0.0.1:8080/file/1/HHghB4hap3tVP3cB',
   ],
   'created paste messages',
 );
