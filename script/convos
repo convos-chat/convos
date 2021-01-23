@@ -40,8 +40,8 @@ sub command_build {
 
   my $push = 'git push origin';
   print $ENV{RELEASE}
-    ? "Now run:\n\$ $push master:master && $push master:stable && $push --tags\n\n"
-    : "Convos must be restarted to use the new CSS and JavaScript assets.";
+    ? "\nNow run:\n\$ $push master:master && $push master:stable && $push --tags\n\n"
+    : "\nConvos must be restarted to use the new CSS and JavaScript assets.\n\n";
 }
 
 sub command_cpanm {
