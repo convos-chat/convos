@@ -1,7 +1,7 @@
 Revision history for perl distribution Convos
 
 5.13 2021-01-23T12:42:00+0900
- - Fix parsgin .po files
+ - Fix parsing .po files
 
 5.12 2021-01-23T11:49:00+0900
  - Add language picker to SettingsAccount and login screen
