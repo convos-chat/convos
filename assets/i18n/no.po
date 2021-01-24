@@ -686,10 +686,6 @@ msgstr "Søk"
 msgid "Search for \"%1\""
 msgstr "Søk etter \"%1\""
 
-#: assets/page/Search.svelte:67
-msgid "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
-msgstr "Søk etter meldinger sendt av deg eller andre siste %1 dager ved å skrive en melding i feltet under."
-
 msgid "Search..."
 msgstr "Søk..."
 
@@ -963,9 +959,8 @@ msgstr "Du er ikke en del av denne samtalen."
 msgid "You are the only participant in this conversation."
 msgstr "Du er den eneste deltakeren i denne samtalen."
 
-#: assets/page/Search.svelte:68
-msgid "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
-msgstr "Du kan skrive et kanal-navn eller bruke `\"conversation:#kanal\" for å begrense søket."
+msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."

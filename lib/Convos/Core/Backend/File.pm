@@ -1,9 +1,9 @@
 package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
-use Convos::Date 'dt';
-use Convos::Util 'DEBUG';
-use Fcntl ':flock';
+use Convos::Date qw(dt);
+use Convos::Util qw(DEBUG);
+use Fcntl qw(:flock);
 use File::ReadBackwards;
 use Mojo::File;
 use Mojo::JSON qw(false true);
@@ -78,7 +78,6 @@ sub load_object_p {
 
 sub messages_p {
   my ($self, $obj, $query) = @_;
-  my ($re, %args);
 
   if ($query->{around}) {
     my %query_before = (%$query, around => undef, before => $query->{around});
@@ -95,17 +94,13 @@ sub messages_p {
     });
   }
 
-  $re       = $query->{match} || qr{.};
-  $re       = qr{\Q$re\E}i unless ref $re;
-  $re       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\d?)\s*(.*$re.*)$/;
-  $args{re} = $re;
-
-  $re = $query->{from};
-  $args{from} = qr/$re/i if $re;
-
+  my %args;
+  $args{re} = join '.*', map { $_ = quotemeta $_; /"(.+)\\"/ ? "\\b$1\\b" : $_ } split /\s+/,
+    $query->{match} // '';
+  $args{re}       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \s (\d?) \s* (.*$args{re}.*)$/x;
+  $args{from}     = $query->{from} if $query->{from};
   $args{include}  = $query->{include} || 0;
   $args{limit}    = $query->{limit}   || 60;
-  $args{match}    = $query->{match};
   $args{messages} = [];
 
   # If both "before" and "after" are provided
@@ -136,8 +131,8 @@ sub messages_p {
   # If neither "before" nor "after" are provided
   # Set "before" to now and "after" to 12 months before "before"
   else {
-    $args{before} = 10 + dt;    # make sure we get the message sent right now as well
-    $args{after} = $args{before}->add_months(-12);
+    $args{before}            = 10 + dt;    # make sure we get the message sent right now as well
+    $args{after}             = $args{before}->add_months(-12);
     @args{qw(cursor inc_by)} = ($args{before}, -1);
   }
 
@@ -158,20 +153,15 @@ sub messages_p {
 
 sub notifications_p {
   my ($self, $user, $query) = @_;
-  my $file = $self->_notifications_file($user);
-  my ($FH, $re, @notifications);
-
   $query->{limit} ||= 40;
 
+  my ($file, $FH) = ($self->_notifications_file($user));
   unless ($FH = File::ReadBackwards->new($file)) {
     warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG >= 3;
     return Mojo::Promise->resolve({messages => []});
   }
 
-  $re = $query->{match} || qr{.};
-  $re = qr{\Q$re\E}i unless ref $re;
-  $re = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*$re.*)$/;
-
+  my ($re, @notifications) = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*)$/;
   warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
     $line = decode 'UTF-8', $line;
@@ -352,7 +342,7 @@ sub _messages {
 
     # Found message
     $self->_message_type_from($message);
-    next if $args->{from} and $message->{from} !~ $args->{from};
+    next if $args->{from} and lc $message->{from} ne lc $args->{from};
 
     $message->{highlight} = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? true : false;
     $args->{inc_by} < 0 ? unshift @{$args->{messages}}, $message : push @{$args->{messages}},

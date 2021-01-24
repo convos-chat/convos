@@ -432,14 +432,6 @@ msgstr "Link di invito copiato"
 msgid "Invite or recover password"
 msgstr "Invita o recupera password"
 
-#: assets/page/Search.svelte:69
-msgid ""
-"It is also possible to use `\"from:some_nick\"` to filter out messages from "
-"a given user."
-msgstr ""
-"È anche possibile usare `\"from:some_nick\"` per filtrare i messaggi di un "
-"dato utente."
-
 #: app.html.ep:36 templates/app.html.ep:36 templates/video.html.ep:26
 msgid "Javascript is disabled"
 msgstr "Javascript è disabilitato"
@@ -685,14 +677,6 @@ msgstr "Ricerca"
 #: assets/components/ChatSidebar.svelte:215
 msgid "Search for \"%1\""
 msgstr "Cerca per \"%1\""
-
-#: assets/page/Search.svelte:67
-msgid ""
-"Search for messages sent by you or others the last %1 days by writing a "
-"message in the input field below."
-msgstr ""
-"Cerca i messaggi inviati da te o da altri negli ultimi %1 giorni scrivendo "
-"un messaggio nel campo di input qui sotto."
 
 msgid "Search..."
 msgstr "Cerca..."
@@ -1002,12 +986,8 @@ msgid "You are the only participant in this conversation."
 msgstr "Sei l'unico partecipante in questa conversazione."
 
 #: assets/page/Search.svelte:68
-msgid ""
-"You can enter a channel name, or use `\"conversation:#channel\"` to narrow "
-"down the search."
-msgstr ""
-"Puoi inserire il nome di un canale, o usare `\"conversation:#channel\"` per "
-"restringere la ricerca."
+msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."

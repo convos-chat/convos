@@ -64,9 +64,7 @@ function setConversationFromRoute(route) {
       <ChatMessage>{$l('No search results for "%1".', $route.param('q'))}</ChatMessage>
     {:else if conversation.is('search')}
       <ChatMessage>
-        {@html $lmd('Search for messages sent by you or others the last %1 days by writing a message in the input field below.', 90)}
-        {@html $lmd('You can enter a channel name, or use `"conversation:#channel"` to narrow down the search.')}
-        {@html $lmd('It is also possible to use `"from:some_nick"` to filter out messages from a given user.')}
+        {@html $lmd('You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user.')}
       </ChatMessage>
     {/if}
   {/if}

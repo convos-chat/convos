@@ -425,10 +425,6 @@ msgstr "Invite link copied"
 msgid "Invite or recover password"
 msgstr "Invite or recover password"
 
-#: assets/page/Search.svelte:69
-msgid "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
-msgstr "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
-
 #: app.html.ep:36
 #: templates/app.html.ep:36
 #: templates/video.html.ep:26
@@ -687,10 +683,6 @@ msgstr "Search"
 #: assets/components/ChatSidebar.svelte:215
 msgid "Search for \"%1\""
 msgstr "Search for \"%1\""
-
-#: assets/page/Search.svelte:67
-msgid "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
-msgstr "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
 
 msgid "Search..."
 msgstr "Search..."
@@ -966,8 +958,8 @@ msgid "You are the only participant in this conversation."
 msgstr "You are the only participant in this conversation."
 
 #: assets/page/Search.svelte:68
-msgid "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
-msgstr "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
+msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."
