@@ -1,3 +1,11 @@
+.embed.for-details {
+  display: none;
+
+  .message.show-details & {
+    display: block;
+  }
+}
+
 .embed.for-youtube iframe {
   max-width: 90vw;
   max-height: (344 / 459 * 90vw);
@@ -69,11 +77,6 @@
   }
 }
 
-.le-provider-link ~ .le-goto-link:before,
-.le-author-link ~ .le-goto-link:before {
-  content: "\2013\00a0";
-}
-
 .le-paste .le-provider-link:before {
   content: "Hosted by ";
 }
@@ -84,10 +87,6 @@
   display: block;
   width: 100%;
   height: auto;
-}
-
-.le-image-card .le-goto-link {
-  display: none;
 }
 
 .le-photo img {

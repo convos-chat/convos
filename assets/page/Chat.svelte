@@ -13,7 +13,6 @@ import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
 import {q, showFullscreen, tagNameIs} from '../js/util';
-import {renderMessages} from '../js/renderMessages';
 import {route} from '../store/Route';
 
 const socket = getContext('socket');
@@ -23,6 +22,7 @@ const dragAndDrop = new DragAndDrop();
 
 let connection = user.notifications;
 let conversation = user.notifications;
+let messages = conversation.messages;
 let now = new Time();
 let onLoadHash = '';
 let uploader;
@@ -30,7 +30,6 @@ let unsubscribe = {};
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
-$: messages = renderMessages({conversation: $conversation, expandUrlToMedia: $user.expandUrlToMedia, from: $connection.nick, waiting: Array.from($socket.waiting.values())});
 $: notConnected = $conversation.frozen ? true : false;
 $: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
@@ -44,15 +43,57 @@ onDestroy(() => {
   dragAndDrop.detach();
 });
 
+function onInfinityScrolled(e) {
+  if (!messages.length) return;
+  const {pos, visibleEls} = e.detail;
+  const firstVisibleEl = visibleEls[0];
+  const lastVisibleEl = visibleEls.slice(-1)[0];
+
+  const go = (hash) => {
+    if (typeof hash == 'undefined') return console.trace({hash}); // debugging
+    route.go(conversation.path + (hash.length ? '#' + hash : ''), {replace: true});
+  };
+
+  if (pos == 'top') {
+    const before = messages.get(0).ts.toISOString();
+    go(before);
+    if (!conversation.historyStartAt) conversation.load({before});
+  }
+  else if (pos == 'bottom') {
+    const after = messages.get(-1).ts.toISOString();
+    go(conversation.historyStopAt ? '' : lastVisibleEl.dataset.ts);
+    if (!conversation.historyStopAt) conversation.load({after});
+  }
+  else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
+    go(firstVisibleEl.dataset.ts);
+  }
+}
+
+function onInfinityVisibility(e) {
+  const {infinityEl, scrollHeightChanged, scrollTo, visibleEls, visibleElsChanged} = e.detail;
+  if (scrollHeightChanged) {
+    scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
+    renderFocusedEl(infinityEl, onLoadHash == route.hash);
+  }
+  if (visibleElsChanged) {
+    visibleEls.forEach(el => messages.render(el.dataset.index));
+  }
+}
+
 function onMessageActionClick(e, action) {
   if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
   e.preventDefault();
   const messageEl = e.target.closest('.message');
-  const message = messageEl && messages[messageEl.dataset.index];
+  const message = messageEl && messages.get(messageEl.dataset.index);
   if (action[1] == 'join') return conversation.send('/join ' + message.from);
   if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
   if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
-  if (action[1] == 'toggleDetails') return q(messageEl, '.embed.for-jsonhtmlify', el => el.classList.toggle('hidden'));
+
+  if (action[1] == 'toggleDetails') {
+    const msg = messages.get(messageEl.dataset.index);
+    msg.showDetails = !msg.showDetails;
+    messages.update({messages: true});
+  }
 }
 
 function onMessageClick(e) {
@@ -79,41 +120,24 @@ function onMessageClick(e) {
   if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
 }
 
-function onRendered(e) {
-  const {infinityEl, scrollTo} = e.detail;
-  scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-  renderFocusedEl(infinityEl, onLoadHash == route.hash);
-}
-
-function onScrolled(e) {
-  if (!conversation.messages.length) return;
-  const {pos, visibleEls} = e.detail;
-  const firstVisibleEl = visibleEls[0];
-  const lastVisibleEl = visibleEls.slice(-1)[0];
-
-  if (pos == 'top') {
-    const before = conversation.messages[0].ts.toISOString();
-    route.go(conversation.path + '#' + before, {replace: true});
-    if (!conversation.historyStartAt) conversation.load({before});
-  }
-  else if (pos == 'bottom') {
-    const after = conversation.messages.slice(-1)[0].ts.toISOString();
-    route.go(conversation.path + (conversation.historyStopAt ? '' : '#' + lastVisibleEl.dataset.ts), {replace: true});
-    if (!conversation.historyStopAt) conversation.load({after});
-  }
-  else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
-    route.go(conversation.path + '#' + firstVisibleEl.dataset.ts, {replace: true});
-  }
-}
-
 function onVideoLinkClick(e) {
   e.preventDefault();
   if (conversation.window) return conversation.window.close();
   conversation.openWindow(videoInfo.convosUrl, videoInfo.roomName);
 
-  const alreadySent = conversation.messages.slice(-30).reverse().find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
+  const alreadySent = messages.toArray().slice(-30).reverse().find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
   const send = !alreadySent || alreadySent.ts.toEpoch() < new Time().toEpoch() - 600;
   if (send) conversation.send({method: 'send', message: videoInfo.realUrl});
+}
+
+function renderEmbed(el, embed) {
+  const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
+  if (parentNode) {
+    const method = parentNode.classList.contains('embed') ? 'add' : 'remove';
+    parentNode.classList[method]('hidden');
+  }
+
+  embed.nodes.forEach(node => el.appendChild(node));
 }
 
 function renderFocusedEl(infinityEl, add) {
@@ -134,6 +158,7 @@ function setConversationFromUser(user) {
   if (unsubscribe.markAsRead) unsubscribe.markAsRead();
 
   conversation = user.activeConversation;
+  messages = conversation.messages;
   connection = user.findConversation({connection_id: conversation.connection_id}) || conversation;
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
@@ -163,7 +188,7 @@ function topicOrStatus(connection, conversation) {
   <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 
-<InfinityScroll class="main is-above-chat-input" on:rendered="{onRendered}" on:scrolled="{onScrolled}">
+<InfinityScroll class="main is-above-chat-input" on:scrolled="{onInfinityScrolled}" on:visibility="{onInfinityVisibility}">
   <!-- status -->
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
@@ -173,7 +198,7 @@ function topicOrStatus(connection, conversation) {
   {/if}
 
   <!-- welcome message -->
-  {#if $conversation.messages.length < 10 && !$conversation.is('not_found')}
+  {#if $messages.length < 10 && !$conversation.is('not_found')}
     {#if $conversation.is_private}
       <ChatMessage>{@html $lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
@@ -187,17 +212,17 @@ function topicOrStatus(connection, conversation) {
   {/if}
 
   <!-- messages -->
-  {#each messages as message, i}
+  {#each $messages.render() as message, i}
     {#if message.dayChanged}
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    {#if i && i == $conversation.messages.length - $conversation.unread}
+    {#if i && i == $messages.length - $conversation.unread}
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
-    <div class="{message.className}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
-      <Icon name="pick:{message.fromId}" color="{message.color}"/>
+    <div class="{message.className}" class:is-not-present="{!$conversation.findParticipant(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
+      <Icon name="pick:{message.from}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
       <a href="#action:join:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
@@ -213,7 +238,7 @@ function topicOrStatus(connection, conversation) {
         {#await embedPromise}
           <!-- loading embed -->
         {:then embed}
-          <div class="embed {embed.className}">{@html embed.html}</div>
+          <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
         {/await}
       {/each}
     </div>
@@ -242,10 +267,10 @@ function topicOrStatus(connection, conversation) {
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
-  {#if !$conversation.historyStopAt && $conversation.messages.length}
+  {#if !$conversation.historyStopAt && $messages.length}
     <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {$l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
   {/if}
 </InfinityScroll>
 
-<ChatInput conversation="{conversation}" bind:uploader="{uploader}"/>
+<ChatInput conversation="{conversation}" bind:uploader/>
 <ChatParticipants conversation="{conversation}"/>

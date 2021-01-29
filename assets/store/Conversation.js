@@ -1,11 +1,10 @@
+import Messages from './Messages';
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
 import {api} from '../js/Api';
 import {camelize, isType, str2color} from '../js/util';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
-import {i18n} from '../store/I18N';
-import {md} from '../js/md';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 import {getSocket} from '../js/Socket';
@@ -31,13 +30,12 @@ export default class Conversation extends Reactive {
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'is_private', () => this.conversation_id && !channelRe.test(this.name));
+    this.prop('ro', 'messages', new Messages({}));
     this.prop('ro', 'nParticipants', () => this.participants().length);
     this.prop('ro', 'path', route.conversationPath(params));
 
-    this.prop('rw', 'errors', 0);
     this.prop('rw', 'historyStartAt', null);
     this.prop('rw', 'historyStopAt', null);
-    this.prop('rw', 'messages', []);
     this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || params.conversation_id || params.connection_id || 'ERR');
     this.prop('rw', 'status', 'pending');
@@ -66,41 +64,23 @@ export default class Conversation extends Reactive {
 
   addMessages(messages, method) {
     if (!Array.isArray(messages)) {
-      this._maybeIncreaseUnread(messages)._maybeNotify(messages);
+      this._maybeIncreaseUnread(messages);
+      this._maybeNotify(messages);
+      if (!this.historyStopAt && ['action', 'private'].indexOf(messages.type) != -1) return;
       messages = [messages];
-      method = 'push';
     }
 
-    let start = 0;
-    let stop = messages.length;
-
-    switch (method) {
-      case 'push':
-        start = this.messages.length;
-        messages = this.messages.concat(messages);
-        stop = messages.length;
-        break;
-      case 'unshift':
-        messages = messages.concat(this.messages);
-        break;
-    }
-
-    for (let i = start; i < stop; i++) {
+    for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-      if (msg.hasOwnProperty('markdown')) continue; // Already processed
-      if (!msg.from) [msg.internal, msg.from, msg.fromId] = [true, this.connection_id || 'Convos', 'Convos'];
-      if (!msg.fromId) msg.fromId = msg.from.toLowerCase();
-      if (!msg.type) msg.type = 'notice'; // TODO: Is this a good default?
-      if (msg.vars) msg.message = i18n.l(msg.message, ...msg.vars);
+      if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
+      if (!msg.type) msg.type = 'notice';
 
-      msg.id = 'msg_' + (++nMessages);
-      msg.color = msg.fromId == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
+      msg.canToggleDetails = msg.type == 'error' || msg.type == 'notice';
+      msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
-      msg.embeds = (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => url.replace(/(\W)?$/, ''));
-      msg.markdown = md(msg.message);
     }
 
-    this.update({messages});
+    this.messages[method || 'push'](messages, method);
     return this;
   }
 
@@ -130,8 +110,8 @@ export default class Conversation extends Reactive {
     const body = this.messagesOp.res.body;
     const internalMessages = [];
     if (params.around || (!params.after && !params.before)) {
-      internalMessages.push.apply(internalMessages, this.messages.filter(msg => msg.internal));
-      this.update({messages: []});
+      internalMessages.push.apply(internalMessages, this.messages.toArray().filter(msg => msg.internal));
+      this.messages.clear();
     }
 
     this.addMessages(body.messages || [], params.before ? 'unshift' : 'push');
@@ -142,6 +122,7 @@ export default class Conversation extends Reactive {
   }
 
   findParticipant(nick) {
+    if (nick == this.connection_id) return {connection: true, name: this.connection_id, id: this.connection_id};
     return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
   }
 
@@ -180,7 +161,6 @@ export default class Conversation extends Reactive {
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
-    this.update({errors: 0, unread: 0});
     await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
     return this.update({unread: 0});
   }
@@ -241,7 +221,7 @@ export default class Conversation extends Reactive {
 
   wsEventSentClear(params) {
     if (params.errors) return;
-    this.update({messages: []});
+    this.messages.clear();
     this.addMessages({message: 'History was cleared for %1.', vars: [this.name]});
   }
 
@@ -352,7 +332,7 @@ export default class Conversation extends Reactive {
   _skipLoad(opParams) {
     if (!this.messagesOp || this.is('loading')) return true;
     if (!this.messages.length) return this.is('success');
-    if (opParams.around) return !!this.messages.find(msg => msg.ts.toISOString() == opParams.around);
+    if (opParams.around) return !!this.messages.toArray().find(msg => msg.ts.toISOString() == opParams.around);
     if (opParams.before && this.historyStartAt) return true;
     if (opParams.after && this.historyStopAt) return true;
     return false;

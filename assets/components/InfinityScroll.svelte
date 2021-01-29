@@ -4,7 +4,7 @@ import {findVisibleElements, isType} from '../js/util';
 
 const DEBUG = false;
 const dispatch = createEventDispatcher();
-const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0};
+const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0, visibleEls: []};
 
 let cancelNextScroll = true;
 let className = '';
@@ -14,24 +14,36 @@ export {className as class};
 export let pos = 'top';
 
 $: classNames = [className || 'infinity-scroll'].concat(['has-pos-' + pos]);
+$: scrollHeight && calculateDetails();
 $: DEBUG && console.log(location.href + ': ' + scrollHeight);
 
-function calculateDetails(infinityEl) {
+function calculateDetails() {
+  const infinityEl = state.infinityEl;
+  if (!infinityEl) return;
+
   pos = infinityEl.scrollTop > scrollHeight - infinityEl.offsetHeight - state.scrollOffset ? 'bottom'
       : infinityEl.scrollTop < state.scrollOffset ? 'top'
       : 'middle';
 
   state.pos = pos;
-  state.visibleEls = findVisibleElements(infinityEl.firstElementChild, infinityEl);
+  state.scrollHeightChanged = state.scrollHeight != scrollHeight;
+  state.scrollHeight = scrollHeight;
+  state.visibleElsChanged = false;
+
+  const visibleEls = findVisibleElements(infinityEl.firstElementChild, infinityEl);
+  if (visibleEls.length != state.visibleEls.length || visibleEls[0] != state.visibleEls[0]) {
+    state.visibleEls = visibleEls;
+    state.visibleElsChanged = true;
+  }
+
+  if (state.scrollHeightChanged || state.visibleElsChanged) dispatch('visibility', state);
 }
 
-function onReady(infinityEl, params) {
+function onReady(infinityEl) {
   state.infinityEl = infinityEl;
   state.scrollTo = scrollTo;
   infinityEl.addEventListener('scroll', () => onScroll(infinityEl));
-  calculateDetails(infinityEl);
-  onUpdate(infinityEl, params);
-  return {update: (params) => onUpdate(infinityEl, params)};
+  calculateDetails();
 }
 
 function onScroll(infinityEl) {
@@ -43,24 +55,17 @@ function onScrolled(infinityEl) {
   if (DEBUG) console.log('onScrolled pos=' + state.scrollTop + '/' + infinityEl.scrollTop + ' cancelNextScroll=' + cancelNextScroll);
 
   if (cancelNextScroll) {
-    // onScrolled() can will get triggered when scrollTo() changes infinityEl.scrollTop.
+    // onScrolled() gets triggered when scrollTo() changes infinityEl.scrollTop.
     // Need to cancel the next "scroll" event as well, in case "scrollTop" was not set correctly.
     cancelNextScroll = Math.abs(infinityEl.scrollTop - state.scrollTop) > 40;
     if (cancelNextScroll) infinityEl.scrollTop = state.scrollTop;
     if (state.scrollTid) clearTimeout(state.scrollTid);
-    return;
+    return calculateDetails();
   }
 
   state.scrollTop = infinityEl.scrollTop;
-  calculateDetails(infinityEl);
+  calculateDetails();
   dispatch('scrolled', state);
-}
-
-function onUpdate(infinityEl, {scrollHeight}) {
-  const emitRendered = state.scrollHeight != scrollHeight;
-  state.scrollHeight = scrollHeight;
-  calculateDetails(infinityEl);
-  if (emitRendered) dispatch('rendered', state);
 }
 
 function scrollTo(pos) {
@@ -78,6 +83,6 @@ function scrollTo(pos) {
 }
 </script>
 
-<main class="{classNames.join(' ')}" use:onReady="{{scrollHeight}}">
+<main class="{classNames.join(' ')}" use:onReady>
   <div bind:offsetHeight="{scrollHeight}"><slot/></div>
 </main>

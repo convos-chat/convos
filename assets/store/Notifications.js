@@ -12,9 +12,14 @@ export default class Notifications extends Conversation {
     });
   }
 
-  addMessages(msg, method) {
-    this.update({unread: this.unread + 1});
-    return super.addMessages(msg);
+  addMessages(messages, method) {
+    if (!Array.isArray(messages)) {
+      messages = [messages];
+      this.update({unread: this.unread + 1});
+    }
+
+    this.messages.push(messages);
+    return this;
   }
 
   is(status) {

@@ -11,10 +11,9 @@ test('constructor', () => {
   expect(c.color).toBe('#6bafb2');
   expect(c.connection_id).toBe('irc-freenode');
   expect(c.conversation_id).toBe('#convos');
-  expect(c.errors).toBe(0);
   expect(c.frozen).toBe('');
   expect(c.is_private).toBe(false);
-  expect(c.messages).toEqual([]);
+  expect(c.messages.toArray()).toEqual([]);
   expect(c.modes).toEqual({});
   expect(c.name).toBe('#convos');
   expect(c.path).toBe('/chat/irc-freenode/%23convos');
@@ -102,7 +101,7 @@ test('load skip', () => {
   // Skip load if no messages and success (already loaded)
   c.update({status: 'success'});
   expect(c._skipLoad({})).toBe(true);
-  c.update({messages: [{ts: new Date('2020-01-20T09:00:00.001Z')}]});
+  c.messages.push([{ts: new Date('2020-01-20T09:00:00.001Z')}]);
   expect(c._skipLoad({})).toBe(false);
 
   // Skip at start/end of history
@@ -117,58 +116,58 @@ test('load skip', () => {
   expect(c._skipLoad({around: '2020-01-20T09:01:01.001Z'})).toBe(false);
 });
 
-test('addMessage channel', () => {
+test('addMessages channel', () => {
   const c = new Conversation({connection_id: 'irc-localhost', conversation_id: '#test'});
   expect(c.unread).toBe(0);
 
-  c.addMessage({from: 'supergirl', highlight: true, message: 'n1', type: 'private', yourself: true});
+  c.addMessages({from: 'supergirl', highlight: true, message: 'n1', type: 'private', yourself: true});
   expect(c.unread).toBe(0);
 
-  c.addMessage({from: 'supergirl', highlight: true, message: 'n2', type: 'private'});
+  c.addMessages({from: 'supergirl', highlight: true, message: 'n2', type: 'private'});
   expect(c.unread).toBe(1);
   expect(c.lastNotification.title).toBe('supergirl in #test');
   expect(c.lastNotification.body).toBe('n2');
 
   document.hasFocus = () => true;
-  c.addMessage({from: 'supergirl', highlight: true, message: 'n3', type: 'private'});
+  c.addMessages({from: 'supergirl', highlight: true, message: 'n3', type: 'private'});
   expect(c.lastNotification.body).toBe('n2');
   document.hasFocus = () => false;
 });
 
-test('addMessage private', () => {
+test('addMessages private', () => {
   const c = new Conversation({connection_id: 'irc-localhost', conversation_id: 'supergirl'});
   expect(c.unread).toBe(0);
 
   // Do not increase unread when sent by yourself
-  c.addMessage({from: 'superwoman', message: 'n1', type: 'private', yourself: true});
+  c.addMessages({from: 'superwoman', message: 'n1', type: 'private', yourself: true});
   expect(c.unread).toBe(0);
 
   // Show notification
-  c.addMessage({from: 'supergirl', message: 'n2', type: 'private'});
+  c.addMessages({from: 'supergirl', message: 'n2', type: 'private'});
   expect(c.unread).toBe(1);
   expect(c.lastNotification.title).toBe('supergirl');
   expect(c.lastNotification.body).toBe('n2');
 
   // Do not show notification when document has focus
   document.hasFocus = () => true;
-  c.addMessage({from: 'supergirl', message: 'n3', type: 'private'});
+  c.addMessages({from: 'supergirl', message: 'n3', type: 'private'});
   expect(c.unread).toBe(2);
   expect(c.lastNotification.body).toBe('n2');
   document.hasFocus = () => false;
 
   // Do not increase unread on "notice"
-  c.addMessage({from: 'Convos', message: 'n3', type: 'notice'});
+  c.addMessages({from: 'Convos', message: 'n3', type: 'notice'});
   expect(c.unread).toBe(2);
 });
 
-test('addMessage without historyStopAt', () => {
+test('addMessages without historyStopAt', () => {
   const c = new Conversation({connection_id: 'irc-localhost', conversation_id: 'supergirl'});
 
-  c.addMessage({from: 'superwoman', message: 'dropped', type: 'private'});
+  c.addMessages({from: 'superwoman', message: 'dropped', type: 'private'});
   expect(c.messages.length).toBe(0);
 
   c.update({historyStopAt: new Date()});
-  c.addMessage({from: 'superwoman', message: 'dropped', type: 'private'});
+  c.addMessages({from: 'superwoman', message: 'kept', type: 'private'});
   expect(c.messages.length).toBe(1);
 });
 

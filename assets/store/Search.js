@@ -29,14 +29,15 @@ export default class Search extends Conversation {
     opParams.match = params.match || params.message;
 
     if (!(opParams.match || '').match(/\S/)) {
-      return this.update({messages: []}).addMessages([{message: 'Search query "%1" does not contain anything to search for.', vars: [params.message]}]);
+      return this.messages.clear().push([{message: 'Search query "%1" does not contain anything to search for.', vars: [params.message]}]);
     }
 
     // Load messages
-    this.update({messages: [], query: opParams.match, status: 'loading'});
+    this.update({query: opParams.match, status: 'loading'});
+    this.messages.clear();
     await this.messagesOp.perform(opParams);
     const body = this.messagesOp.res.body;
-    this.addMessages(opParams.before ? 'unshift' : 'push', body.messages || []);
+    this.messages[opParams.before ? 'unshift' : 'push'](body.messages || []);
 
     return this.update({status: this.messagesOp.status});
   }
