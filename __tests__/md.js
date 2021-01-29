@@ -37,6 +37,8 @@ test('code', () => {
     .toBe('not a <code><a href="https://link.com" target="_blank">https://link.com</a></code>');
   expect(md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
     .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
+  expect(md('kikuchi` changed nick to kikuchi```.'))
+    .toBe('kikuchi` changed nick to kikuchi```.');
 });
 
 function countEmojis(str) {

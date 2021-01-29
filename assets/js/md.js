@@ -119,7 +119,7 @@ function mdBlockQuote(str) {
 }
 
 function mdCode(str) {
-  return str.replace(/(\\?)`([^`]+)`/g, (all, esc, text) => {
+  return str.replace(/(\\?)`(\S[^`]+)`/g, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 }
