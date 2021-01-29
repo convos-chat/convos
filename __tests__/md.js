@@ -12,6 +12,10 @@ test('blockquote', () => {
 
 test('emoji', () => {
   expect(countEmojis(':) :/ :( ;D &lt;3 :D :P ;) :heart:')).toBe(8);
+  expect(md('wouldn\'t it need :// too?'))
+    .toBe('wouldn&apos;t it need :// too?');
+  expect(md('but :/. turns into an emoji'))
+    .toMatch(/but <img.*[^>]+>. turns into an emoji/);
 });
 
 test('em, strong', () => {

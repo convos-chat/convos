@@ -30,7 +30,7 @@ export const emojiAliases = {
   ':wink:': ';)',
 };
 
-const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
+const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\s|\\.|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
 
 /**
  * emojis() is a function to return either a single emoji or a list of emojis
