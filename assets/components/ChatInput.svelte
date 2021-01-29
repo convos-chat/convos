@@ -42,7 +42,7 @@ function focusAutocompleteItem(e, moveBy) {
 function handleMessageResponse(msg) {
   if (!msg.errors) return;
   if (!conversation || msg.conversation_id == conversation.conversation_id) return;
-  conversation.addMessage({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
+  conversation.addMessages({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
 }
 
 function onChange(inputEl) {
@@ -116,14 +116,14 @@ function updateValueWhenConversationChanges(conversation) {
 function uploadFiles(e) {
   const files = (e.target && e.target.files) || (e.dataTransfer && e.dataTransfer.files);
   if (!files || !files.length) return;
-  if (files.length > 1) return conversation.addMessage({message: 'Cannot upload more than one file.', type: 'error'});
+  if (files.length > 1) return conversation.addMessages({message: 'Cannot upload more than one file.', type: 'error'});
 
   const formData = new FormData();
   formData.append('file', files[0]);
   api('uploadFile').perform({formData}).then(op => {
     const res = op.res.body;
     if (res.files && res.files.length) return fillin(res.files[0].url, {append: true});
-    if (res.errors) conversation.addMessage({message: 'Could not upload file: %1', vars: [$l(extractErrorMessage(res.errors))], type: 'error'});
+    if (res.errors) conversation.addMessages({message: 'Could not upload file: %1', vars: [$l(extractErrorMessage(res.errors))], type: 'error'});
   });
 }
 </script>

@@ -64,14 +64,13 @@ export default class Conversation extends Reactive {
     this._addOperations();
   }
 
-  addMessage(msg) {
-    this._maybeIncreaseUnread(msg);
-    this._maybeNotify(msg);
-    if (!this.historyStopAt && msg.type == 'private') return;
-    return this.addMessages('push', [msg]);
-  }
+  addMessages(messages, method) {
+    if (!Array.isArray(messages)) {
+      this._maybeIncreaseUnread(messages)._maybeNotify(messages);
+      messages = [messages];
+      method = 'push';
+    }
 
-  addMessages(method, messages) {
     let start = 0;
     let stop = messages.length;
 
@@ -135,8 +134,8 @@ export default class Conversation extends Reactive {
       this.update({messages: []});
     }
 
-    this.addMessages(params.before ? 'unshift' : 'push', body.messages || []);
-    this.addMessages('push', internalMessages);
+    this.addMessages(body.messages || [], params.before ? 'unshift' : 'push');
+    this.addMessages(internalMessages, 'push');
     this._setEndOfStream(params, body);
 
     return this;
@@ -213,7 +212,7 @@ export default class Conversation extends Reactive {
   wsEventMode(params) {
     if (params.nick) {
       this.participants([{nick: params.nick, mode: params.mode}]);
-      this.addMessage({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+      this.addMessages({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
     }
     else {
       this.update({modes: this._calculateModes(channelModeCharToModeName, params.mode, this.modes)});
@@ -227,7 +226,7 @@ export default class Conversation extends Reactive {
     this._participants.delete(oldId);
     this.participants([{nick: params.new_nick}]);
     const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
-    this.addMessage({message, vars: [params.old_nick, params.new_nick]});
+    this.addMessages({message, vars: [params.old_nick, params.new_nick]});
   }
 
   wsEventPart(params) {
@@ -236,14 +235,14 @@ export default class Conversation extends Reactive {
     this._participants.delete(this._participantId(params.nick));
     this.update({_participants: true});
     if (!params.silent) {
-      this.addMessage(this._partMessage(params));
+      this.addMessages(this._partMessage(params));
     }
   }
 
   wsEventSentClear(params) {
     if (params.errors) return;
     this.update({messages: []});
-    this.addMessage({message: 'History was cleared for %1.', vars: [this.name]});
+    this.addMessages({message: 'History was cleared for %1.', vars: [this.name]});
   }
 
   wsEventSentNames(params) {
@@ -258,12 +257,12 @@ export default class Conversation extends Reactive {
 
     msg.vars[0] = participants.length;
     msg.vars[1] = participants.join(', ');
-    this.addMessage(msg);
+    this.addMessages(msg);
   }
 
   wsEventSentTopic(params) {
     const message = params.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.';
-    this.addMessage({message, vars: [this.name, params.topic]});
+    this.addMessages({message, vars: [this.name, params.topic]});
     this.update({topic: params.topic});
   }
 
@@ -291,25 +290,26 @@ export default class Conversation extends Reactive {
   }
 
   _maybeIncreaseUnread(msg) {
-    if (!msg.from || msg.yourself) return;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
-    this.update({unread: this.unread + 1});
+    if (!msg.from || msg.yourself) return this;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return this;
+    return this.update({unread: this.unread + 1});
   }
 
   _maybeNotify(msg) {
-    if (notify.appHasFocus) return;
-    if (!msg.from || msg.yourself) return;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+    if (notify.appHasFocus) return this;
+    if (!msg.from || msg.yourself) return this;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return this;
 
     const isVideoLink
        = msg.message.indexOf(this.videoInfo().realUrl) != -1
       || msg.message.indexOf(route.urlFor('/video/')) != -1;
 
-    if (!isVideoLink && !msg.highlight && !this.wantNotifications) return;
+    if (!isVideoLink && !msg.highlight && !this.wantNotifications) return this;
 
     const title = msg.from == this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
     const message = isVideoLink ? i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', this.name) : msg.message;
     this.lastNotification = notify.show(message, {path: this.path, title});
+    return this;
   }
 
   _noop() {
@@ -332,19 +332,6 @@ export default class Conversation extends Reactive {
     }
 
     return msg;
-  }
-
-  _realMessage(start) {
-    const incBy = start == -1 ? -1 : 1;
-    const messages = this.messages;
-    let i = start == -1 ? this.messages.length - 1 : 0;
-
-    while (messages[i]) {
-      if (!messages[i].internal) return messages[i];
-      i += incBy;
-    }
-
-    return null;
   }
 
   _setEndOfStream(params, body) {

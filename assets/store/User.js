@@ -154,7 +154,7 @@ export default class User extends Reactive {
     msg.silent = this.ignoreStatuses;
     this.emit(msg.dispatchTo, msg);
 
-    if (msg.highlight) this.notifications.addMessage(msg);
+    if (msg.highlight) this.notifications.addMessages(msg);
 
     const conn = this.findConversation({connection_id: msg.connection_id});
     if (!conn) return;

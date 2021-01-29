@@ -75,7 +75,7 @@ export default class Connection extends Conversation {
 
   wsEventConnection(params) {
     this.update({state: params.state});
-    this.addMessage(params.message
+    this.addMessages(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
         : {message: 'Connection state changed to %1.', vars: [params.state]}
       );
@@ -85,19 +85,19 @@ export default class Connection extends Conversation {
     const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
     this.ensureConversation(params).participants([{nick: this.nick, me: true}]);
-    if (params.frozen) (existing || this).addMessage({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
-    if (wasFrozen && !params.frozen) existing.addMessage({message: 'Connected.', vars: []});
+    if (params.frozen) (existing || this).addMessages({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
+    if (wasFrozen && !params.frozen) existing.addMessages({message: 'Connected.', vars: []});
   }
 
   wsEventMe(params) {
     this.wsEventNickChange(params);
-    if (params.server_op) this.addMessage({message: 'You are an IRC operator.', vars: [], highlight: true});
+    if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
     this.update(params);
   }
 
   wsEventMessage(params) {
     params.yourself = params.from == this.nick;
-    return params.conversation_id ? this.ensureConversation(params).addMessage(params) : this.addMessage(params);
+    return params.conversation_id ? this.ensureConversation(params).addMessages(params) : this.addMessages(params);
   }
 
   wsEventNickChange(params) {
@@ -122,14 +122,14 @@ export default class Connection extends Conversation {
     // Generic errors
     const conversation = (params.conversation_id && params.frozen) ? this.ensureConversation(params) : (this.findConversation(params) || this);
     conversation.update({errors: this.errors + 1});
-    conversation.addMessage(msg);
+    conversation.addMessages(msg);
   }
 
   wsEventJoin(params) {
     const conversation = this.ensureConversation(params);
     const nick = params.nick || this.nick;
     if (nick != this.nick && !params.silent) {
-      conversation.addMessage({message: '%1 joined.', vars: [nick]});
+      conversation.addMessages({message: '%1 joined.', vars: [nick]});
     }
     conversation.participants([{nick}]);
   }
@@ -150,7 +150,7 @@ export default class Connection extends Conversation {
 
   wsEventSentList(params) {
     const args = params.args || '/*/';
-    this.addMessage(params.done
+    this.addMessages(params.done
       ? {message: 'Found %1 of %2 conversations from %3.', vars: [params.conversations.length, params.n_conversations, args]}
       : {message: 'Found %1 of %2 conversations from %3, but conversations are still loading.', vars: [params.conversations.length, params.n_conversations, args]}
     );
@@ -165,9 +165,9 @@ export default class Connection extends Conversation {
 
     switch (modeSent[1]) {
       case '':
-        return conversation.addMessage({message: '%s has mode %s', vars: [params.conversation_id, params.mode]});
+        return conversation.addMessages({message: '%s has mode %s', vars: [params.conversation_id, params.mode]});
       case 'k':
-        return conversation.addMessage({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
+        return conversation.addMessages({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
       case 'b':
         return this._wsEventSentModeB(params, modeSent);
     }
@@ -177,14 +177,14 @@ export default class Connection extends Conversation {
     const conversation = this.findConversation(params) || this;
 
     if (params.banlist) {
-      if (!params.banlist.length) conversation.addMessage({message: 'Ban list is empty.'});
+      if (!params.banlist.length) conversation.addMessages({message: 'Ban list is empty.'});
       params.banlist.forEach(ban => {
-        conversation.addMessage({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
+        conversation.addMessages({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
       });
     }
     else {
       const action = modeSent[0] == '+' ? 'set' : 'removed';
-      conversation.addMessage({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
+      conversation.addMessages({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
     }
   }
 
@@ -217,7 +217,7 @@ export default class Connection extends Conversation {
     }
 
     const conversation = this.findConversation(params) || this;
-    conversation.addMessage({message, vars, sent: params});
+    conversation.addMessages({message, vars, sent: params});
   }
 
   _addDefaultParticipants(conversation) {
