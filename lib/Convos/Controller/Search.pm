@@ -1,30 +1,29 @@
 package Convos::Controller::Search;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Date 'dt';
+use Convos::Date qw(dt);
 use Mojo::JSON qw(false true);
-use Mojo::Util 'url_unescape';
+use Mojo::Util qw(trim);
 
 use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 365;
 
 sub messages {
-  my $self  = shift->openapi->valid_input or return;
-  my $user  = $self->backend->user        or return $self->reply->errors([], 401);
-  my %query = $self->_make_query;
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
-  return $self->render(openapi => {messages => [], end => true}) unless $query{match};
+  my $query = $self->_make_query;
+  return $self->render(openapi => {messages => [], end => true}) if 2 >= keys %$query;
 
-  my $cid = $self->param('connection_id');
-  my @connections = grep $_, $cid ? ($user->get_connection($cid)) : @{$user->connections};
+  my $cid         = delete $query->{connection_id};
+  my @connections = grep {$_} $cid ? $user->get_connection($cid) : @{$user->connections};
   return $self->reply->errors('Connection not found.', 404) if $cid and !@connections;
 
-  my $did           = url_unescape $self->param('conversation_id') || '';
-  my @conversations = grep $_,
-    map { $did ? ($_->get_conversation($did)) : @{$_->conversations} } @connections;
-  return $self->reply->errors('Conversation not found.', 404) if $did and !@conversations;
+  $cid = delete $query->{conversation_id};
+  my @conversations
+    = grep {$_} map { $cid ? ($_->get_conversation($cid)) : @{$_->conversations} } @connections;
   return $self->render(openapi => {messages => [], end => true}) unless @conversations;
 
-  my @p = map { (Mojo::Promise->resolve($_), $_->messages_p(\%query)) } @conversations;
+  my @p = map { (Mojo::Promise->resolve($_), $_->messages_p($query)) } @conversations;
   return Mojo::Promise->all(@p)->then(sub {
     my @messages;
 
@@ -48,15 +47,22 @@ sub messages {
 sub _make_query {
   my $self = shift;
 
-  my %query = (
-    after  => $self->param('after') || (dt() - DEFAULT_AFTER)->datetime,
-    before => $self->param('before'),
-    from   => $self->param('from'),
-    limit  => $self->param('limit') || 60,
-    match  => $self->param('match'),
-  );
+  my %query;
+  $query{after} = $self->param('after') || (dt() - DEFAULT_AFTER)->datetime;
+  $query{limit} = $self->param('limit') || 60;
+  $query{$_}    = $self->param($_)
+    for grep { $self->param($_) } qw(before connection_id conversation_id from);
 
-  return %query;
+  my $match = $self->param('match') // '';
+  my (@conversation_id, @from);
+  $match =~ s!(\#\S+)!{push(@conversation_id, $1), ''}!e unless $query{conversation_id};
+  $match =~ s!\@(\S+)!{push(@from, $1), ''}!e            unless $query{from};
+
+  $query{conversation_id} = $conversation_id[-1] if @conversation_id;
+  $query{from}            = $from[-1]            if @from;
+  $query{match}           = trim $match          if length $match;
+
+  return \%query;
 }
 
 1;

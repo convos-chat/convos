@@ -27,16 +27,8 @@ export default class Search extends Conversation {
     // params = {after, before, limit, match}
     const opParams = {...params};
     opParams.match = params.match || params.message;
-    if (opParams.match == undefined) opParams.match = '';
 
-    // Find conversation
-    opParams.match = opParams.match
-      .replace(/\s*conversation:(\S+)\s*/, (all, conversation_id) => [' ', (opParams.conversation_id = conversation_id)][0])
-      .replace(/\s*from:(\S+)\s*/, (all, from) => [' ', (opParams.from = from)][0])
-      .replace(/\s*([&#]\S+)\s*/, (all, conversation_id) => [' ', (opParams.conversation_id = conversation_id)][0]);
-
-    opParams.match = opParams.match.trim();
-    if (!opParams.match.match(/\S/)) {
+    if (!(opParams.match || '').match(/\S/)) {
       return this.update({messages: []}).addMessages([{message: 'Search query "%1" does not contain anything to search for.', vars: [params.message]}]);
     }
 
