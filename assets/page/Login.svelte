@@ -8,6 +8,8 @@ import {i18n, l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {settings} from '../js/util';
 
+export let title = 'Login';
+
 const api = getContext('api');
 const user = getContext('user');
 
@@ -18,9 +20,9 @@ const registerOp = api('registerUser');
 let formEl;
 
 $: redirect($user);
-$: route.update({title: $route.path.match(/register/) ? 'Register' : 'Login'});
 $: if ($loginOp.is('success')) redirectAfterLogin(loginOp);
 $: if ($registerOp.is('success')) registered();
+$: title = $route.path.match(/register/) ? 'Register' : 'Login';
 
 function redirect(user) {
   const conversation = user.conversations()[0];

@@ -9,6 +9,8 @@ import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
 import {route} from '../store/Route';
 
+export const title = 'Add conversation';
+
 const socket = getContext('socket');
 const user = getContext('user');
 
@@ -21,7 +23,6 @@ let loadConversationsTid;
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
 $: if (!connectionId) connectionId = connectionOptions[0] ? connectionOptions[0][0] : '';
 
-route.update({title: 'Add conversation'});
 onMount(() => route.urlToForm(formEl));
 
 function addConversation(e) {

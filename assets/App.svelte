@@ -23,6 +23,7 @@ const user = new User({});
 
 let [innerHeight, innerWidth] = [0, 0];
 let readyStateNotification = {closed: true};
+let title = i18n.l('Chat');
 
 // This section is to help debugging the WebSocket issue in production
 socket.update({debug: 'WebSocket'});
@@ -49,15 +50,16 @@ $: loggedInRoute = $route.component && $route.requireLogin && user.is('authentic
 $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
 $: settings('app_mode', loggedInRoute);
 $: settings('notify_enabled', loggedInRoute);
-$: calculateTitle($route, $user);
+$: setTitle(title, $user);
 
-function calculateTitle(route, user) {
+function setTitle(title, $user) {
   if (!document) return;
   const organizationName = settings('organization_name');
-  const title = user.unread ? '(' + user.unread + ') ' + route.title : route.title;
 
-  document.title
-    = organizationName == 'Convos' ? i18n.l('%1 - Convos', title) : i18n.l('%1 - Convos for %2', title, organizationName);
+  title = $user.unread ? '(' + $user.unread + ') ' + i18n.l(title) : i18n.l(title);
+  document.title = organizationName == 'Convos'
+    ? i18n.l('%1 - Convos', title)
+    : i18n.l('%1 - Convos for %2', title, organizationName);
 }
 
 async function registerServiceWorker() {
@@ -108,13 +110,13 @@ function socketChanged(socket) {
     <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: isWide ? 0 : innerWidth}}"/>
   {/if}
 
-  <svelte:component this="{$route.component}"/>
+  <svelte:component this="{$route.component}" bind:title/>
 
   {#if $route.activeMenu && !isWide}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
 {:else if $route.requireLogin}
-  <Login/>
+  <Login bind:title/>
 {:else}
-  <svelte:component this="{$route.component || Fallback}"/>
+  <svelte:component this="{$route.component || Fallback}" bind:title/>
 {/if}

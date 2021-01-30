@@ -15,6 +15,8 @@ import {l, lmd} from '../store/I18N';
 import {q, showFullscreen, tagNameIs} from '../js/util';
 import {route} from '../store/Route';
 
+export let title = 'Chat';
+
 const socket = getContext('socket');
 const user = getContext('user');
 
@@ -31,6 +33,7 @@ let unsubscribe = {};
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
 $: notConnected = $conversation.frozen ? true : false;
+$: title = $conversation.title;
 $: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
@@ -163,7 +166,6 @@ function setConversationFromUser(user) {
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
   unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
-  route.update({title: conversation.title});
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});

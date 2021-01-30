@@ -4,12 +4,11 @@ import Link from '../components/Link.svelte';
 import {commands} from '../js/autocomplete';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../store/I18N';
-import {route} from '../store/Route';
 import {settings} from '../js/util';
 
-const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('version') + '/Changes#L3';
+export const title = 'Help';
 
-route.update({title: 'Help'});
+const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('version') + '/Changes#L3';
 </script>
 
 <ChatHeader>

@@ -8,12 +8,15 @@ import {getContext, onDestroy, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 
+export let title = 'Search';
+
 const user = getContext('user');
 
 let conversation = $route.path.indexOf('search') == -1 ? user.notifications : user.search;
 
 $: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
 $: messages = $conversation.messages;
+$: title = $conversation.is('search') ? 'Search' : 'Notifications';
 $: setConversationFromRoute($route);
 
 onMount(() => user.search.on('send', search));

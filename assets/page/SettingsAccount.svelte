@@ -9,8 +9,9 @@ import TextField from '../components/form/TextField.svelte';
 import {getContext, onDestroy} from 'svelte';
 import {i18n, l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
-import {route} from '../store/Route';
 import {settings} from '../js/util';
+
+export const title = 'Account';
 
 const api = getContext('api');
 const themeManager = getContext('themeManager');
@@ -29,8 +30,6 @@ let wantNotifications = notify.wantNotifications;
 
 $: colorSchemeReadonly = $themeManager.hasColorScheme(activeTheme) ? false : true;
 $: i18n.load(lang);
-
-route.update({title: 'Account'});
 
 updateUserOp.on('start', req => {
   if (!req.body.password) delete req.body.password;

@@ -7,7 +7,8 @@ import TextField from '../components/form/TextField.svelte';
 import {getContext, onMount} from 'svelte';
 import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
-import {route} from '../store/Route';
+
+export const title = 'Global settings';
 
 const api = getContext('api');
 const user = getContext('user');
@@ -34,8 +35,6 @@ updateSettingsOp.on('start', req => {
     videoService: req.body.video_service,
   });
 });
-
-route.update({title: 'Global settings'});
 
 onMount(async () => {
   await getSettingsOp.perform();

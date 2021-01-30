@@ -12,6 +12,8 @@ import {l, lmd} from '../store/I18N';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
+export let title = 'Users';
+
 const api = getContext('api');
 const user = getContext('user');
 
@@ -25,8 +27,7 @@ let users = [];
 
 $: editUser = findUser($route, users);
 $: invite = $inviteLinkOp.res.body || {};
-
-route.update({title: 'Users'});
+$: title = editUser ? editUser.email : 'Users';
 
 updateUserOp.on('start', req => {
   editUser.roles = req.body.roles.split(/[.,\s]+/).map(str => str.trim());

@@ -5,16 +5,18 @@ import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {settings} from '../js/util';
 
+export let title = 'Loading...';
+
 const messages = {'loading': 'Loading...', 'not_found': 'Not Found'};
 const socket = getContext('socket');
 const user = getContext('user');
 
 $: status = calculateStatus($route, $user);
-$: route.update({title: messages[status]});
+$: title = messages[status];
 
-function calculateStatus(route, user) {
-  const override = route.path.match(/\/err\/(\w+)/);
-  return override ? override[1] : !route.component || user.is('loading') ? 'loading' : 'not_found';
+function calculateStatus($route, user) {
+  const override = $route.path.match(/\/err\/(\w+)/);
+  return override ? override[1] : !$route.component || user.is('loading') ? 'loading' : 'not_found';
 }
 </script>
 
