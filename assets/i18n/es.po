@@ -956,7 +956,7 @@ msgid "You are the only participant in this conversation."
 msgstr "Eres el único participante en esta conversación."
 
 msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
-msgstr "Puedes ingresar el nombre de un canal como #cool_beans para acotar la búsqueda, o ingresar @algun_nick para filtrar mensajes enviados por un usuario dado."
+msgstr "Puedes ingresar el nombre de un canal como #algun_canal para acotar la búsqueda, o ingresar @algun_nick para filtrar mensajes enviados por un usuario dado."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."
