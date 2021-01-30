@@ -57,13 +57,29 @@ Convos::Plugin::Bot::Action - Base class for bot actions
 
   sub reply {
     my ($self, $event) = @_;
-    return "Cool beans!" if $event->{command} =~ m/^beans/;
+    return "Cool beans!" if $event->{mesages} =~ m/^beans/;
   }
 
 =head1 DESCRIPTION
 
 L<Convos::Plugin::Bot::Action> must be used as base class for
 L<Convos::Plugin::Bot> actions.
+
+=head1 EVENTS
+
+=head2 message
+
+  $action->on(message => sub { my ($action, $event) = @_ });
+
+This event is emitted from L<Convos::Plugin::Bot>, when the bot sees/receives a
+new message. The C<$event> has this structure:
+
+  {
+    connection_id   => "irc-something",
+    conversation_id => "nick_or_#room_lowercase",
+    from            => $nick,
+    is_private      => $bool, # true if sent in a private chat
+  }
 
 =head1 ATTRIBUTES
 
@@ -110,6 +126,8 @@ conversation with the bot.
 Used to get a L</config> parameter for the current C<$action> and an event with
 C<connection_id> and C<conversation_id>.
 
+C<$event> should have the same structure as the L</message> event.
+
 =head2 register
 
   $action->register($bot, \%config);
@@ -118,10 +136,16 @@ Called the first time the C<$action> is loaded by L<Convos::Plugin::Bot>.
 
 =head2 reply
 
-  $str = $action->reply(\%message_event);
+  $str = $action->reply(\%event);
 
-Can be used to generate a reply to a C<%message_event>. C<$str> must be
-C<undef> for the reply to be ignored.
+Can be used to generate a reply to a C<%event>. The first
+L<Convos::Plugin::Bot::Action> object that returns a C<$str> will be used to
+generate a response. This is to prevent the bot from making multiple responses
+to the same message.
+
+Return C<undef> to allow the next action to reply.
+
+C<$event> has the same structure as the L</message> event.
 
 =head1 SEE ALSO
 

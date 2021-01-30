@@ -29,7 +29,8 @@ sub dictionary {
   $self->res->headers->cache_control(RELOAD ? 'no-cache' : 'max-age=86400');
   $self->render(
     json => {
-      available_languages => $self->i18n->languages,
+      %{$self->i18n->meta($self->stash('lang'))},
+      available_languages => $self->i18n->meta,
       dictionary          => $self->i18n->dictionary($self->stash('lang')),
     }
   );

@@ -34,8 +34,8 @@ done_testing;
 sub build_assets {
   opendir(my $ASSETS, 'public/asset');
   /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
-  system 'pnpm run build';
-  ok 1, 'pnpm run build';
+  diag qq(\nPlease consult https://convos.chat/doc/develop for details about "pnpm".\n\n)
+    unless is system('pnpm run build'), 0, 'run "pnpm run build"';
 }
 
 sub test_defaults {

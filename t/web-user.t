@@ -49,8 +49,11 @@ $user->unread(4);
 
 $user->connection({name => 'localhost', protocol => 'irc'})->conversation({name => '#convos'})
   ->unread(42);
-$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
-  ->json_is('/email', 'superman@example.com')->json_is(
+$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200);
+
+my $state = $user->get_connection('irc-localhost')->state;
+like $state, qr{disconnected|queued}, 'the state is subject for race condition';
+$t->json_is('/email', 'superman@example.com')->json_is(
   '/connections',
   [{
     connection_id       => 'irc-localhost',
@@ -59,7 +62,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
     on_connect_commands => [],
     protocol            => 'irc',
     service_accounts    => [qw(chanserv nickserv)],
-    state               => 'queued',
+    state               => $state,
     url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
     wanted_state        => 'connected',
   }]

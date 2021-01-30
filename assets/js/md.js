@@ -30,7 +30,7 @@ export const emojiAliases = {
   ':wink:': ';)',
 };
 
-const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\W|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
+const emojiRe = new RegExp('(^|\\s)(:\\w+:|' + Object.keys(emojiAliases).map(k => regexpEscape(emojiAliases[k])).join('|') + ')(?=\\s|\\.|$)', 'gi'); // :short_code:, :(, :), :/, :D, :P, ;), ;D, <3
 
 /**
  * emojis() is a function to return either a single emoji or a list of emojis
@@ -119,7 +119,7 @@ function mdBlockQuote(str) {
 }
 
 function mdCode(str) {
-  return str.replace(/(\\?)`([^`]+)`/g, (all, esc, text) => {
+  return str.replace(/(\\?)`(\S[^`]+)`/g, (all, esc, text) => {
     return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
   });
 }

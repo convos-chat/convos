@@ -5,16 +5,16 @@ use Convos::Date 'dt';
 use Mojo::JSON qw(false true);
 use Mojo::Util 'url_unescape';
 
-use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 90;
+use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 365;
 
 sub messages {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+  my $self  = shift->openapi->valid_input or return;
+  my $user  = $self->backend->user        or return $self->reply->errors([], 401);
   my %query = $self->_make_query;
 
   return $self->render(openapi => {messages => [], end => true}) unless $query{match};
 
-  my $cid         = $self->param('connection_id');
+  my $cid = $self->param('connection_id');
   my @connections = grep $_, $cid ? ($user->get_connection($cid)) : @{$user->connections};
   return $self->reply->errors('Connection not found.', 404) if $cid and !@connections;
 

@@ -19,7 +19,7 @@ use Cwd ();
 use File::Spec;
 use FindBin;
 
-our $VERSION = '5.11';
+our $VERSION = '5.13';
 
 # Run the program
 (bless {}, __PACKAGE__)->run(@ARGV);
@@ -36,10 +36,12 @@ sub command_build {
   $ENV{RELEASE} //= @cmd && $cmd[0] eq 'release';
   my @tests = qw(t/production-resources.t);
   push @tests, 't/version.t' if $ENV{RELEASE};
-  $script->command_exec(qw(prove -l), @tests);
-  print
-    "Now run:\n\$ git push origin master:master && git push origin master:stable && git push origin --tags\n\n"
-    if $ENV{RELEASE};
+  return unless $script->command_exec(qw(prove -l), @tests);
+
+  my $push = 'git push origin';
+  print $ENV{RELEASE}
+    ? "\nNow run:\n\$ $push master:master && $push master:stable && $push --tags\n\n"
+    : "\nConvos must be restarted to use the new CSS and JavaScript assets.\n\n";
 }
 
 sub command_cpanm {

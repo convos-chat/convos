@@ -63,3 +63,13 @@ body {
   left: 0;
   opacity: 0.3;
 }
+
+.language-selector {
+  a:after {
+    content: ' - ';
+  }
+
+  a:last-of-type:after {
+    content: '';
+  }
+}

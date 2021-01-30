@@ -1,8 +1,21 @@
 Revision history for perl distribution Convos
 
-5.12 Not Released
- - Allow .po files to be reloaded when developing
+5.13 2021-01-23T12:42:00+0900
+ - Fix parsing .po files
+
+5.12 2021-01-23T11:49:00+0900
+ - Add language picker to SettingsAccount and login screen
+ - Add support for multiple lines in .po files
  - Add "recover" command
+ - Fix openssl is required in docker tob build certificates
+ - Improved Italian translations #559
+   Contributor: SerHack
+ - Improved Norwegian translations #553
+ - Improved Spanish translations #552
+   Contributor: Iván Ávalos and José Joaquín Atria
+ - Improved output from "convos build" command
+ - Allow .po files to be reloaded when developing
+ - Removed "command" from Bot action message events
 
 5.11 2021-01-14T08:57:00+0900
  - Add Norwegian translations #549

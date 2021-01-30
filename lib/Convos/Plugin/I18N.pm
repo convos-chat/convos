@@ -3,6 +3,7 @@ use Mojo::Base 'Convos::Plugin';
 
 use Convos::Util qw(DEBUG);
 use HTTP::AcceptLanguage;
+use Mojo::Date;
 use Mojo::File qw(path);
 use Mojo::Util qw(decode);
 
@@ -10,14 +11,15 @@ use constant CAPTURE => $ENV{CONVOS_I18N_CAPTURE_LEXICONS} || 0;
 use constant RELOAD => $ENV{CONVOS_RELOAD_DICTIONARIES} || $ENV{MOJO_WEBPACK_LAZY} || 0;
 
 has _dictionaries => sub { +{} };
+has _meta         => sub { +{} };
 
 sub register {
   my ($self, $app, $config) = @_;
 
   $app->helper('i18n.dictionary'        => sub { $self->_dictionary(@_) });
-  $app->helper('i18n.languages'         => sub { [sort keys %{$self->_dictionaries}] });
   $app->helper('i18n.load_dictionaries' => sub { $self->_load_dictionaries(shift, @_) });
-  $app->helper('l'                      => \&_l);
+  $app->helper('i18n.meta' => sub { $_[1] ? $self->_meta->{$_[1]} || {} : $self->_meta });
+  $app->helper('l'         => \&_l);
   $app->hook(around_action => sub { $self->_around_action(@_) });
 
   $app->i18n->load_dictionaries;
@@ -28,7 +30,8 @@ sub _around_action {
   return $next->() unless $last;
 
   my $dictionaries = $self->_dictionaries;
-  my $lang         = $c->param('lang') || $c->req->headers->accept_language || 'en';
+  my $lang
+    = $c->param('lang') || $c->js_session('lang') || $c->req->headers->accept_language || 'en';
   my $dict;
   for my $l (HTTP::AcceptLanguage->new($lang)->languages) {
     my ($prefix) = split /-/, $l;
@@ -50,6 +53,8 @@ sub _dictionary {
 sub _load_dictionaries {
   my ($self, $c, $load_lang) = @_;
   my $dictionaries = $self->_dictionaries;
+  my $meta         = $self->_meta;
+  my $now          = Mojo::Date->new->to_datetime;
 
   for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->assets_dir) {
     next unless $file =~ m!([\w-]+)\.po$!;
@@ -59,23 +64,66 @@ sub _load_dictionaries {
       sub { $dictionaries->{$lang}{$_[0]->{msgid}} = $_[0]->{msgstr} });
     my $l = $dictionaries->{$lang}{_l} = $lang;
     my $n = $dictionaries->{$lang}{_n} = int(keys %{$dictionaries->{$lang}}) - 1;
+
+    for (split /\n/, $dictionaries->{$lang}{''} // '') {
+      my ($key, $value) = split /:\s+/, $_, 2;
+      $value =~ s!;\s*$!!;
+      $key   =~ s!-!_!g;
+      $meta->{$lang}{lc $key} = $value;
+    }
+
+    for my $k (qw(po_revision_date pot_creation_date)) {
+      $meta->{$lang}{$k} ||= $now;
+      $meta->{$lang}{$k} =~ s!\s!T!;
+    }
+
+    $meta->{$lang}{content_type}         ||= 'text/plain; charset=UTF-8';
+    $meta->{$lang}{language_team}        ||= "$lang <lang\@convos.chat>";
+    $meta->{$lang}{mime_version}         ||= '1.0';
+    $meta->{$lang}{project_id_version}   ||= $Convos::VERSION;
+    $meta->{$lang}{report_msgid_bugs_to} ||= 'https://github.com/Nordaaker/convos/issues';
+
     warn qq([Convos::Plugin::I18N] Loaded $n lexicons for dictionary "$l" from $file.\n) if DEBUG;
   }
 }
 
 sub _parse_po_file {
-  my $cb    = pop;
-  my $PO    = shift->open;
-  my $entry = {};
+  my $cb = pop;
+  my $PO = shift->open;
+  my ($entry, $section, @comments) = ({}, '');
+
+  my $cb_maybe = sub {
+    return unless defined $entry->{msgid} and $entry->{msgstr};
+    $entry->{comments} = \@comments;
+    $cb->($entry);
+    ($entry, $section, @comments) = ({}, '');
+  };
+
   while (<$PO>) {
     s![\r\n]!!g;
-    $_                     = decode 'UTF-8', $_;
-    @$entry{qw{file line}} = ($1, $2)      if /^#:\s*([^:]+):(\d+)/;
-    $entry->{$1}           = _unescape($2) if /(msgid|msgstr)\s*(['"].*)/;
-    next unless $entry->{msgid} and $entry->{msgstr};
-    $cb->($entry);
-    $entry = {};
+    $_ = decode 'UTF-8', $_;
+
+    if (/^\s*#/ and !$entry->{msgid}) {
+      $cb_maybe->();
+      $section = '';
+      push @comments, $1 if /^\s*#:\s*(.+)/;
+    }
+    elsif (s!^\s*msgid!!) {
+      $cb_maybe->();
+      $section = 'msgid';
+    }
+    elsif (s!^\s*msgstr!!) {
+      $section = 'msgstr';
+    }
+
+    if ($section) {
+      $entry->{$section} //= '';
+      $entry->{$section} .= _unescape($1) if /(['"].*)/;
+    }
   }
+
+  # process last translation
+  $cb_maybe->();
 }
 
 sub _l {
@@ -99,6 +147,7 @@ sub _unescape {
   local $_ = $_[0];
   s!^['"]!! and s!['"]$!!;
   s!\\"!"!g;
+  s!\\n!\n!g;
   return $_;
 }
 

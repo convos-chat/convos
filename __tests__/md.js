@@ -12,6 +12,10 @@ test('blockquote', () => {
 
 test('emoji', () => {
   expect(countEmojis(':) :/ :( ;D &lt;3 :D :P ;) :heart:')).toBe(8);
+  expect(md('wouldn\'t it need :// too?'))
+    .toBe('wouldn&apos;t it need :// too?');
+  expect(md('but :/. turns into an emoji'))
+    .toMatch(/but <img.*[^>]+>. turns into an emoji/);
 });
 
 test('em, strong', () => {
@@ -37,6 +41,8 @@ test('code', () => {
     .toBe('not a <code><a href="https://link.com" target="_blank">https://link.com</a></code>');
   expect(md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
     .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
+  expect(md('kikuchi` changed nick to kikuchi```.'))
+    .toBe('kikuchi` changed nick to kikuchi```.');
 });
 
 function countEmojis(str) {

@@ -10,8 +10,10 @@ export default class I18N extends Reactive {
     this.prop('cookie', 'lang', '');
     this.prop('ro', 'dictionaries', {});
     this.prop('ro', 'languages', () => this._languages);
+    this.prop('ro', 'languageOptions', () => this._languageOptions);
 
     this._languages = [];
+    this._languageOptions = [];
   }
 
   l(lexicon, ...vars) {
@@ -23,10 +25,11 @@ export default class I18N extends Reactive {
   }
 
   async load(lang) {
-    if (!lang) lang = document.documentElement.getAttribute('lang');
+    if (!lang) lang = this.lang || document.documentElement.getAttribute('lang');
     const op = await api('/api', 'getDictionary', {lang}).perform();
     this.dictionaries[lang] = op.res.body.dictionary;
-    this._languages = op.res.body.languages;
+    this._languages = op.res.body.available_languages || {};
+    this._languageOptions = Object.keys(this._languages).sort().map(id => [id, this._languages[id].language_team.replace(/\s*<.*/, '')]);
     return this.update({lang});
   }
 

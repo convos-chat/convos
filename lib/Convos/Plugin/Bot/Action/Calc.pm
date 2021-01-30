@@ -13,7 +13,7 @@ sub register {
 
 sub reply {
   my ($self, $event) = @_;
-  return undef unless $event->{command} =~ m/^calc\S*\s+(.+)/;
+  return undef unless $event->{message} =~ m/^calc\S*\s+(.+)/;
 
   my $expr = $1;
   return eval { sprintf '%s = %s', $expr, Math::Calc::Parser->evaluate($expr) } || do {
