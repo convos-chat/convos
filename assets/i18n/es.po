@@ -995,3 +995,5 @@ msgstr "para %1"
 msgid "whatever, keywords"
 msgstr "lo que sea, palabras clave"
 
+msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "Puedes ingresar el nombre de un canal como #cool_beans para acotar la búsqueda, o ingresar @algun_nick para filtrar mensajes enviados por un usuario dado."
