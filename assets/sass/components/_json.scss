@@ -5,7 +5,8 @@
 }
 
 .json-boolean {
-  color: #228dad;
+  background-color: var(--syntax-hl-variable-bg);
+  color: var(--syntax-hl-variable);
 }
 
 .json-key {
@@ -14,17 +15,13 @@
 
 .json-key:after {
   content: ': ';
-  color: #222;
+  background-color: var(--syntax-hl-keyword-bg);
+  color: var(--syntax-hl-keyword);
 }
 
-.json-null {
-  color: #222;
-}
-
-.json-number {
-  color: #cc4638;
-}
-
+.json-null,
+.json-number,
 .json-string {
-  color: #0d9256;
+  background-color: var(--syntax-hl-string-bg);
+  color: var(--syntax-hl-string);
 }
