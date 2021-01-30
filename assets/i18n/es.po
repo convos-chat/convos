@@ -602,7 +602,7 @@ msgstr "Por favor activa Javascript e intenta de nuevo."
 #: templates/blog_entry.html.ep:12
 #: templates/blog_list.html.ep:16
 msgid "Posted by %1"
-msgstr "Posted by %1"
+msgstr "Publicado por %1"
 
 #: assets/components/ConversationSettings.svelte:56
 msgid "Private conversation with %1."
@@ -688,10 +688,10 @@ msgstr "Buscar por \"%1\" \"%1\""
 
 #: assets/page/Search.svelte:67
 msgid "Search for messages sent by you or others the last %1 days by writing a message in the input field below."
-msgstr "Busca mensajes enviados por ti y otros en los últimos %1 días escribiendo un mensaje en el siguiente campo de entrada."
+msgstr "Busca mensajes enviados por ti u otros en los últimos %1 días escribiendo un mensaje en el siguiente campo de entrada."
 
 msgid "Search..."
-msgstr "Search..."
+msgstr "Buscar..."
 
 #: assets/components/ConnectionForm.svelte:142
 msgid "Secure connection (TLS)"
@@ -965,14 +965,14 @@ msgstr "Eres el único participante en esta conversación."
 
 #: assets/page/Search.svelte:68
 msgid "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
-msgstr "You can enter a channel name, or use `\"conversation:#channel\"` to narrow down the search."
+msgstr "Puedes ingresar el nombre de un canal, o usar `\"conversation:#canal\"` para acotar la búsqueda."
 
 #: assets/components/ConnectionForm.svelte:118
 msgid "You cannot create custom connections."
-msgstr "You cannot create custom connections."
+msgstr "No puedes crear conexiones personalizadas."
 
 msgid "You have enabled notifications."
-msgstr "You have enabled notifications."
+msgstr "Haz activado las notificaciones."
 
 #: assets/page/Login.svelte:69
 msgid "Your email is from the invite link."
@@ -1001,7 +1001,7 @@ msgstr "chat.freenode.net:6697"
 #: app.html.ep:13
 #: templates/app.html.ep:13
 msgid "for %1"
-msgstr "for %1"
+msgstr "para %1"
 
 #: assets/page/SettingsAccount.svelte:75
 msgid "whatever, keywords"
