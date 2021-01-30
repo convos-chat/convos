@@ -89,7 +89,7 @@ function onMessageActionClick(e, action) {
   if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
   if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
 
-  if (action[1] == 'toggleDetails') {
+  if (action[1] == 'details') {
     const msg = messages.get(messageEl.dataset.index);
     msg.showDetails = !msg.showDetails;
     messages.update({messages: true});
@@ -230,7 +230,7 @@ function topicOrStatus(connection, conversation) {
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
           <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{$l('Resend')}"><Icon name="sync-alt"/></a>
         {:else if !message.waitingForResponse && message.canToggleDetails}
-          <a href="#action:toggleDetails"><Icon name="{message.type == 'error' ? 'exclamation-circle' : 'info-circle'}"/></a>
+          <a href="#action:details"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
         {@html message.markdown}
       </div>

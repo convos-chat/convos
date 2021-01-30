@@ -18,6 +18,10 @@
     padding: 0.15em 0.25em;
   }
 
+  a[href*="#action:"] .fas {
+    font-size: 1.1em;
+  }
+
   .emoji {
     height: 1.5rem;
     vertical-align: bottom;
@@ -150,17 +154,6 @@
 
     &:hover {
       filter: brightness(0.97);
-    }
-  }
-
-  &.has-message-details {
-    font-size: 0.9rem;
-    line-height: 1.3rem;
-    padding-left: 0.2rem;
-    margin-top: 0;
-
-    > .json-type {
-      display: none;
     }
   }
 }

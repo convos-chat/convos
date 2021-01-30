@@ -1,4 +1,11 @@
 .embed.for-details {
+  background: var(--syntax-hl-base-bg);
+  color: var(--syntax-hl-base);
+  font-size: 0.9rem;
+  line-height: 1.4em;
+  border: var(--hr-border);
+  padding: 0.3rem var(--gutter-small);
+  overflow-x: auto;
   display: none;
 
   .message.show-details & {
