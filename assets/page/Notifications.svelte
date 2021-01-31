@@ -1,31 +1,22 @@
 <script>
 import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
-import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import {conversationUrl, gotoConversation} from '../helpers/chat';
-import {getContext, onMount} from 'svelte';
+import {getContext, onDestroy, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
-import {route} from '../store/Route';
 
-export const title = 'Search';
+export const title = 'Notifications';
 
 const user = getContext('user');
-const conversation = user.search;
+const conversation = user.notifications;
 
-$: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
+$: classNames = ['main', messages.length && 'has-results'].filter(i => i);
 $: messages = $conversation.messages;
-$: route.param('q') && search({message: route.param('q')});
 
-onMount(() => user.search.on('send', search));
-
-function search(msg) {
-  const match = msg.message;
-  conversation.update({userInput: match});
-  route.go('/search?q=' + encodeURIComponent(match), {replace: true});
-  return match ? conversation.load({match}) : messages.clear();
-}
+onDestroy(() => conversation.markAsRead());
+onMount(() => conversation.load());
 </script>
 
 <ChatHeader>
@@ -38,17 +29,10 @@ function search(msg) {
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
-
-  <!-- welcome messages / status -->
   {#if $messages.length == 0 && !conversation.is('loading')}
-    {#if $route.param('q')}
-      <ChatMessage>{$l('No search results for "%1".', $route.param('q'))}</ChatMessage>
-    {:else}
-      <ChatMessage>{@html $lmd('You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user.')}</ChatMessage>
-    {/if}
+    <h2>{$l('No notifications.')}</h2>
   {/if}
 
-  <!-- search results -->
   {#each $messages.render() as message, i}
     {#if !i || message.dayChanged}
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
@@ -62,12 +46,7 @@ function search(msg) {
     </div>
   {/each}
 
-  <!-- status -->
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
 </InfinityScroll>
-
-{#if conversation.is('search')}
-  <ChatInput conversation="{conversation}"/>
-{/if}

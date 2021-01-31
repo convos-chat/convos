@@ -33,4 +33,8 @@ export default class Notifications extends Conversation {
     this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
     this.prop('ro', 'markAsReadOp', api('/api', 'markNotificationsAsRead'));
   }
+
+  _skipLoad() {
+    return false;
+  }
 }

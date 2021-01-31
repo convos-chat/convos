@@ -4,6 +4,7 @@ import ConversationAdd from './page/ConversationAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
 import Login from './page/Login.svelte';
+import Notifications from './page/Notifications.svelte';
 import Search from './page/Search.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
@@ -21,7 +22,7 @@ export function setupRouting(route, user) {
   route.to('/settings', render(SettingsAdmin));
   route.to('/search', render(Search));
 
-  route.to('/chat', render(Search));
+  route.to('/chat', render(Notifications));
   route.to('/chat/:connection_id', render(Chat));
   route.to('/chat/:connection_id/:conversation_id', render(Chat));
 

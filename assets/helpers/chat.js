@@ -15,12 +15,25 @@ videoWindow.open = function(url) {
   this.set(w);
 };
 
+// Exported
+export function conversationUrl(message) {
+  const url = ['', 'chat', message.connection_id, message.conversation_id].map(encodeURIComponent).join('/');
+  return route.urlFor(url + '#' + message.ts.toISOString());
+}
+
 // Exports other functions
 export function chatHelper(method, state) {
   if (method == 'onInfinityScrolled') return (...params) => onInfinityScrolled(state, ...params);
   if (method == 'onInfinityVisibility') return (...params) => onInfinityVisibility(state, ...params);
   if (method == 'onMessageClick') return (...params) => onMessageClick(state, ...params);
   if (method == 'onVideoLinkClick') return (...params) => onVideoLinkClick(state, ...params);
+}
+
+// Exported
+export function gotoConversation(e) {
+  if (e.target.closest('a')) return;
+  e.preventDefault();
+  route.go(e.target.closest('.message').querySelector('a').href);
 }
 
 // Internal

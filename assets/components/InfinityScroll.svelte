@@ -35,6 +35,7 @@ function calculateDetails() {
   }
 
   if (state.scrollHeightChanged || state.visibleElsChanged) dispatch('visibility', state);
+  if (state.scrollHeightChanged) dispatch('rendered', state);
 }
 
 function onReady(infinityEl) {
