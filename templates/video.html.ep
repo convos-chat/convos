@@ -2,8 +2,25 @@
 % layout 'convos';
 % title l('Video conference with "%1" via %2', $name, $domain);
 % stash start_app => 'jitsi';
+% my $home_url = settings('organization_url') || url_for('/');
 
-%= include 'partial/app_header'
+<div class="cms-navbar-wrapper hidden-for-app">
+  <nav class="cms-navbar">
+    <a href="<%= $home_url %>"><%= image '/images/convos-icon-light.png', alt => '' %><%= settings('organization_name') eq 'Convos' ? l('Convos') : settings('organization_name') %></a>
+    % if (session 'email') {
+      %= link_to 'chat', class => 'has-js js-close-window pull-right', begin
+        <i class="fas fa-sign-in-alt"></i> <%=l 'Chat' %>
+      % end
+    % } else {
+      %= link_to '/login#signup', class => 'has-js pull-right', begin
+        <i class="fas fa-user-plus"></i> <%=l 'Sign up' %>
+      % end
+      %= link_to '/login#signin', class => 'has-js', begin
+        <i class="fas fa-sign-in-alt"></i> <%=l 'Sign in' %>
+      % end
+    % }
+  </nav>
+</div>
 
 <main
   class="has-js video-chat-wrapper"

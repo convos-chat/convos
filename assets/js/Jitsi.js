@@ -18,7 +18,6 @@ export default class Jitsi extends Reactive {
     this.targetEl = el;
     await loadScript('https://' + this.domain + '/external_api.js');
     removeChildNodes(this.targetEl);
-    document.body.classList.add('has-video-chat');
     this.jitsi = new JitsiMeetExternalAPI(this.domain, this._options());
 
     document.addEventListener('keydown', (e) => {

@@ -25,11 +25,57 @@ body.for-cms .footer,
   max-width: 100%;
 }
 
+body.has-video-chat .cms-navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 100%;
+  display: flex;
+
+  a.pull-right {
+    margin-left: auto;
+
+    &:last-child {
+      margin-right: -1rem;
+    }
+  }
+
+  img {
+    margin: -0.3rem 0.4rem -0.3rem 0;
+    height: 1.5rem;
+  }
+}
+
 /*
  * Generic navigation styling
  */
 .cms-navbar-wrapper {
   background: var(--sidebar-left-bg);
+
+  a {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    margin-left: -1rem;
+    display: block;
+
+    &.pull-right {
+      float: none;
+    }
+
+    @include if_screen(">two-columns") {
+      &.pull-right {
+        margin-left: auto;
+      }
+
+      &:last-child {
+        margin-right: -1rem;
+      }
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .cms-navbar {
@@ -64,24 +110,13 @@ body.for-cms .footer,
   }
 }
 
+.cms-navbar__links {
+  background: var(--sidebar-left-bg);
+}
+
 .cms-navbar__logo {
   vertical-align: middle;
   height: 2rem;
-}
-
-.cms-navbar__links {
-  background: var(--sidebar-left-bg);
-
-  a {
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    margin: 0 0.5rem 0 -1rem;
-    display: block;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
 
 body.no-js .cms-navbar__links .has-js {
@@ -158,21 +193,19 @@ body.no-js .cms-navbar__links .has-js {
  * Hamburger and main brand are hidden.
  */
 @include if_screen(">two-columns") {
-  .cms-navbar__brand,
-  .cms-navbar .btn.is-hamburger {
-    display: none;
+  .cms-navbar-wrapper {
+    .cms-navbar__brand,
+    .cms-navbar .btn.is-hamburger {
+      display: none;
+    }
   }
 
   .cms-navbar__links {
     display: flex;
     align-items: baseline;
 
-    .is-spacer {
-      flex: 1 0 0;
-    }
-
     img {
-      margin: -0.5rem 0.4rem;
+      margin: -0.5rem 0.4rem -0.5rem 0;
       height: 2rem;
     }
   }

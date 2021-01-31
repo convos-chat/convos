@@ -55,7 +55,7 @@ sub startup {
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/err/:code')->to('url#err');
   $r->get('/sw' => [format => 'js']);
-  $r->get('/video/#domain/:name')->to(template => 'video');
+  $r->get('/video/#domain/:name')->to(cb => sub { shift->render('video') });
 
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');

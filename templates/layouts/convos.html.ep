@@ -1,6 +1,7 @@
 % use Mojo::JSON 'to_json';
 % use Mojo::Util 'b64_encode';
 % my $social = $c->social;
+% stash start_app => 'no' unless stash 'start_app';
 <!DOCTYPE html>
 <html lang="<%= $lang %>">
   <head>
@@ -52,7 +53,7 @@
     %= tag 'meta', name => 'convos:existing_user', content => (stash('existing_user') ? 'yes' : 'no')
     %= tag 'meta', name => 'convos:first_user', content => (stash('first_user') ? 'yes' : 'no')
     %= tag 'meta', name => 'convos:open_to_public', content => (settings('open_to_public') ? 'yes' : 'no')
-    %= tag 'meta', name => 'convos:start_app', content => stash('start_app') || 'no'
+    %= tag 'meta', name => 'convos:start_app', content => stash('start_app')
     %= tag 'meta', name => 'convos:status', content => stash('status') || 200
     %= tag 'meta', name => 'version', content => Convos->VERSION
 
@@ -66,7 +67,11 @@
     % }
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css'
   </head>
-  <body class="no-js notify-disabled for-cms <%= js_session('compactDisplay') ? ' is-compact' : '' =%>">
+
+  % my @classnames = qw(no-js notify-disabled for-cms);
+  % push @classnames, 'js-compact' if js_session 'compactDisplay';
+  % push @classnames, 'has-video-chat' if stash('start_app') eq 'jitsi';
+  <body class="<%= join ' ', @classnames =%>">
     %= content
     %= asset 'convos.js' unless stash 'exception'
   </body>

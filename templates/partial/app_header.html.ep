@@ -20,13 +20,12 @@
         <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
         <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i><span class="visible-sm">Twitter</span></a>
       % }
-      <span class="is-spacer hidden-sm">&nbsp;</span>
       % if (session 'email') {
-      %= link_to 'chat', class => 'has-js js-close-window', begin
+        %= link_to 'chat', class => 'has-js js-close-window pull-right', begin
           <i class="fas fa-sign-in-alt"></i> <%=l 'Chat' %>
         % end
       % } else {
-        %= link_to '/login#signup', class => 'has-js', begin
+        %= link_to '/login#signup', class => 'has-js pull-right', begin
           <i class="fas fa-user-plus"></i> <%=l 'Sign up' %>
         % end
         %= link_to '/login#signin', class => 'has-js', begin
