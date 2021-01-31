@@ -37,7 +37,7 @@ export default class Messages extends Reactive {
   }
 
   push(list) {
-    [].push.apply(this.messages, list);
+    [].push.apply(this.messages, this._fill(list));
     return this.update({messages: true});
   }
 
@@ -73,7 +73,7 @@ export default class Messages extends Reactive {
   }
 
   unshift(list) {
-    [].unshift.apply(this.messages, list);
+    [].unshift.apply(this.messages, this._fill(list));
     return this.update({messages: true});
   }
 
@@ -101,6 +101,20 @@ export default class Messages extends Reactive {
     });
 
     return p.map(p => p.catch(err => console.error('[Messages:embed]', msg, err)));
+  }
+
+  _fill(messages) {
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      if (!msg.from) [msg.internal, msg.from] = [true, 'Convos'];
+      if (!msg.type) msg.type = 'notice';
+
+      msg.canToggleDetails = msg.type == 'error' || msg.type == 'notice';
+      msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
+      msg.ts = new Time(msg.ts);
+    }
+
+    return messages;
   }
 
   async _loadEmbed(msg, url) {

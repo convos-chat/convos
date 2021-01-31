@@ -74,11 +74,6 @@ export default class Conversation extends Reactive {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
       if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
-      if (!msg.type) msg.type = 'notice';
-
-      msg.canToggleDetails = msg.type == 'error' || msg.type == 'notice';
-      msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
-      msg.ts = new Time(msg.ts);
     }
 
     this.messages[method || 'push'](messages, method);
