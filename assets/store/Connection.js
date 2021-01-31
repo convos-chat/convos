@@ -69,7 +69,6 @@ export default class Connection extends Conversation {
 
   update(params) {
     if (params.url && typeof params.url == 'string') params.url = new ConnectionURL(params.url);
-    if (params.videoService) this.conversations.forEach(conn => conn.update({videoService: params.videoService}));
     return super.update(params);
   }
 

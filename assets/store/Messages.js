@@ -108,56 +108,57 @@ export default class Messages extends Reactive {
     const embed = op.res.body;
 
     embed.nodes = [];
+    embed.provider = (embed.provider_name || '').toLowerCase();
     if (!embed.html) return embed;
-    const provider = embed.provider_name && embed.provider_name.toLowerCase() || '';
-    embed.className = provider ? 'for-' + provider : embed.html ? 'for-unknown' : 'hidden';
 
-    const embedEl = document.createRange().createContextualFragment(embed.html).firstChild;
+    let embedEl = document.createRange().createContextualFragment(embed.html).firstChild;
     if (!embedEl) return embed;
 
-    const types = (embedEl && embedEl.className || '').split(/\s+/);
-    embed.nodes = [].slice.call(embedEl.childNodes, 0);
-    if (types.indexOf('le-paste') != -1) this._renderPaste(embed, embedEl);
-    if (provider == 'jitsi') this._renderJitsi(embed, embedEl);
-
+    embedEl = this._renderVideoChat(msg, embed, embedEl) || this._renderPaste(msg, embed, embedEl) || embedEl;
     q(embedEl, 'img', ['error', (e) => (e.target.style.display = 'none')]);
     q(embedEl, '.le-goto-link', (el) => el.parentNode.children.length == 1 && el.parentNode.remove());
 
-    embed.className = [embed.className, embedEl.className].join(' ');
     delete embed.html;
+    embed.className = embedEl.className;
+    embed.nodes = [].slice.call(embedEl.childNodes, 0);
+
     return embed;
   }
 
   async _renderDetails(msg) {
     const details = {...(msg.sent || msg)};
     INTERNAL_MESSAGE_KEYS.forEach(k => delete details[k]);
-    return {className: 'for-details', details: true, nodes: [jsonhtmlify(details).lastChild]};
+    return {className: 'le-details', details: true, nodes: [jsonhtmlify(details).lastChild]};
   }
 
-  _renderPaste(embed, embedEl) {
+  _renderPaste(msg, embed, embedEl) {
     const pre = embedEl.querySelector('pre');
-    if (!pre) return;
-    hljs.lineNumbersBlock(pre);
+    return pre && [embedEl, hljs.lineNumbersBlock(pre)][0];
   }
 
-  _renderJitsi(embed, embedEl) {
-    const url = new URL(embed.url);
-    const roomName = decodeURIComponent(url.pathname.replace(/^\//, ''));
-    if (!roomName || roomName.indexOf('/') != -1) return;
+  _renderVideoChat(msg, embed, embedEl) {
+    const path = new URL(embed.url).pathname.replace(/\/+$/, '').split('/');
+    const isVideoLink = path.length && (embed.provider == 'jitsi' || path.includes('video'));
+    if (!isVideoLink) return;
 
     // Turn "Some-Cool-convosTest" into "Some Cool Convos Test"
-    let humanName = roomName.replace(/^irc-[^-]+-/, '')
+    const roomName = decodeURIComponent(path.slice(-1)[0]);
+    const humanName = roomName.replace(/^irc-[^-]+-/, '')
       .replace(/[_-]+/g, ' ')
       .replace(/([a-z ])([A-Z])/g, (all, a, b) => a + ' ' + b.toUpperCase())
       .replace(/([ ]\w)/g, (all) => all.toUpperCase());
 
+    const message = i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', humanName);
+
     embedEl = document.createElement('div');
     embedEl.className = 'le-card le-rich le-join-request';
     embedEl.innerHTML
-      = '<a class="le-thumbnail" href="' + embed.url + '" target="' + roomName + '"><i class="fas fa-video"></i></a>'
-      + '<h3>' + i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', humanName) + '</h3>'
-      + '<p class="le-description"><a href="' + embed.url + '" target="' + roomName + '">' + i18n.l('Yes, I want to join.') + '</a></p>';
+      = '<a class="le-thumbnail" href="' + embed.url + '" target="convos_video"><i class="fas fa-video"></i></a>'
+      + '<h3>' + message + '</h3>'
+      + '<p class="le-description"><a href="' + embed.url + '" target="convos_video">' + i18n.l('Yes, I want to join.') + '</a></p>';
 
-    embed.nodes = [embedEl];
+    if (msg.fresh) this.emit('notify', {...msg, message});
+
+    return embedEl;
   }
 }

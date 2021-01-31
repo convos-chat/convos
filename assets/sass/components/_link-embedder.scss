@@ -1,4 +1,4 @@
-.embed.for-details {
+.embed.le-details {
   background: var(--syntax-hl-base-bg);
   color: var(--syntax-hl-base);
   font-size: 0.9rem;
@@ -13,7 +13,7 @@
   }
 }
 
-.embed.for-youtube iframe {
+.embed iframe {
   max-width: 90vw;
   max-height: (344 / 459 * 90vw);
 }

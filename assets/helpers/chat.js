@@ -1,12 +1,35 @@
 import Time from '../js/Time';
+import {get, writable} from 'svelte/store';
 import {q, showFullscreen, tagNameIs} from '../js/util';
 import {route} from '../store/Route';
+
+export const videoWindow = writable(null);
+videoWindow.close = function() {
+  const w = get(this);
+  return w ? [true, w.close(), this.set(null)][0] : false;
+};
+
+videoWindow.open = function(url) {
+  const w = window.open(url.toString(), 'convos_video');
+  ['beforeunload', 'close'].forEach(name => w.addEventListener(name, () => this.set(null)));
+  this.set(w);
+};
 
 // Exports other functions
 export function chatHelper(method, state) {
   if (method == 'onInfinityScrolled') return (...params) => onInfinityScrolled(state, ...params);
   if (method == 'onInfinityVisibility') return (...params) => onInfinityVisibility(state, ...params);
+  if (method == 'onMessageClick') return (...params) => onMessageClick(state, ...params);
   if (method == 'onVideoLinkClick') return (...params) => onVideoLinkClick(state, ...params);
+}
+
+// Internal
+function maybeSendVideoUrl(conversation, videoUrl) {
+  videoUrl = new URL(videoUrl, location.href).href;
+  const messages = conversation.messages;
+  const alreadySent = messages.toArray().slice(-20).reverse().find(msg => msg.message.indexOf(videoUrl) != -1);
+  if (alreadySent && alreadySent.ts.toEpoch() > new Time().toEpoch() - 600) return;
+  conversation.send({method: 'send', message: videoUrl});
 }
 
 // Available through chatHelper()
@@ -44,7 +67,7 @@ export function onInfinityVisibility({messages, onLoadHash}, e) {
 }
 
 // Internal
-function onMessageActionClick(e, action) {
+function onMessageActionClick(e, action, messages) {
   if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
   e.preventDefault();
   const messageEl = e.target.closest('.message');
@@ -60,17 +83,17 @@ function onMessageActionClick(e, action) {
   }
 }
 
-// Exported
-export function onMessageClick(e) {
+// Available through chatHelper()
+function onMessageClick({messages, onVideoLinkClick}, e) {
   const aEl = e.target.closest('a');
 
   // Make sure embed links are opened in a new tab/window
   if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
 
-  // Proxy clicks
+  // Proxy video links
   const messageEl = e.target.closest('.message');
-  const proxyEl = aEl && messageEl && document.querySelector('[data-handle-link="' + aEl.href + '"]');
-  if (proxyEl) return [e.preventDefault(), proxyEl.click()];
+  const proxyEl = aEl && messageEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
+  if (proxyEl) return onVideoLinkClick(e);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -78,7 +101,7 @@ export function onMessageClick(e) {
 
   // Special links with actions in #hash
   const action = aEl && aEl.href.match(/#(activeMenu|action:[\w:]+)/);
-  if (action) return onMessageActionClick(e, action[1].split(':', 3));
+  if (action) return onMessageActionClick(e, action[1].split(':', 3), messages);
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
@@ -86,17 +109,32 @@ export function onMessageClick(e) {
 }
 
 // Available through chatHelper()
-function onVideoLinkClick({conversation}, e) {
-  const messages = conversation.messages;
-  const videoInfo = conversation.videoInfo();
+function onVideoLinkClick({conversation, user}, e) {
+  /*
+   * Example aEl.href:
+   * 1. "#action:video"
+   * 2. https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
+   * 3. https://meet.jit.si/irc-freenode-superman-and-superwoman
+   */
 
   e.preventDefault();
-  if (conversation.window) return conversation.window.close();
-  conversation.openWindow(videoInfo.convosUrl, videoInfo.roomName);
+  const aEl = e.target.closest('a');
+  if (videoWindow.close() && aEl.href.indexOf('#action:video') != -1) return;
 
-  const alreadySent = messages.toArray().slice(-30).reverse().find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
-  const send = !alreadySent || alreadySent.ts.toEpoch() < new Time().toEpoch() - 600;
-  if (send) conversation.send({method: 'send', message: videoInfo.realUrl});
+  if (aEl.href.indexOf('#action:video') != -1) {
+    const videoService = new URL(user.videoService);
+    const videoUrl = route.urlFor('/video/' + videoService.hostname + '/' + encodeURIComponent(conversation.title));
+    maybeSendVideoUrl(conversation, videoUrl);
+    videoWindow.open(videoUrl);
+  }
+  else if (aEl.href.indexOf('/video/') != -1) {
+    const url = new URL(aEl.href);
+    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/')));
+  }
+  else {
+    const url = new URL(aEl.href);
+    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname));
+  }
 }
 
 // Exported

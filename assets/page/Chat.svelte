@@ -9,7 +9,7 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {chatHelper, onMessageClick, renderEmbed, topicOrStatus} from '../helpers/chat';
+import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../helpers/chat';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
@@ -33,12 +33,12 @@ $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
 $: notConnected = $conversation.frozen ? true : false;
 $: title = $conversation.title;
-$: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 $: onInfinityScrolled = chatHelper('onInfinityScrolled', {conversation});
 $: onInfinityVisibility = chatHelper('onInfinityVisibility', {messages, onLoadHash});
-$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation});
+$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
+$: onMessageClick = chatHelper('onMessageClick', {messages, onVideoLinkClick});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), uploader);
@@ -76,8 +76,8 @@ function setConversationFromUser(user) {
 <ChatHeader>
   <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{$l(conversation.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
-  {#if videoInfo.convosUrl}
-    <a href="{videoInfo.convosUrl}" on:click="{onVideoLinkClick}" target="{videoInfo.roomName}" data-handle-link="{videoInfo.realUrl}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{videoInfo.icon}"/></a>
+  {#if $conversation.conversation_id && $user.videoService}
+    <a href="#action:video" on:click="{onVideoLinkClick}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
   {/if}
   <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>

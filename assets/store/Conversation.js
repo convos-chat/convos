@@ -5,6 +5,7 @@ import Time from '../js/Time';
 import {api} from '../js/Api';
 import {camelize, isType, str2color} from '../js/util';
 import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
+import {i18n} from './I18N';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 import {getSocket} from '../js/Socket';
@@ -41,12 +42,10 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
-    this.prop('rw', 'videoService', params.videoService || '');
-    this.prop('rw', 'window', null);
 
     if (params.hasOwnProperty('conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);
-      this.prop('ro', 'title', () => [this.name, this.connection_id].join(' - '));
+      this.prop('ro', 'title', () => [this.name, this.connection_id.replace(/^\w+-/, '')].join('@'));
       this.prop('rw', 'frozen', params.frozen || '');
     }
     else {
@@ -59,6 +58,7 @@ export default class Conversation extends Reactive {
     }
 
     this.socket = params.socket || getSocket('/events');
+    this.messages.on('notify', (msg) => this.notify(msg));
     this._addOperations();
   }
 
@@ -67,6 +67,7 @@ export default class Conversation extends Reactive {
       this._maybeIncreaseUnread(messages);
       this._maybeNotify(messages);
       if (!this.historyStopAt && ['action', 'private'].indexOf(messages.type) != -1) return;
+      messages.fresh = true;
       messages = [messages];
     }
 
@@ -121,15 +122,14 @@ export default class Conversation extends Reactive {
     return this;
   }
 
-  findParticipant(nick) {
-    if (nick == this.connection_id) return {connection: true, name: this.connection_id, id: this.connection_id};
-    return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
+  notify(msg) {
+    if (notify.appHasFocus) return;
+    const title = msg.from == this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
+    this.lastNotification = notify.show(msg.message, {path: this.path, title});
   }
 
-  openWindow(url, name) {
-    const w = window.open(url, name || this.path.replace(/\W/g, '_').replace(/^_+/, ''), '');
-    ['beforeunload', 'close'].forEach(name => w.addEventListener(name, () => this.update({window: null})));
-    return this.update({window: w});
+  findParticipant(nick) {
+    return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
   }
 
   participants(participants = []) {
@@ -168,25 +168,6 @@ export default class Conversation extends Reactive {
   update(params) {
     this._loadParticipants();
     return super.update(params);
-  }
-
-  videoInfo() {
-    const roomName = encodeURIComponent([this.connection_id, this.conversation_id].join('-'));
-    const icon = this.window ? 'video-slash' : 'video';
-    const info = {icon, roomName};
-
-    if (!this.conversation_id || !this.videoService) return info;
-
-    try {
-      const me = this._participants.toArray().find(i => i.me);
-      const host = new URL(this.videoService).host;
-      info.convosUrl = route.urlFor('/video/' + host + '/' + roomName, {'nick': me && me.nick || undefined});
-      info.realUrl = this.videoService.replace(/\/*$/, '/') + roomName;
-    } catch(err) {
-      console.error('videoInfo', err);
-    }
-
-    return info;
   }
 
   wsEventMode(params) {
@@ -272,24 +253,14 @@ export default class Conversation extends Reactive {
   _maybeIncreaseUnread(msg) {
     if (!msg.from || msg.yourself) return this;
     if (['action', 'error', 'private'].indexOf(msg.type) == -1) return this;
-    return this.update({unread: this.unread + 1});
+    this.update({unread: this.unread + 1});
   }
 
   _maybeNotify(msg) {
-    if (notify.appHasFocus) return this;
-    if (!msg.from || msg.yourself) return this;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return this;
-
-    const isVideoLink
-       = msg.message.indexOf(this.videoInfo().realUrl) != -1
-      || msg.message.indexOf(route.urlFor('/video/')) != -1;
-
-    if (!isVideoLink && !msg.highlight && !this.wantNotifications) return this;
-
-    const title = msg.from == this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
-    const message = isVideoLink ? i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', this.name) : msg.message;
-    this.lastNotification = notify.show(message, {path: this.path, title});
-    return this;
+    if (!msg.from || msg.yourself) return;
+    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+    if (!msg.highlight && !this.wantNotifications) return;
+    this.notify(msg);
   }
 
   _noop() {
