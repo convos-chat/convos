@@ -2,12 +2,11 @@
 import {createEventDispatcher} from 'svelte';
 import {findVisibleElements, isType} from '../js/util';
 
-const DEBUG = false;
 const dispatch = createEventDispatcher();
 const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0, visibleEls: []};
 
-let cancelNextScroll = true;
 let className = '';
+let scrolledAt = Date.now();
 let scrollHeight = 0;
 
 export {className as class};
@@ -15,7 +14,6 @@ export let pos = 'top';
 
 $: classNames = [className || 'infinity-scroll'].concat(['has-pos-' + pos]);
 $: scrollHeight && calculateDetails();
-$: DEBUG && console.log(location.href + ': ' + scrollHeight);
 
 function calculateDetails() {
   const infinityEl = state.infinityEl;
@@ -52,20 +50,18 @@ function onScroll(infinityEl) {
 }
 
 function onScrolled(infinityEl) {
-  if (DEBUG) console.log('onScrolled pos=' + state.scrollTop + '/' + infinityEl.scrollTop + ' cancelNextScroll=' + cancelNextScroll);
-
-  if (cancelNextScroll) {
+  if (scrolledAt + 500 > Date.now()) {
     // onScrolled() gets triggered when scrollTo() changes infinityEl.scrollTop.
     // Need to cancel the next "scroll" event as well, in case "scrollTop" was not set correctly.
-    cancelNextScroll = Math.abs(infinityEl.scrollTop - state.scrollTop) > 40;
-    if (cancelNextScroll) infinityEl.scrollTop = state.scrollTop;
+    if (Math.abs(infinityEl.scrollTop - state.scrollTop) > 40) infinityEl.scrollTop = state.scrollTop;
     if (state.scrollTid) clearTimeout(state.scrollTid);
-    return calculateDetails();
+    calculateDetails();
   }
-
-  state.scrollTop = infinityEl.scrollTop;
-  calculateDetails();
-  dispatch('scrolled', state);
+  else {
+    state.scrollTop = infinityEl.scrollTop;
+    calculateDetails();
+    dispatch('scrolled', state);
+  }
 }
 
 function scrollTo(pos) {
@@ -75,10 +71,9 @@ function scrollTo(pos) {
   if (pos && pos.tagName) pos = pos.offsetTop;
   if (isType(pos, 'undef')) return false;
   if (pos < 0) return false;
-  cancelNextScroll = true;
+  scrolledAt = Date.now();
   state.infinityEl.scrollTop = pos;
   state.scrollTop = state.infinityEl.scrollTop;
-  if (DEBUG) console.log('scrollTo pos=' + pos + '/' + state.scrollTop);
   return true;
 }
 </script>
