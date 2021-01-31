@@ -174,7 +174,7 @@ export default class Connection extends Conversation {
     }
   }
 
-  _wsEventSentModeB(params, modeSent) {
+  wsEventSentModeB(params, modeSent) {
     const conversation = this.findConversation(params) || this;
 
     if (params.banlist) {
@@ -220,6 +220,8 @@ export default class Connection extends Conversation {
     const conversation = this.findConversation(params) || this;
     conversation.addMessages({message, vars, sent: params});
   }
+
+  wsEventSentNames() { } // Ignore this event
 
   _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];

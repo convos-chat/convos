@@ -76,7 +76,7 @@ export default class Conversation extends Reactive {
       if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
     }
 
-    this.messages[method || 'push'](messages, method);
+    this.messages[method || 'push'](messages);
     return this;
   }
 
@@ -205,7 +205,7 @@ export default class Conversation extends Reactive {
   wsEventSentNames(params) {
     this._updateParticipants(params);
 
-    const msg = {message: 'Participants (%1): %2', vars: []};
+    const msg = {...params, message: 'Participants (%1): %2', vars: []};
     const participants = this._participants.toArray().map(p => (modeMoniker[p.mode] || p.mode || '') + p.name);
     if (participants.length > 1) {
       msg.message += ' and %3.';
