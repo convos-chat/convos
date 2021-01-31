@@ -47,28 +47,27 @@ onDestroy(() => {
 });
 
 function onInfinityScrolled(e) {
-  if (!messages.length) return;
-  const {pos, visibleEls} = e.detail;
-  const firstVisibleEl = visibleEls[0];
-  const lastVisibleEl = visibleEls.slice(-1)[0];
+  const visibleEls = e.detail.visibleEls.filter(el => el.dataset.ts);
+  if (!visibleEls.length) return;
 
   const go = (hash) => {
     if (typeof hash == 'undefined') return console.trace({hash}); // debugging
     route.go(conversation.path + (hash.length ? '#' + hash : ''), {replace: true});
   };
 
+  const pos = e.detail.pos;
   if (pos == 'top') {
-    const before = messages.get(0).ts.toISOString();
-    go(before);
+    const before = visibleEls[0].dataset.ts;
     if (!conversation.historyStartAt) conversation.load({before});
+    go(before);
   }
   else if (pos == 'bottom') {
-    const after = messages.get(-1).ts.toISOString();
-    go(conversation.historyStopAt ? '' : lastVisibleEl.dataset.ts);
+    const after = visibleEls.slice(-1)[0].dataset.ts;
     if (!conversation.historyStopAt) conversation.load({after});
+    go(conversation.historyStopAt ? '' : after);
   }
-  else if (firstVisibleEl && firstVisibleEl.dataset.ts) {
-    go(firstVisibleEl.dataset.ts);
+  else {
+    go(visibleEls[0].dataset.ts);
   }
 }
 
