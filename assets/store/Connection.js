@@ -19,12 +19,13 @@ export default class Connection extends Conversation {
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
     this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('convos://loopback'));
 
-    const me = params.me || {};
-    const nick = me.nick || this.url.searchParams.get('nick') || '';
+    const nick = this.url.searchParams.get('nick') || '';
     this.prop('rw', 'nick', nick);
-    this.prop('rw', 'real_host', me.real_host || this.url.hostname);
-    this.prop('rw', 'server_op', me.server_op || false);
+    this.prop('rw', 'real_host', this.url.hostname);
+    this.prop('rw', 'server_op', false);
     this.participants((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
+
+    if (params.me) this.wsEventMe(params.me);
   }
 
   ensureConversation(params) {
@@ -91,6 +92,7 @@ export default class Connection extends Conversation {
   wsEventMe(params) {
     this.wsEventNickChange(params);
     if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
+    if (params.real_host) this.participants([{nick: params.real_host}]);
     this.update(params);
   }
 

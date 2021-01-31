@@ -129,6 +129,7 @@ export default class Conversation extends Reactive {
   }
 
   findParticipant(nick) {
+    if (nick == this.connection_id) return {id: this.connection_id, nick: this.connection_id};
     return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
   }
 
