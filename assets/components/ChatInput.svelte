@@ -40,9 +40,7 @@ function focusAutocompleteItem(e, moveBy) {
 }
 
 function handleMessageResponse(msg) {
-  if (!msg.errors) return;
-  if (!conversation || msg.conversation_id == conversation.conversation_id) return;
-  conversation.addMessages({...msg, message: 'Message "%1" failed: %2', type: 'error', vars: [msg.message, extractErrorMessage(msg.errors)]});
+  if (!msg.conversation_id && conversation.conversation_id) msg.conversation_id = conversation.conversation_id;
 }
 
 function onChange(inputEl) {
@@ -91,7 +89,7 @@ function selectOptionOrSendMessage(e) {
     msg.message = msg.message.replace(/^\/j\b/i, '/join');
     msg.message = msg.message.replace(/^\/raw/i, '/quote');
 
-    if (msg.message.length) conversation.send(msg).then(handleMessageResponse);
+    if (msg.message.length) conversation.send(msg, handleMessageResponse);
     if (!conversation.is('search')) setValue('');
   }
 }

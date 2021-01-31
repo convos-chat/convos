@@ -68,10 +68,11 @@ test('send', async () => {
     () => socket.ws.onmessage({data: '{"id":"1","sent":true}'}),
   );
 
-  const res = await socket.send({foo: 42});
+  const res = await new Promise(r => socket.send({foo: 42}, r));
+  delete res.stopPropagation;
   expect(socket.ws.sent).toEqual([{id: '1', foo: 42}]);
   expect(socket.getWaitingMessages()).toEqual([]);
-  expect(res).toEqual({id: '1', sent: true});
+  expect(res).toEqual({bubbles: true, id: '1', sent: true});
 });
 
 test('send - error', async () => {
@@ -83,10 +84,11 @@ test('send - error', async () => {
     () => socket.ws.onmessage({data: '{"errors":[{"message":"yikes"}]}'}),
   );
 
-  const res = await socket.send({foo: 42});
+  const res = await new Promise(r => socket.send({foo: 42}, r));
+  delete res.stopPropagation;
   expect(socket.ws.sent).toEqual([{id: '1', foo: 42}]);
   expect(socket.getWaitingMessages()).toEqual([]);
-  expect(res).toEqual({errors: [{message: 'yikes'}]});
+  expect(res).toEqual({bubbles: true, errors: [{message: 'yikes'}]});
 });
 
 test('reconnectIn', () => {

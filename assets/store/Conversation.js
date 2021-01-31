@@ -155,9 +155,9 @@ export default class Conversation extends Reactive {
     return this._participants.toArray();
   }
 
-  send(message) {
+  send(message, cb) {
     if (typeof message == 'string') message = {message};
-    return this.socket.send({method: 'send', connection_id: this.connection_id, conversation_id: this.conversation_id || '', ...message});
+    return this.socket.send({method: 'send', connection_id: this.connection_id, conversation_id: this.conversation_id || '', ...message}, cb);
   }
 
   async markAsRead() {
@@ -248,7 +248,7 @@ export default class Conversation extends Reactive {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is_private ? this.send('/whois ' + this.conversation_id) : this.send('/names').then(this._updateParticipants.bind(this));
+    return this.is_private ? this.send('/whois ' + this.conversation_id) : this.send('/names', this._updateParticipants.bind(this));
   }
 
   _maybeIncreaseUnread(msg) {

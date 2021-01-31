@@ -186,12 +186,13 @@ export default class Socket extends Reactive {
    * @param {Object} msg A message to send to the server.
    * @returns {Promise} A promise that will get resolved when the response comes.
    */
-  send(msg) {
+  send(msg, cb) {
     const id = msg.id || String(++this.id);
     this.queue.push({...msg, id});
     this.open();
     this._dequeue();
-    return this.on('message_' + id);
+    if (cb) this.on('message_' + id, cb);
+    return this;
   }
 
   _dequeue() {
@@ -240,13 +241,15 @@ export default class Socket extends Reactive {
 
   _onMessage(e) {
     const msg = this.inflateMessage(e.data);
+    msg.bubbles = true;
+    msg.stopPropagation = () => { msg.bubbles = false };
 
     if (msg.id) {
       this.emit('message_' + msg.id, msg);
       this.waiting.delete(msg.id);
     }
 
-    this.emit('message', msg);
+    if (msg.bubbles) this.emit('message', msg);
     this.update({waiting: true});
 
     if (!msg.errors || msg.id) return;

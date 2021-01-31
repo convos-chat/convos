@@ -122,7 +122,7 @@ export default class Connection extends Conversation {
 
     // Generic errors
     const conversation = (params.conversation_id && params.frozen) ? this.ensureConversation(params) : (this.findConversation(params) || this);
-    conversation.update({errors: this.errors + 1});
+    console.log(conversation.conversation_id, msg);
     conversation.addMessages(msg);
   }
 

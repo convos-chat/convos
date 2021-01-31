@@ -85,7 +85,9 @@ export default class User extends Reactive {
     if (this.is('loading')) return this;
 
     this.update({status: 'loading'});
-    const res = await this.socket.send({method: 'load', object: 'user', params: {connections: true, conversations: true}});
+
+    const p = new Promise(resolve => this.socket.send({method: 'load', object: 'user', params: {connections: true, conversations: true}}, resolve));
+    const res = await p;
 
     // TODO: Improve error handling
     if (res.errors) {
@@ -149,8 +151,6 @@ export default class User extends Reactive {
 
   _dispatchMessage(msg) {
     msg.dispatchTo = camelize('wsEvent_' + this._getEventNameFromMessage(msg));
-    msg.bubbles = true;
-    msg.stopPropagation = () => { msg.bubbles = false };
     msg.silent = this.ignoreStatuses;
     this.emit(msg.dispatchTo, msg);
 
