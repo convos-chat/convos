@@ -1,5 +1,22 @@
 Revision history for perl distribution Convos
 
+5.14 Not Released
+ - Add "real_host" as connection participant
+ - Add Messages store with renderMessages functionality
+ - Improved search logic and changed keywords #560
+ - Fix errors from commands will show up in the same dialog
+ - Fix hiding <img> inside embed that cannot be loaded
+ - Fix remembering if toggleDetails has been toggled while scrolling
+ - Fix rendering internal video chat links #543
+ - Fix removing "nick=" from internal video links #543
+ - Fix details styling to match paste syntax highlight
+ - Fix not getting "#undefined" when scrolling in conversations
+ - Fix not keeping scroll lock forever
+ - Fix updating document title
+ - Change any jitsy link to be rendered inside the /video/... page
+ - Change Conversation.title to "name@server"
+ - Updated Spanish translation #561
+
 5.13 2021-01-23T12:42:00+0900
  - Fix parsing .po files
 
