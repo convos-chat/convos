@@ -9,26 +9,25 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
+import {chatHelper, onMessageClick, renderEmbed, topicOrStatus} from '../helpers/chat';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
-import {q, showFullscreen, tagNameIs} from '../js/util';
 import {route} from '../store/Route';
 
 export let title = 'Chat';
 
+const dragAndDrop = new DragAndDrop();
 const socket = getContext('socket');
 const user = getContext('user');
-
-const dragAndDrop = new DragAndDrop();
 
 let connection = user.notifications;
 let conversation = user.notifications;
 let messages = conversation.messages;
 let now = new Time();
 let onLoadHash = '';
-let uploader;
 let unsubscribe = {};
+let uploader;
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
@@ -36,6 +35,10 @@ $: notConnected = $conversation.frozen ? true : false;
 $: title = $conversation.title;
 $: videoInfo = $conversation.videoInfo();
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
+
+$: onInfinityScrolled = chatHelper('onInfinityScrolled', {conversation});
+$: onInfinityVisibility = chatHelper('onInfinityVisibility', {messages, onLoadHash});
+$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), uploader);
@@ -46,110 +49,8 @@ onDestroy(() => {
   dragAndDrop.detach();
 });
 
-function onInfinityScrolled(e) {
-  const visibleEls = e.detail.visibleEls.filter(el => el.dataset.ts);
-  if (!visibleEls.length) return;
-
-  const go = (hash) => {
-    if (typeof hash == 'undefined') return console.trace({hash}); // debugging
-    route.go(conversation.path + (hash.length ? '#' + hash : ''), {replace: true});
-  };
-
-  const pos = e.detail.pos;
-  if (pos == 'top') {
-    const before = visibleEls[0].dataset.ts;
-    if (!conversation.historyStartAt) conversation.load({before});
-    go(before);
-  }
-  else if (pos == 'bottom') {
-    const after = visibleEls.slice(-1)[0].dataset.ts;
-    if (!conversation.historyStopAt) conversation.load({after});
-    go(conversation.historyStopAt ? '' : after);
-  }
-  else {
-    go(visibleEls[0].dataset.ts);
-  }
-}
-
-function onInfinityVisibility(e) {
-  const {infinityEl, scrollHeightChanged, scrollTo, visibleEls, visibleElsChanged} = e.detail;
-  if (scrollHeightChanged) {
-    scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-    renderFocusedEl(infinityEl, onLoadHash == route.hash);
-  }
-  if (visibleElsChanged) {
-    visibleEls.forEach(el => messages.render(el.dataset.index));
-  }
-}
-
-function onMessageActionClick(e, action) {
-  if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
-  e.preventDefault();
-  const messageEl = e.target.closest('.message');
-  const message = messageEl && messages.get(messageEl.dataset.index);
-  if (action[1] == 'join') return conversation.send('/join ' + message.from);
-  if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
-  if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
-
-  if (action[1] == 'details') {
-    const msg = messages.get(messageEl.dataset.index);
-    msg.showDetails = !msg.showDetails;
-    messages.update({messages: true});
-  }
-}
-
-function onMessageClick(e) {
-  const aEl = e.target.closest('a');
-
-  // Make sure embed links are opened in a new tab/window
-  if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
-
-  // Proxy clicks
-  const messageEl = e.target.closest('.message');
-  const proxyEl = aEl && messageEl && document.querySelector('[data-handle-link="' + aEl.href + '"]');
-  if (proxyEl) return [e.preventDefault(), proxyEl.click()];
-
-  // Expand/collapse pastebin, except when clicking on a link
-  const pasteMetaEl = e.target.closest('.le-meta');
-  if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
-
-  // Special links with actions in #hash
-  const action = aEl && aEl.href.match(/#(activeMenu|action:[\w:]+)/);
-  if (action) return onMessageActionClick(e, action[1].split(':', 3));
-
-  // Show images in full screen
-  if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
-  if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
-}
-
-function onVideoLinkClick(e) {
-  e.preventDefault();
-  if (conversation.window) return conversation.window.close();
-  conversation.openWindow(videoInfo.convosUrl, videoInfo.roomName);
-
-  const alreadySent = messages.toArray().slice(-30).reverse().find(msg => msg.message.indexOf(videoInfo.realUrl) != -1);
-  const send = !alreadySent || alreadySent.ts.toEpoch() < new Time().toEpoch() - 600;
-  if (send) conversation.send({method: 'send', message: videoInfo.realUrl});
-}
-
-function renderEmbed(el, embed) {
-  const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
-  if (parentNode) {
-    const method = parentNode.classList.contains('embed') ? 'add' : 'remove';
-    parentNode.classList[method]('hidden');
-  }
-
-  embed.nodes.forEach(node => el.appendChild(node));
-}
-
-function renderFocusedEl(infinityEl, add) {
-  const focusEl = add && route.hash && infinityEl.querySelector('.message[data-ts="' + route.hash + '"]');
-  q(infinityEl, '.has-focus', (el) => el.classList.remove('has-focus'));
-  if (focusEl) focusEl.classList.add('has-focus');
-}
-
-function setConversationFromRoute(route) {
-  const [connection_id, conversation_id] = ['connection_id', 'conversation_id'].map(k => route.param(k));
+function setConversationFromRoute($route) {
+  const [connection_id, conversation_id] = ['connection_id', 'conversation_id'].map(k => $route.param(k));
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
 }
@@ -169,14 +70,6 @@ function setConversationFromUser(user) {
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
   if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
-}
-
-function topicOrStatus(connection, conversation) {
-  if (conversation.is('not_found')) return '';
-  if (connection.frozen) return $l(connection.frozen);
-  if (connection == conversation) return $l('Connection messages.');
-  const str = conversation.frozen ? $l(conversation.frozen) : conversation.topic;
-  return str || (conversation.is_private && $l('Private conversation.')) || $l('No topic is set.');
 }
 </script>
 
