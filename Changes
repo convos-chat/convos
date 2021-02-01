@@ -14,7 +14,6 @@ Revision history for perl distribution Convos
  - Fix showing /names response in same dialog
  - Change any Jitsy link to be rendered inside the /video/... page
  - Change Conversation.title to "name@server"
- - Change to only loading new data on reconnect
  - Replace renderMessages with Messages store
  - Updated Spanish translation #561
 
