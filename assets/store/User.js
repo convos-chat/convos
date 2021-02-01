@@ -32,6 +32,8 @@ export default class User extends Reactive {
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));
     this.socket.on('update', (socket) => this._onConnectionChange(socket));
+
+    // setInterval(() => this.socket.close(), 5000); // debug WebSocket reconnect issues
   }
 
   conversations(cb) {
@@ -180,6 +182,7 @@ export default class User extends Reactive {
 
   _maybeUpgradeActiveConversation(conversation) {
     const active = this.activeConversation;
+    if (!conversation.conversation_id) return conversation;
     if (conversation.connection_id && conversation.connection_id != active.connection_id) return conversation;
     if (conversation.conversation_id && conversation.conversation_id != active.conversation_id) return conversation;
     this.update({activeConversation: conversation});
