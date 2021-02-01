@@ -12,8 +12,8 @@ const EMBED_CACHE = {};
 const INTERNAL_MESSAGE_KEYS = [
   'canToggleDetails',  'bubbles',     'className',  'command',
   'connection_id',     'dispatchTo',  'color',      'dayChanged',
-  'embeds',            'event',
-  'highlight',         'id',          'index',      'markdown',
+  'embeds',            'event',       'fresh',      'highlight',
+  'id',                'index',       'internal',   'markdown',
   'method',            'rendered',    'silent',     'stopPropagation',
   'ts',
 ];

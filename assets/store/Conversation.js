@@ -71,11 +71,6 @@ export default class Conversation extends Reactive {
       messages = [messages];
     }
 
-    for (let i = 0; i < messages.length; i++) {
-      const msg = messages[i];
-      if (!msg.from) [msg.internal, msg.from] = [true, this.connection_id || 'Convos'];
-    }
-
     this.messages[method || 'push'](messages);
     return this;
   }
