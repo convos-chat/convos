@@ -107,9 +107,6 @@ test('load skip', () => {
   // Skip at start/end of history
   expect(c._skipLoad({before: '2020-01-20T09:01:50.001Z'})).toBe(false);
   expect(c._skipLoad({after: '2020-01-20T09:01:50.001Z'})).toBe(false);
-  c.update({historyStartAt: new Date(), historyStopAt: new Date()});
-  expect(c._skipLoad({before: '2020-01-20T09:01:50.001Z'})).toBe(true);
-  expect(c._skipLoad({after: '2020-01-20T09:01:50.001Z'})).toBe(true);
 
   // Skip around if alread loaded
   expect(c._skipLoad({around: '2020-01-20T09:00:00.001Z'})).toBe(true);

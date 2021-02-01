@@ -85,7 +85,6 @@ export default class User extends Reactive {
 
   async load() {
     if (this.is('loading')) return this;
-
     this.update({status: 'loading'});
 
     const p = new Promise(resolve => this.socket.send({method: 'load', object: 'user', params: {connections: true, conversations: true}}, resolve));
@@ -98,8 +97,18 @@ export default class User extends Reactive {
     }
 
     const data = res.user || {};
-    this.connections.clear();
-    (data.connections || []).forEach(conn => this.ensureConversation({...conn, status: 'pending'}));
+
+    // Ensure that connections exist
+    const current = {};
+    this.connections.toArray().forEach(conn => (current[conn.connection_id] = true));
+    (data.connections || []).forEach(conn => {
+      delete current[conn.connection_id];
+      this.ensureConversation({...conn, status: 'pending'});
+    });
+
+    Object.keys(current).forEach(connection_id => this.removeConversation({connection_id}));
+
+    // Ensure conversations exist
     (data.conversations || []).forEach(conversation => this.ensureConversation({...conversation, status: 'pending'}));
 
     this.notifications.update({unread: data.unread || 0});

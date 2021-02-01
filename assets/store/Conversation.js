@@ -162,6 +162,7 @@ export default class Conversation extends Reactive {
   }
 
   update(params) {
+    if (params.status == 'pending') this._reload();
     this._loadParticipants();
     return super.update(params);
   }
@@ -281,6 +282,12 @@ export default class Conversation extends Reactive {
     return msg;
   }
 
+  _reload() {
+    const after = this.historyStopAt;
+    if (after) this.load({after: after.toISOString()});
+    this.participantsLoaded = false;
+  }
+
   _setEndOfStream(params, body) {
     if (!params.before && !body.after) {
       const msg = body.messages.slice(-1)[0];
@@ -300,8 +307,6 @@ export default class Conversation extends Reactive {
     if (!this.messagesOp || this.is('loading')) return true;
     if (!this.messages.length) return this.is('success');
     if (opParams.around) return !!this.messages.toArray().find(msg => msg.ts.toISOString() == opParams.around);
-    if (opParams.before && this.historyStartAt) return true;
-    if (opParams.after && this.historyStopAt) return true;
     return false;
   }
 
