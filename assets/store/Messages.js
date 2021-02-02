@@ -157,10 +157,10 @@ export default class Messages extends Reactive {
 
     // Turn "Some-Cool-convosTest" into "Some Cool Convos Test"
     const roomName = decodeURIComponent(path.slice(-1)[0]);
-    const humanName = roomName.replace(/^irc-[^-]+-/, '')
+    const humanName = roomName.replace(/\s-\s[\w-]+$/, '')
       .replace(/[_-]+/g, ' ')
       .replace(/([a-z ])([A-Z])/g, (all, a, b) => a + ' ' + b.toUpperCase())
-      .replace(/([ ]\w)/g, (all) => all.toUpperCase());
+      .replace(/((?:^|[ ])\w)/g, (all) => all.toUpperCase());
 
     const message = i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', humanName);
 
