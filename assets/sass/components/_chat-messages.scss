@@ -1,3 +1,70 @@
+%message--focus {
+  background: var(--highlight-color-bg);
+  box-shadow: 0 0 0 2px var(--highlight-color-bg);
+  border-radius: 3px;
+
+  .message__text,
+  .message__ts {
+    font-weight: bold;
+    opacity: 1;
+  }
+}
+
+%message--internal {
+  .message__text {
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+}
+
+%message--oneline-italic {
+  > i {
+    display: none;
+  }
+
+  .message__from,
+  .message__text {
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  .message__from {
+    margin-right: 0.2em;
+    float: left;
+    display: block;
+  }
+}
+
+%message__from--hidden {
+  > i {
+    display: none;
+  }
+
+  .message__from {
+    display: none;
+  }
+}
+
+%message__text--highlighted {
+  .message__text {
+    background-color: var(--highlight-color-bg);
+    border: 3px solid var(--highlight-color-bg);
+    color: var(--highlight-color);
+    margin: 0 -3px;
+  }
+}
+
+%message__ts--transparent {
+  .message__ts {
+    opacity: 0;
+    transition: opacity 0.3s;
+
+    &:hover .message__ts {
+      opacity: 0.8;
+    }
+  }
+}
+
 .message {
   position: relative;
   padding: 2px;
@@ -22,99 +89,6 @@
     font-size: 1.1em;
   }
 
-  .emoji {
-    height: 1.5rem;
-    vertical-align: bottom;
-  }
-
-  &.has-same-from {
-    .message__from {
-      display: none;
-    }
-
-    .message__ts {
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    &:hover .message__ts {
-      opacity: 0.8;
-    }
-  }
-
-  &.is-not-present .message__from {
-    text-decoration: line-through;
-  }
-
-  &.is-type-error .message__text,
-  &.is-highlighted .message__text {
-    background-color: var(--highlight-color-bg);
-    border: 3px solid var(--highlight-color-bg);
-    color: var(--highlight-color);
-    margin: 0 -3px;
-  }
-
-  &.is-type-error .message__text,
-  &.is-type-notice .message__text {
-    font-size: 0.9rem;
-    font-style: italic;
-  }
-
-  &.is-type-error .fa-exclamation-circle,
-  &.is-type-notice .fa-info-circle {
-    cursor: pointer;
-  }
-
-  &.is-waiting.is-type-notice {
-    animation: pulse-suddle 2s infinite;
-  }
-
-  &.is-waiting.has-same-from .message__ts {
-    display: none;
-  }
-
-  &.is-type-action {
-    .message__from,
-    .message__text {
-      font-size: 1rem;
-      font-style: italic;
-    }
-
-    .message__from {
-      margin-right: 0.2em;
-      float: left;
-      display: block;
-
-      &:before {
-        content: '✦';
-        margin-right: 0.3em;
-      }
-    }
-  }
-
-  &.has-same-from,
-  &.is-type-action {
-    > i {
-      display: none;
-    }
-  }
-
-  &.has-not-same-from {
-    margin-top: 0.5rem;
-  }
-
-  &.has-focus {
-    background: var(--highlight-color-bg);
-    box-shadow: 0 0 0 2px var(--highlight-color-bg);
-    border-radius: 3px;
-
-    .message__text,
-    .message__ts {
-      font-weight: bold;
-      opacity: 1;
-    }
-  }
-
   a.pull-right {
     padding-left: 0.3rem;
     position: relative;
@@ -123,6 +97,56 @@
       position: absolute;
       right: 0;
     }
+  }
+
+  .emoji {
+    height: 1.5rem;
+    vertical-align: bottom;
+  }
+
+  &.is-type-error {
+    @extend %message__from--hidden;
+    @extend %message__ts--transparent;
+    @extend %message--internal;
+    @extend %message__text--highlighted;
+  }
+
+  &.is-type-notice {
+    @extend %message__from--hidden;
+    @extend %message__ts--transparent;
+    @extend %message--internal;
+  }
+
+  &.is-highlighted {
+    @extend %message__text--highlighted;
+  }
+
+  &.has-same-from {
+    @extend %message__from--hidden;
+    @extend %message__ts--transparent;
+  }
+
+  &.is-type-action {
+    @extend %message--oneline-italic;
+
+    .message__from:before {
+      content: '✦';
+      margin-right: 0.3em;
+    }
+  }
+
+  &.has-not-same-from {
+    margin-top: 0.5rem;
+  }
+
+  &.is-not-present {
+    .message__from {
+      text-decoration: line-through;
+    }
+  }
+
+  &.has-focus {
+    @extend %message--focus;
   }
 }
 
@@ -255,10 +279,6 @@
 
   .message__from {
     text-decoration: none;
-  }
-
-  .is-type-notice .message__text {
-    cursor: inherit;
   }
 }
 

@@ -1,7 +1,7 @@
 Revision history for perl distribution Convos
 
 5.15 Not Released
- - Display "Convos" instead of irc-connection-name for notices
+ - Hide from and icon for notice and error messages
 
 5.14 2021-02-02T06:46:00+0900
  - Add "real_host" as connection participant
