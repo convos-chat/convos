@@ -158,7 +158,7 @@ function renderUnread(conversation, max = 60) {
     {#each $user.connections.toArray() as connection}
       <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}">
         <Icon name="network-wired"/>
-        <span>{connection.name || connection.connection_id}</span>
+        <span>{connection.name}</span>
         <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
       {#each connection.conversations.toArray() as conversation}
