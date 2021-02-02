@@ -45,7 +45,7 @@ export default class Conversation extends Reactive {
 
     if (params.hasOwnProperty('conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);
-      this.prop('ro', 'title', () => [this.name, this.connection_id.replace(/^\w+-/, '')].join('@'));
+      this.prop('ro', 'title', () => [this.name, this.connection_id.replace(/^\w+-/, '')].join(' - '));
       this.prop('rw', 'frozen', params.frozen || '');
     }
     else {
