@@ -106,7 +106,7 @@ function onMessageClick({messages, onVideoLinkClick}, e) {
   // Proxy video links
   const messageEl = e.target.closest('.message');
   const proxyEl = aEl && messageEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (proxyEl) return onVideoLinkClick(e);
+  if (proxyEl) return onVideoLinkClick(e, proxyEl);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -122,7 +122,7 @@ function onMessageClick({messages, onVideoLinkClick}, e) {
 }
 
 // Available through chatHelper()
-function onVideoLinkClick({conversation, user}, e) {
+function onVideoLinkClick({conversation, user}, e, aEl) {
   /*
    * Example aEl.href:
    * 1. "#action:video"
@@ -130,22 +130,25 @@ function onVideoLinkClick({conversation, user}, e) {
    * 3. https://meet.jit.si/irc-freenode-superman-and-superwoman
    */
 
-  e.preventDefault();
-  const aEl = e.target.closest('a');
+  if (!aEl) aEl = e.target.closest('a');
   if (videoWindow.close() && aEl.href.indexOf('#action:video') != -1) return;
+  const renderInsideConvos = aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi');
 
   if (aEl.href.indexOf('#action:video') != -1) {
     const videoService = new URL(user.videoService);
     const videoUrl = route.urlFor('/video/' + videoService.hostname + '/' + encodeURIComponent(conversation.title));
     maybeSendVideoUrl(conversation, videoUrl);
+    e.preventDefault();
     videoWindow.open(videoUrl);
   }
   else if (aEl.href.indexOf('/video/') != -1) {
     const url = new URL(aEl.href);
+    e.preventDefault();
     videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/')));
   }
-  else {
+  else if (renderInsideConvos) {
     const url = new URL(aEl.href);
+    e.preventDefault();
     videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname));
   }
 }
@@ -153,7 +156,7 @@ function onVideoLinkClick({conversation, user}, e) {
 // Exported
 export function renderEmbed(el, embed) {
   const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
-  if (parentNode) {
+  if (parentNode && parentNode.classList) {
     const method = parentNode.classList.contains('embed') ? 'add' : 'remove';
     parentNode.classList[method]('hidden');
   }

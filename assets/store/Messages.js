@@ -134,7 +134,7 @@ export default class Messages extends Reactive {
 
     delete embed.html;
     embed.className = embedEl.className;
-    embed.nodes = [].slice.call(embedEl.childNodes, 0);
+    embed.nodes = embedEl.tagName.toLowerCase() == 'iframe' ? [embedEl] : [].slice.call(embedEl.childNodes, 0);
 
     return embed;
   }
@@ -152,20 +152,20 @@ export default class Messages extends Reactive {
 
   _renderVideoChat(msg, embed, embedEl) {
     const path = new URL(embed.url).pathname.replace(/\/+$/, '').split('/');
-    const isVideoLink = path.length && (embed.provider == 'jitsi' || path.includes('video'));
+    const isVideoLink = path.length && (embedEl.classList.contains('le-video-chat') || path.includes('video'));
     if (!isVideoLink) return;
 
     // Turn "Some-Cool-convosTest" into "Some Cool Convos Test"
     const roomName = decodeURIComponent(path.slice(-1)[0]);
     const humanName = roomName.replace(/\s-\s[\w-]+$/, '')
-      .replace(/[_-]+/g, ' ')
+      .replace(/[_.-]+/g, ' ')
       .replace(/([a-z ])([A-Z])/g, (all, a, b) => a + ' ' + b.toUpperCase())
       .replace(/((?:^|[ ])\w)/g, (all) => all.toUpperCase());
 
-    const message = i18n.l('Do you want to join the %1 video chat with "%2"?', 'Jitsi', humanName);
+    const message = i18n.l('Do you want to join the %1 video chat with "%2"?', embed.provider_name, humanName);
 
     embedEl = document.createElement('div');
-    embedEl.className = 'le-card le-rich le-join-request';
+    embedEl.className = 'le-card le-rich le-join-request le-provider-' + embed.provider;
     embedEl.innerHTML
       = '<a class="le-thumbnail" href="' + embed.url + '" target="convos_video"><i class="fas fa-video"></i></a>'
       + '<h3>' + message + '</h3>'
