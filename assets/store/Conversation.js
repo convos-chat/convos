@@ -1,22 +1,16 @@
 import Messages from './Messages';
+import Participants from '../store/Participants';
 import Reactive from '../js/Reactive';
-import SortedMap from '../js/SortedMap';
 import Time from '../js/Time';
 import {api} from '../js/Api';
-import {camelize, isType, str2color} from '../js/util';
-import {channelModeCharToModeName, modeMoniker, userModeCharToModeName} from '../js/constants';
+import {calculateModes, str2color} from '../js/util';
+import {channelModeCharToModeName} from '../js/constants';
+import {getSocket} from '../js/Socket';
 import {i18n} from './I18N';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
-import {getSocket} from '../js/Socket';
 
 const channelRe = new RegExp('^[#&]');
-
-const sortParticipants = (a, b) => {
-  return b.modes.operator || false - a.modes.operator || false
-      || b.modes.voice || false - a.modes.voice || false
-      || a.name.localeCompare(b.name);
-};
 
 export default class Conversation extends Reactive {
   constructor(params) {
@@ -25,11 +19,10 @@ export default class Conversation extends Reactive {
     const keyPrefix = [params.connection_id, params.conversation_id, ''].filter(v => typeof v != 'undefined').join(':');
     this.prop('persist', 'userInput', '', {key: keyPrefix + 'userInput'});
 
-    this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
     this.prop('ro', 'messages', new Messages({}));
-    this.prop('ro', 'nParticipants', () => this.participants().length);
+    this.prop('ro', 'participants', new Participants());
     this.prop('ro', 'path', route.conversationPath(params));
 
     this.prop('rw', 'historyStartAt', null);
@@ -116,30 +109,9 @@ export default class Conversation extends Reactive {
   }
 
   findParticipant(nick) {
+    if (!nick) return this.participants.me();
     if (nick == this.connection_id) return {id: this.connection_id, nick: this.connection_id};
-    return this._participants.get(this._participantId(isType(nick, 'undef') ? '' : nick));
-  }
-
-  participants(participants = []) {
-    participants.forEach(p => {
-      if (!p.nick) p.nick = p.name || ''; // TODO: Just use "name"?
-      const id = this._participantId(p.nick);
-      const existing = this._participants.get(id);
-
-      if (existing) {
-        Object.keys(p).forEach(k => { existing[k] = p[k] });
-        p = existing;
-      }
-
-      // Do not delete p.mode, since it is used by wsEventSentNames()
-      if (!p.modes) p.modes = {};
-      this._calculateModes(userModeCharToModeName, p.mode, p.modes);
-      this._participants.set(id, {name: p.nick, ...p, color: str2color(id), id, ts: new Time()});
-    });
-
-    if (participants.length) this.update({_participants: true});
-
-    return this._participants.toArray();
+    return this.participants.get(nick);
   }
 
   send(message, cb) {
@@ -161,29 +133,27 @@ export default class Conversation extends Reactive {
 
   wsEventMode(params) {
     if (params.nick) {
-      this.participants([{nick: params.nick, mode: params.mode}]);
+      this.participants.set({nick: params.nick, modes: params.mode});
       this.addMessages({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
     }
     else {
-      this.update({modes: this._calculateModes(channelModeCharToModeName, params.mode, this.modes)});
+      this.update({modes: calculateModes(channelModeCharToModeName, params.mode)});
     }
   }
 
   wsEventNickChange(params) {
-    const oldId = this._participantId(params.old_nick);
-    if (!this._participants.has(oldId)) return;
+    if (!this.participants.has(params.old_nick)) return;
     if (params.old_nick == params.new_nick) return;
-    this._participants.delete(oldId);
-    this.participants([{nick: params.new_nick}]);
+    this.participants.rename(params.old_nick, params.new_nick);
     const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
     this.addMessages({message, vars: [params.old_nick, params.new_nick]});
   }
 
   wsEventPart(params) {
-    const participant = this.findParticipant(params.nick);
+    const participant = this.participants.get(params.nick);
     if (!participant || participant.me) return;
-    this._participants.delete(this._participantId(params.nick));
-    this.update({_participants: true});
+    this.participants.delete(params.nick);
+    this.update({participants: true});
     if (!params.silent) {
       this.addMessages(this._partMessage(params));
     }
@@ -196,10 +166,10 @@ export default class Conversation extends Reactive {
   }
 
   wsEventSentNames(params) {
-    this._updateParticipants(params);
+    this.participants.set(params.participants);
 
     const msg = {...params, message: 'Participants (%1): %2', vars: []};
-    const participants = this._participants.toArray().map(p => (modeMoniker[p.mode] || p.mode || '') + p.name);
+    const participants = this.participants.nicks();
     if (participants.length > 1) {
       msg.message += ' and %3.';
       msg.vars[2] = participants.pop();
@@ -221,13 +191,6 @@ export default class Conversation extends Reactive {
     this.prop('ro', 'markAsReadOp', api('/api', 'markConversationAsRead'));
   }
 
-  _calculateModes(modeMap, modeStr, target) {
-    const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
-    modeList.split('').forEach(char => {
-      target[modeMap[char] || char] = addRemove != '-';
-    });
-  }
-
   _calculateFrozen() {
     return '';
   }
@@ -236,7 +199,7 @@ export default class Conversation extends Reactive {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is('private') ? this.send('/whois ' + this.conversation_id) : this.send('/names', this._updateParticipants.bind(this));
+    return this.is('private') ? this.send('/whois ' + this.conversation_id) : this.send('/names', params => this.participants.update(this));
   }
 
   _maybeIncreaseUnread(msg) {
@@ -253,10 +216,6 @@ export default class Conversation extends Reactive {
   }
 
   _noop() {
-  }
-
-  _participantId(name) {
-    return name.toLowerCase();
   }
 
   _partMessage(params) {
@@ -296,11 +255,5 @@ export default class Conversation extends Reactive {
     if (opParams.before && this.historyStartAt) return true;
     if (opParams.after && this.historyStopAt) return true;
     return false;
-  }
-
-  _updateParticipants(params) {
-    this._participants.clear();
-    this.participants(params.participants);
-    params.stopPropagation();
   }
 }

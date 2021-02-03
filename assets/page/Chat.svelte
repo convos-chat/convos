@@ -24,6 +24,7 @@ const user = getContext('user');
 let connection = user.notifications;
 let conversation = user.notifications;
 let messages = conversation.messages;
+let participants = conversation.participants;
 let now = new Time();
 let onLoadHash = '';
 let unsubscribe = {};
@@ -62,6 +63,7 @@ function setConversationFromUser(user) {
 
   conversation = user.activeConversation;
   messages = conversation.messages;
+  participants = conversation.participants;
   connection = user.findConversation({connection_id: conversation.connection_id}) || conversation;
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
@@ -97,10 +99,10 @@ function setConversationFromUser(user) {
       <ChatMessage>{@html $lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
       <ChatMessage>{@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
-      {#if $conversation.nParticipants == 1}
+      {#if $participants.length == 1}
         <ChatMessage same="{true}">{$l('You are the only participant in this conversation.')}</ChatMessage>
       {:else}
-        <ChatMessage same="{true}">{@html $lmd('There are %1 [participants](%2) in this conversation.', $conversation.nParticipants, $conversation.path + '#activeMenu:settings')}</ChatMessage>
+        <ChatMessage same="{true}">{@html $lmd('There are %1 [participants](%2) in this conversation.', $participants.length, $conversation.path + '#activeMenu:settings')}</ChatMessage>
       {/if}
     {/if}
   {/if}

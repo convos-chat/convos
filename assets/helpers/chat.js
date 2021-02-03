@@ -182,6 +182,6 @@ export function topicOrStatus(connection, conversation) {
 }
 
 function videoName(conversation) {
-  const name = conversation.is('private') ? conversation.participants().map(p => p.nick).sort().join('-and-') : conversation.title;
+  const name = conversation.is('private') ? conversation.participants.nicks().sort().join('-and-') : conversation.title;
   return encodeURIComponent(name);
 }

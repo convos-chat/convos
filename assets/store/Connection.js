@@ -23,8 +23,8 @@ export default class Connection extends Conversation {
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', this.url.hostname);
     this.prop('rw', 'server_op', false);
-    this.participants((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
 
+    this.participants.set((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
     if (params.me) this.wsEventMe(params.me);
   }
 
@@ -60,7 +60,7 @@ export default class Connection extends Conversation {
   send(message) {
     if (typeof message == 'string') message = {message};
 
-    const re = new RegExp('^' + this.participants().map(p => p.id).join('|') + ':', 'i');
+    const re = new RegExp('^' + this.participants.toArray().map(p => p.id).join('|') + ':', 'i');
     if (message.message.indexOf('/') != 0 && !message.message.match(re)) {
       message.message = '/quote ' + message.message;
     }
@@ -84,15 +84,15 @@ export default class Connection extends Conversation {
   wsEventFrozen(params) {
     const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
-    this.ensureConversation(params).participants([{nick: this.nick, me: true}]);
+    this.ensureConversation(params).participants.set({nick: this.nick, me: true});
     if (params.frozen) (existing || this).addMessages({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
     if (wasFrozen && !params.frozen) existing.addMessages({message: 'Connected.', vars: []});
   }
 
   wsEventMe(params) {
-    this.wsEventNickChange(params);
+    if (params.nick) this.wsEventNickChange(params);
     if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
-    if (params.real_host) this.update({name: params.real_host}).participants([{nick: params.real_host}]);
+    if (params.real_host) this.update({name: params.real_host}).participants.set({nick: params.real_host});
     this.update(params);
   }
 
@@ -122,7 +122,7 @@ export default class Connection extends Conversation {
 
     // Generic errors
     const conversation = (params.conversation_id && params.frozen) ? this.ensureConversation(params) : (this.findConversation(params) || this);
-    console.log(conversation.conversation_id, msg);
+    console.error(conversation.conversation_id, msg);
     conversation.addMessages(msg);
   }
 
@@ -226,7 +226,7 @@ export default class Connection extends Conversation {
   _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];
     if (conversation.is('private')) participants.push({nick: conversation.name});
-    conversation.participants(participants);
+    conversation.participants.set(participants);
   }
 
   _addOperations() {

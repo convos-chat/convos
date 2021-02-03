@@ -101,13 +101,12 @@ autocomplete.emojis = ({query}) => {
 };
 
 autocomplete.nicks = ({conversation, query}) => {
-  const participants = conversation.participants();
   const re = new RegExp('^' + regexpEscape(query.slice(1)), 'i');
   const opts = [];
 
-  for (let p of participants) {
+  for (let participant of conversation.participants.toArray()) {
     if (opts.length >= maxNumMatches) break;
-    if (p.nick.match(re)) opts.push({val: p.nick});
+    if (participant.nick.match(re)) opts.push({val: participant.nick});
   }
 
   return opts;

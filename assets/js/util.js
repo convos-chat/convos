@@ -33,6 +33,13 @@ const k = 1000;
 const M = k * 1000;
 const G = M * 1000;
 
+export function calculateModes(modeMap, modeStr) {
+  const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
+  const modes = {};
+  modeList.split('').forEach(char => (modes[channelModeCharToModeName[char] || char] = addRemove != '-'));
+  return modes;
+}
+
 /**
  * Used to take snake case and turn it into camel case.
  *

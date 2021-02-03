@@ -22,6 +22,7 @@ let wantNotifications = conversation.wantNotifications;
 
 $: isOperator = calculateIsOperator(conversation);
 $: conversation.update({wantNotifications});
+$: participants = conversation.participants;
 $: if (formEl && formEl.topic) formEl.topic.value = conversation.topic || '';
 
 function calculateIsOperator(conversation) {
@@ -98,8 +99,8 @@ function saveConversationSettings(e) {
 
   {#if !conversation.frozen}
     <nav class="sidebar-left__nav">
-      <h3>{$l('Participants (%1)', conversation.participants().length)}</h3>
-      {#each conversation.participants() as participant}
+      <h3>{$l('Participants (%1)', $participants.length)}</h3>
+      {#each $participants.toArray() as participant}
         <Link href="/chat/{conversation.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <span>{participant.nick}</span>
         </Link>
