@@ -1,40 +1,3 @@
-%message--focus {
-  background: var(--highlight-color-bg);
-  box-shadow: 0 0 0 2px var(--highlight-color-bg);
-  border-radius: 3px;
-
-  .message__text,
-  .message__ts {
-    font-weight: bold;
-    opacity: 1;
-  }
-}
-
-%message--internal {
-  .message__text {
-    font-size: 0.9rem;
-    font-style: italic;
-  }
-}
-
-%message--oneline-italic {
-  > i {
-    display: none;
-  }
-
-  .message__from,
-  .message__text {
-    font-size: 1rem;
-    font-style: italic;
-  }
-
-  .message__from {
-    margin-right: 0.2em;
-    float: left;
-    display: block;
-  }
-}
-
 %message__from--hidden {
   > i {
     display: none;
@@ -63,6 +26,48 @@
       opacity: 0.8;
     }
   }
+}
+
+%message--focus {
+  background: var(--highlight-color-bg);
+  box-shadow: 0 0 0 2px var(--highlight-color-bg);
+  border-radius: 3px;
+
+  .message__text,
+  .message__ts {
+    font-weight: bold;
+    opacity: 1;
+  }
+}
+
+%message--internal {
+  .message__text {
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+}
+
+%message--oneline {
+  > i {
+    display: none;
+  }
+
+  .message__from,
+  .message__text {
+    font-size: 1rem;
+    font-style: italic;
+    display: inline;
+  }
+
+  .message__from {
+    margin-right: 0.2em;
+  }
+
+  .message__from:before {
+    content: '✦';
+    margin-right: 0.3em;
+  }
+
 }
 
 .message {
@@ -127,12 +132,7 @@
   }
 
   &.is-type-action {
-    @extend %message--oneline-italic;
-
-    .message__from:before {
-      content: '✦';
-      margin-right: 0.3em;
-    }
+    @extend %message--oneline;
   }
 
   &.has-not-same-from {

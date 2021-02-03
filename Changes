@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.16 Not Released
+ - Fix rendering action messages
+
 5.15 2021-02-03T10:51:00+0900
  - Hide from and icon for notice and error messages
  - Rolled back "channel@connection" as title
