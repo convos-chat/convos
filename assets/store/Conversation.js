@@ -152,8 +152,9 @@ export default class Conversation extends Reactive {
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
+    this.update({unread: 0});
     await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
-    return this.update({unread: 0});
+    return this;
   }
 
   update(params) {
