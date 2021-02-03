@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 5.16 Not Released
+ - Add nick to video conversation url
  - Fix rendering action messages
  - Improved video conversation name for private conversations
 

@@ -133,6 +133,7 @@ function onVideoLinkClick({conversation, user}, e, aEl) {
   if (!aEl) aEl = e.target.closest('a');
   if (videoWindow.close() && aEl.href.indexOf('#action:video') != -1) return;
   const renderInsideConvos = aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi');
+  const chatParams = {nick: conversation.participants.me().nick};
 
   if (aEl.href.indexOf('#action:video') != -1) {
     const videoUrl = new URL(user.videoService);
@@ -140,17 +141,17 @@ function onVideoLinkClick({conversation, user}, e, aEl) {
     videoUrl.pathname = videoUrl.pathname.replace(/\/+/g, '/');
     maybeSendVideoUrl(conversation, videoUrl.toString());
     e.preventDefault();
-    videoWindow.open(route.urlFor('/video/' + videoUrl.hostname + '/' + videoName(conversation)));
+    videoWindow.open(route.urlFor('/video/' + videoUrl.hostname + '/' + videoName(conversation), chatParams));
   }
   else if (aEl.href.indexOf('/video/') != -1) {
     const url = new URL(aEl.href);
     e.preventDefault();
-    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/')));
+    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/'), chatParams));
   }
   else if (renderInsideConvos) {
     const url = new URL(aEl.href);
     e.preventDefault();
-    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname));
+    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname, chatParams));
   }
 }
 
