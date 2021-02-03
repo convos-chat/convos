@@ -64,7 +64,7 @@
   }
 }
 
-.le-card.le-provider-convosapp {
+.le-card.le-provider-convosapp:not(.le-join-request) {
   h3,
   p {
     display: none;

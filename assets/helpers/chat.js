@@ -135,11 +135,12 @@ function onVideoLinkClick({conversation, user}, e, aEl) {
   const renderInsideConvos = aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi');
 
   if (aEl.href.indexOf('#action:video') != -1) {
-    const videoService = new URL(user.videoService);
-    const videoUrl = route.urlFor('/video/' + videoService.hostname + '/' + encodeURIComponent(conversation.title));
-    maybeSendVideoUrl(conversation, videoUrl);
+    const videoUrl = new URL(user.videoService);
+    videoUrl.pathname += '/' + videoName(conversation);
+    videoUrl.pathname = videoUrl.pathname.replace(/\/+/g, '/');
+    maybeSendVideoUrl(conversation, videoUrl.toString());
     e.preventDefault();
-    videoWindow.open(videoUrl);
+    videoWindow.open(route.urlFor('/video/' + videoUrl.hostname + '/' + videoName(conversation)));
   }
   else if (aEl.href.indexOf('/video/') != -1) {
     const url = new URL(aEl.href);
@@ -177,5 +178,10 @@ export function topicOrStatus(connection, conversation) {
   if (connection.frozen) return connection.frozen;
   if (connection == conversation) return 'Connection messages.';
   const str = conversation.frozen ? conversation.frozen : conversation.topic;
-  return str || (conversation.is_private ? 'Private conversation.' : 'No topic is set.');
+  return str || (conversation.is('private') ? 'Private conversation.' : 'No topic is set.');
+}
+
+function videoName(conversation) {
+  const name = conversation.is('private') ? conversation.participants().map(p => p.nick).sort().join('-and-') : conversation.title;
+  return encodeURIComponent(name);
 }

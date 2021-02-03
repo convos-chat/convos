@@ -7,7 +7,6 @@ export default class Search extends Conversation {
       ...params,
       connection_id: '',
       conversation_id: 'search',
-      is_private: true,
       name: 'Search',
     });
 

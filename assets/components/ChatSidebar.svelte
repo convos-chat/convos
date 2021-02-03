@@ -163,7 +163,7 @@ function renderUnread(conversation, max = 60) {
       </Link>
       {#each connection.conversations.toArray() as conversation}
         <Link href="{conversation.path}" class="{conversationClassNames(connection, conversation)}">
-          <Icon name="{conversation.is_private ? 'user' : 'user-friends'}"/>
+          <Icon name="{conversation.is('private') ? 'user' : 'user-friends'}"/>
           <span>{conversation.name}</span>
           <b class="unread" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
         </Link>

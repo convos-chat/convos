@@ -7,7 +7,6 @@ export default class Notifications extends Conversation {
       ...params,
       connection_id: '',
       conversation_id: 'notifications',
-      is_private: true,
       name: 'Notifications',
     });
   }

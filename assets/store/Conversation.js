@@ -18,8 +18,6 @@ const sortParticipants = (a, b) => {
       || a.name.localeCompare(b.name);
 };
 
-let nMessages = 0;
-
 export default class Conversation extends Reactive {
   constructor(params) {
     super();
@@ -30,7 +28,6 @@ export default class Conversation extends Reactive {
     this.prop('ro', '_participants', new SortedMap([], {sorter: sortParticipants}));
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
-    this.prop('ro', 'is_private', () => this.conversation_id && !channelRe.test(this.name));
     this.prop('ro', 'messages', new Messages({}));
     this.prop('ro', 'nParticipants', () => this.participants().length);
     this.prop('ro', 'path', route.conversationPath(params));
@@ -54,7 +51,7 @@ export default class Conversation extends Reactive {
     }
 
     if (params.conversation_id) {
-      this.prop('persist', 'wantNotifications', this.is_private, {key: params.conversation_id +  ':wantNotifications'});
+      this.prop('persist', 'wantNotifications', this.is('private'), {key: params.conversation_id +  ':wantNotifications'});
     }
 
     this.socket = params.socket || getSocket('/events');
@@ -82,7 +79,7 @@ export default class Conversation extends Reactive {
     if (status == 'locked') return this.frozen == 'Invalid password.';
     if (status == 'not_found') return this.frozen == 'Not found.';
     if (status == 'notifications') return false;
-    if (status == 'private') return this.is_private;
+    if (status == 'private') return this.conversation_id && !channelRe.test(this.conversation_id) || false;
     if (status == 'search') return false;
     if (status == 'unread') return this.unread && true;
     return this.status == status;
@@ -239,7 +236,7 @@ export default class Conversation extends Reactive {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is_private ? this.send('/whois ' + this.conversation_id) : this.send('/names', this._updateParticipants.bind(this));
+    return this.is('private') ? this.send('/whois ' + this.conversation_id) : this.send('/names', this._updateParticipants.bind(this));
   }
 
   _maybeIncreaseUnread(msg) {

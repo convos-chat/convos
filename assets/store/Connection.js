@@ -6,7 +6,7 @@ import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
 
 const sortConversations = (a, b) => {
-  return (a.is_private || 0) - (b.is_private || 0) || a.name.localeCompare(b.name);
+  return (a.is('private') - b.is('private')) || a.name.localeCompare(b.name);
 };
 
 export default class Connection extends Conversation {
@@ -225,7 +225,7 @@ export default class Connection extends Conversation {
 
   _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];
-    if (conversation.is_private) participants.push({nick: conversation.name});
+    if (conversation.is('private')) participants.push({nick: conversation.name});
     conversation.participants(participants);
   }
 

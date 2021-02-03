@@ -93,7 +93,7 @@ function setConversationFromUser(user) {
 
   <!-- welcome message -->
   {#if $messages.length < 10 && !$conversation.is('not_found')}
-    {#if $conversation.is_private}
+    {#if $conversation.is('private')}
       <ChatMessage>{@html $lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
     {:else}
       <ChatMessage>{@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>

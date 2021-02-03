@@ -147,7 +147,7 @@ export default class User extends Reactive {
   _calculateUnread() {
     const activeConversation = this.activeConversation;
     return this.notifications.unread
-      + this.conversations(conversation => conversation.is_private)
+      + this.conversations(conversation => conversation.is('private'))
           .reduce((t, d) => { return t + (d == activeConversation ? 0 : d.unread) }, 0);
   }
 
