@@ -88,6 +88,8 @@ function selectOptionOrSendMessage(e) {
     msg.message = msg.message.replace(/^\/close/i, '/part');
     msg.message = msg.message.replace(/^\/j\b/i, '/join');
     msg.message = msg.message.replace(/^\/raw/i, '/quote');
+    msg.message = msg.message.replace(/^\/ns/i, '/msg nickserv');
+    msg.message = msg.message.replace(/^\/cs/i, '/msg chanserv');
 
     if (msg.message.length) conversation.send(msg, handleMessageResponse);
     if (!conversation.is('search')) setValue('');
