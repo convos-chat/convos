@@ -161,9 +161,9 @@ function setConversationFromUser(user) {
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <p type="error">{@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</p>
+    <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
-    <p type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</p>
+    <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</p>
   {/if}
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>

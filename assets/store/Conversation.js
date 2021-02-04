@@ -133,7 +133,7 @@ export default class Conversation extends Reactive {
 
   wsEventMode(params) {
     if (params.nick) {
-      this.participants.set({nick: params.nick, modes: params.mode});
+      this.participants.add({nick: params.nick, modes: params.mode});
       this.addMessages({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
     }
     else {
@@ -166,7 +166,7 @@ export default class Conversation extends Reactive {
   }
 
   wsEventSentNames(params) {
-    this.participants.set(params.participants);
+    this.participants.add(params.participants);
 
     const msg = {...params, message: 'Participants (%1): %2', vars: []};
     const participants = this.participants.nicks();
@@ -199,7 +199,20 @@ export default class Conversation extends Reactive {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
-    return this.is('private') ? this.send('/whois ' + this.conversation_id) : this.send('/names', params => this.participants.update(this));
+
+    if (this.is('private')) {
+      this.send('/whois ' + this.conversation_id, e => {
+        e.stopPropagation();
+        this.update({frozen: e.errors && e.errors.length ? e.errors[0].message : ''});
+      });
+    }
+    else {
+      this.send('/names ' + this.conversation_id, e => {
+        e.stopPropagation();
+        this.participants.clear();
+        this.participants.add(e.participants);
+      });
+    }
   }
 
   _maybeIncreaseUnread(msg) {

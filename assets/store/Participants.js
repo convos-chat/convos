@@ -17,6 +17,10 @@ export default class Participants extends Reactive {
     this.prop('ro', '_map', new SortedMap([], {sorter}));
   }
 
+  clear() {
+    this._map.clear();
+  }
+
   delete(nick) {
     this._map.delete(this._id(nick));
   }
@@ -42,12 +46,12 @@ export default class Participants extends Reactive {
     delete existing.id;
     existing.nick = newNick;
     this.delete(oldNick);
-    return this.set(existing);
+    return this.add(existing);
   }
 
-  set(participant) {
+  add(participant) {
     if (Array.isArray(participant)) {
-      participant.forEach(p => this.set(p));
+      participant.forEach(p => this.add(p));
       return this;
     }
 

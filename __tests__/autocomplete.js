@@ -6,7 +6,7 @@ global.window.__emojiList = [{"emoji": "😄", "name": "smile", "shortname": ":s
 
 test('calculateAutocompleteOptions', () => {
   const params = {conversation: {participants: new Participants()}};
-  params.conversation.participants.set({nick: 'superman'});
+  params.conversation.participants.add({nick: 'superman'});
   expect(calculateAutocompleteOptions('', 0, params).length).toBe(0);
 
   // Commands

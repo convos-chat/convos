@@ -24,7 +24,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'real_host', this.url.hostname);
     this.prop('rw', 'server_op', false);
 
-    this.participants.set((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
+    this.participants.add((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
     if (params.me) this.wsEventMe(params.me);
   }
 
@@ -84,7 +84,7 @@ export default class Connection extends Conversation {
   wsEventFrozen(params) {
     const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
-    this.ensureConversation(params).participants.set({nick: this.nick, me: true});
+    this.ensureConversation(params).participants.add({nick: this.nick, me: true});
     if (params.frozen) (existing || this).addMessages({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
     if (wasFrozen && !params.frozen) existing.addMessages({message: 'Connected.', vars: []});
   }
@@ -92,7 +92,7 @@ export default class Connection extends Conversation {
   wsEventMe(params) {
     if (params.nick) this.wsEventNickChange(params);
     if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
-    if (params.real_host) this.update({name: params.real_host}).participants.set({nick: params.real_host});
+    if (params.real_host) this.update({name: params.real_host}).participants.add({nick: params.real_host});
     this.update(params);
   }
 
@@ -129,10 +129,8 @@ export default class Connection extends Conversation {
   wsEventJoin(params) {
     const conversation = this.ensureConversation(params);
     const nick = params.nick || this.nick;
-    if (nick != this.nick && !params.silent) {
-      conversation.addMessages({message: '%1 joined.', vars: [nick]});
-    }
-    conversation.participants([{nick}]);
+    if (nick != this.nick && !params.silent) conversation.addMessages({message: '%1 joined.', vars: [nick]});
+    conversation.participants.add({nick});
   }
 
   wsEventPart(params) {
@@ -226,7 +224,7 @@ export default class Connection extends Conversation {
   _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];
     if (conversation.is('private')) participants.push({nick: conversation.name});
-    conversation.participants.set(participants);
+    conversation.participants.add(participants);
   }
 
   _addOperations() {
