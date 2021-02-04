@@ -27,7 +27,7 @@ $: if (formEl && formEl.topic) formEl.topic.value = conversation.topic || '';
 
 function calculateIsOperator(conversation) {
   const connection = user.findConversation({connection_id: conversation.connection_id});
-  const participant = conversation.findParticipant(connection && connection.nick);
+  const participant = conversation.participant.get(connection && connection.nick);
   return participant && participant.modes.operator;
 }
 

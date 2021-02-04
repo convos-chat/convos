@@ -119,7 +119,6 @@ function calculateStyle(name, family, color, initialized) {
 }
 
 function pickIcon(str) {
-  if (str.match(/^\d+$/)) console.log(pickIcons[str]);
   if (str.match(/^\d+$/)) return pickIcons[str];
 
   let hash = 0;
