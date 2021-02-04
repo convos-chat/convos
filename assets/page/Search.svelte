@@ -1,5 +1,4 @@
 <script>
-import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
@@ -42,9 +41,9 @@ function search(msg) {
   <!-- welcome messages / status -->
   {#if $messages.length == 0 && !conversation.is('loading')}
     {#if $route.param('q')}
-      <ChatMessage>{$l('No search results for "%1".', $route.param('q'))}</ChatMessage>
+      <p><Icon name="info-circle"/> {$l('No search results for "%1".', $route.param('q'))}</p>
     {:else}
-      <ChatMessage>{@html $lmd('You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user.')}</ChatMessage>
+      <p><Icon name="info-circle"/> {@html $lmd('You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user.')}</p>
     {/if}
   {/if}
 

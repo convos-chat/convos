@@ -1,6 +1,5 @@
 <script>
 import Button from '../components/form/Button.svelte';
-import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ChatParticipants from '../components/ChatParticipants.svelte';
@@ -85,26 +84,32 @@ function setConversationFromUser(user) {
 </ChatHeader>
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{onInfinityScrolled}" on:visibility="{onInfinityVisibility}">
+  <!-- welcome message -->
+  {#if $messages.length < 10 && !$conversation.is('not_found')}
+    {#if $conversation.is('private')}
+      <p><Icon name="info-circle"/> {@html $lmd('This is a private conversation with "%1".', $conversation.name)}</p>
+    {:else}
+      <p>
+        <Icon name="info-circle"/> 
+        {@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}
+      </p>
+      <p>
+        <Icon name="info-circle"/> 
+        {#if $participants.length == 1}
+          {$l('You are the only participant in this conversation.')}
+        {:else}
+          {@html $lmd('There are %1 [participants](%2) in this conversation.', $participants.length, $conversation.path + '#activeMenu:settings')}
+        {/if}
+      </p>
+    {/if}
+  {/if}
+
   <!-- status -->
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
   {#if $conversation.historyStartAt && !$conversation.is('not_found')}
     <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{$l('Started chatting on %1', $conversation.historyStartAt.getHumanDate())}</i></span></div>
-  {/if}
-
-  <!-- welcome message -->
-  {#if $messages.length < 10 && !$conversation.is('not_found')}
-    {#if $conversation.is('private')}
-      <ChatMessage>{@html $lmd('This is a private conversation with "%1".', $conversation.name)}</ChatMessage>
-    {:else}
-      <ChatMessage>{@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}</ChatMessage>
-      {#if $participants.length == 1}
-        <ChatMessage same="{true}">{$l('You are the only participant in this conversation.')}</ChatMessage>
-      {:else}
-        <ChatMessage same="{true}">{@html $lmd('There are %1 [participants](%2) in this conversation.', $participants.length, $conversation.path + '#activeMenu:settings')}</ChatMessage>
-      {/if}
-    {/if}
   {/if}
 
   <!-- messages -->
@@ -156,9 +161,9 @@ function setConversationFromUser(user) {
       <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <ChatMessage type="error">{@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</ChatMessage>
+    <p type="error">{@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
-    <ChatMessage type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</ChatMessage>
+    <p type="error">{topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</p>
   {/if}
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>

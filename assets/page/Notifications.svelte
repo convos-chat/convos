@@ -1,5 +1,4 @@
 <script>
-import ChatMessage from '../components/ChatMessage.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
