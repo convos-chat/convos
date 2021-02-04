@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.16 Not Released
+5.16 2021-02-04T11:28:00+0900
  - Add nick to video conversation url
  - Add /ns (msg nickserv) and /cs (msg chanserv) aliases
  - Fix rendering action messages
