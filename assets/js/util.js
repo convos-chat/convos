@@ -36,7 +36,7 @@ const G = M * 1000;
 export function calculateModes(modeMap, modeStr) {
   const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
   const modes = {};
-  modeList.split('').forEach(char => (modes[channelModeCharToModeName[char] || char] = addRemove != '-'));
+  modeList.split('').forEach(char => (modes[modeMap[char] || char] = addRemove != '-'));
   return modes;
 }
 
