@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.19 Not Released
+5.19 2021-02-04T12:00:00+0900
  - Fix typo in calculateModes()
  - Fix number of participants in ChatParticipants
  - Fix parsing user modes
