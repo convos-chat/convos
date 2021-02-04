@@ -31,6 +31,7 @@ let uploader;
 
 $: setConversationFromRoute($route);
 $: setConversationFromUser($user);
+$: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
 $: notConnected = $conversation.frozen ? true : false;
 $: title = $conversation.title;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});

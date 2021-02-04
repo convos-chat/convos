@@ -19,7 +19,7 @@ const INTERNAL_MESSAGE_KEYS = [
 ];
 
 export default class Messages extends Reactive {
-  constructor(params) {
+  constructor() {
     super();
     this.prop('ro', 'length', () => this.messages.length);
     this.prop('ro', 'messages', []);
@@ -46,8 +46,8 @@ export default class Messages extends Reactive {
       const msg = this.get(msgIndex);
       if (!msg.rendered) {
         msg.embeds = this._embeds(msg);
-        this.update({messages: true});
         msg.rendered = true;
+        this.update({messages: true});
       }
 
       return this.messages;
@@ -62,7 +62,6 @@ export default class Messages extends Reactive {
       msg.className = this._className(msg, prev);
       msg.embeds = [];
       msg.markdown = msg.vars ? i18n.md(msg.message, ...msg.vars) : md(msg.message);
-      msg.rendered = false;
 
       return (prev = msg);
     });
@@ -70,6 +69,14 @@ export default class Messages extends Reactive {
 
   toArray() {
     return this.messages;
+  }
+
+  update(params) {
+    if (params.hasOwnProperty('expandUrlToMedia') && params.expandUrlToMedia != this.expandUrlToMedia) {
+      this.messages.forEach(msg => delete msg.rendered);
+    }
+
+    return super.update(params);
   }
 
   unshift(list) {
@@ -86,7 +93,7 @@ export default class Messages extends Reactive {
   }
 
   _dayChanged(msg, prev) {
-    return prev.ts && msg.ts.getDate() != prev.ts.getDate();
+    return prev.ts && msg.ts.getDate() != prev.ts.getDate() ? true : false;
   }
 
   _embeds(msg) {
