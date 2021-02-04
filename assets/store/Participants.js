@@ -55,13 +55,12 @@ export default class Participants extends Reactive {
       return this;
     }
 
-    if (!participant.nick) participant.nick = participant.name;
     participant.color = str2color(participant.nick);
     participant.id = this._id(participant.nick);
-    participant.modes =
-      !participant.modes ? {}
-      : typeof participant.modes == 'string' ? calculateModes(userModeCharToModeName, participant.modes)
-      : participant.modes;
+
+    if (typeof participant.mode == 'string') participant.modes = calculateModes(userModeCharToModeName, participant.mode);
+    if (!participant.modes) participant.modes = {};
+    if (!participant.nick) participant.nick = participant.name;
 
     const existing = this._map.get(participant.id);
     if (existing) Object.keys(existing).forEach(k => participant[k] || (participant[k] = existing[k]));

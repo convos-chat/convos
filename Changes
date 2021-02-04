@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 5.19 Not Released
  - Fix typo in calculateModes()
  - Fix number of participants in ChatParticipants
+ - Fix parsing user modes
 
 5.18 2021-02-04T11:47:00+0900
  - Fix typo in Participants.js
