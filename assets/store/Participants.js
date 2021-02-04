@@ -60,7 +60,7 @@ export default class Participants extends Reactive {
     participant.id = this._id(participant.nick);
     participant.modes =
       !participant.modes ? {}
-      : typeof participant.modes == 'string' ? calculateModes(userModeCharToModeName, params.mode)
+      : typeof participant.modes == 'string' ? calculateModes(userModeCharToModeName, participant.modes)
       : participant.modes;
 
     const existing = this._map.get(participant.id);

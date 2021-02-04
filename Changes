@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.18 Not Released
+ - Fix typo in Participants.js
+
 5.17 2021-02-04T11:42:00+0900
  - Fix handling join events
  - Fix handling /names response
