@@ -1,10 +1,12 @@
+import Participants from '../assets/store/Participants';
 import {calculateAutocompleteOptions, fillIn} from '../assets/js/autocomplete';
 
 // calculateAutocompleteOptions
 global.window.__emojiList = [{"emoji": "😄", "name": "smile", "shortname": ":smile:", "unicode": "1f604", "html": "&#128516;", "category": "p", "order": "6"}];
 
 test('calculateAutocompleteOptions', () => {
-  const params = {conversation: {participants: () => [{nick: 'superman'}]}, user: {}};
+  const params = {conversation: {participants: new Participants()}};
+  params.conversation.participants.set({nick: 'superman'});
   expect(calculateAutocompleteOptions('', 0, params).length).toBe(0);
 
   // Commands

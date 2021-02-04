@@ -12,7 +12,7 @@ test('constructor', () => {
   expect(c.connection_id).toBe('irc-freenode');
   expect(c.conversation_id).toBe('#convos');
   expect(c.frozen).toBe('');
-  expect(c.is_private).toBe(false);
+  expect(c.is('private')).toBe(false);
   expect(c.messages.toArray()).toEqual([]);
   expect(c.modes).toEqual({});
   expect(c.name).toBe('#convos');

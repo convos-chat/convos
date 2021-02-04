@@ -19,7 +19,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
     this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('convos://loopback'));
 
-    const nick = this.url.searchParams.get('nick') || '';
+    const nick = this.url.searchParams.get('nick') || 'guest';
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', this.url.hostname);
     this.prop('rw', 'server_op', false);
