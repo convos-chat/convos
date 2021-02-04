@@ -108,12 +108,6 @@ export default class Conversation extends Reactive {
     this.lastNotification = notify.show(msg.message, {path: this.path, title});
   }
 
-  findParticipant(nick) {
-    if (!nick) return this.participants.me();
-    if (nick == this.connection_id) return {id: this.connection_id, nick: this.connection_id};
-    return this.participants.get(nick);
-  }
-
   send(message, cb) {
     if (typeof message == 'string') message = {message};
     return this.socket.send({method: 'send', connection_id: this.connection_id, conversation_id: this.conversation_id || '', ...message}, cb);
@@ -201,13 +195,13 @@ export default class Conversation extends Reactive {
     this.participantsLoaded = true;
 
     if (this.is('private')) {
-      this.send('/whois ' + this.conversation_id, e => {
+      this.send('/whois ' + this.conversation_id, (e) => {
         e.stopPropagation();
         this.update({frozen: e.errors && e.errors.length ? e.errors[0].message : ''});
       });
     }
     else {
-      this.send('/names ' + this.conversation_id, e => {
+      this.send('/names ' + this.conversation_id, (e) => {
         e.stopPropagation();
         this.participants.clear();
         this.participants.add(e.participants);

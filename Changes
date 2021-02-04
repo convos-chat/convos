@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.20 Not Released
+ - Fix handling offline/online nick logic
+
 5.19 2021-02-04T12:00:00+0900
  - Fix typo in calculateModes()
  - Fix number of participants in ChatParticipants

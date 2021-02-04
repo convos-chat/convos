@@ -122,7 +122,7 @@ function setConversationFromUser(user) {
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
-    <div class="{message.className}" class:is-not-present="{!$conversation.findParticipant(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
+    <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
       <a href="#action:join:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
