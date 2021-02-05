@@ -18,11 +18,15 @@ export default class Participants extends Reactive {
   }
 
   clear() {
+    const me = this.me();
     this._map.clear();
+    this.add(me);
+    return this;
   }
 
   delete(nick) {
     this._map.delete(this._id(nick));
+    return this.update({});
   }
 
   get(nick) {
@@ -34,7 +38,7 @@ export default class Participants extends Reactive {
   }
 
   me() {
-    return Array.from(this._map.values()).filter(p => p.me)[0] || this._empty();
+    return Array.from(this._map.values()).filter(p => p.me)[0] || this._defaultParticipant();
   }
 
   nicks() {
@@ -55,8 +59,8 @@ export default class Participants extends Reactive {
       return this;
     }
 
-    participant.color = str2color(participant.nick);
     participant.id = this._id(participant.nick);
+    participant.color = str2color(participant.id);
 
     if (typeof participant.mode == 'string') participant.modes = calculateModes(userModeCharToModeName, participant.mode);
     if (!participant.modes) participant.modes = {};
@@ -73,8 +77,8 @@ export default class Participants extends Reactive {
     return this._map.toArray();
   }
 
-  _empty() {
-    return {color: str2color(''), id: '', modes: '', nick: ''};
+  _defaultParticipant() {
+    return {color: '#000000', id: '', modes: {}, nick: ''};
   }
 
   _id(nick) {
