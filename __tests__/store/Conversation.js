@@ -34,7 +34,7 @@ test('load', async () => {
   expect(c.messagesOp.performed).toEqual({connection_id: 'irc-freenode', conversation_id: '#convos', limit: 40});
   expect(c.status).toBe('success');
   expect(socket.queue.length).toBe(1);
-  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names'});
+  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names #convos'});
 
   c.messagesOp.perform = mockMessagesOpPerform({
     body: {end: true, messages: [{from: 'superman', message: 'm two', type: 'private', ts: '2020-01-20T09:01:50.001Z'}]},
