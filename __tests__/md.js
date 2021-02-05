@@ -30,6 +30,9 @@ test('markdown link', () => {
     .toBe('A link to <a href="https://convos.chat" target="_blank">https://convos.chat</a>');
   expect(md('A link to mailto:jhthorsen@cpan.org'))
     .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>');
+
+  expect(md('https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик last symbol'))
+    .toBe('<a href="https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик" target="_blank">https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol');
 });
 
 test('code', () => {
