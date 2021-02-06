@@ -39,7 +39,7 @@ $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 $: onInfinityScrolled = chatHelper('onInfinityScrolled', {conversation});
 $: onInfinityVisibility = chatHelper('onInfinityVisibility', {messages, onLoadHash});
 $: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
-$: onMessageClick = chatHelper('onMessageClick', {messages, onVideoLinkClick});
+$: onMessageClick = chatHelper('onMessageClick', {conversation, user});
 
 onMount(() => {
   dragAndDrop.attach(document.querySelector('.main'), uploader);
@@ -132,7 +132,7 @@ function setConversationFromUser(user) {
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
           <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{$l('Resend')}"><Icon name="sync-alt"/></a>
         {:else if !message.waitingForResponse && message.canToggleDetails}
-          <a href="#action:details"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
+          <a href="#action:details:{message.index}"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
         {@html message.markdown}
       </div>

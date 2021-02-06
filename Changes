@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.22 Not Released
+ - Fix clicking on nicks in conversation
+
 5.21 2021-02-05T09:23:00+0900
  - Fix handling expandUrlToMedia #562
  - Fix keeping track of which nick is yours in conversations

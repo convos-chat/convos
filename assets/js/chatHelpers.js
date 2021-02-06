@@ -24,6 +24,13 @@ export function chatHelper(method, state) {
 }
 
 // Exported
+export function conversationUrl(message) {
+  const path = ['', 'chat', message.connection_id];
+  if (message.conversation_id) path.push(message.conversation_id);
+  return route.urlFor(path.map(encodeURIComponent).join('/') + '#' + message.ts.toISOString());
+}
+
+// Exported
 export function gotoConversation(e) {
   if (e.target.closest('a')) return;
   e.preventDefault();
@@ -74,33 +81,33 @@ export function onInfinityVisibility({messages, onLoadHash}, e) {
 }
 
 // Internal
-function onMessageActionClick(e, action, messages) {
+function onMessageActionClick({conversation}, e, action) {
   if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
-  e.preventDefault();
-  const messageEl = e.target.closest('.message');
-  const message = messageEl && messages.get(messageEl.dataset.index);
-  if (action[1] == 'join') return conversation.send('/join ' + message.from);
-  if (action[1] == 'remove') return socket.deleteWaitingMessage(message.id);
-  if (action[1] == 'resend') return socket.send(socket.getWaitingMessages([message.id])[0]);
 
+  e.preventDefault();
   if (action[1] == 'details') {
-    const msg = messages.get(messageEl.dataset.index);
+    const msg = conversation.messages.get(action[2]);
     msg.showDetails = !msg.showDetails;
-    messages.update({messages: true});
+    conversation.messages.update({messages: true});
+  }
+  else if (action[1] == 'join') {
+    conversation.send('/join ' + action[2]);
+  }
+  else {
+    console.warn('Unhandled onMessageActionClick', action);
   }
 }
 
 // Available through chatHelper()
-function onMessageClick({messages, onVideoLinkClick}, e) {
+function onMessageClick({conversation, user}, e) {
   const aEl = e.target.closest('a');
 
   // Make sure embed links are opened in a new tab/window
   if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
 
   // Proxy video links
-  const messageEl = e.target.closest('.message');
-  const proxyEl = aEl && messageEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (proxyEl) return onVideoLinkClick(e, proxyEl);
+  const videoLink = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
+  if (videoLink) return onVideoLinkClick({conversation, user}, e, videoLink);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -108,7 +115,7 @@ function onMessageClick({messages, onVideoLinkClick}, e) {
 
   // Special links with actions in #hash
   const action = aEl && aEl.href.match(/#(activeMenu|action:[\w:]+)/);
-  if (action) return onMessageActionClick(e, action[1].split(':', 3), messages);
+  if (action) return onMessageActionClick({conversation}, e, action[1].split(':', 3));
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
@@ -182,11 +189,4 @@ export function topicOrStatus(connection, conversation) {
 function videoName(conversation) {
   const name = conversation.is('private') ? conversation.participants.nicks().sort().join('-and-') : conversation.title;
   return encodeURIComponent(name);
-}
-
-// Exported
-export function urlToMessage(message) {
-  const path = ['', 'chat', message.connection_id];
-  if (message.conversation_id) path.push(message.conversation_id);
-  return route.urlFor(path.map(encodeURIComponent).join('/') + '#' + message.ts.toISOString());
 }

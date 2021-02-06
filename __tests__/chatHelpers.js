@@ -2,7 +2,7 @@ import Conversation from '../assets/store/Conversation';
 import Time from '../assets/js/Time';
 import User from '../assets/store/User';
 import {get} from 'svelte/store';
-import {chatHelper, videoWindow, urlToMessage} from '../assets/js/chatHelpers';
+import {chatHelper, videoWindow, conversationUrl} from '../assets/js/chatHelpers';
 
 window.open = (url, name) => {
   const w = {opened: true, events: {}, name, url};
@@ -11,12 +11,108 @@ window.open = (url, name) => {
   return w;
 };
 
-test('onMessageClick', () => {
-  const onVideoLinkClick = () => {};
-  const onMessageClick = chatHelper('onMessageClick', {messages, onVideoLinkClick});
+describe('onMessageClick', () => {
+  const conversation = new Conversation({});
+  const user = new User({videoService: 'https://meet.convos.chat'});
+  const onMessageClick = chatHelper('onMessageClick', {conversation, user});
+
+  conversation.send = (message) => (conversation.sent = message);
+
+  test('default click', () => {
+    const e = {target: document.createElement('a')};
+    onMessageClick(e);
+    expect(e.target.target).toBe('');
+  });
+
+  test('inside embed', () => {
+    const e = {target: document.createElement('a')};
+    const embedEl = document.createElement('div');
+    embedEl.className = 'embed';
+    embedEl.appendChild(e.target);
+    onMessageClick(e);
+    expect(e.target.target).toBe('_blank');
+  });
+
+  test('inside le-meta', () => {
+    const e = {target: document.createElement('span')};
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'le-meta';
+    metaEl.appendChild(e.target);
+
+    const embedEl = document.createElement('div');
+    embedEl.className = 'embed';
+    embedEl.appendChild(metaEl);
+
+    onMessageClick(e);
+    expect(embedEl.className).toBe('embed is-expanded');
+  });
+
+  test('activeMenu', () => {
+    let preventDefault = 0;
+    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
+    e.target.href = '#activeMenu:settings';
+    onMessageClick(e);
+    expect(preventDefault).toBe(0);
+  });
+
+  test('action details', () => {
+    let preventDefault = 0;
+    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
+    e.target.href = '#action:details:0';
+    conversation.messages.push([{showDetails: false}]);
+    onMessageClick(e);
+    expect(conversation.messages.get(0).showDetails).toBe(true);
+
+    onMessageClick(e);
+    expect(preventDefault).toBe(2);
+    expect(conversation.messages.get(0).showDetails).toBe(false);
+  });
+
+  test('action join', () => {
+    let preventDefault = 0;
+    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
+    e.target.href = '#action:join:foo';
+    onMessageClick(e);
+    expect(preventDefault).toBe(1);
+  });
+
+  test('fullscreen', () => {
+    let preventDefault = 0;
+    const e = {preventDefault: () => (++preventDefault), target: document.createElement('img')};
+
+    e.target.src = 'image.jpeg';
+    expect(document.querySelector('.fullscreen-wrapper')).toBeFalsy();
+    onMessageClick(e);
+    expect(preventDefault).toBe(1);
+    expect(document.querySelector('.fullscreen-wrapper')).toBeTruthy();
+    expect(document.querySelector('.fullscreen-wrapper img[src="image.jpeg"]')).toBeTruthy();
+  });
+
+  test('videolink', () => {
+    let preventDefault = 0;
+    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
+    e.target.href = 'https://demo.convos.chat/video/meet.convos.chat/whatever';
+
+    // Do nothing
+    onMessageClick(e);
+    expect(preventDefault).toBe(0);
+
+    // Proxy to another link
+    const realLink = document.createElement('a');
+    realLink.href = 'https://demo.convos.chat/video/meet.convos.chat/whatever';
+    realLink.target = 'convos_video';
+    document.body.appendChild(realLink);
+    onMessageClick(e);
+    expect(preventDefault).toBe(1);
+    expect(get(videoWindow).url).toEqual('/video/meet.convos.chat/whatever?nick=');
+
+    // Clean up before next test
+    videoWindow.close();
+  });
 });
 
-test('onVideoLinkClick', () => {
+describe('onVideoLinkClick', () => {
   const conversation = new Conversation({connection_id: 'irc-foo', conversation_id: '#convos'});
   const user = new User({videoService: 'https://meet.convos.chat'});
   const onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
@@ -25,45 +121,53 @@ test('onVideoLinkClick', () => {
   const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
   e.target.href = '#action:video';
 
-  // Open video window
-  conversation.participants.add({nick: 'super_duper', me: true});
-  onVideoLinkClick(e);
-  const w1 = get(videoWindow);
-  expect(preventDefault).toBe(1);
-  expect([w1.url, w1.name]).toEqual(['/video/meet.convos.chat/%23convos%20-%20foo?nick=super_duper', 'convos_video']);
-  expect(w1.opened).toBe(true);
+  let w1;
+  test('open video window', () => {
+    conversation.participants.add({nick: 'super_duper', me: true});
+    onVideoLinkClick(e);
+    w1 = get(videoWindow);
+    expect(preventDefault).toBe(1);
+    expect([w1.url, w1.name]).toEqual(['/video/meet.convos.chat/%23convos%20-%20foo?nick=super_duper', 'convos_video']);
+    expect(w1.opened).toBe(true);
+  });
 
-  // Close video window after open
-  onVideoLinkClick(e);
-  expect(preventDefault).toBe(2);
-  expect(w1.opened).toBe(false);
+  test('close video window after open', () => {
+    onVideoLinkClick(e);
+    expect(preventDefault).toBe(2);
+    expect(w1.opened).toBe(false);
+  });
 
-  // Close window from outside
-  onVideoLinkClick(e);
-  const w2 = get(videoWindow);
-  expect(preventDefault).toBe(3);
-  expect(w2).not.toBe(w1);
-  expect(w2.opened).toBe(true);
-  ['beforeunload', 'close'].forEach(name => w2.events[name]());
-  expect(get(videoWindow)).toBe(null);
+  test('close window from outside', () => {
+    onVideoLinkClick(e);
+    const w2 = get(videoWindow);
+    expect(preventDefault).toBe(3);
+    expect(w2).not.toBe(w1);
+    expect(w2.opened).toBe(true);
+    ['beforeunload', 'close'].forEach(name => w2.events[name]());
+    expect(get(videoWindow)).toBe(null);
+  });
 
-  // Internal video link
-  conversation.participants.rename('super_duper', 'superman')
-  e.target.href = '/whatever/video/meet.convos.chat/%23convos%20-%20foo?nick=superwoman';
-  onVideoLinkClick(e);
-  expect(preventDefault).toBe(4);
-  expect(get(videoWindow).url).toBe('/video/meet.convos.chat/%23convos%20-%20foo?nick=superman');
+  test('internal video link', () => {
+    conversation.participants.rename('super_duper', 'superman')
+    e.target.href = '/whatever/video/meet.convos.chat/%23convos%20-%20foo?nick=superwoman';
+    onVideoLinkClick(e);
+    expect(preventDefault).toBe(4);
+    expect(get(videoWindow).url).toBe('/video/meet.convos.chat/%23convos%20-%20foo?nick=superman');
+  });
 
-  // External link
-  e.target.className = 'le-provider-jitsi';
-  e.target.href = 'https://meet2.convos.chat/cool-beans';
-  onVideoLinkClick(e);
-  expect(preventDefault).toBe(5);
-  expect(get(videoWindow).url).toBe('/video/meet2.convos.chat/cool-beans?nick=superman');
+  test('external link', () => {
+    e.target.className = 'le-provider-jitsi';
+    e.target.href = 'https://meet2.convos.chat/cool-beans';
+    onVideoLinkClick(e);
+    expect(preventDefault).toBe(5);
+    expect(get(videoWindow).url).toBe('/video/meet2.convos.chat/cool-beans?nick=superman');
+  });
 });
 
-test('urlToMessage', () => {
-  const ts = new Time('1983-02-24T05:06:07Z');
-  expect(urlToMessage({connection_id: 'irc-foo', ts})).toBe('/chat/irc-foo#1983-02-24T05:06:07.000Z');
-  expect(urlToMessage({connection_id: 'irc-foo', conversation_id: '#convos', ts})).toBe('/chat/irc-foo/%23convos#1983-02-24T05:06:07.000Z');
+describe('conversationUrl', () => {
+  test('conversationUrl', () => {
+    const ts = new Time('1983-02-24T05:06:07Z');
+    expect(conversationUrl({connection_id: 'irc-foo', ts})).toBe('/chat/irc-foo#1983-02-24T05:06:07.000Z');
+    expect(conversationUrl({connection_id: 'irc-foo', conversation_id: '#convos', ts})).toBe('/chat/irc-foo/%23convos#1983-02-24T05:06:07.000Z');
+  });
 });
