@@ -2,6 +2,7 @@
  * util holds a collection of utility functions.
  *
  * @module util
+ * @exports calculateModes
  * @exports camelize
  * @exports clone
  * @exports closestEl
@@ -20,7 +21,6 @@
  * @exports removeChildNodes
  * @exports sameOrigin
  * @exports settings
- * @exports showEl
  * @exports showFullscreen
  * @exports str2color
  * @exports tagNameIs
@@ -33,6 +33,13 @@ const k = 1000;
 const M = k * 1000;
 const G = M * 1000;
 
+/**
+ * Takes a string, and turns it into an object with true/false values.
+ *
+ * @param {Object} modeMap An object with single character keys and descriptive values.
+ * @param {String} modeStr Example: "vo", "+o" or "-vxyz"
+ * @returns {Object}
+ */
 export function calculateModes(modeMap, modeStr) {
   const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
   const modes = {};
@@ -50,7 +57,14 @@ export function camelize(str) {
   return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
 }
 
+/**
+ * Takes a JSON object or undefined and makes a deep copy.
+ *
+ * @param {Object} any
+ * @returns {Object}
+ */
 export function clone(any) {
+  if (any === undefined) return undefined;
   return JSON.parse(JSON.stringify(any));
 }
 
@@ -61,7 +75,7 @@ export function clone(any) {
  * @param {HTMLElement} el The node to search from.
  * @param {HTMLElement} needle Another DOM node.
  * @param {String} needle A CSS selector.
- * @returns {Boolean} True if the "needle" exists as self or parent node.
+ * @returns {HTMLElement} The node that matches the needle
  */
 export function closestEl(el, needle) {
   while (el) {
@@ -108,7 +122,6 @@ export function copyToClipboard(el) {
 export function debounce(cb, delay) {
   const db = function(...args) {
     const self = this; // eslint-disable-line no-invalid-this
-    db.isQueued = true;
     if (db.debounceTid) clearTimeout(db.debounceTid);
     db.debounceTid = setTimeout(function() { cb.apply(self, args); db.debounceTid = 0 }, delay);
   };
@@ -393,26 +406,6 @@ export function settings(key, value) {
   if (key == 'contact') value = btoa(value);
   if (typeof value == 'boolean') value = value ? 'yes' : 'no';
   getEl(key).content = value;
-}
-
-/**
- * Used to show/hide an element or query the state of the element.
- *
- * @example
- * const isVisible = showEl(someEl, 'is-visible'); // Figure out if it is visible
- * showEl(someEl, 'toggle'); // Toggle between visible and hidden
- * showEl(someEl, true); // Force to visible
- * showEl(someEl, false); // Force to hidden
- *
- * @param {HTMLElement} el The element to show or hide.
- * @param {Boolean} show Instruct to show or hide the element.
- * @param {String} show Can be used to "toggle" the state or as a getter with "is-visible".
- * @returns {Boolean} If "show" is "is-visible".
- */
-export function showEl(el, show) {
-  if (show === 'is-visible') return !el.hasAttribute('hidden');
-  if (show === 'toggle') show = el.hasAttribute('hidden');
-  return show ? el.removeAttribute('hidden') : el.setAttribute('hidden', '');
 }
 
 /**

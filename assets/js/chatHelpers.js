@@ -15,12 +15,6 @@ videoWindow.open = function(url) {
   this.set(w);
 };
 
-// Exported
-export function conversationUrl(message) {
-  const url = ['', 'chat', message.connection_id, message.conversation_id].map(encodeURIComponent).join('/');
-  return route.urlFor(url + '#' + message.ts.toISOString());
-}
-
 // Exports other functions
 export function chatHelper(method, state) {
   if (method == 'onInfinityScrolled') return (...params) => onInfinityScrolled(state, ...params);
@@ -131,11 +125,13 @@ function onVideoLinkClick({conversation, user}, e, aEl) {
    */
 
   if (!aEl) aEl = e.target.closest('a');
-  if (videoWindow.close() && aEl.href.indexOf('#action:video') != -1) return;
+
+  const videoButtonClicked = aEl.href.indexOf('#action:video') != -1;
+  if (videoWindow.close() && videoButtonClicked) return e.preventDefault();
+
   const renderInsideConvos = aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi');
   const chatParams = {nick: conversation.participants.me().nick};
-
-  if (aEl.href.indexOf('#action:video') != -1) {
+  if (videoButtonClicked) {
     const videoUrl = new URL(user.videoService);
     videoUrl.pathname += '/' + videoName(conversation);
     videoUrl.pathname = videoUrl.pathname.replace(/\/+/g, '/');
@@ -182,7 +178,15 @@ export function topicOrStatus(connection, conversation) {
   return str || (conversation.is('private') ? 'Private conversation.' : 'No topic is set.');
 }
 
+// Internal
 function videoName(conversation) {
   const name = conversation.is('private') ? conversation.participants.nicks().sort().join('-and-') : conversation.title;
   return encodeURIComponent(name);
+}
+
+// Exported
+export function urlToMessage(message) {
+  const path = ['', 'chat', message.connection_id];
+  if (message.conversation_id) path.push(message.conversation_id);
+  return route.urlFor(path.map(encodeURIComponent).join('/') + '#' + message.ts.toISOString());
 }

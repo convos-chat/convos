@@ -27,7 +27,7 @@ export default class User extends Reactive {
     this.prop('rw', 'default_connection', 'irc://chat.freenode.net:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'status', 'pending');
-    this.prop('rw', 'videoService', '');
+    this.prop('rw', 'videoService', params.videoService || '');
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));

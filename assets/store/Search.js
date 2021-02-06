@@ -20,10 +20,9 @@ export default class Search extends Conversation {
     return super.is(status);
   }
 
-  async load(params) {
+  async load(params = {}) {
     if (this.is('loading')) return this;
 
-    // params = {after, before, limit, match}
     const opParams = {...params};
     opParams.match = params.match || params.message;
 

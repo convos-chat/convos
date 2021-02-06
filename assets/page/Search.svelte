@@ -3,7 +3,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
-import {conversationUrl, gotoConversation} from '../helpers/chat';
+import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';

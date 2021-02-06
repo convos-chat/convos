@@ -26,11 +26,11 @@ export default class Notifications extends Conversation {
   }
 
   // Disabled
-  send() { return Promise.resolve({}) }
+  send(params = {}) { return Promise.resolve(params) }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
     this.prop('ro', 'markAsReadOp', api('/api', 'markNotificationsAsRead'));
+    this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
   }
 
   _skipLoad() {

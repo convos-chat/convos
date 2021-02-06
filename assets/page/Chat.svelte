@@ -8,7 +8,7 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../helpers/chat';
+import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
