@@ -91,7 +91,7 @@ function onMessageActionClick({conversation}, e, action) {
     conversation.messages.update({messages: true});
   }
   else if (action[1] == 'join') {
-    conversation.send('/join ' + action[2]);
+    conversation.send('/join ' + decodeURIComponent(action[2]));
   }
   else {
     console.warn('Unhandled onMessageActionClick', action);
@@ -114,7 +114,7 @@ function onMessageClick({conversation, user}, e) {
   if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
 
   // Special links with actions in #hash
-  const action = aEl && aEl.href.match(/#(activeMenu|action:[\w:]+)/);
+  const action = aEl && aEl.href.match(/#(activeMenu|action:.+)/);
   if (action) return onMessageActionClick({conversation}, e, action[1].split(':', 3));
 
   // Show images in full screen

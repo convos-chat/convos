@@ -72,9 +72,10 @@ describe('onMessageClick', () => {
   test('action join', () => {
     let preventDefault = 0;
     const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-    e.target.href = '#action:join:foo';
+    e.target.href = '#action:join:foo-bÅ_';
     onMessageClick(e);
     expect(preventDefault).toBe(1);
+    expect(conversation.sent).toBe('/join foo-bÅ_');
   });
 
   test('fullscreen', () => {
