@@ -92,7 +92,7 @@ export default class Connection extends Conversation {
   wsEventMe(params) {
     if (params.nick) this.wsEventNickChange(params);
     if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
-    if (params.real_host) this.update({name: params.real_host}).participants.add({nick: params.real_host});
+    if (params.real_host) this.participants.add({nick: params.real_host});
     this.update(params);
   }
 
