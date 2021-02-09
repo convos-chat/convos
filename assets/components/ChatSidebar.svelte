@@ -126,7 +126,7 @@ function onSearchKeydown(e) {
 }
 
 function renderUnread(conversation, max = 60) {
-  return conversation.unread > max ? '60+' : conversation.unread || 0;
+  return conversation.unread > max ? (max + '+') : conversation.unread || 0;
 }
 </script>
 
