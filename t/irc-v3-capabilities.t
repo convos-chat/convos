@@ -39,6 +39,7 @@ is_deeply $connection->TO_JSON->{me},
     'sasl'              => true,
     'userhost-in-names' => true,
   },
+  real_host => 'hybrid8.debian.local',
   },
   'got capabilities';
 

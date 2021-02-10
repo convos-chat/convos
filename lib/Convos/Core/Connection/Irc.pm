@@ -164,13 +164,13 @@ sub _irc_event_ctcp_version {
 
 sub _irc_event_err_cannotsendtochan {
   my ($self, $msg) = @_;
-  $self->_notice("Cannot send to channel $msg->{params}[1].", type => 'error');
+  $self->_message("Cannot send to channel $msg->{params}[1].", type => 'error');
 }
 
 sub _irc_event_err_erroneusnickname {
   my ($self, $msg) = @_;
   my $nick = $msg->{params}[1] || 'unknown';
-  $self->_notice("Invalid nickname $nick.", type => 'error');
+  $self->_message("Invalid nickname $nick.", type => 'error');
 }
 
 sub _irc_event_err_nicknameinuse {
@@ -178,7 +178,7 @@ sub _irc_event_err_nicknameinuse {
   my $nick = $msg->{params}[1];
 
   # do not want to flod frontend with these messages
-  $self->_notice("Nickname $nick is already in use.", type => 'error')
+  $self->_message("Nickname $nick is already in use.", type => 'error')
     unless $self->{err_nicknameinuse}{$nick}++;
 
   $self->{myinfo}{nick} = "${nick}_";
@@ -188,7 +188,7 @@ sub _irc_event_err_nicknameinuse {
 
 sub _irc_event_err_unknowncommand {
   my ($self, $msg) = @_;
-  $self->_notice("Unknown command: $msg->{params}[1]", type => 'error');
+  $self->_message("Unknown command: $msg->{params}[1]", type => 'error');
 }
 
 sub _irc_event_error {
@@ -206,7 +206,7 @@ sub _irc_event_fallback {
   $self->emit(
     message => $self->messages,
     {
-      from      => $msg->{prefix} ? +(IRC::Utils::parse_user($msg->{prefix}))[0] : $self->id,
+      from      => $self->id,
       highlight => false,
       message   => join(' ', @params),
       ts        => time,
@@ -440,8 +440,9 @@ sub _irc_event_rpl_welcome {
   my ($self, $msg) = @_;
 
   $self->{failed_to_connect} = 0;
+  $self->{myinfo}{real_host} ||= $msg->{prefix};
   $self->{myinfo}{nick} = $msg->{params}[0];
-  $self->_notice($msg->{params}[1]);    # Welcome to the debian Internet Relay Chat Network superman
+  $self->_message($msg->{params}[1]);   # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(state => me => $self->{myinfo});
 
   my @commands = (
@@ -629,6 +630,15 @@ sub _make_users_response {
     my ($mode, $nick) = $self->_parse_mode($_);
     push @$users, {nick => $nick, mode => $mode};
   }
+}
+
+sub _message {
+  my ($self, $message) = (shift, shift);
+  my $from = $self->{myinfo}{real_host} || $self->id;
+  $self->emit(
+    message => $self->messages,
+    {from => $from, highlight => false, type => 'private', @_, message => $message, ts => time},
+  );
 }
 
 sub _message_type {

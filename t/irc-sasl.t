@@ -43,7 +43,8 @@ is_deeply(
       'sasl'              => true,
       'userhost-in-names' => true,
     },
-    nick => 'superman',
+    nick      => 'superman',
+    real_host => 'hybrid8.debian.local',
   },
   'got capabilities',
 );

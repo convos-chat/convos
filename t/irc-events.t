@@ -31,8 +31,8 @@ $server->server_write_ok(":localhost 404 superman #nopechan :Cannot send to chan
   ->server_write_ok(":superwoman!Superduper\@localhost QUIT :Gone to lunch\r\n")
   ->client_event_ok('_irc_event_quit')->process_ok('error handlers');
 
-is delete $_->{from}, 'irc-localhost', 'from irc-localhost' for @messages;
-is delete $_->{type}, 'error',         'type error'         for @messages;
+is delete $_->{from}, 'hybrid8.debian.local', 'from irc-localhost' for @messages;
+is delete $_->{type}, 'error',                'type error'         for @messages;
 ok delete $_->{ts},   'got timestamp' for @messages;
 
 is_deeply(
@@ -49,7 +49,14 @@ is_deeply(
 is_deeply(
   \@state,
   [
-    [me   => {authenticated => false, capabilities => {}, nick => 'nopeman_',}],
+    [
+      me => {
+        authenticated => false,
+        capabilities  => {},
+        nick          => 'nopeman_',
+        real_host     => 'hybrid8.debian.local'
+      }
+    ],
     [quit => {message => 'Gone to lunch', nick => 'superwoman'}]
   ],
   'got state changes',
