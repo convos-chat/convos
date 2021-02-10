@@ -1,7 +1,7 @@
 {
   "name": "convos",
   "description": "",
-  "version": "5.22.0",
+  "version": "5.23.0",
   "license": "Artistic-2.0",
   "repository": "https://github.com/nordaaker/convos",
   "scripts": {

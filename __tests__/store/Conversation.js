@@ -42,7 +42,7 @@ test('load', async () => {
   })
   delete c.messagesOp.performed;
   await c.load({around: '2020-01-10T09:01:50.001Z'});
-  expect(c.messagesOp.performed).toEqual({around: '2020-01-10T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 30});
+  expect(c.messagesOp.performed).toEqual({around: '2020-01-10T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 40});
 });
 
 test('load start/end history', () => {
