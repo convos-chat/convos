@@ -9,15 +9,6 @@ import {q, str2color} from '../js/util';
 
 const EMBED_CACHE = {};
 
-const INTERNAL_MESSAGE_KEYS = [
-  'canToggleDetails',  'bubbles',     'className',  'command',
-  'connection_id',     'dispatchTo',  'color',      'dayChanged',
-  'embeds',            'event',       'fresh',      'highlight',
-  'id',                'index',       'internal',   'markdown',
-  'method',            'rendered',    'silent',     'stopPropagation',
-  'ts',
-];
-
 export default class Messages extends Reactive {
   constructor() {
     super();
@@ -44,7 +35,7 @@ export default class Messages extends Reactive {
   render(msgIndex = -1) {
     if (msgIndex != -1) {
       const msg = this.get(msgIndex);
-      if (!msg.rendered) {
+      if (msg && !msg.rendered) {
         msg.embeds = this._embeds(msg);
         msg.rendered = true;
         this.update({messages: true});
@@ -98,7 +89,7 @@ export default class Messages extends Reactive {
 
   _embeds(msg) {
     const p = [];
-    if (msg.canToggleDetails) p.push(this._renderDetails(msg));
+    if (this._msgDetails(msg)) p.push(Promise.resolve({className: 'le-details', details: true, nodes: [jsonhtmlify(msg.details).lastChild]}));
     if (!this.expandUrlToMedia || msg.type == 'notice') return p;
 
     (msg.message.match(/https?:\/\/(\S+)/g) || []).forEach(url => {
@@ -116,7 +107,6 @@ export default class Messages extends Reactive {
       if (!msg.from) [msg.internal, msg.from] = [true, 'Convos'];
       if (!msg.type) msg.type = 'notice';
 
-      msg.canToggleDetails = msg.type == 'error' || msg.type == 'notice';
       msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
     }
@@ -146,10 +136,22 @@ export default class Messages extends Reactive {
     return embed;
   }
 
-  async _renderDetails(msg) {
+  _msgDetails(msg) {
+    if (msg.hasOwnProperty('details')) return msg.details;
+    if (msg.type != 'error' && msg.type != 'notice') return null;
+
     const details = {...(msg.sent || msg)};
-    INTERNAL_MESSAGE_KEYS.forEach(k => delete details[k]);
-    return {className: 'le-details', details: true, nodes: [jsonhtmlify(details).lastChild]};
+
+    [
+      'bubbles',           'className',   'command',
+      'connection_id',     'dispatchTo',  'color',      'dayChanged',
+      'embeds',            'event',       'fresh',      'highlight',
+      'id',                'index',       'internal',   'markdown',
+      'method',            'rendered',    'silent',     'stopPropagation',
+      'ts',
+    ].forEach(k => delete details[k]);
+
+    return Object.keys(details).sort().join(':') == 'from:message:type' ? (msg.details = null) : (msg.details = details);
   }
 
   _renderPaste(msg, embed, embedEl) {

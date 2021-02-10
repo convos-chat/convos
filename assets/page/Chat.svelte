@@ -131,7 +131,7 @@ function setConversationFromUser(user) {
         {#if message.waitingForResponse === false}
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
           <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{$l('Resend')}"><Icon name="sync-alt"/></a>
-        {:else if !message.waitingForResponse && message.canToggleDetails}
+        {:else if !message.waitingForResponse && message.details}
           <a href="#action:details:{message.index}"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
         {@html message.markdown}
