@@ -14,6 +14,7 @@ export let conversation;
 export let transition;
 
 const user = getContext('user');
+const themeManager = getContext('themeManager');
 
 let conversationPassword = '';
 let conversationTopic = conversation.topic;
@@ -97,7 +98,7 @@ function saveConversationSettings(e) {
     </div>
   </form>
 
-  {#if !conversation.frozen}
+  {#if !conversation.frozen && $themeManager.nColumns < 3}
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}

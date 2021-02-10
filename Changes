@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.24 Not Released
+ - Will not show participants in sidebar if already visible on the right side
+
 5.23 2021-02-11T08:03:00+0900
  - Fix hover to show timestamp for message
  - Fix loading more messages if scrollbar is not seen #558

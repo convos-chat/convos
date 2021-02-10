@@ -19,6 +19,7 @@ import Login from './page/Login.svelte';
 import ChatSidebar from './components/ChatSidebar.svelte';
 
 const socket = getSocket('/events');
+const themeManager = new ThemeManager().start();
 const user = new User({});
 
 let [innerHeight, innerWidth] = [0, 0];
@@ -37,7 +38,7 @@ loadScript(route.urlFor('/images/emojis.js'));
 
 setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
 setContext('socket', socket);
-setContext('themeManager', new ThemeManager().start());
+setContext('themeManager', themeManager);
 setContext('user', user);
 
 notify.on('click', (params) => (params.path && route.go(params.path)));
@@ -45,12 +46,13 @@ socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 i18n.load().then(() => user.load());
 
-$: isWide = innerWidth > 800;
 $: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
 $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
 $: settings('app_mode', loggedInRoute);
 $: settings('notify_enabled', loggedInRoute);
 $: setTitle(title, $user);
+$: themeManager.calculateColumns(innerWidth);
+$: nColumns = $themeManager.nColumns;
 
 function setTitle(title, $user) {
   if (!document) return;
@@ -102,17 +104,17 @@ function socketChanged(socket) {
     Reactive.js. Wild guess: A bad combination.
   -->
 
-  {#if ($route.activeMenu == 'nav' || isWide) && $route.activeMenu != 'default'}
-    <ChatSidebar transition="{{duration: isWide ? 0 : 250, x: innerWidth}}"/>
+  {#if ($route.activeMenu == 'nav' || nColumns > 1) && $route.activeMenu != 'default'}
+    <ChatSidebar transition="{{duration: nColumns > 1 ? 0 : 250, x: innerWidth}}"/>
   {/if}
 
   {#if $route.activeMenu == 'settings'}
-    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: isWide ? 0 : innerWidth}}"/>
+    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: nColumns > 1 ? 0 : innerWidth}}"/>
   {/if}
 
   <svelte:component this="{$route.component}" bind:title/>
 
-  {#if $route.activeMenu && !isWide}
+  {#if $route.activeMenu && nColumns == 1}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
   {/if}
 {:else if $route.requireLogin}

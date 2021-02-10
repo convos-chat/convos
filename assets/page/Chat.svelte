@@ -2,7 +2,6 @@
 import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatParticipants from '../components/ChatParticipants.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
@@ -12,12 +11,14 @@ import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHel
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
+import {modeClassNames} from '../js/util';
 import {route} from '../store/Route';
 
 export let title = 'Chat';
 
 const dragAndDrop = new DragAndDrop();
 const socket = getContext('socket');
+const themeManager = getContext('themeManager');
 const user = getContext('user');
 
 let connection = user.notifications;
@@ -175,4 +176,17 @@ function setConversationFromUser(user) {
 </InfinityScroll>
 
 <ChatInput conversation="{conversation}" bind:uploader/>
-<ChatParticipants conversation="{conversation}"/>
+
+{#if $themeManager.nColumns > 2}
+  <div class="sidebar-right">
+    <nav class="sidebar-right__nav" on:click="{onMessageClick}">
+      <h3>{$l('Participants (%1)', $participants.length)}</h3>
+      {#each $participants.toArray() as participant}
+        <a href="#action:join:{participant.id}" class="participant {modeClassNames(participant.modes)}">
+          <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
+          <span>{participant.nick}</span>
+        </a>
+      {/each}
+    <nav>
+  </div>
+{/if}
