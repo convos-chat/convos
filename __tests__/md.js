@@ -45,6 +45,11 @@ test('code', () => {
     .toBe('kikuchi` changed nick to kikuchi```.');
 });
 
+test('nbsp', () => {
+  expect(md('')).toBe('&nbsp;');
+  expect(md('    ___ ___  _  ___   _____  ___')).toBe('&nbsp; &nbsp; ___ ___ &nbsp;_ &nbsp;___ &nbsp; _____ &nbsp;___');
+});
+
 function countEmojis(str) {
   return md(str).match(/class="emoji"/g).length;
 }

@@ -103,6 +103,7 @@ export function md(str) {
 
   [
     xmlEscape,
+    nbsp,
     mdLink,
     mdUrl,
     mdCode,
@@ -158,6 +159,10 @@ function mdUrl(str, state = {}) {
     if (all.indexOf('">') != -1) return all;
     return '<a href="' + all + '" target="_blank">' + email + '</a>';
   });
+}
+
+function nbsp(str) {
+  return !str.length ? '&nbsp;' : str.replace(/^\s/, '&nbsp;').replace(/\s{2}/g, ' &nbsp;');
 }
 
 function xmlEscape(str) {
