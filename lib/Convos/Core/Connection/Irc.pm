@@ -107,6 +107,8 @@ sub _irc_event_906 { goto &_irc_event_sasl_status }    # ERR_SASLABORTED
 sub _irc_event_907 { goto &_irc_event_sasl_status }    # ERR_SASLALREADY
 sub _irc_event_908 { goto &_irc_event_cap }            # RPL_SASLMECHS
 
+sub _irc_event_rpl_endofmotd { }
+
 sub _irc_event_sasl_status {
   my ($self, $msg) = @_;
   $msg->{error} = 1 if $msg->{command} =~ m!90[14567]!;
@@ -256,6 +258,24 @@ sub _irc_event_mode {
       {conversation_id => $conversation->id, from => $from, mode => $mode, nick => $nick});
 }
 
+sub _irc_event_rpl_motd {
+  my ($self, $msg) = @_;
+
+  my $message = $msg->{params}[1];
+  $message =~ s!^-\s!!;
+
+  $self->emit(
+    message => $self->messages,
+    {
+      from      => $msg->{prefix} || $self->id,
+      highlight => false,
+      message   => $message,
+      ts        => time,
+      type      => 'preformat',
+    }
+  );
+}
+
 # :Superman12923!superman@i.love.debian.org NICK :Supermanx
 sub _irc_event_nick {
   my ($self, $msg) = @_;
@@ -384,6 +404,8 @@ sub _irc_event_rpl_myinfo {
   $self->{myinfo}{$_} = $msg->{params}[$i++] // '' for @keys;
   $self->emit(state => me => $self->{myinfo});
 }
+
+sub _irc_event_rpl_motdstart { }
 
 sub _irc_event_authenticate {
   my ($self, $msg) = @_;
@@ -686,11 +708,11 @@ sub _send_join_p {
     sub {
       my $conversation = shift;
       $conversation->password($password) if $conversation and length $password;
-      return $conversation->TO_JSON if $command =~ m!^\w!;    # A bit more sloppy than is_private
+      return $conversation->TO_JSON      if $command =~ m!^\w!;  # A bit more sloppy than is_private
       return !$conversation->frozen ? $conversation->TO_JSON : $self->_write_and_wait_p(
         "JOIN $command", {conversation_id => lc $conversation_id},
-        470                 => {1 => $conversation_id},       # Link channel
-        479                 => {1 => $conversation_id},       # Illegal channel name
+        470                 => {1 => $conversation_id},          # Link channel
+        479                 => {1 => $conversation_id},          # Illegal channel name
         err_badchanmask     => {1 => $conversation_id},
         err_badchannelkey   => {1 => $conversation_id},
         err_bannedfromchan  => {1 => $conversation_id},

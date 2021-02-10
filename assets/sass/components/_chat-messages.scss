@@ -17,12 +17,32 @@
   }
 }
 
+%message__text--preformat {
+  background: var(--syntax-hl-base-bg);
+  padding: 0.2em;
+
+  & + & {
+    margin: 0;
+    padding: 0 0.2em;
+  }
+
+  .message__text {
+    font-family: var(--font-family-monospace);
+    color: var(--syntax-hl-base);
+    line-height: 1.2em;
+  }
+
+  .message__ts {
+    max-height: 1.2em;
+  }
+}
+
 %message__ts--transparent {
   .message__ts {
     opacity: 0;
     transition: opacity 0.3s;
 
-    &:hover .message__ts {
+    &:hover {
       opacity: 0.8;
     }
   }
@@ -120,6 +140,10 @@
     @extend %message__from--hidden;
     @extend %message__ts--transparent;
     @extend %message--internal;
+  }
+
+  &.is-type-preformat {
+    @extend %message__text--preformat;
   }
 
   &.is-highlighted {

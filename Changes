@@ -1,5 +1,11 @@
 Revision history for perl distribution Convos
 
+5.22 Not Released
+ - Add support for nicer message-of-the-day (MOTD) server messages
+ - Fix rendering multiple spaces in a string
+ - Revert "Changed from connection ID to real_host in chat sidebar"
+ - Will not render message details if the message is simple
+
 5.22 2021-02-08T10:05:00+0900
  - Fix clicking on nicks in conversation
 

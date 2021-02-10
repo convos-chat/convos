@@ -14,7 +14,7 @@ use Time::Seconds;
 use constant FLAG_OFFSET    => 48;    # chr 48 == "0"
 use constant FLAG_NONE      => 0;
 use constant FLAG_HIGHLIGHT => 1;
-use constant FLAG_X         => 2;     # not yet in use
+use constant FLAG_PREFORMAT => 2;
 use constant FLAG_Y         => 4;     # not yet in use
 use constant FLAG_Z         => 8;     # not yet in use
 
@@ -25,6 +25,7 @@ my %FORMAT = (
   notice      => ['-%s- %s',                   qw(from message)],
   part        => ['-!- %s parted. %s',         qw(nick message)],
   private     => ['<%s> %s',                   qw(from message)],
+  preformat   => ['<%s> %s',                   qw(from message)],
 );
 
 has home => sub { Carp::confess('home() cannot be built') };
@@ -345,6 +346,8 @@ sub _messages {
     next if $args->{from} and lc $message->{from} ne lc $args->{from};
 
     $message->{highlight} = (ord($flag) - FLAG_OFFSET) & FLAG_HIGHLIGHT ? true : false;
+    $message->{type}      = 'preformat' if +(ord($flag) - FLAG_OFFSET) & FLAG_PREFORMAT;
+
     $args->{inc_by} < 0 ? unshift @{$args->{messages}}, $message : push @{$args->{messages}},
       $message;
 
@@ -408,6 +411,9 @@ sub _setup {
             $self->_add_notification($target, $msg->{ts}, $message);
             $connection->user->save_p;
             $flag |= FLAG_HIGHLIGHT;
+          }
+          if ($msg->{type} eq 'preformat') {
+            $flag |= FLAG_PREFORMAT;
           }
 
           $message = sprintf "%c %s", $flag + FLAG_OFFSET, $message;
