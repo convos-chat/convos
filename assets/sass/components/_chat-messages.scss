@@ -41,10 +41,10 @@
   .message__ts {
     opacity: 0;
     transition: opacity 0.3s;
+  }
 
-    &:hover {
-      opacity: 0.8;
-    }
+  &:hover .message__ts {
+    opacity: 0.8;
   }
 }
 
