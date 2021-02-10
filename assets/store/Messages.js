@@ -138,7 +138,7 @@ export default class Messages extends Reactive {
 
   _msgDetails(msg) {
     if (msg.hasOwnProperty('details')) return msg.details;
-    if (msg.type != 'error' && msg.type != 'notice') return null;
+    if (msg.type != 'error' && msg.type != 'notice') return (msg.details = null);
 
     const details = {...(msg.sent || msg)};
 

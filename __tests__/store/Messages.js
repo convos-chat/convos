@@ -18,7 +18,6 @@ test('clear, get, push, unshift', () => {
   expect(messages.get(-24)).toBe(undefined);
 
   const base = {
-    canToggleDetails: true,
     color: 'inherit',
     from: 'Convos',
     ts: true,
@@ -29,7 +28,7 @@ test('clear, get, push, unshift', () => {
   messages.push([{message: 'b', type: 'error'}, {message: 'c'}]);
   messages.push([]);
   expect(messages.length).toBe(3);
-  expect(predictable(messages.get(0))).toEqual({...base, canToggleDetails: false, color: '#8d6bb2', from: 'superwoman', message: 'a', type: 'private'});
+  expect(predictable(messages.get(0))).toEqual({...base, color: '#8d6bb2', from: 'superwoman', message: 'a', type: 'private'});
   expect(predictable(messages.get(1))).toEqual({...base, internal: true, message: 'b', type: 'error'});
   expect(predictable(messages.get(3))).toBe(undefined);
 
@@ -59,7 +58,6 @@ test('render', () => {
   messages.push([{from: 'superduper', message: 'a', type: 'action', ts: '2020-02-01T01:02:03Z'}]);
   expect(messages.render().map(predictable)).toEqual([
     {
-      canToggleDetails: false,
       className: 'message is-type-action has-not-same-from',
       color: '#b1b26b',
       dayChanged: false,
@@ -112,6 +110,25 @@ test('expandUrlToMedia', () => {
   expect(messages.render(1)[1].embeds.length).toBe(0);
   expect(messages.render(1)[1].rendered).toBe(true);
 }); 
+
+test('details', () => {
+  const messages = new Messages();
+  messages.push([{from: 'superduper', message: 'a', type: 'private'}]);
+  messages.push([{from: 'superduper', message: 'a', type: 'error'}]);
+  messages.push([{from: 'superduper', message: 'a', type: 'notice', kicker: 'superwoman'}]);
+
+  // Try render messages outside of the list
+  [-1, 0, 1, 2, 3, 4, 5].forEach(i => messages.render(i));
+
+  expect(messages.get(0).details).toBe(null);
+  expect(messages.get(1).details).toBe(null);
+  expect(messages.get(2).details).toEqual({
+    from: 'superduper',
+    kicker: 'superwoman',
+    message: 'a',
+    type: 'notice',
+  });
+});
 
 function predictable(msg) {
   return msg ? {...msg, ts: msg.ts ? true : false} : undefined;
