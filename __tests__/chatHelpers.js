@@ -11,6 +11,31 @@ window.open = (url, name) => {
   return w;
 };
 
+describe('onInfinityVisibility - load enough messages', () => {
+  const conversation = new Conversation({connection_id: 'irc-foo', conversation_id: '#convos'});
+  const onInfinityVisibility = chatHelper('onInfinityVisibility', {conversation, onLoadHash: ''});
+
+  conversation.update({status: 'success'});
+  conversation.loaded = [];
+  conversation.load = (params) => { conversation.loaded.push(params); return conversation };
+
+  test('no messages', () => {
+    onInfinityVisibility({detail: {infinityEl: {offsetHeight: 900, scrollHeight: 899}}});
+    expect(conversation.loaded).toEqual([]);
+  });
+
+  test('load more', () => {
+    conversation.messages.push([{message: 'whatever', ts: '2021-02-11T03:04:05.000Z'}]);
+    onInfinityVisibility({detail: {infinityEl: {offsetHeight: 900, scrollHeight: 900}}});
+    expect(conversation.loaded).toEqual([{before: '2021-02-11T03:04:05.000Z'}]);
+  });
+
+  test('has enough', () => {
+    onInfinityVisibility({detail: {infinityEl: {offsetHeight: 900, scrollHeight: 901}}});
+    expect(conversation.loaded).toEqual([{before: '2021-02-11T03:04:05.000Z'}]);
+  });
+});
+
 describe('onMessageClick', () => {
   const conversation = new Conversation({});
   const user = new User({videoService: 'https://meet.convos.chat'});

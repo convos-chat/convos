@@ -114,6 +114,14 @@ test('load skip', () => {
   // Skip around if alread loaded
   expect(c._skipLoad({around: '2020-01-20T09:00:00.001Z'})).toBe(true);
   expect(c._skipLoad({around: '2020-01-20T09:01:01.001Z'})).toBe(false);
+
+  // Prevent loading multiple times
+  c.messages.push([{message: 'whatever'}]);
+  c.update({status: 'loading'});
+  expect(c._skipLoad({})).toBe(true);
+
+  c.update({status: 'success'});
+  expect(c._skipLoad({})).toBe(false);
 });
 
 test('addMessages channel', () => {

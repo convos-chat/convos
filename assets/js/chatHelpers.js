@@ -69,8 +69,14 @@ function onInfinityScrolled({conversation}, e) {
 }
 
 // Available through chatHelper()
-export function onInfinityVisibility({messages, onLoadHash}, e) {
+export function onInfinityVisibility({conversation, onLoadHash}, e) {
   const {infinityEl, scrollHeightChanged, scrollTo, visibleEls, visibleElsChanged} = e.detail;
+  const messages = conversation.messages;
+  const hasScrollbar = infinityEl.scrollHeight > infinityEl.offsetHeight;
+
+  if (!hasScrollbar && messages.length) {
+    conversation.load({before: messages.get(0).ts.toISOString()});
+  }
   if (scrollHeightChanged) {
     scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
     renderFocusedEl(infinityEl, onLoadHash == route.hash);

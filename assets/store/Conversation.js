@@ -83,8 +83,10 @@ export default class Conversation extends Reactive {
 
     // Load messages
     this.update({status: 'loading'});
-    if (!params.limit) params.limit = params.around ? 30 : 40;
-    await this.messagesOp.perform({...params, connection_id: this.connection_id, conversation_id: this.conversation_id});
+    if (!params.limit) params.limit = 40;
+
+    const opParams = {...params, connection_id: this.connection_id, conversation_id: this.conversation_id};
+    await this.messagesOp.perform(opParams);
 
     this.update({status: this.messagesOp.status});
 
