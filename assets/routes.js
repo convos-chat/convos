@@ -34,19 +34,8 @@ export function setupRouting(route, user) {
   route.to('/', render(Login));
   route.to('*', render(Fallback));
 
-  listenToConversationEvents(route, user);
-}
-
-function listenToConversationEvents(route, user) {
   user.on('wsEventSentJoin', e => {
     route.go(route.conversationPath(e));
-  });
-
-  user.on('wsEventSentPart', e => {
-    const conn = user.findConversation({connection_id: e.connection_id});
-    if (!conn) return route.go('/settings/connection');
-    const conversation = conn.conversations.toArray()[0];
-    route.go(conversation ? conversation.path : '/settings/conversation');
   });
 }
 

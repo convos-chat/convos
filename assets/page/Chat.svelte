@@ -79,10 +79,12 @@ function setConversationFromUser(user) {
 <ChatHeader>
   <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{$l(conversation.name)}</a></h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
-  {#if $conversation.conversation_id && $user.videoService}
-    <a href="#action:video" on:click="{onVideoLinkClick}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
+  {#if !$conversation.is('not_found')}
+    {#if $conversation.conversation_id && $user.videoService}
+      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
+    {/if}
+    <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
   {/if}
-  <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
 </ChatHeader>
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{onInfinityScrolled}" on:visibility="{onInfinityVisibility}">
@@ -153,14 +155,14 @@ function setConversationFromUser(user) {
     <p>{$l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
     <p>
       <Link href="/settings/connection?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
-      <Link href="/chat" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
+      <Link href="/settings/connection" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
     </p>
   {:else if $conversation.is('not_found')}
     <h2>{$l('You are not part of this conversation.')}</h2>
     <p>{$l('Do you want to chat with "%1"?', $conversation.conversation_id)}</p>
     <p>
       <Button type="button" icon="thumbs-up" on:click="{() => conversation.send('/join ' + $conversation.conversation_id)}"><span>{$l('Yes')}</span></Button>
-      <Link href="/chat" class="btn"><Icon name="thumbs-down"/><span>{$l('No')}</span></Link>
+      <Link href="/settings/conversation" class="btn"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</p>
@@ -177,7 +179,7 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:uploader/>
 
-{#if $themeManager.nColumns > 2}
+{#if $themeManager.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>

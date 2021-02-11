@@ -9,6 +9,7 @@ import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {modeClassNames} from '../js/util';
+import {route} from '../store/Route';
 
 export let conversation;
 export let transition;
@@ -33,7 +34,7 @@ function calculateIsOperator(conversation) {
 }
 
 function partConversation(e) {
-  conversation.send('/part');
+  conversation.send('/part', (res) => !res.errrors && route.update({activeMenu: ''}));
 }
 
 function saveConversationSettings(e) {
