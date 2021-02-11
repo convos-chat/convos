@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.24 Not Released
+5.24 2021-02-11T09:30:00+0900
  - Will not show participants in sidebar if already visible on the right side
  - Will not jump to the first conversation when leaving a conversation
  - Fix loading conversations in "Add conversation"
