@@ -36,13 +36,14 @@ async function loadConversations(e) {
   if (e.type == 'click' && availableConversations.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
-  const res = await socket.send({connection_id: connectionId, message, method: 'send'});
-  const error = extractErrorMessage(res);
-  availableConversations = error ? {conversations: [], done: true, n_conversations: 0, error} : res;
+  socket.send({connection_id: connectionId, message, method: 'send'}, (res) => {
+    const error = extractErrorMessage(res);
+    availableConversations = error ? {conversations: [], done: true, n_conversations: 0, error} : res;
 
-  let interval = e.interval ? e.interval + 500 : 500;
-  if (interval > 2000) interval = 2000;
-  if (!error && !res.done) loadConversationsTid = setTimeout(() => loadConversations({interval}), interval);
+    let interval = e.interval ? e.interval + 500 : 500;
+    if (interval > 2000) interval = 2000;
+    if (!error && !res.done) loadConversationsTid = setTimeout(() => loadConversations({interval}), interval);
+  });
 }
 
 const debouncedLoadConversations = debounce(loadConversations, 250);
