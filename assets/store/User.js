@@ -174,7 +174,7 @@ export default class User extends Reactive {
     if (msg.event == 'sent' && msg.message.match(/\/\S+/)) {
       msg.command = msg.message.split(/\s+/).filter(s => s.length);
       msg.command[0] = msg.command[0].substring(1);
-      return 'sent_' + msg.command[0];
+      return 'sent_' + msg.command[0].toLowerCase();
     }
 
     return msg.event;

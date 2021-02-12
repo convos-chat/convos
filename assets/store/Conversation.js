@@ -130,9 +130,13 @@ export default class Conversation extends Reactive {
   wsEventMode(params) {
     if (params.nick) {
       this.participants.add({nick: params.nick, modes: params.mode});
-      this.addMessages({message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+      this.addMessages({...params, message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
+    }
+    else if(params.mode_changed) {
+      this.addMessages({...params, message: '%1 received mode %2.', vars: [this.name, params.mode]});
     }
     else {
+      this.addMessages({...params, message: '%1 got mode %2.', vars: [this.name, params.mode]});
       this.update({modes: calculateModes(channelModeCharToModeName, params.mode)});
     }
   }
@@ -206,7 +210,7 @@ export default class Conversation extends Reactive {
       this.send('/names ' + this.conversation_id, (e) => {
         e.stopPropagation();
         this.participants.clear();
-        this.participants.add(e.participants);
+        if (e.participants) this.participants.add(e.participants);
       });
     }
   }

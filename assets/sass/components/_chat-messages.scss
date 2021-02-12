@@ -129,6 +129,15 @@
     vertical-align: bottom;
   }
 
+  &.has-same-from {
+    @extend %message__from--hidden;
+    @extend %message__ts--transparent;
+  }
+
+  &.has-not-same-from {
+    margin-top: 0.5rem;
+  }
+
   &.is-type-error {
     @extend %message__from--hidden;
     @extend %message__ts--transparent;
@@ -137,6 +146,9 @@
   }
 
   &.is-type-notice {
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+
     @extend %message__from--hidden;
     @extend %message__ts--transparent;
     @extend %message--internal;
@@ -150,17 +162,8 @@
     @extend %message__text--highlighted;
   }
 
-  &.has-same-from {
-    @extend %message__from--hidden;
-    @extend %message__ts--transparent;
-  }
-
   &.is-type-action {
     @extend %message--oneline;
-  }
-
-  &.has-not-same-from {
-    margin-top: 0.5rem;
   }
 
   &.is-not-present {

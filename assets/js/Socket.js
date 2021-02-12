@@ -184,7 +184,6 @@ export default class Socket extends Reactive {
    * already connected.
    *
    * @param {Object} msg A message to send to the server.
-   * @returns {Promise} A promise that will get resolved when the response comes.
    */
   send(msg, cb) {
     const id = msg.id || String(++this.id);

@@ -107,7 +107,8 @@ sub _irc_event_906 { goto &_irc_event_sasl_status }    # ERR_SASLABORTED
 sub _irc_event_907 { goto &_irc_event_sasl_status }    # ERR_SASLALREADY
 sub _irc_event_908 { goto &_irc_event_cap }            # RPL_SASLMECHS
 
-sub _irc_event_rpl_endofmotd { }
+sub _irc_event_rpl_creationtime { }
+sub _irc_event_rpl_endofmotd    { }
 
 sub _irc_event_sasl_status {
   my ($self, $msg) = @_;
@@ -246,16 +247,20 @@ sub _irc_event_kick {
 # :hybrid8.debian.local MODE #no_such_room +nt
 sub _irc_event_mode {
   my ($self, $msg) = @_;
+  return if $msg->{handled};
 
   my $mode = $msg->{params}[1] || '';
-  return if $mode =~ /(b|k)$/;    # set key or change ban mask
-
-  return unless my $nick         = $msg->{params}[2];
-  return unless my $conversation = $self->get_conversation({name => $msg->{params}[0]});
-
-  my ($from) = IRC::Utils::parse_user($msg->{prefix});
-  $self->emit(state => mode =>
-      {conversation_id => $conversation->id, from => $from, mode => $mode, nick => $nick});
+  if ($mode =~ /(o|v)$/ and $msg->{params}[2]) {
+    my $nick = $msg->{params}[2];
+    my ($from) = IRC::Utils::parse_user($msg->{prefix});
+    $self->emit(state => mode =>
+        {conversation_id => lc $msg->{params}[0], from => $from, mode => $mode, nick => $nick});
+  }
+  else {
+    my $params = $msg->{params}[2] // '';
+    $params =~ s!.!*!g if $mode =~ /k/;
+    $self->_notice("$msg->{params}[0] changed mode $mode $params");
+  }
 }
 
 sub _irc_event_rpl_motd {
@@ -423,6 +428,13 @@ sub _irc_event_authenticate {
   }
 }
 
+sub _irc_event_rpl_channelmodeis {
+  my ($self, $msg) = @_;
+  my @params = @{$msg->{params}};
+  shift @params unless $params[0] =~ $CHANNEL_RE;
+  $self->_notice("$params[0] has mode $params[1].");
+}
+
 sub _irc_event_rpl_notopic {
   my ($self, $msg) = @_;
   $self->_irc_event_rpl_topic({%$msg, params => [$msg->{params}[0], $msg->{params}[0], '']});
@@ -433,6 +445,14 @@ sub _irc_event_rpl_topic {
   return unless my $conversation = $self->get_conversation($msg->{params}[1]);
   return if $conversation->topic eq $msg->{params}[2];
   $self->emit(state => frozen => $conversation->topic($msg->{params}[2])->TO_JSON);
+}
+
+sub _irc_event_rpl_umodeis {
+  my ($self, $msg) = @_;
+
+  $self->_is_current_nick($msg->{params}[0])
+    ? $self->_notice("You ($msg->{params}[0]) have mode $msg->{params}[1].")
+    : $self->_notice("$msg->{params}[0] has mode $msg->{params}[1].");
 }
 
 # :hybrid8.debian.local 001 superman :Welcome to the debian Internet Relay Chat Network superman
@@ -548,15 +568,30 @@ sub _make_mode_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
   return $p->resolve($res)              if $msg->{command} =~ m!^rpl_endof!;
-  return $p->resolve($res)              if $msg->{command} eq 'mode';
+
+  $msg->{handled} = 1;
+  if ($msg->{command} eq 'mode') {
+    $res->{from}         = IRC::Utils::parse_user($msg->{prefix});
+    $res->{mode}         = $msg->{params}[1] // '';
+    $res->{mode_changed} = 1;
+    $res->{nick}         = $msg->{params}[2] if $res->{mode} =~ /(o|v)$/ and $msg->{params}[2];
+    $res->{target}       = $msg->{params}[0];
+    return $p->resolve($res);
+  }
 
   if ($msg->{command} =~ /^rpl_(\w+list)$/) {
     push @{$res->{$1}},
-      {by => $msg->{params}[3] // '', mask => $msg->{params}[2], ts => $msg->{params}[4] || 0},;
+      {by => $msg->{params}[3] // '', mask => $msg->{params}[2], ts => $msg->{params}[4] || 0};
   }
 
   if ($msg->{command} eq 'rpl_channelmodeis') {
-    $res->{mode} = $msg->{params}[2];
+    my @params = @{$msg->{params}};
+    shift @params unless $params[0] =~ $CHANNEL_RE;
+    @$res{qw(target mode)} = (shift @params, shift @params);
+    return $p->resolve($res);
+  }
+  if ($msg->{command} eq 'rpl_umodeis') {
+    @$res{qw(target mode)} = @{$msg->{params}};
     return $p->resolve($res);
   }
 }
@@ -870,6 +905,7 @@ sub _send_mode_p {
     err_keyset           => {1 => $target},
     err_needmoreparams   => {1 => $target},
     err_nochanmodes      => {1 => $target},
+    err_nosuchchannel    => {1 => $target},
     err_unknownmode      => {1 => $target},
     err_usernotinchannel => {1 => $target},
     mode                 => {0 => $target},
@@ -880,6 +916,7 @@ sub _send_mode_p {
     rpl_banlist          => {1 => $target},
     rpl_exceptlist       => {1 => $target},
     rpl_invitelist       => {1 => $target},
+    rpl_umodeis          => {1 => $target},
     rpl_uniqopis         => {1 => $target},
     '_make_mode_response',
   );

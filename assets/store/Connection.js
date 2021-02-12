@@ -156,20 +156,10 @@ export default class Connection extends Conversation {
   }
 
   wsEventSentMode(params) {
-    const conversation = this.findConversation(params) || this;
-
-    const modeSent = (params.command[1] || '').match(/(\W*)(\w)$/);
-    if (!modeSent) return console.log('[wsEventSentMode] Unable to handle message:', params);
-    modeSent.shift();
-
-    switch (modeSent[1]) {
-      case '':
-        return conversation.addMessages({message: '%s has mode %s', vars: [params.conversation_id, params.mode]});
-      case 'k':
-        return conversation.addMessages({message: modeSent[0] == '+' ? 'Key was set.' : 'Key was unset.'});
-      case 'b':
-        return this._wsEventSentModeB(params, modeSent);
-    }
+    const conversation = this.findConversation(params);
+    return (params.mode || '').match(/b/) ? this.wsEventSentModeB(params)
+      : conversation ? conversation.wsEventMode(params)
+      : this.addMessages({message: '%1 received mode %2.', vars: [params.target, params.mode]});
   }
 
   wsEventSentModeB(params, modeSent) {

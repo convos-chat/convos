@@ -59,7 +59,7 @@ is_deeply(
     ],
     [quit => {message => 'Gone to lunch', nick => 'superwoman'}]
   ],
-  'got state changes',
+  'got state changes on error events',
 );
 
 @state = ();
@@ -96,12 +96,9 @@ $server->server_write_ok(":localhost 004 superman hybrid8.debian.local hybrid-")
 cmp_deeply(
   \@state,
   bag(
-    [join => {conversation_id => '#convos', nick => 'superwoman'}],
-    [
-      mode => {conversation_id => '#convos', from => 'superman', mode => '+i', nick => 'superwoman'}
-    ],
-    [nick_change => {new_nick => 'superduper', old_nick => 'supergirl'}],
-    [part => {conversation_id => '#convos', message => 'I\'m out', nick => 'superduper'}],
+    [join        => {conversation_id => '#convos',    nick     => 'superwoman'}],
+    [nick_change => {new_nick        => 'superduper', old_nick => 'supergirl'}],
+    [part        => {conversation_id => '#convos',    message => 'I\'m out', nick => 'superduper'}],
     [
       me => {
         authenticated           => false,
@@ -132,7 +129,7 @@ cmp_deeply(
       }
     ]
   ),
-  'state changes',
+  'state changes on connect',
 ) or diag explain \@state;
 
 my $conversation = $connection->conversation({name => 'private_man'});

@@ -110,25 +110,48 @@ $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(":localhost 324 superman #convos +intu\r\n");
 $res = $connection->send_p('#convos', '/mode')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {mode => '+intu'}, 'mode response');
+is_deeply($res, {mode => '+intu', target => '#convos'}, 'mode response');
 
 $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(":localhost MODE #convos +k :secret\r\n");
 $res = $connection->send_p('#convos', '/mode +k secret')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {}, 'mode +k response - current channel');
+is_deeply(
+  $res,
+  {from => 'localhost', mode => '+k', mode_changed => 1, target => '#convos'},
+  'mode +k response - current channel'
+);
 
 $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
 $res = $connection->send_p('', '/mode #otherchan +k secret')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {}, 'mode +k response - with no conversation_id');
+is_deeply(
+  $res,
+  {from => 'localhost', mode => '+k', mode_changed => 1, target => '#otherchan'},
+  'mode +k response - with no conversation_id'
+);
+
+$server->server_event_ok('_irc_event_mode')->server_write_ok(":localhost MODE #otherchan -k\r\n");
+$res = $connection->send_p('#convos', '/mode #otherchan -k')->$wait_success;
+$server->processed_ok;
+is_deeply(
+  $res,
+  {from => 'localhost', mode => '-k', mode_changed => 1, target => '#otherchan'},
+  'mode -k response - with custom channel'
+);
 
 $server->server_event_ok('_irc_event_mode')
-  ->server_write_ok(":localhost MODE #otherchan +k :secret\r\n");
-$res = $connection->send_p('#convos', '/mode #otherchan +k secret')->$wait_success;
+  ->server_write_ok(":localhost 324 superman #convos +int\r\n");
+$res = $connection->send_p('#convos', '/mode #convos +i')->$wait_success;
 $server->processed_ok;
-is_deeply($res, {}, 'mode +k response - with custom channel');
+is_deeply($res, {mode => '+int', target => '#convos'}, 'mode #convos +i');
+
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost 324 superman #convos +nt\r\n");
+$res = $connection->send_p('#convos', '/mode #convos -i')->$wait_success;
+$server->processed_ok;
+is_deeply($res, {mode => '+nt', target => '#convos'}, 'mode +k response - with custom channel');
 
 $server->server_event_ok('_irc_event_mode')
   ->server_write_ok(
