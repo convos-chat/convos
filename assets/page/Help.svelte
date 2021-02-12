@@ -21,12 +21,17 @@ const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('ver
     {@html $lmd('More information can also be found on https://convos.chat.')}
   </p>
 
-  <h2 id="shortcuts">{$l('Shortcuts')}</h2>
+  <h2 id="quick-search">{$l('Quick search')}</h2>
+  <p>{$l('Pressing `shift+enter` will shift focus between chat input and search in sidebar.')}</p>
   <dl>
-    <dt>{$l('shift+enter')}</dt>
-    <dd>{$l('Shift focus between chat input and search in sidebar.')}</dd>
-    <dt>{$l('Open conversation or connection settings')}</dt>
-    <dd>{$l('Clicking on the icon next to the conversation name will take you to settings.')}</dd>
+    <dt>+</dt>
+    <dd>{$l('Filter conversations with unread messages.')}</dd>
+    <dt>+@</dt>
+    <dd>{$l('Filter private conversations with unread messages.')}</dd>
+    <dt>+#</dt>
+    <dd>{$l('Filter channels with unread messages.')}</dd>
+    <dt>{$l('Any other combination')}</dt>
+    <dd>{$l('Filter channels, private conversations or search for a string.')}</dd>
   </dl>
 
   <h2 id="autocomplete">{$l('Autocomplete')}</h2>

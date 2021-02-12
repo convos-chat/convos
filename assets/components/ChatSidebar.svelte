@@ -54,7 +54,12 @@ function filterNav() {
 
   // Show and hide navigation links
   for (let p = 0; p < prefix.length; p++) {
-    const filterRe = filter == '+' ? new RegExp(/[1-9]\d*\s*$/) : new RegExp(prefix[p] + regexpEscape(filter), 'i');
+    const filterRe
+      = filter == '+' ? new RegExp(/[1-9]\d*\s*$/)
+      : filter == '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\s*$/)
+      : filter == '+#' ? new RegExp(/^\s*#.*[1-9]\d*\s*$/)
+      : new RegExp(prefix[p] + regexpEscape(filter), 'i');
+
     const seen = {};
     q(navEl, 'a', (aEl, i) => {
       const aClassList = aEl.classList;

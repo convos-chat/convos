@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 5.25 Not Released
  - Entering "+" in the quick search bar will show conversation with unread messages
+ - Entering "+#" in the quick search bar will show channels with unread messages
+ - Entering "+@" in the quick search bar will show private conversation with unread messages
 
 5.24 2021-02-11T09:30:00+0900
  - Will not show participants in sidebar if already visible on the right side
