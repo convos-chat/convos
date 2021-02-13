@@ -1,5 +1,13 @@
 Revision history for perl distribution Convos
 
+5.29 Not Released
+ - Moved video button down to chat input
+ - Changed the textarea to fill up the whole chat input if multiple lines are present
+ - Add (+) icon to the chat input with new action menu on small screens
+   * Start video chat
+   * Upload
+   * Emojis
+
 5.28 2021-02-18T23:11:20+0900
  - Fix video iframe to take full height #570
  - Add support for unicode to the Bot backend storage layer

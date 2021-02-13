@@ -39,7 +39,6 @@ $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 $: onInfinityScrolled = chatHelper('onInfinityScrolled', {conversation});
 $: onInfinityVisibility = chatHelper('onInfinityVisibility', {conversation, onLoadHash});
-$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
 $: onMessageClick = chatHelper('onMessageClick', {conversation, user});
 
 onMount(() => {

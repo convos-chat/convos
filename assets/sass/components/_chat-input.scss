@@ -1,12 +1,13 @@
 .chat-input {
   @extend %next-to-sidebar;
   background: var(--chat-input-bg);
-  margin-top: var(--gutter);
-  margin-bottom: 4px;
   border: var(--chat-input-border);
   border-radius: var(--chat-input-border-radius);
-  padding-top: 3px; // Try to make room for the box-shadow
+  margin-top: var(--gutter);
+  margin-bottom: 4px;
+  height: 3.8rem;
   display: flex;
+  align-items: center;
   bottom: 0;
   z-index: 3;
 
@@ -15,16 +16,20 @@
     border-radius: 2px;
   }
 
-  @include if_screen(">two-columns") {
-    padding-right: 0.5rem;
+  > * {
+    display: block;
   }
 
   textarea {
     background: transparent;
     color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.2rem;
     border: 0;
-    height: 3.2em;
-    padding: var(--gutter-small) 0;
+    padding: 0;
+    margin: 0;
+    height: 1.2rem;
+    max-height: 100%;
     width: 100%;
     display: block;
     resize: none;
@@ -33,6 +38,7 @@
       color: var(--text-color);
       font-size: 1.1rem;
       font-weight: 400;
+      transition: all 0.2s ease-in;
     }
 
     &:focus {
@@ -40,31 +46,32 @@
     }
   }
 
-  .btn,
-  .upload {
-    @extend .btn.is-hallow;
-    @extend .btn.is-narrow;
-    font-size: 1.3rem;
-    top: 0.1rem;
-    position: relative;
+  .btn-hallow {
+    font-size: 1.2rem;
+    color: var(--link-color);
+    margin-left: var(--gutter-small);
   }
 }
 
-.chat-input_autocomplete {
+.chat-input_menu {
   background: var(--autocomplete-bg);
-  border: var(--autocomplete-border);
-  box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-  margin-bottom: -1px;
+  border-radius: 2px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: -3px;
   min-width: 50%;
   max-width: 30em;
   opacity: 0.95;
   position: absolute;
   bottom: 100%;
 
-  a {
+  > * {
+    padding: 0.3em 0.5em;
+  }
+
+  a,
+  label {
     color: var(--input-color);
     text-decoration: none;
-    padding: 0.2em 0.5em;
     display: block;
 
     &.has-focus {
@@ -74,10 +81,34 @@
 
   img {
     height: 1.5em;
+    vertical-align: middle;
+  }
+
+  .side-by-side {
+    padding-top: 0;
+
+    a {
+      padding: 0.3em;
+      display: inline-block;
+    }
   }
 }
 
-.chat-input_autocomplete_emojis {
+.chat-input_menu.for-actions {
+  right: 0.3rem;
+
+  > * {
+    line-height: 1.8em;
+  }
+
+  .far,
+  .fas {
+    width: 2em;
+    text-align: center;
+  }
+}
+
+.chat-input_menu.for-emojis {
   a {
     display: inline-block;
 

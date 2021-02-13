@@ -1,9 +1,13 @@
 <script>
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
+import {chatHelper, videoWindow} from '../js/chatHelpers';
+import {emojis, md} from '../js/md';
+import {extractErrorMessage} from '../js/util';
+import {fly} from 'svelte/transition';
+import {generateWriteable, nColumns} from '../store/writable';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
-import {extractErrorMessage} from '../js/util';
 
 export const uploader = uploadFiles;
 export let conversation;
@@ -11,16 +15,35 @@ export let conversation;
 let autocompleteIndex = 0;
 let autocompleteOptions = [];
 let autocompleteCategory = 'none';
+let chatMenuTransition = {y: -10, duration: 200};
 let inputEl;
+let inputMirror;
 let splitValueAt = 0;
 
 const api = getContext('api');
 const user = getContext('user');
+const activeChatMenu = generateWriteable('activeChatMenu');
+
+const defaultEmojis = [
+  ':smiley:',
+  ':grin:',
+  ':open_mouth:',
+  ':stuck_out_tongue:',
+  ':thumbsup:',
+  ':wink:',
+  ':heart:',
+].map(emoji => {
+  const opt = {val: emojis(emoji, 'single').emoji};
+  opt.text = md(opt.val);
+  return opt;
+});
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
+$: conversation && ($activeChatMenu = '');
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
+$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
 
@@ -53,6 +76,7 @@ function onReady(el) {
   inputEl = el;
   inputEl.addEventListener('focus', () => (splitValueAt = inputEl.value.length + 1));
   inputEl.addEventListener('change', () => onChange(inputEl));
+  inputEl.addEventListener('input', renderInputHeight);
   inputEl.addEventListener('keyup', (e) => {
     if (e.key.length == 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) != -1) onChange(inputEl);
   });
@@ -66,9 +90,16 @@ function onReady(el) {
   setValue(typeof conversation.userInput == 'undefined' ? '' : conversation.userInput);
 }
 
+function renderInputHeight() {
+  if (!inputMirror.maxHeight) inputMirror.maxHeight = inputMirror.parentNode.offsetHeight;
+  inputMirror.value = inputEl.value;
+  inputMirror.style.width = inputEl.offsetWidth + 'px';
+  inputEl.style.height = (inputMirror.maxHeight > inputMirror.scrollHeight ? inputMirror.scrollHeight : inputMirror.maxHeight) + 'px';
+}
+
 function selectOption(e) {
   autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
-  fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
+  fillin(autocompleteOptions[autocompleteIndex] || defaultEmojis[autocompleteIndex], {padAfter: true, replace: true});
   setTimeout(() => inputEl.focus(), 1);
 }
 
@@ -93,6 +124,7 @@ function selectOptionOrSendMessage(e) {
 
     if (msg.message.length) conversation.send(msg, handleMessageResponse);
     if (!conversation.is('search')) setValue('');
+    setTimeout(renderInputHeight, 10);
   }
 }
 
@@ -129,18 +161,47 @@ function uploadFiles(e) {
 </script>
 
 <form class="chat-input" on:submit|preventDefault>
+  <input type="file" id="upload_files" name="upload_files" class="non-interactive" on:change="{uploadFiles}"/>
+  <textarea class="non-interactive" placeholder="{placeholder}" bind:this="{inputMirror}"></textarea>
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
-  <label class="upload is-hallow" hidden="{!conversation.is('conversation')}">
-    <input type="file" on:change="{uploadFiles}"/>
-    <Icon name="cloud-upload-alt"/>
-  </label>
+  {#if $nColumns > 1 && $conversation.is('conversation')}
+    <label for="upload_files" class="btn-hallow upload"><Icon name="cloud-upload-alt"/></label>
+    {#if $user.videoService}
+      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn-hallow has-tooltip" tooltip="{$l('Start a video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
+    {/if}
+  {/if}
 
-  <button type="buttton" on:click="{selectOptionOrSendMessage}" class="btn chat-input__send"><Icon name="{sendIcon}"/></button>
+  {#if $nColumns == 1 && conversation.is('conversation')}
+    <a href="#actions" class="btn-hallow" class:is-active="{$activeChatMenu == 'actions'}" on:click="{activeChatMenu.toggle}">
+      <Icon name="plus-circle"/>
+      <Icon name="times"/>
+    </a>
+  {/if}
 
-  <div class="chat-input_autocomplete chat-input_autocomplete_{autocompleteCategory}" hidden="{!autocompleteOptions.length}">
-    {#each autocompleteOptions as opt, i}
-      <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
-    {/each}
-  </div>
+  <button type="buttton" on:click="{selectOptionOrSendMessage}" class="btn-hallow chat-input__send"><Icon name="{sendIcon}"/></button>
+
+  {#if $activeChatMenu == 'actions' && conversation.is('conversation')}
+    <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenu.toggle}">
+      <a href="#action:video" on:click="{onVideoLinkClick}">
+        <Icon name="{$videoWindow ? 'video-slash' : 'video'}"/>
+        {$l('Start a video conference')}
+      </a>
+      <label for="upload_files">
+        <Icon name="cloud-upload-alt"/>
+        {$l('Attach a file')}
+      </label>
+      <div class="side-by-side">
+        {#each defaultEmojis as opt, i}
+          <a href="#index:{i}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text}</a>
+        {/each}
+      </div>
+    </div>
+  {:else if autocompleteOptions.length}
+    <div class="chat-input_menu for-{autocompleteCategory}" transition:fly="{chatMenuTransition}">
+      {#each autocompleteOptions as opt, i}
+        <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
+      {/each}
+    </div>
+  {/if}
 </form>

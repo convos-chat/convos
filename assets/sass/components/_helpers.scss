@@ -34,6 +34,14 @@ body.with-grid::after {
   }
 }
 
+.non-interactive {
+  opacity: 0;
+  position: absolute;
+  left: -1000px;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .pull-right {
   float: right;
 }
