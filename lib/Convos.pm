@@ -132,6 +132,7 @@ sub _before_dispatch {
   $settings->save_p({base_url => $base_url}) if !CONVOS_GET and $settings->base_url ne $base_url;
   $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
+  $c->res->headers->content_security_policy($c->app->_content_security_policy);
 
   # Used when registering the first user
   $c->stash(first_user => 1) if !$c->session('email') and !$c->app->core->n_users;
@@ -158,6 +159,23 @@ sub _config {
   $settings->save_p->wait;
 
   return $config;
+}
+
+sub _content_security_policy {
+  return join(' ',
+    map {"$_;"} q(block-all-mixed-content),
+    q(base-uri 'self'),
+    q(connect-src 'self'),
+    q(frame-ancestors 'none'),
+    q(manifest-src 'self'),
+    q(default-src 'none'),
+    q(font-src 'self'),
+    q(frame-src 'self'),
+    q(img-src *),
+    q(object-src 'none'),
+    q(script-src 'self' 'unsafe-inline' 'unsafe-eval'),
+    q(style-src 'self' 'unsafe-inline'),
+  );
 }
 
 sub _home_in_share {
