@@ -131,8 +131,8 @@ export default class Conversation extends Reactive {
     const listName = ['banlist', 'exceptlist', 'invitelist', 'quietlist'].filter(n => params[n])[0];
     if (listName) {
       const n = params[listName].length;
-      const rules = n == 1 ? 'rule' : 'rules';
-      this.addMessages({...params, message: '%1 has %2 ' + rules + ' in %3.', vars: [this.name, n, listName]});
+      const entries = n == 1 ? 'entry' : 'entries';
+      this.addMessages({...params, message: '%1 has %2 ' + entries + ' in %3.', vars: [this.name, n, i18n.l(listName)]});
     }
     else if (params.nick) {
       this.participants.add({nick: params.nick, modes: params.mode});

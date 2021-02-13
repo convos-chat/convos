@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 5.25 Not Released
  - Add feedback when changing channel mode #454
+ - Add rendering of banlist, exceptlist, invitelist and quietlist #432
  - Entering "+" in the quick search bar will show conversation with unread messages
  - Entering "+#" in the quick search bar will show channels with unread messages
  - Entering "+@" in the quick search bar will show private conversation with unread messages
