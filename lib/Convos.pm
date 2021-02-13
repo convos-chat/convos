@@ -162,7 +162,7 @@ sub _config {
 }
 
 sub _content_security_policy {
-  print join(' ',
+  return join(' ',
     map {"$_;"} q(block-all-mixed-content),
     q(base-uri 'self'),
     q(connect-src 'self'),
