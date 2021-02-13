@@ -193,6 +193,7 @@ sub _run_actions_with_message {
   return if lc $event->{from} eq lc $connection->nick;
 
   local $event->{is_private} = $event->{conversation_id} =~ m!^$CHANNEL_RE! ? 0 : 1;
+  local $event->{my_nick}    = $connection->nick;
 
   my $reply;
   for my $config (@{$self->config->get('/actions')}) {
