@@ -139,6 +139,9 @@
   }
 
   &.is-type-error {
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+
     @extend %message__from--hidden;
     @extend %message__ts--transparent;
     @extend %message--internal;

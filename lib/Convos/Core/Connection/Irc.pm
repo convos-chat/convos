@@ -566,8 +566,7 @@ sub _make_join_response {
 
 sub _make_mode_response {
   my ($self, $msg, $res, $p) = @_;
-  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  return $p->resolve($res)              if $msg->{command} =~ m!^rpl_endof!;
+  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_! or $msg->{command} eq '697';
 
   $msg->{handled} = 1;
   if ($msg->{command} eq 'mode') {
@@ -578,12 +577,14 @@ sub _make_mode_response {
     $res->{target}       = $msg->{params}[0];
     return $p->resolve($res);
   }
-
+  if ($msg->{command} =~ m!^rpl_endof(\w+list)!) {
+    $res->{$1} ||= [];
+    return $p->resolve($res);
+  }
   if ($msg->{command} =~ /^rpl_(\w+list)$/) {
     push @{$res->{$1}},
       {by => $msg->{params}[3] // '', mask => $msg->{params}[2], ts => $msg->{params}[4] || 0};
   }
-
   if ($msg->{command} eq 'rpl_channelmodeis') {
     my @params = @{$msg->{params}};
     shift @params unless $params[0] =~ $CHANNEL_RE;
@@ -918,6 +919,7 @@ sub _send_mode_p {
     rpl_invitelist       => {1 => $target},
     rpl_umodeis          => {1 => $target},
     rpl_uniqopis         => {1 => $target},
+    697                  => {0 => $target},
     '_make_mode_response',
   );
 }

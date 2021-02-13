@@ -128,7 +128,13 @@ export default class Conversation extends Reactive {
   }
 
   wsEventMode(params) {
-    if (params.nick) {
+    const listName = ['banlist', 'exceptlist', 'invitelist', 'quietlist'].filter(n => params[n])[0];
+    if (listName) {
+      const n = params[listName].length;
+      const rules = n == 1 ? 'rule' : 'rules';
+      this.addMessages({...params, message: '%1 has %2 ' + rules + ' in %3.', vars: [this.name, n, listName]});
+    }
+    else if (params.nick) {
       this.participants.add({nick: params.nick, modes: params.mode});
       this.addMessages({...params, message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
     }

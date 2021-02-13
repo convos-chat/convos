@@ -157,24 +157,8 @@ export default class Connection extends Conversation {
 
   wsEventSentMode(params) {
     const conversation = this.findConversation(params);
-    return (params.mode || '').match(/b/) ? this.wsEventSentModeB(params)
-      : conversation ? conversation.wsEventMode(params)
+    return conversation ? conversation.wsEventMode(params)
       : this.addMessages({message: '%1 received mode %2.', vars: [params.target, params.mode]});
-  }
-
-  wsEventSentModeB(params, modeSent) {
-    const conversation = this.findConversation(params) || this;
-
-    if (params.banlist) {
-      if (!params.banlist.length) conversation.addMessages({message: 'Ban list is empty.'});
-      params.banlist.forEach(ban => {
-        conversation.addMessages({message: 'Ban mask %1 set by %2 at %3.', vars: [ban.mask, ban.by, new Date(ban.ts * 1000).toLocaleString()]});
-      });
-    }
-    else {
-      const action = modeSent[0] == '+' ? 'set' : 'removed';
-      conversation.addMessages({message: `Ban mask %1 ${action}.`, vars: [params.command[2]]});
-    }
   }
 
   wsEventSentQuery(params) {
