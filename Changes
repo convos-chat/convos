@@ -1,10 +1,12 @@
 Revision history for perl distribution Convos
 
-5.25 Not Released
+5.25 2021-02-15T10:25:00+0900
  - Add feedback when changing channel mode #454
  - Add rendering of banlist, exceptlist, invitelist and quietlist #432
  - Add "Facts" bot action
  - Add query_db() method to bot plugins
+ - Add Content-Security-Policy header to Convos #508 #567
+   Contributor: Wylel
  - Entering "+" in the quick search bar will show conversation with unread messages
  - Entering "+#" in the quick search bar will show channels with unread messages
  - Entering "+@" in the quick search bar will show private conversation with unread messages

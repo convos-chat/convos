@@ -75,7 +75,7 @@ function saveConversationSettings(e) {
         </TextArea>
       {:else}
         <div class="text-field">
-          <label>{$l('Topic')}</label>
+          <label for="nothing">{$l('Topic')}</label>
           <div class="input">{@html $lmd(conversationTopic || 'No topic is set.')}</div>
         </div>
       {/if}
