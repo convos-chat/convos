@@ -13,6 +13,15 @@ my $facts = Convos::Plugin::Bot::Action::Facts->new(home => tempdir);
 
 $facts->register($t->app->bot, {});
 
+$facts->emit(message => {my_nick => 'superbot', message => 'what is convos ?  ...'});
+is $facts->query_db('select count(*) from facts')->fetchrow_arrayref->[0], 0,
+  'did not learn a question';
+
+$facts->emit(message =>
+    {my_nick => 'superbot', message => 'some super duper long topic thing is too long to learn'});
+is $facts->query_db('select count(*) from facts')->fetchrow_arrayref->[0], 0,
+  'did not learn long topic';
+
 $facts->emit(message => {my_nick => 'superbot', message => 'foo bar baz'});
 $facts->emit(message => {my_nick => 'superbot', message => 'Convos is an app'});
 is $facts->query_db('select count(*) from facts')->fetchrow_arrayref->[0], 1, 'got one fact';

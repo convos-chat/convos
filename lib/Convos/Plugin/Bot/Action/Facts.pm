@@ -56,11 +56,13 @@ HERE
 
 sub _learn {
   my ($self, $event) = @_;
+  return if $event->{message} =~ m!\?\W*$!;
   return unless my @parts = split $self->{copula_re}, $event->{message}, 3;
 
   my $direct = $parts[0] =~ s!^\W*$event->{my_nick}\W*!!;
   @parts = map { trim $_ } grep { $_ =~ m!\w! } @parts;
   return unless @parts == 3;
+  return unless 30 >= length $parts[0];
 
   my $replaced
     = ($direct ||= $event->{is_private})
