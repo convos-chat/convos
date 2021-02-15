@@ -29,7 +29,6 @@ function search(msg) {
 
 <ChatHeader>
   <h1>{$l(conversation.name)}</h1>
-  <a href="/search" class="btn"><Icon name="search"/></a>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">

@@ -28,6 +28,8 @@
  * @exports uuidv4
  */
 
+import features from './features';
+
 const goldenRatio = 0.618033988749;
 const k = 1000;
 const M = k * 1000;
@@ -348,22 +350,6 @@ export function removeChildNodes(el) {
 }
 
 /**
- * replaceClassName() will replace a className by doing search and replace.
- *
- * @example
- * // Will replace what is currently the class with "for-cms"
- * replaceClassName('body', /(for-)app/, 'cms');
- *
- * @param {String} sel A CSS selector
- * @param {RegExp} re A RegExp to search for an existing class name
- * @param {String} replacement The value to replace
- */
-export function replaceClassName(sel, re, replacement) {
-  const tag = document.querySelector(sel);
-  tag.className = tag.className.replace(re, (all, prefix) => prefix + replacement);
-}
-
-/**
  * sameOrigin() can be used to check if and URL is from the same domain as the
  * current document, or an optional URL.
  *
@@ -388,8 +374,6 @@ export function settings(key, value) {
 
   // Get
   if (arguments.length == 1) {
-    if (key == 'app_mode') return document.body.classList.contains('for-app');
-    if (key == 'notify_enabled') return document.body.classList.contains('notify-enabled');
     if (key == 'organization_name') key = 'contactorganization';
     if (key == 'organization_url') key = 'contactnetworkaddress';
     const el = getEl(key);
@@ -399,8 +383,6 @@ export function settings(key, value) {
   }
 
   // Set
-  if (key == 'app_mode') return replaceClassName('body', /(for-)(app|cms)/, value ? 'app' : 'cms');
-  if (key == 'notify_enabled') return replaceClassName('body', /(notify-)(disabled)/, value ? 'enabled' : 'disabled');
   if (key == 'organization_name') key = 'contactorganization';
   if (key == 'organization_url') key = 'contactnetworkaddress';
   if (key == 'contact') value = btoa(value);

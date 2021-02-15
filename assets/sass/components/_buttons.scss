@@ -1,0 +1,105 @@
+%hallow-child-fill-parent {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+%hallow-focus-effect {
+  box-shadow: 0 0 0 1px currentColor;
+  transform: scale(1.4);
+  opacity: 0.6;
+}
+
+.badge {
+  @include square_text(1.2rem);
+  text-align: center;
+  border-radius: 10px;
+  pointer-events: none;
+  padding: 0 4px;
+
+  &.is-important {
+    background: var(--error-color);
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.btn-hallow {
+  @include square_text(1.6rem);
+  background: transparent;
+  font-weight: normal;
+  display: inline-block;
+  position: relative;
+
+  &:after {
+    @extend %hallow-child-fill-parent;
+    content: '';
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px currentColor;
+    z-index: -1;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transform: scale(1);
+    transform-origin: center;
+  }
+
+  &,
+  &:focus {
+    outline: 0; // Using box-shadow instead
+  }
+
+  .far,
+  .fas {
+    text-align: center;
+    line-height: inherit;
+    width: 100%;
+    transform-origin: center;
+    transition: all 0.2s ease-in;
+  }
+
+  .fa-times {
+    @extend %hallow-child-fill-parent;
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  .badge {
+    position: absolute;
+    bottom: -30%;
+    right: -30%;
+  }
+}
+
+
+input:checked + .btn-hallow,
+.btn-hallow.is-active {
+  &:after {
+    opacity: 1 !important;
+    transform: scale(1);
+  }
+
+  .far,
+  .fas {
+    transform: scale(0.1);
+  }
+
+  .fa-times {
+    font-size: 0.75em;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+body.has-mouse {
+  .btn-hallow:hover:after {
+    @extend %hallow-focus-effect;
+    transform: scale(1.4);
+  }
+}
+
+body.no-touch {
+  &:focus:after {
+    @extend %hallow-focus-effect;
+  }
+}

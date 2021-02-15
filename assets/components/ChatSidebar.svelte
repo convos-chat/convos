@@ -104,7 +104,8 @@ function filterNav() {
 
 function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
-  if (iconName) setTimeout(() => { $activeMenu = '' }, 50);
+  if (iconName) return setTimeout(() => { $activeMenu = 'settings' }, 50);
+  if (e.target.closest('a')) return setTimeout(() => { $activeMenu = '' }, 50);
 }
 
 function onSearchKeydown(e) {
@@ -137,20 +138,18 @@ function renderUnread(conversation, max = 60) {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <form class="sidebar__header is-below" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
+  <form class="sidebar-header" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
     <input type="text" id="search_input" class="is-primary-menu-item"
       placeholder="{searchHasFocus ? $l('Search...') : $l('Convos')}"
       bind:value="{filter}"
       on:blur="{clearFilter}"
       on:focus="{filterNav}"
       on:keydown="{onSearchKeydown}">
-
-    <Link href="/chat" class="sidebar__header__notification">
-      <Icon name="bell"/>
-      <small class="chat-header__unread" hidden="{!$notifications.unread}">{renderUnread($notifications, 10)}</small>
+    <label for="search_input" class="btn-hallow"><Icon name="search"/></label>
+    <Link href="/chat" class="btn-hallow for-notifications">
+      <Icon family="regular" name="bell"/>
+      <small class="badge is-important" hidden="{!$notifications.unread}">{renderUnread($notifications)}</small>
     </Link>
-
-    <label for="search_input"><Icon name="search"/></label>
   </form>
 
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
@@ -165,13 +164,13 @@ function renderUnread(conversation, max = 60) {
       <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}">
         <Icon name="network-wired"/>
         <span>{connection.name || connection.connection_id}</span>
-        <b class="unread" hidden="{!connection.unread}">{renderUnread(connection)}</b>
+        <b class="badge" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
       {#each connection.conversations.toArray() as conversation}
         <Link href="{conversation.path}" class="{conversationClassNames(connection, conversation)}">
           <Icon name="{conversation.is('private') ? 'user' : 'user-friends'}"/>
           <span>{conversation.name}</span>
-          <b class="unread" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
+          <b class="badge" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
         </Link>
       {/each}
     {/each}
@@ -180,7 +179,7 @@ function renderUnread(conversation, max = 60) {
     <Link href="/chat">
       <Icon name="bell"/>
       <span>{$l('Notifications')}</span>
-      <b class="unread" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
+      <b class="badge" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
     </Link>
     <Link href="/search">
       <Icon name="search"/>

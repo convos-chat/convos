@@ -93,6 +93,12 @@ th {
   border-bottom: var(--hr-border);
 }
 
+.ellipsis {
+  text-overflow: ellipsis;
+  white-space: pre;
+  overflow: hidden;
+}
+
 .is-link {
   cursor: pointer;
 }

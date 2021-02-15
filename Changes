@@ -1,6 +1,10 @@
 Revision history for perl distribution Convos
 
 5.29 Not Released
+ - Replaced spinning animation with scale translation between icons
+ - Replaced hover zoom effect with circular border
+ - Changed the headings to be less bold
+ - Changed from "tools" icon to "users-cog" for conversation settings toggle
  - Moved video button down to chat input
  - Changed the textarea to fill up the whole chat input if multiple lines are present
  - Add (+) icon to the chat input with new action menu on small screens

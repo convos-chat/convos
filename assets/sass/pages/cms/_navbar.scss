@@ -31,6 +31,7 @@
   }
 
   a {
+    color: var(--sidebar-left-text);
     text-decoration: none;
     padding: 0.5rem 1rem;
     margin-right: 0.5rem;
@@ -55,36 +56,13 @@
       text-decoration: underline;
     }
   }
-
-  .btn.is-hamburger {
-    @extend .is-hallow;
-    @extend .is-narrow;
-    font-size: 1.4rem;
-    margin-right: -0.5rem;
-    position: absolute;
-    top: 0.6rem;
-    right: 1rem;
-
-    span {
-      position: absolute;
-      top: 0.6rem;
-      right: 2.2rem;
-      font-size: 1rem;
-    }
-  }
-
-  a,
-  .btn,
-  .btn.is-hamburger {
-    color: var(--sidebar-left-text);
-  }
 }
 
 .cms-navbar__links {
   background: var(--sidebar-left-bg);
   display: flex;
   width: 100%;
-  align-items: baseline;
+  align-items: flex-end;
 
   img {
     margin: -0.5rem 0.4rem -0.5rem 0;
@@ -103,12 +81,6 @@ body.no-js .cms-navbar__links .has-js {
   cursor: not-allowed;
 }
 
-#hamburger_checkbox_toggle {
-  opacity: 0;
-  position: absolute;
-  left: -100px;
-}
-
 /*
  * Navigation using hamburger menu
  *
@@ -123,7 +95,22 @@ body.no-js .cms-navbar__links .has-js {
     overflow: visible;
   }
 
-  .can-toggle + .cms-navbar__links {
+  .is-hamburger {
+    font-size: 1.6rem;
+    position: absolute;
+    top: 1.2rem;
+    right: var(--gutter);
+
+    span {
+      font-size: 1rem;
+      padding: 0.5rem;
+      position: absolute;
+      top: -0.5rem;
+      transform: translateX(-100%);
+    }
+  }
+
+  .is-hamburger + .cms-navbar__links {
     display: block;
     box-shadow: var(--chat-header-box-shadow);
     padding: 0 1rem;
@@ -151,21 +138,9 @@ body.no-js .cms-navbar__links .has-js {
     }
   }
 
-  #hamburger_checkbox_toggle:checked + label {
-    i {
-      transform: rotate(180deg);
-      transform-origin: center;
-      opacity: 0;
-    }
-
-    i:nth-child(2) {
-      opacity: 1;
-    }
-
-    & + .cms-navbar__links {
-      opacity: 1;
-      max-height: 80vh;
-    }
+  input:checked + .is-hamburger + .cms-navbar__links {
+    opacity: 1;
+    max-height: 80vh;
   }
 }
 
@@ -176,7 +151,7 @@ body.no-js .cms-navbar__links .has-js {
 @include if_screen(">two-columns") {
   .cms-navbar--wrapper {
     .cms-navbar__brand,
-    .cms-navbar .btn.is-hamburger {
+    .cms-navbar .is-hamburger {
       display: none;
     }
   }

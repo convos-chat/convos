@@ -1,4 +1,5 @@
 <script>
+import features from './js/features';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
 import {activeMenu, nColumns} from './store/writable';
@@ -47,10 +48,11 @@ socket.on('update', socketChanged);
 user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.render());
 i18n.load().then(() => user.load());
 
-$: loggedInRoute = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
+$: isLoggedIn = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
 $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
-$: settings('app_mode', loggedInRoute);
-$: settings('notify_enabled', loggedInRoute);
+$: document.body.className = document.body.className.replace(/for-\w+/, 'for-' + (isLoggedIn ? 'app' : 'cms'));
+$: features[isLoggedIn ? 'add' : 'remove']('notify');
+$: features[$themeManager.compactDisplay ? 'add' : 'remove']('compact-display');
 $: setTitle(title, $user);
 $: $nColumns = innerWidth > 1200 ? 3 : innerWidth > 800 ? 2 : 1; // Need to be in sync with sass/_variables.scss
 
@@ -93,7 +95,7 @@ function socketChanged(socket) {
 
 <svelte:window on:focus="{() => user.email && socket.open()}" bind:innerHeight="{innerHeight}" bind:innerWidth="{innerWidth}"/>
 
-{#if loggedInRoute}
+{#if isLoggedIn}
   <!--
     IMPORTANT! Looks like transition="..." inside <svelte:component/>,
     and a lot of $route updates prevents the <ChatSidebar/> and/or

@@ -1,106 +1,136 @@
-.chat-header {
-  @extend %next-to-sidebar;
-
-  background: var(--body-bg);
+.chat-header,
+.sidebar-header {
   padding-top: var(--gutter);
   padding-bottom: var(--gutter-small);
-  box-shadow: var(--chat-header-box-shadow);
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  position: absolute;
   top: 0;
-  z-index: 900;
-
-  @include if_screen("<=two-columns") {
-    background: var(--sidebar-left-bg);
-    color: var(--sidebar-left-text);
-    padding-top: var(--gutter-small);
-    border-bottom: 0;
-  }
+  z-index: 1;
 
   > * {
     display: block;
   }
 
-  .btn {
-    @extend .is-hallow;
-    @extend .is-narrow;
-    font-size: 1.1rem;
-    margin-right: -0.5rem;
-    align-self: center;
-  }
+  > a {
+    color: inherit;
+    margin-left: var(--gutter-small);
+    flex-basis: auto;
 
-  h1 {
-    margin: 0;
-    white-space: pre;
-    max-width: 80%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-shrink: 0;
-
-    a {
-      color: inherit;
-    }
-
-    @include if_screen("<=two-columns") {
-      flex: 1 0 0;
-    }
-  }
-
-  @include if_screen("<=two-columns") {
-    a,
-    .btn {
-      color: var(--sidebar-left-text);
-    }
-
-    .has-tooltip[data-tooltip]:after {
-      display: none;
-    }
-  }
-
-  .chat-header__topic {
-    font-size: 0.9rem;
-    font-style: italic;
-    text-overflow: ellipsis;
-    white-space: pre;
-    padding-right: 0.2rem; // Fix that weird cutoff becuase of italic font-style and overflow rules
-    overflow: hidden;
-    flex: 1 0 0;
-
-    &::before {
+    &:before {
       content: '';
-      padding-right: 1rem;
-    }
-
-    @include if_screen("<=two-columns") {
-      display: none;
+      width: var(--gutter-small);
     }
   }
 
-  .has-tooltip[data-tooltip]:focus:after,
-  .has-tooltip[data-tooltip]:hover:after {
-    left: 50%;
-    transform: translateX(-50%);
+  h1,
+  h2,
+  input {
+    font-size: var(--h1-font-size);
+    font-weight: 500;
+    line-height: 1em;
+    margin: 0;
+  }
+
+  .far,
+  .fas {
+    font-size: 1.3rem;
   }
 }
 
-.btn.is-hamburger {
-  @include if_screen(">two-columns") {
+.sidebar-header {
+  background: var(--sidebar-left-bg);
+
+  @include if_screen("<=two-columns") {
     display: none;
   }
 }
 
-.chat-header__unread {
-  background: var(--error-color);
-  font-size: 0.85rem;
-  text-align: center;
-  line-height: 1.3rem;
-  border-radius: 50%;
-  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
-  width: 1.3rem;
-  height: 1.3rem;
-  display: block;
-  position: absolute;
-  top: 1.5em;
-  right: 0;
+.chat-header {
+  @extend %next-to-sidebar;
+  background: var(--body-bg);
+  box-shadow: var(--chat-header-box-shadow);
+  justify-content: space-between;
+  z-index: 900;
+
+  @include if_screen("<=two-columns") {
+    background: var(--sidebar-left-bg);
+    color: var(--sidebar-left-text);
+    padding-bottom: calc(var(--gutter-small) + 0.2rem);
+
+    h1 {
+      font-size: var(--h2-font-size);
+      flex: 1 0 0;
+    }
+  }
+}
+
+.chat-header__topic {
+  padding-left: var(--gutter-small);
+  padding-right: var(--gutter-small);
+  flex: 1 0 0;
+  opacity: 0.85;
+  align-self: flex-end;
+
+  @include if_screen("<=two-columns") {
+    display: none;
+  }
+}
+
+.sidebar-header {
+  border-bottom: 2px solid transparent;
+  transition: border 0.2s ease-in;
+  position: sticky;
+
+  &.has-focus {
+    border-bottom-color: var(--sidebar-left-text);
+  }
+
+  h2 {
+    flex: 1 0 0;
+  }
+
+  input {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    width: 70%; // Make sure it does not take up too much space
+    height: 1em;
+    flex: 1 0 0;
+
+    &,
+    &::placeholder {
+      color: var(--sidebar-left-text);
+    }
+
+    &::-moz-placeholder {
+      opacity: 1; // Fix faded color
+    }
+
+    &:focus {
+      outline: 0;
+      border-bottom-color: var(--sidebar-left-text);
+
+      &::placeholder {
+        color: var(--sidebar-left-search-placeholder-color);
+      }
+    }
+  }
+
+  .fa-search {
+    -webkit-text-stroke: 1px var(--sidebar-left-bg);
+  }
+
+  .for-notifications {
+    width: 1.6rem;
+    min-width: auto;
+    left: 0.3rem;
+    transition: all 0.2s ease-in;
+  }
+
+  &.has-focus .for-notifications {
+    width: 0;
+    opacity: 0;
+    transform: scale(0.1);
+  }
 }

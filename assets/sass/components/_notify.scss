@@ -44,6 +44,6 @@
   margin: 0;
 }
 
-.notify-disabled .notify-notification {
+body.no-notify .notify-notification {
   display: none !important;
 }

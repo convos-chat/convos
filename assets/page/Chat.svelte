@@ -76,10 +76,13 @@ function setConversationFromUser(user) {
 </script>
 
 <ChatHeader>
-  <h1>{$l(conversation.name)}</h1>
-  <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
+  <h1 class="ellipsis is-link" on:click="{() => { $activeMenu = 'settings' }}">{$l(conversation.name)}</h1>
+  <span class="chat-header__topic ellipsis">{topicOrStatus(connection, conversation)}</span>
   {#if !$conversation.is('not_found')}
-    <a href="#settings" on:click="{activeMenu.toggle}" class="btn has-tooltip can-toggle" class:is-toggled="{$activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
+    <a href="#settings" class="btn-hallow" class:is-active="{$activeMenu == 'settings'}" on:click="{activeMenu.toggle}">
+      <Icon name="users-cog"/>
+      <Icon name="times"/>
+    </a>
   {/if}
 </ChatHeader>
 

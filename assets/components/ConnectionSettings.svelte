@@ -1,6 +1,6 @@
 <script>
-import ConnectionForm from '../components/ConnectionForm.svelte';
-import Icon from '../components/Icon.svelte';
+import ConnectionForm from './ConnectionForm.svelte';
+import Icon from './Icon.svelte';
 import {activeMenu} from '../store/writable';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
@@ -21,10 +21,10 @@ onMount(async () => {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <a href="#close" class="sidebar__header" on:click="{activeMenu.toggle}">
+  <div class="sidebar-header">
     <h2>{$l('Connection')}</h2>
-    <Icon name="times-circle"/>
-  </a>
+    <a href="#settings" class="btn-hallow is-active" on:click="{activeMenu.toggle}"><Icon name="times"/></a>
+  </div>
 
   {#if !connection.url}
     <p>{$l('Connection not found.')}</p>

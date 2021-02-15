@@ -19,8 +19,7 @@ onMount(() => conversation.load());
 </script>
 
 <ChatHeader>
-  <h1>{$l(conversation.name)}</h1>
-  <a href="/settings/account" class="btn"><Icon name="bell"/></a>
+  <h1>{$l('Notifications')}</h1>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">

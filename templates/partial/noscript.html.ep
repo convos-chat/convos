@@ -9,7 +9,7 @@
       %= link_to '', class => 'btn', begin
         <i class="fas fa-sync-alt"></i> <%=l 'Try again' %>
       % end
-      %= link_to settings('contact'), class => 'btn is-hallow', begin
+      %= link_to settings('contact'), class => 'btn', begin
         <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
       % end
     </p>

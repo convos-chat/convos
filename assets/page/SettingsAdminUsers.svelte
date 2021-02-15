@@ -75,7 +75,7 @@ function updateUserFromForm(e) {
 
 <ChatHeader>
   <h1>{$l(editUser ? 'Account' : 'Users')}</h1>
-  <Link href="/settings/users" class="btn can-toggle {editUser ? 'is-toggled' : ''}" data-tooltip="{$l('See all users')}"><Icon name="list"/><Icon name="times"/></Link>
+  <Link href="/settings/users" class="btn-hallow {editUser ? 'is-active' : ''}" data-tooltip="{$l('See all users')}"><Icon name="list"/><Icon name="times"/></Link>
 </ChatHeader>
 
 <main class="main">

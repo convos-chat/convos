@@ -3,7 +3,7 @@
 
 %= include 'partial/cms_header'
 
-<main class="blog-list">
+<main class="cms-main blog-list">
   <h1 class="cms-header"><%=l 'Blog' %></h1>
 
   % unless (@$blogs) {

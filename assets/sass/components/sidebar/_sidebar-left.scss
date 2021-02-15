@@ -18,64 +18,36 @@
   }
 
   @include if_screen("<=two-columns") {
-    top: 3.1rem; // TODO: Should be a dynamic value
+    top: 3rem; // TODO: Should be a dynamic value
     right: 0;
     left: auto;
-
-    .sidebar__header {
-      display: none;
-    }
   }
 
   h2 {
     font-size: var(--h1-font-size);
-    line-height: var(--h1-font-size);
-    height: var(--h1-font-size);
     margin: 0;
+
+    .btn-hallow {
+      font-size: 1.4rem;
+      position: absolute;
+      right: 0;
+    }
   }
 
   h3 {
     border-bottom: 1px solid var(--sidebar-left-border-bottom);
-  }
-
-  .sidebar__header {
-    background: var(--sidebar-left-bg);
-  }
-
-  .sidebar__header__notification {
-    font-size: 1.8rem;
-    text-align: center;
-    width: 1em;
-    display: block;
-    position: absolute;
-    top: calc(var(--gutter) + 0.1rem);
-    right: 1.3em;
-
-    i {
-      font-size: 1.5rem;
-      position: static;
-    }
-  }
-
-  .chat-header__unread {
-    font-weight: bold;
-    right: -0.2rem;
-    top: -0.3rem;
-  }
-
-  .sidebar__header.has-focus .sidebar__header__notification {
-    display: none;
   }
 }
 
 .sidebar-left__nav a {
   position: relative;
 
-  &.for-connection,
-  &.for-conversation {
-    .fas:hover:before {
-      content: fa-content($fa-var-tools);
-    }
+  &.for-connection .fas:hover:before {
+    content: fa-content($fa-var-cog);
+  }
+
+  &.for-conversation .fas:hover:before {
+    content: fa-content($fa-var-users-cog);
   }
 
   &.for-conversation {
@@ -105,7 +77,7 @@
     background: var(--sidebar-left-search-focus-bg);
     font-style: inherit;
 
-    .unread {
+    .badge {
       display: none;
     }
   }
@@ -115,19 +87,15 @@
   }
 }
 
-.sidebar-left__nav .fas {
-  text-align: center;
-  width: $sidebar-item-icon-width;
-}
-
-.sidebar-left__nav .unread {
-  font-size: 0.9rem;
-  line-height: 0.9rem;
-  border-radius: 0.5em;
-  padding: 0.15em 0.4em;
+.sidebar-left__nav .badge {
   position: absolute;
   top: 0.4em;
   right: 0.3em;
+}
+
+.sidebar-left__nav .fas {
+  text-align: center;
+  width: $sidebar-item-icon-width;
 }
 
 .sidebar-left__nav.is-filtering {

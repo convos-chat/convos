@@ -35,7 +35,6 @@ export default class ThemeManager extends Reactive {
   }
 
   update(params) {
-    if (params.hasOwnProperty('compactDisplay')) document.body.classList[params.compactDisplay ? 'add' : 'remove']('is-compact');
     if (params.activeTheme || params.colorScheme || params.osColorScheme) this._activateTheme(params);
     return super.update(params);
   }

@@ -1,7 +1,7 @@
 <script>
 import Button from './form/Button.svelte';
 import Checkbox from './form/Checkbox.svelte';
-import Icon from '../components/Icon.svelte';
+import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
@@ -49,10 +49,10 @@ function saveConversationSettings(e) {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <a href="#close" class="sidebar__header" on:click="{activeMenu.toggle}">
+  <div class="sidebar-header">
     <h2>{$l('Conversation')}</h2>
-    <Icon name="times-circle"/>
-  </a>
+    <a href="#settings" class="btn-hallow is-active" on:click="{activeMenu.toggle}"><Icon name="times"/></a>
+  </div>
 
   <p>
     {#if conversation.frozen}

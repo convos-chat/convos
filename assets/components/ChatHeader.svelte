@@ -1,6 +1,6 @@
 <script>
-import Icon from '../components/Icon.svelte';
-import {activeMenu} from '../store/writable';
+import Icon from './Icon.svelte';
+import {activeMenu, nColumns} from '../store/writable';
 import {getContext} from 'svelte';
 
 const user = getContext('user');
@@ -8,9 +8,11 @@ const user = getContext('user');
 
 <header class="chat-header">
   <slot/>
-  <a href="#nav" on:click="{activeMenu.toggle}" class="btn is-hamburger can-toggle" class:is-toggled="{$activeMenu == 'nav'}">
-    <Icon name="bars"/>
-    <Icon name="times"/>
-    <small class="chat-header__unread" hidden="{!$user.unread}">{$user.unread}</small>
-  </a>
+  {#if $nColumns <= 1}
+    <a href="#nav" class="btn-hallow" class:is-active="{$activeMenu == 'nav'}" on:click="{activeMenu.toggle}">
+      <Icon name="bars"/>
+      <Icon name="times"/>
+      <small class="badge is-important" hidden="{!$user.unread}">{$user.unread}</small>
+    </a>
+  {/if}
 </header>

@@ -68,8 +68,8 @@
     %= tag style => sub { stash 'custom_css' } if stash 'custom_css'
   </head>
 
-  % my @classnames = qw(no-js notify-disabled for-cms);
-  % push @classnames, 'js-compact' if js_session 'compactDisplay';
+  % my @classnames = qw(no-js no-notify no-mouse no-touch for-cms);
+  % push @classnames, 'has-compact-display' if js_session 'compactDisplay';
   <body class="<%= join ' ', @classnames =%>">
     %= content
     %= asset 'convos.js' unless stash 'exception'

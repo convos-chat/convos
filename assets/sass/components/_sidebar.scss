@@ -22,23 +22,5 @@
   }
 }
 
-.sidebar__header {
-  text-decoration: none;
-  padding-top: var(--gutter);
-  display: block;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-
-  .fas {
-    font-size: 1.8rem;
-    position: absolute;
-    right: 0;
-    top: calc(var(--gutter) + 0.2rem);
-    cursor: pointer;
-  }
-}
-
 @import './sidebar/sidebar-left';
-@import './sidebar/sidebar-left-search-form';
 @import './sidebar/sidebar-right';
