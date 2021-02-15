@@ -28,12 +28,8 @@ function search(msg) {
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:nav" tabindex="-1"><span>{$l(conversation.name)}</span></a></h1>
-  {#if $conversation.is('search')}
-    <a href="/search" class="btn"><Icon name="search"/></a>
-  {:else}
-    <a href="/settings/account" class="btn"><Icon name="bell"/></a>
-  {/if}
+  <h1>{$l(conversation.name)}</h1>
+  <a href="/search" class="btn"><Icon name="search"/></a>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">

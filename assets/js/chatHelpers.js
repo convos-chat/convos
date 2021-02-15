@@ -88,8 +88,6 @@ export function onInfinityVisibility({conversation, onLoadHash}, e) {
 
 // Internal
 function onMessageActionClick({conversation}, e, action) {
-  if (action[0] == 'activeMenu') return true; // Bubble up to Route.js _onClick(e)
-
   e.preventDefault();
   if (action[1] == 'details') {
     const msg = conversation.messages.get(action[2]);
@@ -120,7 +118,7 @@ function onMessageClick({conversation, user}, e) {
   if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
 
   // Special links with actions in #hash
-  const action = aEl && aEl.href.match(/#(activeMenu|action:.+)/);
+  const action = aEl && aEl.href.match(/#(action:.+)/);
   if (action) return onMessageActionClick({conversation}, e, action[1].split(':', 3));
 
   // Show images in full screen

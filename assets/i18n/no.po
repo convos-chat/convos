@@ -812,8 +812,8 @@ msgid "Theme"
 msgstr "Fargevalg"
 
 #: assets/page/Chat.svelte:190
-msgid "There are %1 [participants](%2) in this conversation."
-msgstr "Det er  %1 [deltakere](%2) i denne samtalen."
+msgid "There are %1 participants in this conversation."
+msgstr "Det er  %1 deltakere i denne samtalen."
 
 #: assets/page/SettingsAdmin.svelte:74
 msgid "These settings control what users experience when they visit [%1](%1)."

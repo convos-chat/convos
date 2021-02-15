@@ -1,6 +1,7 @@
 <script>
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
+import {activeMenu} from '../store/writable';
 import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
@@ -103,7 +104,7 @@ function filterNav() {
 
 function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
-  if (iconName) setTimeout(() => route.update({activeMenu: 'settings'}), 50);
+  if (iconName) setTimeout(() => { $activeMenu = '' }, 50);
 }
 
 function onSearchKeydown(e) {

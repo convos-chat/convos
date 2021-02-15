@@ -1,6 +1,7 @@
 <script>
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
+import {activeMenu, nColumns} from './store/writable';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {i18n} from './store/I18N';
@@ -51,8 +52,7 @@ $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.ac
 $: settings('app_mode', loggedInRoute);
 $: settings('notify_enabled', loggedInRoute);
 $: setTitle(title, $user);
-$: themeManager.calculateColumns(innerWidth);
-$: nColumns = $themeManager.nColumns;
+$: $nColumns = innerWidth > 1200 ? 3 : innerWidth > 800 ? 2 : 1; // Need to be in sync with sass/_variables.scss
 
 function setTitle(title, $user) {
   if (!document) return;
@@ -104,18 +104,18 @@ function socketChanged(socket) {
     Reactive.js. Wild guess: A bad combination.
   -->
 
-  {#if ($route.activeMenu == 'nav' || nColumns > 1) && $route.activeMenu != 'default'}
-    <ChatSidebar transition="{{duration: nColumns > 1 ? 0 : 250, x: innerWidth}}"/>
+  {#if $activeMenu == 'nav' || $nColumns > 1}
+    <ChatSidebar transition="{{duration: $nColumns > 1 ? 0 : 250, x: innerWidth}}"/>
   {/if}
 
-  {#if $route.activeMenu == 'settings'}
-    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: nColumns > 1 ? 0 : innerWidth}}"/>
+  {#if $activeMenu == 'settings'}
+    <svelte:component this="{settingsComponent}" conversation="{$user.activeConversation}" transition="{{duration: 250, x: $nColumns > 1 ? 0 : innerWidth}}"/>
   {/if}
 
   <svelte:component this="{$route.component}" bind:title/>
 
-  {#if $route.activeMenu && nColumns == 1}
-    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => $route.update({activeMenu: ''})}">&nbsp;</div>
+  {#if $activeMenu && $nColumns == 1}
+    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => { $activeMenu = '' }}">&nbsp;</div>
   {/if}
 {:else if $route.requireLogin}
   <Login bind:title/>

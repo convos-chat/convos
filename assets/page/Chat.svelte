@@ -7,6 +7,7 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
+import {activeMenu, nColumns} from '../store/writable';
 import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -18,7 +19,6 @@ export let title = 'Chat';
 
 const dragAndDrop = new DragAndDrop();
 const socket = getContext('socket');
-const themeManager = getContext('themeManager');
 const user = getContext('user');
 
 let connection = user.notifications;
@@ -77,13 +77,10 @@ function setConversationFromUser(user) {
 </script>
 
 <ChatHeader>
-  <h1><a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" tabindex="-1">{$l(conversation.name)}</a></h1>
+  <h1>{$l(conversation.name)}</h1>
   <span class="chat-header__topic">{topicOrStatus(connection, conversation)}</span>
   {#if !$conversation.is('not_found')}
-    {#if $conversation.conversation_id && $user.videoService}
-      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn has-tooltip" tooltip="{$l('Start video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
-    {/if}
-    <a href="#activeMenu:{conversation.connection_id ? 'settings' : 'nav'}" class="btn has-tooltip can-toggle" class:is-toggled="{$route.activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
+    <a href="#settings" on:click="{activeMenu.toggle}" class="btn has-tooltip can-toggle" class:is-toggled="{$activeMenu == 'settings'}" data-tooltip="{$l('Settings')}"><Icon name="tools"/><Icon name="times"/></a>
   {/if}
 </ChatHeader>
 
@@ -102,7 +99,7 @@ function setConversationFromUser(user) {
         {#if $participants.length == 1}
           {$l('You are the only participant in this conversation.')}
         {:else}
-          {@html $lmd('There are %1 [participants](%2) in this conversation.', $participants.length, $conversation.path + '#activeMenu:settings')}
+          {@html $lmd('There are %1 participants in this conversation.', $participants.length)}
         {/if}
       </p>
     {/if}
@@ -165,7 +162,7 @@ function setConversationFromUser(user) {
       <Link href="/settings/conversation" class="btn"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#activeMenu:settings')}</p>
+    <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#settings')}</p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</p>
   {/if}
@@ -179,7 +176,7 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:uploader/>
 
-{#if $themeManager.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
+{#if $nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>

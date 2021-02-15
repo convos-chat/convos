@@ -9,15 +9,9 @@ export default class ThemeManager extends Reactive {
     this.prop('cookie', 'compactDisplay', false);
     this.prop('ro', 'colorSchemeOptions', ['Auto', 'Light', 'Dark'].map(o => [o.toLowerCase(), o]));
     this.prop('ro', 'themeOptions', () => Array.from(this._stylesheets.entries()));
-    this.prop('rw', 'nColumns', 1);
     this.prop('rw', 'osColorScheme', '');
 
     this._stylesheets = new Map([]);
-  }
-
-  calculateColumns(innerWidth) {
-    // Need to be in sync with sass/_variables.scss
-    return this.update({nColumns: innerWidth > 1200 ? 3 : innerWidth > 800 ? 2 : 1});
   }
 
   hasColorScheme(name) {

@@ -808,8 +808,8 @@ msgid "Theme"
 msgstr "Tema"
 
 #: assets/page/Chat.svelte:190
-msgid "There are %1 [participants](%2) in this conversation."
-msgstr "Hay %1 [participantes](%2) en esta conversación."
+msgid "There are %1 participants in this conversation."
+msgstr "Hay %1 participantes en esta conversación."
 
 #: assets/page/SettingsAdmin.svelte:74
 msgid "These settings control what users experience when they visit [%1](%1)."

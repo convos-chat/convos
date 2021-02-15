@@ -5,7 +5,6 @@ test('defaults', () => {
 
   r._location = {hash: '#foo', href: 'https://demo.convos.chat/chat'};
 
-  expect(r.activeMenu).toBe('');
   expect(r.basePath).toBe('');
   expect(r.baseUrl).toBe('');
   expect(r.component).toBe(null);

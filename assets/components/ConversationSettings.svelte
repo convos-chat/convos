@@ -1,21 +1,20 @@
 <script>
 import Button from './form/Button.svelte';
 import Checkbox from './form/Checkbox.svelte';
+import Icon from '../components/Icon.svelte';
 import Link from './Link.svelte';
-import SettingsHeader from '../components/SettingsHeader.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {activeMenu, nColumns} from '../store/writable';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {modeClassNames} from '../js/util';
-import {route} from '../store/Route';
 
 export let conversation;
 export let transition;
 
 const user = getContext('user');
-const themeManager = getContext('themeManager');
 
 let conversationPassword = '';
 let conversationTopic = conversation.topic;
@@ -34,7 +33,7 @@ function calculateIsOperator(conversation) {
 }
 
 function partConversation(e) {
-  conversation.send('/part', (res) => !res.errrors && route.update({activeMenu: ''}));
+  conversation.send('/part', (res) => !res.errrors && ($activeMenu = ''));
 }
 
 function saveConversationSettings(e) {
@@ -50,7 +49,10 @@ function saveConversationSettings(e) {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <SettingsHeader conversation="{conversation}"/>
+  <a href="#close" class="sidebar__header" on:click="{activeMenu.toggle}">
+    <h2>{$l('Conversation')}</h2>
+    <Icon name="times-circle"/>
+  </a>
 
   <p>
     {#if conversation.frozen}
@@ -99,7 +101,7 @@ function saveConversationSettings(e) {
     </div>
   </form>
 
-  {#if !conversation.frozen && $themeManager.nColumns < 3}
+  {#if !conversation.frozen && $nColumns < 3}
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}

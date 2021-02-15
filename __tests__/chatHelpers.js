@@ -73,14 +73,6 @@ describe('onMessageClick', () => {
     expect(embedEl.className).toBe('embed is-expanded');
   });
 
-  test('activeMenu', () => {
-    let preventDefault = 0;
-    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-    e.target.href = '#activeMenu:settings';
-    onMessageClick(e);
-    expect(preventDefault).toBe(0);
-  });
-
   test('action details', () => {
     let preventDefault = 0;
     const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};

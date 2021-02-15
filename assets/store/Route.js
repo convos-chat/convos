@@ -12,7 +12,6 @@ export default class Route extends Reactive {
     this.prop('ro', 'params', () => this._params);
     this.prop('ro', 'query', () => this._query);
 
-    this.prop('rw', 'activeMenu', '');
     this.prop('rw', 'baseUrl', '');
     this.prop('rw', 'component', null);
     this.prop('rw', 'match', '');
@@ -82,7 +81,6 @@ export default class Route extends Reactive {
         this._params[route.names[pi]] = decodeURIComponent(m[pi + 1]);
       }
 
-      this.update({activeMenu: '', match: route.path, state});
       route.cb(this);
 
       const e = document.createEvent('CustomEvent');
@@ -174,14 +172,6 @@ export default class Route extends Reactive {
     }
 
     if (linkEl.hasAttribute('download') || linkEl.hasAttribute('target')) return;
-
-    // Toggle activeMenu with href="#activeMenu:..."
-    const activeMenu = linkEl && linkEl.href.match(/#activeMenu:(\w*)/);
-    if (activeMenu) {
-      if (closestEl(e.target, '.sidebar-left') && !linkEl) return;
-      this.update({activeMenu: activeMenu[1] == this.activeMenu ? '' : activeMenu[1]});
-      e.preventDefault();
-    }
 
     let href = linkEl.getAttribute('href') || '';
     if (href.indexOf(this.baseUrl) == 0) href = href.substr(this.baseUrl.length);

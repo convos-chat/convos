@@ -1,6 +1,7 @@
 <script>
 import ConnectionForm from '../components/ConnectionForm.svelte';
-import SettingsHeader from '../components/SettingsHeader.svelte';
+import Icon from '../components/Icon.svelte';
+import {activeMenu} from '../store/writable';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
@@ -20,7 +21,10 @@ onMount(async () => {
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
-  <SettingsHeader {conversation}/>
+  <a href="#close" class="sidebar__header" on:click="{activeMenu.toggle}">
+    <h2>{$l('Connection')}</h2>
+    <Icon name="times-circle"/>
+  </a>
 
   {#if !connection.url}
     <p>{$l('Connection not found.')}</p>
