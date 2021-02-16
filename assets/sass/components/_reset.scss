@@ -202,6 +202,10 @@ button,
 [type="reset"],
 [type="submit"] {
   -webkit-appearance: button;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 
 /**
