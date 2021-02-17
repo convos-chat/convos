@@ -1,0 +1,37 @@
+.footer-wrapper {
+  background: var(--footer-bg);
+  font-size: 0.9rem;
+  margin-top: 4rem;
+  padding-top: 1rem;
+  min-height: 30vh;
+
+  &.is-small {
+    min-height: auto;
+    padding-top: 0;
+  }
+
+  &,
+  a {
+    color: var(--sidebar-left-text);
+    text-decoration: none;
+  }
+
+  img {
+    max-height: 2.2rem;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+
+    > * {
+      display: block;
+      margin-right: 1rem;
+    }
+  }
+
+  p {
+    margin-top: 1rem;
+    margin-bottom: 0;
+  }
+}

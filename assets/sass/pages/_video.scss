@@ -1,0 +1,19 @@
+body.has-video-chat .cms-navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 100%;
+  display: flex;
+
+  a.pull-right {
+    margin-left: auto;
+
+    &:last-child {
+      margin-right: -1rem;
+    }
+  }
+
+  img {
+    margin: -0.3rem 0.4rem -0.3rem 0;
+    height: 1.5rem;
+  }
+}

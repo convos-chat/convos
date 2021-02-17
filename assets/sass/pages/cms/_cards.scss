@@ -1,0 +1,50 @@
+.cards {
+  margin: 0 -var(--gutter);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cards--card {
+  text-align: center;
+  text-decoration: none;
+  border: var(--hr-border);
+  border-radius: 0.5rem;
+  width: 95%;
+  margin: calc(var(--gutter) / 2);
+  padding: 1.5rem var(--gutter);
+  display: block;
+  transition: filter 0.25s ease-in-out;
+
+  > i {
+    color: var(--link-color);
+    font-size: 2rem;
+    margin-bottom: -0.5rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  @include if_screen(">two-columns") {
+    max-width: calc(var(--content-max-width) / 3.5);
+    padding: 2rem var(--gutter);
+
+    i {
+      margin: 0;
+      font-size: 3rem;
+    }
+  }
+}
+
+a.cards--card {
+  color: var(--text-color);
+
+  &:hover {
+    filter: brightness(0.1);
+  }
+
+  u {
+    color: var(--link-color);
+  }
+}
