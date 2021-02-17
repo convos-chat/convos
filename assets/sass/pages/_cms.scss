@@ -3,30 +3,22 @@ body.for-cms {
   min-height: 100vh;
   flex-direction: column;
 
-  > article,
-  > main,
-  > noscript {
+  > noscript,
+  > .cms-main {
     flex: 1;
-  }
-
-  code {
-    background: var(--syntax-hl-base-bg);
-    padding: 2px 4px;
   }
 }
 
-body.for-cms > article,
-body.for-cms > main,
 body.for-cms .footer,
-.cms-navbar {
+.cms-navbar,
+.cms-main {
   margin: 0 auto;
   padding: var(--gutter);
   width: var(--content-max-width);
   max-width: 100%;
 }
 
-body.for-cms > article,
-body.for-cms > main {
+.cms-main {
   padding-top: 0;
 
   a:hover {
@@ -37,6 +29,11 @@ body.for-cms > main {
     padding-bottom: 0.3rem;
     padding-top: 1.5rem;
     margin-top: 2rem;
+  }
+
+  code {
+    background: var(--syntax-hl-base-bg);
+    padding: 2px 4px;
   }
 
   img {

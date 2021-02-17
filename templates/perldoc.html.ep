@@ -2,7 +2,7 @@
 
 %= include 'partial/cms_header'
 
-<main>
+<main class="cms-main">
   <h1 class="cms-header"><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
   %= include 'partial/toc', toc => $doc->{toc};
   %== $doc->{body}

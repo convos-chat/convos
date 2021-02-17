@@ -38,22 +38,5 @@
   </p>
 </main>
 
-<noscript>
-  <div>
-    <h2><%=l 'Javascript is disabled' %></h2>
-    <p class="error">
-      <%=l 'Javascript is disabled so Convos cannot start.' %>
-      <%=l 'Please enable Javascript and try again.' %>
-    </p>
-    <p>
-      %= link_to '', class => 'btn', begin
-        <i class="fas fa-sync-alt"></i> <%=l 'Try again' %>
-      % end
-      %= link_to settings('contact'), class => 'btn is-hallow', begin
-        <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
-      % end
-    </p>
-  </div>
-</noscript>
-
+%= include 'partial/noscript'
 %= include 'partial/app_footer'

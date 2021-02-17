@@ -9,7 +9,7 @@
 
 %= include 'partial/app_header'
 
-<main>
+<main class="cms-main">
   <h1><%=l $file->filename %></h1>
   <div class="cms-meta">
     % my $dt = dt $file->saved;

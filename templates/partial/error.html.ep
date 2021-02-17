@@ -5,7 +5,7 @@
 
 %= include 'partial/app_header'
 
-<article>
+<article class="cms-main">
   <h1><%=l $message %> (<%= $status %>)</h1>
   % if ($status == 404) {
     <p><%=l 'Could not find the page you are looking for. Maybe you entered an invalid URL?' %></p>

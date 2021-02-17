@@ -20,7 +20,7 @@ function calculateStatus($route, user) {
 }
 </script>
 
-<main>
+<main class="cms-main">
   <h2>{$l(messages[status])}</h2>
   {#if status == 'loading'}
     <p><Icon name="download"/> {$l('Downloaded Convos.')}</p>
