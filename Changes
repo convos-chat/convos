@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 5.27 Not Released
  - "Facts" bot action will not learn questions
+ - Fix searching case insensitive
 
 5.26 2021-02-15T10:34:00+0900
  - Reverted "Add Content-Security-Policy header to Convos" #508

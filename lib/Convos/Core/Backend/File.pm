@@ -98,7 +98,7 @@ sub messages_p {
   my %args;
   $args{re} = join '.*', map { $_ = quotemeta $_; /"(.+)\\"/ ? "\\b$1\\b" : $_ } split /\s+/,
     $query->{match} // '';
-  $args{re}       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \s (\d?) \s* (.*$args{re}.*)$/x;
+  $args{re}       = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) \s (\d?) \s* (.*$args{re}.*)$/ix;
   $args{from}     = $query->{from} if $query->{from};
   $args{include}  = $query->{include} || 0;
   $args{limit}    = $query->{limit}   || 60;
