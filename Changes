@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
-5.27 Not Released
+5.27 2021-02-17T23:04:00+0900
+ - Compatible with latest Mojolicious 9.0 and M::P::OpenAPI 4.0
  - "Facts" bot action will not learn questions
  - Fix searching case insensitive
 
