@@ -1,4 +1,4 @@
-<div class="footer-wrapper is-small">
+<div class="footer--wrapper is-small">
   <footer class="footer">
     <nav>
       <a href="https://convos.chat/blog"></i><%=l 'Blog' %></a>

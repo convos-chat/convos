@@ -17,13 +17,13 @@ q(document, '.js-close-window', el => {
 });
 
 if (document.querySelector('meta[name="convos:start_app"][content="chat"]')) {
-  document.querySelector('.footer-wrapper').remove();
+  document.querySelector('.footer--wrapper').remove();
   document.querySelector('main').remove();
   const app = new App({target: document.body});
 }
 else if (document.querySelector('meta[name="convos:start_app"][content="jitsi"]')) {
-  document.querySelector('.footer-wrapper').remove();
-  const main = document.querySelector('.video-chat-wrapper');
+  document.querySelector('.footer--wrapper').remove();
+  const main = document.querySelector('.video-chat--wrapper');
   const app = new Jitsi(main.dataset).render(main);
 }
 else {
@@ -36,7 +36,7 @@ else {
 document.addEventListener('keydown', function(e) {
   // Esc
   if (e.keyCode == 27) {
-    q(document, '.fullscreen-wrapper', el => el.click());
+    q(document, '.fullscreen', el => el.click());
     moveFocus();
   }
 

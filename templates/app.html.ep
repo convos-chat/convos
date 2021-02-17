@@ -4,7 +4,7 @@
 
 %= include 'partial/app_header'
 
-<div class="hero-wrapper is-small hidden-for-app">
+<div class="hero--wrapper is-small hidden-for-app">
   <header class="hero">
     <div class="hero--text">
       <div class="hero--header hidden-sm"><%= image '/images/convos-light.png', alt => 'Convos' %></div>

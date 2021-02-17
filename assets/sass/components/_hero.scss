@@ -1,4 +1,4 @@
-.hero-wrapper {
+.hero--wrapper {
   background: var(--sidebar-left-bg);
 }
 
@@ -26,20 +26,20 @@
   }
 }
 
-.hero--header {
+.hero__header {
   margin-bottom: 1rem;
 }
 
-.hero--tagline {
+.hero__tagline {
   margin: 0.5rem 0;
 }
 
-.hero--body {
+.hero__body {
   font-size: 0.9rem;
   margin: 0.5rem 0;
 }
 
-.hero--footer {
+.hero__footer {
   margin-top: 1rem;
 }
 
@@ -50,7 +50,7 @@
     align-items: center;
   }
 
-  .hero--text {
+  .hero__text {
     padding-top: var(--gutter);
     padding-footer: var(--gutter);
   }

@@ -418,7 +418,7 @@ export function settings(key, value) {
 export function showFullscreen(e, contentEl) {
   if (e && e.preventDefault) e.preventDefault();
 
-  const mediaWrapper = ensureChildNode(document.body, 'fullscreen-wrapper', (el) => {
+  const mediaWrapper = ensureChildNode(document.body, 'fullscreen', (el) => {
     el.addEventListener('click', (e) => e.target == el && el.hide());
     el.hide = () => mediaWrapper.classList.add('hidden');
   });

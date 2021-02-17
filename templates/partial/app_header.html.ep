@@ -1,6 +1,6 @@
 % my $home_url = settings('organization_url') || url_for('/');
 
-<div class="cms-navbar-wrapper hidden-for-app">
+<div class="cms-navbar--wrapper hidden-for-app">
   <nav class="cms-navbar">
     %= link_to $home_url, class => 'cms-navbar__brand', begin
       <%= image '/images/convos-light.png', class => 'cms-navbar__logo', alt => '' %>

@@ -1,4 +1,4 @@
-<div class="footer-wrapper">
+<div class="footer--wrapper">
   <footer class="footer">
     <nav>
       <a href="https://convos.chat"><%= image '/images/convos-light.png', alt => 'Convos' %></a>

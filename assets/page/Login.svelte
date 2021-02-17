@@ -117,7 +117,7 @@ function registered() {
   </main>
 {/if}
 
-<div class="footer-wrapper is-small">
+<div class="footer--wrapper is-small">
   <footer class="footer language-selector">
     <Icon name="globe"/>
     {#each $i18n.languageOptions as lang}

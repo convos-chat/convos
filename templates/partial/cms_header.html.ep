@@ -1,4 +1,4 @@
-<div class="cms-navbar-wrapper">
+<div class="cms-navbar--wrapper">
   <nav class="cms-navbar">
     %= link_to '/', class => 'cms-navbar__brand', begin
       <%= image '/images/convos-light.png', class => 'cms-navbar__logo', alt => '' %>

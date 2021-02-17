@@ -56,7 +56,7 @@ export default class Jitsi extends Reactive {
   }
 
   _interfaceConfigOverwrite() {
-    const style = window.getComputedStyle(document.querySelector('.cms-navbar-wrapper'));
+    const style = window.getComputedStyle(document.querySelector('.cms-navbar--wrapper'));
     const DEFAULT_BACKGROUND = style.backgroundColor || '#222222';
 
     const TOOLBAR_BUTTONS = [

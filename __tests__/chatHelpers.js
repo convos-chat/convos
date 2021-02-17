@@ -108,11 +108,11 @@ describe('onMessageClick', () => {
     const e = {preventDefault: () => (++preventDefault), target: document.createElement('img')};
 
     e.target.src = 'image.jpeg';
-    expect(document.querySelector('.fullscreen-wrapper')).toBeFalsy();
+    expect(document.querySelector('.fullscreen')).toBeFalsy();
     onMessageClick(e);
     expect(preventDefault).toBe(1);
-    expect(document.querySelector('.fullscreen-wrapper')).toBeTruthy();
-    expect(document.querySelector('.fullscreen-wrapper img[src="image.jpeg"]')).toBeTruthy();
+    expect(document.querySelector('.fullscreen')).toBeTruthy();
+    expect(document.querySelector('.fullscreen img[src="image.jpeg"]')).toBeTruthy();
   });
 
   test('videolink', () => {

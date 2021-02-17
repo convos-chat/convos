@@ -4,7 +4,7 @@
 % stash start_app => 'jitsi';
 % my $home_url = settings('organization_url') || url_for('/');
 
-<div class="cms-navbar-wrapper hidden-for-app">
+<div class="cms-navbar--wrapper hidden-for-app">
   <nav class="cms-navbar">
     <a href="<%= $home_url %>"><%= image '/images/convos-icon-light.png', alt => '' %><%= settings('organization_name') eq 'Convos' ? l('Convos') : settings('organization_name') %></a>
     % if (session 'email') {
@@ -23,7 +23,7 @@
 </div>
 
 <main
-  class="has-js video-chat-wrapper"
+  class="has-js video-chat--wrapper"
   data-domain="<%= $domain %>"
   data-nick="<%= url_escape param('nick') || 'guest' %>"
   data-room-name="<%= url_escape $name %>">
