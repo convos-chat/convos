@@ -16,6 +16,9 @@ host: convos.chat
 basePath: /api
 schemes: [ http ]
 
+consumes: [ 'application/json' ]
+produces: [ 'application/json' ]
+
 paths:
   /connection/{connection_id}:
     delete:
@@ -243,6 +246,7 @@ paths:
 
   /file:
     post:
+      consumes: [ 'application/x-www-form-urlencoded', 'multipart/form-data' ]
       operationId: uploadFile
       summary: Upload file.
       tags: [ files ]
@@ -286,6 +290,18 @@ paths:
 
   /file/{uid}/{fid}:
     get:
+      produces:
+        - application/pdf
+        - application/zip
+        - audio/mpeg
+        - audio/ogg
+        - image/gif
+        - image/jpeg
+        - image/png
+        - text/html
+        - video/mp4
+        - video/ogg
+        - video/webm
       operationId: getFile
       summary: Retrieve uploaded file.
       tags: [ files ]
