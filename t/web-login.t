@@ -14,7 +14,7 @@ $t->get_ok('/api/user')->status_is(401);
 $t->get_ok('/user/recover/superman@example.com')->status_is(404);
 
 $t->post_ok('/api/user/login')->status_is(400)
-  ->json_is('/errors/0', {message => 'Expected object - got null.', path => '/body'});
+  ->json_is('/errors/0', {message => 'Missing property.', path => '/body'});
 
 $t->post_ok('/api/user/login', json => {email => 'xyz', password => 'foo'})->status_is(400)
   ->json_is('/errors/0', {message => 'Does not match email format.', path => '/body/email'});
