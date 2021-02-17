@@ -142,9 +142,9 @@ sub _connect_args_p {
   $params->param(tls => 1)              unless defined $params->param('tls');
   return Mojo::Promise->resolve(\%args) unless $params->param('tls');
 
-  $args{tls}        = 1;
-  $args{tls_ca}     = $ENV{CONVOS_TLS_CA} if $ENV{CONVOS_TLS_CA};
-  $args{tls_verify} = 0x00 unless $params->param('tls_verify');
+  $args{tls}                          = 1;
+  $args{tls_ca}                       = $ENV{CONVOS_TLS_CA} if $ENV{CONVOS_TLS_CA};
+  $args{tls_options}{SSL_verify_mode} = 0x00 unless $params->param('tls_verify');
   return Mojo::Promise->resolve(\%args) unless GENERATE_CERT;
 
   my $cert_dir = $self->user->core->home->child($self->user->email, $self->id);
