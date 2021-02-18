@@ -1,5 +1,5 @@
 import Reactive from './Reactive';
-import {loadScript, removeChildNodes} from './util';
+import {loadScript, q} from './util';
 
 export default class Jitsi extends Reactive {
   constructor(params) {
@@ -14,11 +14,22 @@ export default class Jitsi extends Reactive {
     this.prop('persist', 'resolution', 720, {key: 'video:resolution'});
   }
 
-  async render(el) {
-    this.targetEl = el;
-    await loadScript('https://' + this.domain + '/external_api.js');
-    removeChildNodes(this.targetEl);
-    this.jitsi = new JitsiMeetExternalAPI(this.domain, this._options());
+  async render(targetEl) {
+    try {
+      const childNodes = [].slice.call(targetEl.children, 0);
+      this.targetEl = targetEl;
+      this.jitsi = await this._load();
+      childNodes.forEach(el => el.remove());
+      targetEl.className = targetEl.className.replace(/cms-main/, 'video-chat--wrapper');
+    } catch(err) {
+      console.error('[Jitsi]', {err});
+      const errorEl = document.querySelector('.video-error');
+      errorEl.querySelector('span').textContent = String(err).substring(0, 350);
+      errorEl.classList.remove('hidden');
+      q(document, '.cms-main .fa-spin', el => el.parentNode.classList.add('hidden'));
+    }
+
+    if (!this.jitsi) return this;
 
     document.addEventListener('keydown', (e) => {
       if (e.code == 'KeyC') this.jitsi.executeCommand('toggleChat');
@@ -34,6 +45,8 @@ export default class Jitsi extends Reactive {
     document.addEventListener('keyup', (e) => {
       if (e.code == 'Space') this.jitsi.isAudioMuted().then(muted => muted || this.jitsi.executeCommand('toggleAudio'));
     });
+
+    return this;
   }
 
   _configOverwrite() {
@@ -80,6 +93,11 @@ export default class Jitsi extends Reactive {
       VERTICAL_FILMSTRIP: false,
       VIDEO_QUALITY_LABEL_DISABLED: true,
     };
+  }
+
+  async _load() {
+    await loadScript('https://' + this.domain + '/external_api.js');
+    return new JitsiMeetExternalAPI(this.domain, this._options());
   }
 
   _options() {

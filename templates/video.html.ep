@@ -25,8 +25,7 @@
   </nav>
 </div>
 
-<main
-  class="has-js video-chat--wrapper"
+<main class="cms-main has-js"
   data-domain="<%= $domain %>"
   data-nick="<%= url_escape param('nick') || 'guest' %>"
   data-room-name="<%= url_escape $name %>">
@@ -34,6 +33,7 @@
   <h2><%=l 'Loading video conference with "%1" via %2', $name, $domain %></h2>
   <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
   <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting video chat...' %></p>
+  <p class="video-error hidden"><i class="fas fa-exclamation-triangle"></i> <span></span></p>
   <p>
     %= link_to settings('contact'), class => 'btn', begin
       <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>

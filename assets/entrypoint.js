@@ -18,13 +18,13 @@ q(document, '.js-close-window', el => {
 
 if (document.querySelector('meta[name="convos:start_app"][content="chat"]')) {
   document.querySelector('.footer--wrapper').remove();
-  document.querySelector('main').remove();
+  document.querySelector('.cms-main').remove();
   const app = new App({target: document.body});
 }
 else if (document.querySelector('meta[name="convos:start_app"][content="jitsi"]')) {
   document.querySelector('.footer--wrapper').remove();
-  const main = document.querySelector('.video-chat--wrapper');
-  const app = new Jitsi(main.dataset).render(main);
+  const wrapper = document.querySelector('.cms-main');
+  const app = new Jitsi(wrapper.dataset).render(wrapper);
 }
 else {
   document.addEventListener('DOMContentLoaded', function(e) {
