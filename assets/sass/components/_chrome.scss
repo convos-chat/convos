@@ -1,3 +1,17 @@
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+  block-size: -webkit-fill-available;
+  block-size: stretch;
+}
+
+body {
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  min-block-size: -webkit-fill-available;
+  min-block-size: stretch;
+}
+
 html,
 body {
   background: var(--body-bg);
@@ -16,17 +30,6 @@ body {
 
   &.for-cms {
     scroll-behavior: smooth;
-  }
-
-  &.has-video-chat {
-    max-height: 100vh;
-    overflow: hidden;
-
-    .video-chat--wrapper {
-      padding: 0;
-      margin: 0;
-      width: 100%;
-    }
   }
 }
 

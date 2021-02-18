@@ -21,6 +21,7 @@ export default class Jitsi extends Reactive {
       this.jitsi = await this._load();
       childNodes.forEach(el => el.remove());
       targetEl.className = targetEl.className.replace(/cms-main/, 'video-chat--wrapper');
+      document.querySelector('.cms-navbar').classList.add('is-full-width');
     } catch(err) {
       console.error('[Jitsi]', {err});
       const errorEl = document.querySelector('.video-error');

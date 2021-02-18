@@ -1,19 +1,10 @@
-body.has-video-chat .cms-navbar {
-  padding-top: 0;
-  padding-bottom: 0;
-  width: 100%;
-  display: flex;
-
-  a.pull-right {
-    margin-left: auto;
-
-    &:last-child {
-      margin-right: -1rem;
-    }
-  }
-
-  img {
-    margin: -0.3rem 0.4rem -0.3rem 0;
-    height: 1.5rem;
+.video-chat--wrapper {
+  iframe {
+    height: calc(100vh - var(--navbar-small-height)) !important;
+    position: absolute;
+    top: var(--navbar-small-height);
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
 }

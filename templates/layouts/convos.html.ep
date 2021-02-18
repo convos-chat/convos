@@ -70,7 +70,6 @@
 
   % my @classnames = qw(no-js notify-disabled for-cms);
   % push @classnames, 'js-compact' if js_session 'compactDisplay';
-  % push @classnames, 'has-video-chat' if stash('start_app') eq 'jitsi';
   <body class="<%= join ' ', @classnames =%>">
     %= content
     %= asset 'convos.js' unless stash 'exception'
