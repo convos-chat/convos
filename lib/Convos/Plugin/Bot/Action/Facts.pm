@@ -27,14 +27,18 @@ sub reply {
 
   return undef unless $topic =~ m!\w!;
 
-  my $explanation = $self->query_db(
+  my $fact = $self->query_db(
     'select topic, copula, explanation from facts where topic = ? collate nocase
       order by case copula when ? then 0 else 1 end', $topic, $parts[1] || 'is',
   )->fetchrow_arrayref;
 
-  return sprintf "%s %s %s", @$explanation if $explanation;
+  # Reply with fact
+  return sprintf "%s %s %s", @$fact if $fact;
+
+  # Check if we should reply at all
+  return undef if $self->event_config($event, 'suppress_do_not_know_reply');
   return undef unless $direct ||= $event->{is_private};
-  return if $self->event_config($event, 'suppress_do_not_know_reply');
+
   my $answers = $self->event_config($event, 'answers_do_not_know')
     || [q(Sorry, I don't know anything about "%s".)];
   return @$answers ? sprintf $answers->[rand @$answers], $topic : undef;
