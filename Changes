@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.28 Not Released
+5.28 2021-02-18T23:11:20+0900
  - Fix video iframe to take full height #570
  - Add support for unicode to the Bot backend storage layer
  - Add error handling to Jitsi
