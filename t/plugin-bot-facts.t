@@ -54,4 +54,9 @@ is $facts->query_db('select count(*) from facts')->fetchrow_arrayref->[0], 3, 'm
 is $facts->reply({my_nick => 'superbot', message => 'superbot: foobar?'}),
   q(Sorry, I don't know anything about "foobar".), 'unknown fact';
 
+my $config = $facts->config->data->{action}{'Convos::Plugin::Bot::Action::Facts'} = {};
+$config->{suppress_do_not_know_reply} = 1;
+is $facts->reply({my_nick => 'superbot', message => 'superbot: foobar?'}), undef,
+  'suppress_do_not_know_reply';
+
 done_testing;

@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 5.28 Not Released
  - Fix video iframe to take full height #570
  - Add error handling to Jitsi
+ - Add suport for "suppress_do_not_know_reply" ot "Facts" bot action
 
 5.27 2021-02-17T23:04:00+0900
  - Compatible with latest Mojolicious 9.0 and M::P::OpenAPI 4.0

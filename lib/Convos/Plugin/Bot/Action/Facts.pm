@@ -34,6 +34,7 @@ sub reply {
 
   return sprintf "%s %s %s", @$explanation if $explanation;
   return undef unless $direct ||= $event->{is_private};
+  return if $self->event_config($event, 'suppress_do_not_know_reply');
   my $answers = $self->event_config($event, 'answers_do_not_know')
     || [q(Sorry, I don't know anything about "%s".)];
   return @$answers ? sprintf $answers->[rand @$answers], $topic : undef;
@@ -74,8 +75,8 @@ sub _learn {
   return unless $direct;
   my $answers
     = $replaced
-    ? $self->event_config($event, 'answers_relearned') || [q(I learned something new about %s.)]
-    : $self->event_config($event, 'answers_learned')   || [q(I learned about %s.)];
+    ? $self->event_config($event, 'answers_relearned') || ['I learned something new about %s.']
+    : $self->event_config($event, 'answers_learned')   || ['I learned about %s.'];
   $self->{reply} = sprintf $answers->[rand @$answers], $parts[0] if @$answers;
 }
 
@@ -128,6 +129,7 @@ You need to install L<DBD::SQLite> to use this action:
   ---
   actions:
   - class: Convos::Plugin::Bot::Action::Facts
+    suppress_do_not_know_reply: 0
 
 =head1 DESCRIPTION
 
