@@ -25,7 +25,7 @@ $connection->on(
   state => sub {
     shift;
     push @connection_state, $_[1]->{state} if $_[0] eq 'connection';
-    push @state, [@_];
+    push @state,            [@_];
   }
 );
 
@@ -88,13 +88,13 @@ mock_connect(
 
     cmp_deeply $connect_args->[0],
       {
-      address    => 'irc.example.com',
-      port       => 6667,
-      timeout    => 20,
-      tls        => 1,
-      tls_cert   => re(qr{\.cert}),
-      tls_key    => re(qr{\.key}),
-      tls_verify => 0x00
+      address     => 'irc.example.com',
+      port        => 6667,
+      timeout     => 20,
+      tls         => 1,
+      tls_cert    => re(qr{\.cert}),
+      tls_key     => re(qr{\.key}),
+      tls_options => {SSL_verify_mode => 0x00},
       },
       'connect args first';
     is_deeply $connect_args->[1], {address => 'irc.example.com', port => 6667, timeout => 20},
