@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 5.28 Not Released
  - Fix video iframe to take full height #570
+ - Add support for unicode to the Bot backend storage layer
  - Add error handling to Jitsi
  - Add suport for "suppress_do_not_know_reply" ot "Facts" bot action
 

@@ -59,4 +59,8 @@ $config->{suppress_do_not_know_reply} = 1;
 is $facts->reply({my_nick => 'superbot', message => 'superbot: foobar?'}), undef,
   'suppress_do_not_know_reply';
 
+$facts->emit(message => {my_nick => 'superbot', message => 'SQLite is compatible with æøå'});
+is $facts->reply({my_nick => 'superbot', message => q(what is sqlite?)}),
+  'SQLite is compatible with æøå', 'unicode';
+
 done_testing;

@@ -61,9 +61,17 @@ sub _dbh {
   my $home = $self->home;
   $home->child('karma.sqlite')->move_to('bot_actions.sqlite') if -e $home->child('karma.sqlite');
 
-  return $self->{dbh}
-    = DBI->connect(sprintf('dbi:SQLite:dbname=%s', $home->child('bot_actions.sqlite')->to_string),
-    '', '', {AutoCommit => 1, PrintError => 0, RaiseError => 1});
+  return $self->{dbh} = DBI->connect(
+    sprintf('dbi:SQLite:dbname=%s', $home->child('bot_actions.sqlite')->to_string),
+    '', '',
+    {
+      AutoCommit          => 1,
+      AutoInactiveDestroy => 1,
+      PrintError          => 0,
+      RaiseError          => 1,
+      sqlite_unicode      => 1,
+    }
+  );
 }
 
 1;
