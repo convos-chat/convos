@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.29 Not Released
+5.29 2021-02-20T14:00:00+0900
  - Replaced spinning animation with scale translation between icons
  - Replaced hover zoom effect with circular border
  - Changed the headings to be less bold
