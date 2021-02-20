@@ -4,6 +4,7 @@ import SortedMap from '../js/SortedMap';
 import {extractErrorMessage} from '../js/util';
 import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
+import {notify} from '../js/Notify';
 
 const sortConversations = (a, b) => {
   return (a.is('private') - b.is('private')) || a.name.localeCompare(b.name);
@@ -84,9 +85,10 @@ export default class Connection extends Conversation {
   wsEventFrozen(params) {
     const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
-    this.ensureConversation(params).participants.add({nick: this.nick, me: true});
-    if (params.frozen) (existing || this).addMessages({message: params.frozen, vars: []}); // Add "vars:[]" to force translation
+    const conversation = this.ensureConversation(params);
+    conversation.participants.add({nick: this.nick, me: true});
     if (wasFrozen && !params.frozen) existing.addMessages({message: 'Connected.', vars: []});
+    if (params.frozen && conversation.is('pending')) notify.show(params.frozen, {title: params.name});
   }
 
   wsEventMe(params) {

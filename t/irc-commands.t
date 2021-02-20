@@ -283,6 +283,12 @@ $res = $connection->send_p('', '/join some_user')->$wait_success;
 is $res->{conversation_id}, 'some_user', 'join alias for query';
 $connection->send_p('', '/part some_user')->$wait_success('clean up for state test later on');
 
+note 'invite';
+$server->server_event_ok('_irc_event_invite')->server_write_ok(['invitation.irc']);
+$res = $connection->send_p('#invite_only', '/invite devman')->$wait_success;
+$server->processed_ok;
+is_deeply($res, {conversation_id => '#invite_only', invited => 'devman'}, 'invitation sent');
+
 note 'list';
 $p = $connection->send_p('', '/list');
 $server->server_event_ok('_irc_event_list')
@@ -407,6 +413,8 @@ __DATA__
 :localhost 332 superman ##redirected :Used to be #redirected
 :localhost 353 superman @ ##redirected :superwoman @superman
 :localhost 366 superman ##redirected :End of /NAMES list.
+@@ invitation.irc
+:localhost 341 superman devman #invite_only
 @@ names.irc
 :localhost 353 superman = #convos :superwoman ~superman &robin
 :localhost 353 superman = #convos :%batboy @superboy +robyn

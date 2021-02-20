@@ -50,6 +50,13 @@ onDestroy(() => {
   dragAndDrop.detach();
 });
 
+function conversationCommand(command) {
+  conversation.send(command + ' ' + conversation.name, (res) => {
+    if (!res.errrors) $activeMenu = '';
+    if (command == '/close') route.go('/settings/conversation');
+  });
+}
+
 function setConversationFromRoute($route) {
   const [connection_id, conversation_id] = ['connection_id', 'conversation_id'].map(k => $route.param(k));
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
@@ -158,13 +165,20 @@ function setConversationFromUser(user) {
     </p>
   {:else if $conversation.is('not_found')}
     <h2>{$l('You are not part of this conversation.')}</h2>
-    <p>{$l('Do you want to chat with "%1"?', $conversation.conversation_id)}</p>
+    <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
     <p>
-      <Button type="button" icon="thumbs-up" on:click="{() => conversation.send('/join ' + $conversation.conversation_id)}"><span>{$l('Yes')}</span></Button>
+      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/join')}"><span>{$l('Yes')}</span></Button>
       <Link href="/settings/conversation" class="btn"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#settings')}</p>
+  {:else if $conversation.frozen && $conversation.is('pending')}
+    <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
+    <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
+    <p>
+      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/join')}"><span>{$l('Yes')}</span></Button>
+      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/close')}"><span>{$l('No')}</span></Button>
+    </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation)}</p>
   {/if}

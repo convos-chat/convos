@@ -67,10 +67,11 @@ sub send_p {
 
   return $self->_send_names_p($target) if $cmd eq 'NAMES';
 
-  return $self->_send_kick_p($target, $message)  if $cmd eq 'KICK';
-  return $self->_send_mode_p($target, $message)  if $cmd eq 'MODE';
-  return $self->_send_oper_p($target, $message)  if $cmd eq 'OPER';
-  return $self->_send_topic_p($target, $message) if $cmd eq 'TOPIC';
+  return $self->_send_invite_p($target, $message) if $cmd eq 'INVITE';
+  return $self->_send_kick_p($target, $message)   if $cmd eq 'KICK';
+  return $self->_send_mode_p($target, $message)   if $cmd eq 'MODE';
+  return $self->_send_oper_p($target, $message)   if $cmd eq 'OPER';
+  return $self->_send_topic_p($target, $message)  if $cmd eq 'TOPIC';
 
   return $self->_send_ison_p($message || $target) if $cmd eq 'ISON';
   return $self->_send_part_p($message || $target) if $cmd eq 'CLOSE' or $cmd eq 'PART';
@@ -214,6 +215,13 @@ sub _irc_event_fallback {
       type      => $msg->{error} || $msg->{command} =~ m!err! ? 'error' : 'notice',
     }
   );
+}
+
+sub _irc_event_invite {
+  my ($self, $msg) = @_;
+  my $conversation
+    = $self->conversation({name => $msg->{params}[1], frozen => 'You have a pending invitation.'});
+  $self->emit(state => frozen => $conversation->TO_JSON);
 }
 
 sub _irc_event_join {
@@ -512,6 +520,13 @@ sub _make_default_response {
   return $p->resolve($res);
 }
 
+sub _make_invite_response {
+  my ($self, $msg, $res, $p) = @_;
+  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
+  $self->_notice("Invitation sent to $msg->{params}[1].");
+  $p->resolve({conversation_id => $msg->{params}[2], invited => $msg->{params}[1]});
+}
+
 sub _make_invalid_target_p {
   my ($self, $target) = @_;
 
@@ -741,6 +756,23 @@ sub _send_clear_p {
     : Mojo::Promise->reject('Unknown conversation.');
 }
 
+sub _send_invite_p {
+  my ($self, $target, $command) = @_;
+  my ($nick, $conversation_id) = split /\s/, ($command || ''), 2;
+  $conversation_id ||= $target;
+
+  return $self->_write_and_wait_p(
+    "INVITE $nick $conversation_id", {conversation_id => lc $conversation_id},
+    err_chanoprivsneeded => {1 => $target},
+    err_needmoreparams   => {1 => $target},
+    err_nosuchnick       => {1 => $nick},
+    err_notonchannel     => {1 => $nick},
+    err_useronchannel    => {1 => $target},
+    rpl_inviting         => {1 => $nick},
+    '_make_invite_response',
+  );
+}
+
 sub _send_ison_p {
   my ($self, $target) = @_;
   return Mojo::Promise->reject('Cannot send without target.') unless $target;
@@ -805,7 +837,7 @@ sub _send_kick_p {
     err_badchanmask      => {1 => $target},
     err_chanoprivsneeded => {1 => $target},
     err_usernotinchannel => {1 => $nick},
-    err_notonchannel     => {1 => $target},
+    err_notonchannel     => {1 => $nick},
     kick                 => {0 => $target, 1 => $nick},
     '_make_default_response',
   );
@@ -976,7 +1008,7 @@ sub _send_part_p {
 
   my $conversation = $self->get_conversation($target);
   return $self->_remove_conversation($target)->save_p->then(sub { +{} })
-    if $conversation and $conversation->is_private;
+    if $conversation and ($conversation->is_private or $conversation->frozen);
 
   return $self->_remove_conversation($target)->save_p->then(sub { +{} })
     if $self->state eq 'disconnected';

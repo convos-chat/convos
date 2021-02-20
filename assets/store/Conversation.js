@@ -72,6 +72,7 @@ export default class Conversation extends Reactive {
     if (status == 'locked') return this.frozen == 'Invalid password.';
     if (status == 'not_found') return this.frozen == 'Not found.';
     if (status == 'notifications') return false;
+    if (status == 'pending') return this.frozen.match(/pending invitation/i);
     if (status == 'private') return this.conversation_id && !channelRe.test(this.conversation_id) || false;
     if (status == 'search') return false;
     if (status == 'unread') return this.unread && true;

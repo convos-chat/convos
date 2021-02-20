@@ -125,6 +125,7 @@ commands.push({cmd: '/part', example: '/part', description: 'Leave channel, and 
 commands.push({cmd: '/close', example: '/close <nick>', description: 'Close conversation with nick, defaults to current active.'});
 commands.push({cmd: '/kick', example: '/kick <nick>', description: 'Kick a user from the current channel.'});
 commands.push({cmd: '/mode', example: '/mode [+|-][b|o|v] <user>', description: 'Change mode of yourself or a user'});
+commands.push({cmd: '/invite', example: '/invite <nick> [#channel]', description: 'Invite a user to a channel.'});
 commands.push({cmd: '/reconnect', example: '/reconnect', description: 'Restart the current connection.'});
 commands.push({cmd: '/clear', example: '/clear history <#channel> or /clear history <nick>', description: 'Delete all history for the given conversation.'});
 commands.push({cmd: '/oper', example: '/oper <msg>', description: 'Send server operator messages.'});
