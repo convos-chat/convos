@@ -47,7 +47,7 @@ function registered() {
 }
 </script>
 
-<main id="signup">
+<main id="sigup" class="cms-main">
   {#if settings('status') >= 400}
     <h2>{$l('Invalid invite/recover URL')}</h2>
     <p>{$l(settings('status') == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
@@ -96,7 +96,7 @@ function registered() {
 </main>
 
 {#if !settings('first_user')}
-  <main id="signin">
+  <main id="signin" class="cms-main">
     <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
       <h2>{$l('Sign in')}</h2>
       <TextField type="email" name="email" placeholder="{$l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
