@@ -91,7 +91,7 @@ function setConversationFromUser(user) {
   {#if $messages.length < 10 && !$conversation.is('not_found')}
     {#if $conversation.is('private')}
       <p><Icon name="info-circle"/> {@html $lmd('This is a private conversation with "%1".', $conversation.name)}</p>
-    {:else}
+    {:else if !$conversation.frozen}
       <p>
         <Icon name="info-circle"/> 
         {@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}
@@ -111,7 +111,7 @@ function setConversationFromUser(user) {
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
-  {#if $conversation.historyStartAt && !$conversation.is('not_found')}
+  {#if $conversation.historyStartAt && !$conversation.is('not_found') && $messages.length}
     <div class="message__status-line for-start-of-history"><span><Icon name="calendar-alt"/> <i>{$l('Started chatting on %1', $conversation.historyStartAt.getHumanDate())}</i></span></div>
   {/if}
 
@@ -166,7 +166,7 @@ function setConversationFromUser(user) {
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#settings')}</p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
-    <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation).replace(/\.$/, '') || $l($conversation.frozen)}</p>
+    <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation)}</p>
   {/if}
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>

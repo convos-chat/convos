@@ -271,6 +271,14 @@ is_deeply(
   'join protected'
 );
 
+note 'join invite only';
+ok !$connection->get_conversation('#invite_only'), 'invite_only is not joined';
+$server->server_event_ok('_irc_event_join')->server_write_ok(['join-invite-only.irc']);
+$res = $connection->send_p('', '/join #invite_only')->$wait_reject('Cannot join channel (+i)');
+$server->processed_ok;
+my $invite_only = $connection->get_conversation('#invite_only');
+is $invite_only->frozen, 'This channel requires an invitation.', 'invite_only frozen';
+
 $res = $connection->send_p('', '/join some_user')->$wait_success;
 is $res->{conversation_id}, 'some_user', 'join alias for query';
 $connection->send_p('', '/part some_user')->$wait_success('clean up for state test later on');
@@ -389,6 +397,8 @@ cmp_deeply(
 done_testing;
 
 __DATA__
+@@ join-invite-only.irc
+:localhost 473 superman #invite_only :Cannot join channel (+i)
 @@ join-protected.irc
 :localhost 366 superman #protected :End of /NAMES list.
 @@ join-redirected-1.irc

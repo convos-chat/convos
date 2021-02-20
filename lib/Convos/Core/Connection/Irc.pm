@@ -542,10 +542,15 @@ sub _make_join_response {
     $self->_notice("Forwarding $msg->{params}[1] to $msg->{params}[2].");
     return $self->_send_join_p("$msg->{params}[2]")->then(sub { $p->resolve($_[0]) });
   }
-
   if ($msg->{command} eq 'err_badchannelkey') {
     my $conversation = $self->conversation({name => $msg->{params}[1]});
     $self->emit(state => frozen => $conversation->frozen('Invalid password.')->TO_JSON);
+    return $p->reject($msg->{params}[2]);
+  }
+  if ($msg->{command} eq 'err_inviteonlychan') {
+    my $conversation = $self->conversation({name => $msg->{params}[1]});
+    $self->emit(
+      state => frozen => $conversation->frozen('This channel requires an invitation.')->TO_JSON);
     return $p->reject($msg->{params}[2]);
   }
 

@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+5.30 Not Released
+ - Add better user experience for +i (invite only) channels #568
+
 5.29 2021-02-20T14:00:00+0900
  - Replaced spinning animation with scale translation between icons
  - Replaced hover zoom effect with circular border
