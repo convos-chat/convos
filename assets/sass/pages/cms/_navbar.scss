@@ -31,7 +31,6 @@
   }
 
   a {
-    color: var(--sidebar-left-text);
     text-decoration: none;
     padding: 0.5rem 1rem;
     margin-right: 0.5rem;
@@ -55,6 +54,11 @@
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  a,
+  label {
+    color: var(--sidebar-left-text);
   }
 }
 

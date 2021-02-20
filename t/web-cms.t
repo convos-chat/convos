@@ -11,7 +11,7 @@ $t->get_ok('/doc/nope')->status_is(404)->element_exists('h1')->text_is('h1', 'No
 $t->get_ok('/doc/Convos/Core')->status_is(200)->header_is('X-Provider-Name', undef)
   ->element_exists(
   'meta[name="description"][content="Convos::Core is the heart of the Convos backend."]')
-  ->element_exists(qq(meta[name="convos:start_app"][content="no"]))
+  ->element_exists(qq(meta[name="convos:start_app"][content=""]))
   ->text_is('.toc li a[href="#description"]', 'DESCRIPTION')
   ->text_is('title',                          'Convos::Core - Convos backend - Convos')
   ->text_is('h1.cms-header',                  'Convos::Core - Convos backend');
@@ -25,7 +25,7 @@ my $cms_dir = $t->app->core->home->child('content');
 $cms_dir->make_path;
 $cms_dir->child('index.md')->spurt("# Custom index\n\nToo cool for school!\n");
 $t->get_ok('/')->status_is(200)->header_is('X-Provider-Name', undef)
-  ->element_exists(qq(meta[name="convos:start_app"][content="no"]))->element_exists('body.for-cms')
+  ->element_exists(qq(meta[name="convos:start_app"][content=""]))->element_exists('body.for-cms')
   ->element_exists('body.for-cms > article')->text_is('title', 'Custom index - Convos')
   ->text_is('h1', 'Custom index')->text_like('body.for-cms > article > p', qr{Too cool for school});
 
@@ -72,7 +72,7 @@ HERE
 $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(200)->header_is('X-Provider-Name', undef)
   ->element_exists('body.for-cms > article')->text_is('title', 'Cool title - Convos')
   ->element_exists('meta[name="description"][content="This blog is about some cool stuff."]')
-  ->element_exists(qq(meta[name="convos:start_app"][content="no"]))->text_is('h1', 'Cool heading')
+  ->element_exists(qq(meta[name="convos:start_app"][content=""]))->text_is('h1', 'Cool heading')
   ->element_exists('body.for-cms')
   ->text_like('body.for-cms > article > p', qr{This blog is about.*some cool stuff}s)
   ->text_is('.toc li a[href="#cool-sub-title"]',     'Cool sub title')

@@ -1,7 +1,7 @@
 % use Mojo::JSON 'to_json';
 % use Mojo::Util 'b64_encode';
 % my $social = $c->social;
-% stash start_app => 'no' unless stash 'start_app';
+% stash start_app => '' unless stash 'start_app';
 <!DOCTYPE html>
 <html lang="<%= $lang %>">
   <head>
@@ -60,7 +60,7 @@
     <!-- base style + themes -->
     <noscript><style>.has-js { display: none; }</style></noscript>
     %= asset 'convos.css'
-    % my $theme = $c->themes->get(js_session('theme'), js_session('colorScheme'));
+    % my $theme = stash('start_app') ? $c->themes->get(js_session('theme'), js_session('colorScheme')) : $c->themes->get('convos', js_session('colorScheme'));
     %= tag 'link', rel => 'stylesheet', type => 'text/css', id => "theme_primary", href => url_for($theme->{url}), title => $theme->{title}
     % for my $theme (@{$c->themes->list}) {
     %= tag 'link', rel => 'alternate stylesheet', type => 'text/css', id => "theme_alt__$theme->{id}", href => url_for($theme->{url}), title => $theme->{title}
