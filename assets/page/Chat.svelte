@@ -174,7 +174,7 @@ function setConversationFromUser(user) {
     <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#settings')}</p>
   {:else if $conversation.frozen && $conversation.is('pending')}
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
-    <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
+    <p>{$l('Do you want to join?')}</p>
     <p>
       <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/join')}"><span>{$l('Yes')}</span></Button>
       <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/close')}"><span>{$l('No')}</span></Button>
