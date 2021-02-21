@@ -310,3 +310,27 @@ p.help {
   overflow: visible;
   transition: width 0.5s ease-in;
 }
+
+.text-field.has-password {
+  position: relative;
+
+  .text-field__toggle {
+    color: var(--input-color);
+    position: absolute;
+    left: $input-max-width - 1.7em;
+    top: 0.5em;
+
+    @media (max-width: #{$input-max-width}) {
+      left: auto;
+      right: 0.7em;
+    }
+  }
+
+  input {
+    padding-right: 2em;
+  }
+
+  label + input + .text-field__toggle {
+    top: 2em;
+  }
+}

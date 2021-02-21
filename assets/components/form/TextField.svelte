@@ -1,8 +1,10 @@
 <script>
+import Icon from '../Icon.svelte';
 import {uuidv4} from '../../js/util';
 
 const onInput = e => { value = type.match(/^(number|range)$/) ? parseInt(e.target.value, 10) : e.target.value };
 let inputEl;
+let visible = false;
 
 export let autocomplete = null;
 export let hidden = false;
@@ -21,6 +23,9 @@ $: if (inputEl && !inputEl.syncValue) {
 
 <div class="text-field" class:has-password="{type == 'password'}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input {type} {name} {id} {autocomplete} {placeholder} {readonly} {value} bind:this="{inputEl}" on:input={onInput} on:keyup/>
+  <input type="{visible ? 'text' : type}" {name} {id} {autocomplete} {placeholder} {readonly} {value} bind:this="{inputEl}" on:input={onInput} on:keyup/>
+  {#if type == 'password'}
+    <a href="#toggle" class="text-field__toggle" on:click|preventDefault="{() => { visible = !visible }}"><Icon name="{visible ? 'eye-slash' : 'eye'}"/></a>
+  {/if}
   <slot name="help"></slot>
 </div>
