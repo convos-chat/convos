@@ -17,7 +17,7 @@
   % } else {
     <p>
       <%=l 'This should not happen.' %>
-      Please submit <a href="https://github.com/Nordaaker/convos/issues/">an issue</a>,
+      Please submit <a href="https://github.com/convos-chat/convos/issues/">an issue</a>,
       if the problem does not go away.
     </p>
   % }

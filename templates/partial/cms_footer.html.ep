@@ -3,11 +3,11 @@
     <nav>
       <a href="https://convos.chat"><%= image '/images/convos-light.png', alt => 'Convos' %></a>
       <a href="https://convos.chat/blog"></i><%=l 'Blog' %></a>
-      <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i></a>
+      <a href="https://github.com/convos-chat/convos/"><i class="fab fa-github"></i></a>
       <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i></a>
     </nav>
     <p>
-      Copyright (C) 2012-2020, <a href="https://github.com/nordaaker">Nordaaker</a>.
+      Copyright (C) 2012-2020, <a href="https://github.com/convos-chat">convos-chat</a>.
     </p>
     <p>
       This program is free software, you can redistribute it and/or modify it under

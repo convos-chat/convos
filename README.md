@@ -1,7 +1,7 @@
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
-[![Docker Status](https://github.com/Nordaaker/convos/workflows/Docker%20Image%20CI/badge.svg?branch=master)](https://hub.docker.com/r/nordaaker/convos)
-[![Build Status](https://github.com/Nordaaker/convos/workflows/Linux%20CI/badge.svg?branch=master)](https://github.com/Nordaaker/convos/actions)
-[![GitHub issues](https://img.shields.io/github/issues/nordaaker/convos)](https://github.com/nordaaker/convos/issues)
+[![Docker Status](https://github.com/convos-chat/convos/workflows/Docker%20Image%20CI/badge.svg?branch=master)](https://hub.docker.com/r/convos/convos)
+[![Build Status](https://github.com/convos-chat/convos/workflows/Linux%20CI/badge.svg?branch=master)](https://github.com/convos-chat/convos/actions)
+[![GitHub issues](https://img.shields.io/github/issues/convos-chat/convos)](https://github.com/convos-chat/convos/issues)
 
 # Convos - Multiuser chat application
 
@@ -50,26 +50,17 @@ $EDITOR Changes
 
 ### stable
 
-"[stable](https://github.com/Nordaaker/convos/tree/stable)" is the branch you
+"[stable](https://github.com/convos-chat/convos/tree/stable)" is the branch you
 should use, if you want to clone and run Convos, instead of just running the
 install command above.
 
-[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=stable)](https://travis-ci.org/Nordaaker/convos)
-
 ### master
 
-"[master](https://github.com/Nordaaker/convos/tree/master)" is for developers.
+"[master](https://github.com/convos-chat/convos/tree/master)" is for developers.
 It's mostly stable, but might require extra tools and packages to run.
-
-[![Build Status](https://travis-ci.org/Nordaaker/convos.svg?branch=master)](https://travis-ci.org/Nordaaker/convos)
 
 ### www.convos.chat
 
-"[www.convos.chat](https://github.com/Nordaaker/convos/tree/www.convos.chat)" is the source
+"[www.convos.chat](https://github.com/convos-chat/convos/tree/www.convos.chat)" is the source
 for [http://convos.chat](http://convos.chat), which is powered by the built-in CMS
 In Convos.
-
-### backup/convos-0.8604
-
-[backup/convos-0.8604](https://github.com/Nordaaker/convos/tree/backup/convos-0.8604)
-is a snapshot for the first iteration of Convos.

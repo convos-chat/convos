@@ -17,7 +17,7 @@
       <a href="<%= $home_url %>" class="is-primary-menu-item"><%= image '/images/convos-icon-light.png', alt => '', class => 'visible-sm' %><%= settings('organization_name') eq 'Convos' ? l('About') : settings('organization_name') %></a>
       % if (settings('organization_name') eq 'Convos') {
         <a href="https://convos.chat/blog"><i class="fas fa-glasses visible-sm"></i><%=l 'Blog' %></a>
-        <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
+        <a href="https://github.com/convos-chat/convos/"><i class="fab fa-github"></i><span class="visible-sm">Github</span></a>
         <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i><span class="visible-sm">Twitter</span></a>
       % }
       % if (session 'email') {

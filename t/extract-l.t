@@ -116,7 +116,7 @@ sub blacklisted {
   return 1 if $_[0] =~ m!^https?:!;
 
   $_[0] eq $_ and return 1
-    for ('Nordaaker', 'base_url', 'contact', 'existing_user',
+    for ('convos-chat', 'base_url', 'contact', 'existing_user',
     'irc://chat.freenode.net:6697/%%23convos',
     'on', 'organization_name', 'q', 'shift+enter', 'status', 'user@example.com', 'version');
 

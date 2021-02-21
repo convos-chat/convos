@@ -64,7 +64,7 @@ my $after  = Convos::Date->parse($t->tx->res->json('/messages/13/ts'));
 my $before = Convos::Date->parse($t->tx->res->json('/messages/15/ts'));
 note "before=$before";
 $t->get_ok("/api/connection/irc-localhost/conversation/%23convos/messages?before=$before")
-  ->json_is('/after', undef)->json_is('/before', undef)->status_is(200)
+  ->json_is('/after',            undef)->json_is('/before', undef)->status_is(200)
   ->json_is('/messages/0/from',  'river')->json_is('/messages/0/message',  '0 pencil')
   ->json_is('/messages/14/from', 'anger')->json_is('/messages/14/message', '14 fowl');
 num_messages_is($t, 15, "before=$before");
@@ -159,7 +159,7 @@ $t->get_ok(
 my %uniq;
 $uniq{$_->{ts}}++ for @{$t->tx->res->json->{messages} || []};
 is int(grep { $_ != 1 } values %uniq), 0,
-  'add_months(-1) hack https://github.com/Nordaaker/convos/pull/292';
+  'add_months(-1) hack https://github.com/convos-chat/convos/pull/292';
 
 note 'server messages';
 $connection->emit(message => $connection->messages => $_) for t::Helper->messages($t0->epoch);

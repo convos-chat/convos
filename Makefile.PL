@@ -29,16 +29,16 @@ my %WriteMakefileArgs = (
     'dynamic_config' => 0,
     'meta-spec'      => {version => 2},
     'resources'      => {
-      bugtracker => {web => 'https://github.com/Nordaaker/convos/issues'},
-      homepage   => 'https://github.com/Nordaaker/convos',
+      bugtracker => {web => 'https://github.com/convos-chat/convos/issues'},
+      homepage   => 'https://github.com/convos-chat/convos',
       repository => {
         type => 'git',
-        url  => 'https://github.com/Nordaaker/convos.git',
-        web  => 'https://github.com/Nordaaker/convos',
+        url  => 'https://github.com/convos-chat/convos.git',
+        web  => 'https://github.com/convos-chat/convos',
       },
     },
     'x_contributors' =>
-      ['Jan Henning Thorsen <jhthorsen@cpan.org>', 'Marcus Ramberg <marcus@nordaaker.com>'],
+      ['Jan Henning Thorsen <jhthorsen@cpan.org>', 'Marcus Ramberg <marcus@convos-chat.com>'],
   },
   test => {TESTS => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
 );

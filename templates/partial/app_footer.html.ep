@@ -2,8 +2,8 @@
   <footer class="footer">
     <nav>
       <a href="https://convos.chat/blog"></i><%=l 'Blog' %></a>
-      <a href="https://github.com/Nordaaker/convos/blob/master/LICENSE"><%=l 'License' %></a>
-      <a href="https://github.com/nordaaker/convos/"><i class="fab fa-github"></i></a>
+      <a href="https://github.com/convos-chat/convos/blob/master/LICENSE"><%=l 'License' %></a>
+      <a href="https://github.com/convos-chat/convos/"><i class="fab fa-github"></i></a>
       <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i></a>
     </nav>
   </footer>

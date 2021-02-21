@@ -25,7 +25,7 @@ test_defaults('/err/404' => 404)->element_exists('a.btn[href="/"]')
   ->text_is('title', 'Not Found (404) - Convos')->text_is('h1', 'Not Found (404)');
 
 test_defaults('/err/500' => 500)
-  ->element_exists('a[href="https://github.com/Nordaaker/convos/issues/"]')
+  ->element_exists('a[href="https://github.com/convos-chat/convos/issues/"]')
   ->element_exists('a.btn[href="/"]')->text_is('title', 'Internal Server Error (500) - Convos')
   ->text_is('h1', 'Internal Server Error (500)');
 

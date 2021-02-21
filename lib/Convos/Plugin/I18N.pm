@@ -81,7 +81,7 @@ sub _load_dictionaries {
     $meta->{$lang}{language_team}        ||= "$lang <lang\@convos.chat>";
     $meta->{$lang}{mime_version}         ||= '1.0';
     $meta->{$lang}{project_id_version}   ||= $Convos::VERSION;
-    $meta->{$lang}{report_msgid_bugs_to} ||= 'https://github.com/Nordaaker/convos/issues';
+    $meta->{$lang}{report_msgid_bugs_to} ||= 'https://github.com/convos-chat/convos/issues';
 
     warn qq([Convos::Plugin::I18N] Loaded $n lexicons for dictionary "$l" from $file.\n) if DEBUG;
   }

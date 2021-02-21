@@ -302,7 +302,7 @@ under the L<CC-BY license|https://creativecommons.org/licenses/by/4.0/>.
 
 =head2 Convos core and frontend
 
-Copyright (C) 2012-2015, Nordaaker.
+Copyright (C) 2012, Convos Org.
 
 This program is free software, you can redistribute it and/or modify it under
 the terms of the Artistic License version 2.0.

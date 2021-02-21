@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.32 2021-02-22T08:47:00+0900
+5.32 2021-02-22T09:10:00+0900
  - Can toggle password inputs as plain text #569
  - Add alert icon if a channel is frozen in the sidebar #568
  - Changed login screen to be side-by-side
@@ -688,7 +688,7 @@ Revision history for perl distribution Convos
 
 1.02 2019-11-13T16:02:05+0900
  - Fix Docker builds for master and tags #401
-   https://hub.docker.com/r/nordaaker/convos
+   https://hub.docker.com/r/convos/convos
  - Fix service worker so it serves fresh assets #402
  - Fix cleaning user input #403
  - Fix "convos dev" command so it works with webpack

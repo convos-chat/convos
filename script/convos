@@ -38,9 +38,10 @@ sub command_build {
   push @tests, 't/version.t' if $ENV{RELEASE};
   return unless $script->command_exec(qw(prove -l), @tests);
 
+  require Convos;    # Must be loaded afterwards to have the correct version
   my $push = 'git push origin';
   print $ENV{RELEASE}
-    ? "\nNow run:\n\$ $push master:master && $push master:stable && $push --tags\n\n"
+    ? "\nNow run:\n\$ $push master:master && $push master:stable && $push v$Convos::VERSION\n\n"
     : "\nConvos must be restarted to use the new CSS and JavaScript assets.\n\n";
 }
 
@@ -153,8 +154,8 @@ sub command_upgrade {
     $script->_run_or_abort(qw(git pull origin) => $branch);
   }
   else {
-    my $version = $ENV{CONVOS_WANTED_VERSION} || 'stable';                         # experimental
-    my $url     = "https://github.com/nordaaker/convos/archive/$version.tar.gz";
+    my $version = $ENV{CONVOS_WANTED_VERSION} || 'stable';                           # experimental
+    my $url     = "https://github.com/convos-chat/convos/archive/$version.tar.gz";
     my $tar     = _which('tar') or die qq(Couldn't find executable "tar".);
     my $tar_cmd = "$tar xz --strip-components 1";
 

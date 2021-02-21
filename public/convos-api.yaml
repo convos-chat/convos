@@ -6,7 +6,7 @@ info:
   description: This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.
   contact:
     name: Convos
-    url: https://github.com/Nordaaker/convos
+    url: https://github.com/convos-chat/convos
   license:
     name: Artistic License version 2.0
     url: http://opensource.org/licenses/Artistic-2.0

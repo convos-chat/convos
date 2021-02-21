@@ -3,7 +3,7 @@
   "description": "",
   "version": "5.31.0",
   "license": "Artistic-2.0",
-  "repository": "https://github.com/nordaaker/convos",
+  "repository": "https://github.com/convos-chat/convos",
   "scripts": {
     "build": "rollup -c --environment production",
     "dev": "./script/convos dev",

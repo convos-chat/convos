@@ -8,7 +8,7 @@ import {settings} from '../js/util';
 
 export const title = 'Help';
 
-const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('version') + '/Changes#L3';
+const changelogUrl = 'https://github.com/convos-chat/convos/blob/v' + settings('version') + '/Changes#L3';
 </script>
 
 <ChatHeader>
@@ -71,8 +71,8 @@ const changelogUrl = 'https://github.com/Nordaaker/convos/blob/' + settings('ver
   <ul>
     <li><a href="{changelogUrl}" target="_blank">{$l('Changelog for v%1', settings('version'))}</a></li>
     <li><a href="https://convos.chat" target="_blank">{$l('Project homepage')}</a></li>
-    <li><a href="https://github.com/Nordaaker/convos/issues" target="_blank">{$l('Bug/issue tracker')}</a></li>
-    <li><a href="https://github.com/Nordaaker/convos" target="_blank">{$l('Source code')}</a></li>
+    <li><a href="https://github.com/convos-chat/convos/issues" target="_blank">{$l('Bug/issue tracker')}</a></li>
+    <li><a href="https://github.com/convos-chat/convos" target="_blank">{$l('Source code')}</a></li>
 
     {#if settings('organization_name') != 'Convos' && settings('organization_url') != 'https://convos.chat'}
       <li><a href="{settings('organization_url')}" target="_blank">{settings('organization_name')}</a></li>

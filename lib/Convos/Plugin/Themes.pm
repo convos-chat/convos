@@ -120,7 +120,7 @@ while running. This means that if a new theme is created, then it should be
 available in the web gui after just some seconds.
 
 There are multiple themes
-L<bundled|https://github.com/Nordaaker/convos/tree/master/public/themes> with
+L<bundled|https://github.com/convos-chat/convos/tree/master/public/themes> with
 Convos, but you can also create your own custom themes. The custom themes must
 be placed in
 L<$CONVOS_HOME/themes|https://convos.chat/doc/config#convos_home>. The
@@ -141,7 +141,7 @@ version of the theme. The filename will be completely ignored if the header
 exist, so you can name the file whatever you want.
 
 The rest of the file should mostly contain variable definitions.
-L<https://github.com/Nordaaker/convos/blob/master/assets/sass/_variables.scss>
+L<https://github.com/convos-chat/convos/blob/master/assets/sass/_variables.scss>
 shows the available variables that you can override. Here is an example of a
 custom theme that will look the same as the default "Convos" light theme, but
 will have a much bigger font size.
