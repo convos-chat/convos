@@ -13,6 +13,20 @@ body.with-grid::after {
   opacity: 0.4;
 }
 
+@include if_screen(">two-columns") {
+  .two-columns {
+    display: flex;
+
+    > * {
+      flex: 1 0 50%;
+    }
+
+    > div:first-child {
+      padding-right: 2rem;
+    }
+  }
+}
+
 .error,
 .loading {
   border: 1px solid transparent;

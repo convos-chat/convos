@@ -24,13 +24,6 @@
         %= link_to 'chat', class => 'has-js js-close-window pull-right', begin
           <i class="fas fa-sign-in-alt"></i> <%=l 'Chat' %>
         % end
-      % } else {
-        %= link_to '/login#signup', class => 'has-js pull-right', begin
-          <i class="fas fa-user-plus"></i> <%=l 'Sign up' %>
-        % end
-        %= link_to '/login#signin', class => 'has-js', begin
-          <i class="fas fa-sign-in-alt"></i> <%=l 'Sign in' %>
-        % end
       % }
     </div>
   </nav>

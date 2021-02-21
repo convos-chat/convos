@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 5.32 Not Released
  - Add alert icon if a channel is frozen in the sidebar #568
+ - Changed login screen to be side-by-side
 
 5.31 2021-02-21T14:30:00+0900
  - Fix styling on login screen
