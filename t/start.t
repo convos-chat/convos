@@ -1,4 +1,5 @@
 #!perl
+BEGIN { $ENV{CONVOS_SKIP_QUEUE_HOSTNAME} = 'oragono.local' }
 use lib '.';
 use t::Helper;
 use Convos::Core;
@@ -13,9 +14,9 @@ note 'jhthorsen connections';
 $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
 $user->save_p->$wait_success('save_p');
 
-# 1: localhost connects instantly
-$user->connection({name => 'localhost', protocol => 'irc'})
-  ->tap(sub { shift->url->parse('irc://localhost') })->save_p->$wait_success('save_p');
+# 1: oragono.local connects instantly
+$user->connection({name => 'oragono', protocol => 'irc'})
+  ->tap(sub { shift->url->parse('irc://oragono.local') })->save_p->$wait_success('save_p');
 
 # 2: instant or queued
 $user->connection({name => 'magnet', protocol => 'irc'})
@@ -28,7 +29,7 @@ $user = $core->user({email => 'mramberg@cpan.org', uid => 32});
 $user->save_p->$wait_success('save_p');
 
 # 0: will not be connected
-my $conn_0 = $user->connection({name => 'localhost', protocol => 'Irc'});
+my $conn_0 = $user->connection({name => 'oragono.local', protocol => 'Irc'});
 $conn_0->wanted_state('disconnected')->url->parse('irc://127.0.0.1');
 $conn_0->save_p->$wait_success('save_p');
 
@@ -61,11 +62,11 @@ Mojo::IOLoop->one_tick until $core->ready;
 cmp_deeply $core->{connect_queue},
   {'chat.freenode.net' => [], 'irc.perl.org' => [(obj_isa('Convos::Core::Connection::Irc')) x 2],},
   'connect_queue';
-is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'localhost' => 1},
+is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'oragono.local' => 1},
   'started connections, except disconnected';
 
 Mojo::IOLoop->start;
-is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'localhost' => 1},
+is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
   'started duplicate connection delayed';
 
 is $core->get_user('mramberg@cpan.org')->uid, 32, 'uid from storage';

@@ -29,8 +29,9 @@ sub connect {
 
   $connection->state(queued => $reason || 'Connecting soon...');
 
-  my $host = $connection->url->host;
-  if ($host =~ /\blocalhost\b/) {
+  my $host                = $connection->url->host;
+  my $skip_queue_hostname = $ENV{CONVOS_SKIP_QUEUE_HOSTNAME} || 'localhost';
+  if ($host =~ /\b$skip_queue_hostname\b/) {
     $connection->connect_p;
   }
   elsif ($self->{connect_queue}{$host}) {
