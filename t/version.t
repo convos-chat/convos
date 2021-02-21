@@ -64,8 +64,8 @@ $failed += is($api_version, $node_wanted, 'correct version in public/convos-api.
 
 if ($ENV{RELEASE} and !$failed) {
   system git => add    => 'public';
-  system git => commit => -a => -m => "Released $perl_wanted";
-  system git => tag    => $perl_wanted;
+  system git => commit => -a => -m => "Released v$perl_wanted";
+  system git => tag    => "v$perl_wanted";
   print <<'HERE';
 
   All files updated correctly.

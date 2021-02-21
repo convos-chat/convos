@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-5.32 Not Released
+5.32 2021-02-22T08:47:00+0900
  - Can toggle password inputs as plain text #569
  - Add alert icon if a channel is frozen in the sidebar #568
  - Changed login screen to be side-by-side
