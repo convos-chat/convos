@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.01 Not Released
+6.01 2021-02-23T08:48:00+0900
  - Add support for setting source IP for a connection
  - Changed the design on the login screen to only show one form
  - Fix clipping of text in the heading
