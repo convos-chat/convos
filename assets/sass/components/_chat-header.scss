@@ -36,6 +36,16 @@
   .fas {
     font-size: 1.3rem;
   }
+
+  @include if_screen("<=two-columns") {
+    padding-top: var(--gutter-small);
+
+    h1 {
+      font-size: calc(var(--h2-font-size) * 1.1);
+      line-height: 1.4em;
+      flex: 1 0 0;
+    }
+  }
 }
 
 .sidebar-header {
@@ -56,12 +66,6 @@
   @include if_screen("<=two-columns") {
     background: var(--sidebar-left-bg);
     color: var(--sidebar-left-text);
-    padding-bottom: calc(var(--gutter-small) + 0.2rem);
-
-    h1 {
-      font-size: var(--h2-font-size);
-      flex: 1 0 0;
-    }
   }
 }
 
