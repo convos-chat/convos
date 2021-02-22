@@ -73,6 +73,7 @@ cmp_deeply(
 
 $connection->disconnect_p->$wait_success('disconnect_p');
 $connection->url(Mojo::URL->new('irc://irc.example.com'));
+$connection->url->query->param(local_address => '1.1.1.1');
 
 note 'reconnect on ssl error';
 @connection_state = ();
@@ -88,16 +89,24 @@ mock_connect(
 
     cmp_deeply $connect_args->[0],
       {
-      address     => 'irc.example.com',
-      port        => 6667,
-      timeout     => 20,
-      tls         => 1,
-      tls_cert    => re(qr{\.cert}),
-      tls_key     => re(qr{\.key}),
-      tls_options => {SSL_verify_mode => 0x00},
+      address        => 'irc.example.com',
+      port           => 6667,
+      socket_options => {LocalAddr => '1.1.1.1'},
+      timeout        => 20,
+      tls            => 1,
+      tls_cert       => re(qr{\.cert}),
+      tls_key        => re(qr{\.key}),
+      tls_options    => {SSL_verify_mode => 0x00},
+      tls_options    => {SSL_verify_mode => 0x00},
       },
       'connect args first';
-    is_deeply $connect_args->[1], {address => 'irc.example.com', port => 6667, timeout => 20},
+    is_deeply $connect_args->[1],
+      {
+      address        => 'irc.example.com',
+      port           => 6667,
+      socket_options => {LocalAddr => '1.1.1.1'},
+      timeout        => 20
+      },
       'connect args second';
 
     ok -s $connect_args->[0]{tls_cert}, 'tls_cert generated';

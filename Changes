@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.01 Not Released
+ - Add support for setting source IP for a connection
+
 6.00 2021-02-22T09:30:00+0900
  - Changed from Nordaaker to github.com/convos-chat and hub.docker.com/r/convos
  - Highlights since 5.00

@@ -134,10 +134,11 @@ sub _connect_args_p {
   my $params = $url->query;
 
   my %args;
-  $args{address}       = $url->host;
-  $args{local_address} = $params->param('local_address') if $params->param('local_address');
-  $args{port}          = $url->port;
-  $args{timeout}       = 20;
+  $args{address} = $url->host;
+  $args{socket_options}{LocalAddr} = $params->param('local_address')
+    if $params->param('local_address');
+  $args{port}    = $url->port;
+  $args{timeout} = 20;
 
   $params->param(tls => 1)              unless defined $params->param('tls');
   return Mojo::Promise->resolve(\%args) unless $params->param('tls');

@@ -34,7 +34,6 @@ let useTls = false;
 let verifyTls = false;
 let wantToBeConnected = false;
 
-
 $: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
 
 onMount(async () => {
@@ -59,6 +58,7 @@ function defaultsToForm() {
   if (connURL.password) formEl.password.value = connURL.password;
   if (connURL.username) formEl.username.value = connURL.username;
   if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
+  if (connParams.get('local_address')) formEl.local_address.value = connParams.get('local_address');
   if (connParams.get('realname')) formEl.realname.value = connParams.get('realname');
   if (connURL.pathname && formEl.conversation) formEl.conversation.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
   if (connParams.get('sasl')) saslMechanism = connParams.get('sasl');
@@ -70,6 +70,7 @@ function connectionToForm() {
   if (!connection.url) return; // Could not find connection
   formEl.server.value = connection.url.host;
   formEl.nick.value = connection.url.searchParams.get('nick') || '';
+  formEl.local_address.value = connection.url.searchParams.get('local_address') || '';
   formEl.realname.value = connection.url.searchParams.get('realname') || '';
   formEl.on_connect_commands.value = connection.on_connect_commands.join('\n');
   formEl.password.value = connection.url.password;
@@ -81,6 +82,21 @@ function connectionToForm() {
   wantToBeConnected = connection.wanted_state == 'connected';
 }
 
+function formToUrl(form) {
+  const url = new ConnectionURL('irc://localhost:6667');
+  const server = form.server.value;
+  if (form.local_address.value.length) url.searchParams.append('local_address', form.local_address.value.trim());
+  if (form.nick.value.length) url.searchParams.append('nick', form.nick.value.trim());
+  if (form.realname.value.length) url.searchParams.append('realname', form.realname.value.trim());
+  url.searchParams.append('sasl', form.sasl.value || 'none');
+  url.searchParams.append('tls', form.tls.checked ? '1' : '0');
+  url.searchParams.append('tls_verify', form.tls_verify && form.tls_verify.checked ? '1' : '0');
+  url.host = server.match(/:\d+$/) ? server : server + ':6667';
+  url.password = form.password.value;
+  url.username = form.username.value;
+  return url;
+}
+
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
   user.removeConversation(connection);
@@ -90,7 +106,7 @@ async function removeConnection(e) {
 async function submitForm(e) {
   if (!formEl.server.value) return; // TODO: Inform that it is required
 
-  formEl.url.value = new ConnectionURL('irc://localhost:6667').fromForm(e.target).toString();
+  formEl.url.value = formToUrl(e.target).toString();
 
   if (connection.connection_id) {
     await updateConnectionOp.perform(e.target);
@@ -161,6 +177,10 @@ async function submitForm(e) {
   <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
     <span slot="label">{$l('On-connect commands')}</span>
   </TextArea>
+  <TextField name="local_address" hidden="{!showAdvancedSettings}">
+    <span slot="label">{$l('Source IP')}</span>
+    <p class="help" slot="help">{$l('Leave this blank, unless you know what you are doing.')}</p>
+  </TextField>
   <div class="form-actions">
     {#if connection.url}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
