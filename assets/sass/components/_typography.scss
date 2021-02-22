@@ -38,7 +38,7 @@ h2 {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  line-height: 1;
+  line-height: 1.25;
   font-weight: 500;
 }
 
@@ -95,8 +95,8 @@ th {
 
 .ellipsis {
   text-overflow: ellipsis;
-  white-space: pre;
-  overflow-x: hidden;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .is-link {

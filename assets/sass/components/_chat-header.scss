@@ -27,8 +27,6 @@
   h2,
   input {
     font-size: var(--h1-font-size);
-    font-weight: 500;
-    line-height: 1em;
     margin: 0;
   }
 
@@ -42,7 +40,6 @@
 
     h1 {
       font-size: calc(var(--h2-font-size) * 1.1);
-      line-height: 1.4em;
       flex: 1 0 0;
     }
   }
@@ -72,6 +69,7 @@
 .chat-header__topic {
   padding-left: var(--gutter-small);
   padding-right: var(--gutter-small);
+  margin-bottom: 0.4rem;
   flex: 1 0 0;
   opacity: 0.85;
   align-self: flex-end;
@@ -99,7 +97,8 @@
     border: 0;
     padding: 0;
     width: 70%; // Make sure it does not take up too much space
-    height: 1em;
+    line-height: 1.25;
+    height: 1.25;
     flex: 1 0 0;
 
     &,
