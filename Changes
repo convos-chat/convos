@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.00 2021-02-22T09:30:00+0900
+ - Changed from Nordaaker to github.com/convos-chat and hub.docker.com/r/convos
+
 5.32 2021-02-22T09:10:00+0900
  - Can toggle password inputs as plain text #569
  - Add alert icon if a channel is frozen in the sidebar #568

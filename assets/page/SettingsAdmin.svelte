@@ -71,7 +71,7 @@ function updateSettingsFromForm(e) {
     <h2>{$l('Convos settings')}</h2>
     <p>{@html $lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
-    <TextField name="organization_name" placeholder="{$l('Nordaaker')}" bind:value="{convosSettings.organization_name}">
+    <TextField name="organization_name" bind:value="{convosSettings.organization_name}">
       <span slot="label">{$l('Organization name')}</span>
       <p class="help" slot="help">{$l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
