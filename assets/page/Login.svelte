@@ -17,12 +17,20 @@ const emailFromParams = location.href.indexOf('email=') != -1;
 const loginOp = api('loginUser');
 const registerOp = api('registerUser');
 
+let password = '';
 let formEl;
 
 $: redirect($user);
 $: if ($loginOp.is('success')) redirectAfterLogin(loginOp);
 $: if ($registerOp.is('success')) registered();
+$: show = calculateShow($route);
 $: title = $route.path.match(/register/) ? 'Register' : 'Login';
+
+function calculateShow() {
+  if ($route.hash && ['signin', 'signup'].indexOf($route.hash) != -1) return $route.hash;
+  if (settings('first_user') || settings('open_to_public')) return 'signup';
+  return 'signin';
+}
 
 function redirect(user) {
   const conversation = user.conversations()[0];
@@ -47,14 +55,15 @@ function registered() {
 }
 </script>
 
-<main class="two-columns cms-main">
-  <div id="sigup">
+<main class="cms-main">
+  <div id="signup" class:hidden="{show != 'signup'}">
     {#if settings('status') >= 400}
       <h2>{$l('Invalid invite/recover URL')}</h2>
       <p>{$l(settings('status') == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
       <p>{$l('Please ask your Convos admin for a new link.')}</p>
       <p>
         <a class="btn" href="{settings('contact')}">{$l('Contact admin')}</a>
+        <a href="#signin" replace>{$l('Sign in')}</a>
       </p>
     {:else if emailFromParams || settings('open_to_public') || settings('first_user')}
       <form method="post" on:submit|preventDefault="{e => registerOp.perform(e.target)}" bind:this="{formEl}">
@@ -76,13 +85,14 @@ function registered() {
           </p>
         </TextField>
 
-        <TextField type="password" name="password">
+        <TextField type="password" name="password" bind:value="{password}">
           <span slot="label">{$l('Password')}</span>
           <p class="help" slot="help">{$l('Hint: Use a phrase from a book.')}</p>
         </TextField>
 
         <div class="form-actions">
           <Button icon="save" op="{registerOp}"><span>{$l(settings('existing_user') ? 'Set new password' : 'Sign up')}</span></Button>
+          <a href="#signin" replace>{$l('Sign in')}</a>
         </div>
 
         <OperationStatus op="{registerOp}"/>
@@ -92,25 +102,27 @@ function registered() {
       <p>{$l('Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account.')}</p>
       <div class="form-actions">
         <a class="btn" href="{settings('contact')}"><Icon name="paper-plane"/> {$l('Contact admin')}</a>
+        <a href="#signin" replace>{$l('Sign in')}</a>
       </div>
     {/if}
   </div>
 
   {#if !settings('first_user')}
-    <div id="signin">
+    <div id="signin" class:hidden="{show != 'signin'}">
       <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
         <h2>{$l('Sign in')}</h2>
         <TextField type="email" name="email" placeholder="{$l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
           <span slot="label">{$l('Email')}</span>
         </TextField>
 
-        <TextField type="password" name="password" autocomplete="current-password">
+        <TextField type="password" name="password" autocomplete="current-password" bind:value="{password}">
           <span slot="label">{$l('Password')}</span>
           <p class="help" slot="help">{@html $lmd('Contact your [Convos admin](%1) if you have forgotten your password.', settings('contact'))}</p>
         </TextField>
 
         <div class="form-actions">
           <Button icon="sign-in-alt" op="{loginOp}"><span>{$l('Sign in')}</span></Button>
+          <a href="#signup">{$l('Sign up')}</a>
         </div>
 
         <OperationStatus op="{loginOp}"/>

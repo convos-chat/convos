@@ -47,7 +47,7 @@ export default class Route extends Reactive {
     const url = this.baseUrl + path;
     if (url == this._location.href) return this;
     this._history[replace ? 'replaceState' : 'pushState'](state, this.title, url);
-    this.render(url, state);
+    this.update({path: true}).render(url, state);
   }
 
   param(name, def = '') {
@@ -174,6 +174,7 @@ export default class Route extends Reactive {
     if (linkEl.hasAttribute('download') || linkEl.hasAttribute('target')) return;
 
     let href = linkEl.getAttribute('href') || '';
+    if (href.indexOf('#') == 0) href = this.path + href;
     if (href.indexOf(this.baseUrl) == 0) href = href.substr(this.baseUrl.length);
     if (href.indexOf(this.basePath) == 0) href = href.substr(this.basePath.length);
     if (href.indexOf('/') == 0) {
