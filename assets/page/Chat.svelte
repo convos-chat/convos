@@ -84,7 +84,7 @@ function setConversationFromUser(user) {
 
 <ChatHeader>
   <h1 class="ellipsis is-link" on:click="{() => {$activeMenu = $activeMenu ? '' : 'settings'}}">{$l(conversation.name)}</h1>
-  <span class="chat-header__topic ellipsis">{topicOrStatus(connection, conversation)}</span>
+  <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {#if !$conversation.is('not_found')}
     <a href="#settings" class="btn-hallow" class:is-active="{$activeMenu == 'settings'}" on:click="{activeMenu.toggle}">
       <Icon name="users-cog"/>
