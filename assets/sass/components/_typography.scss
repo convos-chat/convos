@@ -96,7 +96,7 @@ th {
 .ellipsis {
   text-overflow: ellipsis;
   white-space: pre;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .is-link {
