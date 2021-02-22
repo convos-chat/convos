@@ -2,6 +2,31 @@ Revision history for perl distribution Convos
 
 6.00 2021-02-22T09:30:00+0900
  - Changed from Nordaaker to github.com/convos-chat and hub.docker.com/r/convos
+ - Highlights since 5.00
+   * Add "Facts" bot action
+   * Add "compact display mode" as Viewport option
+   * Add /ns (msg nickserv) and /cs (msg chanserv) aliases
+   * Add better user experience for +i (invite only) channels
+   * Add rendering of banlist, exceptlist, invitelist and quietlist
+   * Add support for EXTERNAL and PLAIN SASL authentication
+   * Add support for WEBIRC
+   * Add support for negotiating IRCv3 capabilities
+   * Add support for nicer message-of-the-day (MOTD) server messages
+   * Add support for translations, and got translated to Italian, Norwegian and Spanish
+   * Changed "chanserv" and "nickserv" to be inside the connection conversation
+   * Compatible with latest Mojolicious 9.0 and M::P::OpenAPI 4.0
+   * Improved animations
+   * Moved video button to chat input
+   * Render Google meet, Webex and Whereby as video invite links
+ - Contributors:
+   * Abhijit Menon-Sen
+   * Iván Ávalos
+   * Jan Henning Thorsen
+   * José Joaquín Atria
+   * Marcus Ramberg
+   * Megaf
+   * SerHack
+   * Thibault Duponchelle
 
 5.32 2021-02-22T09:10:00+0900
  - Can toggle password inputs as plain text #569
