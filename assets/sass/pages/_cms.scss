@@ -1,4 +1,7 @@
 body.for-cms {
+  background: var(--cms-bg);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   display: flex;
   min-height: 100vh;
   flex-direction: column;

@@ -11,6 +11,7 @@
    * Original One Light Syntax theme from https://github.com/atom/one-light-syntax
    */
   --code-bg: #dddedd;
+  --cms-bg: linear-gradient(170deg, #f8f9f8, #eff0e8);
   --syntax-hl-base: #383a42;
   --syntax-hl-base-bg: #edeeed;
   --syntax-hl-addition: #50a14f;

@@ -5,6 +5,7 @@
 
 :root {
   --body-bg: #333333;
+  --cms-bg: linear-gradient(170deg, #444444, #222222);
   --text-color: #f4f4f4;
   --link-color: #d1cfca;
   --quote-color: #d1cfca;
