@@ -1,0 +1,2 @@
+% use Convos::Util qw(yaml);
+%== yaml encode => {body => "$doc->{body}", meta => $doc->{meta}, mtime => $doc->{mtime}, toc => $doc->{toc} || []};

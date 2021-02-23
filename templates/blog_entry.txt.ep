@@ -1,0 +1,6 @@
+% use Mojo::DOM;
+# <%= $doc->{meta}{heading} || $doc->{meta}{title} %>
+
+<%=l 'Posted by %1', $doc->{meta}{author} || settings('organization_name') %> <%=l 'on' %> [<%= $doc->{meta}{date} %>](<%= url_for $doc->{meta}{url}, class => 'cms-meta__date' %>).
+
+%== Mojo::DOM->new($doc->{body})->all_text;

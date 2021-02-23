@@ -44,7 +44,8 @@ sub _document_p {
   my ($self, $c, $path) = @_;
 
   # Normalize input
-  $path->[-1] =~ s!\.html$!!;
+  $path = [@$path];
+  my $format = $path->[-1] =~ s!\.(html|txt|yaml)$!! ? $1 : 'html';
   $path->[-1] .= '.md';
 
   my $file;
@@ -55,9 +56,12 @@ sub _document_p {
 
   my $p = Mojo::Promise->new;
   eval {
-    my $md = -r $file ? $self->_parse_document($file, {}) : {};
-    $self->_rewrite_href($c, $md);
-    $p->resolve($md);
+    $p->resolve({}) unless -r $file;
+    $p->resolve({body => $file->slurp, format => $format}) if $format eq 'txt';
+    my $doc = $self->_get_cached_document($file) || $self->_parse_document($file, {});
+    $doc->{format} = $format;
+    $self->_rewrite_href($c, $doc) if $format eq 'html';
+    $p->resolve($doc);
   } or do {
     $p->reject($@);
   };
@@ -82,26 +86,32 @@ sub _extract_heading {
   $h1->remove;
 }
 
+sub _get_cached_document {
+  my ($self, $file) = @_;
+  return undef if $ENV{CONVOS_CMS_NO_CACHE};
+
+  my $doc   = $self->_cache->get("$file");
+  my $mtime = $file->stat->mtime;
+  return $doc if $doc and $doc->{mtime} == $mtime;
+}
+
 sub _parse_document {
   my ($self, $file, $params) = @_;
-  my $mtime = $file->stat->mtime;
-  my $doc   = $ENV{CONVOS_CMS_NO_CACHE} ? undef : $self->_cache->get("$file");
-  return $doc if $doc and $doc->{mtime} == $mtime;
 
-  $doc = {
+  my $doc = {
     after_content  => '',
     before_content => '',
     custom_css     => '',
     excerpt        => '',
     meta           => {},
-    mtime          => $mtime
+    mtime          => $file->stat->mtime,
   };
 
   my ($body, $FH) = ('', $file->open);
   while (readline $FH) {
     $_ = decode 'UTF-8', $_;
-    $body .= $_ and last if $. == 1 and !/^---/;    # meta header has to start with "---"
-    last if $. > 1 and /^---/;                      # meta header stops with "----"
+    $body .= $_ and last  if $. == 1 and !/^---/;    # meta header has to start with "---"
+    last                  if $. > 1 and /^---/;      # meta header stops with "----"
     $doc->{meta}{$1} = $2 if /^\s*(\w+)\s*:\s*(.+)/;
   }
 
@@ -112,7 +122,7 @@ sub _parse_document {
   $self->_extract_excerpt($body, $doc);
   $self->_extract_heading($body, $doc);
 
-  my $dt = dt $file->basename =~ m!(\d{4}-\d{2}-\d{2})! ? "${1}T00:00:00" : $mtime;
+  my $dt = dt $file->basename =~ m!(\d{4}-\d{2}-\d{2})! ? "${1}T00:00:00" : $doc->{mtime};
   $doc->{ts} = $dt->epoch;
   $doc->{meta}{name} = $file->basename;
   $doc->{meta}{name} =~ s!^\d{4}-\d{2}-\d{2}-!!;

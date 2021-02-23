@@ -35,6 +35,7 @@ sub startup {
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
+  $self->types->type(yaml => $self->types->type('txt'));
   push @{$self->renderer->classes}, __PACKAGE__;
 
   # Autogenerate routes from the OpenAPI specification

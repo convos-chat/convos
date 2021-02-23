@@ -92,4 +92,16 @@ $t->get_ok('/blog')->status_is(200)->header_is('X-Provider-Name', undef)->elemen
   ->text_like('section .cms-excerpt', qr{This blog is about.*some cool stuff.}s)
   ->text_is('section .cms-more a', 'Read more');
 
+note 'txt';
+$t->get_ok('/.txt')->status_is(200)->content_like(qr{^\# Custom index}s);
+$t->get_ok('/blog.txt')->status_is(200)->content_like(qr{^\# Blog.*\#\# Cool heading}s);
+$t->get_ok('/blog/2020/5/17/too-cool.txt')->status_is(200)->content_like(qr{^\# Cool heading}s);
+$t->get_ok('/doc/Convos.txt')->status_is(200)->content_like(qr{^package Convos;});
+
+note 'yaml';
+$t->get_ok('/.yaml')->status_is(200)->content_like(qr{^---.*body:}s);
+$t->get_ok('/blog.yaml')->status_is(200)->content_like(qr{^---.*blogs:}s);
+$t->get_ok('/blog/2020/5/17/too-cool.yaml')->status_is(200)->content_like(qr{^---.*body:}s);
+$t->get_ok('/doc/Convos.yaml')->status_is(200)->content_like(qr{^---.*body:}s);
+
 done_testing;

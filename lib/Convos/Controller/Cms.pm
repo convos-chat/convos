@@ -32,14 +32,19 @@ sub blog_list {
 sub doc {
   my $self = shift;
   my @path = ('doc', split '/', $self->stash('file'));
-  push @path, 'index' if @path == 1;
+  $path[-1] = sprintf 'index.%s', $self->stash('format') || 'html' if $path[-1] eq 'index';
 
   return $self->cms->document_p(\@path)->then(sub {
     my $doc = shift;
+    $self->stash(format => $doc->{format})               if $doc->{format};
     return $self->redirect_to($doc->{meta}{redirect_to}) if $doc->{meta}{redirect_to};
-    return $self->_render_doc(cms => $doc) if $doc->{body};
+    return $self->_render_doc(cms => $doc)               if $doc->{body};
 
-    my $module       = join '::', split '/', $self->stash('file');
+    shift @path;    # remove "doc"
+    my $format = $path[-1] =~ s!\.(txt|yaml)$!! ? $1 : 'html';
+    $self->stash(format => $format);
+
+    my $module       = join '::', @path;
     my $metacpan_url = "https://metacpan.org/pod/$module";
     $self->stash(module => $module);
     $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
@@ -54,9 +59,10 @@ sub doc {
 }
 
 sub index {
-  my $self = shift;
+  my $self   = shift;
+  my $format = $self->stash('format') || 'html';
 
-  return $self->cms->document_p(['index'])->then(sub {
+  return $self->cms->document_p(["index.$format"])->then(sub {
     my $doc = shift;
     return $self->_render_doc(cms => $doc) if $doc->{body};
     return $self->render('app');
@@ -84,6 +90,11 @@ sub _render_perldoc {
 
   $self->respond_to(
     txt  => {data => $src},
+    yaml => sub {
+      my $doc = $self->cms->perldoc($src);
+      $doc->{body} = $src;
+      $self->render('perldoc', doc => $doc);
+    },
     html => sub {
       my $doc  = $self->cms->perldoc($src);
       my $meta = $doc->{meta};

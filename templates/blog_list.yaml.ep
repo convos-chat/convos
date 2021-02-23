@@ -1,0 +1,2 @@
+% use Convos::Util qw(yaml);
+%== yaml encode => {blogs => [map { +{excerpt => $_->{excerpt}, meta => {%{$_->{meta}}, url => "$_->{meta}{url}"}, mtime => $_->{mtime}} } @$blogs]};
