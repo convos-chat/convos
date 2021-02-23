@@ -1,7 +1,6 @@
 .chat-header,
 .sidebar-header {
   padding-top: var(--gutter);
-  padding-bottom: var(--gutter-small);
   display: flex;
   align-items: center;
   position: absolute;
@@ -56,6 +55,7 @@
 .chat-header {
   @extend %next-to-sidebar;
   background: var(--body-bg);
+  padding-bottom: var(--gutter-small);
   box-shadow: var(--chat-header-box-shadow);
   justify-content: space-between;
   z-index: 900;

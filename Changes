@@ -1,10 +1,10 @@
 Revision history for perl distribution Convos
 
 6.02 Not Released
- - Add support for convos install [--bot,--ldap]
  - Add default lang to stash #578
- - Fix placing password toggle in sidebar
- - Fix "/reconnect" command
+ - Add support for convos install [--bot,--ldap]
+ - Fix "/reconnect" command #576
+ - Fix placing password toggle at the right place
 
 6.01 2021-02-23T08:48:00+0900
  - Add support for setting source IP for a connection
