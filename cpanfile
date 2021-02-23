@@ -19,12 +19,15 @@ requires "Unicode::UTF8"                  => "0.62";
 suggests "Cpanel::JSON::XS"  => "4.09";
 suggests "EV"                => "4.0";
 suggests "IO::Socket::Socks" => "0.64";
-suggests "Net::LDAP"         => "0.66";
 
-on develop => sub {
-  requires "Test::Deep"                 => "0.11";
-  requires "Test::Mojo::Role::Selenium" => "0.09";
-  requires "Test::More"                 => "0.88";
+feature 'bot', 'Convos bot' => sub {
+  requires 'DBD::SQLite'        => "1.66";
+  requires 'Hailo'              => "0.75";
+  requires 'Math::Calc::Parser' => "1.00";
+};
+
+feature 'ldap', 'LDAP user management' => sub {
+  requires 'Net::LDAP' => "0.68";
 };
 
 test_requires "Test::Deep" => "0.11";

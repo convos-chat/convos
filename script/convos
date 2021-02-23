@@ -127,8 +127,10 @@ sub command_install {
 
   # @missing = ([mode, name, version, error], ...)
   my @missing = grep { $_->[3] } $script->_dependencies;
-  @missing = grep { $_->[0] ne 'develop' } @missing  if $mode =~ /^--?all/;
-  @missing = grep { $_->[0] eq 'requires' } @missing if $mode =~ /^--?prod/;
+  $mode =~ s!^-+!!;
+  @missing = grep { $_->[0] ne 'develop' } @missing  if $mode eq 'all';
+  @missing = grep { $_->[0] eq 'requires' } @missing if $mode eq 'prod';
+  @missing = grep { $_->[0] eq $mode } @missing      if $mode =~ /^(ldap|bot)/;
   $script->command_cpanm(-n => $_->[1]) or die "cpanm failed: $?\n" for @missing;
   system $0, 'version';
   print <<"HERE";
@@ -175,25 +177,24 @@ sub command_upgrade {
 
 sub command_version {
   my $script = shift;
-  my @deps   = map { $_->[3] ||= $_->[1]->VERSION; [$_->[0], sprintf "  %-30s %-10s\n", @$_[1, 3]] }
-    sort { $a->[1] cmp $b->[1] } $script->_dependencies;
 
-  unshift @deps, [requires => sprintf "  %-30s %-10s\n", 'Perl',   $^V];
-  unshift @deps, [requires => sprintf "  %-30s %-10s\n", 'Convos', $VERSION];
+  my %deps;
+  for my $dep (sort { $a->[1] cmp $b->[1] } $script->_dependencies) {
+    my ($mode, $module, $version, $err) = @$dep;
+    my $category = $mode eq 'develop' ? $mode : $mode eq 'requires' ? 'core' : 'optional';
+    my $note     = $mode =~ m!^[A-Z]! ? " # $mode" : '';
+    push @{$deps{$category}}, sprintf "  %-30s %-10s%s\n", $module, $version, $note;
+  }
 
-  my $dev_deps = join '', map { $_->[1] } grep { $_->[0] eq 'develop' } @deps;
-  my $req_deps = join '', map { $_->[1] } grep { $_->[0] eq 'requires' } @deps;
-  my $opt_deps = join '', map { $_->[1] } grep { $_->[0] eq 'suggests' } @deps;
+  unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Perl',   $^V;
+  unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Convos', $VERSION;
 
-  print <<"HERE";
-
-CORE
-$req_deps
-OPTIONAL
-$opt_deps
-DEVELOPMENT
-$dev_deps
-HERE
+  for my $category (qw(core optional develop)) {
+    next unless $deps{$category};
+    print uc "$category\n";
+    print for @{$deps{$category}};
+    print "\n";
+  }
 }
 
 sub run {
@@ -258,10 +259,11 @@ sub _dependencies {
 
   no warnings 'once';
   local $script->{cpanfile_mode};
-  local *main::on            = sub { local $script->{cpanfile_mode} = shift; shift->() };
+  local *main::feature       = sub { local $script->{cpanfile_mode} = $_[1]; pop->() };
+  local *main::on            = sub { local $script->{cpanfile_mode} = shift; pop->() };
   local *main::requires      = sub { $load->(requires => @_) };
   local *main::suggests      = sub { $load->(suggests => @_) };
-  local *main::test_requires = sub { $load->(test     => @_) };
+  local *main::test_requires = sub { $load->(develop  => @_) };
 
   local ($@, $!) = ('', 0);
   do $ENV{CONVOS_CPAN_FILE};
