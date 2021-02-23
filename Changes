@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.03 2021-02-23T21:15:00+0900
+ - Had to revert Alpine to 3.12 to complete the build on hub.docker.com
+
 6.02 2021-02-23T20:28:00+0900
  - Add default lang to stash #578
  - Add support for convos install [--bot,--ldap]
