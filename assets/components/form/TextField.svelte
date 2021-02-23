@@ -27,5 +27,5 @@ $: if (inputEl && !inputEl.syncValue) {
   {#if type == 'password'}
     <a href="#toggle" class="text-field__toggle" on:click|preventDefault="{() => { visible = !visible }}"><Icon name="{visible ? 'eye-slash' : 'eye'}"/></a>
   {/if}
-  <slot name="help"></slot>
 </div>
+<slot name="help"></slot>

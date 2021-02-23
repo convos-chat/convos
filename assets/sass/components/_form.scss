@@ -19,6 +19,7 @@ textarea {
 .text-area,
 .text-field {
   margin-bottom: var(--input-gutter);
+  max-width: $input-max-width;
 
   input,
   textarea {
@@ -207,12 +208,6 @@ textarea {
   .has-remaining-space {
     flex: 1 1 0;
   }
-
-  @media (min-width: #{$input-max-width}) {
-    .text-field {
-      min-width: $input-max-width;
-    }
-  }
 }
 
 .select-field {
@@ -238,13 +233,8 @@ textarea {
     color: var(--input-color);
     position: absolute;
     bottom: 0.6rem;
-    left: $input-max-width - 1.2em;
+    right: 0.6em;
     pointer-events: none;
-
-    @media (max-width: #{$input-max-width}) {
-      left: auto;
-      right: 0.6em;
-    }
   }
 
   &.is-open:after {
@@ -269,7 +259,6 @@ textarea {
   border: var(--input-border);
   border-radius: var(--input-border-radius);
   box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1), -1px 1px 2px rgba(0, 0, 0, 0.1);
-  max-width: $input-max-width;
   height: 0;
   width: 100%;
   display: none;
@@ -318,13 +307,8 @@ p.help {
   .text-field__toggle {
     color: var(--input-color);
     position: absolute;
-    left: $input-max-width - 1.7em;
-    top: 0.5em;
-
-    @media (max-width: #{$input-max-width}) {
-      left: auto;
-      right: 0.7em;
-    }
+    top: 55%;
+    right: 0.6em;
   }
 
   input {
