@@ -400,6 +400,10 @@ cmp_deeply(
   'connection states'
 ) or diag explain \@state;
 
+note 'reconnect';
+Mojo::Promise->timer(0.4)->wait;
+$connection->send_p('', '/reconnect')->$wait_success('reconnect command');
+
 done_testing;
 
 __DATA__

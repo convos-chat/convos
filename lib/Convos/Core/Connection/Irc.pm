@@ -79,6 +79,7 @@ sub send_p {
   return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
   return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
   return $self->_write_p($message)                  if $cmd eq 'QUOTE';
+  return $self->_reconnect                          if $cmd eq 'RECONNECT';
 
   return Mojo::Promise->reject('Unknown command.');
 }
@@ -734,6 +735,12 @@ sub _periodic_events {
       $self->_write("PING $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
     }
   );
+}
+
+sub _reconnect {
+  my $self = shift;
+  return $self->disconnect_p->then(
+    sub { $self->wanted_state('connected'); $self->user->core->connect($self, ''); return {} });
 }
 
 sub _sasl_mechanism {
