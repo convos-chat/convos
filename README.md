@@ -48,7 +48,7 @@ for a while, but the new official image is "convos/convos".
 
 Notes for developers so a new release is made in a proper way.
 
-```
+```bash
 # Update with the recent changes and make sure the timestamp is proper
 $EDITOR Changes
 
@@ -61,15 +61,18 @@ $EDITOR Changes
 
 ### alpha
 
-The "alpha" branch will be force pushed to when we need to make a new docker
-builds with working assets, but with experimental features. Example:
+THe "[alpha](https://github.com/convos-chat/convos/tree/alpha)" branch branch
+will be force pushed to when we need to make a new docker build with working
+assets, but with experimental features. Example:
 
-  git checkout -b user/some-feature
-  $EDITOR assets/store/Conversation.js
-  ./script/convos build
-  git add .
-  git commit -a -m "made some experimental changes"
-  git push origin -f user/some-feature:alpha
+```bash
+git checkout -b user/some-feature
+$EDITOR assets/store/Conversation.js
+./script/convos build
+git add .
+git commit -a -m "made some experimental changes"
+git push origin -f user/some-feature:alpha
+```
 
 ### master
 
