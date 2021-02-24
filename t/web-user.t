@@ -50,32 +50,31 @@ $user->unread(4);
 $user->connection({name => 'localhost', protocol => 'irc'})->conversation({name => '#convos'})
   ->unread(42);
 $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200);
-
-my $state = $user->get_connection('irc-localhost')->state;
-like $state, qr{disconnected|queued}, 'the state is subject for race condition';
-$t->json_is('/email', 'superman@example.com')->json_is(
-  '/connections',
-  [{
-    connection_id       => 'irc-localhost',
-    me                  => {authenticated => false, capabilities => {}, nick => 'superman'},
-    name                => 'localhost',
-    on_connect_commands => [],
-    protocol            => 'irc',
-    service_accounts    => [qw(chanserv nickserv)],
-    state               => $state,
-    url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
-    wanted_state        => 'connected',
-  }]
-)->json_is(
-  '/conversations',
-  [{
-    connection_id   => 'irc-localhost',
-    conversation_id => '#convos',
-    frozen          => 'Not connected.',
-    name            => '#convos',
-    topic           => '',
-    unread          => 42,
-  }]
+cmp_deeply(
+  $t->tx->res->json,
+  superhashof({
+    email         => 'superman@example.com',
+    conversations => [{
+      connection_id   => 'irc-localhost',
+      conversation_id => '#convos',
+      frozen          => 'Not connected.',
+      name            => '#convos',
+      topic           => '',
+      unread          => 42,
+    }],
+    connections => [{
+      connection_id       => 'irc-localhost',
+      me                  => {authenticated => false, capabilities => {}, nick => 'superman'},
+      name                => 'localhost',
+      on_connect_commands => [],
+      protocol            => 'irc',
+      service_accounts    => [qw(chanserv nickserv)],
+      state               => re(qr{disconnected|queued}),
+      url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
+      wanted_state        => 'connected',
+    }],
+  }),
+  'user.json'
 );
 
 $t->post_ok('/api/notifications/read')->status_is(200);
