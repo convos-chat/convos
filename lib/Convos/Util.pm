@@ -16,7 +16,7 @@ $ENV{OPENSSL_BIN} ||= 'openssl';
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE DEBUG disk_usage generate_cert_p generate_secret has_many pretty_connection_name),
-  qw(require_module short_checksum),
+  qw(require_module short_checksum yaml),
 );
 
 sub disk_usage {
@@ -165,6 +165,20 @@ sub short_checksum {
   my $short    = b64_encode pack 'H*', $checksum;
   $short =~ s![eioEIO+=/\n]!!g;
   return substr $short, 0, 16;
+}
+
+if (eval 'use YAML::XS 0.67;1') {
+  *yaml = sub {
+    local $YAML::XS::Boolean = 'JSON::PP';
+    return $_[0] eq 'load' ? YAML::XS::Load($_[1]) : YAML::XS::Dump($_[1]);
+  };
+}
+else {
+  require YAML::PP;
+  my $pp = YAML::PP->new(boolean => 'JSON::PP');
+  *yaml = sub {
+    return $_[0] eq 'load' ? $pp->load($_[1]) : $pp->dump_string($_[1]);
+  };
 }
 
 sub _generate_secret_fallback {
@@ -329,6 +343,14 @@ Will take a MD5 or SHA1 string and shorten it.
 
   # "7Mvfktc4v4MZ8q68"
   short_checksum "77de68daecd823babbb58edb1c8e14d7106e83bb";
+
+=head2 yaml
+
+  $str  = yaml encode => \%data;
+  $data = yaml decode => "---\nfoo: bar";
+
+Utility function to parse or generate YAML, using either L<YAML::PP> or
+L<YAML::XS>.
 
 =head1 SEE ALSO
 
