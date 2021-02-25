@@ -15,10 +15,10 @@ export default class Connection extends Conversation {
     super(params);
 
     this.prop('ro', 'conversations', new SortedMap([], {sorter: sortConversations}));
-    this.prop('rw', 'on_connect_commands', params.on_connect_commands || '');
+    this.prop('rw', 'on_connect_commands', params.on_connect_commands || []);
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
-    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('convos://loopback'));
+    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('irc://localhost'));
 
     const nick = this.url.searchParams.get('nick') || 'guest';
     this.prop('rw', 'nick', nick);
@@ -67,6 +67,50 @@ export default class Connection extends Conversation {
     }
 
     return super.send(message);
+  }
+
+  toForm() {
+    const urlParams = this.url.searchParams;
+    return {
+      local_address: urlParams.get('local_address') || '',
+      nick: urlParams.get('nick') || this.nick,
+      on_connect_commands: this.on_connect_commands.join('\n'),
+      password: this.url.password || '',
+      realname: urlParams.get('realname') || '',
+      sasl: urlParams.get('sasl') || 'none',
+      server: this.url.host,
+      tls: urlParams.get('tls') ? true : false,
+      tls_verify: urlParams.get('tls_verify') ? true : false,
+      username: this.url.username || '',
+      wanted_state: this.wanted_state,
+    };
+  }
+
+  toSaveOperationParams(fields) {
+    const url = new ConnectionURL('irc://localhost:6667');
+    const urlParams = url.searchParams;
+
+    const server = fields.server || '';
+    url.host = server.match(/:\d+$/) ? server : server + ':6667';
+
+    if (fields.password) url.password = fields.password;
+    if (fields.username) url.username = fields.username;
+
+    if (fields.local_address) urlParams.append('local_address', fields.local_address.trim());
+    if (fields.nick) urlParams.append('nick', fields.nick.trim());
+    if (fields.realname) urlParams.append('realname', fields.realname.trim());
+    urlParams.append('sasl', fields.sasl || 'none');
+    urlParams.append('tls', fields.tls ? '1' : '0');
+    urlParams.append('tls_verify', fields.tls_verify ? '1' : '0');
+
+    const params = {};
+    params.on_connect_commands = typeof fields.on_connect_commands == 'undefined' ? this.on_connect_commands : fields.on_connect_commands.split(/\n\r?/);
+    params.on_connect_commands = params.on_connect_commands.filter(cmd => cmd.length);
+    params.wanted_state = fields.hasOwnProperty('wanted_state') ? fields.wanted_state : this.wanted_state;
+    if (this.connection_id) params.connection_id = this.connection_id;
+    if (server) params.url = url.toString();
+
+    return params;
   }
 
   update(params) {

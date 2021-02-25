@@ -4,6 +4,7 @@ import Icon from '../Icon.svelte';
 
 export let checked = false;
 export let disabled = false;
+export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let value = 1;
@@ -19,7 +20,7 @@ $: if (inputEl && !inputEl.syncValue) {
 }
 </script>
 
-<div class="checkbox" class:has-focus="{hasFocus}" class:is-disabled="{disabled}">
+<div class="checkbox" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
   <input type="checkbox"
     id="{id}"
     name="{name}"

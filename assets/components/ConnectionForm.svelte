@@ -1,11 +1,13 @@
 <script>
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
+import Connection from '../store/Connection';
 import ConnectionURL from '../js/ConnectionURL';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {formAction, makeFormStore} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
@@ -13,6 +15,7 @@ import {route} from '../store/Route';
 export let conversation = {};
 
 const api = getContext('api');
+const form = makeFormStore({});
 const user = getContext('user');
 const saslMechanisms = [['none', 'None'], ['plain', 'Plain'], ['external', 'External']];
 
@@ -20,81 +23,51 @@ const createConnectionOp = api('createConnection');
 const removeConnectionOp = api('removeConnection');
 const updateConnectionOp = api('updateConnection');
 
-[createConnectionOp, updateConnectionOp].forEach(op => {
-  op.on('start', req => {
-    req.body.on_connect_commands = req.body.on_connect_commands.split('\n').map(str => str.trim());
-  });
-});
-
 let connection = {};
-let formEl;
-let saslMechanism = 'none';
 let showAdvancedSettings = false;
-let useTls = false;
-let verifyTls = false;
-let wantToBeConnected = false;
 
-$: if (formEl) formEl.wanted_state.value = wantToBeConnected ? 'connected' : 'disconnected';
+$: showAdvancedSettings && form.renderOnNextTick();
 
 onMount(async () => {
-  if (!formEl) return; // if unMounted while loading user data
   connection = user.findConversation({connection_id: conversation.connection_id}) || {};
-  return connection.url ? connectionToForm() : defaultsToForm();
+  if (connection.toForm) form.render(connection.toForm());
+  if (!connection.connection_id) form.render(defaultConnectinFormFields());
+
+  form.submit = async () => {
+    if (connection.connection_id) {
+      await updateConnectionOp.perform(connection.toSaveOperationParams($form));
+      connection = user.ensureConversation(updateConnectionOp.res.body);
+      form.render(connection.toForm());
+    }
+    else {
+      await createConnectionOp.perform(new Connection({}).toSaveOperationParams($form));
+      const body = createConnectionOp.res.body;
+      if (body.connection_id) route.go(user.ensureConversation(body).path);
+    }
+  };
 });
 
-function defaultsToForm() {
-  if (user.forced_connection) formEl.server.value = user.default_connection;
-  formEl.nick.value = user.email.replace(/@.*/, '').replace(/\W/g, '_');
-  saslMechanism = 'none';
-  useTls = true;
-  wantToBeConnected = true;
+function defaultConnectinFormFields() {
+  const url = new ConnectionURL(route.query.uri || user.default_connection || '');
+  const fields = {
+    nick: user.email.replace(/@.*/, '').replace(/\W/g, '_'),
+    sasl: 'none',
+    server: '',
+    wanted_state: 'connected',
+   };
 
-  if (!route.query.uri) return route.urlToForm(formEl);
+  if (route.query.uri || user.forced_connection) {
+    fields.conversation_id = decodeURIComponent(url.pathname.split('/').filter(p => p.length)[0] || '');
+    fields.password = url.password,
+    fields.server = url.host;
+    fields.sasl = url.searchParams.get('sasl') || 'none';
+    fields.tls = url.searchParams.get('tls') ? true : false;
+    fields.tls_verify = url.searchParams.get('tls_verify') ? true : false;
+    fields.username = url.username;
+    fields.username = url.username;
+  }
 
-  const connURL = new ConnectionURL(route.query.uri);
-  const connParams = connURL.searchParams;
-
-  if (connURL.host) formEl.server.value = connURL.host;
-  if (connURL.password) formEl.password.value = connURL.password;
-  if (connURL.username) formEl.username.value = connURL.username;
-  if (connParams.get('nick')) formEl.nick.value = connParams.get('nick');
-  if (connParams.get('local_address')) formEl.local_address.value = connParams.get('local_address');
-  if (connParams.get('realname')) formEl.realname.value = connParams.get('realname');
-  if (connURL.pathname && formEl.conversation) formEl.conversation.value = decodeURIComponent(connURL.pathname.split('/').filter(p => p.length)[0] || '');
-  if (connParams.get('sasl')) saslMechanism = connParams.get('sasl');
-  if (Number(connParams.get('tls') || 0)) useTls = true;
-  if (Number(connParams.get('tls_verify') || 0)) verifyTls = true;
-}
-
-function connectionToForm() {
-  if (!connection.url) return; // Could not find connection
-  formEl.server.value = connection.url.host;
-  formEl.nick.value = connection.url.searchParams.get('nick') || '';
-  formEl.local_address.value = connection.url.searchParams.get('local_address') || '';
-  formEl.realname.value = connection.url.searchParams.get('realname') || '';
-  formEl.on_connect_commands.value = connection.on_connect_commands.join('\n');
-  formEl.password.value = connection.url.password;
-  formEl.username.value = connection.url.username;
-  formEl.url.value = connection.url.toString();
-  saslMechanism = connection.url.searchParams.get('sasl') || 'none';
-  useTls = connection.url.searchParams.get('tls') == '1' && true || false;
-  verifyTls = connection.url.searchParams.get('tls_verify') == '1' && true || false;
-  wantToBeConnected = connection.wanted_state == 'connected';
-}
-
-function formToUrl(form) {
-  const url = new ConnectionURL('irc://localhost:6667');
-  const server = form.server.value;
-  if (form.local_address.value.length) url.searchParams.append('local_address', form.local_address.value.trim());
-  if (form.nick.value.length) url.searchParams.append('nick', form.nick.value.trim());
-  if (form.realname.value.length) url.searchParams.append('realname', form.realname.value.trim());
-  url.searchParams.append('sasl', form.sasl.value || 'none');
-  url.searchParams.append('tls', form.tls.checked ? '1' : '0');
-  url.searchParams.append('tls_verify', form.tls_verify && form.tls_verify.checked ? '1' : '0');
-  url.host = server.match(/:\d+$/) ? server : server + ':6667';
-  url.password = form.password.value;
-  url.username = form.username.value;
-  return url;
+  return fields;
 }
 
 async function removeConnection(e) {
@@ -102,31 +75,10 @@ async function removeConnection(e) {
   user.removeConversation(connection);
   route.go('/settings/connection');
 }
-
-async function submitForm(e) {
-  if (!formEl.server.value) return; // TODO: Inform that it is required
-
-  formEl.url.value = formToUrl(e.target).toString();
-
-  if (connection.connection_id) {
-    await updateConnectionOp.perform(e.target);
-    connection = user.ensureConversation(updateConnectionOp.res.body);
-    connectionToForm();
-  }
-  else {
-    await createConnectionOp.perform(e.target);
-    const conn = user.ensureConversation(createConnectionOp.res.body);
-    route.go(conn.path);
-  }
-}
 </script>
 
-<form method="post" bind:this="{formEl}" on:submit|preventDefault="{submitForm}">
-  {#if connection.connection_id}
-    <input type="hidden" name="connection_id" value="{connection.connection_id}">
-  {/if}
+<form method="post" use:formAction="{form}">
   <input type="hidden" name="url">
-  <input type="hidden" name="wanted_state">
 
   <TextField name="server" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
     <span slot="label">{$l('Host and port')}</span>
@@ -144,8 +96,8 @@ async function submitForm(e) {
     <p class="help" slot="help">Visible in WHOIS response</p>
   </TextField>
 
-  {#if connection.url}
-    <Checkbox bind:checked="{wantToBeConnected}">
+  {#if connection.connection_id}
+    <Checkbox name="wanted_state">
       <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
   {:else}
@@ -154,35 +106,37 @@ async function submitForm(e) {
     </TextField>
   {/if}
 
-  <Checkbox name="tls" bind:checked="{useTls}">
+  <Checkbox name="tls">
     <span slot="label">{$l('Secure connection (TLS)')}</span>
   </Checkbox>
-  {#if useTls}
-    <Checkbox name="tls_verify" bind:checked="{verifyTls}">
-      <span slot="label">{$l('Verify certificate (TLS)')}</span>
-    </Checkbox>
-  {/if}
+  <Checkbox name="tls_verify" disabled="{!$form.tls}" hidden="{!$form.tls}">
+    <span slot="label">{$l('Verify certificate (TLS)')}</span>
+  </Checkbox>
+
   <Checkbox bind:checked="{showAdvancedSettings}">
     <span slot="label">{$l('Show advanced settings')}</span>
   </Checkbox>
-  <TextField name="username" hidden="{!showAdvancedSettings}">
-    <span slot="label">{$l('Username')}</span>
-  </TextField>
-  <TextField type="password" name="password" hidden="{!showAdvancedSettings}">
-    <span slot="label">{$l('Password')}</span>
-  </TextField>
-  <SelectField name="sasl" options="{saslMechanisms}" bind:value="{saslMechanism}" hidden="{!showAdvancedSettings}">
-    <span slot="label">{$l('SASL authentication mechanism')}</span>
-  </SelectField>
-  <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}" hidden="{!showAdvancedSettings}">
-    <span slot="label">{$l('On-connect commands')}</span>
-  </TextArea>
-  <TextField name="local_address" hidden="{!showAdvancedSettings}">
-    <span slot="label">{$l('Source IP')}</span>
-    <p class="help" slot="help">{$l('Leave this blank, unless you know what you are doing.')}</p>
-  </TextField>
+  {#if showAdvancedSettings}
+    <TextField name="username">
+      <span slot="label">{$l('Username')}</span>
+    </TextField>
+    <TextField type="password" name="password">
+      <span slot="label">{$l('Password')}</span>
+    </TextField>
+    <SelectField name="sasl" options="{saslMechanisms}">
+      <span slot="label">{$l('SASL authentication mechanism')}</span>
+    </SelectField>
+    <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}">
+      <span slot="label">{$l('On-connect commands')}</span>
+    </TextArea>
+    <TextField name="local_address">
+      <span slot="label">{$l('Source IP')}</span>
+      <p class="help" slot="help">{$l('Leave this blank, unless you know what you are doing.')}</p>
+    </TextField>
+  {/if}
+
   <div class="form-actions">
-    {#if connection.url}
+    {#if connection.connection_id}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
       <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}

@@ -96,6 +96,7 @@ function selectOption(e) {
   if (!opt || !opt.length) opt = [''];
   value = opt[0];
   open = false;
+  setTimeout(() => hiddenEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true})), 1);
 }
 
 function renderHuman(needle) {
@@ -118,7 +119,7 @@ function toggle(e) {
 
 <div class="select-field text-field" class:is-open="{open}" class:is-readonly="{readonly}" hidden="{hidden}" bind:this="{wrapperEl}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input type="hidden" {name} bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
+  <input type="hidden" name="{name}" bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
   <input type="text" {placeholder} {id} {readonly} autocomplete="off" bind:this="{humanEl}" on:keydown="{keydown}" on:keyup="{keyup}" on:click|preventDefault="{toggle}">
   <div class="select-field__options" on:click|preventDefault="{toggle}">
     {#each visibleOptions as opt, i}
