@@ -1151,7 +1151,9 @@ sub _stream {
   return if $err;
 
   my $url = $self->url;
-  if (my $password = $self->_web_irc_password) {
+  my $webirc_env_key = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc $self->name;
+  $webirc_env_key =~ s!\W!_!g;
+  if (my $password = $ENV{$webirc_env_key}) {
     my $remote_address  = $url->query->param('remote_address')               || '127.0.0.1';
     my $remote_hostname = gethostbyaddr(inet_aton($remote_address), AF_INET) || $remote_address;
     $self->_write(sprintf "WEBIRC %s %s %s %s\r\n",
@@ -1218,15 +1220,6 @@ CHUNK:
 
     $self->emit(irc_message => $msg)->emit($method => $msg) if IS_TESTING;
   }
-}
-
-sub _web_irc_password {
-  my $name = shift->name;
-  state $pw = {};
-  return $pw->{$name} if $pw->{$name};
-  my $key = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc $name;
-  $key =~ s!\W!_!g;
-  return $pw->{$key} = Mojo::URL->new($ENV{$key} || '');
 }
 
 # This method is used to write a message to the IRC server and wait for a

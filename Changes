@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.04 Not Released
  - Add EXPERIMENTAL support for serving CMS pages as text and yaml
+ - Fix only sending "WEBIRC ..." command if environment variable is set
 
 6.03 2021-02-23T21:15:00+0900
  - Had to revert Alpine to 3.12 to complete the build on hub.docker.com
