@@ -1,9 +1,9 @@
 package Convos::Plugin::Bot;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw($CHANNEL_RE DEBUG generate_secret pretty_connection_name require_module);
+use Convos::Util qw($CHANNEL_RE DEBUG generate_secret pretty_connection_name require_module yaml);
 use Mojo::JSON::Pointer;
-use Mojo::Util 'camelize';
+use Mojo::Util qw(camelize);
 
 use constant LOAD_INTERVAL => $ENV{CONVOS_BOT_LOAD_INTERVAL} || 10;
 
@@ -23,15 +23,6 @@ sub action {
 
   $name = join '::', 'Convos::Plugin::Bot::Action', $name;
   return $actions->{$name} if $actions->{$name};
-}
-
-if (eval 'use YAML::XS 0.67;1') {
-  *load_config_file = sub { local $YAML::XS::Boolean = 'JSON::PP'; YAML::XS::LoadFile("$_[1]") };
-}
-else {
-  require YAML::PP;
-  my $pp = YAML::PP->new(boolean => 'JSON::PP');
-  *load_config_file = sub { $pp->load_file("$_[1]") };
 }
 
 sub register {
@@ -136,7 +127,7 @@ sub _load_config {
   return if $self->config->data->{ts} and $ts == $self->config->data->{ts};
 
   $self->_log->info("Reloading @{[$self->_config_file]}");
-  my $config = $self->load_config_file($self->_config_file);
+  my $config = yaml decode => $self->_config_file->slurp;
   @$config{qw(action connection ts)} = ({}, {}, $ts);
   $config->{$_} ||= [] for qw(actions connections);
   my $old_password = $self->config->get('/generic/password') || '';
@@ -344,12 +335,6 @@ Returns an action object by C<$moniker> or C<$class_name>. Example:
   $karma_action = $bot->action("karma");
   $karma_action = $bot->action("Karma");
   $karma_action = $bot->action("Convos::Plugin::Bot::Action::Karma");
-
-=head2 load_config_file
-
-  $hash_ref = $self->load_config_file($path);
-
-Used to load YAML config file and return it as a data structure.
 
 =head2 register
 

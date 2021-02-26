@@ -170,14 +170,14 @@ sub short_checksum {
 if (eval 'use YAML::XS 0.67;1') {
   *yaml = sub {
     local $YAML::XS::Boolean = 'JSON::PP';
-    return $_[0] eq 'load' ? YAML::XS::Load($_[1]) : YAML::XS::Dump($_[1]);
+    return $_[0] eq 'decode' ? YAML::XS::Load($_[1]) : YAML::XS::Dump($_[1]);
   };
 }
 else {
   require YAML::PP;
   my $pp = YAML::PP->new(boolean => 'JSON::PP');
   *yaml = sub {
-    return $_[0] eq 'load' ? $pp->load($_[1]) : $pp->dump_string($_[1]);
+    return $_[0] eq 'decode' ? $pp->load_string($_[1]) : $pp->dump_string($_[1]);
   };
 }
 
