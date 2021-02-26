@@ -25,6 +25,10 @@ textarea {
   textarea {
     max-width: $input-max-width;
   }
+
+  & + p.help {
+    margin-top: calc(-1 * var(--input-gutter));
+  }
 }
 
 .checkbox {
@@ -65,7 +69,6 @@ textarea {
   }
 
   & + p.help {
-    margin-top: calc(-1 * var(--input-gutter));
     margin-left: 1.1rem;
   }
 }
@@ -143,6 +146,10 @@ textarea {
     vertical-align: middle;
     margin-right: 0.8rem;
   }
+}
+
+.form-group {
+  padding: var(--gutter-small) 0 var(--gutter) var(--gutter-small);
 }
 
 .btn {

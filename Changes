@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.05 Not Released
+ - Split advanced options into "Show advanced settings" and "Show authentication settings"
+
 6.04 2021-02-23T11:43:00+0900
  - Add EXPERIMENTAL support for serving CMS pages as text and yaml
  - Fix only sending "WEBIRC ..." command if environment variable is set

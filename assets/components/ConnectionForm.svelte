@@ -11,6 +11,7 @@ import {formAction, makeFormStore} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
+import {slide} from 'svelte/transition';
 
 export let conversation = {};
 
@@ -25,13 +26,14 @@ const updateConnectionOp = api('updateConnection');
 
 let connection = {};
 let showAdvancedSettings = false;
+let showAuthenticationSettings = false;
 
-$: showAdvancedSettings && form.renderOnNextTick();
+$: if (showAdvancedSettings || showAuthenticationSettings) form.renderOnNextTick();
 
 onMount(async () => {
   connection = user.findConversation({connection_id: conversation.connection_id}) || {};
-  if (connection.toForm) form.render(connection.toForm());
-  if (!connection.connection_id) form.render(defaultConnectinFormFields());
+  if (connection.toForm) form.renderOnNextTick(connection.toForm());
+  if (!connection.connection_id) form.renderOnNextTick(defaultConnectinFormFields());
 
   form.submit = async () => {
     if (connection.connection_id) {
@@ -53,7 +55,7 @@ function defaultConnectinFormFields() {
     nick: user.email.replace(/@.*/, '').replace(/\W/g, '_'),
     sasl: 'none',
     server: '',
-    wanted_state: 'connected',
+    want_to_be_connected: true,
    };
 
   if (route.query.uri || user.forced_connection) {
@@ -78,13 +80,9 @@ async function removeConnection(e) {
 </script>
 
 <form method="post" use:formAction="{form}">
-  <input type="hidden" name="url">
-
   <TextField name="server" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
     <span slot="label">{$l('Host and port')}</span>
-    <p class="help" slot="help">
-      {@html $lmd(user.forced_connection ? 'You cannot create custom connections.' : 'Example: %1', 'chat.freenode.net:6697')}
-    </p>
+    <p class="help" slot="help" hidden="{!user.forced_connection}">{$l('You cannot create custom connections.')}</p>
   </TextField>
 
   <TextField name="nick" placeholder="{$l('Ex: superman')}">
@@ -93,11 +91,10 @@ async function removeConnection(e) {
 
   <TextField name="realname" placeholder="{$l('Ex: Clark Kent')}">
     <span slot="label">{$l('Your name')}</span>
-    <p class="help" slot="help">Visible in WHOIS response</p>
   </TextField>
 
   {#if connection.connection_id}
-    <Checkbox name="wanted_state">
+    <Checkbox name="want_to_be_connected">
       <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
   {:else}
@@ -117,22 +114,32 @@ async function removeConnection(e) {
     <span slot="label">{$l('Show advanced settings')}</span>
   </Checkbox>
   {#if showAdvancedSettings}
-    <TextField name="username">
-      <span slot="label">{$l('Username')}</span>
-    </TextField>
-    <TextField type="password" name="password">
-      <span slot="label">{$l('Password')}</span>
-    </TextField>
-    <SelectField name="sasl" options="{saslMechanisms}">
-      <span slot="label">{$l('SASL authentication mechanism')}</span>
-    </SelectField>
-    <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}">
-      <span slot="label">{$l('On-connect commands')}</span>
-    </TextArea>
-    <TextField name="local_address">
-      <span slot="label">{$l('Source IP')}</span>
-      <p class="help" slot="help">{$l('Leave this blank, unless you know what you are doing.')}</p>
-    </TextField>
+    <div class="form-group" transition:slide="{{duration: 150}}">
+      <TextArea name="on_connect_commands" placeholder="{$l('Put each command on a new line.')}">
+        <span slot="label">{$l('On-connect commands')}</span>
+      </TextArea>
+      <TextField name="local_address">
+        <span slot="label">{$l('Source IP')}</span>
+        <p class="help" slot="help">{$l('Leave this blank, unless you know what you are doing.')}</p>
+      </TextField>
+    </div>
+  {/if}
+
+  <Checkbox bind:checked="{showAuthenticationSettings}">
+    <span slot="label">{$l('Show authentication settings')}</span>
+  </Checkbox>
+  {#if showAuthenticationSettings}
+    <div class="form-group" transition:slide="{{duration: 150}}">
+      <TextField name="username">
+        <span slot="label">{$l('Username')}</span>
+      </TextField>
+      <TextField type="password" name="password">
+        <span slot="label">{$l('Password')}</span>
+      </TextField>
+      <SelectField name="sasl" options="{saslMechanisms}">
+        <span slot="label">{$l('SASL authentication mechanism')}</span>
+      </SelectField>
+    </div>
   {/if}
 
   <div class="form-actions">
