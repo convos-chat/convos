@@ -82,7 +82,7 @@ export default class Connection extends Conversation {
       tls: urlParams.get('tls') ? true : false,
       tls_verify: urlParams.get('tls_verify') ? true : false,
       username: this.url.username || '',
-      wanted_state: this.wanted_state,
+      want_to_be_connected: this.wanted_state == 'disconnected' ? false : true,
     };
   }
 
@@ -92,21 +92,20 @@ export default class Connection extends Conversation {
 
     const server = fields.server || '';
     url.host = server.match(/:\d+$/) ? server : server + ':6667';
+    urlParams.append('sasl', fields.sasl || 'none');
 
     if (fields.password) url.password = fields.password;
     if (fields.username) url.username = fields.username;
-
     if (fields.local_address) urlParams.append('local_address', fields.local_address.trim());
     if (fields.nick) urlParams.append('nick', fields.nick.trim());
     if (fields.realname) urlParams.append('realname', fields.realname.trim());
-    urlParams.append('sasl', fields.sasl || 'none');
-    urlParams.append('tls', fields.tls ? '1' : '0');
-    urlParams.append('tls_verify', fields.tls_verify ? '1' : '0');
+    if (fields.tls) urlParams.append('tls', '1');
+    if (fields.tls && fields.tls_verify) urlParams.append('tls_verify', '1');
 
     const params = {};
     params.on_connect_commands = typeof fields.on_connect_commands == 'undefined' ? this.on_connect_commands : fields.on_connect_commands.split(/\n\r?/);
     params.on_connect_commands = params.on_connect_commands.filter(cmd => cmd.length);
-    params.wanted_state = fields.hasOwnProperty('wanted_state') ? fields.wanted_state : this.wanted_state;
+    params.wanted_state = !fields.hasOwnProperty('want_to_be_connected') ? this.wanted_state : fields.want_to_be_connected ? 'connected' : 'disconnected';
     if (this.connection_id) params.connection_id = this.connection_id;
     if (server) params.url = url.toString();
 

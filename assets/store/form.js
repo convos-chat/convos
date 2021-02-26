@@ -5,7 +5,8 @@ export const formAction = (formEl, formStore) => {
     const inputEl = e.target;
     if (!inputEl || !inputEl.name) return;
     const value = inputEl.type == 'checkbox' ? inputEl.checked ? inputEl.value : undefined : inputEl.value;
-    formStore.set({...get(formStore), [inputEl.name]: value});
+    const changed = formStore.changed(inputEl.name, value);
+    if (changed) formStore.set({...get(formStore), ...changed});
   });
 
   formEl.addEventListener('submit', (e) => {
@@ -20,6 +21,7 @@ export const formAction = (formEl, formStore) => {
 export const makeFormStore = (defaults = {}) => {
   const formStore = writable(defaults);
 
+  formStore.changed = (name, value) => ({[name]: value});
   formStore.renderOnNextTick = function(fields) { setTimeout(() => this.render(fields), 1) };
   formStore.submit = function() { };
 

@@ -15,11 +15,11 @@ test('toForm', () => {
     tls: false,
     tls_verify: false,
     username: '',
-    wanted_state: 'connected',
+    want_to_be_connected: true,
   });
 
   const url = new ConnectionURL('irc://superwoman:s3cret@irc.example.com:6667/?local_address=1.1.1.1&nick=superwoman&realname=Super+Duper&sasl=external&tls=1&tls_verify=1');
-  c.update({url, on_connect_commands: ['cool', 'beans']});
+  c.update({url, on_connect_commands: ['cool', 'beans'], wanted_state: 'disconnected'});
 
   expect(c.toForm()).toEqual({
     local_address: '1.1.1.1',
@@ -32,7 +32,7 @@ test('toForm', () => {
     tls: true,
     tls_verify: true,
     username: 'superwoman',
-    wanted_state: 'connected',
+    want_to_be_connected: false,
   });
 });
 
@@ -49,9 +49,9 @@ test('toSaveOperationParams create', () => {
     tls: true,
     tls_verify: true,
     username: 'superwoman',
-    wanted_state: 'connected',
+    want_to_be_connected: true,
   })).toEqual({
-    url: 'irc://superwoman:s3cret@irc.example.com:6667/?local_address=1.1.1.1&nick=superwoman&realname=Super+Duper&sasl=none&tls=1&tls_verify=1',
+    url: 'irc://superwoman:s3cret@irc.example.com:6667/?sasl=none&local_address=1.1.1.1&nick=superwoman&realname=Super+Duper&tls=1&tls_verify=1',
     on_connect_commands: ['cool', 'beans'],
     wanted_state: 'connected',
   });
@@ -65,12 +65,12 @@ test('toSaveOperationParams update', () => {
     password: 's3cret',
     realname: '',
     server: 'irc.example.com:6667',
-    tls: true,
-    tls_verify: false,
-    wanted_state: 'disconnected',
+    tls: false,
+    tls_verify: true, // ignored when tls:false
+    want_to_be_connected: false,
   })).toEqual({
     connection_id: 'irc-example',
-    url: 'irc://:s3cret@irc.example.com:6667/?nick=superwoman&sasl=none&tls=1&tls_verify=0',
+    url: 'irc://:s3cret@irc.example.com:6667/?sasl=none&nick=superwoman',
     on_connect_commands: [],
     wanted_state: 'disconnected',
   });
