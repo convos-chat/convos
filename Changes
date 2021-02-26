@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.06 Not released
+ - Fix not learning "h is tory" facts
+
 6.05 2021-02-23T13:43:00+0900
  - Split advanced options into "Show advanced settings" and "Show authentication settings"
 

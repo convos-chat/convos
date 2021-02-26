@@ -63,4 +63,8 @@ $facts->emit(message => {my_nick => 'superbot', message => 'SQLite is compatible
 is $facts->reply({my_nick => 'superbot', message => q(what is sqlite?)}),
   'SQLite is compatible with æøå', 'unicode';
 
+$facts->emit(message => {my_nick => 'superbot', message => 'history'});
+is $facts->reply({my_nick => 'superbot', message => q(what is h?)}), undef,
+  'do not reply with h is tory';
+
 done_testing;

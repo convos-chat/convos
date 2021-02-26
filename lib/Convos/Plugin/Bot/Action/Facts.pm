@@ -13,7 +13,7 @@ sub register {
   $self->on(message => sub { shift->_learn(@_) });
 
   # TODO: Use config instead?
-  $self->{copula_re} = qr{(aren't|isn't|are|is|says)};
+  $self->{copula_re} = qr{\b(aren't|isn't|are|is|says)\b};
 }
 
 sub reply {
