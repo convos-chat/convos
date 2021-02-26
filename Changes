@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.04 Not Released
+6.04 2021-02-23T11:43:00+0900
  - Add EXPERIMENTAL support for serving CMS pages as text and yaml
  - Fix only sending "WEBIRC ..." command if environment variable is set
  - Fix hiding the sidebar menu when URL changes
