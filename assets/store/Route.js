@@ -1,5 +1,6 @@
 import Reactive from '../js/Reactive';
 import qs from 'qs';
+import {activeMenu} from './writable';
 import {closestEl, isType} from '../js/util';
 
 export default class Route extends Reactive {
@@ -47,6 +48,7 @@ export default class Route extends Reactive {
     const url = this.baseUrl + path;
     if (url == this._location.href) return this;
     this._history[replace ? 'replaceState' : 'pushState'](state, this.title, url);
+    if (!replace) activeMenu.set('');
     this.update({path: true}).render(url, state);
   }
 
@@ -184,6 +186,7 @@ export default class Route extends Reactive {
   }
 
   _onpopstate(e) {
+    activeMenu.set('');
     this.render(this._location.href, e.state);
   }
 
