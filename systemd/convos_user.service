@@ -1,0 +1,21 @@
+##########
+# Convos User Systemd Unit
+##########
+#
+# Edit the paths to fit your needs/installation
+#
+##########
+
+[Unit]
+Description=Convos User Service
+After=network.target
+ 
+[Service]
+Type=simple
+Environment="CONVOS_HOME=%h/.convos" "CONVOS_REVERSE_PROXY=1" "LISTEN=http://127.0.0.1:8081"
+ExecStart=%h/convos/script/convos daemon --listen ${LISTEN}
+KillMode=process
+Restart=on-failure
+ 
+[Install]
+WantedBy=default.target
