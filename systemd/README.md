@@ -51,5 +51,9 @@ We are assuming you'll be using _Convos_ behind a reverse proxy. If that's not t
 3 - To restart _Convos_ (after an update):
 
     systemctl --user restart convos_user.service
+
+4 - To see the status of your _Convos_ instance:
+
+    systemctl --user status convos_user.service
 #
 From  now on, your convos instance will be automatically started if your machine/computer is rebooted. 
