@@ -4,6 +4,8 @@
 #
 # Edit the paths to fit your needs/installation
 #
+# NOTE: The %h on systemd units will be automatically replaced by the user $HOME directory
+#
 ##########
 
 [Unit]
