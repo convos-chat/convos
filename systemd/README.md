@@ -19,7 +19,7 @@ and
     
    b) Or as the user with:
    
-    loginctl enable-linger` 
+    loginctl enable-linger  
     
 2 - Login as the user that will be or is already running _**Convos**_.
 
