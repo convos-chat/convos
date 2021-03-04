@@ -8,6 +8,7 @@ import {fly} from 'svelte/transition';
 import {generateWriteable, nColumns} from '../store/writable';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
+import {normalizeCommand} from '../js/commands';
 
 export const uploader = uploadFiles;
 export let conversation;
@@ -113,15 +114,7 @@ function selectOptionOrSendMessage(e) {
   else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
     e.preventDefault();
     const msg = {method: 'send'};
-    msg.message = inputEl.value;
-
-    // Aliases
-    msg.message = msg.message.replace(/^\/close/i, '/part');
-    msg.message = msg.message.replace(/^\/j\b/i, '/join');
-    msg.message = msg.message.replace(/^\/raw/i, '/quote');
-    msg.message = msg.message.replace(/^\/ns/i, '/msg nickserv');
-    msg.message = msg.message.replace(/^\/cs/i, '/msg chanserv');
-
+    msg.message = normalizeCommand(inputEl.value);
     if (msg.message.length) conversation.send(msg, handleMessageResponse);
     if (!conversation.is('search')) setValue('');
     setTimeout(renderInputHeight, 10);

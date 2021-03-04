@@ -1,7 +1,7 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
-import {commands} from '../js/autocomplete';
+import {commands} from '../js/commands';
 import {emojiAliases} from '../js/md';
 import {l, lmd} from '../store/I18N';
 import {settings} from '../js/util';

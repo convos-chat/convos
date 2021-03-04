@@ -1,0 +1,20 @@
+import {commandOptions, commands, normalizeCommand} from '../assets/js/commands';
+
+test('commands', () => {
+  expect(commands.length > 15).toBe(true);
+  commands.forEach(cmd => expect(Object.keys(cmd).sort()).toEqual(['cmd', 'description', 'example']));
+});
+
+test('commandOptions', () => {
+  expect(commandOptions({query: '/'}).length).toBe(commands.length);
+  expect(commandOptions({query: '/join'})).toEqual([{text: '/join &lt;#channel&gt;', val: '/join'}]);
+});
+
+test('normalizeCommand', () => {
+  expect(normalizeCommand('/CLOSE')).toBe('/part');
+  expect(normalizeCommand('/cs cool beans')).toBe('/msg chanserv cool beans');
+  expect(normalizeCommand('/j #foo pass')).toBe('/join #foo pass');
+  expect(normalizeCommand('/j')).toBe('/join');
+  expect(normalizeCommand('/ns cool beans')).toBe('/msg nickserv cool beans');
+  expect(normalizeCommand('/raw YIKES')).toBe('/quote YIKES');
+});
