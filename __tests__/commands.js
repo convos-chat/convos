@@ -17,4 +17,6 @@ test('normalizeCommand', () => {
   expect(normalizeCommand('/j')).toBe('/join');
   expect(normalizeCommand('/ns cool beans')).toBe('/msg nickserv cool beans');
   expect(normalizeCommand('/raw YIKES')).toBe('/quote YIKES');
+  expect(normalizeCommand('/shrug')).toBe('/say ¯\\_(ツ)_/¯');
+  expect(normalizeCommand('/shrug not sure')).toBe('/say not sure ¯\\_(ツ)_/¯');
 });

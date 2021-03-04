@@ -18,6 +18,7 @@ export function commandOptions({query}) {
 export function normalizeCommand(command) {
   const parts = command.split(/\s/);
   const rule = rewriteRule[parts[0].toLowerCase()];
+  if (typeof rule == 'function') return rule(parts.slice(1));
   if (rule) return [rule].concat(parts.slice(1)).filter(p => typeof p != 'undefined' && p.length).join(' ');
   return command;
 }
@@ -30,6 +31,7 @@ add('/say', '/say <msg>', 'Used when you want to send a message starting with "/
 add('/whois', '/whois <nick>', 'Show information about a user.');
 add('/query', '/query <nick>', 'Open up a new chat window with nick.');
 add('/msg', '/msg <nick> <msg>', 'Send a direct message to nick.');
+add('/shrug', '/shrug <msg>', 'Add a shrug to end of message. Message is optional.');
 add('/join', '/join <#channel>', 'Join channel and open up a chat window.');
 add('/close', '/close [nick|#channel]', 'Close conversation.');
 add('/nick', '/nick <nick>', 'Change your wanted nick.');
@@ -48,6 +50,7 @@ add('/quote', '/quote <irc-command>', 'Allow you to send any raw IRC message.');
 const addRewriteRule = (cmd, rule) => (rewriteRule[cmd] = rule);
 
 addRewriteRule('/close', '/part');
+addRewriteRule('/shrug', (parts) => '/say ' + parts.concat('¯\\_(ツ)_/¯').join(' '));
 addRewriteRule('/cs', '/msg chanserv');
 addRewriteRule('/j', '/join');
 addRewriteRule('/ns', '/msg nickserv');
