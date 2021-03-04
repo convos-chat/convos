@@ -47,11 +47,11 @@ add('/cs', '/cs <msg>', 'Send a message to chanserv.');
 add('/ns', '/ns <msg>', 'Send a message to nickserv.');
 add('/quote', '/quote <irc-command>', 'Allow you to send any raw IRC message.');
 
-const addRewriteRule = (cmd, rule) => (rewriteRule[cmd] = rule);
+const rewrite = (from, to) => (rewriteRule[from] = to);
 
-addRewriteRule('/close', '/part');
-addRewriteRule('/shrug', (parts) => '/say ' + parts.concat('¯\\_(ツ)_/¯').join(' '));
-addRewriteRule('/cs', '/msg chanserv');
-addRewriteRule('/j', '/join');
-addRewriteRule('/ns', '/msg nickserv');
-addRewriteRule('/raw', '/quote');
+rewrite('/close', '/part');
+rewrite('/shrug', (parts) => '/say ' + parts.concat('¯\\_(ツ)_/¯').join(' '));
+rewrite('/cs', '/msg chanserv');
+rewrite('/j', '/join');
+rewrite('/ns', '/msg nickserv');
+rewrite('/raw', '/quote');
