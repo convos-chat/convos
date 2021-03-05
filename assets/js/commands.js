@@ -45,10 +45,10 @@ add('/clear', '/clear history <#channel> or /clear history <nick>', 'Delete all 
 add('/oper', '/oper <nick> <password>', 'Gain operator status on a network.');
 add('/cs', '/cs <msg>', 'Send a message to chanserv.');
 add('/ns', '/ns <msg>', 'Send a message to nickserv.');
-add('/ms', '/ms <msg>', 'Send a message to memoserv');
-add('/hs', '/hs <msg>', 'Send a message to hostserv');
-add('/bs', '/bs <msg>', 'Send a message to botserv');
-add('/os', '/os <msg>', 'Send a message to operserv');
+add('/ms', '/ms <msg>', 'Send a message to memoserv.');
+add('/hs', '/hs <msg>', 'Send a message to hostserv.');
+add('/bs', '/bs <msg>', 'Send a message to botserv.');
+add('/os', '/os <msg>', 'Send a message to operserv.');
 add('/quote', '/quote <irc-command>', 'Allow you to send any raw IRC message.');
 
 const rewrite = (from, to) => (rewriteRule[from] = to);
