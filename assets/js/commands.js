@@ -42,7 +42,7 @@ add('/names', '/names', 'Show participants in the channel.');
 add('/invite', '/invite <nick> [#channel]', 'Invite a user to a channel.');
 add('/reconnect', '/reconnect', 'Restart the current connection.');
 add('/clear', '/clear history <#channel> or /clear history <nick>', 'Delete all history for the given conversation.');
-add('/oper', '/oper <msg>', 'Send server operator messages.');
+add('/oper', '/oper <nick> <password>', 'Gain operator status on a network.');
 add('/cs', '/cs <msg>', 'Send a message to chanserv.');
 add('/ns', '/ns <msg>', 'Send a message to nickserv.');
 add('/ms', '/ms <msg>', 'Send a message to memoserv');
