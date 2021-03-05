@@ -62,5 +62,4 @@ rewrite('/hs', '/quote hotserv');
 rewrite('/bs', '/quote botserv');
 rewrite('/os', '/quote operserv');
 rewrite('/j', '/join');
-rewrite('/ns', '/msg nickserv');
 rewrite('/raw', '/quote');
