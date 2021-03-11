@@ -55,7 +55,8 @@ sub startup {
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/err/:code')->to('url#err');
-  $r->get('/sw' => [format => 'js']);
+  $r->get('/sw'      => [format => 'js']);
+  $r->get('/sw/info' => {json => {mode => $self->mode, version => $self->VERSION}});
   $r->get('/video/#domain/:name')->to(cb => sub { shift->render('video') });
 
   # Event channel
