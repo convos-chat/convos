@@ -26,7 +26,7 @@ function calculateStatus($route, user) {
     <p><Icon name="download"/> {$l('Downloaded Convos.')}</p>
     <p><Icon name="rocket"/> {$l('Started Convos.')}</p>
     {#if $socket.error}
-      <p><Icon name="exclamation-triangle"/> {$l('Loading user data failed: %1', l($socket.error))}</p>
+      <p><Icon name="exclamation-triangle"/> {$l('Loading user data failed: %1', $l($socket.error))}</p>
     {:else}
       <p><Icon name="spinner fa-spin"/> {$l('Loading user data...')}</p>
     {/if}
