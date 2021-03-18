@@ -1,3 +1,12 @@
+
+     ▄▄▓▀█▄█▄   ▄▄▓▀█▄▄   ▓▄▓▓▀█▄▄    ▄▓█ ▓▄▒█   ▄▄▓▀█▄▄    ▄▄█▀█▒▄▄
+    ▐▒▓█ █▀▀█  ▐▒▓█ ██▓▌  █▒▓█ ██▓▌  ▒▒▓█ ██▓▒  ▐▒▓█ ██▓▌  ▐▒▓█ ▀▀▀▀
+    █▓██       █▓██ █▓██  █▓██ █▓██   ▓█░ ████  █▓██ █▓██  ▀▀▀▀▀█▓▄█
+    ▐█▓█ █▄▄█  ▐█▓█ ██▒▌  ██▓█ ██▒█  ▐▀██ █▓██  ▐█▓█ ██▒▌  █▓▄  ██▒▌
+     ▀▀█▄█▀█▀   ▀▀█▄█▀▀   ▓▓▒█ ██▓█   ▀▀▓▄░▀▀█   ▀▀█▄█▀▀   ▀▒▀█▄█▒▀
+                           █▓░▓
+                             ▀▀
+
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
 [![Docker Status](https://github.com/convos-chat/convos/workflows/Docker%20Image%20CI/badge.svg?branch=master)](https://hub.docker.com/r/convos/convos)
 [![Build Status](https://github.com/convos-chat/convos/workflows/Linux%20CI/badge.svg?branch=master)](https://github.com/convos-chat/convos/actions)
