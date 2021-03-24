@@ -11,6 +11,7 @@ sub settings_get {
 
   my $core     = $self->app->core;
   my $settings = $core->settings->TO_JSON;
+  $settings->{dependencies} = $self->_dependencies;
   eval { $settings->{disk_usage} = disk_usage $core->home };
   $self->render(openapi => $settings);
 }
@@ -54,6 +55,43 @@ sub _clean_json {
   }
 
   return \@err, \%clean;
+}
+
+sub _dependencies {
+  my $self = shift;
+
+  my @dependencies;
+  my $load = sub {
+    my ($mode, $module, $version) = @_;
+    local ($@, $!) = ('', 0);
+    eval "use $module $version ();1";
+    my $err = $@;
+    $err = 'Not installed.' if $err =~ m!Can't locate!;
+    $err =~ s! at .*!!s;
+    $err =~ s! in \@INC.*!!s;
+    $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
+    push @dependencies,
+      {
+      error   => $err,
+      mode    => ucfirst($self->{cpanfile_mode} || $mode),
+      name    => $module,
+      version => $version,
+      };
+  };
+
+  no warnings qw(once);
+  local $self->{cpanfile_mode};
+  local *Convos::Sandbox::cpanfile::feature = sub { local $self->{cpanfile_mode} = $_[1]; pop->() };
+  local *Convos::Sandbox::cpanfile::on      = sub { local $self->{cpanfile_mode} = shift; pop->() };
+  local *Convos::Sandbox::cpanfile::requires      = sub { $load->(requires => @_) };
+  local *Convos::Sandbox::cpanfile::suggests      = sub { $load->(suggests => @_) };
+  local *Convos::Sandbox::cpanfile::test_requires = sub { $load->(develop  => @_) };
+
+  local ($@, $!) = ('', 0);
+  return [{mode => 'requires', name => 'cpanfile', error => $@}]
+    unless eval "package Convos::Sandbox::cpanfile;"
+    . $self->app->home->rel_file('cpanfile')->slurp;
+  return \@dependencies;
 }
 
 1;

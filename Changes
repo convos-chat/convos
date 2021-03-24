@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.07 Not Released
+ - Add dependency information to Admin page
  - Fix compatibility with Mojolicious 9.11
  - Fix typo in Fallback.svelte
 

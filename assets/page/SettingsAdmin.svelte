@@ -18,6 +18,7 @@ const updateSettingsOp = api('updateSettings');
 
 let convosSettings = {};
 
+$: dependencies = convosSettings.dependencies || [];
 $: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
 
 updateSettingsOp.on('start', req => {
@@ -129,4 +130,13 @@ function updateSettingsFromForm(e) {
       <p class="help">{$l('Inode usage')}: {diskUsage.inodes_used} / {diskUsage.inodes_total}</p>
     </div>
   {/if}
+
+  <div id="dependencies">
+    <h2>{$l('Dependencies')}</h2>
+    <ul>
+      {#each dependencies as dependency}
+        <li>{dependency.mode} - <a href="https://metacpan.org/pod/{dependency.name}" target="_blank">{dependency.name}</a> {dependency.version ? dependency.version : dependency.error}</li>
+      {/each}
+    </ul>
+  </div>
 </main>

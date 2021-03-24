@@ -17,8 +17,10 @@ $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
 note 'get default settings';
-$t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
-  ->json_hasnt('/session_secrets')->json_is('/contact', 'mailto:root@localhost')
+$t->get_ok('/api/settings')->status_is(200)->json_has('/dependencies/0/mode')
+  ->json_has('/dependencies/0/name')->json_has('/dependencies/0/version')
+  ->json_hasnt('/local_secret')->json_hasnt('/session_secrets')
+  ->json_is('/contact',            'mailto:root@localhost')
   ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
   ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat')
@@ -26,9 +28,9 @@ $t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
 
 SKIP: {
   local $TODO = "Cannot test on $^O", 1 unless $^O eq 'darwin' or $^O eq 'linux';
-  $t->json_like('/disk_usage/dev', qr{\w})->json_like('/disk_usage/block_size', qr{\d+})
-    ->json_like('/disk_usage/blocks_free', qr{\d+})->json_like('/disk_usage/blocks_total', qr{\d+})
-    ->json_like('/disk_usage/blocks_used', qr{\d+})->json_like('/disk_usage/inodes_free',  qr{\d+})
+  $t->json_like('/disk_usage/dev',          qr{\w})->json_like('/disk_usage/block_size', qr{\d+})
+    ->json_like('/disk_usage/blocks_free',  qr{\d+})->json_like('/disk_usage/blocks_total', qr{\d+})
+    ->json_like('/disk_usage/blocks_used',  qr{\d+})->json_like('/disk_usage/inodes_free',  qr{\d+})
     ->json_like('/disk_usage/inodes_total', qr{\d+})->json_like('/disk_usage/inodes_used', qr{\d+});
 }
 
@@ -68,7 +70,7 @@ $t->post_ok(
   }
 )->status_is(200)->json_is('/contact' => 'mailto:jhthorsen@cpan.org')
   ->json_is('/default_connection' => 'irc://chat.freenode.net:6697/%23mojo')
-  ->json_is('/forced_connection'  => true)->json_is('/local_secret' => undef)
+  ->json_is('/forced_connection'  => true)->json_is('/local_secret'      => undef)
   ->json_is('/open_to_public'     => true)->json_is('/organization_name' => 'Superheroes')
   ->json_is('/organization_url'   => 'https://metacpan.org')->json_is('/session_secrets' => undef)
   ->json_is('/video_service'      => 'https://video.convos.chat/');
