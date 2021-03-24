@@ -13,7 +13,7 @@ sub register {
   $app->helper('themes.get'    => sub { $self->_get(@_) });
   $app->helper('themes.list'   => sub { $self->_themes_list });
   $app->helper('themes.serve'  => sub { $self->_serve(shift) });
-  $app->routes->get('/themes/:theme')->to(cb => sub { $_[0]->themes->serve(@_) });
+  $app->routes->get('/themes/:theme', [format => ['css']], sub { $_[0]->themes->serve(@_) });
 
   Mojo::IOLoop->recurring($ENV{CONVOS_DETECT_THEMES_INTERVAL} || 10, sub { $app->themes->detect });
   $app->themes->detect;

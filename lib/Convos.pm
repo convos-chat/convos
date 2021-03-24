@@ -41,15 +41,23 @@ sub startup {
   # Autogenerate routes from the OpenAPI specification
   my $api_route = $self->routes->under('/')->to('user#check_if_ready', openapi => 1);
   $self->plugin(
-    OpenAPI => {route => $api_route, url => $self->static->file('convos-api.yaml')->path});
+    OpenAPI => {
+      format => ['json'],
+      route  => $api_route,
+      url    => $self->static->file('convos-api.yaml')->path
+    }
+  );
 
   # Add basic routes
-  my $r = $self->routes;
-  $r->get('/')->to('cms#index')->name('index');
-  $r->get('/blog')->to('cms#blog_list');
-  $r->get('/blog/:year/:mon/:mday/:name', {page => 1})->to('cms#blog_entry')->name('blog_entry');
-  $r->get('/doc/*file',                   {file => 'index'})->to('cms#doc')->name('doc');
-  $r->get('/logout')->to('user#logout', format => 'html');
+  my $r                  = $self->routes;
+  my @format_constraints = (format => [qw(html json txt yaml)]);
+  $r->get('/',     [@format_constraints])->to('cms#index',     format => undef)->name('index');
+  $r->get('/blog', [@format_constraints])->to('cms#blog_list', format => undef);
+  $r->get('/blog/:year/:mon/:mday/:name', [@format_constraints])
+    ->to('cms#blog_entry', format => undef, page => 1)->name('blog_entry');
+  $r->get('/doc/*file', [@format_constraints])->to('cms#doc', file => 'index', format => undef)
+    ->name('doc');
+  $r->get('/logout', [format => [qw(html json)]])->to('user#logout', format => undef);
   $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
     ->to(template => 'asset/browserconfig');
   $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');

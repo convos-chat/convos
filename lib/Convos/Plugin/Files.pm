@@ -10,13 +10,13 @@ sub register {
   $app->helper('files.save_p' => \&_save_p);
 
   # Friendly alias for /api/file/:uid/:fid
-  $app->routes->get('/file/:uid/:fid')->to('files#get');
+  $app->routes->get('/file/:uid/:fid', [format => 1])->to('files#get');
 
   # Upgrade message to paste
   $app->core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
 
   # Back compat from Convos::Plugin::Paste
-  $app->routes->get('/paste/:email_hash/:file_hash' => \&_back_compat);
+  $app->routes->get('/paste/:email_hash/:file_hash', [format => 1], \&_back_compat);
 }
 
 sub _back_compat {

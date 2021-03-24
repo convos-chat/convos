@@ -233,7 +233,7 @@ paths:
       operationId: embed
       summary: Get information from a URL
       tags: [ 'misc' ]
-      x-mojo-to: url#info
+      x-mojo-to: [ 'url#info', [ "format", [ html, json, jsonp ] ] ]
       parameters:
       - description: URL to resource
         in: query
@@ -507,7 +507,7 @@ paths:
       operationId: logoutUser
       summary: Logout a user.
       tags: [ user ]
-      x-mojo-to: user#logout
+      x-mojo-to: ["user#logout", ["format", ["html", "json"]]]
       responses:
         '200':
           description: Successfully logged out.
@@ -594,7 +594,7 @@ paths:
       operationId: inviteUser
       summary: Generate invite link for an existing / new user.
       tags: [ user ]
-      x-mojo-to: user#generate_invite_link
+      x-mojo-to: ["user#generate_invite_link", ["format", ["html", "json"]]]
       parameters:
       - $ref: '#/parameters/email_in_path'
       responses:
