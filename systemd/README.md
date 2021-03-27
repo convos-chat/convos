@@ -3,7 +3,7 @@
 We are assuming you've installed _**Convos**_ with the commands from the [Quick start guide](https://convos.chat/doc/start#quick-start-guide).
 
 This systemd unit was tested on Ubuntu 20.04, but should work on all the distros with systemd support,  
-although you should check your distro documentation for systemd paths and adit them accordingly on the [Instructions](https://github.com/PeGaSuS-Coder/convos/blob/patch-1/systemd/README.md#instructions)..
+although you should check your distro documentation for systemd paths and edit them accordingly on the **Instructions**.
 
 We are assuming you'll be using _**Convos**_ behind a reverse proxy. If that's not the case, change:  
 `CONVOS_REVERSE_PROXY=1` to `CONVOS_REVERSE_PROXY=0`  
