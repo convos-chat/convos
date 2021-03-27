@@ -31,7 +31,9 @@ and
 
     systemctl --user disable enable systemd-tmpfiles-clean.timer
 
-5 - Copy the _**convos_user.service**_ to `$HOME/.config/systemd/user/`.
+5 - Copy the _**convos_user.service**_ to:
+
+    ~/.config/systemd/user/
 
 6 - Reload the user systemd daemon with:
 
