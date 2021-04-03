@@ -41,6 +41,7 @@ function redirect(user) {
 
 onMount(() => {
   if (formEl) route.urlToForm(formEl);
+  if (formEl && !('ontouchstart' in window)) formEl.querySelector('input').focus();
 });
 
 async function redirectAfterLogin(op) {
@@ -109,7 +110,7 @@ function registered() {
 
   {#if !settings('first_user')}
     <div id="signin" class:hidden="{show != 'signin'}">
-      <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}">
+      <form method="post" on:submit|preventDefault="{e => loginOp.perform(e.target)}" bind:this="{formEl}">
         <h2>{$l('Sign in')}</h2>
         <TextField type="email" name="email" placeholder="{$l('Ex: john@doe.com')}" bind:value="{user.formEmail}">
           <span slot="label">{$l('Email')}</span>
