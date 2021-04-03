@@ -263,23 +263,27 @@ export function humanReadableNumber(n, suffix) {
  *
  * @example
  * if (is.array(val)) { }
+ * if (is.false(val)) { }
  * if (is.function(val)) { }
  * if (is.defined(val)) { }
  * if (is.number(val)) { }
  * if (is.object(val)) { }
  * if (is.string(val)) { }
  * if (is.stringable(val)) { }
+ * if (is.true(val)) { }
  * if (is.undefined(val)) { }
  *
  */
 export const is = {
   array: (val) => Array.isArray(val),
   defined: (val) => !is.undefined(val),
+  false: (val) => !is.true(val),
   function: (val) => typeof val === 'function',
   number: (val) => typeof val === 'number',
   object: (val) => typeof val === 'object' && val !== null,
-  stringable: (val) => typeof val === 'number' || typeof val === 'string',
   string: (val) => typeof val === 'string',
+  stringable: (val) => typeof val === 'number' || typeof val === 'string',
+  true: (val) => is.string(val) ? !!val.length && val != '0' : !!val,
   undefined: (val) => val === null || typeof val === 'undefined',
 };
 

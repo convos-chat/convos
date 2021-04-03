@@ -13,6 +13,16 @@ test('defined', () => {
   expect(is.defined(true)).toBe(true);
 });
 
+test('false', () => {
+  expect(is.false('0')).toBe(true);
+  expect(is.false('')).toBe(true);
+  expect(is.false(0)).toBe(true);
+  expect(is.false(false)).toBe(true);
+  expect(is.false(null)).toBe(true);
+  expect(is.false(undefined)).toBe(true);
+  expect(is.false({})).toBe(false);
+});
+
 test('function', () => {
   expect(is.function(() => {})).toBe(true);
   expect(is.function(null)).toBe(false);
@@ -43,6 +53,17 @@ test('stringable', () => {
   expect(is.stringable(42)).toBe(true);
   expect(is.stringable([])).toBe(false);
   expect(is.stringable(null)).toBe(false);
+});
+
+test('true', () => {
+  expect(is.true('1')).toBe(true);
+  expect(is.true('cool beans')).toBe(true);
+  expect(is.true(1)).toBe(true);
+  expect(is.true('')).toBe(false);
+  expect(is.true(true)).toBe(true);
+  expect(is.true(null)).toBe(false);
+  expect(is.true(undefined)).toBe(false);
+  expect(is.true({})).toBe(true);
 });
 
 test('undefined', () => {
