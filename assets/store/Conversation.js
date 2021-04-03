@@ -3,7 +3,7 @@ import Participants from '../store/Participants';
 import Reactive from '../js/Reactive';
 import Time from '../js/Time';
 import {api} from '../js/Api';
-import {calculateModes, str2color} from '../js/util';
+import {calculateModes, is, str2color} from '../js/util';
 import {channelModeCharToModeName} from '../js/constants';
 import {getSocket} from '../js/Socket';
 import {i18n} from './I18N';
@@ -16,7 +16,7 @@ export default class Conversation extends Reactive {
   constructor(params) {
     super();
 
-    const keyPrefix = [params.connection_id, params.conversation_id, ''].filter(v => typeof v != 'undefined').join(':');
+    const keyPrefix = [params.connection_id, params.conversation_id, ''].filter(is.defined).join(':');
     this.prop('persist', 'userInput', '', {key: keyPrefix + 'userInput'});
 
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
@@ -112,7 +112,7 @@ export default class Conversation extends Reactive {
   }
 
   send(message, cb) {
-    if (typeof message == 'string') message = {message};
+    if (is.string(message)) message = {message};
     return this.socket.send({method: 'send', connection_id: this.connection_id, conversation_id: this.conversation_id || '', ...message}, cb);
   }
 

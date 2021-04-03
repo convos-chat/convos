@@ -13,7 +13,7 @@
  * @exports findVisibleElements
  * @exports hsvToRgb
  * @exports humanReadableNumber
- * @exports isType
+ * @exports is
  * @exports loadScript
  * @exports modeClassNames
  * @exports q
@@ -257,24 +257,31 @@ export function humanReadableNumber(n, suffix) {
   return (v.match(/\./) ? v : v + '.0') + h[1] + (suffix ? suffix : '');
 }
 
-/**
- * isType is used to check if a value is a given type.
+/*
+ * "is" is an object that can be used to detect data types. It's a bit like
+ * typeof, just simpler to use.
  *
- * - "array" will check if val is an array
- * - "object" will check if typeof is "object" and val is not null.
- * - "undef" will check for either typeof "undefined", or null.
+ * @example
+ * if (is.array(val)) { }
+ * if (is.function(val)) { }
+ * if (is.defined(val)) { }
+ * if (is.number(val)) { }
+ * if (is.object(val)) { }
+ * if (is.string(val)) { }
+ * if (is.stringable(val)) { }
+ * if (is.undefined(val)) { }
  *
- * @param {Any} val Any value, including null
- * @param {String} type Either "object" or "undef"
- * @return {Boolean} True if val is an object
  */
-
-export function isType(val, type) {
-  return type == 'array'  ? Array.isArray(val)
-       : type == 'object' ? typeof val == 'object' && val !== null
-       : type == 'undef'  ? typeof val == 'undefined' || val === null
-       : typeof val == type;
-}
+export const is = {
+  array: (val) => Array.isArray(val),
+  defined: (val) => !is.undefined(val),
+  function: (val) => typeof val === 'function',
+  number: (val) => typeof val === 'number',
+  object: (val) => typeof val === 'object' && val !== null,
+  stringable: (val) => typeof val === 'number' || typeof val === 'string',
+  string: (val) => typeof val === 'string',
+  undefined: (val) => val === null || typeof val === 'undefined',
+};
 
 /**
  * loadScript() can be used to load a JavaScript. Calling it multiple times
@@ -443,7 +450,7 @@ export function str2color(str, nColors = 100) {
  * @returns {Boolean} True if the tag name matches.
  */
 export function tagNameIs(el, tagName) {
-  if (isType(tagName, 'array')) return tagName.find(name => tagNameIs(el, name)) || false;
+  if (is.array(tagName)) return tagName.find(name => tagNameIs(el, name)) || false;
   return el && el.tagName && el.tagName.toLowerCase() === tagName || false;
 }
 

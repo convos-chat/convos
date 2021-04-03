@@ -1,7 +1,7 @@
 import Reactive from '../js/Reactive';
 import qs from 'qs';
 import {activeMenu} from './writable';
-import {closestEl, isType} from '../js/util';
+import {closestEl, is} from '../js/util';
 
 export default class Route extends Reactive {
   constructor() {
@@ -136,7 +136,7 @@ export default class Route extends Reactive {
 
   urlFor(url, query = {}) {
     const base = url.match(/^\w+:/) ? url : url.match(/^#/) ? url : this.basePath + url;
-    const queryString = Object.keys(query).sort().filter(k => !isType(query[k], 'undef')).map(k => k + '=' + encodeURIComponent(query[k])).join('&');
+    const queryString = Object.keys(query).sort().filter(k => is.defined(query[k])).map(k => k + '=' + encodeURIComponent(query[k])).join('&');
     return base + (queryString ? '?' + queryString : '');
   }
 

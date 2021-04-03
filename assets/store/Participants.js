@@ -1,6 +1,6 @@
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
-import {calculateModes, camelize, isType, str2color} from '../js/util';
+import {calculateModes, camelize, is, str2color} from '../js/util';
 import {userModeCharToModeName} from '../js/constants';
 
 export default class Participants extends Reactive {
@@ -62,7 +62,7 @@ export default class Participants extends Reactive {
     participant.id = this._id(participant.nick);
     participant.color = str2color(participant.id);
 
-    if (typeof participant.mode == 'string') participant.modes = calculateModes(userModeCharToModeName, participant.mode);
+    if (is.string(participant.mode)) participant.modes = calculateModes(userModeCharToModeName, participant.mode);
     if (!participant.modes) participant.modes = {};
     if (!participant.nick) participant.nick = participant.name;
 

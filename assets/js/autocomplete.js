@@ -1,6 +1,6 @@
 import {commandOptions} from './commands';
 import {emojis, md} from './md';
-import {regexpEscape} from './util';
+import {is, regexpEscape} from './util';
 
 export const maxNumMatches = 20;
 
@@ -13,7 +13,7 @@ export function fillIn(middle, params) {
 
   const cursorPos = params.append ? params.value.length : params.cursorPos;
   let [before, after] = [params.value.substring(0, cursorPos), params.value.substring(cursorPos)];
-  if (typeof middle == 'undefined') return {before, middle: '', after};
+  if (is.undefined(middle)) return {before, middle: '', after};
 
   if (params.append) {
     before = before.replace(/[ ]$/, '');

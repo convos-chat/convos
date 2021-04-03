@@ -1,5 +1,6 @@
 import Conversation from './Conversation';
 import {api} from '../js/Api';
+import {is} from '../js/util';
 
 export default class Search extends Conversation {
   constructor(params) {
@@ -41,7 +42,7 @@ export default class Search extends Conversation {
   }
 
   send(message) {
-    if (typeof message == 'string') message = {message};
+    if (is.string(message)) message = {message};
     this.emit('send', message);
     return Promise.resolve(message);
   }

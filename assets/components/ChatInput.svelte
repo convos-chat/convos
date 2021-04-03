@@ -3,7 +3,7 @@ import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {chatHelper, videoWindow} from '../js/chatHelpers';
 import {emojis, md} from '../js/md';
-import {extractErrorMessage} from '../js/util';
+import {extractErrorMessage, is} from '../js/util';
 import {fly} from 'svelte/transition';
 import {generateWriteable, nColumns} from '../store/writable';
 import {getContext} from 'svelte';
@@ -88,7 +88,7 @@ function onReady(el) {
     if (e.key == 'Tab') return focusAutocompleteItem(e, e.shiftKey ? -1 : 1);
   });
 
-  setValue(typeof conversation.userInput == 'undefined' ? '' : conversation.userInput);
+  setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
 }
 
 function renderInputHeight() {
@@ -135,7 +135,7 @@ function startAutocomplete(splitValueAt) {
 function updateValueWhenConversationChanges(conversation) {
   if (updateValueWhenConversationChanges.lock == conversation.path) return;
   updateValueWhenConversationChanges.lock = conversation.path;
-  setValue(typeof conversation.userInput == 'undefined' ? '' : conversation.userInput);
+  setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
 }
 
 function uploadFiles(e) {

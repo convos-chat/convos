@@ -1,3 +1,4 @@
+import {is} from './util';
 import {md} from './md';
 
 export const commands = [];
@@ -18,8 +19,8 @@ export function commandOptions({query}) {
 export function normalizeCommand(command) {
   const parts = command.split(/\s/);
   const rule = rewriteRule[parts[0].toLowerCase()];
-  if (typeof rule == 'function') return rule(parts.slice(1));
-  if (rule) return [rule].concat(parts.slice(1)).filter(p => typeof p != 'undefined' && p.length).join(' ');
+  if (is.function(rule)) return rule(parts.slice(1));
+  if (rule) return [rule].concat(parts.slice(1)).filter(p => is.defined(p) && p.length).join(' ');
   return command;
 }
 

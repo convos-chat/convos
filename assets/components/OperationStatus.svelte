@@ -1,5 +1,6 @@
 <script>
 import Operation from '../store/Operation';
+import {is} from '../js/util';
 import {l} from '../store/I18N';
 import {onDestroy} from 'svelte';
 
@@ -16,7 +17,7 @@ onDestroy(() => (tid && clearTimeout(tid)));
 function calculateProgress($op, progress) {
   if (tid) clearTimeout(tid);
   if (!$op.is('loading')) return;
-  if (typeof progress == 'number') return (pct = progress);
+  if (is.number(progress)) return (pct = progress);
   pct = 0;
   tid = setInterval(() => (++pct), 500);
 }

@@ -1,6 +1,6 @@
 <script>
 import {createEventDispatcher} from 'svelte';
-import {findVisibleElements, isType} from '../js/util';
+import {findVisibleElements, is} from '../js/util';
 
 const dispatch = createEventDispatcher();
 const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0, visibleEls: []};
@@ -66,11 +66,11 @@ function onScrolled(infinityEl) {
 }
 
 function scrollTo(pos) {
-  if (isType(pos, 'undef')) return false;
+  if (is.undefined(pos)) return false;
   if (pos == -1) pos = scrollHeight;
-  if (isType(pos, 'string')) pos = state.infinityEl.querySelector(pos);
+  if (is.string(pos)) pos = state.infinityEl.querySelector(pos);
   if (pos && pos.tagName) pos = pos.offsetTop;
-  if (isType(pos, 'undef')) return false;
+  if (is.undefined(pos)) return false;
   if (pos < 0) return false;
   scrolledAt = Date.now();
   state.infinityEl.scrollTop = pos;

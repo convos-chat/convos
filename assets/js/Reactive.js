@@ -11,7 +11,7 @@
  */
 
 import Cookies from 'js-cookie';
-import {isType} from '../js/util';
+import {is} from '../js/util';
 
 export default class Reactive {
   constructor() {
@@ -155,8 +155,8 @@ export default class Reactive {
 
   _cookieProp(prop) {
     const fromStorage = this._cookie(prop);
-    if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef')) this._cookie(prop, prop.value);
+    if (is.defined(fromStorage)) prop.value = fromStorage;
+    if (is.undefined(fromStorage)) this._cookie(prop, prop.value);
     this._updateableProp(prop);
   }
 
@@ -195,14 +195,14 @@ export default class Reactive {
 
   _localStorageProp(prop) {
     const fromStorage = this._localStorage(prop);
-    if (!isType(fromStorage, 'undef')) prop.value = fromStorage;
-    if (isType(fromStorage, 'undef')) this._localStorage(prop, prop.value);
+    if (is.defined(fromStorage)) prop.value = fromStorage;
+    if (is.undefined(fromStorage)) this._localStorage(prop, prop.value);
     this._updateableProp(prop);
   }
 
   _readOnlyProp(prop) {
     if (prop.value === undefined) throw '[' + this.constructor.name + '] Read-only attribute "' + prop.name + '" cannot be undefined';
-    const get = typeof prop.value == 'function' ? prop.value : () => prop.value;
+    const get = is.function(prop.value) ? prop.value : () => prop.value;
     Object.defineProperty(this, prop.name, {get});
   }
 

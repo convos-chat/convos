@@ -1,7 +1,7 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
-import {extractErrorMessage} from '../js/util';
+import {extractErrorMessage, is} from '../js/util';
 import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
 import {notify} from '../js/Notify';
@@ -18,7 +18,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || []);
     this.prop('rw', 'state', params.state || 'queued');
     this.prop('rw', 'wanted_state', params.wanted_state || 'connected');
-    this.prop('rw', 'url', typeof params.url == 'string' ? new ConnectionURL(params.url) : params.url || new ConnectionURL('irc://localhost'));
+    this.prop('rw', 'url', is.string(params.url) ? new ConnectionURL(params.url) : params.url || new ConnectionURL('irc://localhost'));
 
     const nick = this.url.searchParams.get('nick') || 'guest';
     this.prop('rw', 'nick', nick);
@@ -59,7 +59,7 @@ export default class Connection extends Conversation {
   }
 
   send(message) {
-    if (typeof message == 'string') message = {message};
+    if (is.string(message)) message = {message};
 
     const re = new RegExp('^' + this.participants.toArray().map(p => p.id).join('|') + ':', 'i');
     if (message.message.indexOf('/') != 0 && !message.message.match(re)) {
@@ -103,7 +103,7 @@ export default class Connection extends Conversation {
     if (fields.tls && fields.tls_verify) urlParams.append('tls_verify', '1');
 
     const params = {};
-    params.on_connect_commands = typeof fields.on_connect_commands == 'undefined' ? this.on_connect_commands : fields.on_connect_commands.split(/\n\r?/);
+    params.on_connect_commands = is.undefined(fields.on_connect_commands) ? this.on_connect_commands : fields.on_connect_commands.split(/\n\r?/);
     params.on_connect_commands = params.on_connect_commands.filter(cmd => cmd.length);
     params.wanted_state = !fields.hasOwnProperty('want_to_be_connected') ? this.wanted_state : fields.want_to_be_connected ? 'connected' : 'disconnected';
     if (this.connection_id) params.connection_id = this.connection_id;
@@ -113,7 +113,7 @@ export default class Connection extends Conversation {
   }
 
   update(params) {
-    if (params.url && typeof params.url == 'string') params.url = new ConnectionURL(params.url);
+    if (params.url && is.string(params.url)) params.url = new ConnectionURL(params.url);
     return super.update(params);
   }
 

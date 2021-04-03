@@ -9,7 +9,7 @@
 
 import Operation from '../store/Operation';
 import Reactive from './Reactive';
-import {isType} from '../js/util';
+import {is} from '../js/util';
 
 export const api = (id, operationId, params) => {
   const singleton = api.singletons[id] || (api.singletons[id] = new Api());
@@ -106,7 +106,7 @@ class Api extends Reactive {
       while (refPath.length) res = res[refPath.shift()];
     }
 
-    if (isType(res, 'object')) {
+    if (is.object(res)) {
       Object.keys(res).forEach(k => {
         res[k] = this._resolveRef(res[k]);
       });

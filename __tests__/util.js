@@ -1,4 +1,4 @@
-import {calculateModes, camelize, clone, closestEl, debounce, isType, modeClassNames, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {calculateModes, camelize, clone, closestEl, debounce, modeClassNames, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {modeMoniker} from '../assets/js/constants';
 
 test('calculateModes', () => {
@@ -55,29 +55,6 @@ test('debounce, timer', async () => {
   expect(await timer(60)).toBe(true);
   expect(res).toEqual([[5, 6]]);
   expect(cb.debounceTid).toBe(0);
-});
-
-test('isType fallback', () => {
-  expect(isType(42, 'number')).toBe(true);
-  expect(isType('42', 'number')).toBe(false);
-});
-
-test('isType array', () => {
-  expect(isType([42], 'array')).toBe(true);
-  expect(isType('42', 'array')).toBe(false);
-});
-
-test('isType object', () => {
-  expect(isType({}, 'object')).toBe(true);
-  expect(isType(null, 'object')).toBe(false);
-});
-
-test('isType undef', () => {
-  expect(isType(undefined, 'undef')).toBe(true);
-  expect(isType(null, 'undef')).toBe(true);
-  expect(isType({}, 'undef')).toBe(false);
-  expect(isType(false, 'undef')).toBe(false);
-  expect(isType(true, 'undef')).toBe(false);
 });
 
 test('modeClassNames', () => {
