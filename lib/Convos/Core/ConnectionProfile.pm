@@ -10,7 +10,7 @@ has loaded                => sub {false};
 has max_bulk_message_size => sub { $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3 };
 has max_message_length    => sub { $ENV{CONVOS_MAX_MESSAGE_LENGTH}    || 512 };
 has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
-has url              => sub { Mojo::URL->new('irc://localhost') };
+has url              => sub { Mojo::URL->new };
 has webirc_password  => sub { $ENV{sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc shift->name} // '' };
 
 sub find_service_account {
@@ -102,9 +102,11 @@ sub _set_attributes {
 
 sub TO_JSON {
   my $self = shift;
+  my $default_connection =$self->core->settings;
 
   return {
     id                    => $self->id,
+    is_default            => $self->url->host eq $default_connection->host ? true : false,
     max_bulk_message_size => $self->max_bulk_message_size,
     max_message_length    => $self->max_message_length,
     service_accounts      => $self->service_accounts,

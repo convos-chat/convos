@@ -23,7 +23,17 @@ has messages => sub {
 
 has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
-has profile             => sub { $_[0]->user->core->connection_profile({id => $_[0]->id}) };
+has profile             => sub {
+  my $self    = shift;
+  my $profile = $self->user->core->connection_profile({id => $self->id});
+
+  unless ($profile->url->host) {
+    my $url = $self->url->clone->userinfo(undef);
+    $profile->url($url->query(map { ($_ => $url->query->param($_)) } qw(tls tls_verify)));
+  }
+
+  return $profile;
+};
 
 sub url {
   my ($self, $url) = @_;
