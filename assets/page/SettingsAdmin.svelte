@@ -22,18 +22,12 @@ $: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
 
 updateSettingsOp.on('start', req => {
   if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
-  req.body.forced_connection = req.body.forced_connection ? true : false;
   req.body.open_to_public = req.body.open_to_public ? true : false;
   settings('contact', req.body.contact);
   settings('open_to_public', req.body.open_to_public);
   settings('organization_name', req.body.organization_name);
   settings('organization_url', req.body.organization_url);
-
-  user.update({
-    default_connection: req.body.default_connection,
-    forced_connection: req.body.forced_connection,
-    videoService: req.body.video_service,
-  });
+  user.update({videoService: req.body.video_service});
 });
 
 onMount(async () => {
@@ -86,28 +80,15 @@ function updateSettingsFromForm(e) {
       <p class="help" slot="help">{$l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
 
-    <TextField name="default_connection" placeholder="{$l('irc://chat.freenode.net:6697/%%23convos')}" bind:value="{convosSettings.default_connection}">
-      <span slot="label">{$l('Default connection URL')}</span>
-      <p class="help" slot="help">
-        {$l('This is the default connection new users will connect to.')}
-        {$l('The path part is the default channel to join. "%%23convos" means "#convos".')}
-      </p>
+    <TextField name="video_service" placeholder="{$l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
+      <span slot="label">{$l('Video service')}</span>
+      <p class="help" slot="help">{@html $lmd('This should point to a [%1](%2) instance.', 'https://meet.jit.si/', 'https://github.com/jitsi/jitsi-meet')}</p>
     </TextField>
-
-    <Checkbox name="forced_connection" checked="{convosSettings.forced_connection}">
-      <span slot="label">{$l('Force default connection')}</span>
-    </Checkbox>
-    <p class="help">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
 
     <Checkbox name="open_to_public" checked="{convosSettings.open_to_public}">
       <span slot="label">{$l('Registration is open to public')}</span>
     </Checkbox>
     <p class="help">{$l('Tick this box if you want users to be able to register without an invite URL.')}</p>
-
-    <TextField name="video_service" placeholder="{$l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
-      <span slot="label">{$l('Video service')}</span>
-      <p class="help" slot="help">{$l('This should point to a %1 instance.', 'https://meet.jit.si/')}</p>
-    </TextField>
 
     <div class="form-actions">
       <Button icon="save" op="{updateSettingsOp}"><span>{$l('Save settings')}</span></Button>
