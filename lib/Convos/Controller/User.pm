@@ -42,7 +42,7 @@ sub generate_invite_link {
 
   my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
   my $user     = $self->app->core->get_user($self->_email);
-  my $password = $user ? $user->password : $self->settings('local_secret');
+  my $password = $user ? $user->password : $self->app->core->settings->local_secret;
 
   my $params
     = $self->_add_invite_token_to_params(
@@ -65,10 +65,11 @@ sub get {
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
   return $user->get_p($self->req->url->query->to_hash)->then(sub {
-    my $user = shift;
-    $user->{default_connection} = $self->settings('default_connection')->to_string;
-    $user->{forced_connection}  = $self->settings('forced_connection');
-    $user->{video_service}      = $self->settings('video_service');
+    my $user     = shift;
+    my $settings = $self->app->core->settings;
+    $user->{default_connection} = $settings->default_connection->to_string;
+    $user->{forced_connection}  = $settings->forced_connection;
+    $user->{video_service}      = $settings->video_service;
     $self->render(openapi => $user);
   });
 }
@@ -116,7 +117,7 @@ sub register {
 
     # Validate input
     return $self->reply->errors('Convos registration is not open to public.', 401)
-      if !$json->{token} and !$self->settings('open_to_public');
+      if !$json->{token} and !$self->app->core->settings->open_to_public;
 
     # TODO: Add test
     return $self->reply->errors('Email is taken.', 401) if !$json->{token} and $user;
@@ -135,7 +136,7 @@ sub register {
     $user = shift;
     $user->role(give => 'admin') if $self->app->core->n_users == 1;
     $self->session(email => $user->email);
-    $self->backend->connection_create_p(Mojo::URL->new($self->settings('default_connection')));
+    $self->backend->connection_create_p($self->app->core->settings->default_connection->clone);
   })->then(sub {
     my $connection = shift;
     $self->app->core->connect($connection);
@@ -242,7 +243,7 @@ sub _get_user_from_param {
 sub _is_valid_invite_token {
   my ($self, $user, $params) = @_;
 
-  $params->{password} = $user ? $user->password : $self->settings('local_secret');
+  $params->{password} = $user ? $user->password : $self->app->core->settings->local_secret;
   for my $secret (@{$self->app->secrets}) {
     my $generated = $self->_add_invite_token_to_params({%$params}, $secret);
     return 1 if $generated->{token} eq $params->{token};

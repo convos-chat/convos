@@ -30,7 +30,7 @@ sub _clean_json {
 
   my $json  = $self->req->json;
   my %clean = map { ($_ => $json->{$_}) }
-    grep { defined $json->{$_} } @{$self->app->core->settings->public_attributes};
+    grep { defined $json->{$_} } $self->app->core->settings->public_attributes;
 
   my @err;
   if ($clean{contact}) {

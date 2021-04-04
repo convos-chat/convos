@@ -6,16 +6,16 @@
 <html lang="<%= $lang %>">
   <head>
     <!-- social + seo -->
-    % if (settings('organization_name') eq 'Convos') {
+    % if ($organization_name eq 'Convos') {
     <title><%=l '%1 - Convos', title %></title>
     % } else {
-    <title><%=l '%1 - Convos for %2', title, settings('organization_name') %></title>
+    <title><%=l '%1 - Convos for %2', title, $organization_name %></title>
     % }
     %= tag 'meta', name => 'description', content => $social->{description}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@convosby">
     <meta property="og:type" content="object">
-    %= tag 'meta', property => 'og:site_name', content => settings('organization_name')
+    %= tag 'meta', property => 'og:site_name', content => $organization_name
     %= tag 'meta', property => 'og:url', content => $social->{url}
     %= tag 'meta', name => 'twitter:description', property => 'og:description', content => $social->{description}
     %= tag 'meta', name => 'twitter:image:src', property => 'og:image', content => $social->{image}
@@ -46,14 +46,14 @@
     <meta name="theme-color" content="#00451D">
 
     <!-- convos settings -->
-    %= tag 'meta', name => 'contactorganization', content => settings('organization_name')
-    %= tag 'meta', name => 'contactnetworkaddress', content => settings('organization_url')
-    %= tag 'meta', name => 'convos:base_url', content => app->settings('base_url')
-    %= tag 'meta', name => 'convos:contact', content => b64_encode(settings('contact'), '')
-    %= tag 'meta', name => 'convos:existing_user', content => (stash('existing_user') ? 'yes' : 'no')
-    %= tag 'meta', name => 'convos:first_user', content => (stash('first_user') ? 'yes' : 'no')
-    %= tag 'meta', name => 'convos:open_to_public', content => (settings('open_to_public') ? 'yes' : 'no')
-    %= tag 'meta', name => 'convos:start_app', content => stash('start_app')
+    %= tag 'meta', name => 'contactorganization', content => $organization_name
+    %= tag 'meta', name => 'contactnetworkaddress', content => $organization_url
+    %= tag 'meta', name => 'convos:base_url', content => $base_url
+    %= tag 'meta', name => 'convos:contact', content => b64_encode($contact, '')
+    %= tag 'meta', name => 'convos:existing_user', content => $existing_user ? 'yes' : 'no'
+    %= tag 'meta', name => 'convos:first_user', content => $first_user ? 'yes' : 'no'
+    %= tag 'meta', name => 'convos:open_to_public', content => $open_to_public ? 'yes' : 'no'
+    %= tag 'meta', name => 'convos:start_app', content => $start_app
     %= tag 'meta', name => 'convos:status', content => stash('status') || 200
     %= tag 'meta', name => 'version', content => Convos->VERSION
 

@@ -12,10 +12,10 @@ sub create {
   $url->path("/$json->{conversation_id}") if $json->{conversation_id};
   $url->query->param(remote_address => $self->tx->remote_address);
 
-  if ($self->settings('forced_connection')) {
-    my $default_connection = Mojo::URL->new($self->settings('default_connection'));
+  my $settings = $self->app->core->settings;
+  if ($settings->forced_connection) {
     return $self->reply->errors('Will only accept forced connection URL.', 400)
-      if $url->host_port ne $default_connection->host_port;
+      if $url->host_port ne $settings->default_connection->host_port;
   }
 
   return $self->reply->errors('Missing "host" in URL', 400) unless $url->host;
@@ -80,7 +80,7 @@ sub update {
   $url = $connection->url unless $url->host;
   $url->query->param(remote_address => $self->tx->remote_address);
 
-  unless ($self->settings('forced_connection')) {
+  unless ($self->app->core->settings->forced_connection) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $wanted_state = 'reconnect'
       if $wanted_state ne 'disconnected' and not _same_url($url, $connection->url);

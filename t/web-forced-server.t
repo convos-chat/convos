@@ -1,11 +1,11 @@
-#!perl
 use lib '.';
 use t::Helper;
 
-$ENV{CONVOS_BACKEND}           = 'Convos::Core::Backend';
-$ENV{CONVOS_FORCED_IRC_SERVER} = 'chat.example.com:1234';
-$ENV{CONVOS_OPEN_TO_PUBLIC}    = 1;
+$ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
+
+$t->app->core->settings->default_connection(Mojo::URL->new('irc://chat.example.com:1234'))
+  ->forced_connection(true)->open_to_public(true);
 
 $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);

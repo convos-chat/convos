@@ -8,20 +8,14 @@ use Convos::Util qw(DEBUG has_many);
 use Mojo::File;
 use Mojo::Log;
 use Mojo::URL;
-use Mojo::Util 'trim';
+use Mojo::Util qw(trim);
 use Mojolicious::Plugins;
 
-has backend => sub { Convos::Core::Backend->new };
-has home    => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
-has log     => sub { Mojo::Log->new };
-has ready   => 0;
-
-has settings => sub {
-  my $self     = shift;
-  my $settings = Convos::Core::Settings->new;
-  Scalar::Util::weaken($settings->{core} = $self);
-  return $settings;
-};
+has backend  => sub { Convos::Core::Backend->new };
+has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+has log      => sub { Mojo::Log->new };
+has ready    => 0;
+has settings => sub { Convos::Core::Settings->new(core => shift) };
 
 sub connect {
   my ($self, $connection, $reason) = @_;

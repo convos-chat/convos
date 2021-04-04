@@ -6,7 +6,7 @@ This blog is empty.
 % for my $blog (@$blogs) {
 ## <%== $blog->{meta}{heading} || $blog->{meta}{title} %>
 
-<%=l 'Posted by %1', $blog->{meta}{author} || settings('organization_name') %> <%=l 'on' %> [<%= $blog->{meta}{date} %>](<%= url_for $blog->{meta}{url}, class => 'cms-meta__date' %>).
+<%=l 'Posted by %1', $blog->{meta}{author} || $organization_name %> <%=l 'on' %> [<%= $blog->{meta}{date} %>](<%= url_for $blog->{meta}{url}, class => 'cms-meta__date' %>).
 
 <%== $blog->{excerpt} %>
 

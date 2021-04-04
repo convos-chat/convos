@@ -6,37 +6,26 @@ use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;
 
-has base_url => sub { Mojo::URL->new('http://127.0.0.1:8080') };
-has contact  => sub { $ENV{CONVOS_CONTACT} || 'mailto:root@localhost' };
-sub core { shift->{core} or die 'core is required in constructor' }
-has default_connection => \&_build_default_connection;
-has forced_connection  =>
-  sub { $ENV{CONVOS_FORCED_CONNECTION} || $ENV{CONVOS_FORCED_IRC_SERVER} ? true : false };
-sub id {'settings'}
-has local_secret      => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
-has open_to_public    => sub { $ENV{CONVOS_OPEN_TO_PUBLIC} ? true : false };
-has organization_name =>
-  sub { $ENV{CONVOS_ORGANIZATION_NAME} || shift->defaults->{organization_name} };
-has organization_url =>
-  sub { Mojo::URL->new($ENV{CONVOS_ORGANIZATION_URL} || shift->defaults->{organization_url}) };
-
-sub public_attributes {
-  return [
-    qw(contact default_connection forced_connection),
-    qw(open_to_public organization_name organization_url video_service),
-  ];
-}
-
-has session_secrets => \&_build_session_secrets;
-has video_service   => 'https://meet.jit.si/';
-
-sub defaults {
-  return {organization_name => 'Convos', organization_url => 'https://convos.chat'};
-}
+has base_url           => sub { Mojo::URL->new('http://127.0.0.1:8080') };
+has contact            => 'mailto:root@localhost';
+has core               => sub { Convos::Core->new }, weak => 1;
+has id                 => 'settings';
+has default_connection => sub { Mojo::URL->new('irc://chat.freenode.net:6697/%23convos') };
+has forced_connection  => sub {false};
+has local_secret       => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
+has open_to_public     => sub {false};
+has organization_name  => 'Convos';
+has organization_url   => sub { Mojo::URL->new('https://convos.chat') };
+has session_secrets    => sub { shift->_build_session_secrets };
+has video_service      => 'https://meet.jit.si/';
 
 sub load_p {
   my $self = shift;
   return $self->core->backend->load_object_p($self)->then(sub { $self->_set_attributes(shift, 1) });
+}
+
+sub public_attributes {
+  qw(contact default_connection forced_connection open_to_public organization_name organization_url video_service);
 }
 
 sub save_p {
@@ -47,21 +36,6 @@ sub save_p {
 }
 
 sub uri { Mojo::Path->new('settings.json') }
-
-sub _build_default_connection {
-  my $self = shift;
-
-  my @urls = map { $ENV{uc("CONVOS_$_")} // '' }
-    qw(forced_connection forced_irc_server default_connection default_server);
-
-  for my $url (grep {$_} @urls) {
-    next                unless 3 < length $url;      # skip "0", "1" and "yes"
-    $url = "irc://$url" unless $url =~ m!^\w+://!;
-    return Mojo::URL->new($url);
-  }
-
-  return Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
-}
 
 sub _build_session_secrets {
   my $self = shift;
@@ -94,7 +68,7 @@ sub _set_attributes {
 sub TO_JSON {
   my ($self, $persist) = @_;
 
-  my %json = map { ($_ => $self->$_) } @{$self->public_attributes};
+  my %json = map { ($_ => $self->$_) } $self->public_attributes;
   $json{$_} = $self->$_->to_string for qw(base_url default_connection organization_url);
 
   if ($persist) {
@@ -183,15 +157,6 @@ Can be used to customize the title and sidebars.
 Will be used together with a custom L</organization_name> to add links to your
 organization in the Convos UI.
 
-=head2 public_attributes
-
-  $array_ref = $settings->public_attributes;
-
-Returns a list of L</ATTRIBUTES> that are considered open_to_public.
-Currently that is: L</contact>, L</default_connection>,
-L</forced_connection>, L</open_to_public>, L</organization_name> and
-L</organization_url>.
-
 =head2 session_secrets
 
   $array_ref = $settings->session_secrets;
@@ -213,12 +178,6 @@ stored.
 
 =head1 METHODS
 
-=head2 defaults
-
-  $hash_ref = $settings->defaults;
-
-Returns default settings.
-
 =head2 id
 
   $str = $settings->id;
@@ -231,6 +190,14 @@ Always returns "settings". Used by L<Convos::Core::Backend::File> and friends.
 
 Will save L</ATTRIBUTES> to persistent storage.
 See L<Convos::Core::Backend/save_object> for details.
+
+=head2 public_attributes
+
+  @attr_names = $settings->public_attributes;
+
+Returns a list of L</ATTRIBUTES> that are considered open_to_public.  Currently
+that is: L</contact>, L</open_to_public>, L</organization_name> and
+L</organization_url>.
 
 =head2 save_p
 

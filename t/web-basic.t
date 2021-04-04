@@ -42,16 +42,11 @@ $t->text_is('title', 'Better group chat - Convos')
 
 $t->text_like('noscript p', qr{javascript}i);
 $t->text_is('a[href="https://convos.chat/blog"]', 'Blog');
+$t->element_exists('link[rel="stylesheet"]')->element_exists('script');
 
-unless ($ENV{TRAVIS_BUILD_ID}) {
-  $t->element_exists('link[rel="stylesheet"]')->element_exists('script');
-}
-
-$ENV{CONVOS_ORGANIZATION_NAME} = 'Example';
-$ENV{CONVOS_ORGANIZATION_URL}  = 'http://example.com';
-
-$t = t::Helper->t->get_ok('/');
-$t->text_is('title', 'Better group chat - Convos for Example')
+$t->app->core->settings->organization_name('Example')
+  ->organization_url(Mojo::URL->new('http://example.com'));
+$t->get_ok('/')->text_is('title', 'Better group chat - Convos for Example')
   ->element_exists(qq(meta[name="twitter:title"][content="Better group chat"]))
   ->element_exists(qq(meta[property="og:site_name"][content="Example"]))
   ->element_exists(qq(meta[property="og:title"][content="Better group chat"]));

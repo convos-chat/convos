@@ -3,10 +3,10 @@ use lib '.';
 use t::Helper;
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
-$ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://localhost:6123/%23convos';
-$ENV{CONVOS_OPEN_TO_PUBLIC} = 1;
 
 my $t = t::Helper->t;
+$t->app->core->settings->default_connection(Mojo::URL->new('irc://localhost:6123/%23convos'))
+  ->open_to_public(true);
 is $t->app->core->ready, 1, 'ready';
 
 $t->get_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');

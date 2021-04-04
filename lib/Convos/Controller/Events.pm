@@ -68,10 +68,11 @@ sub _event_load {
   my $id = $data->{id} || time;
 
   $self->backend->user->get_p($data->{params} || {})->then(sub {
-    my $user = shift;
-    $user->{default_connection} = $self->settings('default_connection')->to_string;
-    $user->{forced_connection}  = $self->settings('forced_connection');
-    $user->{video_service}      = $self->settings('video_service');
+    my $user     = shift;
+    my $settings = $self->app->core->settings;
+    $user->{default_connection} = $settings->default_connection->to_string;
+    $user->{forced_connection}  = $settings->forced_connection;
+    $user->{video_service}      = $settings->video_service;
     $self->send({json => {event => 'load', id => $id, user => $user}});
   });
 }

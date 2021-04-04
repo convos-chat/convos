@@ -31,10 +31,8 @@ $t->get_ok(
   "/register?email=superman\@example.com&exp=xyz&token=27c4e74740ce492d24ff843f7e788baab010d24")
   ->status_is(410);
 
-$t->post_ok(
-  '/api/user/superman@example.com/invite.html',
-  {'X-Local-Secret' => $t->app->settings('local_secret')}
-)->status_is(200);
+$t->post_ok('/api/user/superman@example.com/invite.html',
+  {'X-Local-Secret' => $t->app->core->settings->local_secret})->status_is(200);
 my $url = $t->tx->res->text;
 $url = $url =~ s!(http.*)!$1! ? $1 : 'http://invalid';
 $url = Mojo::URL->new($url);

@@ -4,10 +4,8 @@ use t::Helper;
 use t::Server::Irc;
 
 my $server = t::Server::Irc->new->start;
-$ENV{CONVOS_DEFAULT_CONNECTION} = $server->url;
-$ENV{CONVOS_OPEN_TO_PUBLIC}     = 1;
-
-my $t = t::Helper->t;
+my $t      = t::Helper->t;
+$t->app->core->settings->default_connection(Mojo::URL->new($server->url))->open_to_public(true);
 
 note 'No user';
 $t->get_ok('/api/user')->status_is(401)->json_is('/errors/0/message', 'Need to log in first.');

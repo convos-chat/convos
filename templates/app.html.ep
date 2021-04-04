@@ -9,8 +9,8 @@
     <div class="hero--text">
       <div class="hero--header hidden-sm"><%= image '/images/convos-light.png', alt => 'Convos' %></div>
       <div class="hero--tagline">
-        % if (settings('organization_name') ne 'Convos') {
-          &mdash; <a href="<%= settings('organization_url') %>"><%=l 'for %1', settings('organization_name') %></a>
+        % if ($organization_name ne 'Convos') {
+          &mdash; <a href="<%= $organization_url %>"><%=l 'for %1', $organization_name %></a>
         % } else {
         &mdash; <%=l 'A better chat experience' %>
         % }
@@ -25,7 +25,7 @@
   <p><i class="fas fa-download"></i> <%=l 'Downloaded Convos.' %></p>
   <p><i class="fas fa-spinner fa-spin"></i> <%=l 'Starting Convos...' %></p>
   <p>
-    %= link_to settings('contact'), class => 'btn', begin
+    %= link_to $contact, class => 'btn', begin
       <i class="fas fa-paper-plane"></i> <%=l 'Contact admin' %>
     % end
   </p>

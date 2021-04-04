@@ -20,7 +20,6 @@ sub register {
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
   $app->helper('js_session'                  => \&_js_session);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
-  $app->helper('settings'                    => \&_settings);
   $app->helper('reply.errors'                => \&_reply_errors);
   $app->helper('reply.exception'             => \&_exception);
   $app->helper('social'                      => \&_social);
@@ -110,15 +109,8 @@ sub _reply_errors {
   return undef;
 }
 
-sub _settings {
-  my ($c, $key) = @_;
-  my $settings = $c->app->core->settings;
-  return $settings->$key if $settings->can($key);
-  return $settings->defaults->{$key};
-}
-
 sub _social {
-  my $c = shift;
+  my $c      = shift;
   my $social = $c->stash->{social} ||= {};
 
   # Defaults
@@ -146,8 +138,8 @@ sub _user_has_admin_rights {
 
   # Special request for forgotten password
   my $remote_address = $c->tx->original_remote_address;
-  my $valid          = $x_local_secret eq $c->settings('local_secret') ? 1       : 0;
-  my $valid_str      = $valid                                          ? 'Valid' : 'Invalid';
+  my $valid     = $x_local_secret eq $c->app->core->settings->local_secret ? 1       : 0;
+  my $valid_str = $valid                                                   ? 'Valid' : 'Invalid';
   $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
   return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';
 }

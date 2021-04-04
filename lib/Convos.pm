@@ -31,7 +31,7 @@ sub startup {
   my $config = $self->_config;
 
   $self->_home_in_share unless -d $self->home->rel_file('public');
-  $self->defaults(debug => $self->mode eq 'development' ? ['info'] : [], lang => 'en');
+  $self->defaults(existing_user => 0, lang => 'en', start_app => '');
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
   $self->sessions->default_expiration(86400 * 7);
@@ -123,14 +123,11 @@ sub _before_dispatch {
   ]);
 
   # Handle mount point like /apps/convos
-  my $base_url = $c->req->headers->header('X-Request-Base');
-  if ($base_url and !$ENV{CONVOS_REVERSE_PROXY}) {
-    return $c->reply->exception(
-      'X-Request-Base header was seen, but CONVOS_REVERSE_PROXY is not set');
-  }
-  elsif ($base_url) {
-    $base_url = Mojo::URL->new($base_url);
-    $c->req->url->base($base_url);
+  my ($base_url, $env_missing) = ($c->req->headers->header('X-Request-Base'), 0);
+  if ($base_url) {
+    $base_url    = Mojo::URL->new($base_url);
+    $env_missing = !$ENV{CONVOS_REVERSE_PROXY};
+    $c->req->url->base($base_url) if $ENV{CONVOS_REVERSE_PROXY};
   }
   elsif ($ENV{CONVOS_REQUEST_BASE}) {
     $base_url = Mojo::URL->new($ENV{CONVOS_REQUEST_BASE});
@@ -144,7 +141,13 @@ sub _before_dispatch {
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 
   # Used when registering the first user
-  $c->stash(first_user => 1) if !$c->session('email') and !$c->app->core->n_users;
+  $c->stash(first_user => !$c->session('email') && !$c->app->core->n_users);
+
+  # App settings
+  $c->stash($settings->TO_JSON);
+
+  $c->reply->exception('X-Request-Base header was seen, but CONVOS_REVERSE_PROXY is not set')
+    if $env_missing;
 }
 
 sub _config {

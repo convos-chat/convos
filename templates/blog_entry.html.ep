@@ -9,7 +9,7 @@
 <article class="cms-main">
   <h1 class="cms-header"><%= $doc->{meta}{heading} || $doc->{meta}{title} %></h1>
   <div class="cms-meta">
-    <span class="cms-meta__author"><%=l 'Posted by %1', $doc->{meta}{author} || settings('organization_name') %></span>
+    <span class="cms-meta__author"><%=l 'Posted by %1', $doc->{meta}{author} || $organization_name %></span>
     <%=l 'on' %>
     <%= link_to $doc->{meta}{date}, $doc->{meta}{url}, class => 'cms-meta__date' %>.
   </div>
