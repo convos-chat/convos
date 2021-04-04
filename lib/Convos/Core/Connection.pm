@@ -25,7 +25,7 @@ has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
 has profile             => sub {
   my $self    = shift;
-  my $profile = $self->user->core->connection_profile({id => $self->id});
+  my $profile = $self->user->core->connection_profile({url => $self->url});
 
   unless ($profile->url->host) {
     my $url = $self->url->clone->userinfo(undef);

@@ -23,7 +23,7 @@ $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok
 
 $connection->disconnect_p->wait;
 
-my $profile = $core->get_connection_profile('irc-example')->webirc_password('secret_passphrase');
+my $profile = $core->get_connection_profile('irc-localhost')->webirc_password('secret_passphrase');
 is $connection->profile->id, $profile->id, 'shared profile id';
 is $connection->profile->webirc_password, $profile->webirc_password,
   'shared profile webirc_password';

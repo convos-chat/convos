@@ -1,6 +1,7 @@
 package Convos::Core::ConnectionProfile;
 use Mojo::Base -base;
 
+use Convos::Util qw(pretty_connection_name);
 use List::Util qw(first);
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(trim);
@@ -11,7 +12,12 @@ has max_bulk_message_size => sub { $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3 };
 has max_message_length    => sub { $ENV{CONVOS_MAX_MESSAGE_LENGTH}    || 512 };
 has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
 has url              => sub { Mojo::URL->new };
-has webirc_password  => sub { $ENV{sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc shift->name} // '' };
+
+has webirc_password => sub {
+  my $self = shift;
+  my $key  = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc +(split '-', $self->id)[1];
+  return $ENV{$key} // '';
+};
 
 sub find_service_account {
   my $self   = shift;
@@ -20,15 +26,19 @@ sub find_service_account {
   return $found && $needle{$found};
 }
 
-sub id { ($_[1] || $_[0])->{id} }
+sub id {
+  my $from = $_[1] || $_[0];
+  return $from->{id} ||= do {
+    my $url = Mojo::URL->new($from->{url});
+    join '-', $url->scheme, pretty_connection_name($url->host);
+  };
+}
 
 sub load_p {
   my $self = shift;
   return $self->core->backend->load_object_p($self, @_)
     ->then(sub { $self->_set_attributes(shift, 1)->loaded(true) });
 }
-
-sub name { +(split '-', $_[0]->id)[1] || $_[0]->url->host }
 
 sub save_p {
   my $self = shift;
@@ -101,18 +111,23 @@ sub _set_attributes {
 }
 
 sub TO_JSON {
-  my $self = shift;
-  my $default_connection =$self->core->settings;
-
-  return {
+  my ($self, $persist) = @_;
+  my %json = (
     id                    => $self->id,
-    is_default            => $self->url->host eq $default_connection->host ? true : false,
     max_bulk_message_size => $self->max_bulk_message_size,
     max_message_length    => $self->max_message_length,
     service_accounts      => $self->service_accounts,
     url                   => $self->url->to_string,
     webirc_password       => $self->webirc_password,
-  };
+  );
+
+  unless ($persist) {
+    my $settings = $self->core->settings;
+    $json{is_default} = $self->url->host eq $settings->default_connection->host ? true : false;
+    $json{is_forced}  = $json{is_default} && $settings->forced_connection       ? true : false;
+  }
+
+  return \%json;
 }
 
 1;
@@ -191,12 +206,6 @@ Returns the first match in L</service_accounts> or C<undef>.
   $p = $connection_settings->load_p;
 
 Load settings from L<Convos::Core::Backend>.
-
-=head2 name
-
-  $str = $connection_settings->name;
-
-The name part from L</id>.
 
 =head2 save_p
 

@@ -212,6 +212,50 @@ paths:
           schema:
             $ref: '#/definitions/Connection'
 
+  /connection-profiles:
+    get:
+      operationId: listConnectionProfiles
+      summary: List all connection profiles.
+      tags: [ connection, connection-profile ]
+      x-mojo-to: connection_profile#list
+      responses:
+        '200':
+          description: List of profiles.
+          schema:
+            type: object
+            properties:
+              profiles:
+                type: array
+                items:
+                  $ref: '#/definitions/ConnectionProfile'
+    post:
+      operationId: saveConnectionProfile
+      summary: Update or create a profile.
+      tags: [ connection, connection-profile ]
+      x-mojo-to: connection_profile#save
+      parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ConnectionProfile'
+      responses:
+        '200':
+          description: Success.
+          schema:
+            $ref: '#/definitions/ConnectionProfile'
+  /connection-profiles/{id}:
+    delete:
+      operationId: removeConnectionProfile
+      summary: Remove a connection profile.
+      tags: [ connection, connection-profile ]
+      x-mojo-to: connection_profile#remove
+      responses:
+        '200':
+          description: Success.
+          schema:
+            type: object
+
   /conversations:
     get:
       operationId: listConversations
@@ -708,6 +752,32 @@ definitions:
       wanted_state:
         description: Wanted connection state
         enum: [ connected, disconnected ]
+        type: string
+
+  ConnectionProfile:
+    type: object
+    required: [ url ]
+    properties:
+      is_default:
+        type: boolean
+      is_forced:
+        type: boolean
+      url:
+        type: string
+        format: uri
+      max_bulk_message_size:
+        type: integer
+        minimum: 1
+        maximum: 32
+      max_message_length:
+        type: integer
+        minimum: 32
+        maximum: 2048
+      service_accounts:
+        type: array
+        items:
+          type: string
+      webirc_password:
         type: string
 
   Conversation:

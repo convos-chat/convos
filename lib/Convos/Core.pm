@@ -71,6 +71,11 @@ sub new {
   return $self;
 }
 
+sub remove_connection_profile_p {
+  my ($self, $profile) = @_;
+  return $self->backend->delete_object_p($profile)->then(sub {$profile});
+}
+
 sub remove_user_p {
   my ($self, $user) = @_;
   my @p = $user->connections->map(sub { $user->remove_connection_p($_) })->each;

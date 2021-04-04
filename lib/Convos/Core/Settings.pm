@@ -34,8 +34,7 @@ sub save_p {
   $self->_set_attributes(shift, 0) if ref $_[0] eq 'HASH';
 
   my $url = $self->default_connection;
-  $self->core->connection_profile(
-    {id => Convos::Core::Connection->id({url => $url}), url => $url->clone});
+  $self->core->connection_profile({url => $url->clone});
 
   my $p = $self->core->backend->save_object_p($self, @_);
   return $p;
@@ -46,8 +45,7 @@ sub uri { Mojo::Path->new('settings.json') }
 sub _build_default_connection {
   my $self = shift;
   my $url  = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
-  $self->core->connection_profile(
-    {id => Convos::Core::Connection->id({url => $url}), url => $url->clone});
+  $self->core->connection_profile({url => $url->clone});
   return $url;
 }
 
