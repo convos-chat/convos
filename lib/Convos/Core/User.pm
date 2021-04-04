@@ -68,6 +68,22 @@ sub get_p {
   return @p ? Mojo::Promise->all(@p)->then(sub {$res}) : Mojo::Promise->resolve($res);
 }
 
+sub load_connections_p {
+  my $self = shift;
+
+  return $self->core->backend->connections_p($self)->then(sub {
+    my $connections = shift;
+
+    for (@$connections) {
+      my $connection = $self->connection($_);
+      $self->core->connect($connection)
+        if $connection->wanted_state eq 'connected' and !$ENV{CONVOS_SKIP_CONNECT};
+    }
+
+    return $self;
+  });
+}
+
 sub role {
   my ($self, $action, $role) = @_;
 
@@ -269,6 +285,12 @@ Used to retrive information about the current user.
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a user.
+
+=head2 load_connections_p
+
+  $p = $user->load_connections_p;
+
+Used to load all connections for a user.
 
 =head2 new
 

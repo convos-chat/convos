@@ -77,35 +77,20 @@ sub start {
   my $self = shift;
   return $self if !@_ and $self->{started}++;
 
-  my ($first_user, $has_admin, $uid) = (undef, 0, 0);
   $self->backend->users_p->then(sub {
-    my $users = shift;
+    my ($users, $first_user, $has_admin, @p) = (shift);
 
-    my (@p, @users);
     for (@$users) {
       my $user = $self->user($_);
       $first_user ||= $user;
       $has_admin++ if $user->role(has => 'admin');
-      push @p,     $self->backend->connections_p($user);
-      push @users, $user;
-    }
-
-    return Mojo::Promise->all(Mojo::Promise->resolve(\@users), @p);
-  })->then(sub {
-    my ($users, @connections_for_users) = map { $_->[0] } @_;
-
-    for my $connections (@connections_for_users) {
-      my $user = shift @$users;
-
-      for (@$connections) {
-        my $connection = $user->connection($_);
-        $self->connect($connection)
-          if !$ENV{CONVOS_SKIP_CONNECT} and $connection->wanted_state eq 'connected';
-      }
+      push @p, $user->load_connections_p;
     }
 
     # Upgrade the first registered user (back compat)
     $first_user->role(give => 'admin') if $first_user and !$has_admin;
+    return @p && Mojo::Promise->all(@p);
+  })->then(sub {
     $self->ready(1);
   })->catch(sub {
     warn "start() FAILED $_[0]\n";
