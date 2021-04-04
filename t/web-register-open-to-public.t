@@ -42,6 +42,6 @@ $t->get_ok("/register?uri=$url")->status_is(302)
 $url =~ s!127.0.0.1!irc.example.com!;
 $t->get_ok("/register?uri=$url")->status_is(302)
   ->header_is(
-  Location => '/settings/connection?uri=irc%3A%2F%2Firc.example.com%3A6123%2F%2523superduper');
+  Location => '/settings/connections?uri=irc%3A%2F%2Firc.example.com%3A6123%2F%2523superduper');
 
 done_testing;

@@ -56,7 +56,7 @@ function defaultsToForm() {
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
   user.removeConversation(connection);
-  route.go('/settings/connection');
+  route.go('/settings/connections');
 }
 
 async function saveConnection() {
@@ -147,7 +147,7 @@ async function saveConnection() {
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
       <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}
-      <Button icon="save" op="{createConnectionOp}"><span>{$l('Create')}</span></Button>
+      <Button icon="network-wired" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>
