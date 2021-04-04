@@ -1,0 +1,10 @@
+$flex-basis-width: (
+  30: 30%,
+  50: 50%
+);
+
+@each $name, $width in $flex-basis-width {
+  .flex-basis-#{$name} {
+    flex-basis: $width;
+  }
+}

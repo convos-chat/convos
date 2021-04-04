@@ -61,7 +61,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
       <SelectField name="connection_id" options="{connectionOptions}" placeholder="{$l('Select...')}" bind:value="{connectionId}">
         <span slot="label">{$l('Connection')}</span>
       </SelectField>
-      <div class="has-remaining-space">
+      <div class="flex-basis-30">
         <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableConversations.done === false}"><span>{$l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
       </div>
     </div>
@@ -72,7 +72,7 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
         on:keyup="{debouncedLoadConversations}">
         <span slot="label">{$l('Conversation name')}</span>
       </TextField>
-      <div class="has-remaining-space">
+      <div class="flex-basis-30">
         <Button icon="comment" disabled="{!connectionId || !conversationId}"><span>{$l('Add')}</span></Button>
       </div>
     </div>
