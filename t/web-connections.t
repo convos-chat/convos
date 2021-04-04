@@ -25,7 +25,7 @@ $t->post_ok('/api/connections', json => {url => 'irc://irc.example.com:6667'})->
   ->json_is('/errors/0/message', 'Connection already exists.');
 
 $t->post_ok('/api/connections', json => {url => 'foo://example.com'})->status_is(400)
-  ->json_is('/errors/0/message', 'Protocol "foo" is not supported.');
+  ->json_is('/errors/0/message', 'Convos::Core::Connection::Foo is not supported.');
 
 $t->get_ok('/api/connections')->status_is(200)->json_is(
   '/connections/0',
@@ -34,7 +34,6 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
     name                => 'example',
     me                  => {authenticated => false, capabilities => {}},
     on_connect_commands => [],
-    protocol            => 'irc',
     service_accounts    => [qw(chanserv nickserv)],
     state               => 'disconnected',
     url                 => 'irc://irc.example.com:6667',

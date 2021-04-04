@@ -9,7 +9,7 @@ use Convos::Core;
 my $server     = t::Server::Irc->new->start;
 my $core       = Convos::Core->new;
 my $user       = $core->user({email => 'nick.young@example.com'});
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 my $nick       = '';
 
 $connection->on(state => sub { return unless $_[1] eq 'me'; $nick = $_[2]->{nick}; });

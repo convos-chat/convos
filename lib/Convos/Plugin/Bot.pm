@@ -1,6 +1,7 @@
 package Convos::Plugin::Bot;
 use Mojo::Base 'Convos::Plugin';
 
+use Convos::Core::Connection;
 use Convos::Util qw($CHANNEL_RE DEBUG generate_secret pretty_connection_name require_module yaml);
 use Mojo::JSON::Pointer;
 use Mojo::Util qw(camelize);
@@ -91,16 +92,15 @@ sub _ensure_connection {
   my ($self, $config) = @_;
   return unless $config->{url};
 
-  my $url           = Mojo::URL->new($config->{url});
-  my $user          = $self->user;
-  my %attrs         = (name => pretty_connection_name($url), protocol => $url->scheme);
-  my $connection_id = join '-', @attrs{qw(protocol name)};
-  $self->config->data->{connection}{$connection_id} = $config;
+  my $url   = Mojo::URL->new($config->{url});
+  my $user  = $self->user;
+  my %attrs = (name => pretty_connection_name($url), url => $url);
+  $attrs{connection_id} = Convos::Core::Connection->id(\%attrs);
+  $self->config->data->{connection}{$attrs{connection_id}} = $config;
 
-  my $has_connection = $user->get_connection($connection_id) && 1;
+  my $has_connection = $user->get_connection($attrs{connection_id}) && 1;
   my $connection     = $user->connection(\%attrs);
   $connection->on(state => sub { $self and $self->_on_state(@_) }) unless $has_connection;
-  $connection->url($url);
   $connection->wanted_state($config->{wanted_state} || 'connected');
 
   my $conversations = $config->{conversations} || {};

@@ -12,7 +12,7 @@ my $user   = $core->user({email => 'superwoman@example.com'});
 $user->save_p->$wait_success;
 
 note 'external';
-my $connection = $user->connection({name => 'example', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://example'});
 $connection->url->userinfo('superwoman:superduper');
 $connection->save_p->$wait_success;
 

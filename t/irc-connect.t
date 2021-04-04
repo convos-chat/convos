@@ -15,7 +15,7 @@ my $core   = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user   = $core->user({email => 'test.user@example.com'});
 $user->save_p->$wait_success;
 
-my $connection = $user->connection({name => 'example', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://example'});
 $connection->conversation({name => '#convos'});
 $connection->conversation({name => 'private_ryan'});
 $connection->save_p->$wait_success;

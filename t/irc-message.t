@@ -12,7 +12,7 @@ use Convos::Core::Backend::File;
 my $server     = t::Server::Irc->new->start;
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user       = $core->user({email => 'superman@example.com'});
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 
 my $user_home = $core->home->child('superman@example.com');
 
@@ -163,7 +163,7 @@ $connection->send_p('#convos' => ' ')->$wait_success('send_p single space');
 like slurp_log('#convos'), qr{<superman>\s\s\r?\n}, 'single space in log';
 
 note 'paste';
-my $long_line = join '', map {$_} 0 .. 150;
+my $long_line            = join '', map {$_} 0 .. 150;
 my $long_line_with_space = "$long_line $long_line";
 $long_line = "$long_line$long_line";
 my @sent = (

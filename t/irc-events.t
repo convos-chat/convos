@@ -8,7 +8,7 @@ use Convos::Core;
 my $server     = t::Server::Irc->new->start;
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend');
 my $user       = $core->user({email => 'superman@example.com'});
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 
 $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
   ->client_event_ok('_irc_event_rpl_welcome')->process_ok('welcome');

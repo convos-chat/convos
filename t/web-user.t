@@ -48,7 +48,7 @@ $t->get_ok('/api/user')->status_is(200)->json_is('/email', 'superman@example.com
 my $user = $t->app->core->get_user('superman@example.com');
 $user->unread(4);
 
-$user->connection({name => 'localhost', protocol => 'irc'})->conversation({name => '#convos'})
+$user->connection({connection_id => 'irc-localhost'})->conversation({name => '#convos'})
   ->unread(42);
 $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200);
 cmp_deeply(
@@ -68,7 +68,6 @@ cmp_deeply(
       me                  => {authenticated => false, capabilities => {}, nick => 'superman'},
       name                => 'localhost',
       on_connect_commands => [],
-      protocol            => 'irc',
       service_accounts    => [qw(chanserv nickserv)],
       state               => re(qr{disconnected|queued}),
       url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',

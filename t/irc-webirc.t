@@ -11,7 +11,7 @@ my $core   = Convos::Core->new;
 my $user   = $core->user({email => 'superwoman@example.com'});
 $user->save_p->$wait_success;
 
-my $connection = $user->connection({name => 'example', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://example'});
 $connection->save_p->$wait_success;
 
 my @webirc;

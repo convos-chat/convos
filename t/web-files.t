@@ -39,7 +39,7 @@ $t->get_ok("/api/file/1/1000000000000000")->status_is(404);
 $t->get_ok("/file/1/1000000000000000")->status_is(404);
 
 note 'set up connection';
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
   ->client_event_ok('_irc_event_rpl_welcome')->process_ok;
 

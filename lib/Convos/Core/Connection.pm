@@ -2,7 +2,7 @@ package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Conversation;
-use Convos::Util qw(DEBUG generate_cert_p has_many);
+use Convos::Util qw(DEBUG generate_cert_p has_many pretty_connection_name);
 use Mojo::JSON qw(false true);
 use Mojo::Loader 'load_class';
 use Mojo::Promise;
@@ -21,23 +21,15 @@ has messages => sub {
   return $conversation;
 };
 
-sub name { shift->{name} }
+has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
 has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
-has protocol         => 'null';
 has wanted_state     => 'connected';
 
 sub url {
-  my $self = shift;
-
-  # Set
-  return $self->_set_url(shift) if @_;
-
-  # Default value
-  $self->_set_url($self->{url} || sprintf '%s://localhost', $self->protocol)
-    unless ref $self->{url};
-
-  # Get
+  my ($self, $url) = @_;
+  return $self->tap(sub { $self->{url} = ref $url ? $url : Mojo::URL->new($url) }) if @_ == 2;
+  return $self->{url} = Mojo::URL->new($self->{url} || 'localhost') unless ref $self->{url};
   return $self->{url};
 }
 
@@ -79,7 +71,13 @@ has_many conversations => 'Convos::Core::Conversation' => sub {
 
 sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
 
-sub id { my $from = $_[1] || $_[0]; lc join '-', @$from{qw(protocol name)} }
+sub id {
+  my $from = $_[1] || $_[0];
+  return $from->{connection_id} || do {
+    my $url = Mojo::URL->new($from->{url});
+    join '-', $url->scheme, pretty_connection_name($url->host);
+  };
+}
 
 sub new {
   my $self          = shift->SUPER::new(@_);
@@ -191,13 +189,6 @@ sub _remove_conversation {
   return $self;
 }
 
-sub _set_url {
-  my $self = shift;
-  my $url  = ref $_[0] ? shift : Mojo::URL->new(shift);
-  $self->{url} = $url;
-  return $self;
-}
-
 sub _stream {
   my ($self, $loop, $err, $stream) = @_;
   delete $self->{connecting};
@@ -296,7 +287,7 @@ sub _write {
 sub TO_JSON {
   my ($self, $persist) = @_;
   my $url  = $self->url;
-  my %json = map { ($_, $self->$_) } qw(name protocol wanted_state);
+  my %json = map { ($_, $self->$_) } qw(name wanted_state);
 
   $json{connection_id}       = $self->id;
   $json{on_connect_commands} = $self->on_connect_commands;
@@ -420,12 +411,6 @@ Holds a list of commands to execute when first connected.
   $str = $conn->name;
 
 Holds the name of the connection.
-
-=head2 protocol
-
-  $str = $conn->protocol;
-
-Holds the protocol name.
 
 =head2 service_accounts
 

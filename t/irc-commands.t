@@ -11,7 +11,7 @@ my $core   = Convos::Core->new(backend => 'Convos::Core::Backend');
 $core->start;
 
 my $user       = $core->user({email => 'superman@example.com'});
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 my ($err, $p, $res);
 
 my @state;

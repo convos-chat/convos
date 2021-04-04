@@ -17,7 +17,7 @@ my $spool = Convos::Plugin::Bot::Action::Spool->new;
 $spool->register($bot, {});
 $spool->_dir->child('whatever.yml')->spurt(test_file());
 
-my $connection = $bot->user->connection({protocol => 'irc', name => 'localhost'});
+my $connection = $bot->user->connection({url => 'irc://localhost'});
 my $event;
 $server->client($connection)->server_event_ok('_irc_event_privmsg', sub { $event = pop })
   ->process_ok;

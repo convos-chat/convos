@@ -5,10 +5,10 @@ use Convos::Core;
 
 my $core       = Convos::Core->new;
 my $user       = $core->user({email => 'test@example.com'});
-my $connection = $user->connection({name => 'whatever', protocol => 'Irc'});
+my $connection = $user->connection({url => 'irc://whatever'});
 
-ok !$connection->conversation({name => '#foo'})->is_private, 'channel';
-ok $connection->conversation({name => 'marcus'})->is_private, 'person';
+ok !$connection->conversation({name => '#foo'})->is_private,   'channel';
+ok $connection->conversation({name  => 'marcus'})->is_private, 'person';
 ok !$connection->{conversation}{'#foo'}, 'no conversation on get';
 
 my $conversation = $connection->get_conversation('#foo');

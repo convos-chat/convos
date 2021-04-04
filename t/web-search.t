@@ -17,7 +17,7 @@ $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', true)
   ->json_is('/messages', []);
 
 note 'search everything';
-my $connection   = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection   = $user->connection({url => 'irc://localhost'});
 my $conversation = $connection->conversation({name => '#convos'});
 $t->get_ok('/api/search?match=xyz')->status_is(200)->json_is('/end', false)
   ->json_is('/messages', []);

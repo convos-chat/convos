@@ -19,7 +19,7 @@ for my $t ($th, $ws) {
 }
 
 $ws->websocket_ok('/events');
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 $server->client($connection)->server_event_ok('_irc_event_nick')->process_ok;
 
 subtest connect => sub {

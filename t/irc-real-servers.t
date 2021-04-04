@@ -28,7 +28,7 @@ for my $host (sort keys %hosts) {
   my ($err, $name) = ('err was not set', $host);
   $name =~ s!:\d+$!!;
   $name =~ s!\W!-!g;
-  my $connection = $user->connection({name => $name, protocol => 'irc'});
+  my $connection = $user->connection({url => "irc://$name"});
   $connection->url->parse("irc://$host");
   $connection->connect(sub { connected($host, @_) });
   note "connecting to $host ...";

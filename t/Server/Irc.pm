@@ -81,9 +81,9 @@ sub server_write_ok {
 sub start {
   my $self = shift;
 
-  my $url        = $self->url;
-  my %conn_attrs = (name => 'server', protocol => 'irc', url => $url);
-  $conn_attrs{user} = Convos::Core::User->new(email => 'server@test');
+  my $url = $self->url;
+  my %conn_attrs
+    = (name => 'server', user => Convos::Core::User->new(email => 'server@test'), url => $url);
 
   Mojo::IOLoop->server(
     {address => $url->host, port => $url->port},

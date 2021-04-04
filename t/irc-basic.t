@@ -4,10 +4,9 @@ use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 
-my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
-my $user = $core->user({email => 'test.user@example.com'});
-my $connection
-  = $user->connection({name => 'localhost', protocol => 'irc', url => 'irc://127.0.0.1'});
+my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
+my $user       = $core->user({email => 'test.user@example.com'});
+my $connection = $user->connection({url => 'irc://127.0.0.1'});
 my $settings_file
   = File::Spec->catfile($ENV{CONVOS_HOME}, qw(test.user@example.com irc-localhost connection.json));
 
@@ -25,7 +24,6 @@ cmp_deeply(
     me                  => {authenticated => false, capabilities => {}},
     name                => 'localhost',
     on_connect_commands => [],
-    protocol            => 'irc',
     service_accounts    => [qw(chanserv nickserv)],
     state               => 'queued',
     url                 => 'irc://127.0.0.1',

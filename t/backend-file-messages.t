@@ -18,7 +18,7 @@ File::Path::remove_tree($t::Helper::CONVOS_HOME);
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 $user->save_p->$wait_success('save_p');
 
-my $connection   = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection   = $user->connection({url => 'irc://localhost'});
 my $conversation = $connection->conversation({name => '#convos'});
 
 my $ts_re = qr/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;

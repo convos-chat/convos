@@ -15,13 +15,13 @@ $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
 $user->save_p->$wait_success('save_p');
 
 # 1: oragono.local connects instantly
-$user->connection({name => 'oragono', protocol => 'irc'})
+$user->connection({connection_id => 'irc-oragono'})
   ->tap(sub { shift->url->parse('irc://oragono.local') })->save_p->$wait_success('save_p');
 
 # 2: instant or queued
-$user->connection({name => 'magnet', protocol => 'irc'})
+$user->connection({connection_id => 'irc-magnet'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save_p->$wait_success('save_p');
-$user->connection({name => 'magnet2', protocol => 'irc'})
+$user->connection({connection_id => 'irc-magnet2'})
   ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save_p->$wait_success('save_p');
 
 note 'mramberg connections';
@@ -29,15 +29,15 @@ $user = $core->user({email => 'mramberg@cpan.org', uid => 32});
 $user->save_p->$wait_success('save_p');
 
 # 0: will not be connected
-my $conn_0 = $user->connection({name => 'oragono.local', protocol => 'Irc'});
+my $conn_0 = $user->connection({connection_id => 'irc-oragono.local'});
 $conn_0->wanted_state('disconnected')->url->parse('irc://127.0.0.1');
 $conn_0->save_p->$wait_success('save_p');
 
 # 2: instant or queued
-$user->connection({name => 'freenode', protocol => 'irc'})
+$user->connection({url => 'irc://freenode'})
   ->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save_p;
-$user->connection({name => 'magnet', protocol => 'irc'})
-  ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save_p;
+$user->connection({url => 'irc://magnet'})->tap(sub { shift->url->parse('irc://irc.perl.org') })
+  ->save_p;
 
 # ^^ total connections to connect
 my $expected = 5;

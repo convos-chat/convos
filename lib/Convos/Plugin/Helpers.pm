@@ -1,7 +1,7 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util 'pretty_connection_name';
+use Convos::Util qw(pretty_connection_name);
 use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json false true);
@@ -56,10 +56,10 @@ sub _backend_connection_create_p {
     unless my $name = pretty_connection_name($url);
 
   return Mojo::Promise->reject('Connection already exists.')
-    if $user->get_connection({protocol => $url->scheme, name => $name});
+    if $user->get_connection({url => $url});
 
   eval {
-    my $connection = $user->connection({name => $name, protocol => $url->scheme, url => $url});
+    my $connection = $user->connection({name => $name, url => $url});
     $connection->conversation({name => $url->path->[0]}) if $url->path->[0];
     return $connection->save_p;
   } or do {

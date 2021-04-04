@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.08 Not Released
+ - Removed "protocol" from Convos::Core::Connection
  - Simpler Convos::Core::Settings by removing support for deprecated environment variables
  - Moved "remote_address" tracking from connection URL to user object
 

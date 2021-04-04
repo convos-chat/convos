@@ -79,7 +79,6 @@ sub update {
   $url = $connection->url unless $url->host;
 
   unless ($self->app->core->settings->forced_connection) {
-    $url->scheme($json->{protocol} || $connection->url->scheme || '');
     $wanted_state = 'reconnect'
       if $wanted_state ne 'disconnected' and not _same_url($url, $connection->url);
     $connection->url($url);

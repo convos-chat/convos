@@ -7,7 +7,7 @@ use Crypt::Eksblowfish::Bcrypt ();
 use File::Path                 ();
 use Mojo::Date;
 use Mojo::Promise;
-use Mojo::Util 'trim';
+use Mojo::Util qw(camelize trim);
 
 use constant BCRYPT_BASE_SETTINGS => do {
   my $cost = sprintf '%02i', 8;
@@ -27,15 +27,21 @@ has unread => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
-  my $class = 'Convos::Core::Connection';
+  my $connection_class = 'Convos::Core::Connection';
 
-  if ($attrs->{protocol}) {
-    my $protocol = Mojo::Util::camelize($attrs->{protocol} || '');
-    $class = "Convos::Core::Connection::$protocol";
-    eval "require $class;1" or die qq(Protocol "$attrs->{protocol}" is not supported: $@);
+  if ($attrs->{connection_id}) {
+    $connection_class = sprintf 'Convos::Core::Connection::%s',
+      camelize(+(split '-', $attrs->{connection_id})[0]);
+  }
+  elsif ($attrs->{url}) {
+    my $url = Mojo::URL->new($attrs->{url});
+    $connection_class = sprintf 'Convos::Core::Connection::%s', camelize($url->scheme);
   }
 
-  my $connection = $class->new($attrs);
+  die qq($connection_class is not supported: $@)
+    if !$connection_class->can('new')
+    and !eval "require $connection_class;1";
+  my $connection = $connection_class->new($attrs);
   Scalar::Util::weaken($connection->{user} = $self);
   warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
   $self->core->backend->emit(connection => $connection);

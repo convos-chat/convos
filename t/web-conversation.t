@@ -11,9 +11,9 @@ $user->save_p->$wait_success('save_p');
 $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
   ->status_is(200);
 
-$user->connection({name => 'localhost', protocol => 'irc'})->state(connected => '');
+$user->connection({url => 'irc://localhost'})->state(connected => '');
 
-my $connection = $user->connection({name => 'localhost', protocol => 'irc'});
+my $connection = $user->connection({url => 'irc://localhost'});
 $connection->_irc_event_privmsg({
   command => 'privmsg',
   prefix  => 'Supergirl!super.girl@i.love.debian.org',
@@ -33,8 +33,8 @@ $t->get_ok('/api/conversations')->status_is(200)->json_is(
   ]
 );
 
-$user->connection({name => 'example', protocol => 'irc'})
-  ->conversation({name => '#superheroes', frozen => ''})->unread(34);
+$user->connection({url => 'irc://example'})->conversation({name => '#superheroes', frozen => ''})
+  ->unread(34);
 $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->json_is(
   '/connections',
   [
@@ -43,10 +43,9 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
       me                  => {authenticated => false, capabilities => {}},
       name                => 'example',
       on_connect_commands => [],
-      protocol            => 'irc',
       service_accounts    => [qw(chanserv nickserv)],
       state               => 'queued',
-      url                 => 'irc://localhost',
+      url                 => 'irc://example',
       wanted_state        => 'connected',
     },
     {
@@ -54,7 +53,6 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
       me                  => {authenticated => false, capabilities => {}},
       name                => 'localhost',
       on_connect_commands => [],
-      protocol            => 'irc',
       service_accounts    => [qw(chanserv nickserv)],
       state               => 'connected',
       url                 => 'irc://localhost',
