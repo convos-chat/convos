@@ -24,3 +24,42 @@ test('ConnectionURL irc', () => {
   expect(url.username).toBe('x');
   expect(url.password).toBe('y');
 });
+
+test('toFields', () => {
+  const url = new ConnectionURL('irc://irc.example.com/');
+
+  expect(url.toFields()).toEqual({
+    conversation_id: '',
+    host: 'irc.example.com',
+    local_address: '',
+    nick: '',
+    password: '',
+    protocol: 'irc:',
+    realname: '',
+    sasl: 'none',
+    tls: false,
+    tls_verify: false,
+    username: '',
+  });
+});
+
+test('fromFields, toFields', () => {
+  const url = new ConnectionURL('irc://0:0@convos.chat:6697/%23convos?local_address=1.2.3.4&sasl=cool&nick=Super&realname=Clark&tls=1&tls_verify=0');
+
+  expect(url.toFields()).toEqual({
+    conversation_id: '#convos',
+    host: 'convos.chat:6697',
+    local_address: '1.2.3.4',
+    nick: 'Super',
+    password: '0',
+    protocol: 'irc:',
+    realname: 'Clark',
+    sasl: 'cool',
+    tls: true,
+    tls_verify: false,
+    username: '0',
+  });
+
+  expect(new ConnectionURL().fromFields(url.toFields()).toString())
+    .toBe('irc://0:0@convos.chat:6697/%23convos?local_address=1.2.3.4&nick=Super&realname=Clark&sasl=cool&tls=1&tls_verify=0');
+});

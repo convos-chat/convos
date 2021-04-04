@@ -69,49 +69,6 @@ export default class Connection extends Conversation {
     return super.send(message);
   }
 
-  toForm() {
-    const urlParams = this.url.searchParams;
-    return {
-      local_address: urlParams.get('local_address') || '',
-      nick: urlParams.get('nick') || this.nick,
-      on_connect_commands: this.on_connect_commands.join('\n'),
-      password: this.url.password || '',
-      realname: urlParams.get('realname') || '',
-      sasl: urlParams.get('sasl') || 'none',
-      server: this.url.host,
-      tls: urlParams.get('tls') == '1' ? true : false,
-      tls_verify: urlParams.get('tls_verify') == '1' ? true : false,
-      username: this.url.username || '',
-      want_to_be_connected: this.wanted_state == 'disconnected' ? false : true,
-    };
-  }
-
-  toSaveOperationParams(fields) {
-    const url = new ConnectionURL('irc://localhost:6667');
-    const urlParams = url.searchParams;
-
-    const server = fields.server || '';
-    url.host = server.match(/:\d+$/) ? server : server + ':6667';
-    urlParams.append('sasl', fields.sasl || 'none');
-    urlParams.append('tls', fields.tls ? '1' : '0');
-
-    if (fields.password) url.password = fields.password;
-    if (fields.username) url.username = fields.username;
-    if (fields.local_address) urlParams.append('local_address', fields.local_address.trim());
-    if (fields.nick) urlParams.append('nick', fields.nick.trim());
-    if (fields.realname) urlParams.append('realname', fields.realname.trim());
-    if (fields.tls && fields.tls_verify) urlParams.append('tls_verify', '1');
-
-    const params = {};
-    params.on_connect_commands = is.undefined(fields.on_connect_commands) ? this.on_connect_commands : fields.on_connect_commands.split(/\n\r?/);
-    params.on_connect_commands = params.on_connect_commands.filter(cmd => cmd.length);
-    params.wanted_state = !fields.hasOwnProperty('want_to_be_connected') ? this.wanted_state : fields.want_to_be_connected ? 'connected' : 'disconnected';
-    if (this.connection_id) params.connection_id = this.connection_id;
-    if (server) params.url = url.toString();
-
-    return params;
-  }
-
   update(params) {
     if (params.url && is.string(params.url)) params.url = new ConnectionURL(params.url);
     return super.update(params);

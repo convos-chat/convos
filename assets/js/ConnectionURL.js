@@ -6,8 +6,10 @@
  * @class ConnectionURL
  */
 
+import {is} from './util';
+
 export default class ConnectionURL {
-  constructor(href) {
+  constructor(href = 'http://localhost') {
     this._url = new URL('http://localhost');
 
     Object.defineProperty(this, 'href', {
@@ -26,6 +28,43 @@ export default class ConnectionURL {
     });
 
     this.href = href;
+  }
+
+  fromFields(fields) {
+    if (is.string(fields.protocol)) this.protocol = fields.protocol;
+    if (is.string(fields.host)) this.host = fields.host;
+    if (is.string(fields.password)) this.password = fields.password;
+    if (is.string(fields.username)) this.username = fields.username;
+    if (is.string(fields.conversation_id)) this.pathname = encodeURIComponent(fields.conversation_id);
+
+    const searchParams = this.searchParams;
+    if (is.string(fields.local_address)) searchParams.append('local_address', fields.local_address.trim());
+    if (is.string(fields.nick)) searchParams.append('nick', fields.nick.trim());
+    if (is.string(fields.realname) && fields.realname.length) searchParams.append('realname', fields.realname.trim());
+    if (is.string(fields.sasl)) searchParams.append('sasl', fields.sasl || 'none');
+    if (is.defined(fields.tls)) searchParams.append('tls', is.true(fields.tls) ? '1' : '0');
+    if (is.defined(fields.tls_verify)) searchParams.append('tls_verify', is.true(fields.tls) && is.true(fields.tls_verify) ? '1' : '0');
+
+    return this;
+  }
+
+  toFields(fields = {}) {
+    fields.protocol = this.protocol;
+    fields.host = this.host;
+    fields.password = is.string(this.password) ? this.password : '';
+    fields.username = is.string(this.username) ? this.username : '';
+    fields.conversation_id = decodeURIComponent(this.pathname.split('/').filter(p => p.length)[0] || '');
+
+    const searchParams = this.searchParams;
+    fields.local_address = searchParams.get('local_address') || fields.local_address || '';
+    fields.nick = searchParams.get('nick') || fields.nick || '';
+    fields.realname = searchParams.get('realname') || fields.realname || '';
+    fields.sasl = searchParams.get('sasl') || fields.sasl || 'none';
+    fields.realname = searchParams.get('realname') || fields.realname || '';
+    fields.tls = is.true(searchParams.get('tls'));
+    fields.tls_verify = is.true(searchParams.get('tls_verify'));
+
+    return fields;
   }
 
   /**
