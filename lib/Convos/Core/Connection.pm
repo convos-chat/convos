@@ -73,7 +73,7 @@ sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
 
 sub id {
   my $from = $_[1] || $_[0];
-  return $from->{connection_id} || do {
+  return $from->{connection_id} ||= do {
     my $url = Mojo::URL->new($from->{url});
     join '-', $url->scheme, pretty_connection_name($url->host);
   };
