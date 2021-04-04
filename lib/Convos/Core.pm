@@ -2,6 +2,7 @@ package Convos::Core;
 use Mojo::Base -base;
 
 use Convos::Core::Backend;
+use Convos::Core::ConnectionProfile;
 use Convos::Core::Settings;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
@@ -10,6 +11,7 @@ use Mojo::Log;
 use Mojo::URL;
 use Mojo::Util qw(trim);
 use Mojolicious::Plugins;
+use Scalar::Util qw(blessed weaken);
 
 has backend  => sub { Convos::Core::Backend->new };
 has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
@@ -30,7 +32,7 @@ sub connect {
   }
   elsif ($self->{connect_queue}{$host}) {
     push @{$self->{connect_queue}{$host}}, $connection;
-    Scalar::Util::weaken($self->{connect_queue}{$host}[-1]);
+    weaken($self->{connect_queue}{$host}[-1]);
   }
   else {
     $self->{connect_queue}{$host} = [];
@@ -39,6 +41,11 @@ sub connect {
 
   return $self;
 }
+
+has_many connection_profiles => 'Convos::Core::ConnectionProfile' => sub {
+  my ($self, $attrs) = @_;
+  return Convos::Core::ConnectionProfile->new(core => $self, %$attrs);
+};
 
 sub connections_by_id {
   my ($self, $cid) = @_;
@@ -96,7 +103,7 @@ sub start {
     warn "start() FAILED $_[0]\n";
   });
 
-  Scalar::Util::weaken($self);
+  weaken($self);
   $self->{connect_tid}
     = Mojo::IOLoop->recurring($ENV{CONVOS_CONNECT_DELAY} || 4, sub { $self->_dequeue });
 
@@ -110,7 +117,7 @@ has_many users => 'Convos::Core::User' => sub {
   $attrs->{uid}++ while $self->get_user_by_uid($attrs->{uid});
   my $user = Convos::Core::User->new($attrs);
   die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
-  Scalar::Util::weaken($user->{core} = $self);
+  weaken($user->{core} = $self);
   return $user;
 };
 
@@ -248,6 +255,26 @@ fails.
 C<$cb> is optional, but will be passed on to
 L<Convos::Core::Connection/connect> if defined.
 
+=head2 connection_profile
+
+  $profile = $core->connection_profile({id => $connection_id, ...});
+
+Returns a shared L<Convos::Core::ConnectionProfile> object for a connection ID.
+
+=head2 get_connection_profile
+
+  $user = $core->get_connection_profile(\%attrs);
+  $user = $core->get_connection_profile($email);
+
+Returns a L<Convos::Core::User> object or undef.
+
+=head2 connection_profiles
+
+  $collection = $core->connection_profiles;
+
+Returns a L<Mojo::Collection> of all known L<Convos::Core::ConnectionProfile>
+objects.
+
 =head2 connections_by_id
 
   $collection = $core->connections_by_id($cid);
@@ -274,18 +301,24 @@ Returns a L<Convos::Core::User> object or C<undef>.
 
 Object constructor. Builds L</backend> if a classname is provided.
 
-=head2 start
+=head2 remove_connection_profile_p
 
-  $core = $core->start;
+  $p = $core->remove_connection_profile_p($profile)->then(sub { $profile });
 
-Will start the backend. This means finding all users and start connections
-if state is not "disconnected".
+Used to delete a connection profile.
 
 =head2 remove_user_p
 
   $p = $core->remove_user_p($user)->then(sub { $user });
 
 Used to delete user data and remove the user from C<$core>.
+
+=head2 start
+
+  $core = $core->start;
+
+Will start the backend. This means finding all users and start connections
+if state is not "disconnected".
 
 =head2 user
 

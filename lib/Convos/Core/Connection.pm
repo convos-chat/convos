@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Convos::Core::Conversation;
 use Convos::Util qw(DEBUG generate_cert_p has_many pretty_connection_name);
 use Mojo::JSON qw(false true);
-use Mojo::Loader 'load_class';
+use Mojo::Loader qw(load_class);
 use Mojo::Promise;
 use Mojo::URL;
 use Mojo::Util qw(term_escape url_escape);
@@ -23,8 +23,7 @@ has messages => sub {
 
 has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
-has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
-has wanted_state     => 'connected';
+has profile             => sub { $_[0]->user->core->connection_profile({id => $_[0]->id}) };
 
 sub url {
   my ($self, $url) = @_;
@@ -32,6 +31,8 @@ sub url {
   return $self->{url} = Mojo::URL->new($self->{url} || 'localhost') unless ref $self->{url};
   return $self->{url};
 }
+
+has wanted_state => 'connected';
 
 sub user { shift->{user} }
 
@@ -287,12 +288,11 @@ sub _write {
 sub TO_JSON {
   my ($self, $persist) = @_;
   my $url  = $self->url;
-  my %json = map { ($_, $self->$_) } qw(name wanted_state);
+  my %json = map { ($_, $self->$_) } qw(name on_connect_commands wanted_state);
 
-  $json{connection_id}       = $self->id;
-  $json{on_connect_commands} = $self->on_connect_commands;
-  $json{service_accounts}    = $self->service_accounts;
-  $json{url}                 = $url->to_unsafe_string;
+  $json{connection_id}    = $self->id;
+  $json{service_accounts} = $self->profile->service_accounts;
+  $json{url}              = $url->to_unsafe_string;
 
   if (!$persist and $url->query->param('forced')) {
     my $password = $url->password // '';
@@ -412,13 +412,13 @@ Holds a list of commands to execute when first connected.
 
 Holds the name of the connection.
 
-=head2 service_accounts
+=head2 profile
 
-  $array_ref = $conn->service_accounts;
-  $conn = $conn->service_accounts([qw(chanserv nickserv)]);
+  $profile = $conn->profile;
+  $conn = $conn->profile(Convos::Core::ConnectionProfile->new);
 
-A list of users that will go into the connection chat, instead of opening new
-conversations.
+Holds a L<Convos::Core::ConnectionProfile> object from
+L<Convos::Core/connection_settings>.
 
 =head2 url
 

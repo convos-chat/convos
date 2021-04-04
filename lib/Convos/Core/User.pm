@@ -18,12 +18,12 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 has highlight_keywords => sub { +[] };
-sub password { shift->{password} ||= '' }
-has remote_address => '127.0.0.1';
+sub password   { shift->{password}   ||= '' }
 sub registered { shift->{registered} ||= Mojo::Date->new }
-has roles  => sub { +[] };
-has uid    => sub { die 'uid() cannot be built' };
-has unread => sub {0};
+has remote_address => '127.0.0.1';
+has roles          => sub { +[] };
+has uid            => sub { die 'uid() cannot be built' };
+has unread         => sub {0};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
@@ -71,11 +71,19 @@ sub get_p {
 sub load_connections_p {
   my $self = shift;
 
+  my @connections;
   return $self->core->backend->connections_p($self)->then(sub {
-    my $connections = shift;
+    my ($connections, %p) = (shift);    # data structures
 
     for (@$connections) {
       my $connection = $self->connection($_);
+      push @connections, $connection;
+      $p{$connection->id} ||= $connection->profile->load_p unless $connection->profile->loaded;
+    }
+
+    return %p && Mojo::Promise->all(values %p);
+  })->then(sub {
+    for my $connection (@connections) {
       $self->core->connect($connection)
         if $connection->wanted_state eq 'connected' and !$ENV{CONVOS_SKIP_CONNECT};
     }

@@ -23,7 +23,11 @@ $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok
 
 $connection->disconnect_p->wait;
 
-$ENV{CONVOS_WEBIRC_PASSWORD_EXAMPLE} = 'secret_passphrase';
+my $profile = $core->get_connection_profile('irc-example')->webirc_password('secret_passphrase');
+is $connection->profile->id, $profile->id, 'shared profile id';
+is $connection->profile->webirc_password, $profile->webirc_password,
+  'shared profile webirc_password';
+
 $server->client($connection)->server_event_ok('_irc_event_cap')->server_event_ok('_irc_event_nick')
   ->server_write_ok(":example CAP * LS :\r\n")->client_event_ok('_irc_event_cap')
   ->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')

@@ -6,7 +6,7 @@ use Convos::Util qw($CHANNEL_RE DEBUG);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
 use Mojo::Parameters;
-use Mojo::Util qw(b64_decode b64_encode gzip gunzip term_escape trim);
+use Mojo::Util qw(b64_encode term_escape trim);
 use Parse::IRC ();
 use Socket;
 use Time::HiRes 'time';
@@ -47,7 +47,7 @@ sub send_p {
   $message =~ s![\r\n]+$!!s;
 
   unless ($message =~ s!^/([A-Za-z]+)\s*!!) {
-    my $re = join '|', @{$self->service_accounts};
+    my $re = join '|', @{$self->profile->service_accounts};
     $target = $1 if $message =~ s!^($re):\s+!!;
     return $self->_send_message_p($target, $message);
   }
@@ -351,7 +351,7 @@ sub _irc_event_privmsg {
   $message[0] =~ s/\x03\d{0,15}(,\d{0,15})?//g;
   $message[0] =~ s/[\x00-\x1f]//g;
 
-  if (grep { $_ eq lc $nick || $_ eq lc $conversation_id } map {lc} @{$self->service_accounts}) {
+  if ($self->profile->find_service_account($nick, $conversation_id)) {
     $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
     $target = $self->get_conversation($target) || $self->messages;
     $from   = $nick;
@@ -900,10 +900,10 @@ sub _send_message_p {
   my $invalid_target_p = $self->_make_invalid_target_p(\$target);
   return $invalid_target_p if $invalid_target_p;
 
-  my $messages = $self->_split_message($message);
+  my $messages = $self->profile->split_message($message);
   return Mojo::Promise->reject('Cannot send empty message.') unless @$messages;
 
-  if (MAX_BULK_MESSAGE_SIZE <= @$messages or MAX_MESSAGE_LENGTH < length $messages->[0]) {
+  if ($self->profile->too_long_messages($messages)) {
     return $self->user->core->backend->emit_to_class_p(message_to_paste => $self, $message)
       ->then(sub { $self->_send_message_p($target, shift->to_message) });
   }
@@ -1099,69 +1099,21 @@ sub _set_wanted_state_p {
   return Mojo::Promise->resolve({});
 }
 
-sub _split_message {
-  my ($self, $message) = @_;
-  return [split /\n\r?/, $message] if length($message) < MAX_MESSAGE_LENGTH;
-
-  my @messages;
-  while (length $message) {
-    $message =~ s!^\r*\n*!!s;
-    $message =~ s!^(.*)!!m;
-    my $line = $1;
-
-    # No need to check anymore, since we are going to make a paste anyways
-    return \@messages if @messages >= MAX_BULK_MESSAGE_SIZE;
-
-    # Line is short
-    if (length($line) < MAX_MESSAGE_LENGTH) {
-      push @messages, $line;
-      next;
-    }
-
-    # Split long lines into multiple lines
-    my @chunks = split /(\s)/, $line;
-    $line = '';
-    while (@chunks) {
-      my $chunk = shift @chunks;
-
-      # Force break, in case it's just one long word
-      if (MAX_MESSAGE_LENGTH < length $chunk) {
-        unshift @chunks, substr($chunk, 0, MAX_MESSAGE_LENGTH - 1, ''), $chunk;
-        next;
-      }
-
-      $line .= $chunk;
-      my $next = @chunks && $chunks[0] || '';
-      if (MAX_MESSAGE_LENGTH < length "$line$next") {
-        push @messages, trim $line;
-        $line = '';
-      }
-    }
-
-    # Add remaining chunk
-    push @messages, trim $line if length $line;
-  }
-
-  return \@messages;
-}
-
 sub _stream {
   my ($self, $loop, $err, $stream) = @_;
   $self->SUPER::_stream($loop, $err, $stream);
   return if $err;
 
-  my $url = $self->url;
-  my $webirc_env_key = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc $self->name;
-  $webirc_env_key =~ s!\W!_!g;
-  if (my $password = $ENV{$webirc_env_key}) {
+  if (my $password = $self->profile->webirc_password) {
 
     # $url->query->param('remote_address') is back compat code
-    my $remote_address  = $url->query->param('remote_address') || $self->user->remote_address;
+    my $remote_address  = $self->url->query->param('remote_address') || $self->user->remote_address;
     my $remote_hostname = gethostbyaddr(inet_aton($remote_address), AF_INET) || $remote_address;
     $self->_write(sprintf "WEBIRC %s %s %s %s\r\n",
       $password, 'convos', $remote_hostname, $remote_address);
   }
 
+  my $url = $self->url;
   $self->_write("CAP LS\r\n");
   $self->_write(sprintf "PASS %s\r\n", $url->password)
     if length $url->password and !$self->_sasl_mechanism;
