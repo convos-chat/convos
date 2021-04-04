@@ -30,6 +30,7 @@ is_deeply $loaded,
   highlight_keywords => [],
   password           => '',
   registered         => 'ts',
+  remote_address     => '127.0.0.1',
   roles              => [],
   uid                => 42,
   unread             => 0

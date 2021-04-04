@@ -10,7 +10,6 @@ sub create {
 
   my $url = Mojo::URL->new($json->{url} || '');
   $url->path("/$json->{conversation_id}") if $json->{conversation_id};
-  $url->query->param(remote_address => $self->tx->remote_address);
 
   my $settings = $self->app->core->settings;
   if ($settings->forced_connection) {
@@ -78,7 +77,6 @@ sub update {
 
   my $url = Mojo::URL->new($json->{url} || '');
   $url = $connection->url unless $url->host;
-  $url->query->param(remote_address => $self->tx->remote_address);
 
   unless ($self->app->core->settings->forced_connection) {
     $url->scheme($json->{protocol} || $connection->url->scheme || '');

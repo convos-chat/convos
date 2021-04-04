@@ -28,6 +28,7 @@ is_deeply(
     email              => 'jhthorsen@cpan.org',
     highlight_keywords => [],
     registered         => Mojo::Date->new($main::time)->to_datetime,
+    remote_address     => '127.0.0.1',
     roles              => [],
     uid                => 1,
     unread             => 0

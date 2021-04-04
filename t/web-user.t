@@ -31,6 +31,7 @@ is_deeply(
     default_connection => 'irc://localhost:6123/%23convos',
     highlight_keywords => [],
     registered         => $registered,
+    remote_address     => '127.0.0.1',
     roles              => ['admin'],
     uid                => 1,
     unread             => 0,

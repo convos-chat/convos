@@ -1154,7 +1154,9 @@ sub _stream {
   my $webirc_env_key = sprintf 'CONVOS_WEBIRC_PASSWORD_%s', uc $self->name;
   $webirc_env_key =~ s!\W!_!g;
   if (my $password = $ENV{$webirc_env_key}) {
-    my $remote_address  = $url->query->param('remote_address')               || '127.0.0.1';
+
+    # $url->query->param('remote_address') is back compat code
+    my $remote_address  = $url->query->param('remote_address') || $self->user->remote_address;
     my $remote_hostname = gethostbyaddr(inet_aton($remote_address), AF_INET) || $remote_address;
     $self->_write(sprintf "WEBIRC %s %s %s %s\r\n",
       $password, 'convos', $remote_hostname, $remote_address);

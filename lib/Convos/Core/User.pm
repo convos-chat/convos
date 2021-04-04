@@ -18,7 +18,8 @@ use constant BCRYPT_BASE_SETTINGS => do {
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
 has highlight_keywords => sub { +[] };
-sub password   { shift->{password}   ||= '' }
+sub password { shift->{password} ||= '' }
+has remote_address => '127.0.0.1';
 sub registered { shift->{registered} ||= Mojo::Date->new }
 has roles  => sub { +[] };
 has uid    => sub { die 'uid() cannot be built' };
@@ -150,6 +151,7 @@ sub TO_JSON {
   delete $json->{password} unless $persist;
   $json->{highlight_keywords} = $self->highlight_keywords;
   $json->{registered}         = $self->registered->to_datetime;
+  $json->{remote_address}     = $self->remote_address;
   $json->{roles}              = $self->roles;
   $json->{unread}             = $self->unread;
   $json->{uid}                = $self->uid;
@@ -191,6 +193,13 @@ Email address of user.
 
 Encrypted password. See L</set_password> for how to change the password and
 L</validate_password> for password authentication.
+
+=head2 remote_address
+
+  $str = $user->remote_address;
+  $user = $user->remote_address('127.0.0.1');
+
+Holds the last known remote address for the user.
 
 =head2 roles
 
