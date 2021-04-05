@@ -1,6 +1,7 @@
 package Convos::Core::Settings;
 use Mojo::Base -base;
 
+use Convos::Core::Connection;
 use Convos::Util 'generate_secret';
 use Mojo::JSON qw(false true);
 use Mojo::Path;
@@ -10,7 +11,7 @@ has base_url           => sub { Mojo::URL->new('http://127.0.0.1:8080') };
 has contact            => 'mailto:root@localhost';
 has core               => sub { Convos::Core->new }, weak => 1;
 has id                 => 'settings';
-has default_connection => sub { Mojo::URL->new('irc://chat.freenode.net:6697/%23convos') };
+has default_connection => sub { shift->_build_default_connection };
 has forced_connection  => sub {false};
 has local_secret       => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
 has open_to_public     => sub {false};
@@ -31,11 +32,22 @@ sub public_attributes {
 sub save_p {
   my $self = shift;
   $self->_set_attributes(shift, 0) if ref $_[0] eq 'HASH';
+
+  my $url = $self->default_connection;
+  $self->core->connection_profile({url => $url->clone});
+
   my $p = $self->core->backend->save_object_p($self, @_);
   return $p;
 }
 
 sub uri { Mojo::Path->new('settings.json') }
+
+sub _build_default_connection {
+  my $self = shift;
+  my $url  = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
+  $self->core->connection_profile({url => $url->clone});
+  return $url;
+}
 
 sub _build_session_secrets {
   my $self = shift;

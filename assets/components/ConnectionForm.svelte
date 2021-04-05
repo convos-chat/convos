@@ -14,7 +14,8 @@ import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
-export let conversation = {};
+let connection_id = null;
+export {connection_id as id};
 
 const api = getContext('api');
 const form = makeFormStore({});
@@ -31,9 +32,9 @@ let showAuthenticationSettings = false;
 
 $: if (showAdvancedSettings || showAuthenticationSettings) form.renderOnNextTick();
 
-onMount(async () => {
+onMount(() => {
   form.submit = saveConnection;
-  connection = user.findConversation({connection_id: conversation.connection_id}) || {};
+  connection = user.findConversation({connection_id}) || {};
   connectionToForm(connection);
   if (!connection.connection_id) defaultsToForm();
 });
@@ -49,6 +50,7 @@ function connectionToForm(connection) {
 function defaultsToForm() {
   const fields = new ConnectionURL(route.query.uri || user.default_connection || 'irc://localhost').toFields();
   fields.want_to_be_connected = true;
+  if (user.connections.size) fields.host = '';
   if (!fields.nick) fields.nick = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   form.renderOnNextTick(fields);
 }
@@ -56,7 +58,7 @@ function defaultsToForm() {
 async function removeConnection(e) {
   await removeConnectionOp.perform(connection);
   user.removeConversation(connection);
-  route.go('/settings/connection');
+  route.go('/settings/connections');
 }
 
 async function saveConnection() {
@@ -147,7 +149,7 @@ async function saveConnection() {
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
       <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}
-      <Button icon="save" op="{createConnectionOp}"><span>{$l('Create')}</span></Button>
+      <Button icon="network-wired" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>

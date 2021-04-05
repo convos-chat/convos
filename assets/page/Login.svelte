@@ -34,7 +34,7 @@ function calculateShow() {
 
 function redirect(user) {
   const conversation = user.conversations()[0];
-  const url = route.lastUrl ? route.lastUrl : conversation ? conversation.path : '/settings/connection';
+  const url = route.lastUrl ? route.lastUrl : conversation ? conversation.path : '/settings/connections';
   if (user.is('loading') || !user.is('authenticated')) return;
   route.go(url);
 }

@@ -1,5 +1,5 @@
 import Chat from './page/Chat.svelte';
-import ConnectionAdd from './page/ConnectionAdd.svelte';
+import Connections from './page/Connections.svelte';
 import ConversationAdd from './page/ConversationAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
@@ -16,7 +16,7 @@ export function setupRouting(route, user) {
 
   route.to('/help', render(Help));
   route.to('/settings/account', render(SettingsAccount));
-  route.to('/settings/connection', render(ConnectionAdd));
+  route.to('/settings/connections', render(Connections));
   route.to('/settings/conversation', render(ConversationAdd));
   route.to('/settings/users', render(SettingsAdminUsers));
   route.to('/settings', render(SettingsAdmin));

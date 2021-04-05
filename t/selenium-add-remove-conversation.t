@@ -37,7 +37,7 @@ $t->click_ok($too_cool_link)->wait_for('.is-primary-input')
 note 'Close connection';
 my $delete_btn = '.sidebar-left .form-actions .btn.for-trash';
 $t->click_ok(qq(a[href="/chat/irc-convos"] i))->wait_for($delete_btn);
-$t->click_ok($delete_btn)->wait_for(qq(a[href="/settings/connection"].has-path))
-  ->live_text_is('.sidebar-left a[href="/settings/connection"] span', 'No conversations');
+$t->click_ok($delete_btn)->wait_for(qq(a[href="/settings/connections"].has-path))
+  ->live_text_is('.sidebar-left a[href="/settings/connections"] span', 'No conversations');
 
 done_testing;

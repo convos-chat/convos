@@ -36,5 +36,5 @@ onMount(async () => {
     <p>{$l('Currently connecting to %1.', connectionHost)}</p>
   {/if}
 
-  <ConnectionForm {conversation}/>
+  <ConnectionForm id="{conversation.connection_id}"/>
 </div>

@@ -155,7 +155,7 @@ function renderUnread(conversation, max = 60) {
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
     <h3>{$l('Conversations')}</h3>
     {#if !$user.connections.size}
-      <Link href="/settings/connection">
+      <Link href="/settings/connections">
         <Icon name="exclamation-circle"/>
         <span>{$l('No conversations')}</span>
       </Link>
@@ -193,9 +193,9 @@ function renderUnread(conversation, max = 60) {
       <Icon name="comment"/>
       <span>{$l('Add conversation')}</span>
     </Link>
-    <Link href="/settings/connection">
+    <Link href="/settings/connections">
       <Icon name="network-wired"/>
-      <span>{$l('Add connection')}</span>
+      <span>{$l('Connections')}</span>
     </Link>
     <Link href="/settings/account">
       <Icon name="user-cog"/>

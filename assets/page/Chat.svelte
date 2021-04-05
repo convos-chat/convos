@@ -160,8 +160,8 @@ function setConversationFromUser(user) {
     <h2>{$l('Connection does not exist.')}</h2>
     <p>{$l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
     <p>
-      <Link href="/settings/connection?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
-      <Link href="/settings/connection" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
+      <Link href="/settings/connections?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
+      <Link href="/settings/connections" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
     </p>
   {:else if $conversation.is('not_found')}
     <h2>{$l('You are not part of this conversation.')}</h2>
