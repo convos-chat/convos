@@ -12,10 +12,10 @@ test('commandOptions', () => {
 
 test('normalizeCommand', () => {
   expect(normalizeCommand('/CLOSE')).toBe('/part');
-  expect(normalizeCommand('/cs cool beans')).toBe('/msg chanserv cool beans');
+  expect(normalizeCommand('/cs cool beans')).toBe('/quote chanserv cool beans');
   expect(normalizeCommand('/j #foo pass')).toBe('/join #foo pass');
   expect(normalizeCommand('/j')).toBe('/join');
-  expect(normalizeCommand('/ns cool beans')).toBe('/msg nickserv cool beans');
+  expect(normalizeCommand('/ns cool beans')).toBe('/quote nickserv cool beans');
   expect(normalizeCommand('/raw YIKES')).toBe('/quote YIKES');
   expect(normalizeCommand('/shrug')).toBe('/say ¯\\_(ツ)_/¯');
   expect(normalizeCommand('/shrug not sure')).toBe('/say not sure ¯\\_(ツ)_/¯');
