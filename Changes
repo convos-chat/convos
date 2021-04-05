@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.09 Not Released
+6.09 2021-04-05T15:18:00+0900
  - Add "skip_queue" to connection profile
  - Fix not skip the connection queue on connect failure
  - Hide port number in connection list
