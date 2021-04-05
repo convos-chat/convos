@@ -1,10 +1,19 @@
 Revision history for perl distribution Convos
 
-6.08 Not Released
- - Add support for connection profiles
+6.08 2021-04-05T12:43:00+0900
+ - Add support for some more command aliases #580
+ - Add logging of login attempts #582
+ - Add support for connection profiles #584
+ - Add DELETE /api/connection-profiles/:id #584
+ - Add GET /api/connection-profiles #584
+ - Add POST /api/connection-profiles #584
+ - Add focus to login form on desktop
+ - Fix width of inputs on ConversationAdd page
+ - Renamed /settings/connection to /settings/connections #584
  - Removed "protocol" from Convos::Core::Connection
  - Removed dependencies from "Settings"
  - Simpler Convos::Core::Settings by removing support for deprecated environment variables
+ - Moved global connection settings from "Settings" to "Connections" #584
  - Moved "remote_address" tracking from connection URL to user object
 
 6.07 2021-03-24T12:44:00+0900
