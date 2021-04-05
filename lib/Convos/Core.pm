@@ -25,17 +25,16 @@ sub connect {
 
   $connection->state(queued => $reason || 'Connecting soon...');
 
-  my $host                = $connection->url->host;
-  my $skip_queue_hostname = $ENV{CONVOS_SKIP_QUEUE_HOSTNAME} || 'localhost';
-  if ($host =~ /\b$skip_queue_hostname\b/) {
+  my $host = $connection->url->host;
+  if ($connection->profile->skip_queue and !$reason) {
     $connection->connect_p;
   }
-  elsif ($self->{connect_queue}{$host}) {
+  elsif ($self->{connect_queue}{$host} or $reason) {
     push @{$self->{connect_queue}{$host}}, $connection;
     weaken($self->{connect_queue}{$host}[-1]);
   }
   else {
-    $self->{connect_queue}{$host} = [];
+    $self->{connect_queue}{$host} ||= [];
     $connection->connect_p;
   }
 

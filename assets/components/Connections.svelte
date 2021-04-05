@@ -24,7 +24,7 @@ function findConnection(route, connections) {
 }
 
 function normalizeConnection(connection) {
-  return connection.url.toFields({connection_id: connection.connection_id, frozen: connection.frozen});
+  return connection.url.toFields({connection_id: connection.connection_id});
 }
 </script>
 
@@ -35,19 +35,17 @@ function normalizeConnection(connection) {
   <table>
     <thead>
       <tr>
-        <th>{$l('Server')}</th>
+        <th>{$l('Host')}</th>
         <th>{$l('Secure')}</th>
         <th>{$l('Nick')}</th>
-        <th>{$l('State')}</th>
       </tr>
     </thead>
     <tbody>
       {#each connections as connection}
         <tr>
-          <td><a href="#connection-{connection.connection_id}">{connection.host}</a></td>
+          <td><a href="#connection-{connection.connection_id}">{connection.host.replace(/:\d+$/, '')}</a></td>
           <td>{is.true(connection.tls_verify) ? $l('Strict') : is.true(connection.tls) ? $l('Yes') : $l('No')}</td>
           <td>{connection.nick}</td>
-          <td>{$l(connection.frozen)}</td>
         </tr>
       {/each}
     </tbody>

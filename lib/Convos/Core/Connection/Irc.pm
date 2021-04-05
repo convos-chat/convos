@@ -11,10 +11,8 @@ use Parse::IRC ();
 use Socket;
 use Time::HiRes 'time';
 
-use constant IS_TESTING            => $ENV{HARNESS_ACTIVE}               || 0;
-use constant MAX_BULK_MESSAGE_SIZE => $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3;
-use constant MAX_MESSAGE_LENGTH    => $ENV{CONVOS_MAX_MESSAGE_LENGTH}    || 512;
-use constant PERIDOC_INTERVAL      => $ENV{CONVOS_IRC_PERIDOC_INTERVAL}  || 60;
+use constant IS_TESTING       => $ENV{HARNESS_ACTIVE}              || 0;
+use constant PERIDOC_INTERVAL => $ENV{CONVOS_IRC_PERIDOC_INTERVAL} || 60;
 
 require Convos;
 our $VERSION = Convos->VERSION;

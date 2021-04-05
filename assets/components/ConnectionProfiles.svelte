@@ -26,7 +26,7 @@ const saveConnectionProfileOp = api('saveConnectionProfile');
 
 let showAdvancedSettings = false;
 
-$: isAdmin = false && user.roles.has('admin');
+$: isAdmin = user.roles.has('admin');
 $: findProfile($route, $connectionProfiles);
 $: if (showAdvancedSettings) form.renderOnNextTick();
 
@@ -58,7 +58,7 @@ function normalizeProfile(profile) {
 
 async function saveConnectionProfile() {
   const params = {};
-  ['is_default', 'is_forced'].forEach(k => (params[k] = !!$form[k]));
+  ['is_default', 'is_forced', 'skip_queue'].forEach(k => (params[k] = !!$form[k]));
   ['max_bulk_message_size', 'max_message_length', 'webirc_password'].forEach(k => (params[k] = $form[k]));
   params.service_accounts = $form.service_accounts.split(/\s*,\s*/).map(nick => nick.trim()).filter(nick => nick.length);
   params.url = new ConnectionURL('irc://localhost').fromFields($form).toString();
@@ -130,6 +130,10 @@ async function saveConnectionProfile() {
         <TextField name="webirc_password" type="password" readonly="{!isAdmin}">
           <span slot="label">{$l('WEBIRC password')}</span>
         </TextField>
+        <Checkbox name="skip_queue" disabled="{!isAdmin}">
+          <span slot="label">{$l('Skip connection queue')}</span>
+        </Checkbox>
+        <p class="help">{$l('This might result in flood ban.')}</p>
       </div>
     {/if}
 
@@ -148,7 +152,7 @@ async function saveConnectionProfile() {
   <table>
     <thead>
       <tr>
-        <th>{$l('Server')}</th>
+        <th>{$l('Host')}</th>
         <th>{$l('Secure')}</th>
         <th>{$l('Default')}</th>
         <th>{$l('Forced')}</th>
@@ -157,7 +161,7 @@ async function saveConnectionProfile() {
     <tbody>
       {#each $connectionProfiles as profile}
         <tr>
-          <td><a href="#profile-{profile.id}">{profile.url.host}</a></td>
+          <td><a href="#profile-{profile.id}">{profile.url.host.replace(/:\d+$/, '')}</a></td>
           <td>{is.true(profile.tls_verify) ? $l('Strict') : is.true(profile.tls) ? $l('Yes') : $l('No')}</td>
           <td>{profile.is_default ? $l('Yes') : $l('No')}</td>
           <td>{profile.is_forced ? $l('Yes') : $l('No')}</td>

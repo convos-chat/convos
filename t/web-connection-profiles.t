@@ -23,6 +23,7 @@ $t->get_ok('/api/connection-profiles')->status_is(200)->json_is(
     max_bulk_message_size => 3,
     max_message_length    => 512,
     service_accounts      => [qw(chanserv nickserv)],
+    skip_queue            => false,
     url                   => 'irc://chat.freenode.net:6697/%23convos',
 
     # webirc_password       => '', <--- not admin
@@ -47,6 +48,7 @@ my %profile = (
   max_message_length    => 99,
   max_bulk_message_size => 32,
   service_accounts      => ['fooserv'],
+  skip_queue            => true,
   webirc_password       => 'yikes',
 );
 $t->post_ok('/api/connection-profiles', json => \%profile)->status_is(200)

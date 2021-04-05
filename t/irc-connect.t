@@ -1,5 +1,6 @@
 #!perl
 BEGIN {
+  $ENV{CONVOS_CONNECT_DELAY} = 0.1;
   $ENV{CONVOS_GENERATE_CERT} = 1;
   $ENV{CONVOS_SKIP_CONNECT}  = 1;
 }
@@ -13,6 +14,8 @@ use Test::Deep;
 my $server = t::Server::Irc->new->start;
 my $core   = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user   = $core->user({email => 'test.user@example.com'});
+
+$core->start;    # make sure the reconnect timer is started
 $user->save_p->$wait_success;
 
 my $connection = $user->connection({url => 'irc://example'});

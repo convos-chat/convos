@@ -11,7 +11,14 @@ has loaded                => sub {false};
 has max_bulk_message_size => sub { $ENV{CONVOS_MAX_BULK_MESSAGE_SIZE} || 3 };
 has max_message_length    => sub { $ENV{CONVOS_MAX_MESSAGE_LENGTH}    || 512 };
 has service_accounts => sub { +[split /,/, $ENV{CONVOS_SERVICE_ACCOUNTS} // 'chanserv,nickserv'] };
-has url              => sub { Mojo::URL->new };
+has skip_queue       => sub { shift->url->host eq 'localhost' ? true : false };
+
+sub url {
+  my ($self, $url) = @_;
+  return $self->tap(sub { $self->{url} = ref $url ? $url : Mojo::URL->new($url) }) if @_ == 2;
+  return $self->{url} = Mojo::URL->new($self->{url} || 'localhost') unless ref $self->{url};
+  return $self->{url};
+}
 
 has webirc_password => sub {
   my $self = shift;
@@ -105,7 +112,7 @@ sub _set_attributes {
 
   $self->$_($params->{$_})
     for grep { defined $params->{$_} }
-    qw(max_bulk_message_size max_message_length service_accounts webirc_password);
+    qw(max_bulk_message_size max_message_length service_accounts skip_queue webirc_password);
 
   return $self;
 }
@@ -117,6 +124,7 @@ sub TO_JSON {
     max_bulk_message_size => $self->max_bulk_message_size,
     max_message_length    => $self->max_message_length,
     service_accounts      => $self->service_accounts,
+    skip_queue            => $self->skip_queue,
     url                   => $self->url->to_string,
     webirc_password       => $self->webirc_password,
   );
@@ -212,6 +220,13 @@ Load settings from L<Convos::Core::Backend>.
   $p = $connection_settings->save_p;
 
 Save settings to L<Convos::Core::Backend>.
+
+=head2 skip_queue
+
+  $bool = $connection_settings->skip_queue;
+  $connection_settings = $connection_settings->skip_queue(true);
+
+Used to skip the initial connection queue.
 
 =head2 split_message
 
