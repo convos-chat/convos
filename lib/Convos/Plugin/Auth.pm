@@ -1,7 +1,7 @@
 package Convos::Plugin::Auth;
 use Mojo::Base 'Mojolicious::Plugin';
 
-use Mojo::JSON qw(false true);
+use Mojo::JSON qw(encode_json false true);
 use Mojo::Util;
 
 sub register {
@@ -15,8 +15,23 @@ sub register {
 sub _login_p {
   my ($c, $args) = @_;
   my $user = $c->app->core->get_user($args);
-  return Mojo::Promise->resolve($user) if $user and $user->validate_password($args->{password});
+
+  my $success = $user && $user->validate_password($args->{password});
+  Convos::Plugin::Auth::_log_attempt($c, $user ? $user->TO_JSON : $args, $success);
+
+  return Mojo::Promise->resolve($user) if $success;
   return Mojo::Promise->reject('Invalid email or password.');
+}
+
+sub _log_attempt {
+  my ($c, $args, $success) = @_;
+  my $level = $success ? 'info' : 'warn';
+  $c->app->log->$level(
+    sprintf 'login_p(%s) %s %s.',
+    encode_json({email => $args->{email}, remote_address => $c->tx->remote_address}),
+    $success ? 'SUCCESS' : 'FAIL',
+    $success ? 'Valid email and password.' : $args->{uid} ? 'Invalid password' : 'Invalid email',
+  );
 }
 
 sub _logout_p {
