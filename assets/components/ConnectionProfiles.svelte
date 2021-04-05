@@ -26,7 +26,7 @@ const saveConnectionProfileOp = api('saveConnectionProfile');
 
 let showAdvancedSettings = false;
 
-$: isAdmin = user.roles.has('admin');
+$: isAdmin = false && user.roles.has('admin');
 $: findProfile($route, $connectionProfiles);
 $: if (showAdvancedSettings) form.renderOnNextTick();
 
@@ -96,7 +96,7 @@ async function saveConnectionProfile() {
     <Checkbox name="tls_verify" disabled="{!$form.tls || !isAdmin}" hidden="{!$form.tls}">
       <span slot="label">{$l('Verify certificate (TLS)')}</span>
     </Checkbox>
-    <TextField name="conversation_id" placeholder="{$l('Ex: #convos')}">
+    <TextField name="conversation_id" placeholder="{$l('Ex: #convos')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Conversation name')}</span>
     </TextField>
     <TextField name="service_accounts" placeholder="{$l('chanserv, nickserv, ...')}" readonly="{!isAdmin}">
@@ -104,13 +104,15 @@ async function saveConnectionProfile() {
       <p class="help" slot="help">{$l('Messages from these nicks will be shown in the connection conversation.')}</p>
     </TextField>
 
-    <Checkbox name="is_default">
+    <Checkbox name="is_default" disabled="{!isAdmin}">
       <span slot="label">{$l('Default connection')}</span>
     </Checkbox>
-    <Checkbox name="is_forced" hidden="{!$form.is_default}">
+    <Checkbox name="is_forced" disabled="{!isAdmin}" hidden="{!$form.is_default}">
       <span slot="label">{$l('Force default connection')}</span>
     </Checkbox>
-    <p class="help" hidden="{!$form.is_default}">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
+    {#if isAdmin}
+      <p class="help" hidden="{!$form.is_default}">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
+    {/if}
 
     <Checkbox bind:checked="{showAdvancedSettings}">
       <span slot="label">{$l('Show advanced settings')}</span>
@@ -131,16 +133,13 @@ async function saveConnectionProfile() {
       </div>
     {/if}
 
-    {#if isAdmin}
-      <div class="form-actions">
-        {#if editProfile.id}
-          <Button icon="save" op="{saveConnectionProfileOp}"><span>{$l('Update')}</span></Button>
-        {:else}
-          <Button icon="save" op="{saveConnectionProfileOp}"><span>{$l('Add')}</span></Button>
-        {/if}
-      </div>
-      <OperationStatus op="{saveConnectionProfileOp}"/>
+    {#if !isAdmin}
+      <p class="error">{$l('Only administrators can edit this section.')}</p>
     {/if}
+    <div class="form-actions">
+      <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{editProfile.id ? $l('Update') : $l('Add')}</span></Button>
+    </div>
+    <OperationStatus op="{saveConnectionProfileOp}"/>
   </form>
 {:else}
   <h2>{$l('Connection profiles')}</h2>

@@ -24,7 +24,7 @@ $: if (inputEl && !inputEl.syncValue) {
 <div class="text-field" class:has-password="{type == 'password'}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="{visible ? 'text' : type}" {name} {id} {autocomplete} {placeholder} {readonly} {value} bind:this="{inputEl}" on:input={onInput} on:keyup/>
-  {#if type == 'password'}
+  {#if type == 'password' && !readonly}
     <a href="#toggle" class="text-field__toggle" on:click|preventDefault="{() => { visible = !visible }}"><Icon name="{visible ? 'eye-slash' : 'eye'}"/></a>
   {/if}
 </div>
