@@ -5,7 +5,7 @@ export default class Notify extends Reactive {
     super();
     this.Notification = window.Notification || {permission: 'denied'};
     this.prop('persist', 'notificationCloseDelay', 5000);
-    this.prop('persist', 'wantNotifications', null);
+    this.prop('persist', 'wantNotifications', this.Notification.requestPermission ? null : false);
     this.prop('ro', 'appHasFocus', () => document.hasFocus());
     this.prop('rw', 'desktopAccess', this.Notification.permission);
   }

@@ -13,6 +13,7 @@ import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
 import {modeClassNames} from '../js/util';
+import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
 export let title = 'Chat';
@@ -184,6 +185,12 @@ function setConversationFromUser(user) {
       <div class="message__text"><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation)}</div>
     </div>
   {/if}
+
+  {#if notify.wantNotifications === null}
+    <div class="message is-highlighted">
+      <div class="message__text"><Icon name="info-circle"/> {@html $lmd('Go to "[account settings](%1)" to enable or disable notifications.', '/settings/account')}</div>
+    </div>
+   {/if}
 
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
