@@ -37,13 +37,13 @@
   border: var(--button-border);
   border-radius: var(--input-border-radius);
   box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
-  transition: filter 0.25s ease-in-out;
+  transition: all 0.25s ease-in-out;
   display: inline-block;
   cursor: pointer;
 
   &:focus,
   &:hover {
-    box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     filter: brightness(1.3);
   }
 
@@ -58,6 +58,11 @@
 
   .fas + span {
     margin-left: 0.2em;
+  }
+
+  &.is-secondary {
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-color);
   }
 
   &[disabled] {

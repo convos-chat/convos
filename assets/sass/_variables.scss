@@ -36,6 +36,8 @@ $sidebar-item-icon-width: 1.5rem;
   --button-disabled-border: #fff;
   --button-danger-bg: #9c2626;
   --button-danger-color: #fff;
+  --button-secondary-bg: var(--body-bg);
+  --button-secondary-color: var(--link-color);
   --code-bg: inherit;
   --notify-bg: rgba(30, 30, 30, 0.85);
   --notify-color: #eaeaea;

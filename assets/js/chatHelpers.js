@@ -94,8 +94,12 @@ function onMessageActionClick({conversation}, e, action) {
     msg.showDetails = !msg.showDetails;
     conversation.messages.update({messages: true});
   }
+  else if (action[1] == 'close') {
+    conversation.send('/close ' + (action[2] ? decodeURIComponent(action[2]) : conversation.conversation_id));
+    route.go('/settings/conversation');
+  }
   else if (action[1] == 'join') {
-    conversation.send('/join ' + decodeURIComponent(action[2]));
+    conversation.send('/join ' + (action[2] ? decodeURIComponent(action[2]) : conversation.conversation_id));
   }
   else {
     console.warn('Unhandled onMessageActionClick', action);

@@ -50,11 +50,9 @@ onDestroy(() => {
   dragAndDrop.detach();
 });
 
-function conversationCommand(command) {
-  conversation.send(command + ' ' + conversation.name, (res) => {
-    if (!res.errrors) $activeMenu = '';
-    if (command == '/close') route.go('/settings/conversation');
-  });
+function conversationToUri() {
+  const [scheme, host] = $conversation.connection_id.split('-');
+  return scheme + '://' + host + '/' + encodeURIComponent($conversation.conversation_id) + '?tls=1';
 }
 
 function setConversationFromRoute($route) {
@@ -83,7 +81,7 @@ function setConversationFromUser(user) {
 </script>
 
 <ChatHeader>
-  <h1 class="ellipsis is-link" on:click="{() => {$activeMenu = $activeMenu ? '' : 'settings'}}">{$l(conversation.name)}</h1>
+  <h1 class="ellipsis"><a href="#settings" on:click="{activeMenu.toggle}">{$l(conversation.name)}</a></h1>
   <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {#if !$conversation.is('not_found')}
     <a href="#settings" class="btn-hallow" class:is-active="{$activeMenu == 'settings'}" on:click="{activeMenu.toggle}">
@@ -115,7 +113,7 @@ function setConversationFromUser(user) {
   {/if}
 
   <!-- status -->
-  {#if $conversation.is('loading')}
+  {#if $conversation.is('loading') && $messages.length > 10}
     <div class="message__status-line for-loading has-pos-top"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
   {#if $conversation.historyStartAt && !$conversation.is('not_found') && $messages.length}
@@ -156,32 +154,37 @@ function setConversationFromUser(user) {
   {/each}
 
   <!-- status -->
-  {#if $connection.is('not_found') && !$conversation.conversation_id}
+  {#if $connection.is('not_found')}
     <h2>{$l('Connection does not exist.')}</h2>
     <p>{$l('Do you want to create the connection "%1"?', $connection.connection_id)}</p>
     <p>
-      <Link href="/settings/connections?server={encodeURIComponent($conversation.connection_id)}&conversation={encodeURIComponent($conversation.conversation_id)}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
-      <Link href="/settings/connections" class="btn"><Icon name="thumbs-down"/> {$l('No')}</Link>
+      <Link href="/settings/connections?uri={encodeURIComponent(conversationToUri($conversation))}" class="btn"><Icon name="thumbs-up"/> {$l('Yes')}</Link>
+      <Link href="/settings/connections" class="btn is-secondary"><Icon name="thumbs-down"/> {$l('No')}</Link>
     </p>
   {:else if $conversation.is('not_found')}
     <h2>{$l('You are not part of this conversation.')}</h2>
     <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
     <p>
-      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/join')}"><span>{$l('Yes')}</span></Button>
-      <Link href="/settings/conversation" class="btn"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{$conversation.name}" class="btn" on:click="{onMessageClick}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="/settings/conversation" class="btn is-secondary"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <p><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '#settings')}</p>
+    <div class="message is-highlighted" on:click="{activeMenu.toggle}">
+      <div class="message__text"><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '/chat/' + $connection.connection_id + '#settings')}</div>
+    </div>
   {:else if $conversation.frozen && $conversation.is('pending')}
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
     <p>{$l('Do you want to join?')}</p>
     <p>
-      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/join')}"><span>{$l('Yes')}</span></Button>
-      <Button type="button" icon="thumbs-up" on:click="{() => conversationCommand('/close')}"><span>{$l('No')}</span></Button>
+      <Link href="#action:join" class="btn" on:click="{onMessageClick}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="#action:close" class="btn is-secondary" on:click="{onMessageClick}"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
-    <p><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation)}</p>
+    <div class="message is-highlighted">
+      <div class="message__text"><Icon name="exclamation-triangle"/> {topicOrStatus($connection, $conversation)}</div>
+    </div>
   {/if}
+
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
