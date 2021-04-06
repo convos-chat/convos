@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.10 Not Released
+6.10 2021-04-05T14:12:00+0900
  - Will prompt the user to enable notifications
  - Fix chat action links
  - Fix editing connection when uri= is present
