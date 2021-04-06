@@ -35,8 +35,7 @@ $: if (showAdvancedSettings || showAuthenticationSettings) form.renderOnNextTick
 onMount(() => {
   form.submit = saveConnection;
   connection = user.findConversation({connection_id}) || {};
-  connectionToForm(connection);
-  if (!connection.connection_id) defaultsToForm();
+  connection.connection_id ? connectionToForm(connection) : defaultsToForm();
 });
 
 function connectionToForm(connection) {
@@ -50,7 +49,7 @@ function connectionToForm(connection) {
 function defaultsToForm() {
   const fields = new ConnectionURL(route.query.uri || user.default_connection || 'irc://localhost').toFields();
   fields.want_to_be_connected = true;
-  if (user.connections.size) fields.host = '';
+  if (user.connections.size && !route.query.uri) fields.host = '';
   if (!fields.nick) fields.nick = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   form.renderOnNextTick(fields);
 }

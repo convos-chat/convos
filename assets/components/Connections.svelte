@@ -21,6 +21,7 @@ function findConnection(route, connections) {
   const connection_id = route.hash.replace(/^connection-/, '');
   editConnection = connections.filter(c => c.connection_id == connection_id)[0] || null;
   if (route.hash == 'add-connection') editConnection = {};
+  if (route.query.uri) editConnection = {};
 }
 
 function normalizeConnection(connection) {
