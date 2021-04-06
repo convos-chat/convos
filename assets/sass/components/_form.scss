@@ -152,51 +152,6 @@ textarea {
   padding: var(--gutter-small) 0 var(--gutter) var(--gutter-small);
 }
 
-.btn {
-  background: var(--button-bg);
-  color: var(--button-color);
-  font-weight: 500;
-  font-size: inherit;
-  text-decoration: none;
-  padding: 0.5em 1em;
-  height: 2.2em;
-  line-height: 1.2em;
-  border: var(--button-border);
-  border-radius: var(--input-border-radius);
-  box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
-  transition: filter 0.25s ease-in-out;
-  display: inline-block;
-  cursor: pointer;
-
-  &:focus,
-  &:hover {
-    box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.1);
-    filter: brightness(1.3);
-  }
-
-  &:focus {
-    outline: var(--button-focus-outline);
-    outline-offset: -2px;
-  }
-
-  &.for-trash {
-    background: var(--button-danger-bg);
-  }
-
-  .fas + span {
-    margin-left: 0.2em;
-  }
-
-  &[disabled] {
-    background: var(--button-disabled-bg);
-    color: var(--button-disabled-color);
-    border: var(--button-disabled-border);
-    box-shadow: none;
-    filter: none;
-    cursor: not-allowed;
-  }
-}
-
 .inputs-side-by-side {
   margin-bottom: var(--input-gutter);
   display: flex;
