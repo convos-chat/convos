@@ -21,7 +21,7 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 ok $t->app->core->get_user('superman@example.com'), 'superman account was created';
 
 $t->get_ok('/api/user')->status_is(200);
-$t->get_ok('/api/user/logout')->status_is(200);
+$t->get_ok('/api/user/logout')->status_is(302);
 
 note 'fallback to local user';
 $t->app->core->user({email => 'superwoman@example.com'})->set_password('superduper');

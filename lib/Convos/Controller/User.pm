@@ -97,13 +97,11 @@ sub login {
 }
 
 sub logout {
-  my $self   = shift;    # Not a big deal if it's ->openapi->valid_input or not
-  my $format = $self->stash('format') || 'json';
+  my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
 
   return $self->auth->logout_p({})->then(sub {
     $self->session({expires => 1});
-    return $self->redirect_to('/login') if $format eq 'html';
-    return $self->render(openapi => {message => 'Logged out.'});
+    return $self->redirect_to('/login');
   });
 }
 

@@ -18,7 +18,7 @@ $t->post_ok('/api/user/superman@example.com/invite.json')->status_is(200)
 my $recover_url = Mojo::URL->new($t->tx->res->json->{url});
 
 note 'Log out admin';
-$t->get_ok('/api/user/logout')->status_is(200);
+$t->get_ok('/api/user/logout')->status_is(302);
 
 note 'Let recover user do the rest';
 $t->get_ok(substr $recover_url, 0, -1)->status_is(400)

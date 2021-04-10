@@ -18,7 +18,7 @@ $t->get_ok('/register')->status_is(200)
   ->element_exists(qq(meta[name="convos:first_user"][content="yes"]));
 my %register = (email => 'first@convos.chat', password => 'firstpassword');
 $t->post_ok('/api/user/register', json => \%register)->status_is(200);
-$t->get_ok('/api/user/logout.html')->status_is(302)->header_is(Location => '/login');
+$t->get_ok('/api/user/logout')->status_is(302)->header_is(Location => '/login');
 
 note 'second user needs invite link';
 $t->get_ok('/register')->status_is(200)

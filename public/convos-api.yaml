@@ -553,10 +553,8 @@ paths:
       tags: [ user ]
       x-mojo-to: ["user#logout", ["format", ["html", "json"]]]
       responses:
-        '200':
+        '302':
           description: Successfully logged out.
-          schema:
-            $ref: '#/definitions/Success'
 
   /user/register:
     post:

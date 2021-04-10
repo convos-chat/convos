@@ -25,7 +25,7 @@ $t->post_ok('/api/user/superduper@example.com', json => {})->status_is(404)
   ->json_is('/errors/0/message', 'No such user.');
 
 note 'Logout first user';
-$t->get_ok('/api/user/logout')->status_is(200);
+$t->get_ok('/api/user/logout')->status_is(302);
 
 note 'Second user';
 $t->post_ok('/api/user/register',
@@ -44,7 +44,7 @@ $t->post_ok('/api/user/superman@example.com', json => {})->status_is(403)
   ->json_is('/errors/0/message', 'Only admins can update other users.');
 
 note 'Logout second user';
-$t->get_ok('/api/user/logout')->status_is(200);
+$t->get_ok('/api/user/logout')->status_is(302);
 $server->client($t->app->core->get_user('superwoman@example.com')->connections->[0])
   ->server_event_ok('_irc_event_nick')->process_ok;
 delete $server->{client};
