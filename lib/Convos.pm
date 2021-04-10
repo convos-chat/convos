@@ -174,6 +174,7 @@ sub _config {
   my $settings = $self->core->settings;
   $settings->load_p->wait;
   $self->secrets($settings->session_secrets);
+  $settings->check_for_update->{available_version} ||= $self->VERSION;
   $settings->save_p->wait;
 
   return $config;
@@ -200,9 +201,9 @@ sub _plugins {
   unshift @{$self->plugins->namespaces}, 'Convos::Plugin';
 
   my @plugins = (
-    qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
-    qw(Convos::Plugin::Files Convos::Plugin::I18N Convos::Plugin::Helpers),
-    qw(Convos::Plugin::Themes),
+    qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::CheckForUpdate),
+    qw(Convos::Plugin::Cms Convos::Plugin::Files Convos::Plugin::Helpers),
+    qw(Convos::Plugin::I18N Convos::Plugin::Themes),
   );
 
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};

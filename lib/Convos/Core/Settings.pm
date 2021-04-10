@@ -2,23 +2,29 @@ package Convos::Core::Settings;
 use Mojo::Base -base;
 
 use Convos::Core::Connection;
-use Convos::Util 'generate_secret';
+use Convos::Util qw(generate_secret);
 use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;
+use Mojo::Util qw(sha1_sum);
 
 has base_url           => sub { Mojo::URL->new('http://127.0.0.1:8080') };
+has check_for_update   => sub { +{available_version => 0, interval => 86400, last_checked => 0} };
 has contact            => 'mailto:root@localhost';
 has core               => sub { Convos::Core->new }, weak => 1;
-has id                 => 'settings';
 has default_connection => sub { shift->_build_default_connection };
 has forced_connection  => sub {false};
+has id                 => 'settings';
 has local_secret       => sub { $ENV{CONVOS_LOCAL_SECRET} || generate_secret };
 has open_to_public     => sub {false};
 has organization_name  => 'Convos';
 has organization_url   => sub { Mojo::URL->new('https://convos.chat') };
 has session_secrets    => sub { shift->_build_session_secrets };
 has video_service      => 'https://meet.jit.si/';
+
+sub app_id {
+  sha1_sum(join ':', map { $_[0]->$_ } qw(contact local_secret));
+}
 
 sub load_p {
   my $self = shift;
@@ -32,12 +38,9 @@ sub public_attributes {
 sub save_p {
   my $self = shift;
   $self->_set_attributes(shift, 0) if ref $_[0] eq 'HASH';
-
   my $url = $self->default_connection;
   $self->core->connection_profile({url => $url->clone});
-
-  my $p = $self->core->backend->save_object_p($self, @_);
-  return $p;
+  return $self->core->backend->save_object_p($self, @_);
 }
 
 sub uri { Mojo::Path->new('settings.json') }
@@ -81,6 +84,7 @@ sub TO_JSON {
   my ($self, $persist) = @_;
 
   my %json = map { ($_ => $self->$_) } $self->public_attributes;
+  $json{check_for_update} = $self->check_for_update;
   $json{$_} = $self->$_->to_string for qw(base_url default_connection organization_url);
 
   if ($persist) {

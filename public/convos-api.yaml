@@ -676,6 +676,36 @@ paths:
                 items:
                   $ref: '#/definitions/User'
 
+  /version:
+    get:
+      operationId: callHomeForVersion
+      summary: Check if a new version is available
+      x-mojo-to: admin#check_for_update
+      parameters:
+      - description: App ID
+        in: query
+        name: app_id
+        type: string
+        minLength: 40
+        maxLength: 40
+        required: true
+      - description: The running version
+        in: query
+        name: running
+        type: string
+        pattern: '^\d+(\.\d+)?$'
+        required: true
+      responses:
+        '200':
+          description: Version information
+          schema:
+            type: object
+            properties:
+              available_version:
+                type: string
+              update_available:
+                type: boolean
+
 parameters:
   after:
     name: after

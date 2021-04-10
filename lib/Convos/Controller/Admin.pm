@@ -5,6 +5,18 @@ use Convos::Util qw(disk_usage);
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(trim);
 
+sub check_for_update {
+  my $self              = shift->openapi->valid_input or return;
+  my $app_id            = $self->param('app_id');
+  my $running           = $self->param('running');
+  my $available_version = $self->app->VERSION;
+  my $update_available  = $available_version > $running ? true : false;
+
+  $self->log->info(sprintf 'Remote Convos %s is running version %s', $app_id, $running);
+  $self->render(
+    openapi => {available_version => $available_version, update_available => $update_available});
+}
+
 sub settings_get {
   my $self = shift->openapi->valid_input or return;
   return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
