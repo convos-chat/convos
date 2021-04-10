@@ -17,10 +17,8 @@ $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
 note 'get default settings';
-$t->get_ok('/api/settings')->status_is(200)->json_has('/dependencies/0/mode')
-  ->json_has('/dependencies/0/name')->json_has('/dependencies/0/version')
-  ->json_hasnt('/local_secret')->json_hasnt('/session_secrets')
-  ->json_is('/contact',            'mailto:root@localhost')
+$t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
+  ->json_hasnt('/session_secrets')->json_is('/contact', 'mailto:root@localhost')
   ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
   ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat')
