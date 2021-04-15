@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.12 Not Released
+ - Fix on_connect_commands might not be set in all cases
+
 6.11 2021-04-10T19:54:00+0900
  - Changed /logout to always result in 302 redirect #586
  - Removed "dependencies" from /settings

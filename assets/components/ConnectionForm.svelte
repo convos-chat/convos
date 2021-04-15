@@ -62,7 +62,7 @@ async function removeConnection(e) {
 
 async function saveConnection() {
   const params = {};
-  params.on_connect_commands = $form.on_connect_commands.split(/\n\r?/);
+  params.on_connect_commands = ($form.on_connect_commands || '').split(/\n\r?/);
   params.url = new ConnectionURL('irc://localhost').fromFields($form).toString();
 
   if (connection.connection_id) {
