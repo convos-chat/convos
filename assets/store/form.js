@@ -11,26 +11,29 @@ export const formAction = (formEl, formStore) => {
 
   formEl.addEventListener('submit', (e) => {
     e.preventDefault();
-    formStore.submit();
+    formStore.submit().catch(error => {
+      console.error('formAction.submit() failed:', error);
+      formStore.set({...get(formStore), error});
+    });
   });
 
   formStore.formEl = formEl;
   formStore.render();
 };
 
-export const makeFormStore = (defaults = {}) => {
+export const makeFormStore = (defaults = {error: ''}) => {
   const formStore = writable(defaults);
 
   formStore.changed = (name, value) => ({[name]: value});
   formStore.renderOnNextTick = function(fields) { setTimeout(() => this.render(fields), 1) };
-  formStore.submit = function() { };
+  formStore.submit = function() { return Promise.resolve() };
 
   formStore.render = function(fields) {
     if (fields) this.set({...get(this), ...fields});
     if (!this.formEl) return null;
     if (!fields) fields = get(this);
 
-    return Object.keys(fields).map(name => {
+    return Object.keys(fields).filter(name => name != 'error').map(name => {
       const inputEl = this.formEl.querySelector('[name="' + name + '"]');
       if (!inputEl || typeof fields[name] == 'undefined') return null;
       inputEl.type == 'checkbox' ? (inputEl.checked = fields[name] ? true : false)

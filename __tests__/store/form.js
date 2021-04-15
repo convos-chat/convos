@@ -23,11 +23,11 @@ test('formAction change', () => {
   inputEl.value = 'accepted';
   formEl.appendChild(inputEl);
   inputEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
-  expect(get(formStore)).toEqual({accept: undefined});
+  expect(get(formStore)).toEqual({accept: undefined, error: ''});
 
   inputEl.checked = true;
   inputEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
-  expect(get(formStore)).toEqual({accept: 'accepted'});
+  expect(get(formStore)).toEqual({accept: 'accepted', error: ''});
 });
 
 test('formAction submit', () => {
@@ -36,14 +36,14 @@ test('formAction submit', () => {
   const action = formAction(formEl, formStore);
 
   let submit = [];
-  formStore.submit = (el) => submit.push(formStore.formEl);
+  formStore.submit = (el) => { submit.push(formStore.formEl); return Promise.resolve() };
   formEl.dispatchEvent(new Event('submit'));
   expect(submit).toEqual([formEl]);
 });
 
 test('makeFormStore', () => {
   const formStore = makeFormStore();
-  expect(get(formStore)).toEqual({});
+  expect(get(formStore)).toEqual({error: ''});
 });
 
 test('render', () => {

@@ -18,7 +18,7 @@ let connection_id = null;
 export {connection_id as id};
 
 const api = getContext('api');
-const form = makeFormStore({});
+const form = makeFormStore();
 const user = getContext('user');
 const saslMechanisms = [['none', 'None'], ['plain', 'Plain'], ['external', 'External']];
 
@@ -151,7 +151,10 @@ async function saveConnection() {
       <Button icon="network-wired" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
     {/if}
   </div>
+  {#if $form.error}
+    <div class="error">{$l($form.error)}</div>
+  {/if}
   <OperationStatus op="{createConnectionOp}"/>
-  <OperationStatus op="{removeConnectionOp}"/>
+  <OperationStatus op="{removeConnectionOp}" success="Deleted."/>
   <OperationStatus op="{updateConnectionOp}"/>
 </form>

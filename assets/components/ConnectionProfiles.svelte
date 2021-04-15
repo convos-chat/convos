@@ -19,7 +19,7 @@ const api = getContext('api');
 const user = getContext('user');
 
 const connectionProfiles = generateWriteable('connectionProfiles', []);
-const form = makeFormStore({});
+const form = makeFormStore();
 const listConnectionProfiles = api('listConnectionProfiles');
 const removeConnectionProfileOp = api('removeConnectionProfileOp');
 const saveConnectionProfileOp = api('saveConnectionProfile');
@@ -143,6 +143,9 @@ async function saveConnectionProfile() {
     <div class="form-actions">
       <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{editProfile.id ? $l('Update') : $l('Add')}</span></Button>
     </div>
+    {#if $form.error}
+      <div class="error">{$l($form.error)}</div>
+    {/if}
     <OperationStatus op="{saveConnectionProfileOp}"/>
   </form>
 {:else}

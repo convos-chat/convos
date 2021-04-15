@@ -96,7 +96,7 @@ function registered() {
           <a href="#signin" replace>{$l('Sign in')}</a>
         </div>
 
-        <OperationStatus op="{registerOp}"/>
+        <OperationStatus op="{registerOp}" success="Loading Convos..."/>
       </form>
     {:else}
       <h2>{$l('Sign up')}</h2>
@@ -126,7 +126,7 @@ function registered() {
           <a href="#signup">{$l('Sign up')}</a>
         </div>
 
-        <OperationStatus op="{loginOp}"/>
+        <OperationStatus op="{loginOp}" success="Loading Convos..."/>
       </form>
     </div>
   {/if}

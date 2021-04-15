@@ -14,15 +14,18 @@ body.with-grid::after {
 }
 
 .error,
-.loading {
-  border: 1px solid transparent;
-  padding: 0.5rem;
+.success {
   margin: var(--gutter) 0;
 }
 
 .error {
   background: var(--button-danger-bg);
   color: var(--button-danger-color);
+  padding: 0.5rem;
+}
+
+.success {
+  padding: 0 0.5rem;
 }
 
 .fade-in {

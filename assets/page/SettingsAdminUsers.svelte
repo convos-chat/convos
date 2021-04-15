@@ -112,7 +112,7 @@ function updateUserFromForm(e) {
         <Button icon="trash" op="{deleteUserOp}" disabled="{confirmEmail != editUser.email}"><span>{$l('Delete user')}</span></Button>
       </div>
 
-      <OperationStatus op="{deleteUserOp}"/>
+      <OperationStatus op="{deleteUserOp}" success="Deleted."/>
     </form>
   {:else}
     <form id="invite" method="post" on:submit|preventDefault="{generateInviteLink}">
@@ -136,7 +136,7 @@ function updateUserFromForm(e) {
         <Button icon="save" op="{inviteLinkOp}"><span>{$l('Generate link')}</span></Button>
       </div>
 
-      <OperationStatus op="{inviteLinkOp}"/>
+      <OperationStatus op="{inviteLinkOp}" success="Link generated."/>
     </form>
 
     <h2>{$l('Users')} <small>({users.length})</small></h2>
