@@ -41,8 +41,8 @@ export default class ConnectionURL {
     if (is.string(fields.nick)) searchParams.append('nick', fields.nick.trim());
     if (is.string(fields.realname) && fields.realname.length) searchParams.append('realname', fields.realname.trim());
     if (is.string(fields.sasl)) searchParams.append('sasl', fields.sasl || 'none');
-    if (is.defined(fields.tls)) searchParams.append('tls', is.true(fields.tls) ? '1' : '0');
-    if (is.defined(fields.tls_verify)) searchParams.append('tls_verify', is.true(fields.tls) && is.true(fields.tls_verify) ? '1' : '0');
+    searchParams.append('tls', is.true(fields.tls) ? '1' : '0');
+    searchParams.append('tls_verify', is.true(fields.tls) && is.true(fields.tls_verify) ? '1' : '0');
 
     return this;
   }
