@@ -93,6 +93,7 @@ sub _connect_args_p {
   $self->{myinfo}{authenticated} = false;
   $self->{myinfo}{capabilities}  = {};
   $self->{myinfo}{nick}          = $params->param('nick');
+  delete $self->{myinfo}{real_host};
 
   return $self->SUPER::_connect_args_p;
 }
