@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix on_connect_commands might not be set in all cases
  - Fix toggling TLS and TLS verify checkboxes
  - Improved feedback to user on failed/successful save of forms
+ - Improved feedback in case TLS settings are incorrect
 
 6.11 2021-04-10T19:54:00+0900
  - Changed /logout to always result in 302 redirect #586

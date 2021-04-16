@@ -185,6 +185,8 @@ sub _debug {
 #warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
 }
 
+sub _failed_to_connect {0}
+
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
@@ -226,13 +228,7 @@ sub _stream_on_close {
   my $state = delete $self->{disconnecting} ? 'disconnected' : 'queued';
   delete @$self{qw(stream stream_id)};
   return $self->state(disconnected => 'Closed.') if $state eq 'disconnected';
-
-  if ($self->{failed_to_connect}) {
-    my $n = 1 + $self->{failed_to_connect};
-    return Mojo::IOLoop->timer(($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
-      sub { $self and $self->user->core->connect($self, 'You got disconnected.') });
-  }
-
+  return                                         if $self->_failed_to_connect;
   return $self->user->core->connect($self, sprintf 'You got disconnected from %s.',
     $self->url->host);
 }

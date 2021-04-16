@@ -97,6 +97,22 @@ sub _connect_args_p {
   return $self->SUPER::_connect_args_p;
 }
 
+sub _failed_to_connect {
+  my $self = shift;
+
+  Scalar::Util::weaken($self);
+  if ($self->{failed_to_connect}) {
+    my $n = 1 + $self->{failed_to_connect};
+    return Mojo::IOLoop->timer(($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
+      sub { $self and $self->user->core->connect($self, 'You got disconnected.') });
+  }
+
+  if (!$self->{myinfo}{real_host}) {
+    $self->state(disconnected => 'Got unexpected close. Is the TLS settings correct?');
+    return Mojo::IOLoop->timer(30 => sub { $self and $self->user->core->connect($self) });
+  }
+}
+
 sub _irc_event_900 { goto &_irc_event_sasl_status }    # RPL_LOGGEDIN
 sub _irc_event_901 { goto &_irc_event_sasl_status }    # RPL_LOGGEDOUT
 sub _irc_event_902 { goto &_irc_event_sasl_status }    # ERR_NICKLOCKED
