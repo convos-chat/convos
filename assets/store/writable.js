@@ -1,5 +1,4 @@
 import {get, writable} from 'svelte/store';
-import {route} from '../store/Route';
 
 const generated = {};
 
@@ -20,7 +19,6 @@ export function generateWriteable(name, intial = '') {
       store.set(get(store) == val ? '' : val);
     }
     else {
-      route.go(aEl.href.replace(/#.*/, ''));
       setTimeout(() => store.set(val), 100);
     }
   };
