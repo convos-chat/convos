@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.12 Not Released
+6.12 2021-04-16T09:45:00+0900
  - Fix on_connect_commands might not be set in all cases
  - Fix toggling TLS and TLS verify checkboxes
  - Improved feedback to user on failed/successful save of forms
