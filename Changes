@@ -1,6 +1,8 @@
 Revision history for perl distribution Convos
 
+6.13 Not Released
  - Add dracula color theme
+ - Will set MOJO_REVERSE_PROXY based on CONVOS_REVERSE_PROXY
 
 6.12 2021-04-16T09:45:00+0900
  - Fix on_connect_commands might not be set in all cases

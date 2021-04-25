@@ -13,7 +13,8 @@ use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
 
 our $VERSION = '6.12';
 
-$ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY} || 0;
+$ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY}   || 0;
+$ENV{MOJO_REVERSE_PROXY}   //= $ENV{CONVOS_REVERSE_PROXY} || 0;
 
 has core => sub {
   my $self = shift;
