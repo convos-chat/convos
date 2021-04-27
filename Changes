@@ -1,5 +1,7 @@
 Revision history for perl distribution Convos
 
+ - Add dracula color theme
+
 6.12 2021-04-16T09:45:00+0900
  - Fix on_connect_commands might not be set in all cases
  - Fix toggling TLS and TLS verify checkboxes

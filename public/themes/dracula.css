@@ -1,0 +1,100 @@
+/*
+ * name: Dracula
+ * color-scheme: dark
+ */
+
+:root {
+  --body-bg: #282a36;
+  --cms-bg: linear-gradient(170deg, #282a36, #44475a);
+  --text-color: #f8f8f2;
+  --link-color: #ff79c6;
+  --quote-color: #8be9fd;
+  --error-color: #ff5555;
+  --success-color: #50fa7b;
+  --highlight-color-bg: #44475a;
+  --highlight-color: #ffb86c;
+  --hr-border: 1px solid #6272a4;
+  --button-bg: #ff79c6;
+  --code-bg: #44475a;
+  --button-color: #f8f8f2;
+  --button-border: 1px solid #bd93f9;
+  --button-focus-outline: 2px solid #6272a4;
+  --button-disabled-bg: #44475a;
+  --button-disabled-color: #f1fa8c;
+  --button-disabled-border: #44475a;
+  --button-danger-bg: #ffb86c;
+  --button-danger-color: #6272a4;
+  --input-bg: #bd93f9;
+  --input-border: 1px solid #4e4e4e;
+  --input-color: #50fa7b;
+  --input-focus-outline: 2px solid #6272a4;
+  --input-disabled-bg: #282a36;
+  --input-disabled-color: #ffb86c;
+  --input-placeholder-color: #50fa7b;
+  --chat-input-bg: #44475a;
+  --autocomplete-bg: #44475a;
+  --autocomplete-border: 2px solid #bd93f9;
+  --autocomplete-focus-bg: #6272a4; 
+  --ts-color: #f1fa8c;
+  --sidebar-left-bg: #282a36;
+  --sidebar-left-frozen-color: #bd93f9;
+  --sidebar-left-text: #8be9fd;
+  --sidebar-left-outline: #8ece93 auto 3px;
+  --sidebar-left-border-bottom: #6272a4;
+  --sidebar-left-search-placeholder-color: #bd93f9;
+  --sidebar-left-search-focus-bg: #44475a;
+  --sidebar-right-bg: var(--body-bg);
+  --sidebar-right-text: var(--text-color);
+
+  /*
+   * Copyright (c) 2017-present Arctic Ice Studio <development@arcticicestudio.com>
+   * Copyright (c) 2017-present Sven Greb <development@svengreb.de>
+   *
+   * Project:    Nord highlight.js
+   * Version:    0.1.0
+   * Repository: https://github.com/arcticicestudio/nord-highlightjs
+   * License:    MIT
+   */
+  --syntax-hl-base: #f8f8f2;
+  --syntax-hl-base-bg: #282a36;
+  --syntax-hl-addition-bg: rgba(163, 190, 140, 0.5);
+  --syntax-hl-deletion-bg: rgba(191, 97, 106, 0.5);
+  --syntax-hl-attr: #f1fa8c;
+  --syntax-hl-attribute: #f1fa8c;
+  --syntax-hl-built-in: #8FBCBB;
+  --syntax-hl-bullet: ##f1fa8c;
+  --syntax-hl-comment: #6272a4;
+  --syntax-hl-doctag: #8FBCBB;
+  --syntax-hl-class: #8BE9FD;
+  --syntax-hl-code: #F8F8F2;
+  --syntax-hl-code-bg: #282A36;
+  --syntax-hl-formula: #BD93F9;
+  --syntax-hl-function: #50FA7B;
+  --syntax-hl-keyword: #FF79C6;
+  --syntax-hl-literal: #F1FA8C;
+  --syntax-hl-meta: #5E81AC;
+  --syntax-hl-meta-keyword: #5E81AC;
+  --syntax-hl-meta-string: #A3BE8C;
+  --syntax-hl-name: #81A1C1;
+  --syntax-hl-number: #8BE9FD;
+  --syntax-hl-params: #D8DEE9;
+  --syntax-hl-quote: #F1FA8C;
+  --syntax-hl-regexp: #FF5555;
+  --syntax-hl-section: #FF79C6;
+  --syntax-hl-selector-attr: #8FBCBB;
+  --syntax-hl-selector-class: #8FBCBB;
+  --syntax-hl-selector-id: #8FBCBB;
+  --syntax-hl-selector-pseudo: #88C0D0;
+  --syntax-hl-selector-tag: #D8DEE9;
+  --syntax-hl-string: #A3BE8C;
+  --syntax-hl-subst: #D8DEE9;
+  --syntax-hl-symbol: #50FA7B;
+  --syntax-hl-template-variable: #FFB86C;
+  --syntax-hl-title: #8FBCBB;
+  --syntax-hl-type: #8BE9FD;
+  --syntax-hl-variable: #f8f8f2;
+}
+
+body.for-cms {
+  --footer-bg: #6272a4;
+}
