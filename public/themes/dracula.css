@@ -46,15 +46,7 @@
   --sidebar-right-bg: var(--body-bg);
   --sidebar-right-text: var(--text-color);
 
-  /*
-   * Copyright (c) 2017-present Arctic Ice Studio <development@arcticicestudio.com>
-   * Copyright (c) 2017-present Sven Greb <development@svengreb.de>
-   *
-   * Project:    Nord highlight.js
-   * Version:    0.1.0
-   * Repository: https://github.com/arcticicestudio/nord-highlightjs
-   * License:    MIT
-   */
+  /* Dracula Highlight.scss */
   --syntax-hl-base: #f8f8f2;
   --syntax-hl-base-bg: #282a36;
   --syntax-hl-addition-bg: rgba(163, 190, 140, 0.5);
