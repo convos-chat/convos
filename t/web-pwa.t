@@ -14,7 +14,7 @@ $t->tx->res->dom->at('head')->find('[content^="/"], [content^="http"], [href]')-
   $n++;
 });
 
-is $n, 32, 'expected number of head [href]';
+is $n, 33, 'expected number of head [href]';
 
 $t->get_ok('/sw/info')->status_is(200)->json_like('/mode', qr(^\w+$))
   ->json_is('/version', Convos->VERSION);

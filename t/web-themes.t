@@ -22,7 +22,7 @@ $t->get_ok('/')->status_is(200)->element_exists('link[id$="dark-convos"][title="
   ->element_exists('link[id$="normal-mytheme"][title="MyTheme"]')
   ->element_count_is(
   'link[rel="alternate stylesheet"][id^="theme_alt__dark-"][type="text/css"][href^="/themes/"]',
-  3, 'dark themes')
+  4, 'dark themes')
   ->element_count_is(
   'link[rel="alternate stylesheet"][id^="theme_alt__light-"][type="text/css"][href^="/themes/"]',
   3, 'light themes')
