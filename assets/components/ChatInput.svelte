@@ -2,7 +2,6 @@
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {chatHelper, videoWindow} from '../js/chatHelpers';
-import {emojis, md} from '../js/md';
 import {extractErrorMessage, is} from '../js/util';
 import {fly} from 'svelte/transition';
 import {generateWriteable, nColumns} from '../store/writable';
@@ -24,20 +23,6 @@ let splitValueAt = 0;
 const api = getContext('api');
 const user = getContext('user');
 const activeChatMenu = generateWriteable('activeChatMenu');
-
-const defaultEmojis = [
-  ':smiley:',
-  ':grin:',
-  ':open_mouth:',
-  ':stuck_out_tongue:',
-  ':thumbsup:',
-  ':wink:',
-  ':heart:',
-].map(emoji => {
-  const opt = {val: emojis(emoji, 'single').emoji};
-  opt.text = md(opt.val);
-  return opt;
-});
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 $: conversation && ($activeChatMenu = '');
@@ -100,7 +85,7 @@ function renderInputHeight() {
 
 function selectOption(e) {
   autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
-  fillin(autocompleteOptions[autocompleteIndex] || defaultEmojis[autocompleteIndex], {padAfter: true, replace: true});
+  fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
   setTimeout(() => inputEl.focus(), 1);
 }
 
@@ -184,11 +169,6 @@ function uploadFiles(e) {
         <Icon name="cloud-upload-alt"/>
         {$l('Attach a file')}
       </label>
-      <div class="side-by-side">
-        {#each defaultEmojis as opt, i}
-          <a href="#index:{i}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text}</a>
-        {/each}
-      </div>
     </div>
   {:else if autocompleteOptions.length}
     <div class="chat-input_menu for-{autocompleteCategory}" transition:fly="{chatMenuTransition}">
