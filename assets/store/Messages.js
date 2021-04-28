@@ -4,7 +4,6 @@ import Time from '../js/Time';
 import {api} from '../js/Api';
 import {i18n} from './I18N';
 import {jsonhtmlify} from 'jsonhtmlify';
-import {md} from '../js/md';
 import {q, str2color} from '../js/util';
 
 const EMBED_CACHE = {};
@@ -52,7 +51,7 @@ export default class Messages extends Reactive {
       msg.dayChanged = this._dayChanged(msg, prev);
       msg.className = this._className(msg, prev);
       msg.embeds = [];
-      msg.markdown = msg.vars ? i18n.md(msg.message, ...msg.vars) : md(msg.message);
+      msg.markdown = msg.vars ? i18n.lmd(msg.message, ...msg.vars) : i18n.md(msg.message);
 
       return (prev = msg);
     });

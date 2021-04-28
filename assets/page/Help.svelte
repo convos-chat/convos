@@ -2,13 +2,13 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import Link from '../components/Link.svelte';
 import {commands} from '../js/commands';
-import {emojiAliases} from '../js/md';
-import {l, lmd} from '../store/I18N';
+import {i18n, l, lmd} from '../store/I18N';
 import {settings} from '../js/util';
 
 export const title = 'Help';
 
 const changelogUrl = 'https://github.com/convos-chat/convos/blob/v' + settings('version') + '/Changes#L3';
+const emojiAliases = Object.keys(i18n.emojis.aliases).sort().join(', ');
 </script>
 
 <ChatHeader>
@@ -46,7 +46,7 @@ const changelogUrl = 'https://github.com/convos-chat/convos/blob/v' + settings('
   <h2 id="formatting">{$l('Text formatting')}</h2>
   <p>{$l('Convos supports some special way of formatting text:')}</p>
   <dl>
-    <dt>{Object.keys(emojiAliases).sort().map(k => emojiAliases[k]).join(', ')}</dt>
+    <dt>{@html emojiAliases}</dt>
     <dd>{$l('Will be automatically converted into emojis.')}</dd>
     <dt>{$l('> some text')}</dt>
     <dd>{$l('A line starting with ">" will be converted into a quote.')}</dd>

@@ -1,8 +1,6 @@
 import {commandOptions} from './commands';
-import {emojis, md} from './md';
+import {i18n} from '../store/I18N';
 import {is, regexpEscape} from './util';
-
-export const maxNumMatches = 20;
 
 export function autocomplete(category, params) {
   return autocomplete[category] ? autocomplete[category](params) : [];
@@ -69,22 +67,19 @@ autocomplete.conversations = ({conversation, query, user}) => {
   for (let i = 0; i < conversations.length; i++) {
     if (conversations[i].name.toLowerCase().indexOf(query) == -1) continue;
     opts.push({text: conversations[i].name, val: conversations[i].conversation_id});
-    if (opts.length >= maxNumMatches) break;
+    if (opts.length >= 20) break;
   }
 
   return opts;
 };
 
 autocomplete.emojis = ({query}) => {
+  const emojis = i18n.emojis;
   const opts = [];
-
-  [':', '_'].map(p => p + query.slice(1, 2)).forEach(group => {
-    const emojiList = emojis(group, 'group');
-    for (let i = 0; i < emojiList.length; i++) {
-      if (emojiList[i].shortname.indexOf(query) >= 0) opts.push({val: emojiList[i].emoji, text: md(emojiList[i].emoji)});
-      if (opts.length >= maxNumMatches) break;
-    }
-  });
+  for (let emoji of emojis.search(query.substring(1))) {
+    opts.push({val: emoji.emoji, text: emojis.markup(emoji.emoji)});
+    if (opts.length >= 30) break;
+  }
 
   return opts;
 };
@@ -94,7 +89,7 @@ autocomplete.nicks = ({conversation, query}) => {
   const opts = [];
 
   for (let participant of conversation.participants.toArray()) {
-    if (opts.length >= maxNumMatches) break;
+    if (opts.length >= 20) break;
     if (participant.nick.match(re)) opts.push({val: participant.nick});
   }
 

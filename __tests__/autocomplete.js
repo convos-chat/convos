@@ -1,10 +1,10 @@
 import Participants from '../assets/store/Participants';
 import {calculateAutocompleteOptions, fillIn} from '../assets/js/autocomplete';
-
-// calculateAutocompleteOptions
-global.window.__emojiList = [{"emoji": "😄", "name": "smile", "shortname": ":smile:", "unicode": "1f604", "html": "&#128516;", "category": "p", "order": "6"}];
+import {emojis} from '../public/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json';
+import {i18n} from '../assets/store/I18N';
 
 test('calculateAutocompleteOptions', () => {
+  i18n.emojis._load(emojis);
   const params = {conversation: {participants: new Participants()}};
   params.conversation.participants.add({nick: 'superman'});
   expect(calculateAutocompleteOptions('', 0, params).length).toBe(0);
@@ -19,8 +19,9 @@ test('calculateAutocompleteOptions', () => {
   // TODO: expect(calculateAutocompleteOptions('foo #con channel', 4, params).length).toBe(2);
 
   // Emoji
-  expect(calculateAutocompleteOptions('foo :sm emoji', 7, params).length).toBe(2);
-  expect(calculateAutocompleteOptions('foo :fo', 7, params).length).toBe(0);
+  expect(calculateAutocompleteOptions('foo :nor emoji', 8, params).length).toBe(6);
+  expect(calculateAutocompleteOptions('foo :norw emoji', 9, params).length).toBe(2);
+  expect(calculateAutocompleteOptions('foo :xyz', 8, params).length).toBe(0);
 
   // Nicks
   expect(calculateAutocompleteOptions('foo @su cool beans', 7, params).length).toBe(2);

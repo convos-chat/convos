@@ -1,5 +1,5 @@
+import {i18n} from '../store/I18N';
 import {is} from './util';
-import {md} from './md';
 
 export const commands = [];
 export const rewriteRule = {};
@@ -10,7 +10,7 @@ export function commandOptions({query}) {
   for (let i = 0; i < commands.length; i++) {
     if (commands[i].cmd.indexOf(query) != 0) continue;
     const val = commands[i].alias || commands[i].cmd;
-    opts.push({val, text: md(commands[i].example)});
+    opts.push({val, text: i18n.md(commands[i].example)});
   }
 
   return opts;

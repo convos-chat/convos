@@ -6,7 +6,7 @@ import {activeMenu, nColumns} from './store/writable';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {i18n} from './store/I18N';
-import {loadScript, q, settings} from './js/util';
+import {q, settings} from './js/util';
 import {notify} from './js/Notify';
 import {route} from './store/Route';
 import {getSocket} from './js/Socket';
@@ -36,7 +36,6 @@ route.update({baseUrl: settings('base_url')});
 socket.update({url: route.wsUrlFor('/events')});
 registerServiceWorker().catch(err => console.error('[serviceWorker]', err));
 setupRouting(route, user);
-loadScript(route.urlFor('/images/emojis.js'));
 
 setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
 setContext('socket', socket);
@@ -49,6 +48,7 @@ user.on('update', (user, changed) => changed.hasOwnProperty('roles') && route.re
 i18n.load().then(() => user.load());
 
 $: isLoggedIn = $route.component && $route.requireLogin && user.is('authenticated') ? true : false;
+$: if (isLoggedIn) i18n.emojis.load();
 $: settingsComponent = !$user.activeConversation.connection_id ? null : $user.activeConversation.conversation_id ? ConversationSettings : ConnectionSettings;
 $: document.body.className = document.body.className.replace(/for-\w+/, 'for-' + (isLoggedIn ? 'app' : 'cms'));
 $: features[isLoggedIn ? 'add' : 'remove']('notify');
