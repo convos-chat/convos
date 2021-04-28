@@ -76,7 +76,7 @@ sub startup {
   $user_r->get('/help');
   $user_r->get('/chat')->name('chat');
   $user_r->get('/chat/:connection_id')->name('chat.connection_id');
-  $user_r->get('/chat/:connection_id/:conversation_id')->name('chat.connection_id.conversation_id');
+  $user_r->get('/chat/:connection_id/#conversation_id')->name('chat.connection_id.conversation_id');
   $user_r->get('/login');
   $user_r->get('/register')->to('user#register_html');
   $user_r->get('/settings/*rest', {rest => ''});

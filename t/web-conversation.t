@@ -98,6 +98,13 @@ for (split /\n/, data_section qw(main notifications.log)) {
 $t->get_ok('/api/notifications')->status_is(200);
 is @{$t->tx->res->json->{messages}}, 5, 'got all notifications, including utf8';
 
+note 'channel with dot';
+$user->connection({url => 'irc://example'})->conversation({name => '#a.js', frozen => ''});
+$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
+  ->json_is('/conversations/0/name', '#a.js');
+$t->get_ok('/chat/irc-freenode/%23convos')->status_is(200);
+$t->get_ok('/chat/irc-freenode/%23a.js')->status_is(200);
+
 done_testing;
 
 __DATA__
