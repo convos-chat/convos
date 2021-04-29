@@ -94,10 +94,10 @@ export default class Emojis {
 
   _toGrouped(emoji) {
     const grouped = this.grouped;
-    const groups = [emoji.shortname, emoji.name].join('-').replace(/\W+/, ' ').match(/(?<=\s)(\w{2})/g);
+    const groups = [emoji.shortname, emoji.name].join('-').replace(/\W+/, ' ').match(/\W(\w{2})/g);
 
     (groups || []).forEach((g, i) => {
-      g = g.toLowerCase();
+      g = g.substring(1).toLowerCase();
       if (!grouped[g]) grouped[g] = {};
       grouped[g][emoji.shortname] = i;
 

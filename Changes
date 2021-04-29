@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.14 Not Released
+ - Fix iOS bug, where Safari would crash because it can't handle complex regexes
+
 6.13 2021-04-29T10:59:00+0900
  - Add dracula color theme
  - Fix handling URLs with conversation names ending with ".js"
