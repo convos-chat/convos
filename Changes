@@ -1,10 +1,16 @@
 Revision history for perl distribution Convos
 
+6.15 Not Released
+ - Fix invitation link handling
+ - Improved handling of errors on the login page
+ - Improved input field focus on login screen
+ - Improved "Dracula" theme form field rendering
+
 6.14 2021-04-29T20:30:00+0900
  - Fix iOS bug, where Safari would crash because it can't handle complex regexes
 
 6.13 2021-04-29T10:59:00+0900
- - Add dracula color theme
+ - Add "Dracula" color theme
  - Fix handling URLs with conversation names ending with ".js"
  - Improved emoji autocomplete #547
  - Updated emojis list #547
