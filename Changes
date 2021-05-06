@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.15 Not Released
+6.15 2021-05-06T10:30:00+0900
  - Fix invitation link handling
  - Fix changing "Source IP" fo a connection
  - Improved handling of errors on the login page
