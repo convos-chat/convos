@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.15 Not Released
  - Fix invitation link handling
+ - Fix changing "Source IP" fo a connection
  - Improved handling of errors on the login page
  - Improved input field focus on login screen
  - Improved "Dracula" theme form field rendering

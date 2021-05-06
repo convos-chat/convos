@@ -38,6 +38,7 @@ export default class ConnectionURL {
     if (is.string(fields.conversation_id)) this.pathname = encodeURIComponent(fields.conversation_id);
 
     const searchParams = this.searchParams;
+    if (is.string(fields.local_address)) searchParams.append('local_address', fields.local_address || '');
     if (is.string(fields.nick)) searchParams.append('nick', fields.nick.trim());
     if (is.string(fields.realname) && fields.realname.length) searchParams.append('realname', fields.realname.trim());
     if (is.string(fields.sasl)) searchParams.append('sasl', fields.sasl || 'none');
@@ -55,6 +56,7 @@ export default class ConnectionURL {
     fields.conversation_id = decodeURIComponent(this.pathname.split('/').filter(p => p.length)[0] || '');
 
     const searchParams = this.searchParams;
+    fields.local_address = searchParams.get('local_address') || fields.local_address || '';
     fields.nick = searchParams.get('nick') || fields.nick || '';
     fields.realname = searchParams.get('realname') || fields.realname || '';
     fields.sasl = searchParams.get('sasl') || fields.sasl || 'none';
