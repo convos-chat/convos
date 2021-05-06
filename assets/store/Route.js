@@ -188,6 +188,7 @@ export default class Route extends Reactive {
   _onpopstate(e) {
     activeMenu.set('');
     this.render(this._location.href, e.state);
+    this.update({path: true});
   }
 
   _pathWithoutPrefix(path) {
