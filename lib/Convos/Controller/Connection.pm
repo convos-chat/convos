@@ -104,8 +104,11 @@ sub _same_url {
   my ($u1, $u2) = @_;
 
   return 0 unless $u1->host_port eq $u2->host_port;
-  return 0 unless +($u1->query->param('sasl') || '') eq +($u2->query->param('sasl') || '');
-  return 0 unless +($u1->query->param('tls')  || '0') eq +($u2->query->param('tls') || '0');
+  return 0 unless +($u1->query->param('realname') || '') eq +($u2->query->param('realname') || '');
+  return 0 unless +($u1->query->param('sasl')     || '') eq +($u2->query->param('sasl')     || '');
+  return 0 unless +($u1->query->param('tls')      || '0') eq +($u2->query->param('tls')     || '0');
+  return 0
+    unless +($u1->query->param('tls_verify') || '0') eq +($u2->query->param('tls_verify') || '0');
   return 0 unless +($u1->userinfo // '') eq +($u2->userinfo // '');
   return 1;
 }

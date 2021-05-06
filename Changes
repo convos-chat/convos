@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Improved handling of errors on the login page
  - Improved input field focus on login screen
  - Improved "Dracula" theme form field rendering
+ - Will reconnect to IRC server when "Your name" or "TLS verify" changes as well
 
 6.14 2021-04-29T20:30:00+0900
  - Fix iOS bug, where Safari would crash because it can't handle complex regexes
