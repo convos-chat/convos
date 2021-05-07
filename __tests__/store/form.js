@@ -1,91 +1,63 @@
+import {createForm} from '../../assets/store/form';
 import {get} from 'svelte/store';
-import {formAction, makeFormStore} from '../../assets/store/form';
 
-test('formAction', () => {
-  const formStore = makeFormStore();
-  const formEl = document.createElement('form');
-
-  const rendered = []
-  formStore.render = (fields) => rendered.push(fields);
-
-  const action = formAction(formEl, formStore);
-  expect(rendered).toEqual([undefined]);
+test('field', () => {
+  const form = createForm();
+  const ageField = form.field('age');
+  expect(form.field('age')).toEqual(ageField);
 });
 
-test('formAction change', () => {
-  const formStore = makeFormStore();
-  const formEl = document.createElement('form');
-  const action = formAction(formEl, formStore);
-
-  const inputEl = document.createElement('input');
-  inputEl.type = 'checkbox';
-  inputEl.name = 'accept';
-  inputEl.value = 'accepted';
-  formEl.appendChild(inputEl);
-  inputEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
-  expect(get(formStore)).toEqual({accept: undefined, error: ''});
-
-  inputEl.checked = true;
-  inputEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
-  expect(get(formStore)).toEqual({accept: 'accepted', error: ''});
+test('get', () => {
+  const form = createForm();
+  const ageField = form.field('age');
+  expect(form.get('age')).toBe('');
+  expect(form.get('age')).toBe(get(ageField));
+  expect(form.get('foo')).toBe(undefined);
+  expect(form.get(['age', 'bar'])).toEqual({age: '', bar: undefined});
+  expect(form.get()).toEqual({age: ''});
 });
 
-test('formAction submit', () => {
-  const formStore = makeFormStore();
-  const formEl = document.createElement('form');
-  const action = formAction(formEl, formStore);
-
-  let submit = [];
-  formStore.submit = (el) => { submit.push(formStore.formEl); return Promise.resolve() };
-  formEl.dispatchEvent(new Event('submit'));
-  expect(submit).toEqual([formEl]);
+test('set', () => {
+  const form = createForm();
+  form.set({age: 42});
+  expect(form.get('age')).toBe('42');
+  expect(form.get('foo')).toBe(undefined);
 });
 
-test('makeFormStore', () => {
-  const formStore = makeFormStore();
-  expect(get(formStore)).toEqual({error: ''});
+test('get - immutable', () => {
+  const form = createForm();
+  const ageField = form.field('name');
+  const data = form.get();
+  expect(data).toEqual({name: ''});
+
+  data.name = 'superman';
+  expect(data).toEqual({name: 'superman'});
+
+  form.set({name: 'superwoman'})
+  expect(form.get('name')).toBe('superwoman');
+  expect(get(ageField)).toBe('superwoman');
+  expect(data).toEqual({name: 'superman'});
+
+  const fields = form.get(['name']);
+  expect(fields).toEqual({name: 'superwoman'});
+
+  fields.name = 'superduper';
+  expect(fields).toEqual({name: 'superduper'});
+  expect(form.get(['name'])).toEqual({name: 'superwoman'});
 });
 
-test('render', () => {
-  const formStore = makeFormStore();
-  expect(formStore.render()).toBe(null);
+test('subscribe', () => {
+  const form = createForm();
+  const cb = jest.fn();
+  form.subscribe(cb);
+  expect(cb.mock.calls.pop()).toEqual([{}]);
 
-  formStore.formEl = document.createElement('form');
-  expect(formStore.render()).toEqual([]);
+  form.set({age: 42});
+  expect(cb.mock.calls.pop()).toEqual([{age: '42'}]);
 
-  const nickEl = document.createElement('input');
-  formStore.formEl.appendChild(nickEl);
-  formStore.set({nick: 'superman'});
-  expect(formStore.render()).toEqual([null]);
+  form.set({beans: 'cool'});
+  expect(cb.mock.calls.pop()).toEqual([{age: '42', beans: 'cool'}]);
 
-  nickEl.name = 'nick';
-  expect(formStore.render()).toEqual(['nick']);
-  expect(nickEl.value).toBe('superman');
-
-  expect(formStore.render({nick: 'superwoman'})).toEqual(['nick']);
-  expect(nickEl.value).toBe('superwoman');
-
-  const acceptEl = document.createElement('input');
-  acceptEl.type = 'checkbox';
-  acceptEl.name = 'accept';
-  acceptEl.value = 'accepted';
-  formStore.formEl.appendChild(acceptEl);
-  expect(formStore.render({accept: false})).toEqual(['accept']);
-  expect(acceptEl.value).toBe('accepted');
-  expect(acceptEl.checked).toBe(false);
-
-  expect(formStore.render({accept: true})).toEqual(['accept']);
-  expect(acceptEl.value).toBe('accepted');
-  expect(acceptEl.checked).toBe(true);
-
-  // Unchanged
-  expect(nickEl.value).toBe('superwoman');
-});
-
-test('renderOnNextTick', async () => {
-  const formStore = makeFormStore();
-  const p = new Promise(resolve => { formStore.render = resolve });
-
-  formStore.renderOnNextTick({foo: 42});
-  expect(await p).toEqual({foo: 42});
+  form.set({agree: false});
+  expect(cb.mock.calls.pop()).toEqual([{age: '42', agree: false, beans: 'cool'}]);
 });

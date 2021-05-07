@@ -4,6 +4,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {createForm} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
@@ -11,30 +12,21 @@ import {l, lmd} from '../store/I18N';
 export const title = 'Global settings';
 
 const api = getContext('api');
+const form = createForm();
 const user = getContext('user');
 
 const getSettingsOp = api('getSettings');
 const updateSettingsOp = api('updateSettings');
 
-let convosSettings = {};
-
-$: diskUsage = calculateDiskUsage(convosSettings.disk_usage);
-
-updateSettingsOp.on('start', req => {
-  if (req.body.contact) req.body.contact = 'mailto:' + req.body.contact;
-  req.body.open_to_public = req.body.open_to_public ? true : false;
-  settings('contact', req.body.contact);
-  settings('open_to_public', req.body.open_to_public);
-  settings('organization_name', req.body.organization_name);
-  settings('organization_url', req.body.organization_url);
-  user.update({videoService: req.body.video_service});
-});
+let diskUsage = null;
 
 onMount(async () => {
   await getSettingsOp.perform();
-  const body = getSettingsOp.res.body;
-  body.contact = body.contact.replace(/mailto:/, '');
-  convosSettings = body;
+  const fields = getSettingsOp.res.body;
+  diskUsage = calculateDiskUsage(fields.disk_usage);
+  delete fields.disk_usage;
+  fields.contact = fields.contact.replace(/mailto:/, '');
+  form.set(fields);
 });
 
 function calculateDiskUsage(usage) {
@@ -51,8 +43,15 @@ function calculateDiskUsage(usage) {
   };
 }
 
-function updateSettingsFromForm(e) {
-  updateSettingsOp.perform(e.target);
+function updateSettingsFromForm() {
+  const fields = form.get();
+  if (fields.contact) fields.contact = 'mailto:' + fields.contact;
+  settings('contact', fields.contact);
+  settings('open_to_public', fields.open_to_public);
+  settings('organization_name', fields.organization_name);
+  settings('organization_url', fields.organization_url);
+  user.update({videoService: fields.video_service});
+  updateSettingsOp.perform(fields);
 }
 </script>
 
@@ -65,27 +64,23 @@ function updateSettingsFromForm(e) {
     <h2>{$l('Convos settings')}</h2>
     <p>{@html $lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
-    <TextField name="organization_name" bind:value="{convosSettings.organization_name}">
+    <TextField name="organization_name" form="{form}">
       <span slot="label">{$l('Organization name')}</span>
       <p class="help" slot="help">{$l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
-
-    <TextField name="organization_url" placeholder="{$l('https://convos.chat')}" bind:value="{convosSettings.organization_url}">
+    <TextField name="organization_url" form="{form}" placeholder="{$l('https://convos.chat')}">
       <span slot="label">{$l('Organization URL')}</span>
       <p class="help" slot="help">{$l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>
-
-    <TextField name="contact" placeholder="{$l('Ex: jhthorsen@cpan.org')}" bind:value="{convosSettings.contact}">
+    <TextField name="contact" form="{form}" placeholder="{$l('Ex: jhthorsen@cpan.org')}">
       <span slot="label">{$l('Admin email')}</span>
       <p class="help" slot="help">{$l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
-
-    <TextField name="video_service" placeholder="{$l('Ex: https://meet.jit.si/')}" bind:value="{convosSettings.video_service}">
+    <TextField name="video_service" form="{form}" placeholder="{$l('Ex: https://meet.jit.si/')}">
       <span slot="label">{$l('Video service')}</span>
       <p class="help" slot="help">{@html $lmd('This should point to a [%1](%2) instance.', 'https://meet.jit.si/', 'https://github.com/jitsi/jitsi-meet')}</p>
     </TextField>
-
-    <Checkbox name="open_to_public" checked="{convosSettings.open_to_public}">
+    <Checkbox name="open_to_public" form="{form}">
       <span slot="label">{$l('Registration is open to public')}</span>
     </Checkbox>
     <p class="help">{$l('Tick this box if you want users to be able to register without an invite URL.')}</p>

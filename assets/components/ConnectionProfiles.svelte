@@ -5,33 +5,29 @@ import Icon from '../components/Icon.svelte';
 import TextField from '../components/form/TextField.svelte';
 import ConnectionURL from '../js/ConnectionURL';
 import OperationStatus from '../components/OperationStatus.svelte';
-import {formAction, makeFormStore} from '../store/form';
+import {createForm} from '../store/form';
 import {generateWriteable} from '../store/writable';
+import {getContext, onMount} from 'svelte';
 import {is} from '../js/util';
 import {l, lmd} from '../store/I18N';
-import {getContext, onMount} from 'svelte';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
 export let editProfile = null;
 
 const api = getContext('api');
+const form = createForm();
 const user = getContext('user');
 
 const connectionProfiles = generateWriteable('connectionProfiles', []);
-const form = makeFormStore();
 const listConnectionProfilesOp = api('listConnectionProfiles');
 const removeConnectionProfileOp = api('removeConnectionProfileOp');
 const saveConnectionProfileOp = api('saveConnectionProfile');
 
-let showAdvancedSettings = false;
-
 $: isAdmin = user.roles.has('admin');
 $: findProfile($route, $connectionProfiles);
-$: if (showAdvancedSettings) form.renderOnNextTick();
 
 onMount(async () => {
-  form.submit = saveConnectionProfile;
   if ($connectionProfiles.length) return;
   await listConnectionProfilesOp.perform();
   $connectionProfiles = listConnectionProfilesOp.res.body.profiles.map(normalizeProfile);
@@ -46,7 +42,7 @@ function findProfile(route, $connectionProfiles) {
   if (!editProfile) return;
   editProfile.url.toFields(editProfile);
   if (editProfile.host == '0.0.0.0') editProfile.host = '';
-  form.renderOnNextTick(editProfile);
+  form.set(editProfile);
 }
 
 function normalizeProfile(profile) {
@@ -57,11 +53,10 @@ function normalizeProfile(profile) {
 }
 
 async function saveConnectionProfile() {
-  const params = {};
-  ['is_default', 'is_forced', 'skip_queue'].forEach(k => (params[k] = !!$form[k]));
-  ['max_bulk_message_size', 'max_message_length', 'webirc_password'].forEach(k => (params[k] = $form[k]));
-  params.service_accounts = $form.service_accounts.split(/\s*,\s*/).map(nick => nick.trim()).filter(nick => nick.length);
-  params.url = new ConnectionURL('irc://localhost').fromFields($form).toString();
+  const params = form.get();
+  ['is_default', 'is_forced', 'skip_queue'].forEach(k => (params[k] = !!params[k]));
+  params.service_accounts = (params.service_accounts || '').split(/\s*,\s*/).map(nick => nick.trim()).filter(nick => nick.length);
+  params.url = new ConnectionURL('irc://localhost').fromFields(params).toString();
 
   await saveConnectionProfileOp.perform(params);
   if (saveConnectionProfileOp.is('error')) return;
@@ -79,58 +74,57 @@ async function saveConnectionProfile() {
     user.update({default_connection: profile.url.toString(), forced_connection: profile.is_forced});
   }
 
-  showAdvancedSettings = false;
   route.go('/settings/connections');
+  saveConnectionProfileOp.reset();
 }
 </script>
 
 {#if editProfile}
-  <form method="post" use:formAction="{form}">
-    <TextField name="host" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{!isAdmin}">
+  <form method="post" on:submit|preventDefault="{saveConnectionProfile}">
+    <TextField name="host" form="{form}" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Host and port')}</span>
       <p class="help" slot="help">{$l('Will match connections on hostname.')}</p>
     </TextField>
-    <Checkbox name="tls" disabled="{!isAdmin}">
+    <Checkbox name="tls" form="{form}" disabled="{!isAdmin}">
       <span slot="label">{$l('Secure connection (TLS)')}</span>
     </Checkbox>
-    <Checkbox name="tls_verify" disabled="{!$form.tls || !isAdmin}" hidden="{!$form.tls}">
+    <Checkbox name="tls_verify" form="{form}" disabled="{!$form.tls || !isAdmin}" hidden="{!$form.tls}">
       <span slot="label">{$l('Verify certificate (TLS)')}</span>
     </Checkbox>
-    <TextField name="conversation_id" placeholder="{$l('Ex: #convos')}" readonly="{!isAdmin}">
+    <TextField name="conversation_id" form="{form}" placeholder="{$l('Ex: #convos')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Conversation name')}</span>
     </TextField>
-    <TextField name="service_accounts" placeholder="{$l('chanserv, nickserv, ...')}" readonly="{!isAdmin}">
+    <TextField name="service_accounts" form="{form}" placeholder="{$l('chanserv, nickserv, ...')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Service accounts')}</span>
       <p class="help" slot="help">{$l('Messages from these nicks will be shown in the connection conversation.')}</p>
     </TextField>
-
-    <Checkbox name="is_default" disabled="{!isAdmin}">
+    <Checkbox name="is_default" form="{form}" disabled="{!isAdmin}">
       <span slot="label">{$l('Default connection')}</span>
     </Checkbox>
-    <Checkbox name="is_forced" disabled="{!isAdmin}" hidden="{!$form.is_default}">
+    <Checkbox name="is_forced" form="{form}" disabled="{!isAdmin}" hidden="{!$form.is_default}">
       <span slot="label">{$l('Force default connection')}</span>
     </Checkbox>
     {#if isAdmin}
       <p class="help" hidden="{!$form.is_default}">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
     {/if}
 
-    <Checkbox bind:checked="{showAdvancedSettings}">
+    <Checkbox name="show_advanced_settings" form="{form}">
       <span slot="label">{$l('Show advanced settings')}</span>
     </Checkbox>
-    {#if showAdvancedSettings}
+    {#if $form.show_advanced_settings}
       <div class="form-group" transition:slide="{{duration: 150}}">
-        <TextField name="max_bulk_message_size" type="number" readonly="{!isAdmin}">
+        <TextField name="max_bulk_message_size" form="{form}" type="number" readonly="{!isAdmin}">
           <span slot="label">{$l('Max number of pasted lines')}</span>
           <p class="help" slot="help">{$l('Setting this value too high might get you banned from the server.')}</p>
         </TextField>
-        <TextField name="max_message_length" type="number" readonly="{!isAdmin}">
+        <TextField name="max_message_length" form="{form}" type="number" readonly="{!isAdmin}">
           <span slot="label">{$l('Max message length')}</span>
           <p class="help" slot="help">{$l('Messages longer than this will be split into multiple messages.')}</p>
         </TextField>
-        <TextField name="webirc_password" type="password" readonly="{!isAdmin}">
+        <TextField name="webirc_password" form="{form}" type="password" readonly="{!isAdmin}">
           <span slot="label">{$l('WEBIRC password')}</span>
         </TextField>
-        <Checkbox name="skip_queue" disabled="{!isAdmin}">
+        <Checkbox name="skip_queue" form="{form}" disabled="{!isAdmin}">
           <span slot="label">{$l('Skip connection queue')}</span>
         </Checkbox>
         <p class="help">{$l('This might result in flood ban.')}</p>
@@ -143,9 +137,6 @@ async function saveConnectionProfile() {
     <div class="form-actions">
       <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{editProfile.id ? $l('Update') : $l('Add')}</span></Button>
     </div>
-    {#if $form.error}
-      <div class="error">{$l($form.error)}</div>
-    {/if}
     <OperationStatus op="{saveConnectionProfileOp}"/>
   </form>
 {:else}

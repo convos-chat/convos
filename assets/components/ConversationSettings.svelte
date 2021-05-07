@@ -3,9 +3,11 @@ import Button from './form/Button.svelte';
 import Checkbox from './form/Checkbox.svelte';
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
+import SimpleField from '../components/form/SimpleField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {activeMenu, viewPort} from '../store/writable';
+import {createForm} from '../store/form';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N';
@@ -14,6 +16,7 @@ import {modeClassNames} from '../js/util';
 export let conversation;
 export let transition;
 
+const form = createForm();
 const user = getContext('user');
 
 let conversationPassword = '';
@@ -32,11 +35,11 @@ function calculateIsOperator(conversation) {
   return participant && participant.modes.operator;
 }
 
-function partConversation(e) {
+function partConversation() {
   conversation.send('/part', (res) => !res.errrors && ($activeMenu = ''));
 }
 
-function saveConversationSettings(e) {
+function saveConversationSettings() {
   if (conversationPassword) {
     conversation.send(isOperator ? '/mode +k ' + conversationPassword : '/join ' + conversation.name + ' ' + conversationPassword);
     conversationPassword = '';
@@ -66,13 +69,13 @@ function saveConversationSettings(e) {
     {/if}
   </p>
 
-  <form method="post" on:submit|preventDefault="{saveConversationSettings}" bind:this="{formEl}">
+  <form method="post" on:submit|preventDefault="{saveConversationSettings}">
     {#if !conversation.is('private')}
-      <input type="hidden" name="connection_id" value="{conversation.connection_id}">
-      <input type="hidden" name="conversation_id" value="{conversation.conversation_id}">
+      <SimpleField name="connection_id" form="{form}"/>
+      <SimpleField name="conversation_id" form="{form}"/>
 
       {#if isOperator}
-        <TextArea name="topic" placeholder="{$l('No topic is set.')}" bind:value="{conversationTopic}">
+        <TextArea name="topic" form="{form}" placeholder="{$l('No topic is set.')}">
           <span slot="label">{$l('Topic')}</span>
         </TextArea>
       {:else}
@@ -82,13 +85,13 @@ function saveConversationSettings(e) {
         </div>
       {/if}
 
-      <TextField type="password" name="password" bind:value="{conversationPassword}" readonly="{!conversation.is('locked') && !isOperator}">
+      <TextField type="password" name="password" form="{form}" readonly="{!conversation.is('locked') && !isOperator}">
         <span slot="label">{$l('Password')}</span>
       </TextField>
     {/if}
 
     {#if conversation.hasOwnProperty('wantNotifications')}
-      <Checkbox bind:checked="{wantNotifications}">
+      <Checkbox name="want_notifications" form="{form}">
         <span slot="label">{$l('Notify me on new messages')}</span>
       </Checkbox>
     {/if}

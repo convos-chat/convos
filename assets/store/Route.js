@@ -72,23 +72,6 @@ export default class Route extends Reactive {
     return base + (queryString ? '?' + queryString : '');
   }
 
-  urlToForm(formEl) {
-    Object.keys(this.query).forEach(name => {
-      const val = this.query[name];
-      const inputEl = formEl[name];
-      if (!inputEl || !inputEl.tagName) return;
-
-      if (inputEl.type == 'checkbox') {
-        inputEl.checked = val ? true : false;
-      }
-      else {
-        inputEl.value = val;
-      }
-
-      if (inputEl.syncValue) inputEl.syncValue();
-    });
-  }
-
   wsUrlFor(url) {
     const wsUrl = url.match(/^\w+:/) ? url : this.baseUrl + url;
     return wsUrl.replace(/^http/, 'ws');

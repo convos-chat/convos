@@ -4,9 +4,11 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
+import SimpleField from '../components/form/SimpleField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
-import {copyToClipboard} from '../js/util';
+import {copyToClipboard, str2array} from '../js/util';
+import {createForm} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {notify} from '../js/Notify';
@@ -15,6 +17,7 @@ import {route} from '../store/Route';
 export let title = 'Users';
 
 const api = getContext('api');
+const form = createForm();
 const user = getContext('user');
 
 const deleteUserOp = api('deleteUser');
@@ -22,94 +25,89 @@ const getUsersOp = api('getUsers');
 const inviteLinkOp = api('inviteUser');
 const updateUserOp = api('updateUser');
 
-let confirmEmail = '';
 let users = [];
 
-$: editUser = findUser($route, users);
+$: findUser($route, users);
 $: invite = $inviteLinkOp.res.body || {};
-$: title = editUser ? editUser.email : 'Users';
+$: title = $form.uid ? $form.email : 'Users';
 
-updateUserOp.on('start', req => {
-  editUser.roles = req.body.roles.split(/[.,\s]+/).map(str => str.trim());
-  req.body.roles = editUser.roles;
-});
-
-onMount(async () => {
-  await getUsersOp.perform();
-  users = getUsersOp.res.body.users || [];
-});
+onMount(loadUsers);
 
 function copyInviteLink(e) {
   const copied = copyToClipboard(e.target);
   if (copied) notify.showInApp(copied, {title: $l('Invite link copied')});
 }
 
-async function deleteUserFromForm(e) {
-  e.preventDefault();
+async function deleteUser() {
   deleteUserOp.reset();
   updateUserOp.reset();
-  if (confirmEmail != editUser.email) return;
+  if (form.get('confirm_email') != form.get('email')) return;
 
-  await deleteUserOp.perform(e.target);
+  await deleteUserOp.perform(form.get());
   if (!deleteUserOp.is('success')) return;
 
-  await getUsersOp.perform();
+  loadUsers();
   route.go('/settings/users', {replace: true});
 }
 
-function findUser(route, users) {
-  const uid = route.hash;
-  confirmEmail = '';
-  return users.filter(user => user.uid == uid)[0];
+function findUser($route, users) {
+  const uid = $route.hash;
+  const user = uid && users.filter(user => user.uid == uid)[0];
+  if (!user) return form.set({confirm_email: '', uid: ''});
+  form.set({confirm_email: ''}).set(user);
 }
 
-function generateInviteLink(e) {
-  inviteLinkOp.perform(e.target);
+function generateInviteLink() {
+  inviteLinkOp.perform(form.get(['email']));
 }
 
-function updateUserFromForm(e) {
+async function loadUsers() {
+  await getUsersOp.perform();
+  users = getUsersOp.res.body.users || [];
+  getUsersOp.reset();
+}
+
+function updateUser() {
   deleteUserOp.reset();
-  updateUserOp.perform(e.target);
+  updateUserOp.perform({email: form.get('email'), roles: str2array(form.get('roles'))});
 }
 </script>
 
 <ChatHeader>
-  <h1>{$l(editUser ? 'Account' : 'Users')}</h1>
-  <Link href="/settings/users" class="btn-hallow {editUser ? 'is-active' : ''}" data-tooltip="{$l('See all users')}"><Icon name="list"/><Icon name="times"/></Link>
+  <h1>{$l($form.uid ? 'Account' : 'Users')}</h1>
+  <Link href="/settings/users" class="btn-hallow {$form.uid ? 'is-active' : ''}" data-tooltip="{$l('See all users')}"><Icon name="list"/><Icon name="times"/></Link>
 </ChatHeader>
 
 <main class="main">
-  {#if editUser}
-    <form id="edit" method="post" on:submit|preventDefault="{updateUserFromForm}">
-      <TextField name="email" value="{editUser.email}" readonly>
+  {#if $form.uid}
+    <form id="edit" method="post" on:submit|preventDefault="{updateUser}">
+      <SimpleField name="uid" form="{form}"/>
+      <TextField name="email" form="{form}" readonly>
         <span slot="label">{$l('Email')}</span>
       </TextField>
-
-      <TextField name="roles" value="{editUser.roles.join(', ')}" placeholder="{$l('admin, bot, ...')}">
+      <TextField name="roles" form="{form}" placeholder="{$l('admin, bot, ...')}">
         <span slot="label">{$l('Roles')}</span>
         <p class="help" slot="help">{$l('Roles must be separated by comma.')}</p>
       </TextField>
-
       <div class="form-actions">
         <Button icon="save" op="{updateUserOp}"><span>{$l('Save user')}</span></Button>
       </div>
-
       <OperationStatus op="{updateUserOp}"/>
     </form>
 
     <h2>Delete account</h2>
-    <form id="delete" method="post" on:submit|preventDefault="{deleteUserFromForm}">
+    <form id="delete" method="post" on:submit|preventDefault="{deleteUser}">
       <p>
         {$l('This will permanently remove user settings, chat logs, uploaded files and other user related data.')}
-        {@html $lmd('Please confirm by entering **%1** before hitting **%2**.', editUser.email, $l('Delete user'))}
+        {@html $lmd('Please confirm by entering **%1** before hitting **%2**.', $form.email, $l('Delete user'))}
       </p>
 
-      <TextField name="email" bind:value="{confirmEmail}">
+      <TextField name="confirm_email" form="{form}">
         <span slot="label">{$l('Confirm email')}</span>
       </TextField>
 
       <div class="form-actions">
-        <Button icon="trash" op="{deleteUserOp}" disabled="{confirmEmail != editUser.email}"><span>{$l('Delete user')}</span></Button>
+        <Button icon="trash" op="{deleteUserOp}" disabled="{$form.confirm_email != $form.email}"><span>{$l('Delete user')}</span></Button>
       </div>
 
       <OperationStatus op="{deleteUserOp}" success="Deleted."/>
@@ -117,7 +115,7 @@ function updateUserFromForm(e) {
   {:else}
     <form id="invite" method="post" on:submit|preventDefault="{generateInviteLink}">
       <h2>{$l('Invite or recover password')}</h2>
-      <TextField type="email" name="email" placeholder="{$l('user@example.com')}">
+      <TextField type="email" name="email" form="{form}" placeholder="{$l('user@example.com')}">
         <span slot="label">{$l('User email')}</span>
         <p class="help" slot="help">{$l('Using this form, you can generate a forgotten password or invite link for a user.')}</p>
       </TextField>
@@ -133,7 +131,7 @@ function updateUserFromForm(e) {
       {/if}
 
       <div class="form-actions">
-        <Button icon="save" op="{inviteLinkOp}"><span>{$l('Generate link')}</span></Button>
+        <Button icon="save" op="{inviteLinkOp}" disabled="{!$form.email}"><span>{$l('Generate link')}</span></Button>
       </div>
 
       <OperationStatus op="{inviteLinkOp}" success="Link generated."/>

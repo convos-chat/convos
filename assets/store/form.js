@@ -1,47 +1,67 @@
-import {get, writable} from 'svelte/store';
+import {getLogger} from '../js/logger';
+import {is} from '../js/util';
+import {writable} from 'svelte/store';
 
-export const formAction = (formEl, formStore) => {
-  formEl.addEventListener('change', (e) => {
-    const inputEl = e.target;
-    if (!inputEl || !inputEl.name) return;
-    const value = inputEl.type == 'checkbox' ? inputEl.checked ? inputEl.value : undefined : inputEl.value;
-    const changed = formStore.changed(inputEl.name, value);
-    if (changed) formStore.set({...get(formStore), ...changed});
-  });
+const log = getLogger('form');
 
-  formEl.addEventListener('submit', (e) => {
-    e.preventDefault();
-    formStore.submit().catch(error => {
-      console.error('formAction.submit() failed:', error);
-      formStore.set({...get(formStore), error});
+function get(data, names) {
+  if (is.undefined(names)) names = Object.keys(data);
+  return is.array(names) ? names.reduce((map, name) => { map[name] = data[name]; return map }, {}) : data[names];
+}
+
+function set(form, to) {
+  Object.keys(to).forEach(name => form.field(name).set(is.stringable(to[name]) ? String(to[name]) : to[name]));
+  return form;
+}
+
+function subscribe(subscribers, cb) {
+  const subscriber = [cb]; // Make sure each element is unique
+  subscribers.push(subscriber);
+  return () => {
+    const index = subscribers.indexOf(subscriber);
+    if (index != -1) subscribers.splice(index, 1);
+  };
+}
+
+/**
+ * createForm() is used to create a form object that makes it easy to
+ * synchronize form values.
+ *
+ * @example
+ * const form = createForm();
+ * form.set({agree: false, foo: 'bar'});           // == form
+ * const agreeField = form.field('agree');         // svelte/store "writable" object
+ * agreeField.set(true);
+ * form.subscribe(fields => { ... });
+ *
+ * const fieldValue = form.get('agree');           // == true
+ * const allFieldValues = form.get();              // == {agree: true, foo: 'bar'}
+ * const someFieldValuesMap = form.get(['agree']); // == {agree: true}
+ *
+ * @returns {Object} A reactive form store
+ */
+export const createForm = () => {
+  const data = {};
+  const fields = {};
+  const form = {};
+  const subscribers = [];
+
+  form.field = (name) => {
+    if (fields[name]) return fields[name];
+
+    const field = writable('');
+    field.subscribe((val) => {
+      log.debug(name, '=', val);
+      data[name] = val;
+      for (const subscriber of subscribers) subscriber[0](data);
     });
-  });
 
-  formStore.formEl = formEl;
-  formStore.render();
-};
-
-export const makeFormStore = (defaults = {error: ''}) => {
-  const formStore = writable(defaults);
-
-  formStore.changed = (name, value) => ({[name]: value});
-  formStore.renderOnNextTick = function(fields) { setTimeout(() => this.render(fields), 1) };
-  formStore.submit = function() { return Promise.resolve() };
-
-  formStore.render = function(fields) {
-    if (fields) this.set({...get(this), ...fields});
-    if (!this.formEl) return null;
-    if (!fields) fields = get(this);
-
-    return Object.keys(fields).filter(name => name != 'error').map(name => {
-      const inputEl = this.formEl.querySelector('[name="' + name + '"]');
-      if (!inputEl || typeof fields[name] == 'undefined') return null;
-      inputEl.type == 'checkbox' ? (inputEl.checked = fields[name] ? true : false)
-        : (inputEl.value = fields[name]);
-      if (inputEl.syncValue) inputEl.syncValue();
-      return name;
-    });
+    return (fields[name] = field);
   };
 
-  return formStore;
+  form.get = (fields) => get(data, fields);
+  form.set = (to) => set(form, to);
+  form.subscribe = (cb) => { cb(data); return subscribe(subscribers, cb) };
+
+  return form;
 };

@@ -6,57 +6,56 @@ import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {createForm} from '../store/form';
 import {getContext, onDestroy} from 'svelte';
 import {i18n, l} from '../store/I18N.js';
 import {notify} from '../js/Notify';
-import {settings} from '../js/util';
+import {settings, str2array} from '../js/util';
 
 export const title = 'Account';
 
 const api = getContext('api');
+const form = createForm();
 const themeManager = getContext('themeManager');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
-let formEl;
-let activeTheme = themeManager.activeTheme;
-let colorScheme = themeManager.colorScheme;
-let lang = i18n.lang;
-let compactDisplay = themeManager.compactDisplay;
-let expandUrlToMedia = user.expandUrlToMedia;
-let highlightKeywords = user.highlightKeywords.join(', ');
-let ignoreStatuses = user.ignoreStatuses;
-let wantNotifications = notify.wantNotifications;
+$: colorSchemeReadonly = $themeManager.hasColorScheme($form.activeTheme) ? false : true;
+$: i18n.load($form.lang);
 
-$: colorSchemeReadonly = $themeManager.hasColorScheme(activeTheme) ? false : true;
-$: i18n.load(lang);
-
-updateUserOp.on('start', req => {
-  if (!req.body.password) delete req.body.password;
-  req.body.highlight_keywords = req.body.highlight_keywords.split(/[.,\s]+/).map(str => str.trim());
-  user.update({highlightKeywords: req.body.highlight_keywords});
+form.set({
+  activeTheme: themeManager.activeTheme,
+  colorScheme: themeManager.colorScheme,
+  compactDisplay: themeManager.compactDisplay,
+  email: user.email,
+  expandUrlToMedia: user.expandUrlToMedia,
+  highlightKeywords: user.highlightKeywords.join(', '),
+  ignoreStatuses: user.ignoreStatuses,
+  lang: i18n.lang,
+  wantNotifications: notify.wantNotifications,
 });
 
-
-onDestroy(notify.on('update', notifyWantNotificationsChanged));
-
-function notifyWantNotificationsChanged(notify, changed) {
+// Using onDestroy() to unsubscribe to notify "update" event
+onDestroy(notify.on('update', (notify, changed) => {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
   if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
-}
+}));
 
-function updateFromForm(e) {
-  const form = e.target;
-  const passwords = [form.password.value, form.password_again.value];
-
+function saveAccount() {
+  const passwords = [$form.password, $form.password_again];
   if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
-  if (colorSchemeReadonly) colorScheme = 'auto';
-  if (wantNotifications) notify.requestDesktopAccess();
 
-  notify.update({wantNotifications});
-  themeManager.update({activeTheme, colorScheme, compactDisplay});
-  user.update({expandUrlToMedia, ignoreStatuses});
-  updateUserOp.perform(e.target);
+  if ($form.wantNotifications) notify.requestDesktopAccess();
+  notify.update(form.get(['wantNotifications']));
+
+  if (colorSchemeReadonly) form.set({colorScheme: 'auto'});
+  themeManager.update(form.get(['activeTheme', 'colorScheme', 'compactDisplay']));
+
+  const highlightKeywords = str2array(form.get('highlightKeywords'));
+  const body = {email: user.email, highlight_keywords: highlightKeywords};
+  if (passwords[0]) body.password = passwords[0];
+  user.update(form.get(['expandUrlToMedia', 'ignoreStatuses'])).update({highlightKeywords});
+  updateUserOp.perform(body);
 }
 </script>
 
@@ -65,48 +64,38 @@ function updateFromForm(e) {
 </ChatHeader>
 
 <main class="main">
-  <form method="post" on:submit|preventDefault="{updateFromForm}" bind:this="{formEl}">
-    <TextField type="email" name="email" value="{$user.email}" readonly>
+  <form method="post" on:submit|preventDefault="{saveAccount}">
+    <TextField type="email" name="email" form="{form}" readonly>
       <span slot="label">{$l('Email')}</span>
     </TextField>
-
-    <TextField name="highlight_keywords" placeholder="{$l('whatever, keywords')}" value="{highlightKeywords}">
+    <TextField name="highlightKeywords" form="{form}" placeholder="{$l('whatever, keywords')}">
       <span slot="label">{$l('Notification keywords')}</span>
     </TextField>
-
-    <Checkbox name="notifications" bind:checked="{wantNotifications}">
+    <Checkbox name="wantNotifications" form="{form}">
       <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
-    
-    <Checkbox name="statuses" bind:checked="{ignoreStatuses}">
+    <Checkbox name="ignoreStatuses" form="{form}">
       <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
-
-    <Checkbox name="expand_url" bind:checked="{expandUrlToMedia}">
+    <Checkbox name="expandUrlToMedia" form="{form}">
       <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
-
-    <SelectField name="theme" options="{themeManager.themeOptions}" bind:value="{activeTheme}">
+    <SelectField name="activeTheme" form="{form}" options="{themeManager.themeOptions}">
       <span slot="label">{$l('Theme')}</span>
     </SelectField>
-
-    <SelectField name="color_scheme" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}" bind:value="{colorScheme}">
+    <SelectField name="colorScheme" form="{form}" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}">
       <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
-
-    <Checkbox name="compact" bind:checked="{compactDisplay}">
+    <Checkbox name="compactDisplay" form="{form}">
       <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
-
-    <SelectField name="lang" options="{$i18n.languageOptions}" bind:value="{lang}">
+    <SelectField name="lang" form="{form}" options="{$i18n.languageOptions}">
       <span slot="label">{$l('Language')} <Icon name="globe"/></span>
     </SelectField>
-
-    <TextField type="password" name="password" autocomplete="new-password">
+    <TextField type="password" name="password" form="{form}" autocomplete="new-password">
       <span slot="label">{$l('Password')}</span>
     </TextField>
-
-    <TextField type="password" name="password_again" autocomplete="new-password">
+    <TextField type="password" name="password_again" form="{form}" autocomplete="new-password">
       <span slot="label">{$l('Repeat password')}</span>
     </TextField>
 

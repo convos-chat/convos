@@ -1,46 +1,37 @@
 <script>
 import {closestEl, regexpEscape, uuidv4} from '../../js/util';
-import {onMount} from 'svelte';
-
-const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
 let activeIndex = 0;
-let hiddenEl;
 let humanEl;
 let open = false;
 let typed = '';
 let wrapperEl;
 let visibleOptions = [];
 
+export let form;
 export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let options; // [["value", "label"], ...]
 export let placeholder = '';
 export let readonly = false;
-export let value;
+
+const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
+const value = form.field(name);
 
 $: calculateVisibleOptions(options, typed);
-$: if (humanEl) renderHuman(value);
+$: if (humanEl) renderHuman($value);
 $: if (open == false) typed = '';
 
-$: if (hiddenEl && !hiddenEl.syncValue) {
-  hiddenEl.syncValue = function() { value = this.value };
-  hiddenEl.syncValue();
-}
-
 $: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
-  const found = options.find(opt => opt[0] == hiddenEl.value);
+  const found = options.find(opt => opt[0] == $value);
   if (found) humanEl.value = found[1] || found[0];
 }
 
-onMount(() => {
-  value = hiddenEl.value;
-  humanEl.addEventListener('blur', () => {
-    setTimeout(() => document.activeElement.closest('.select-field__option') || (open = false), 100);
-    renderHuman(value);
-  });
-});
+function blur() {
+  setTimeout(() => document.activeElement.closest('.select-field__option') || (open = false), 100);
+  renderHuman($value);
+}
 
 function calculateVisibleOptions(options, needle) {
   let re = new RegExp('(?:^|\\s|-)' + regexpEscape(needle), 'i'); // TODO: needle need to be safe string
@@ -86,7 +77,7 @@ function keyup(e) {
 function selectOption(e) {
   let opt;
   if (e.type == 'keydown') {
-    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] == value)[0];
+    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] == $value)[0];
   }
   else {
     const needle = closestEl(e.target, '.select-field__option').href.replace(/^.*?#\d+:/, '');
@@ -94,9 +85,8 @@ function selectOption(e) {
   }
 
   if (!opt || !opt.length) opt = [''];
-  value = opt[0];
+  value.set(opt[0]);
   open = false;
-  setTimeout(() => hiddenEl.dispatchEvent(new Event('change', {bubbles: true, cancelable: true})), 1);
 }
 
 function renderHuman(needle) {
@@ -109,7 +99,7 @@ function toggle(e) {
   const optionEl = e && e.target && closestEl(e.target, '.select-field__option');
 
   if (!open) {
-    activeIndex = visibleOptions.map(o => o[0]).indexOf(value);
+    activeIndex = visibleOptions.map(o => o[0]).indexOf($value);
     humanEl.setSelectionRange(0, 9999);
   }
 
@@ -119,8 +109,17 @@ function toggle(e) {
 
 <div class="select-field text-field" class:is-open="{open}" class:is-readonly="{readonly}" hidden="{hidden}" bind:this="{wrapperEl}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input type="hidden" name="{name}" bind:this="{hiddenEl}" bind:value on:keydown="{keydown}"/>
-  <input type="text" {placeholder} {id} {readonly} autocomplete="off" bind:this="{humanEl}" on:keydown="{keydown}" on:keyup="{keyup}" on:click|preventDefault="{toggle}">
+  <input type="hidden" name="{name}" bind:value="{$value}" on:keydown="{keydown}"/>
+  <input type="text"
+    id="{id}"
+    autocomplete="off"
+    placeholder="{placeholder}"
+    readonly="{readonly}"
+    bind:this="{humanEl}"
+    on:blur="{blur}"
+    on:keydown="{keydown}"
+    on:keyup="{keyup}"
+    on:click|preventDefault="{toggle}">
   <div class="select-field__options" on:click|preventDefault="{toggle}">
     {#each visibleOptions as opt, i}
       <a href="#{i}:{opt[0]}" class="select-field__option" class:is-active="{i == activeIndex}" on:mouseover="{() => { activeIndex = i }}" tabindex="-1">{opt.length > 1 ? opt[1] : opt[0]}</a>
