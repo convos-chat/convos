@@ -45,6 +45,7 @@ export default class I18N extends Reactive {
    */
   async load(lang) {
     if (!lang) lang = this.lang || document.documentElement.getAttribute('lang');
+    if (this.dictionaries[lang]) return this.update({lang});
     const op = await api('/api', 'getDictionary', {lang}).perform();
     this.dictionaries[lang] = op.res.body.dictionary;
     this._languages = op.res.body.available_languages || {};
