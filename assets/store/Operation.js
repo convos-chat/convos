@@ -67,7 +67,6 @@ export default class Operation extends Reactive {
    *
    * @memberof Operation
    * @param {Object} params Mapping between request parameter names and values.
-   * @param {HTMLFormElement} params A form with parameter names and values.
    * @returns {Promise} The promise will be resolved on error and success.
    */
   perform(params) {
@@ -79,7 +78,7 @@ export default class Operation extends Reactive {
         const [url, req] = this._paramsToRequest(opSpec, params || this.defaultParams);
         if (!url) throw req;
 
-        this.update({status: 'loading'}).emit('start', req);
+        this.update({status: 'loading'});
         if (is.object(req.body) && !is.function(req.body.has)) req.body = JSON.stringify(req.body);
         return fetch(url, req);
       }).then(res => {
@@ -137,42 +136,13 @@ export default class Operation extends Reactive {
   }
 
   _extractValue(params, p) {
-    if (p.schema && (params.tagName || '').toLowerCase() == 'form') {
-      const body = {};
-      return Object.keys(p.schema.properties).reduce((body, k) => {
-        const inputEl = params[k];
-        if (!inputEl) return body; // No such form element
-        if (inputEl.type == 'checkbox' && !inputEl.checked) return body;
-        body[k] = inputEl.value;
-        return body;
-      }, {});
-    }
-    else if (params[p.name] && params[p.name].tagName) {
-      return params[p.name].value;
-    }
-    else if (p.schema) {
-      const body = {};
-      Object.keys(p.schema.properties).forEach(k => { body[k] = params[k] });
-      return body;
-    }
-    else {
-      return params[p.name];
-    }
+    return !p.schema ? params[p.name] : Object.keys(p.schema.properties).reduce((map, k) => { map[k] = params[k]; return map }, {});
   }
 
   _hasProperty(params, p) {
-    if (p.in == 'body') {
-      return true;
-    }
-    else if (p.in == 'formData') {
-      return params.formData.has(p.name);
-    }
-    else if ((params.tagName || '').toLowerCase() == 'form') {
-      return params[p.name] ? true : false;
-    }
-    else {
-      return params.hasOwnProperty(p.name);
-    }
+    if (p.in == 'body') return true;
+    if (p.in == 'formData') return params.formData.has(p.name);
+    return params.hasOwnProperty(p.name);
   }
 
   _paramsToRequest(opSpec, params) {
