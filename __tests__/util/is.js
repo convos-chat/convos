@@ -60,6 +60,7 @@ test('true', () => {
   expect(is.true('cool beans')).toBe(true);
   expect(is.true(1)).toBe(true);
   expect(is.true('')).toBe(false);
+  expect(is.true('0')).toBe(false);
   expect(is.true(true)).toBe(true);
   expect(is.true(null)).toBe(false);
   expect(is.true(undefined)).toBe(false);

@@ -31,7 +31,7 @@ export default class ConnectionURL {
   }
 
   fromFields(fields) {
-    if (is.string(fields.protocol)) this.protocol = fields.protocol;
+    if (is.string(fields.protocol)) this.protocol = fields.protocol.replace(/:?$/, ':');
     if (is.string(fields.host)) this.host = fields.host;
     if (is.string(fields.password)) this.password = fields.password;
     if (is.string(fields.username)) this.username = fields.username;
@@ -49,7 +49,7 @@ export default class ConnectionURL {
   }
 
   toFields(fields = {}) {
-    fields.protocol = this.protocol;
+    fields.protocol = this.protocol.replace(/:$/, '');
     fields.host = this.host;
     fields.password = is.string(this.password) ? this.password : '';
     fields.username = is.string(this.username) ? this.username : '';
