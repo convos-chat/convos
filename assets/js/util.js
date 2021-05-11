@@ -424,6 +424,10 @@ export function showFullscreen(e, contentEl) {
   return mediaWrapper;
 }
 
+export function str2array(str) {
+  return (is.string(str) ? str : '').split(/[.,\s]+/).map(i => i.trim()).filter(i => i.length);
+}
+
 /**
  * str2color() will hash the input string and use hsvToRgb() to convert the hash
  * value into a color.

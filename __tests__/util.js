@@ -1,4 +1,4 @@
-import {calculateModes, camelize, clone, closestEl, debounce, modeClassNames, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {calculateModes, camelize, clone, closestEl, debounce, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {modeMoniker} from '../assets/js/constants';
 
 test('calculateModes', () => {
@@ -62,6 +62,14 @@ test('modeClassNames', () => {
   expect(modeClassNames({operator: true})).toBe('has-mode-operator');
   expect(modeClassNames({operator: true, voice: true})).toBe('has-mode-operator has-mode-voice');
   expect(modeClassNames({operator: false, voice: true})).toBe('has-mode-voice');
+});
+
+test('str2array', () => {
+  expect(str2array()).toEqual([]);
+  expect(str2array(undefined)).toEqual([]);
+  expect(str2array(false)).toEqual([]);
+  expect(str2array('  ')).toEqual([]);
+  expect(str2array(' foo,. bar  ')).toEqual(['foo', 'bar']);
 });
 
 test('str2color', () => {
