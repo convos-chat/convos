@@ -20,11 +20,12 @@ $t->get_ok('/api/connections')->status_is(200)
   ->json_is('/connections/0/url',           'irc://chat.example.com:1234?nick=superman&tls=1');
 
 # The new URL will be ignored
-$t->post_ok('/api/connection/irc-example', json => {url => 'irc://irc.perl.org'})->status_is(200);
+$t->post_ok('/api/connection/irc-example',
+  json => {url => 'irc://irc.perl.org?nick=superduper&tls=0&tls_verify=0'})->status_is(200);
 
 $t->get_ok('/api/connections')->status_is(200)
   ->json_is('/connections/0/connection_id', 'irc-example')
   ->json_is('/connections/0/name',          'example')
-  ->json_is('/connections/0/url',           'irc://chat.example.com:1234?nick=superman&tls=1');
+  ->json_is('/connections/0/url', 'irc://chat.example.com:1234?tls=0&tls_verify=0&nick=superduper');
 
 done_testing;

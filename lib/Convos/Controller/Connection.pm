@@ -78,13 +78,17 @@ sub update {
   my $url = Mojo::URL->new($json->{url} || '');
   $url = $connection->url unless $url->host;
 
-  unless ($self->app->core->settings->forced_connection) {
-    $wanted_state = 'reconnect'
-      if $wanted_state ne 'disconnected' and not _same_url($url, $connection->url);
-    $connection->url($url);
+  my $settings = $self->app->core->settings;
+  if ($settings->forced_connection) {
+    my $default = $settings->default_connection->clone;
+    $default->query->param($_ => $url->query->param($_)) for qw(nick realname sasl tls tls_verify);
+    $url = $default;
+  }
+  elsif ($wanted_state ne 'disconnected' and not _same_url($url, $connection->url)) {
+    $wanted_state = 'reconnect';
   }
 
-  my @p = ($connection->save_p);
+  my @p = ($connection->url($url)->save_p);
   $wanted_state = '' if $connection->state eq 'connected' and $wanted_state eq 'connected';
   if ($wanted_state eq 'disconnected' or $wanted_state eq 'reconnect') {
     push @p, $connection->disconnect_p;
