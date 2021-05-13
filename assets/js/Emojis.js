@@ -8,6 +8,7 @@ export default class Emojis {
     this.re = this._buildRe();
     this.byShortName = {};
     this.grouped = {};
+    this.status = 'pending';
   }
 
   /**
@@ -16,9 +17,12 @@ export default class Emojis {
    * @return {Promise} The promise will be fulfilled when the databse is fetched and parsed.
    */
   async load() {
+    if (['loading', 'success'].indexOf(this.status) != -1) return this;
+    this.status = 'loading';
     const res = await fetch(route.urlFor('/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json'));
-    const json = await res.json();
-    this._load(json.emojis);
+    this._load((await res.json()).emojis);
+    this.status = 'success';
+    return this;
   }
 
   /**
@@ -75,6 +79,7 @@ export default class Emojis {
     return new RegExp('(^|\\s)(:\\w+:|' + re + ')(?=\\s|\\,|\\.|$)', 'gi');
   }
 
+  // This is used in unit tests
   _load(emojis) {
     this.grouped = {};
     for (const emoji of emojis) {
