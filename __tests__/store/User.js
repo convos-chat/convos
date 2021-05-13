@@ -136,7 +136,6 @@ test('load error', async () => {
   socket.ws.dispatchEvent('message', {data: {id : '1', errors: [{message: 'Need to log in first.'}]}});
   await user.on('update');
   expect(hasChanged).toEqual({roles: false, status: true}); // "roles" need to be part of "changed" to start rendering in App.svelte
-  expect(user.roles.has('anonymous')).toBe(true);
   expect(user.status).toBe('error');
   expect(user.default_connection).toBe('irc://chat.freenode.net:6697/%23convos');
   expect(user.email).toBe('');

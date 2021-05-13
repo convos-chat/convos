@@ -30,7 +30,7 @@ form.submit = async () => {
 };
 
 function redirect(user) {
-  if (user.is('loading') || !user.is('authenticated')) return;
+  if (user.is('loading') || !user.email) return;
   const conversation = user.conversations()[0];
   const url = user.lastUrl ? user.lastUrl : conversation ? conversation.path : '/settings/connections';
   route.go(url, {replace: true});

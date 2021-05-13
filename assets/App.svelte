@@ -32,7 +32,6 @@ const themeManager = new ThemeManager().start();
 const user = new User({});
 
 let width = 0;
-let isLoggedIn = false;
 let readyStateNotification = {closed: true};
 let title = i18n.l('Chat');
 
@@ -80,17 +79,12 @@ async function registerServiceWorker() {
 }
 
 async function routeOrUserChanged(route, user) {
-  const authenticated = user.is('authenticated');
-  if (authenticated != isLoggedIn) {
-    if (authenticated) i18n.emojis.load();
-    isLoggedIn = authenticated;
-    features[authenticated ? 'add' : 'remove']('notify');
-    await tick();
-  }
-
-  const appOrCms = !isLoggedIn || document.querySelector('.cms-main') ? 'cms' : 'app';
+  if (user.email) i18n.emojis.load();
+  features[user.email ? 'add' : 'remove']('notify');
+  await tick();
+  const appOrCms = user.is(['loading', 'pending']) || document.querySelector('.cms-main') ? 'cms' : 'app';
   document.body.className = document.body.className.replace(/for-\w+/, 'for-' + appOrCms);
-  if (isLoggedIn) user.update({lastUrl: location.href});
+  if (user.email) user.update({lastUrl: location.href});
 }
 
 function socketChanged(socket) {
@@ -112,9 +106,9 @@ function socketChanged(socket) {
 
 <svelte:window on:focus="{() => user.email && socket.open()}" bind:innerWidth="{width}"/>
 
-{#if $user.is('loading') || $user.is('pending')}
+{#if $user.is(['loading', 'pending'])}
   <Fallback/>
-{:else if isLoggedIn}
+{:else if $user.email}
   {#if $activeMenu == 'nav' || $viewPort.nColumns > 1}
     <ChatSidebar transition="{{duration: $viewPort.nColumns > 1 ? 0 : 250, x: width}}"/>
   {/if}

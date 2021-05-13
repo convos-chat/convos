@@ -86,7 +86,7 @@ export default class User extends Reactive {
 
   async load() {
     if (this.is('loading')) return this;
-
+    this.roles.clear();
     this.update({status: 'loading'});
 
     const p = new Promise(resolve => this.socket.send({method: 'load', object: 'user', params: {connections: true, conversations: true}}, resolve));
@@ -94,8 +94,7 @@ export default class User extends Reactive {
 
     // TODO: Improve error handling
     if (res.errors) {
-      this.roles.add('anonymous');
-      return this.update({roles: true, status: res.errors ? 'error' : 'success'});
+      return this.update({email: '', roles: true, status: res.errors ? 'error' : 'success'});
     }
 
     const data = res.user || {};
@@ -104,8 +103,6 @@ export default class User extends Reactive {
     (data.conversations || []).forEach(conversation => this.ensureConversation({...conversation, status: 'pending'}));
 
     this.notifications.update({unread: data.unread || 0});
-    this.roles.clear();
-    this.roles.add(data.email ? 'authenticated' : 'anonymous');
     (data.roles || []).forEach(role => this.roles.add(role));
 
     return this.update({
