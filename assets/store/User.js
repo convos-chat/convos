@@ -20,6 +20,7 @@ export default class User extends Reactive {
 
     this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'ignoreStatuses', false);
+    this.prop('persist', 'lastUrl', '');
 
     this.prop('rw', 'activeConversation', this.notifications);
     this.prop('rw', 'email', '');
@@ -193,7 +194,7 @@ export default class User extends Reactive {
     if (socket.is('open') && this.is('pending')) return this.load();
     if (socket.is('closed')) {
       this.connections.forEach(conn => conn.update({state: 'unreachable'}));
-      if (!this.is('loading')) this.update({status: 'pending'});
+      if (!this.is(['error', 'loading'])) this.update({status: 'pending'});
     }
   }
 }

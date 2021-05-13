@@ -1,6 +1,6 @@
 <script>
 import Icon from './Icon.svelte';
-import {activeMenu, nColumns} from '../store/writable';
+import {activeMenu, viewPort} from '../store/writable';
 import {getContext} from 'svelte';
 
 const user = getContext('user');
@@ -8,7 +8,7 @@ const user = getContext('user');
 
 <header class="chat-header">
   <slot/>
-  {#if $nColumns <= 1}
+  {#if $viewPort.nColumns <= 1}
     <a href="#nav" class="btn-hallow" class:is-active="{$activeMenu == 'nav'}" on:click="{activeMenu.toggle}">
       <Icon name="bars"/>
       <Icon name="times"/>

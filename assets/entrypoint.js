@@ -47,9 +47,6 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Like "load", but from ./store/Route.js
-document.addEventListener('routerender', () => moveFocus());
-
 function moveFocus(toggle) {
   if ('ontouchstart' in window) return;
 

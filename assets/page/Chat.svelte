@@ -2,12 +2,14 @@
 import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
+import ConnectionSettings from '../components/ConnectionSettings.svelte';
+import ConversationSettings from '../components/ConversationSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {activeMenu, nColumns} from '../store/writable';
+import {activeMenu, viewPort} from '../store/writable';
 import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -16,6 +18,8 @@ import {modeClassNames} from '../js/util';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
+export let connection_id = '';
+export let conversation_id = '';
 export let title = 'Chat';
 
 const dragAndDrop = new DragAndDrop();
@@ -31,7 +35,7 @@ let onLoadHash = '';
 let unsubscribe = {};
 let uploader;
 
-$: setConversationFromRoute($route);
+$: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
 $: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
 $: notConnected = $conversation.frozen ? true : false;
@@ -56,8 +60,7 @@ function conversationToUri() {
   return scheme + '://' + host + '/' + encodeURIComponent($conversation.conversation_id) + '?tls=1';
 }
 
-function setConversationFromRoute($route) {
-  const [connection_id, conversation_id] = ['connection_id', 'conversation_id'].map(k => $route.param(k));
+function setConversationFromRoute(connection_id, conversation_id) {
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
 }
@@ -91,6 +94,14 @@ function setConversationFromUser(user) {
     </a>
   {/if}
 </ChatHeader>
+
+{#if $activeMenu == 'settings'}
+  {#if conversation_id}
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewPort.nColumns > 1 ? 0 : $viewPort.width}}"/>
+  {:else}
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewPort.nColumns > 1 ? 0 : $viewPort.width}}"/>
+  {/if}
+{/if}
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{onInfinityScrolled}" on:visibility="{onInfinityVisibility}">
   <!-- welcome message -->
@@ -202,7 +213,7 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:uploader/>
 
-{#if $nColumns > 2 && $participants.length && !$conversation.is('not_found')}
+{#if $viewPort.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>

@@ -10,28 +10,21 @@ export default class Route extends Reactive {
     this.prop('ro', 'basePath', () => this._basePath);
     this.prop('ro', 'hash', () => (this._location.hash || '').replace(/^#/, ''));
     this.prop('ro', 'path', () => this._path);
-    this.prop('ro', 'params', () => this._params);
+    this.prop('ro', 'pathParts', () => this._pathParts);
     this.prop('ro', 'query', () => this._query);
-
     this.prop('rw', 'baseUrl', '');
-    this.prop('rw', 'component', null);
-    this.prop('rw', 'match', '');
-    this.prop('rw', 'requireLogin', false);
-    this.prop('rw', 'state', {});
-    this.prop('rw', 'title', document.title || '');
 
-    this.prop('persist', 'lastUrl', '');
+    this._onClick = this._onClick.bind(this);
+    this._onLocationChange = this._onLocationChange.bind(this);
+    window.addEventListener('click', this._onClick);
+    window.addEventListener('popstate', this._onLocationChange);
 
     this._history = window.history;
     this._location = window.location;
-    this._onClick = this._onClick.bind(this);
-    this._onpopstate = this._onpopstate.bind(this);
-
     this._basePath = '';
-    this._params = {};
     this._path = '/';
+    this._pathParts = [];
     this._query = {};
-    this._routes = [];
   }
 
   conversationPath(params) {
@@ -42,85 +35,24 @@ export default class Route extends Reactive {
     return path.map(p => encodeURIComponent(p)).join('/');
   }
 
-  go(path, state = {}, replace = false) {
-    if (state.replace) [replace, state] = [true, this.state];
+  go(path, params = {}) {
     if (path.indexOf(this.baseUrl) == 0) path = path.substr(this.baseUrl.length);
     const url = this.baseUrl + path;
     if (url == this._location.href) return this;
-    this._history[replace ? 'replaceState' : 'pushState'](state, this.title, url);
-    if (!replace) activeMenu.set('');
-    this.update({path: true}).render(url, state);
+    this._history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+    if (!params.replace) activeMenu.set('');
+    this.update({path: true})._onLocationChange({});
   }
 
   param(name, def = '') {
-    const params = this.params;
-    if (params.hasOwnProperty(name)) return params[name];
-
     const query = this.query;
     if (query.hasOwnProperty(name)) return query[name];
-
     return def;
-  }
-
-  render(abs, state) {
-    if (!this._started) {
-      window.addEventListener('click', this._onClick);
-      window.addEventListener('popstate', this._onpopstate);
-      this._started = true;
-    }
-
-    if (!abs) abs = this._location.href;
-    if (!state) state = this.state;
-
-    this._urlToProps(abs);
-    this._params = {};
-    for (let ri = 0; ri < this._routes.length; ri++) {
-      const route = this._routes[ri];
-      const m = this._path.match(route.re);
-      if (!m) continue;
-
-      for (let pi = 0; pi < route.names.length; pi++) {
-        this._params[route.names[pi]] = decodeURIComponent(m[pi + 1]);
-      }
-
-      route.cb(this);
-
-      const e = document.createEvent('CustomEvent');
-      e.initCustomEvent('routerender', false, false, {});
-      setTimeout(() => document.dispatchEvent(e), 1);
-
-      return this;
-    }
-
-    console.log({abs, routes: this._routes});
-    throw '[Route] No route for "' + abs + '".';
   }
 
   subscribe(cb) {
     cb(this);
     return this.on('update', cb);
-  }
-
-  to(path, cb) {
-    const names = [];
-    const parts = [];
-
-    path.split('/').forEach((p, i) => {
-      let re = p;
-
-      if (p.indexOf('*') == 0) {
-        re = '(.*)';
-        names.push(String(p.slice(1) || i));
-      }
-      else if (p.indexOf(':') == 0) {
-        re = '([^/]+)';
-        names.push(String(p.slice(1) || i));
-      }
-
-      parts.push(re);
-    });
-
-    this._routes.push({cb, names, path, re: new RegExp('^' + parts.join('/') + '$')});
   }
 
   update(params) {
@@ -130,7 +62,7 @@ export default class Route extends Reactive {
     }
 
     super.update(params);
-    if (params.baseUrl) this._urlToProps(location.href);
+    if (params.baseUrl) this._onLocationChange();
     return this;
   }
 
@@ -185,21 +117,15 @@ export default class Route extends Reactive {
     }
   }
 
-  _onpopstate(e) {
+  _onLocationChange(e) {
     activeMenu.set('');
-    this.render(this._location.href, e.state);
-    this.update({path: true});
-  }
-
-  _pathWithoutPrefix(path) {
-    return path.indexOf(this.basePath) == 0 ? path.substr(this.basePath.length) : path;
-  }
-
-  _urlToProps(abs) {
+    const abs = this._location.href;
     const pathname = abs.substr(this.baseUrl.length);
     const url = pathname.split('#')[0].split('?');
     this._query = url.length == 2 ? qs.parse(url.pop()) : {};
     this._path = url[0];
+    this._pathParts = url[0].replace(/^\//, '').split('/').map(decodeURIComponent);
+    this.update({path: true});
   }
 }
 

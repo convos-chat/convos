@@ -16,7 +16,7 @@ $: title = messages[status];
 
 function calculateStatus($route, user) {
   const override = $route.path.match(/\/err\/(\w+)/);
-  return override ? override[1] : !$route.component || user.is('loading') ? 'loading' : 'not_found';
+  return override ? override[1] : user.is('pending') || user.is('loading') ? 'loading' : 'not_found';
 }
 </script>
 

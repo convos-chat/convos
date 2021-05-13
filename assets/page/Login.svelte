@@ -25,15 +25,15 @@ $: mode = renderForm($route);
 form.submit = async () => {
   const op = mode == 'login' ? loginOp : registerOp;
   await op.perform($form);
-  if (mode != 'login') route.update({lastUrl: ''}); // Make sure the old value is forgotten
+  if (mode != 'login') user.update({lastUrl: ''}); // Make sure the old value is forgotten
   if (!op.error()) await user.load(); // Causes redirect() to be called
 };
 
 function redirect(user) {
   if (user.is('loading') || !user.is('authenticated')) return;
   const conversation = user.conversations()[0];
-  const url = route.lastUrl ? route.lastUrl : conversation ? conversation.path : '/settings/connections';
-  route.go(url, {}, true);
+  const url = user.lastUrl ? user.lastUrl : conversation ? conversation.path : '/settings/connections';
+  route.go(url, {replace: true});
 }
 
 function renderForm($route) {

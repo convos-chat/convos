@@ -81,7 +81,8 @@ sub update {
   my $settings = $self->app->core->settings;
   if ($settings->forced_connection) {
     my $default = $settings->default_connection->clone;
-    $default->query->param($_ => $url->query->param($_)) for qw(nick realname sasl tls tls_verify);
+    $default->query->param($_ => $url->query->param($_))
+      for grep { defined $url->query->param($_) } qw(nick realname sasl tls tls_verify);
     $url = $default;
   }
   elsif ($wanted_state ne 'disconnected' and not _same_url($url, $connection->url)) {
