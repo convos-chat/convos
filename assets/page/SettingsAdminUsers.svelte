@@ -140,7 +140,6 @@ function updateUserFromForm(e) {
     </form>
 
     <h2>{$l('Users')} <small>({users.length})</small></h2>
-    <OperationStatus op="{getUsersOp}" progress="{true}"/>
     <table>
       <thead>
         <tr>
@@ -150,6 +149,9 @@ function updateUserFromForm(e) {
         </tr>
       </thead>
       <tbody>
+        {#if $getUsersOp.is('loading')}
+          <tr><td colspan="3">{$l('Loading...')}</td></tr>
+        {/if}
         {#each users as user}
           <tr>
             <td><a href="#{user.uid}">{user.email}</a></td>

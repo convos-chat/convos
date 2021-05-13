@@ -20,7 +20,7 @@ const user = getContext('user');
 
 const connectionProfiles = generateWriteable('connectionProfiles', []);
 const form = makeFormStore();
-const listConnectionProfiles = api('listConnectionProfiles');
+const listConnectionProfilesOp = api('listConnectionProfiles');
 const removeConnectionProfileOp = api('removeConnectionProfileOp');
 const saveConnectionProfileOp = api('saveConnectionProfile');
 
@@ -33,8 +33,8 @@ $: if (showAdvancedSettings) form.renderOnNextTick();
 onMount(async () => {
   form.submit = saveConnectionProfile;
   if ($connectionProfiles.length) return;
-  await listConnectionProfiles.perform();
-  $connectionProfiles = listConnectionProfiles.res.body.profiles.map(normalizeProfile);
+  await listConnectionProfilesOp.perform();
+  $connectionProfiles = listConnectionProfilesOp.res.body.profiles.map(normalizeProfile);
 });
 
 function findProfile(route, $connectionProfiles) {
@@ -151,7 +151,6 @@ async function saveConnectionProfile() {
 {:else}
   <h2>{$l('Connection profiles')}</h2>
   <p>{$l('Connection profiles are used to set up global values for every connection that connect to the same host.')}</p>
-  <OperationStatus op="{listConnectionProfiles}" progress="{true}"/>
   <table>
     <thead>
       <tr>
@@ -162,6 +161,9 @@ async function saveConnectionProfile() {
       </tr>
     </thead>
     <tbody>
+      {#if $listConnectionProfilesOp.is('loading')}
+        <tr><td colspan="3">{$l('Loading...')}</td></tr>
+      {/if}
       {#each $connectionProfiles as profile}
         <tr>
           <td><a href="#profile-{profile.id}">{profile.url.host.replace(/:\d+$/, '')}</a></td>
