@@ -11,7 +11,10 @@
  */
 
 import Cookies from 'js-cookie';
+import {getLogger} from './logger';
 import {is} from '../js/util';
+
+const log = getLogger('reactive');
 
 export default class Reactive {
   constructor() {
@@ -123,7 +126,7 @@ export default class Reactive {
   update(params) {
     Object.keys(params).forEach(name => {
       const prop = this._props[name];
-      if (!prop) return; // console.log('[' + this.constructor.name + '] Unknown prop "' + name + '".');
+      if (!prop) return log.trace('[' + this.constructor.name + '] Unknown prop "' + name + '".');
       if (!prop.hasOwnProperty('prev')) prop.prev = prop.type == 'ro' ? undefined : prop.value;
       if (prop.updateable) prop.value = params[name];
     });
@@ -141,7 +144,7 @@ export default class Reactive {
         const cookieString = Cookies.get(this.cookieName);
         store[this.cookieName] = JSON.parse(cookieString ? atob(cookieString) : '{}');
       } catch(err) {
-        console.error('[Reactive:cookie]', {[key]: err});
+        log.error({[key]: err});
       }
     }
 
@@ -188,7 +191,7 @@ export default class Reactive {
     try {
       return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
     } catch(err) {
-      console.error('[Reactive:localStorage]', {[key]: localStorage.getItem(key)}, err);
+      log.error({[key]: localStorage.getItem(key)}, err);
       return undefined;
     }
   }

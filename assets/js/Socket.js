@@ -7,6 +7,9 @@
 
 import Reactive from './Reactive';
 import Time from './Time';
+import {getLogger} from './logger';
+
+const log = getLogger('socket');
 
 /**
  * getSocket() can be used to create global socket objects.
@@ -30,7 +33,6 @@ export default class Socket extends Reactive {
   constructor(params) {
     super();
 
-    this.prop('persist', 'debug', '');
     this.prop('ro', 'readyState', () => this.ws.readyState);
     this.prop('ro', 'readyStateHuman', () => readyStateHuman[this.ws.readyState]);
     this.prop('ro', 'waiting', new Map());
@@ -218,7 +220,7 @@ export default class Socket extends Reactive {
   }
 
   _onClose(e) {
-    if (this.debug) console.log('[Socket:close]', new Time().toISOString(), e);
+    log.debug('close', e);
 
     for (let [id, msg] of this.waiting) {
       if (Object.keys(msg).length <= 1) this.waiting.delete(id);
@@ -234,7 +236,7 @@ export default class Socket extends Reactive {
   _onError(e) {
     let error = String(e.message || e);
     if (!error || error.indexOf('[') == 0) error = 'Could not connect.';
-    if (this.debug) console.log('[Socket:error]', new Time().toISOString(), error, e);
+    log.error('error', error, e);
     this.update({error});
   }
 
@@ -257,14 +259,14 @@ export default class Socket extends Reactive {
   }
 
   _onOpen(e) {
-    if (this.debug) console.log('[Socket:open]', new Time().toISOString(), e);
+    log.info('open', e);
     this.update({closed: 0, error: '', readyState: true});
     this._dequeue();
   }
 
   _reconnectStart(delay) {
     this._reconnectStop();
-    if (this.debug) console.log('[Socket:reconnect]', new Time().toISOString(), delay);
+    log.info('reconnect in', delay);
     if (delay === true) return this.open();
     if (typeof delay != 'number') return (this.keepClosed = true);
     this.reconnectTid = setTimeout(() => this.open(), delay);

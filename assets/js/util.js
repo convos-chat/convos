@@ -29,7 +29,9 @@
  */
 
 import features from './features';
+import {getLogger} from './logger';
 
+const log = getLogger('util');
 const goldenRatio = 0.618033988749;
 const k = 1000;
 const M = k * 1000;
@@ -105,7 +107,7 @@ export function copyToClipboard(el) {
     document.execCommand('copy');
   } catch(err) {
     ta.value = '';
-    console.log('copyToClipboard() failed:', err);
+    log.error('copyToClipboard() failed:', err);
   }
 
   document.body.removeChild(ta);
