@@ -4,6 +4,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
+import OperationStatusRow from '../components/OperationStatusRow.svelte';
 import SimpleField from '../components/form/SimpleField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
@@ -147,9 +148,7 @@ function updateUser() {
         </tr>
       </thead>
       <tbody>
-        {#if $getUsersOp.is('loading')}
-          <tr><td colspan="3">{$l('Loading...')}</td></tr>
-        {/if}
+        <OperationStatusRow colspan="3" op="{$getUsersOp}"/>
         {#each users as user}
           <tr>
             <td><a href="#{user.uid}">{user.email}</a></td>

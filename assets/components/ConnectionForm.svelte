@@ -14,8 +14,9 @@ import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
-let connection_id = null;
+let connection_id = 'add';
 export {connection_id as id};
+export let is_page = false;
 
 const api = getContext('api');
 const form = createForm();
@@ -29,7 +30,7 @@ const updateConnectionOp = api('updateConnection');
 let connection = {};
 
 onMount(() => {
-  connection = $user.findConversation({connection_id}) || {connection_id};
+  connection = connection_id == 'add' ? {} : $user.findConversation({connection_id}) || {};
   connection.connection_id ? connectionToForm(connection) : defaultsToForm();
 });
 
@@ -72,6 +73,8 @@ async function saveConnection() {
     const body = createConnectionOp.res.body;
     if (body.connection_id) route.go(user.ensureConversation(body).path);
   }
+
+  if (is_page) route.go('/settings/connections');
 }
 </script>
 
@@ -87,7 +90,7 @@ async function saveConnection() {
     <span slot="label">{$l('Your name')}</span>
   </TextField>
 
-  {#if connection.connection_id}
+  {#if connection_id != 'add'}
     <Checkbox name="want_to_be_connected" form="{form}">
       <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
@@ -140,11 +143,11 @@ async function saveConnection() {
   {/if}
 
   <div class="form-actions">
-    {#if connection.connection_id}
+    {#if connection_id != 'add'}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
       <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}
-      <Button icon="network-wired" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
+      <Button icon="plus-circle" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>

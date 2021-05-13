@@ -1,85 +1,62 @@
 <script>
 import Button from '../components/form/Button.svelte';
+import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
-import Icon from '../components/Icon.svelte';
-import TextField from '../components/form/TextField.svelte';
 import ConnectionURL from '../js/ConnectionURL';
+import Icon from '../components/Icon.svelte';
+import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
+import TextField from '../components/form/TextField.svelte';
 import {createForm} from '../store/form';
-import {generateWriteable} from '../store/writable';
-import {getContext, onMount} from 'svelte';
-import {is} from '../js/util';
+import {getContext, onMount, tick} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
+import {str2array} from '../js/util';
 
-export let editProfile = null;
+export let profile_id = 'add';
+export const title = profile_id == 'add' ? 'Add connection profile' : 'Edit connection profile';
 
 const api = getContext('api');
-const form = createForm();
 const user = getContext('user');
-
-const connectionProfiles = generateWriteable('connectionProfiles', []);
-const listConnectionProfilesOp = api('listConnectionProfiles');
-const removeConnectionProfileOp = api('removeConnectionProfileOp');
+const connectionProfiles = user.connectionProfiles;
+const form = createForm();
+const removeConnectionProfileOp = api('removeConnectionProfile');
 const saveConnectionProfileOp = api('saveConnectionProfile');
 
+$: form.set($connectionProfiles.find(profile_id) || $connectionProfiles.defaultProfile());
 $: isAdmin = user.roles.has('admin');
-$: findProfile($route, $connectionProfiles);
 
-onMount(async () => {
-  if ($connectionProfiles.length) return;
-  await listConnectionProfilesOp.perform();
-  $connectionProfiles = listConnectionProfilesOp.res.body.profiles.map(normalizeProfile);
-});
+onMount(() => connectionProfiles.load());
 
-function findProfile(route, $connectionProfiles) {
-  const profileId = route.hash.replace(/^profile-/, '');
-  editProfile = profileId == 'add'
-    ? {max_bulk_message_size: 3, max_message_length: 512, url: new ConnectionURL('irc://0.0.0.0')}
-    : $connectionProfiles.filter(p => p.id == profileId)[0] || null;
-
-  if (!editProfile) return;
-  editProfile.url.toFields(editProfile);
-  if (editProfile.host == '0.0.0.0') editProfile.host = '';
-  form.set(editProfile);
-}
-
-function normalizeProfile(profile) {
-  profile.url = new ConnectionURL(profile.url);
-  profile.service_accounts = profile.service_accounts.join(', ');
-  profile.url.toFields(profile);
-  return profile;
+async function removeConnectionProfile() {
+  await removeConnectionProfileOp.perform({id: profile_id});
+  await connectionProfiles.load({force: true});
+  await tick();
+  route.go('/settings/connections');
 }
 
 async function saveConnectionProfile() {
-  const params = form.get();
-  ['is_default', 'is_forced', 'skip_queue'].forEach(k => (params[k] = !!params[k]));
-  params.service_accounts = (params.service_accounts || '').split(/\s*,\s*/).map(nick => nick.trim()).filter(nick => nick.length);
-  params.url = new ConnectionURL('irc://localhost').fromFields(params).toString();
+  const profile = form.get();
+  ['is_default', 'is_forced', 'skip_queue'].forEach(k => (profile[k] = !!profile[k]));
+  profile.service_accounts = str2array(profile.service_accounts);
+  profile.url = new ConnectionURL('irc://localhost').fromFields(profile).toString();
 
-  await saveConnectionProfileOp.perform(params);
+  await saveConnectionProfileOp.perform(profile);
   if (saveConnectionProfileOp.is('error')) return;
-
-  const profile = normalizeProfile(saveConnectionProfileOp.res.body);
-  $connectionProfiles = $connectionProfiles.filter(p => p.id != profile.id)
-    .concat(profile)
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map(p => {
-      if (profile.is_default && p.id != profile.id) p.is_default = p.is_forced = false;
-      return p;
-    });
-
-  if (profile.is_default) {
-    user.update({default_connection: profile.url.toString(), forced_connection: profile.is_forced});
-  }
-
+  if (profile.is_default) user.update({default_connection: profile.url, forced_connection: profile.is_forced});
+  await connectionProfiles.load({force: true});
+  await tick();
   route.go('/settings/connections');
-  saveConnectionProfileOp.reset();
 }
 </script>
 
-{#if editProfile}
+<ChatHeader>
+  <h1>{profile_id == 'add' ? $l('Add connection profile') : $l('Edit connection profile')}</h1>
+  <Link href="/settings/connections" class="btn-hallow is-active" data-tooltip="{$l('See all connection profiles')}"><Icon name="list"/><Icon name="times"/></Link>
+</ChatHeader>
+
+<main class="main">
   <form method="post" on:submit|preventDefault="{saveConnectionProfile}">
     <TextField name="host" form="{form}" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Host and port')}</span>
@@ -134,40 +111,16 @@ async function saveConnectionProfile() {
     {#if !isAdmin}
       <p class="error">{$l('Only administrators can edit this section.')}</p>
     {/if}
+
     <div class="form-actions">
-      <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{editProfile.id ? $l('Update') : $l('Add')}</span></Button>
+      {#if profile_id != 'add'}
+        <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{$l('Update')}</span></Button>
+        <Button icon="trash" type="button" op="{removeConnectionProfileOp}" on:click="{removeConnectionProfile}"><span>{$l('Delete')}</span></Button>
+      {:else}
+        <Button icon="plus-circle" op="{saveConnectionProfileOp}"><span>{$l('Add')}</span></Button>
+      {/if}
     </div>
+    <OperationStatus op="{removeConnectionProfileOp}" success="Deleted."/>
     <OperationStatus op="{saveConnectionProfileOp}"/>
   </form>
-{:else}
-  <h2>{$l('Connection profiles')}</h2>
-  <p>{$l('Connection profiles are used to set up global values for every connection that connect to the same host.')}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>{$l('Host')}</th>
-        <th>{$l('Secure')}</th>
-        <th>{$l('Default')}</th>
-        <th>{$l('Forced')}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#if $listConnectionProfilesOp.is('loading')}
-        <tr><td colspan="3">{$l('Loading...')}</td></tr>
-      {/if}
-      {#each $connectionProfiles as profile}
-        <tr>
-          <td><a href="#profile-{profile.id}">{profile.url.host.replace(/:\d+$/, '')}</a></td>
-          <td>{is.true(profile.tls_verify) ? $l('Strict') : is.true(profile.tls) ? $l('Yes') : $l('No')}</td>
-          <td>{profile.is_default ? $l('Yes') : $l('No')}</td>
-          <td>{profile.is_forced ? $l('Yes') : $l('No')}</td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
-  {#if isAdmin}
-    <div class="form-actions">
-      <a href="#profile-add" class="btn"><Icon name="plus-circle"/> <span>{$l('Add')}</span></a>
-    </div>
-  {/if}
-{/if}
+</main>

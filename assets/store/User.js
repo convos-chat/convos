@@ -1,4 +1,5 @@
 import Connection from './Connection';
+import ConnectionProfiles from './ConnectionProfiles';
 import Conversation from './Conversation';
 import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
@@ -13,6 +14,7 @@ export default class User extends Reactive {
     super();
 
     this.prop('ro', 'connections', new SortedMap());
+    this.prop('ro', 'connectionProfiles', new ConnectionProfiles());
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());

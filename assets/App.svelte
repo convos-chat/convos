@@ -2,6 +2,8 @@
 // Pages
 import Chat from './page/Chat.svelte';
 import Connections from './page/Connections.svelte';
+import ConnectionProfileSettings from './page/ConnectionProfileSettings.svelte';
+import ConnectionSettings from './page/ConnectionSettings.svelte';
 import ConversationAdd from './page/ConversationAdd.svelte';
 import Fallback from './page/Fallback.svelte';
 import Help from './page/Help.svelte';
@@ -127,6 +129,10 @@ function socketChanged(socket) {
     <SettingsAccount bind:title/>
   {:else if $route.path == '/settings/connections'}
     <Connections bind:title/>
+  {:else if $route.path.indexOf('/settings/connection/') == 0}
+    <ConnectionSettings connection_id="{$route.pathParts[2]}" bind:title/>
+  {:else if $route.path.indexOf('/settings/connection-profile/') == 0}
+    <ConnectionProfileSettings profile_id="{$route.pathParts[2]}" bind:title/>
   {:else if $route.path == '/settings/conversation'}
     <ConversationAdd bind:title/>
   {:else if $route.path == '/settings/users'}

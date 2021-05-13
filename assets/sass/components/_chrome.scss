@@ -48,6 +48,15 @@ body {
     height: 4rem;
     display: block;
   }
+
+  /* This is a hack to make sure that another ".main" component is hidden,
+   * instead of being partially seethrough. This happens when going to
+   * /settings/connection-profile/irc-whatever, toggling "Show advanced settings",
+   * and then going back to /settings/connections.
+   */
+  .for-app & {
+    background: var(--body-bg);
+  }
 }
 
 .overlay {
