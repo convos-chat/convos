@@ -13,7 +13,7 @@
   --code-bg: #ccc;
   --button-bg: #ba8c58;
   --button-border: 1px solid #ba8c58;
-  --button-danger-bg: #ba8c58;
+  --button-danger-bg: #dd6e83;
   --button-disabled-bg: #e1cdb7;
   --button-disabled-border: #373737;
   --button-focus-outline: 1px solid #ba8c58;
@@ -24,10 +24,10 @@
   --sidebar-right-bg: #f9f9f9;
   --sidebar-left-bg: #0c9ddc;
   --sidebar-left-border: 1px solid #000000;
-  --sidebar-left-frozen-color: #aaaaaa;
+  --sidebar-left-frozen-color: #c7d1d9;
   --sidebar-left-text: #f8f8f8;
   --sidebar-left-border-bottom: #fff;
-  --sidebar-left-search-placeholder-color: #999999;
+  --sidebar-left-search-placeholder-color: #c7d1d9;
   --sidebar-left-search-focus-bg: #ba8c58;
   --syntax-hl-base-bg: #fff;
 }
