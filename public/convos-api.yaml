@@ -244,12 +244,19 @@ paths:
           description: Success.
           schema:
             $ref: '#/definitions/ConnectionProfile'
+
   /connection-profiles/{id}:
     delete:
       operationId: removeConnectionProfile
       summary: Remove a connection profile.
       tags: [ connection, connection-profile ]
       x-mojo-to: connection_profile#remove
+      parameters:
+      - description: A unique profile identifier
+        in: path
+        name: id
+        required: true
+        type: string
       responses:
         '200':
           description: Success.

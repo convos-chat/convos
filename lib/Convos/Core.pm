@@ -72,7 +72,10 @@ sub new {
 
 sub remove_connection_profile_p {
   my ($self, $profile) = @_;
-  return $self->backend->delete_object_p($profile)->then(sub {$profile});
+  return $self->backend->delete_object_p($profile)->then(sub {
+    $self->remove_connection_profile($profile->id);
+    return $profile;
+  });
 }
 
 sub remove_user_p {
