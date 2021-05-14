@@ -20,6 +20,7 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
@@ -189,7 +190,7 @@ function renderUnread(conversation, max = 60) {
       <Icon name="search"/>
       <span>{$l('Search')}</span>
     </Link>
-    <Link href="/settings/conversation">
+    <Link href="{addConversationLink}">
       <Icon name="comment"/>
       <span>{$l('Add conversation')}</span>
     </Link>
