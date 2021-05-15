@@ -2,6 +2,9 @@ import Reactive from '../js/Reactive';
 import qs from 'qs';
 import {activeMenu} from './writable';
 import {closestEl, is} from '../js/util';
+import {getLogger} from '../js/logger';
+
+const log = getLogger('route');
 
 export default class Route extends Reactive {
   constructor() {
@@ -107,7 +110,8 @@ export default class Route extends Reactive {
     const url = pathname.split('#')[0].split('?');
     this._query = url.length == 2 ? qs.parse(url.pop()) : {};
     this._path = url[0];
-    this._pathParts = url[0].replace(/^\//, '').split('/').map(decodeURIComponent);
+    this._pathParts = url[0].length <= 1 ? [] : url[0].replace(/^\//, '').split('/').map(decodeURIComponent);
+    log.info('path="' + this._path + '" ' + JSON.stringify(this._pathParts) + ', query=' + JSON.stringify(this._query));
     this.update({path: true});
   }
 }

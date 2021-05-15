@@ -86,7 +86,14 @@ async function routeOrUserChanged(route, user) {
   await tick();
   const appOrCms = user.is(['loading', 'pending']) || document.querySelector('.cms-main') ? 'cms' : 'app';
   document.body.className = document.body.className.replace(/for-\w+/, 'for-' + appOrCms);
-  if (user.email) user.update({lastUrl: location.href});
+
+  if (route.pathParts.length == 0) {  // path = "/" or path = ""
+    const url = !user.email ? '/login' : user.lastUrl || '/chat';
+    route.go(url, {replace: true});
+  }
+  else if (user.email) {
+    user.update({lastUrl: location.href});
+  }
 }
 
 function socketChanged(socket) {
