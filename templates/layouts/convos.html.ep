@@ -60,8 +60,8 @@
     <!-- base style + themes -->
     <noscript><style>.has-js { display: none; }</style></noscript>
     %= asset 'convos.css'
-    % my $theme = stash('start_app') ? $c->themes->get(js_session('theme'), js_session('colorScheme')) : $c->themes->get('convos', js_session('colorScheme'));
-    %= tag 'link', rel => 'stylesheet', type => 'text/css', id => "theme_primary", href => url_for($theme->{url}), title => $theme->{title}
+    % my $theme = stash('start_app') ? $c->themes->get(js_session('theme'), js_session('colorScheme')) : $c->themes->get;
+    %= tag 'link', rel => 'stylesheet', type => 'text/css', id => 'theme_primary', href => url_for($theme->{url}), title => $theme->{title}
     % for my $theme (@{$c->themes->list}) {
     %= tag 'link', rel => 'alternate stylesheet', type => 'text/css', id => "theme_alt__$theme->{id}", href => url_for($theme->{url}), title => $theme->{title}
     % }

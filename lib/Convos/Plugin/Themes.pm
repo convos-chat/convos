@@ -76,11 +76,9 @@ sub _detect {
 
 sub _get {
   my ($self, $c) = (shift, shift);
-
-  my $id     = shift                     || 'convos';
+  my $id     = shift || $ENV{CONVOS_DEFAULT_THEME}  || 'convos';
+  my $scheme = shift || $ENV{CONVOS_DEFAULT_SCHEME} || 'light';
   my $theme  = $self->_themes_map->{$id} || $self->_themes_map->{convos};
-  my $scheme = shift;
-  $scheme = (keys %{$theme->{urls}})[0] if !$scheme or $scheme eq 'auto';
 
   return {
     %$theme,

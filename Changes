@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 6.17 Not Released
  - Fix not enabling the client side router for CMS pages
+ - Fix always rendering the same theme for the CMS pages
+ - Add support for CONVOS_DEFAULT_THEME and CONVOS_DEFAULT_SCHEME environment variables
 
 6.16 2021-05-18T11:03:00+0900
  - Add <SimpleField> for form fields without styling
