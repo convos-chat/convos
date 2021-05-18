@@ -426,6 +426,12 @@ export function showFullscreen(e, contentEl) {
   return mediaWrapper;
 }
 
+/**
+ * str2array() takes a string, splits it and returns an array of words.
+ *
+ * @param {String} str Any string
+ * @returns {Array} A list of words
+ */
 export function str2array(str) {
   return (is.string(str) ? str : '').split(/[.,\s]+/).map(i => i.trim()).filter(i => i.length);
 }

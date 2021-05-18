@@ -3,7 +3,7 @@ import {get, writable} from 'svelte/store';
 const generated = {};
 
 export const activeMenu = generateWriteable('menu');
-export const viewPort = writable({nColumns: 1, width: 0});
+export const viewport = writable({nColumns: 1, width: 0});
 
 export function generateWriteable(name, intial = '') {
   if (generated[name]) return generated[name];

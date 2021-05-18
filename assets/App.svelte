@@ -19,7 +19,7 @@ import features from './js/features';
 import ChatSidebar from './components/ChatSidebar.svelte';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
-import {activeMenu, viewPort} from './store/writable';
+import {activeMenu, viewport} from './store/writable';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
@@ -58,7 +58,7 @@ i18n.load().then(() => user.load());
 $: features[$themeManager.compactDisplay ? 'add' : 'remove']('compact-display');
 $: routeOrUserChanged($route, $user);
 $: setTitle(title, $user);
-$: viewPort.set({width, nColumns: width > 1200 ? 3 : width > 800 ? 2 : 1}); // Need to be in sync with sass/_variables.scss
+$: viewport.set({width, nColumns: width > 1200 ? 3 : width > 800 ? 2 : 1}); // Need to be in sync with sass/_variables.scss
 
 function setTitle(title, $user) {
   if (!document) return;
@@ -87,7 +87,7 @@ async function routeOrUserChanged(route, user) {
   const appOrCms = user.is(['loading', 'pending']) || document.querySelector('.cms-main') ? 'cms' : 'app';
   document.body.className = document.body.className.replace(/for-\w+/, 'for-' + appOrCms);
 
-  if (route.pathParts.length == 0) {  // path = "/" or path = ""
+  if (route.pathParts.length == 0) { // path = "/" or path = ""
     const url = !user.email ? '/login' : user.lastUrl || '/chat';
     route.go(url, {replace: true});
   }
@@ -118,8 +118,8 @@ function socketChanged(socket) {
 {#if $user.is(['loading', 'pending'])}
   <Fallback/>
 {:else if $user.email}
-  {#if $activeMenu == 'nav' || $viewPort.nColumns > 1}
-    <ChatSidebar transition="{{duration: $viewPort.nColumns > 1 ? 0 : 250, x: width}}"/>
+  {#if $activeMenu == 'nav' || $viewport.nColumns > 1}
+    <ChatSidebar transition="{{duration: $viewport.nColumns > 1 ? 0 : 250, x: width}}"/>
   {/if}
 
   {#if $route.path == '/chat'}
@@ -150,7 +150,7 @@ function socketChanged(socket) {
     <Fallback bind:title/>
   {/if}
 
-  {#if $activeMenu && $viewPort.nColumns == 1}
+  {#if $activeMenu && $viewport.nColumns == 1}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => { $activeMenu = '' }}">&nbsp;</div>
   {/if}
 {:else}

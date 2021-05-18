@@ -4,7 +4,7 @@ import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplet
 import {chatHelper, videoWindow} from '../js/chatHelpers';
 import {extractErrorMessage, is} from '../js/util';
 import {fly} from 'svelte/transition';
-import {generateWriteable, viewPort} from '../store/writable';
+import {generateWriteable, viewport} from '../store/writable';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
@@ -143,14 +143,14 @@ function uploadFiles(e) {
   <textarea class="non-interactive" placeholder="{placeholder}" bind:this="{inputMirror}"></textarea>
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
-  {#if $viewPort.nColumns > 1 && $conversation.is('conversation')}
+  {#if $viewport.nColumns > 1 && $conversation.is('conversation')}
     <label for="upload_files" class="btn-hallow upload"><Icon name="cloud-upload-alt"/></label>
     {#if $user.videoService}
       <a href="#action:video" on:click="{onVideoLinkClick}" class="btn-hallow has-tooltip" tooltip="{$l('Start a video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
     {/if}
   {/if}
 
-  {#if $viewPort.nColumns == 1 && conversation.is('conversation')}
+  {#if $viewport.nColumns == 1 && conversation.is('conversation')}
     <a href="#actions" class="btn-hallow" class:is-active="{$activeChatMenu == 'actions'}" on:click="{activeChatMenu.toggle}">
       <Icon name="plus-circle"/>
       <Icon name="times"/>

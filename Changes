@@ -1,5 +1,30 @@
 Revision history for perl distribution Convos
 
+6.16 Not Released
+ - Add <SimpleField> for form fields without styling
+ - Add "viewport" store, which replaces "nColumns" store
+ - Add client side log utility for easier debugging
+   * Can be toggled with "?_debug=root:trace,category:level"
+ - Fix "removeConnectionProfile" operation in the API
+ - Fix changing nick, realname, sasl, tls and tls_verify for forced connections
+ - Fix changing source IP for connections
+ - Fix constrast issues for "South" theme
+ - Fix only loading emojis once
+ - Fix only loading translations once
+ - Fix rendering issue when switching between connection profiles and profile editor
+ - Bumped rollup and svelte dependencies
+ - Changed "Generate invite link" button to only be active when an email is filled in
+ - Changed client side routing logic
+   * Removed routes.js
+   * Moved routing logic into App.svelte
+ - Replaced form "change" event handling with svelte stores bound to the form elements
+   * This will hopefully fix some issues where toggling TLS did not work properly
+ - Replaced node-sass with sass
+ - Removed "anonymous" and "authenticated" roles from client side User object roles
+ - Removed support for "form" HTML element and "start" event in Operation.js
+ - Removed support for showing progress bar when loading data
+ - Will use the current connection Id when clicking on "Add conversation"
+
 6.15 2021-05-06T10:30:00+0900
  - Fix invitation link handling
  - Fix changing "Source IP" fo a connection

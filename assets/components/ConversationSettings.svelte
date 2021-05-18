@@ -6,7 +6,7 @@ import Link from './Link.svelte';
 import SimpleField from '../components/form/SimpleField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {activeMenu, viewPort} from '../store/writable';
+import {activeMenu, viewport} from '../store/writable';
 import {createForm} from '../store/form';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
@@ -104,7 +104,7 @@ function saveConversationSettings() {
     </div>
   </form>
 
-  {#if !conversation.frozen && $viewPort.nColumns < 3}
+  {#if !conversation.frozen && $viewport.nColumns < 3}
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}

@@ -9,7 +9,7 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {activeMenu, viewPort} from '../store/writable';
+import {activeMenu, viewport} from '../store/writable';
 import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -97,9 +97,9 @@ function setConversationFromUser(user) {
 
 {#if $activeMenu == 'settings'}
   {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewPort.nColumns > 1 ? 0 : $viewPort.width}}"/>
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.nColumns > 1 ? 0 : $viewport.width}}"/>
   {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewPort.nColumns > 1 ? 0 : $viewPort.width}}"/>
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.nColumns > 1 ? 0 : $viewport.width}}"/>
   {/if}
 {/if}
 
@@ -213,7 +213,7 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:uploader/>
 
-{#if $viewPort.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
+{#if $viewport.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
