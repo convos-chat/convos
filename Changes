@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.16 Not Released
+6.16 2021-05-18T11:03:00+0900
  - Add <SimpleField> for form fields without styling
  - Add "viewport" store, which replaces "nColumns" store
  - Add client side log utility for easier debugging
