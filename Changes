@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.17 Not Released
+6.17 2021-05-18T12:13:00+0900
  - Fix not enabling the client side router for CMS pages
  - Fix always rendering the same theme for the CMS pages
  - Add support for CONVOS_DEFAULT_THEME and CONVOS_DEFAULT_SCHEME environment variables
