@@ -41,7 +41,7 @@ let title = i18n.l('Chat');
 socket.update({debug: 'WebSocket'});
 window.convosWebSockeet = socket;
 
-route.update({baseUrl: settings('base_url')});
+route.update({baseUrl: settings('base_url'), enabled: true});
 socket.update({url: route.wsUrlFor('/events')});
 user.on('wsEventSentJoin', e => route.go(route.conversationPath(e)));
 registerServiceWorker().catch(err => console.error('[serviceWorker]', err));

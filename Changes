@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.17 Not Released
+ - Fix not enabling the client side router for CMS pages
+
 6.16 2021-05-18T11:03:00+0900
  - Add <SimpleField> for form fields without styling
  - Add "viewport" store, which replaces "nColumns" store

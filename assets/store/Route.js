@@ -16,6 +16,7 @@ export default class Route extends Reactive {
     this.prop('ro', 'pathParts', () => this._pathParts);
     this.prop('ro', 'query', () => this._query);
     this.prop('rw', 'baseUrl', '');
+    this.prop('rw', 'enabled', false);
 
     this._onClick = this._onClick.bind(this);
     this._onLocationChange = this._onLocationChange.bind(this);
@@ -81,6 +82,7 @@ export default class Route extends Reactive {
   }
 
   _onClick(e) {
+    if (!this.enabled) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
 
     const linkEl = e.target && e.target.closest('a');
@@ -104,6 +106,7 @@ export default class Route extends Reactive {
   }
 
   _onLocationChange(e) {
+    if (!this.enabled) return;
     activeMenu.set('');
     const abs = this._location.href;
     const pathname = abs.substr(this.baseUrl.length);
