@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.18 Not Released
  - Changing defaults from freenode to https://libera.chat/
+ - Changed sections toggle styling from checkbox to caret
 
 6.17 2021-05-18T12:13:00+0900
  - Fix not enabling the client side router for CMS pages

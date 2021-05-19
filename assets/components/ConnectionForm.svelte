@@ -106,8 +106,8 @@ async function saveConnection() {
   <Checkbox name="tls_verify" form="{form}" disabled="{!$form.tls}" hidden="{!$form.tls}">
     <span slot="label">{$l('Verify certificate (TLS)')}</span>
   </Checkbox>
-  <Checkbox name="show_advanced_settings" form="{form}">
-    <span slot="label">{$l('Show advanced settings')}</span>
+  <Checkbox icon="caret" name="show_advanced_settings" form="{form}">
+    <span slot="label">{$l('Advanced settings')}</span>
   </Checkbox>
   {#if $form.show_advanced_settings}
     <div class="form-group" transition:slide="{{duration: 150}}">
@@ -124,8 +124,8 @@ async function saveConnection() {
   {/if}
 
   {#if !user.forced_connection}
-    <Checkbox name="show_auth_settings" form="{form}">
-      <span slot="label">{$l('Show authentication settings')}</span>
+    <Checkbox icon="caret" name="show_auth_settings" form="{form}">
+      <span slot="label">{$l('Authentication settings')}</span>
     </Checkbox>
     {#if $form.show_auth_settings}
       <div class="form-group" transition:slide="{{duration: 150}}">

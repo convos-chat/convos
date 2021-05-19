@@ -85,8 +85,8 @@ async function saveConnectionProfile() {
       <p class="help" hidden="{!$form.is_default}">{$l('Tick this box if you want to prevent users from creating custom connections.')}</p>
     {/if}
 
-    <Checkbox name="show_advanced_settings" form="{form}">
-      <span slot="label">{$l('Show advanced settings')}</span>
+    <Checkbox icon="caret" name="show_advanced_settings" form="{form}">
+      <span slot="label">{$l('Advanced settings')}</span>
     </Checkbox>
     {#if $form.show_advanced_settings}
       <div class="form-group" transition:slide="{{duration: 150}}">
