@@ -7,7 +7,7 @@ use Mojo::Cache;
 use Mojo::Collection;
 use Mojo::DOM;
 use Mojo::URL;
-use Mojo::Util qw(decode slugify trim xml_escape);
+use Mojo::Util qw(decode slugify trim);
 use Pod::Simple::Search;
 use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
@@ -149,7 +149,7 @@ sub _parse_markdown {
 
   $dom->child_nodes->each(sub {
     my $tag = shift;
-    $tag->replace($self->_md->markdown(xml_escape $tag->content))
+    $tag->replace($self->_md->markdown($tag->content))
       if $tag->type eq 'text'
       or $tag->type eq 'raw';
   });

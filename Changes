@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.19 Not Released
+ - Add support for quotes in the CMS
+
 6.18 2021-05-20T07:30:00+0900
  - Changing defaults from freenode to https://libera.chat/
  - Changed sections toggle styling from checkbox to caret

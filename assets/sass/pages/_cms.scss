@@ -34,6 +34,26 @@ body.for-cms .footer,
     margin-top: 2rem;
   }
 
+  blockquote {
+    background: var(--syntax-hl-base-bg);
+    color: var(--syntax-hl-base);
+    font-style: italic;
+    margin: var(--gutter) 0;
+    padding: var(--gutter-small);
+    position: relative;
+    quotes: "\201C""\201D""\2018""\2019";
+
+    &:before {
+      content: open-quote;
+      font-size: 3em;
+      position: absolute;
+    }
+
+    p {
+      margin: var(--gutter-small) 0 0 2rem;
+    }
+  }
+
   code {
     background: var(--syntax-hl-base-bg);
     padding: 2px 4px;
