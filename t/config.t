@@ -9,7 +9,7 @@ my $i      = 0;
 my $convos = Convos->new;
 my $secret = $convos->secrets->[0];
 is $convos->config->{backend}, 'Convos::Core::Backend::File', 'default backend';
-is $convos->core->settings->default_connection, 'irc://chat.freenode.net:6697/%23convos',
+is $convos->core->settings->default_connection, 'irc://irc.libera.chat:6697/%23convos',
   'default default_connection';
 is $convos->config->{home}, $ENV{CONVOS_HOME}, 'home from ENV';
 is $convos->core->settings->organization_name, 'Convos',              'default organization_name';

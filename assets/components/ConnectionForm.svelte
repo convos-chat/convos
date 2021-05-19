@@ -79,7 +79,7 @@ async function saveConnection() {
 </script>
 
 <form method="post" on:submit|preventDefault="{saveConnection}">
-  <TextField name="host" form="{form}" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{user.forced_connection}">
+  <TextField name="host" form="{form}" placeholder="{$l('Ex: irc.libera.chat:6697')}" readonly="{user.forced_connection}">
     <span slot="label">{$l('Host and port')}</span>
     <p class="help" slot="help" hidden="{!user.forced_connection}">{$l('You cannot create custom connections.')}</p>
   </TextField>

@@ -44,7 +44,7 @@ sub uri { Mojo::Path->new('settings.json') }
 
 sub _build_default_connection {
   my $self = shift;
-  my $url  = Mojo::URL->new('irc://chat.freenode.net:6697/%23convos');
+  my $url  = Mojo::URL->new('irc://irc.libera.chat:6697/%23convos');
   $self->core->connection_profile({url => $url->clone});
   return $url;
 }
@@ -131,7 +131,7 @@ Holds a L<Convos::Core> object.
   $settings = $settings->default_connection(Mojo::URL->new("irc://..."));
 
 Holds a L<Mojo::URL> object with the default connection URL. Default value
-is "irc://chat.freenode.net:6697/%23convos". (Subject to change)
+is "irc://irc.libera.chat:6697/%23convos". (Subject to change)
 
 =head2 forced_connection
 

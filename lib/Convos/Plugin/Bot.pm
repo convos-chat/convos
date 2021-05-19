@@ -266,14 +266,14 @@ using chat commands, if you are a convos admin.
     wanted_state: connected          # connected (default), disconnected
     actions:
       Convos::Plugin::Bot::Action::Hailo:
-        free_speak_ratio: 0.001      # override "free_speak_ratio" for any conversation on freenode
+        free_speak_ratio: 0.001      # override "free_speak_ratio" for any conversation on libera
     conversations:
       "#convos":
         password: s3cret             # optional
         state: join                  # join (default), part
         actions:
           Convos::Plugin::Bot::Action::Hailo:
-            free_speak_ratio: 0.5    # override "free_speak_ratio" for #convos on freenode
+            free_speak_ratio: 0.5    # override "free_speak_ratio" for #convos on libera
 
 =head2 Actions
 

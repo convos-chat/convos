@@ -41,27 +41,27 @@ subtest 'test that defaults got set' => sub {
 subtest 'generate with defaults' => sub {
   local $ENV{OPENSSL_COUNTRY} = 'NO';
   generate_cert_p({
-    cert  => $tmpdir->child('irc-freenode.cert'),
-    key   => $tmpdir->child('irc-freenode.key'),
+    cert  => $tmpdir->child('irc-libera.cert'),
+    key   => $tmpdir->child('irc-libera.key'),
     email => 'superman@convos.chat',
   })->then(sub {
     is_deeply(
       $_[0],
       {
         bits         => $ENV{OPENSSL_BITS},
-        cert         => $tmpdir->child('irc-freenode.cert'),
+        cert         => $tmpdir->child('irc-libera.cert'),
         common_name  => 'superman',
         country      => $ENV{OPENSSL_COUNTRY},
         days         => 3650,
         email        => 'superman@convos.chat',
-        key          => $tmpdir->child('irc-freenode.key'),
+        key          => $tmpdir->child('irc-libera.key'),
         organization => $ENV{OPENSSL_ORGANIZATION},
       },
       'cert info'
     );
   })->wait;
   test_cert(
-    'irc-freenode',
+    'irc-libera',
     {
       bits         => $ENV{OPENSSL_BITS},
       common_name  => 'superman',

@@ -332,8 +332,8 @@ msgid "Ex: Clark Kent"
 msgstr "Ej: Juan Pérez"
 
 #: assets/components/ConnectionForm.svelte:115
-msgid "Ex: chat.freenode.net:6697"
-msgstr "Ej: chat.freenode.net:6697"
+msgid "Ex: irc.libera.chat:6697"
+msgstr "Ej: irc.libera.chat:6697"
 
 #: assets/page/SettingsAdmin.svelte:109
 msgid "Ex: https://meet.jit.si/"
@@ -382,8 +382,8 @@ msgid "Go to start page"
 msgstr "Ir a la página de inicio"
 
 #: assets/page/Help.svelte:21
-msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://freenode.net."
-msgstr "¿Tienes alguna pregunta? Ven y habla con nosotros en el canal \"#convos\" en https://freenode.net."
+msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
+msgstr "¿Tienes alguna pregunta? Ven y habla con nosotros en el canal \"#convos\" en https://libera.chat."
 
 #: assets/components/ChatSidebar.svelte:197
 #: assets/page/Help.svelte:16
@@ -986,8 +986,8 @@ msgid "admin, bot, ..."
 msgstr "admin, bot, ..."
 
 #: assets/components/ConnectionForm.svelte:118
-msgid "chat.freenode.net:6697"
-msgstr "chat.freenode.net:6697"
+msgid "irc.libera.chat:6697"
+msgstr "irc.libera.chat:6697"
 
 #: app.html.ep:13
 #: templates/app.html.ep:13

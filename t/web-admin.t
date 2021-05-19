@@ -19,7 +19,7 @@ $t->post_ok('/api/user/register',
 note 'get default settings';
 $t->get_ok('/api/settings')->status_is(200)->json_hasnt('/local_secret')
   ->json_hasnt('/session_secrets')->json_is('/contact', 'mailto:root@localhost')
-  ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
+  ->json_is('/default_connection', 'irc://irc.libera.chat:6697/%23convos')
   ->json_is('/forced_connection',  false)->json_is('/open_to_public', false)
   ->json_is('/organization_name',  'Convos')->json_is('/organization_url', 'https://convos.chat')
   ->json_is('/video_service' => 'https://meet.jit.si/');
@@ -47,7 +47,7 @@ $t->post_ok(
 note 'change only one setting';
 $t->post_ok('/api/settings', json => {open_to_public => true})->status_is(200)
   ->json_hasnt('/local_secret')->json_hasnt('/session_secrets')
-  ->json_is('/default_connection', 'irc://chat.freenode.net:6697/%23convos')
+  ->json_is('/default_connection', 'irc://irc.libera.chat:6697/%23convos')
   ->json_is('/open_to_public',     true);
 
 note 'change all settings and also reject some';
@@ -57,7 +57,7 @@ $t->post_ok(
   '/api/settings',
   json => {
     contact            => 'mailto:jhthorsen@cpan.org',
-    default_connection => 'irc://chat.freenode.net:6697/%23mojo     ',
+    default_connection => 'irc://irc.libera.chat:6697/%23mojo     ',
     forced_connection  => true,
     local_secret       => 's3cret',
     open_to_public     => true,
@@ -67,7 +67,7 @@ $t->post_ok(
     video_service      => ' https://video.convos.chat/',
   }
 )->status_is(200)->json_is('/contact' => 'mailto:jhthorsen@cpan.org')
-  ->json_is('/default_connection' => 'irc://chat.freenode.net:6697/%23mojo')
+  ->json_is('/default_connection' => 'irc://irc.libera.chat:6697/%23mojo')
   ->json_is('/forced_connection'  => true)->json_is('/local_secret'      => undef)
   ->json_is('/open_to_public'     => true)->json_is('/organization_name' => 'Superheroes')
   ->json_is('/organization_url'   => 'https://metacpan.org')->json_is('/session_secrets' => undef)

@@ -203,7 +203,7 @@ a message you can use the instruction "/say". Example:
 
   {
     method: "send",
-    connection_id: "irc-freenode",
+    connection_id: "irc-libera",
     conversation_id: "#convos",
     message: "/say /part is a command you can use to leave a conversation"
   }

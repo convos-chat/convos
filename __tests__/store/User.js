@@ -93,7 +93,7 @@ test('load success', async () => {
     waitingForResponse: true
   }]);
 
-  expect(user.default_connection).toBe('irc://chat.freenode.net:6697/%23convos');
+  expect(user.default_connection).toBe('irc://irc.libera.chat:6697/%23convos');
   expect(user.email).toBe('');
   expect(user.forced_connection).toBe(false);
   expect(user.highlightKeywords).toEqual([]);
@@ -104,7 +104,7 @@ test('load success', async () => {
       id : '1',
       user: {
         email: 'superwoman@convos.chat',
-        default_connection: 'irc://chat.freenode.net',
+        default_connection: 'irc://irc.libera.chat',
         forced_connection: true,
         highlight_keywords: ['foo', 'bar'],
       },
@@ -112,7 +112,7 @@ test('load success', async () => {
   });
 
   await user.on('update');
-  expect(user.default_connection).toBe('irc://chat.freenode.net');
+  expect(user.default_connection).toBe('irc://irc.libera.chat');
   expect(user.email).toBe('superwoman@convos.chat');
   expect(user.forced_connection).toBe(true);
   expect(user.highlightKeywords).toEqual(['foo', 'bar']);
@@ -137,7 +137,7 @@ test('load error', async () => {
   await user.on('update');
   expect(hasChanged).toEqual({roles: false, status: true}); // "roles" need to be part of "changed" to start rendering in App.svelte
   expect(user.status).toBe('error');
-  expect(user.default_connection).toBe('irc://chat.freenode.net:6697/%23convos');
+  expect(user.default_connection).toBe('irc://irc.libera.chat:6697/%23convos');
   expect(user.email).toBe('');
   expect(user.forced_connection).toBe(false);
   expect(user.highlightKeywords).toEqual([]);

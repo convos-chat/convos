@@ -7,23 +7,23 @@ test('constructor', () => {
   let c = new Conversation({});
   expect(c.name).toBe('ERR');
 
-  c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+  c = new Conversation({connection_id: 'irc-libera', conversation_id: '#convos'});
   expect(c.color).toBe('#6bafb2');
-  expect(c.connection_id).toBe('irc-freenode');
+  expect(c.connection_id).toBe('irc-libera');
   expect(c.conversation_id).toBe('#convos');
   expect(c.frozen).toBe('');
   expect(c.is('private')).toBe(false);
   expect(c.messages.toArray()).toEqual([]);
   expect(c.modes).toEqual({});
   expect(c.name).toBe('#convos');
-  expect(c.path).toBe('/chat/irc-freenode/%23convos');
+  expect(c.path).toBe('/chat/irc-libera/%23convos');
   expect(c.status).toBe('pending');
   expect(c.topic).toBe('');
   expect(c.unread).toBe(0);
 });
 
 test('load', async () => {
-  const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+  const c = new Conversation({connection_id: 'irc-libera', conversation_id: '#convos'});
   expect(c.status).toBe('pending');
 
   c.messagesOp.perform = mockMessagesOpPerform({
@@ -31,10 +31,10 @@ test('load', async () => {
     status: 200,
   })
   await c.load();
-  expect(c.messagesOp.performed).toEqual({connection_id: 'irc-freenode', conversation_id: '#convos', limit: 40});
+  expect(c.messagesOp.performed).toEqual({connection_id: 'irc-libera', conversation_id: '#convos', limit: 40});
   expect(c.status).toBe('success');
   expect(socket.queue.length).toBe(1);
-  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-freenode', conversation_id: '#convos', message: '/names #convos'});
+  expect(socket.queue[0]).toEqual({id: "1", method: 'send', connection_id: 'irc-libera', conversation_id: '#convos', message: '/names #convos'});
 
   c.messagesOp.perform = mockMessagesOpPerform({
     body: {end: true, messages: [{from: 'superman', message: 'm two', type: 'private', ts: '2020-01-20T09:01:50.001Z'}]},
@@ -42,11 +42,11 @@ test('load', async () => {
   })
   delete c.messagesOp.performed;
   await c.load({around: '2020-01-10T09:01:50.001Z'});
-  expect(c.messagesOp.performed).toEqual({around: '2020-01-10T09:01:50.001Z', connection_id: 'irc-freenode', conversation_id: '#convos', limit: 40});
+  expect(c.messagesOp.performed).toEqual({around: '2020-01-10T09:01:50.001Z', connection_id: 'irc-libera', conversation_id: '#convos', limit: 40});
 });
 
 test('load start/end history', () => {
-  const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+  const c = new Conversation({connection_id: 'irc-libera', conversation_id: '#convos'});
   const messages = [1, 2, 3].map(i => ({ts: '2020-01-01T09:01:01.001Z'.replace(/1/g, i)}));
 
   const reset = () => c.update({historyStartAt: null, historyStopAt: null});
@@ -92,7 +92,7 @@ test('load start/end history', () => {
 });
 
 test('load skip', () => {
-  const c = new Conversation({connection_id: 'irc-freenode', conversation_id: '#convos'});
+  const c = new Conversation({connection_id: 'irc-libera', conversation_id: '#convos'});
 
   // Prevent loading multiple times
   c.update({status: 'loading'});

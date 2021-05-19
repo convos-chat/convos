@@ -453,10 +453,10 @@ C<$HOME> is figured out from L<File::HomeDir/my_home>.
   $CONVOS_HOME/
   $CONVOS_HOME/joe@example.com/                                 # one directory per user
   $CONVOS_HOME/joe@example.com/user.json                        # user settings
-  $CONVOS_HOME/joe@example.com/irc-freenode/connection.json     # connection settings
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/02.log         # connection log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/10/marcus.log  # conversation log
-  $CONVOS_HOME/joe@example.com/irc-freenode/2015/12/#convos.log # conversation log
+  $CONVOS_HOME/joe@example.com/irc-libera/connection.json     # connection settings
+  $CONVOS_HOME/joe@example.com/irc-libera/2015/02.log         # connection log
+  $CONVOS_HOME/joe@example.com/irc-libera/2015/10/marcus.log  # conversation log
+  $CONVOS_HOME/joe@example.com/irc-libera/2015/12/#convos.log # conversation log
 
 Notes about the structure:
 

@@ -58,7 +58,7 @@ async function saveConnectionProfile() {
 
 <main class="main">
   <form method="post" on:submit|preventDefault="{saveConnectionProfile}">
-    <TextField name="host" form="{form}" placeholder="{$l('Ex: chat.freenode.net:6697')}" readonly="{!isAdmin}">
+    <TextField name="host" form="{form}" placeholder="{$l('Ex: irc.libera.chat:6697')}" readonly="{!isAdmin}">
       <span slot="label">{$l('Host and port')}</span>
       <p class="help" slot="help">{$l('Will match connections on hostname.')}</p>
     </TextField>

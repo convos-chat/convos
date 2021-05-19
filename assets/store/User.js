@@ -27,7 +27,7 @@ export default class User extends Reactive {
     this.prop('rw', 'activeConversation', this.notifications);
     this.prop('rw', 'email', '');
     this.prop('rw', 'forced_connection', false);
-    this.prop('rw', 'default_connection', 'irc://chat.freenode.net:6697/%23convos');
+    this.prop('rw', 'default_connection', 'irc://irc.libera.chat:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'videoService', params.videoService || '');

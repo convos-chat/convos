@@ -11,7 +11,7 @@ $t->post_ok('/api/user/register',
   json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
 $t->post_ok('/api/connections', json => {url => 'irc://irc.perl.org'})->status_is(400);
-$t->post_ok('/api/connections', json => {url => 'irc://chat.freenode.net'})->status_is(400)
+$t->post_ok('/api/connections', json => {url => 'irc://irc.libera.chat'})->status_is(400)
   ->json_is('/errors/0/message', 'Will only accept forced connection URL.');
 
 $t->get_ok('/api/connections')->status_is(200)

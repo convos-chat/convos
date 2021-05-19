@@ -34,8 +34,8 @@ $conn_0->wanted_state('disconnected')->url->parse('irc://127.0.0.1');
 $conn_0->save_p->$wait_success('save_p');
 
 # 2: instant or queued
-$user->connection({url => 'irc://freenode'})
-  ->tap(sub { shift->url->parse('irc://chat.freenode.net:6697') })->save_p;
+$user->connection({url => 'irc://libera'})
+  ->tap(sub { shift->url->parse('irc://irc.libera.chat:6697') })->save_p;
 $user->connection({url => 'irc://magnet'})->tap(sub { shift->url->parse('irc://irc.perl.org') })
   ->save_p;
 
@@ -60,13 +60,13 @@ $ENV{CONVOS_CONNECT_DELAY} //= 0.05;
 $core->start for 0 .. 4;    # calling start() multiple times result in no-op
 Mojo::IOLoop->one_tick until $core->ready;
 cmp_deeply $core->{connect_queue},
-  {'chat.freenode.net' => [], 'irc.perl.org' => [(obj_isa('Convos::Core::Connection::Irc')) x 2]},
+  {'irc.libera.chat' => [], 'irc.perl.org' => [(obj_isa('Convos::Core::Connection::Irc')) x 2]},
   'connect_queue';
-is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 1, 'oragono.local' => 1},
+is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 1, 'oragono.local' => 1},
   'started connections, except disconnected';
 
 Mojo::IOLoop->start;
-is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
+is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
   'started duplicate connection delayed';
 
 is $core->get_user('mramberg@cpan.org')->uid, 32, 'uid from storage';
@@ -75,7 +75,7 @@ note 'force delay';
 my $connection
   = $core->get_user('jhthorsen@cpan.org')->get_connection({url => 'irc://oragono.local'});
 $core->connect($connection, 'something went wrong');
-is_deeply \%connect, {'chat.freenode.net:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
+is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
   'does not skip queue on reconnect';
 
 done_testing;

@@ -59,7 +59,7 @@ might want to prioritize certain messages.
 The file must be a valid YAML file. Example message file:
 
   ---
-  connection_id: irc-freenode
+  connection_id: irc-libera
   conversation_id: "#convos"
   message: Some message
 

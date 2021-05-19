@@ -136,7 +136,7 @@ function onVideoLinkClick({conversation, user}, e, aEl) {
    * Example aEl.href:
    * 1. "#action:video"
    * 2. https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
-   * 3. https://meet.jit.si/irc-freenode-superman-and-superwoman
+   * 3. https://meet.jit.si/irc-libera-superman-and-superwoman
    */
 
   if (!aEl) aEl = e.target.closest('a');

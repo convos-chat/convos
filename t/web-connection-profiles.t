@@ -7,7 +7,7 @@ my $t = t::Helper->t;
 
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
 
-$t->delete_ok('/api/connection-profiles/irc-freenode')->status_is(401);
+$t->delete_ok('/api/connection-profiles/irc-libera')->status_is(401);
 $t->get_ok('/api/connection-profiles')->status_is(401);
 $t->post_ok('/api/connection-profiles', json => {url => 'irc://localhost'})->status_is(401);
 
@@ -17,24 +17,24 @@ $t->post_ok('/api/user/login', json => {email => 'superman@example.com', passwor
 $t->get_ok('/api/connection-profiles')->status_is(200)->json_is(
   '/profiles',
   [{
-    id                    => 'irc-freenode',
+    id                    => 'irc-libera',
     is_default            => true,
     is_forced             => false,
     max_bulk_message_size => 3,
     max_message_length    => 512,
     service_accounts      => [qw(chanserv nickserv)],
     skip_queue            => false,
-    url                   => 'irc://chat.freenode.net:6697/%23convos',
+    url                   => 'irc://irc.libera.chat:6697/%23convos',
 
     # webirc_password       => '', <--- not admin
   }]
 );
 
-$t->delete_ok('/api/connection-profiles/irc-freenode')->status_is(403)
+$t->delete_ok('/api/connection-profiles/irc-libera')->status_is(403)
   ->json_is('/errors/0/message', 'Only admins can delete connection profiles.');
 
 $user->role(give => 'admin');
-$t->delete_ok('/api/connection-profiles/irc-freenode')->status_is(400)
+$t->delete_ok('/api/connection-profiles/irc-libera')->status_is(400)
   ->json_is('/errors/0/message', 'You cannot delete the default connection.');
 
 $t->post_ok('/api/connection-profiles', json => {url => 'irc://localhost'})->status_is(200)
@@ -56,13 +56,13 @@ $t->post_ok('/api/connection-profiles', json => \%profile)->status_is(200)
 
 $t->get_ok('/api/user')->status_is(200)->json_is('/default_connection', $profile{url});
 
-$t->get_ok('/api/connection-profiles')->status_is(200)->json_is('/profiles/0/id', 'irc-freenode')
+$t->get_ok('/api/connection-profiles')->status_is(200)->json_is('/profiles/0/id', 'irc-libera')
   ->json_is('/profiles/1/id', 'irc-localhost');
 
-$t->delete_ok('/api/connection-profiles/irc-freenode')->status_is(200)
+$t->delete_ok('/api/connection-profiles/irc-libera')->status_is(200)
   ->json_is('/message', 'Deleted.');
 
-$t->delete_ok('/api/connection-profiles/irc-freenode')->status_is(200, 'already deleted')
+$t->delete_ok('/api/connection-profiles/irc-libera')->status_is(200, 'already deleted')
   ->json_is('/message', 'Deleted.');
 
 done_testing;

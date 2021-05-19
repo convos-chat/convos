@@ -17,7 +17,7 @@ const emojiAliases = Object.keys(i18n.emojis.aliases).sort().join(', ');
 
 <main class="main">
   <p>
-    {@html $lmd('Got any questions? Come and talk to us in the "#convos" channel on https://freenode.net.')}
+    {@html $lmd('Got any questions? Come and talk to us in the "#convos" channel on https://libera.chat.')}
     {@html $lmd('More information can also be found on https://convos.chat.')}
   </p>
 

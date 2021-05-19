@@ -117,7 +117,7 @@ sub blacklisted {
 
   $_[0] eq $_ and return 1
     for ('convos-chat', 'base_url', 'contact', 'existing_user',
-    'irc://chat.freenode.net:6697/%%23convos',
+    'irc://irc.libera.chat:6697/%%23convos',
     'on', 'organization_name', 'q', 'shift+enter', 'status', 'user@example.com', 'version');
 
   return 0;
