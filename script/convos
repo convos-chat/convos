@@ -180,10 +180,12 @@ sub command_version {
 
   my %deps;
   for my $dep (sort { $a->[1] cmp $b->[1] } $script->_dependencies) {
-    my ($mode, $module, $version, $err) = @$dep;
+    my ($mode, $module, $wanted, $err) = @$dep;
     my $category = $mode eq 'develop' ? $mode : $mode eq 'requires' ? 'core' : 'optional';
     my $note     = $mode =~ m!^[A-Z]! ? " # $mode" : '';
-    push @{$deps{$category}}, sprintf "  %-30s %-10s%s\n", $module, $version, $note;
+    my $got      = eval { $module->VERSION };
+    push @{$deps{$category}}, sprintf "  %-30s %-10s %-10s%s\n", $module, $got // 'n/a',
+      "($wanted)", $note;
   }
 
   unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Perl',   $^V;
