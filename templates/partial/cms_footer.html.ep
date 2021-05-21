@@ -7,7 +7,7 @@
       <a href="https://twitter.com/convosby/"><i class="fab fa-twitter"></i></a>
     </nav>
     <p>
-      Copyright (C) 2012-<%= 1900 + (localtime)[5] %>, <a href="https://github.com/convos-chat">convos-chat</a>.
+      Copyright (C) 2012-<%= 1900 + (localtime)[5] %>, <a href="https://github.com/convos-chat">Convos</a>.
     </p>
     <p>
       This program is free software, you can redistribute it and/or modify it under
