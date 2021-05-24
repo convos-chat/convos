@@ -45,7 +45,7 @@ sub send_p {
   $message =~ s![\r\n]+$!!s;
 
   unless ($message =~ s!^/([A-Za-z]+)\s*!!) {
-    my $re = join '|', @{$self->profile->service_accounts};
+    my $re = join '|', map {quotemeta} @{$self->profile->service_accounts};
     $target = $1 if $message =~ s!^($re):\s+!!;
     return $self->_send_message_p($target, $message);
   }
