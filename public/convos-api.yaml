@@ -683,43 +683,29 @@ paths:
                 items:
                   $ref: '#/definitions/User'
 
-  /webhook/github:
+  /webhook/{provider_name}:
     post:
-      operationId: webhookGitHub
-      summary: Handles github webhooks
+      operationId: webhook
+      summary: Forwards the webhook payload to the Convos bot
       tags: [ webhook ]
-      x-mojo-to: webhook#github
+      x-mojo-to: events#webhook
       parameters:
-      - description: fork, issues, ...
-        in: header
-        name: X-GitHub-Event
+      - description: Provider name
+        in: path
+        name: provider_name
         type: string
         required: true
-      - in: body
+      - description: Any webhook payload
+        in: body
         name: body
         required: true
         schema:
           type: object
-          properties:
-            action:
-              type: string
-            forkee:
-              type: object
-            repository:
-              type: object
-            sender:
-              type: object
       responses:
         '200':
-          description: List of users.
+          description: Webhook response
           schema:
             type: object
-            properties:
-              users:
-                type: array
-                items:
-                  $ref: '#/definitions/User'
-
 
 parameters:
   after:

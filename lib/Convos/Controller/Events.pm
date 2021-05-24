@@ -1,13 +1,18 @@
 package Convos::Controller::Events;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util 'DEBUG';
-use Mojo::JSON 'encode_json';
-use Mojo::Util;
-use Time::HiRes 'time';
+use Convos::Util qw(DEBUG);
+use List::Util qw(any);
+use Mojo::JSON qw(encode_json false true);
+use Mojo::Util qw(network_contains);
 use Scalar::Util qw(blessed weaken);
+use Time::HiRes qw(time);
 
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 60;
+
+# https://github.blog/changelog/2019-04-09-webhooks-ip-changes/
+our @WEBHOOK_NETWORKS = split ',',
+  ($ENV{CONVOS_WEBHOOK_NETWORKS} // '140.82.112.0/20,192.30.252.0/22');
 
 my %RESPONSE_EVENT_NAME = (ping => 'pong', send => 'sent');
 
@@ -46,6 +51,22 @@ sub start {
       $res->catch(sub { $self->_err(shift, $data) }) if blessed $res and $res->can('catch');
     }
   );
+}
+
+sub webhook {
+  my $self = shift->openapi->valid_input or return;
+
+  return $self->reply->errors('Unable to accept webhook request.', 503)
+    unless my $bot = eval { $self->bot };
+
+  my $remote_address = $self->tx->remote_address;
+  return $self->reply->errors("Invalid source IP $remote_address.", 403)
+    unless any { network_contains $_, $remote_address } @WEBHOOK_NETWORKS;
+
+  my $method = sprintf 'handle_webhook_%s_event', $self->stash('provider_name');
+  my @res    = $bot->call_actions($method => $self->req->headers, $self->req->json);
+  return $self->render(openapi => $res[0]) if $res[0];
+  return $self->reply->errors('Unable to deliver the message.', 200);
 }
 
 sub _err {
@@ -418,6 +439,10 @@ Can be...
 
 Will push L<Convos::Core::User> and L<Convos::Core::Connection> events as JSON
 objects over a WebSocket connection and receive messages from the frontend.
+
+=head2 webhook
+
+See L<https://convos.chat/api.html#op-post--webhook>
 
 =head1 SEE ALSO
 

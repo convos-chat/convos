@@ -7,38 +7,56 @@ use Mojo::File qw(path);
 
 has description => 'Send messages based on GitHub events.';
 
-sub register {
-  my ($self, $bot, $config) = @_;
-  my $class = ref $self;
-  my $user  = $bot->user;
+sub handle_webhook_github_event {
+  my ($self, $headers, $payload) = @_;
+  return unless $self->enabled;
 
-  Scalar::Util::weaken($user);
-  $self->on(
-    webhook_github => sub {
-      my ($self, $event, $payload) = @_;
+  my $event  = $headers->header('X-GitHub-Event') || 'unknown';
+  my $method = $self->can("_github_event_$event");
+  unless ($method) {
+    warn qq([GitHub] Action cannot handle event $event.\n) if DEBUG;
+    return;
+  }
 
-      return DEBUG && warn qq([GitHub] Action cannot handle event $event.\n)
-        unless my $method = $self->can("_github_event_$event");
+  my $class        = ref $self;
+  my $repo_name    = $payload->{repository}{full_name}                 || 'default';
+  my $repositories = $self->config->get("/action/$class/repositories") || {};
+  my $rules        = $repositories->{$repo_name};
+  unless ($rules) {
+    warn qq([GitHub] Action has no config for $repo_name.\n) if DEBUG;
+    return;
+  }
 
-      my $repo_name    = $payload->{repository}{full_name}                 || 'default';
-      my $repositories = $self->config->get("/action/$class/repositories") || {};
-      return DEBUG && warn qq([GitHub] Action has no config for $repo_name.\n)
-        unless my $rules = $repositories->{$repo_name};
+  my @status;
+  for my $rule (@$rules) {
+    next unless my ($connection_id, $conversation_id) = split '/', +($rule->{to} || ''), 2;
 
-      for my $rule (@$rules) {
-        next unless any { $_ eq $event } @{$rule->{events} || []};
-        next unless my ($connection_id, $conversation_id) = @{$rule->{to}};
+    push @status,
+      {connection_id => $connection_id, conversation_id => $conversation_id, error => ''};
+    $status[-1]{error} = "Unwanted event $event.", next
+      unless any { $_ eq $event } @{$rule->{events} || []};
 
-        my $connection = $user->get_connection($connection_id);
-        next unless $connection and $connection->state eq 'connected';
-        next unless my $message = $self->$method($rule, $payload);
+    my $connection = $self->bot->user->get_connection($connection_id);
+    $status[-1]{error} = 'Not connnected.', next
+      unless $connection and $connection->state eq 'connected';
+    $status[-1]{error} = 'No message generated.', next
+      unless my $message = $self->$method($rule, $payload);
 
-        $connection->send_p($conversation_id, $message)->catch(sub {
-          $user->core->log->warn(sprintf 'Bot sent "%s": %s', $message, pop);
-        });
-      }
-    }
-  );
+    $connection->send_p($conversation_id, $message)->catch(sub {
+      $self->user->core->log->warn(sprintf 'Bot sent "%s": %s', $message, pop);
+    });
+  }
+
+  return {status => \@status};
+}
+
+sub _github_event_create {
+  my ($self, $rule, $payload) = @_;
+
+  return unless $payload->{ref_type} eq 'tag';
+  return sprintf '%s created %s %s in %s - %s/tree/%s', $payload->{sender}{login},
+    $payload->{ref_type}, $payload->{ref}, $payload->{repository}{name},
+    $payload->{repository}{html_url}, $payload->{ref};
 }
 
 sub _github_event_fork {
@@ -105,8 +123,41 @@ Convos::Plugin::Bot::Action::Github - Act on GitHub webhooks
   - class: Convos::Plugin::Bot::Action::Github
     repositories:
       'convos-chat/convos':
-      - events: [ fork, issues, milestone, pull_request, star ]
-        to: [ 'irc-localhost', '#convos' ]
+      - events: [ create, fork, issues, milestone, pull_request, star ]
+        to: 'irc-localhost/#convos'
+
+=head2 Github webhook config
+
+Github have to be configured to send webhooks to Convos.
+
+=over 2
+
+=item * Payload URL
+
+"Payload URL" must be sent to the
+L<https://convos.chat/api.html#op-post--webhook--provider_name-> endpoint, with
+"provider_name" set to "github". Example:
+
+  https://convos.example.com/api/webhook/github
+
+=item * Content type
+
+"Content type" must be set to "application/json".
+
+=item * Secret
+
+"Secret" can be left blank since Convos will check C<CONVOS_WEBHOOK_NETWORKS>
+for a valid source IP instead.
+
+Note: This might change in the future.
+
+=item * Which events would you like to trigger this webhook?
+
+Supported triggers are currently: "Branch or tag creation", "Forks", "Issues",
+"Milestones", "Pull requests" and "Stars". You can however just send "anything"
+since the bot will filter out the supported "events".
+
+=back
 
 =head1 DESCRIPTION
 
@@ -121,9 +172,11 @@ See L<Convos::Plugin::Bot::Action/description>.
 
 =head1 METHODS
 
-=head2 register
+=head2 handle_webhook_github_event
 
-Starts listening to the "webhook_github" event.
+  my $res = $action->handle_webhook_github_event($event_name, $payload);
+
+Will try to render a message based on a GitHub event and payload.
 
 =head1 SEE ALSO
 

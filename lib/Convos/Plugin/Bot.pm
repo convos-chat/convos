@@ -27,18 +27,15 @@ sub action {
   return undef;
 }
 
-sub emit_all {
-  my ($self, $event) = (shift, shift);
+sub call_actions {
+  my ($self, $method) = (shift, shift);
 
-  my @listeners;
+  my @res;
   for my $action (sort values %{$self->actions}) {
-    my $subscribers = $action->subscribers($event);
-    next unless @$subscribers;
-    for my $cb (@$subscribers) { $action->$cb(@_) }
-    push @listeners, $action;
+    push @res, $action->$method(@_) if $action->can($method);
   }
 
-  return @listeners;
+  return @res;
 }
 
 sub register {
@@ -55,7 +52,8 @@ sub _construct_action {
   require_module $action_class;
   my $home    = $self->user->core->home->child($self->user->email);
   my $enabled = $config->{enabled} // 1;
-  my $action  = $action_class->new(config => $self->config, enabled => $enabled, home => $home);
+  my $action
+    = $action_class->new(bot => $self, config => $self->config, enabled => $enabled, home => $home);
   $action->register($self, $config);
   $self->_log->info(qq($action_class is @{[$action->enabled ? 'enabled' : 'disabled']}.));
   return $action;
@@ -272,8 +270,8 @@ using chat commands, if you are a convos admin.
   - class: Convos::Plugin::Bot::Action::Github
     repositories:
       'convos-chat/convos':
-      - events: [ fork, issues, milestone, pull_request, star ]
-        to: [ 'irc-localhost', '#convos' ]
+      - events: [ create, fork, issues, milestone, pull_request, star ]
+        to: 'irc-localhost/#convos'
 
   # Default config parameters can be specified for each action,
   # and overridden per connection or channel
@@ -307,6 +305,8 @@ core actions, but you can also write your own. The core actions are:
 =item * L<Convos::Plugin::Bot::Action::Calc>
 
 =item * L<Convos::Plugin::Bot::Action::Core>
+
+=item * L<Convos::Plugin::Bot::Action::Github>
 
 =item * L<Convos::Plugin::Bot::Action::Hailo>
 
@@ -357,11 +357,11 @@ Returns an action object by C<$moniker> or C<$class_name>. Example:
   $karma_action = $bot->action("Karma");
   $karma_action = $bot->action("Convos::Plugin::Bot::Action::Karma");
 
-=head2 emit_all
+=head2 call_actions
 
-  $actions = $bot->emit_all($event => @args);
+  @res = $bot->call_actions($method => @args);
 
-Will emit the event to all L</actions> that has subscribers.
+Will call a given method on all L</actions> that implements the method.
 
 =head2 register
 

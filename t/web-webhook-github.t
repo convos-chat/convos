@@ -25,14 +25,12 @@ subtest 'setup' => sub {
 };
 
 subtest 'input validation' => sub {
-  $t->post_ok('/api/webhook/github', json => {action => 'closed'})->status_is(400)
-    ->json_is('/errors/0/path', '/X-GitHub-Event');
   $t->post_ok('/api/webhook/github', {'X-GitHub-Event' => 'issues'}, json => {action => 'closed'})
     ->status_is(403)->json_like('/errors/0/message', qr{Invalid source IP});
 };
 
 subtest 'delivered' => sub {
-  @Convos::Controller::Webhook::GITHUB_WEBHOOK_NETWORKS = qw(127.0.0.0/24);
+  @Convos::Controller::Events::WEBHOOK_NETWORKS = qw(127.0.0.0/24);
   my $json = {
     action     => 'opened',
     issue      => {html_url  => 'https://x.y.z', number => 42, title => 'Cool beans'},
@@ -40,7 +38,8 @@ subtest 'delivered' => sub {
     sender     => {login     => 'jhthorsen'},
   };
   $t->post_ok('/api/webhook/github', {'X-GitHub-Event' => 'issues'}, json => $json)->status_is(200)
-    ->json_is('/delivered', true);
+    ->json_is('/status/0/connection_id',   'irc-localhost')
+    ->json_is('/status/0/conversation_id', '#convos')->json_is('/status/0/error', '');
 };
 
 done_testing;
@@ -58,7 +57,7 @@ actions:
   repositories:
     'convos-chat/convos':
     - events: [ fork, issues, milestone, pull_request, star ]
-      to: [ 'irc-localhost', '#convos' ]
+      to: 'irc-localhost/#convos'
 
 connections:
 - url: CONVOS_DEFAULT_CONNECTION

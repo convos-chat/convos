@@ -4,6 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Carp 'confess';
 use Mojo::Util 'decamelize';
 
+has bot         => undef, weak => 1;
 has config      => sub { Mojo::JSON::Pointer->new({}) };
 has description => 'No description.';
 has enabled     => 1;
@@ -114,6 +115,12 @@ new message. The C<$event> has this structure:
   }
 
 =head1 ATTRIBUTES
+
+=head2 bot
+
+  $bot = $action->bot;
+
+Access the parent L<Convos::Plugin::Bot> object.
 
 =head2 config
 
