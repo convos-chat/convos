@@ -24,6 +24,21 @@ sub action {
 
   $name = join '::', 'Convos::Plugin::Bot::Action', $name;
   return $actions->{$name} if $actions->{$name};
+  return undef;
+}
+
+sub emit_all {
+  my ($self, $event) = (shift, shift);
+
+  my @listeners;
+  for my $action (sort values %{$self->actions}) {
+    my $subscribers = $action->subscribers($event);
+    next unless @$subscribers;
+    for my $cb (@$subscribers) { $action->$cb(@_) }
+    push @listeners, $action;
+  }
+
+  return @listeners;
 }
 
 sub register {
@@ -216,6 +231,7 @@ sub _user_is_registered {
 
   $self->_config_file($core->home->child($self->user->email, 'bot.yaml'));
   Mojo::IOLoop->recurring(LOAD_INTERVAL, sub { $self and $self->_load_config });
+  eval { $self->_load_config; 1 } or warn $@;
 }
 
 1;
@@ -253,6 +269,11 @@ using chat commands, if you are a convos admin.
   - class: Convos::Plugin::Bot::Action::Core
   - class: Convos::Plugin::Bot::Action::Karma
   - class: Convos::Plugin::Bot::Action::Calc
+  - class: Convos::Plugin::Bot::Action::Github
+    repositories:
+      'convos-chat/convos':
+      - events: [ fork, issues, milestone, pull_request, star ]
+        to: [ 'irc-localhost', '#convos' ]
 
   # Default config parameters can be specified for each action,
   # and overridden per connection or channel
@@ -335,6 +356,12 @@ Returns an action object by C<$moniker> or C<$class_name>. Example:
   $karma_action = $bot->action("karma");
   $karma_action = $bot->action("Karma");
   $karma_action = $bot->action("Convos::Plugin::Bot::Action::Karma");
+
+=head2 emit_all
+
+  $actions = $bot->emit_all($event => @args);
+
+Will emit the event to all L</actions> that has subscribers.
 
 =head2 register
 

@@ -683,6 +683,44 @@ paths:
                 items:
                   $ref: '#/definitions/User'
 
+  /webhook/github:
+    post:
+      operationId: webhookGitHub
+      summary: Handles github webhooks
+      tags: [ webhook ]
+      x-mojo-to: webhook#github
+      parameters:
+      - description: fork, issues, ...
+        in: header
+        name: X-GitHub-Event
+        type: string
+        required: true
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            action:
+              type: string
+            forkee:
+              type: object
+            repository:
+              type: object
+            sender:
+              type: object
+      responses:
+        '200':
+          description: List of users.
+          schema:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+
+
 parameters:
   after:
     name: after
