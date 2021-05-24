@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 6.20 Not Released
  - Compatible with Mojolicious::Plugin::Webpack 1.00
  - Bumped many JavaScript dependencies
+ - Fix catching unhandled send_p() promises
  - Fix join/part actions for the bot plugin
  - Fix showing the correct copyright year
  - Fix showing the installed version when running "convos version"

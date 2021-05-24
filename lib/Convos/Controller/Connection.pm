@@ -95,7 +95,7 @@ sub update {
     push @p, $connection->disconnect_p;
   }
   elsif ($url->query->param('nick')) {
-    $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'));
+    push @p, $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'));
   }
 
   return Mojo::Promise->all(@p)->then(sub {

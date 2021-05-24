@@ -499,13 +499,15 @@ sub _irc_event_rpl_welcome {
   );
 
   Scalar::Util::weaken($self);
-  my $write;
+  my ($i, $write) = (0);
   $write = sub {
+    $i++;
     return unless $self and @commands;
     my $command = shift @commands;
-    $command =~ m!^/sleep\s+(\d+\.?\d*)!i
-      ? Mojo::IOLoop->timer($1, $write)
-      : $self->send_p('', $command)->finally($write);
+    return Mojo::IOLoop->timer($1, $write) if $command =~ m!^/sleep\s+(\d+\.?\d*)!i;
+    return $self->send_p('', $command)
+      ->catch(sub { $self->_message("On-connect command #$i failed: @_", type => 'error') })
+      ->finally($write);
   };
   $self->$write;
 }
@@ -593,7 +595,7 @@ sub _make_join_response {
   return $res->{topic_by} = $msg->{params}[2] if $msg->{command} eq 'rpl_topicwhotime';
 
   if ($msg->{command} eq 'rpl_endofnames') {
-    my $conversation = $self->conversation({name => $msg->{params}[1]});
+    my $conversation = $self->get_conversation($msg->{params}[1]);
     $conversation->frozen('') if $conversation;
     $res->{topic}    //= '';
     $res->{topic_by} //= '';

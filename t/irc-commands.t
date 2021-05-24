@@ -393,6 +393,8 @@ cmp_deeply(
   \@state,
   [
     [connection => superhashof({state           => 'queued'})],
+    [frozen     => superhashof({conversation_id => '##redirected'})],
+    [frozen     => superhashof({conversation_id => '#protected'})],
     [connection => superhashof({state           => 'connected'})],
     [me         => superhashof({nick            => 'superman'})],
     [frozen     => superhashof({conversation_id => '##redirected'})],
