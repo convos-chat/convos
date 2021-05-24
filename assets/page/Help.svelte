@@ -51,7 +51,7 @@ const emojiAliases = Object.keys(i18n.emojis.aliases).sort().join(', ');
     <dt>{$l('> some text')}</dt>
     <dd>{$l('A line starting with ">" will be converted into a quote.')}</dd>
     <dt>{$l('*some text*, **some text**, ***some text***')}</dt>
-    <dd>{@html $lmd('Using "\*" around some text, will convert it into *italic*, **bold** or ***italic bold***.')}</dd>
+    <dd>{@html $lmd('Using "*" around some text, will convert it into *italic*, **bold** or ***italic bold***.')}</dd>
     <dt>{$l('`some fragment`')}</dt>
     <dd>{@html $lmd('Using backticks around some text, will format it as a `code fragment`.')}</dd>
     <dt>https://...</dt>

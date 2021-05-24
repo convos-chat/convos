@@ -31,4 +31,4 @@ convos*_source.tar.bz2
 /prime/
 /stage/
 /public/asset/*.development.*
-/public/docs/js-modules-visualized.html
+/assets/asset_map.development.json

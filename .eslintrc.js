@@ -7,6 +7,12 @@ module.exports = {
   'extends': [
     'eslint:recommended',
   ],
+  'overrides': [
+    {
+      files: ['*.svelte'],
+      processor: 'svelte3/svelte3'
+    }
+  ],
   'parserOptions': {
     'ecmaVersion': 2018,
     'sourceType': 'module'
@@ -122,6 +128,7 @@ module.exports = {
     'no-plusplus': 0,
     'no-process-exit': 2,
     'no-proto': 2,
+    'no-prototype-builtins': 0,
     'no-redeclare': 2,
     'no-regex-spaces': 2,
     'no-restricted-modules': 0,

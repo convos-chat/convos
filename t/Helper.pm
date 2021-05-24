@@ -17,7 +17,6 @@ $ENV{CONVOS_I18N_CAPTURE_LEXICONS} ||= 1;
 $ENV{CONVOS_GENERATE_CERT} //= 0;
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
 $ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
-$ENV{MOJO_MODE} ||= 'test';
 $ENV{OPENSSL_BITS} //= 1024;
 
 sub subprocess_in_main_process {
@@ -78,7 +77,6 @@ sub t_selenium {
   $ENV{CONVOS_BACKEND}            ||= 'Convos::Core::Backend';
   $ENV{CONVOS_DEFAULT_CONNECTION} ||= 'irc://irc.convos.chat/%23convos';
   $ENV{MOJO_SELENIUM_DRIVER}      ||= 'Selenium::Firefox';
-  $ENV{MOJO_MODE} = 'development' if $ENV{MOJO_MODE} eq 'test';
 
   require Test::Mojo;
   my $t = Test::Mojo->with_roles('+Selenium')->new($app || 'Convos')->setup_or_skip_all;

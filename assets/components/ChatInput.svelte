@@ -173,7 +173,7 @@ function uploadFiles(e) {
   {:else if autocompleteOptions.length}
     <div class="chat-input_menu for-{autocompleteCategory}" transition:fly="{chatMenuTransition}">
       {#each autocompleteOptions as opt, i}
-        <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
+        <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
       {/each}
     </div>
   {/if}

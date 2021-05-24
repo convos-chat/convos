@@ -26,8 +26,9 @@ our $VERSION = '6.19';
 
 # Need to be first, because it is called without parenthesis
 sub path_to {
-  state $home = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
-  return File::Spec->catfile($home, @_);
+  state $root
+    = $ENV{CONVOS_ROOT} || Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
+  return File::Spec->catfile($root, @_);
 }
 
 sub command_build {
@@ -58,12 +59,13 @@ sub command_cpanm {
 
 sub command_dev {
   my $script = shift;
-  my @cmd    = $script->_cmd_with_secure_listen(@_);
+  $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
+  my @cmd = $script->_cmd_with_secure_listen(@_);
   $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_DEBUG);
   push @cmd, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @cmd;
-  warn "\$ script/convos webpack @cmd\n";
-  exec $^X => qw(script/convos), webpack => @cmd;
-  die "Could not exec $^X script/convos webpack @cmd: $!\n";
+  warn "\$ mojo webpack script/convos @cmd\n";
+  exec qw(mojo webpack), $0, @cmd;
+  die "Could not exec mojo webpack $0 @cmd: $!\n";
 }
 
 sub command_exec {
@@ -261,14 +263,14 @@ sub _dependencies {
 
   no warnings 'once';
   local $script->{cpanfile_mode};
-  local *main::feature       = sub { local $script->{cpanfile_mode} = $_[1]; pop->() };
-  local *main::on            = sub { local $script->{cpanfile_mode} = shift; pop->() };
-  local *main::requires      = sub { $load->(requires => @_) };
-  local *main::suggests      = sub { $load->(suggests => @_) };
-  local *main::test_requires = sub { $load->(develop  => @_) };
+  local *cpanfile::feature       = sub { local $script->{cpanfile_mode} = $_[1]; pop->() };
+  local *cpanfile::on            = sub { local $script->{cpanfile_mode} = shift; pop->() };
+  local *cpanfile::requires      = sub { $load->(requires => @_) };
+  local *cpanfile::suggests      = sub { $load->(suggests => @_) };
+  local *cpanfile::test_requires = sub { $load->(develop  => @_) };
 
   local ($@, $!) = ('', 0);
-  do $ENV{CONVOS_CPAN_FILE};
+  { package cpanfile; do $ENV{CONVOS_CPAN_FILE} };
   my $err = $@ || $!;
   die "Could not source $ENV{CONVOS_CPAN_FILE}: $err\n" if $err;
 
