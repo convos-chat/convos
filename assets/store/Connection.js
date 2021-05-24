@@ -78,7 +78,7 @@ export default class Connection extends Conversation {
     this.update({state: params.state});
     this.addMessages(params.message
         ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
-        : {message: 'Connection state changed to %1.', vars: [params.state]}
+        : {message: 'Connection state changed to %1.', vars: [params.state]},
       );
   }
 
@@ -153,7 +153,7 @@ export default class Connection extends Conversation {
     const args = params.args || '/*/';
     this.addMessages(params.done
       ? {message: 'Found %1 of %2 conversations from %3.', vars: [params.conversations.length, params.n_conversations, args]}
-      : {message: 'Found %1 of %2 conversations from %3, but conversations are still loading.', vars: [params.conversations.length, params.n_conversations, args]}
+      : {message: 'Found %1 of %2 conversations from %3, but conversations are still loading.', vars: [params.conversations.length, params.n_conversations, args]},
     );
   }
 

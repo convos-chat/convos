@@ -56,7 +56,7 @@ sub _load_dictionaries {
   my $meta         = $self->_meta;
   my $now          = Mojo::Date->new->to_datetime;
 
-  for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->assets_dir) {
+  for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->engine->assets_dir) {
     next unless $file =~ m!([\w-]+)\.po$!;
     my $lang = $1;
     next if $load_lang and $load_lang ne $lang;

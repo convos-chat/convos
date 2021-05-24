@@ -22,7 +22,8 @@ sub register {
   my ($self, $app, $config) = @_;
 
   $app->defaults('cms.blogs' => Mojo::Collection->new);
-  $app->config('cms.paths' => [$app->core->home->child('content'), $app->asset->assets_dir]);
+  $app->config(
+    'cms.paths' => [$app->core->home->child('content'), $app->asset->engine->assets_dir]);
   unshift @{$app->static->paths},   $app->core->home->child(qw(content public))->to_string;
   unshift @{$app->renderer->paths}, $app->core->home->child(qw(content templates))->to_string;
 

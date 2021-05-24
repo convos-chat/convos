@@ -8,6 +8,7 @@ plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
+$ENV{NODE_ENV}       = 'production';
 
 SKIP: {
   skip 'BUILD_ASSETS=1 to run "pnpm run build"', 1 unless $ENV{BUILD_ASSETS} or $ENV{RELEASE};
