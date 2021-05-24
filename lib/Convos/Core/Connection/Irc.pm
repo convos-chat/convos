@@ -593,6 +593,8 @@ sub _make_join_response {
   return $res->{topic_by} = $msg->{params}[2] if $msg->{command} eq 'rpl_topicwhotime';
 
   if ($msg->{command} eq 'rpl_endofnames') {
+    my $conversation = $self->conversation({name => $msg->{params}[1]});
+    $conversation->frozen('') if $conversation;
     $res->{topic}    //= '';
     $res->{topic_by} //= '';
     $res->{users} ||= {};

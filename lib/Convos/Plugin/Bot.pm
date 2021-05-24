@@ -47,27 +47,29 @@ sub _construct_action {
 }
 
 sub _conversation_join {
-  my ($self, $connection, $conversation_config) = @_;
-  my $conversation = $connection->conversation({name => $conversation_config->{conversation_id}});
+  my ($self, $connection, $conversation_id, $conversation_config) = @_;
 
-  $conversation->password($conversation_config->{password}) if $conversation_config->{password};
-  return $conversation->frozen('Not connected.') unless $connection->state eq 'connected';
+  my $conversation = $connection->get_conversation($conversation_id);
+  return if $conversation and !$conversation->frozen;
 
-  my $command = sprintf '/join %s', $conversation->name;
-  $command .= ' ' . $conversation->password if $conversation->password;
+  my $command = "/join $conversation_id";
+  $self->_log->info(qq(Bot sends "$command" to @{[$connection->id]}));
+  $command .= ' ' . $conversation_config->{password} if $conversation_config->{password};
   $connection->send_p('', $command)->catch(sub {
-    $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
+    $self->_log->warn(sprintf 'Bot send "%s": %s', $command, pop);
   });
 }
 
 sub _conversation_part {
-  my ($self, $connection, $conversation_config) = @_;
-  my $conversation = $connection->conversation_remove(lc $conversation_config->{conversation_id});
-  return unless $connection->state eq 'connected';
+  my ($self, $connection, $conversation_id, $conversation_config) = @_;
+
+  my $conversation = $connection->get_conversation(lc $conversation_id);
+  return if !$conversation or $connection->state ne 'connected';
 
   my $command = sprintf '/part %s', $conversation->name;
+  $self->_log->info(qq(Bot sends "$command" to @{[$connection->id]}));
   $connection->send_p('', $command)->catch(sub {
-    $self->_log->info(sprintf 'Bot send "%s": %s', $command, pop);
+    $self->_log->warn(sprintf 'Bot send "%s": %s', $command, pop);
   });
 }
 
@@ -89,46 +91,44 @@ sub _ensure_action {
 }
 
 sub _ensure_connection {
-  my ($self, $config) = @_;
-  return unless $config->{url};
+  my ($self, $connection_config) = @_;
+  return unless $connection_config->{url};
 
-  my $url   = Mojo::URL->new($config->{url});
+  my $url   = Mojo::URL->new($connection_config->{url});
   my $user  = $self->user;
   my %attrs = (name => pretty_connection_name($url), url => $url);
   $attrs{connection_id} = Convos::Core::Connection->id(\%attrs);
-  $self->config->data->{connection}{$attrs{connection_id}} = $config;
+  $self->config->data->{connection}{$attrs{connection_id}} = $connection_config;
 
   my $has_connection = $user->get_connection($attrs{connection_id}) && 1;
   my $connection     = $user->connection(\%attrs);
   $connection->on(state => sub { $self and $self->_on_state(@_) }) unless $has_connection;
-  $connection->wanted_state($config->{wanted_state} || 'connected');
-
-  my $conversations = $config->{conversations} || {};
-  for my $conversation_id (keys %$conversations) {
-    my $conversation_method
-      = ($conversations->{$conversation_id}{state} || '') eq 'part'
-      ? '_conversation_part'
-      : '_conversation_join';
-    local $conversations->{$conversation_id}{conversation_id} = $conversation_id;
-    $self->$conversation_method($connection, $conversations->{$conversation_id});
-  }
+  $connection->wanted_state($connection_config->{wanted_state} || 'connected');
 
   my $state_method = $connection->wanted_state eq 'connected' ? 'connect_p' : 'disconnect_p';
   $connection->$state_method unless $connection->state eq $connection->wanted_state;
   $self->_log->info(
     "Bot connection @{[$connection->url]} has wanted state @{[$connection->wanted_state]}.");
+
+  my $conversations = $connection_config->{conversations} || {};
+  for my $conversation_id (keys %$conversations) {
+    my $state  = $conversations->{$conversation_id}{state} || 'join';
+    my $method = $state eq 'part' ? '_conversation_part' : '_conversation_join';
+    $self->$method($connection, $conversation_id, $conversations->{$conversation_id});
+  }
 }
 
 sub _load_config {
   my $self = shift;
   return unless $self->_config_file and -s $self->_config_file;
 
-  my $ts = $self->_config_file->stat->mtime;
-  return if $self->config->data->{ts} and $ts == $self->config->data->{ts};
+  my $stat = $self->_config_file->stat;
+  my $seen = $stat->mtime + $stat->size;
+  return if $self->config->data->{seen} and $seen == $self->config->data->{seen};
 
   $self->_log->info("Reloading @{[$self->_config_file]}");
   my $config = yaml decode => $self->_config_file->slurp;
-  @$config{qw(action connection ts)} = ({}, {}, $ts);
+  @$config{qw(action connection seen)} = ({}, {}, $seen);
   $config->{$_} ||= [] for qw(actions connections);
   my $old_password = $self->config->get('/generic/password') || '';
   $self->config->data($config);

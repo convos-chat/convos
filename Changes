@@ -1,5 +1,12 @@
 Revision history for perl distribution Convos
 
+6.20 Not Released
+ - Compatible with Mojolicious::Plugin::Webpack 1.00
+ - Bumped many JavaScript dependencies
+ - Fix join/part actions for the bot plugin
+ - Fix showing the correct copyright year
+ - Fix showing the installed version when running "convos version"
+
 6.19 2021-05-20T09:03:00+0900
  - Add support for quotes in the CMS
 
