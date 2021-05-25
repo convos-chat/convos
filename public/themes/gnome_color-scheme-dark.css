@@ -30,7 +30,7 @@
   --input-focus-outline: 2px solid #15539e;
   --input-disabled-bg: #2d2d2d;
   --input-disabled-color: #D8DEE9;
-  --chat-input-bg: #2d2d2d;
+  --chat-input-bg: #353535;
   --autocomplete-bg: #353535;
   --autocomplete-border: 1px solid #1b1b1b;
   --autocomplete-focus-bg: #15539e;
@@ -43,10 +43,6 @@
   --sidebar-right-bg: var(--body-bg);
   --sidebar-right-text: var(--text-color);
   --syntax-hl-base-bg: #353535;
-}
-
-.chat-input {
-  background: #353535;
 }
 
 .sidebar-left__nav > h3 {
