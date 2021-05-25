@@ -1,8 +1,8 @@
 Revision history for perl distribution Convos
 
-6.20 Not Released
+6.20 2021-05-25T10:03:00+0900
  - Add support for Github Webhooks, through the bot system
- - Compatible with Mojolicious::Plugin::Webpack 1.00
+ - Compatible with Mojolicious::Plugin::Webpack 1.01
  - Bumped many JavaScript dependencies
  - Fix catching unhandled send_p() promises
  - Fix join/part actions for the bot plugin
