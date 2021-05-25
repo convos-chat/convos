@@ -11,7 +11,7 @@ use Time::HiRes qw(time);
 use constant INACTIVE_TIMEOUT => $ENV{CONVOS_INACTIVE_TIMEOUT} || 60;
 
 # https://github.blog/changelog/2019-04-09-webhooks-ip-changes/
-our @WEBHOOK_NETWORKS = split ',',
+our @WEBHOOK_NETWORKS = split /\s*,\s*/,
   ($ENV{CONVOS_WEBHOOK_NETWORKS} // '140.82.112.0/20,192.30.252.0/22');
 
 my %RESPONSE_EVENT_NAME = (ping => 'pong', send => 'sent');
