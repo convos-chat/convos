@@ -1,0 +1,58 @@
+/*
+ * name: GNOME
+ * color-scheme: dark
+ */
+
+:root {
+  --body-bg: #2d2d2d;
+  --cms-bg: var(--body-bg);
+  --text-color: #fff;
+  --link-color: #3472bd;
+  --quote-color: #3472bd;
+  --error-color: #ae151c;
+  --success-color: #0f3b71;
+  --highlight-color-bg: #353535;
+  --highlight-color: #fff;
+  --hr-border: 1px solid #1b1b1b;
+  --button-bg: #343434;
+  --code-bg: #292929;
+  --button-color: #ECEFF4;
+  --button-border: 1px solid #1b1b1b;
+  --button-focus-outline: 2px solid #1b1b1b;
+  --button-disabled-bg: #323232;
+  --button-disabled-color: #eceff4;
+  --button-disabled-border: #1b1b1b;
+  --button-danger-bg: #ae151c;
+  --button-danger-color: #fff;
+  --input-bg: #2d2d2d;
+  --input-border: 1px solid #1b1b1b;
+  --input-color: #fff;
+  --input-focus-outline: 2px solid #15539e;
+  --input-disabled-bg: #2d2d2d;
+  --input-disabled-color: #D8DEE9;
+  --chat-input-bg: #2d2d2d;
+  --autocomplete-bg: #353535;
+  --autocomplete-border: 1px solid #1b1b1b;
+  --autocomplete-focus-bg: #15539e;
+  --ts-color: #919190;
+  --sidebar-left-bg: #313131;
+  --sidebar-left-text: #fff;
+  --sidebar-left-border-bottom: #1b1b1b;
+  --sidebar-left-search-placeholder-color: #fff;
+  --sidebar-left-search-focus-bg: #15539e;
+  --sidebar-right-bg: var(--body-bg);
+  --sidebar-right-text: var(--text-color);
+  --syntax-hl-base-bg: #353535;
+}
+
+.chat-input {
+  background: #353535;
+}
+
+.sidebar-left__nav > h3 {
+  color: #919190;
+}
+
+body.for-cms {
+  --footer-bg: var(--sidebar-left-bg);
+}
