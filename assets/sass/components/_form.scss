@@ -53,6 +53,14 @@ textarea {
     opacity: 0;
   }
 
+  &.has-badge {
+    position: relative;
+
+    .badge {
+      top: 0.1em;
+    }
+  }
+
   &.is-disabled {
     i,
     label {
@@ -264,6 +272,7 @@ p.help {
 
   .text-field__toggle {
     color: var(--input-color);
+    padding: 0; // override .sidebar-left__nav a
     position: absolute;
     top: 55%;
     right: 0.6em;

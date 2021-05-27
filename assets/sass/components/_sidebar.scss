@@ -20,6 +20,12 @@
     margin-bottom: 0.3rem;
     margin-top: var(--gutter);
   }
+
+  .checkbox.is-disabled {
+    i, label {
+      color: var(--sidebar-left-text);
+    }
+  }
 }
 
 @import './sidebar/sidebar-left';

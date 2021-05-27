@@ -8,13 +8,14 @@ test('field', () => {
 });
 
 test('get', () => {
-  const form = createForm();
+  const form = createForm({defaultValue: 42});
   const ageField = form.field('age');
+  expect(form.get('defaultValue')).toBe('42');
   expect(form.get('age')).toBe('');
   expect(form.get('age')).toBe(get(ageField));
   expect(form.get('foo')).toBe(undefined);
   expect(form.get(['age', 'bar'])).toEqual({age: '', bar: undefined});
-  expect(form.get()).toEqual({age: ''});
+  expect(form.get()).toEqual({age: '', defaultValue: '42'});
 });
 
 test('set', () => {

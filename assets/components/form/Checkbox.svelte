@@ -2,6 +2,7 @@
 import Icon from '../Icon.svelte';
 import {uuidv4} from '../../js/util';
 
+export let badge = false;
 export let disabled = false;
 export let form;
 export let hidden = false;
@@ -16,7 +17,7 @@ $: icons = icon == 'caret' ? ['caret-square-down', 'caret-square-up'] : ['square
 $: stateIcon = icons[$checked ? 1 : 0];
 </script>
 
-<div class="checkbox" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
+<div class="checkbox" class:has-badge="{badge}" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
   <input type="checkbox"
     id="{id}"
     name="{name}"

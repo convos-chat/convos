@@ -46,9 +46,17 @@ const G = M * 1000;
  * @returns {Object}
  */
 export function calculateModes(modeMap, modeStr) {
-  const [all, addRemove, modeList] = (modeStr || '').match(/^(\+|-)?(.*)/) || ['', '+', ''];
+  if (modeStr && !modeStr.match(/^[+-]\w/)) modeStr = '+' + modeStr;
+  if (!modeStr) return {};
+
   const modes = {};
-  modeList.split('').forEach(char => (modes[modeMap[char] || char] = addRemove != '-'));
+  let has = true;
+  for (const c of modeStr) {
+    if (c == '+') { has = true }
+    else if (c == '-') { has = false }
+    else { modes[modeMap[c] || c] = has }
+  }
+
   return modes;
 }
 

@@ -132,12 +132,13 @@ is_deeply(
   'mode +k response - with no conversation_id'
 );
 
-$server->server_event_ok('_irc_event_mode')->server_write_ok(":localhost MODE #otherchan -k\r\n");
-$res = $connection->send_p('#convos', '/mode #otherchan -k')->$wait_success;
+$server->server_event_ok('_irc_event_mode')
+  ->server_write_ok(":localhost MODE #otherchan -k+m-i+sp\r\n");
+$res = $connection->send_p('#convos', '/mode #otherchan -k+m-i+sp')->$wait_success;
 $server->processed_ok;
 is_deeply(
   $res,
-  {from => 'localhost', mode => '-k', mode_changed => 1, target => '#otherchan'},
+  {from => 'localhost', mode => '-k+m-i+sp', mode_changed => 1, target => '#otherchan'},
   'mode -k response - with custom channel'
 );
 

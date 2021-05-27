@@ -6,6 +6,7 @@ test('calculateModes', () => {
   expect(calculateModes(modeMoniker, 'vo')).toEqual({'@': true, '+': true});
   expect(calculateModes(modeMoniker, '+vx')).toEqual({'+': true, 'x': true});
   expect(calculateModes(modeMoniker, '-xo')).toEqual({'@': false, 'x': false});
+  expect(calculateModes(modeMoniker, '-im+n')).toEqual({i: false, m: false, n: true});
 });
 
 test('camelize', () => {

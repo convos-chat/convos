@@ -3,12 +3,14 @@ Revision history for perl distribution Convos
 6.21 Not Released
  - Add possibility to remove password protection in Conversation Settings
  - Add active conversation modes to Conversation Settings
+ - Can toggle channel modes from conversation settings
  - Fix sending messages to participants in connection conversation
  - Fix setting password in conversation settings
  - Fix setting topic in conversation settings
  - Fix toggling notification in conversation settings
  - Fix bug where conversation modes could get reset
  - Fix bug where user modes could get reset
+ - Fix being able to change the topic if the channel has mode -t #427
 
 6.20 2021-05-25T10:03:00+0900
  - Add support for Github Webhooks, through the bot system
