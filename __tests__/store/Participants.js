@@ -33,6 +33,10 @@ test('add', () => {
   participants.add({nick: 'Superwoman', modes: {bar: false, foo: true}});
   expect(participants.length).toBe(1);
   expect(participants.get('superwoman').modes).toEqual({bar: false, foo: true});
+
+  participants.add({nick: 'Superwoman', me: true});
+  expect(participants.length).toBe(1);
+  expect(participants.get('superwoman').modes).toEqual({bar: false, foo: true});
 });
 
 test('add, rename, delete', () => {

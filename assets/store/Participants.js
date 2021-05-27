@@ -61,13 +61,13 @@ export default class Participants extends Reactive {
 
     participant.id = this._id(participant.nick);
     participant.color = str2color(participant.id);
-
     if (is.string(participant.mode)) participant.modes = calculateModes(userModeCharToModeName, participant.mode);
-    if (!participant.modes) participant.modes = {};
-    if (!participant.nick) participant.nick = participant.name;
 
     const existing = this._map.get(participant.id);
     if (existing) Object.keys(existing).forEach(k => participant[k] || (participant[k] = existing[k]));
+
+    if (!participant.modes) participant.modes = {};
+    if (!participant.nick) participant.nick = participant.name;
 
     this._map.set(participant.id, participant);
     return this.update({length: true});

@@ -40,7 +40,7 @@ function subscribe(subscribers, cb) {
  *
  * @returns {Object} A reactive form store
  */
-export const createForm = () => {
+export const createForm = (defaultFields = {}) => {
   const data = {};
   const fields = {};
   const form = {};
@@ -62,6 +62,7 @@ export const createForm = () => {
   form.get = (fields) => get(data, fields);
   form.set = (to) => set(form, to);
   form.subscribe = (cb) => { cb(data); return subscribe(subscribers, cb) };
+  Object.keys(defaultFields).forEach(k => form.set({[k]: defaultFields[k]}));
 
   return form;
 };

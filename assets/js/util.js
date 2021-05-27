@@ -25,6 +25,7 @@
  * @exports str2color
  * @exports tagNameIs
  * @exports timer
+ * @exports ucFirst
  * @exports uuidv4
  */
 
@@ -483,6 +484,10 @@ export function timer(ms, res = true) {
       typeof res == 'function' ? resolve(res()) : typeof res == 'string' ? reject(res) : resolve(res);
     }, ms);
   });
+}
+
+export function ucFirst(str) {
+  return str.slice(0, 1).toUpperCase() + str.slice(1);
 }
 
 /**

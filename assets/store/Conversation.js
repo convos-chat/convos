@@ -136,15 +136,16 @@ export default class Conversation extends Reactive {
       this.addMessages({...params, message: '%1 has %2 ' + entries + ' in %3.', vars: [this.name, n, i18n.l(listName)]});
     }
     else if (params.nick) {
-      this.participants.add({nick: params.nick, modes: params.mode});
+      this.participants.add({nick: params.nick, mode: params.mode});
       this.addMessages({...params, message: '%1 got mode %2 from %3.', vars: [params.nick, params.mode, params.from]});
     }
-    else if(params.mode_changed) {
+    else if (params.mode_changed) {
       this.addMessages({...params, message: '%1 received mode %2.', vars: [this.name, params.mode]});
+      this.update({modes: Object.assign({}, this.modes, calculateModes(channelModeCharToModeName, params.mode))});
     }
     else {
       this.addMessages({...params, message: '%1 got mode %2.', vars: [this.name, params.mode]});
-      this.update({modes: calculateModes(channelModeCharToModeName, params.mode)});
+      this.update({modes: Object.assign({}, this.modes, calculateModes(channelModeCharToModeName, params.mode))});
     }
   }
 
