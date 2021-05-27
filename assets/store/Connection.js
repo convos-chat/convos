@@ -1,7 +1,7 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
-import {extractErrorMessage, is} from '../js/util';
+import {extractErrorMessage, is, regexpEscape} from '../js/util';
 import {api} from '../js/Api';
 import {modeMoniker} from '../js/constants';
 import {notify} from '../js/Notify';
@@ -61,7 +61,7 @@ export default class Connection extends Conversation {
   send(message) {
     if (is.string(message)) message = {message};
 
-    const re = new RegExp('^' + this.participants.toArray().map(p => p.id).join('|') + ':', 'i');
+    const re = new RegExp('^' + this.participants.toArray().map(p => regexpEscape(p.id)).join('|') + ':', 'i');
     if (message.message.indexOf('/') != 0 && !message.message.match(re)) {
       message.message = '/quote ' + message.message;
     }
