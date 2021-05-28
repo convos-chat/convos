@@ -24,12 +24,12 @@
   --button-disabled-border: #1b1b1b;
   --button-danger-bg: #ae151c;
   --button-danger-color: #fff;
-  --input-bg: #353535;
+  --input-bg: #3a3a3a;
   --input-border: 1px solid #1b1b1b;
   --input-color: #fff;
   --input-focus-outline: 2px solid #15539e;
-  --input-disabled-bg: #2d2d2d;
-  --chat-input-bg: #353535;
+  --input-disabled-bg: #202020;
+  --chat-input-bg: #3a3a3a;
   --autocomplete-bg: #353535;
   --autocomplete-border: 1px solid #1b1b1b;
   --autocomplete-focus-bg: #15539e;
