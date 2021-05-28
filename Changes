@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.23 Not Released
+ - Add popover on nick click, closes #566, #591
  - Fix allowing to create new connections for non-admin users
 
 6.22 2021-05-28T10:25:00+0900

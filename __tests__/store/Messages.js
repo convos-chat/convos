@@ -28,16 +28,16 @@ test('clear, get, push, unshift', () => {
   messages.push([{message: 'b', type: 'error'}, {message: 'c'}]);
   messages.push([]);
   expect(messages.length).toBe(3);
-  expect(predictable(messages.get(0))).toEqual({...base, color: '#8d6bb2', from: 'superwoman', message: 'a', type: 'private'});
-  expect(predictable(messages.get(1))).toEqual({...base, internal: true, message: 'b', type: 'error'});
+  expect(predictable(messages.get(0))).toEqual({...base, color: '#8d6bb2', from: 'superwoman', id: 1, message: 'a', type: 'private'});
+  expect(predictable(messages.get(1))).toEqual({...base, id: 2, internal: true, message: 'b', type: 'error'});
   expect(predictable(messages.get(3))).toBe(undefined);
 
   messages.unshift([]);
   messages.unshift([{message: '1'}]);
   messages.unshift([{message: '2'}, {...base, message: '3'}]);
   expect(messages.length).toBe(6);
-  expect(predictable(messages.get(0))).toEqual({...base, internal: true, message: '2'});
-  expect(predictable(messages.get(5))).toEqual({...base, internal: true, message: 'c'});
+  expect(predictable(messages.get(0))).toEqual({...base, id: 5, internal: true, message: '2'});
+  expect(predictable(messages.get(5))).toEqual({...base, id: 3, internal: true, message: 'c'});
   expect(predictable(messages.get(6))).toBe(undefined);
 
   messages.clear();
@@ -63,6 +63,7 @@ test('render', () => {
       dayChanged: false,
       embeds: [],
       from: 'superduper',
+      id: 9,
       index: 0,
       markdown: 'a',
       message: 'a',

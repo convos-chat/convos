@@ -3,6 +3,7 @@ import Time from '../assets/js/Time';
 import User from '../assets/store/User';
 import {get} from 'svelte/store';
 import {chatHelper, videoWindow, conversationUrl} from '../assets/js/chatHelpers';
+import {generateWriteable} from '../assets/store/writable';
 
 window.open = (url, name) => {
   const w = {opened: true, events: {}, name, url};
@@ -38,8 +39,9 @@ describe('onInfinityVisibility - load enough messages', () => {
 
 describe('onMessageClick', () => {
   const conversation = new Conversation({});
+  const popoverTarget = generateWriteable('chat:popoverTarget');
   const user = new User({videoService: 'https://meet.convos.chat'});
-  const onMessageClick = chatHelper('onMessageClick', {conversation, user});
+  const onMessageClick = chatHelper('onMessageClick', {conversation, popoverTarget, user});
 
   conversation.send = (message) => (conversation.sent = message);
 

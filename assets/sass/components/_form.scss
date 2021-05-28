@@ -220,28 +220,11 @@ textarea {
 }
 
 .select-field__options {
-  background: var(--autocomplete-bg);
-  line-height: 2.2em;
-  border: var(--input-border);
-  border-radius: var(--input-border-radius);
-  box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1), -1px 1px 2px rgba(0, 0, 0, 0.1);
+  @include select_options;
   height: 0;
   width: 100%;
   display: none;
-  overflow: hidden;
   position: relative;
-
-  a {
-    color: var(--input-color);
-    text-decoration: none;
-    padding: 0em 0.5em;
-    display: block;
-
-    &.is-active {
-      background: var(--autocomplete-focus-bg);
-      color: var(--autocomplete-focus);
-    }
-  }
 }
 
 p.help {

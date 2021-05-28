@@ -1,6 +1,6 @@
 import Time from '../js/Time';
+import {extractErrorMessage, q, showFullscreen, tagNameIs} from '../js/util';
 import {get, writable} from 'svelte/store';
-import {q, showFullscreen, tagNameIs} from '../js/util';
 import {route} from '../store/Route';
 
 export const videoWindow = writable(null);
@@ -87,9 +87,12 @@ export function onInfinityVisibility({conversation, onLoadHash}, e) {
 }
 
 // Internal
-function onMessageActionClick({conversation}, e, action) {
+function onMessageActionClick({conversation, fillIn, focusChatInput, popoverTarget}, e, action) {
   e.preventDefault();
-  if (action[1] == 'details') {
+  if (action[0] == 'popover') {
+    popoverTarget.set(get(popoverTarget) == action[1] ? null : action[1]);
+  }
+  else if (action[1] == 'details') {
     const msg = conversation.messages.get(action[2]);
     msg.showDetails = !msg.showDetails;
     conversation.messages.update({messages: true});
@@ -99,7 +102,20 @@ function onMessageActionClick({conversation}, e, action) {
     route.go('/settings/conversation');
   }
   else if (action[1] == 'join') {
+    popoverTarget.set(null);
     conversation.send('/join ' + (action[2] ? decodeURIComponent(action[2]) : conversation.conversation_id));
+  }
+  else if (action[1] == 'mention') {
+    popoverTarget.set(null);
+    fillIn(action[2], {});
+    focusChatInput();
+  }
+  else if (action[1] == 'whois') {
+    popoverTarget.set(null);
+    conversation.send('/whois ' + decodeURIComponent(action[2]), (sent) => {
+      const message = extractErrorMessage(sent);
+      if (message) conversation.addMessages({message, sent, type: 'error'});
+    });
   }
   else {
     console.warn('Unhandled onMessageActionClick', action);
@@ -107,7 +123,7 @@ function onMessageActionClick({conversation}, e, action) {
 }
 
 // Available through chatHelper()
-function onMessageClick({conversation, user}, e) {
+function onMessageClick(curried, e) {
   const aEl = e.target.closest('a');
 
   // Make sure embed links are opened in a new tab/window
@@ -115,15 +131,15 @@ function onMessageClick({conversation, user}, e) {
 
   // Proxy video links
   const videoLink = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (videoLink) return onVideoLinkClick({conversation, user}, e, videoLink);
+  if (videoLink) return onVideoLinkClick(curried, e, videoLink);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
   if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
 
   // Special links with actions in #hash
-  const action = aEl && aEl.href.match(/#(action:.+)/);
-  if (action) return onMessageActionClick({conversation}, e, action[1].split(':', 3));
+  const action = aEl && aEl.href.match(/#(action|popover):(\w+):?(.*)/);
+  if (action) return onMessageActionClick(curried, e, action.slice(1));
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);

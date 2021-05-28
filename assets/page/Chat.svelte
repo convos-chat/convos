@@ -9,8 +9,9 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {activeMenu, viewport} from '../store/writable';
+import {activeMenu, generateWriteable, viewport} from '../store/writable';
 import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
+import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
@@ -25,6 +26,7 @@ export let title = 'Chat';
 const dragAndDrop = new DragAndDrop();
 const socket = getContext('socket');
 const user = getContext('user');
+const popoverTarget = generateWriteable('chat:popoverTarget');
 
 let connection = user.notifications;
 let conversation = user.notifications;
@@ -33,7 +35,7 @@ let participants = conversation.participants;
 let now = new Time();
 let onLoadHash = '';
 let unsubscribe = {};
-let uploader;
+let focusChatInput, fillIn, uploader;
 
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
@@ -44,9 +46,10 @@ $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 $: onInfinityScrolled = chatHelper('onInfinityScrolled', {conversation});
 $: onInfinityVisibility = chatHelper('onInfinityVisibility', {conversation, onLoadHash});
-$: onMessageClick = chatHelper('onMessageClick', {conversation, user});
+$: onMessageClick = chatHelper('onMessageClick', {conversation, fillIn, focusChatInput, popoverTarget, user});
 
 onMount(() => {
+  popoverTarget.set('');
   dragAndDrop.attach(document.querySelector('.main'), uploader);
 });
 
@@ -63,6 +66,7 @@ function conversationToUri() {
 function setConversationFromRoute(connection_id, conversation_id) {
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
+  popoverTarget.set('');
 }
 
 function setConversationFromUser(user) {
@@ -81,6 +85,18 @@ function setConversationFromUser(user) {
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
   if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
+}
+
+function showPopover(e) {
+  const {relatedTarget, target, type} = e;
+  setTimeout(() => {
+    if (type == 'mouseout') {
+      if (!relatedTarget || !relatedTarget.closest('.popover')) $popoverTarget = null;
+    }
+    else {
+      if (!$popoverTarget) target.click();
+    }
+  }, 250);
 }
 </script>
 
@@ -145,7 +161,7 @@ function setConversationFromUser(user) {
     <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-      <a href="#action:join:{message.from}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#popover:{message.id}" on:mouseover="{showPopover}" on:mouseout="{showPopover}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
@@ -162,6 +178,13 @@ function setConversationFromUser(user) {
           <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
         {/await}
       {/each}
+      {#if $popoverTarget == message.id}
+        <div class="popover" transition:fade="{{duration: 200}}" on:mouseout="{showPopover}">
+          <a href="#action:mention:{message.from}" class="on-hover"><Icon name="quote-left"/> {$l('Mention')}</a>
+          <a href="#action:join:{message.from}" class="on-hover"><Icon name="comments"/> {$l('Chat')}</a>
+          <a href="#action:whois:{message.from}" class="on-hover"><Icon name="address-card"/> {$l('Whois')}</a>
+        </div>
+      {/if}
     </div>
   {/each}
 
@@ -211,7 +234,7 @@ function setConversationFromUser(user) {
   {/if}
 </InfinityScroll>
 
-<ChatInput conversation="{conversation}" bind:uploader/>
+<ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader/>
 
 {#if $viewport.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">

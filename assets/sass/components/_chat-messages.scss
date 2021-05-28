@@ -199,6 +199,17 @@
   }
 }
 
+.message .popover {
+  @include select_options;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  min-width: 14em;
+  position: absolute;
+  top: 1.5em;
+  left: 0.5em;
+  z-index: 1000;
+}
+
 .message__embed {
   text-decoration: none;
   margin-top: 0.6rem;

@@ -7,6 +7,7 @@ import {jsonhtmlify} from 'jsonhtmlify';
 import {q, str2color} from '../js/util';
 
 const EMBED_CACHE = {};
+let ID = 0;
 
 export default class Messages extends Reactive {
   constructor() {
@@ -108,6 +109,7 @@ export default class Messages extends Reactive {
 
       msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
+      msg.id = ++ID;
     }
 
     return messages;
