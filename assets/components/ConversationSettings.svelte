@@ -53,7 +53,8 @@ function saveChannelModes() {
   for (const mode of toggleModes) {
     const checked = form.get('mode_' + mode) || false;
     if (mode == 'password' && checked) {
-      if (form.get('password')) conversation.send('/mode +k ' + form.get('password'));
+      const password = form.get('password');
+      if (password) conversation.send(isOperator ? '/mode +k ' + password : '/join ' + conversation.name + ' ' + password);
       form.set({password: ''});
     }
     else if (checked != (conversation.modes[mode] || false)) {
