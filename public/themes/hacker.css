@@ -54,7 +54,7 @@
   /* Keep as is */
   --error-color: #ee2222;
   --success-color: #338833;
-  --syntax-hl-base-bg: #fff;
+  --syntax-hl-base-bg: black;
 
   /* Listbox */
   --autocomplete-bg: #181818;
