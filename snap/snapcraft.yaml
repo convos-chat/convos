@@ -1,5 +1,5 @@
 name: convos
-version: '6.20.0'
+version: '6.21.0'
 summary: Multiuser chat application that runs in your web browser
 description: |
   The supported chat protocol is currently IRC.
