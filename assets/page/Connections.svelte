@@ -45,7 +45,7 @@ onMount(() => connectionProfiles.load());
       {/each}
     </tbody>
   </table>
-  {#if isAdmin}
+  {#if isAdmin || !user.forced_connection}
     <div class="form-actions">
       <Link href="/settings/connection/add" class="btn"><Icon name="plus-circle"/> <span>{$l('Add')}</span></Link>
     </div>

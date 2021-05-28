@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.23 Not Released
+ - Fix allowing to create new connections for non-admin users
+
 6.22 2021-05-28T10:25:00+0900
  - Add GNOME theme #594
  - Fix joining password protected channels

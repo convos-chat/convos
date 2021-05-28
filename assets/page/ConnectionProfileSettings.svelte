@@ -115,7 +115,7 @@ async function saveConnectionProfile() {
     <div class="form-actions">
       {#if profile_id != 'add'}
         <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{$l('Update')}</span></Button>
-        <Button icon="trash" type="button" op="{removeConnectionProfileOp}" on:click="{removeConnectionProfile}"><span>{$l('Delete')}</span></Button>
+        <Button icon="trash" type="button" op="{removeConnectionProfileOp}" disabled="{!isAdmin}" on:click="{removeConnectionProfile}"><span>{$l('Delete')}</span></Button>
       {:else}
         <Button icon="plus-circle" op="{saveConnectionProfileOp}"><span>{$l('Add')}</span></Button>
       {/if}
