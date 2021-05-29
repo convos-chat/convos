@@ -33,10 +33,14 @@ $: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
 
-function fillin(str, params) {
+export function fillIn(str, params) {
   const {before, middle, after} = _fillIn(str, {...params, cursorPos: inputEl.selectionStart, value: inputEl.value});
   setValue(before + middle + after);
   inputEl.selectionStart = inputEl.selectionEnd = (before + middle).length;
+}
+
+export function focus() {
+  if (inputEl) inputEl.focus();
 }
 
 function focusAutocompleteItem(e, moveBy) {
@@ -45,7 +49,7 @@ function focusAutocompleteItem(e, moveBy) {
   autocompleteIndex += moveBy;
   if (autocompleteIndex < 0) autocompleteIndex = autocompleteOptions.length - 1;
   if (autocompleteIndex >= autocompleteOptions.length) autocompleteIndex = 0;
-  fillin(autocompleteOptions[autocompleteIndex], {replace: true});
+  fillIn(autocompleteOptions[autocompleteIndex], {replace: true});
 }
 
 function handleMessageResponse(msg) {
@@ -85,7 +89,7 @@ function renderInputHeight() {
 
 function selectOption(e) {
   autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
-  fillin(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
+  fillIn(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
   setTimeout(() => inputEl.focus(), 1);
 }
 
@@ -93,7 +97,7 @@ function selectOptionOrSendMessage(e) {
   const autocompleteOpt = autocompleteOptions[autocompleteIndex];
   if (autocompleteOpt) {
     e.preventDefault();
-    fillin(autocompleteOptions[autocompleteIndex], {replace: true});
+    fillIn(autocompleteOptions[autocompleteIndex], {replace: true});
     splitValueAt = inputEl.selectionStart + 1;
   }
   else if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -132,7 +136,7 @@ function uploadFiles(e) {
   formData.append('file', files[0]);
   api('uploadFile').perform({formData}).then(op => {
     const res = op.res.body;
-    if (res.files && res.files.length) return fillin(res.files[0].url, {append: true});
+    if (res.files && res.files.length) return fillIn(res.files[0].url, {append: true});
     if (res.errors) conversation.addMessages({message: 'Could not upload file: %1', vars: [$l(extractErrorMessage(res.errors))], type: 'error'});
   });
 }
