@@ -90,7 +90,7 @@ function renderInputHeight() {
 function selectOption(e) {
   autocompleteIndex = parseInt(e.target.closest('a').href.replace(/.*index:/, ''), 10);
   fillIn(autocompleteOptions[autocompleteIndex], {padAfter: true, replace: true});
-  setTimeout(() => inputEl.focus(), 1);
+  setTimeout(() => { onChange(inputEl); inputEl.focus() }, 1);
 }
 
 function selectOptionOrSendMessage(e) {
