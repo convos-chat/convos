@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.23 Not Released
+6.23 2021-05-29T11:55:00+0900
  - Add popover on nick click, closes #566, #591
  - Fix hiding menu when selecting an emoji
  - Fix allowing to create new connections for non-admin users
