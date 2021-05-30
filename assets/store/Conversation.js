@@ -92,13 +92,14 @@ export default class Conversation extends Reactive {
     this.update({status: this.messagesOp.status});
 
     const body = this.messagesOp.res.body;
+    if (!body.messages) body.messages = [];
     const internalMessages = [];
     if (params.around || (!params.after && !params.before)) {
       internalMessages.push.apply(internalMessages, this.messages.toArray().filter(msg => msg.internal));
       this.messages.clear();
     }
 
-    this.addMessages(body.messages || [], params.before ? 'unshift' : 'push');
+    this.addMessages(body.messages, params.before ? 'unshift' : 'push');
     this.addMessages(internalMessages, 'push');
     this._setEndOfStream(params, body);
 
