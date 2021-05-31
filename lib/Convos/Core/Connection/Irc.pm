@@ -362,10 +362,6 @@ sub _irc_event_privmsg {
   my ($conversation_id, @message) = @{$msg->{params}};
   $message[0] = join ' ', @message;
 
-  # http://www.mirc.com/colors.html
-  $message[0] =~ s/\x03\d{0,15}(,\d{0,15})?//g;
-  $message[0] =~ s/[\x00-\x1f]//g;
-
   if ($self->profile->find_service_account($nick, $conversation_id)) {
     $target = $self->_is_current_nick($conversation_id) ? $nick : $conversation_id;
     $target = $self->get_conversation($target) || $self->messages;

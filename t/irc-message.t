@@ -13,8 +13,7 @@ my $server     = t::Server::Irc->new->start;
 my $core       = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user       = $core->user({email => 'superman@example.com'});
 my $connection = $user->connection({url => 'irc://localhost'});
-
-my $user_home = $core->home->child('superman@example.com');
+my $user_home  = $core->home->child('superman@example.com');
 
 my $err;
 $connection->send_p('', 'whatever')->catch(sub { $err = shift })->$wait_success('send_p');
@@ -47,9 +46,15 @@ $server->server_write_ok(
   ->client_event_ok('_irc_event_privmsg')
   ->server_write_ok(
   ":Supergirl!sg\@example.com PRIVMSG #convos :Or what about a normal message in a channel?\r\n")
-  ->client_event_ok('_irc_event_privmsg')->process_ok;
-like slurp_log('#convos'), qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}m,
-  'notification';
+  ->client_event_ok('_irc_event_privmsg')
+  ->server_write_ok(
+  ":superman!sm\@example.com PRIVMSG #convos :[[\x0307Wikinews:Sandbox\x03]]  \x0302https://en.wikinews.org/w/index.php?diff=4621760&oldid=4621759\x03 \x0305*\x03 \x0303103.48.104.126\x03 \x0305*\x03 (+2) \x0310more test\x03\r\n"
+)->client_event_ok('_irc_event_privmsg')->process_ok;
+{
+  my $log = slurp_log('#convos');
+  like $log, qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}s, 'notification';
+  like $log, qr/\x0307Wikinews:Sandbox\x03/s,                                'colors';
+}
 
 my $notifications;
 $core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })

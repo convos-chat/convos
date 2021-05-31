@@ -95,11 +95,20 @@ export default class I18N extends Reactive {
     str = this._nbsp(str);
     str = this._mdLink(str);
     str = this._plainUrlToLink(str);
+    str = this._extendedFormatting(str);
     str = this._mdCode(str);
     str = this._mdEmStrong(str);
     str = this.emojis.markup(str);
     str = this._mdBlockQuote(str);
     return str;
+  }
+
+  // https://modern.ircdocs.horse/formatting.html
+  _extendedFormatting(str) {
+    const zeroTo99 = '0[0-9]|[1-9][0-9]';
+    const colorRe = new RegExp('\x03(' + zeroTo99 + ')(?:,(' + zeroTo99 + '))?([^\x03]*)', 'g');
+
+    return str.replace(colorRe, (all, fg, bg, text) => text).replace(/[\x02\x03\x1d\x1f\x1e\x11\x16\x0f]/g, '');
   }
 
   _mdBlockQuote(str) {

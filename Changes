@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+6.24 Not Released
+ - Fix /chat/ will render notifications
+ - Changed extended formatting to be stripped frontend code
+
 6.23 2021-05-29T11:55:00+0900
  - Add popover on nick click, closes #566, #591
  - Fix hiding menu when selecting an emoji
