@@ -122,10 +122,10 @@ function socketChanged(socket) {
     <ChatSidebar transition="{{duration: $viewport.nColumns > 1 ? 0 : 250, x: width}}"/>
   {/if}
 
-  {#if $route.path == '/chat'}
-    <Notifications bind:title/>
-  {:else if $route.path.indexOf('/chat/') == 0}
+  {#if $route.path.match(/\/chat\/./)}
     <Chat connection_id={$route.pathParts[1]} conversation_id={$route.pathParts[2]} bind:title/>
+  {:else if $route.path.indexOf('/chat') == 0}
+    <Notifications bind:title/>
   {:else if $route.path == '/help'}
     <Help bind:title/>
   {:else if $route.path == '/search'}
