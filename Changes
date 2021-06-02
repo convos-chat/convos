@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.25 Not Released
+ - Fix animation when focusing sidebar-header search field
+
 6.24 2021-06-02T10:28:00+0900
  - Add chat input field sent messages/commands history #598
  - Fix rendering notifications with non-unicode characters #596

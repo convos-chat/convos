@@ -101,6 +101,7 @@
     line-height: 1.25;
     height: 1.25;
     flex: 1 0 0;
+    transition: max-width 0.3s ease-in;
 
     &,
     &::placeholder {
@@ -113,6 +114,7 @@
 
     &:focus {
       outline: 0;
+      max-width: 100%;
       border-bottom-color: var(--sidebar-left-text);
 
       &::placeholder {
