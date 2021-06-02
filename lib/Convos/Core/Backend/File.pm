@@ -165,7 +165,7 @@ sub notifications_p {
   my ($re, @notifications) = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*)$/;
   warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
   while (my $line = $FH->getline) {
-    $line = decode 'UTF-8', $line;
+    $line = decode('UTF-8', $line) || $line;
     next unless $line =~ $re;
     my $message = {connection_id => $2, conversation_id => $3, message => $4, ts => $1};
     my $ts      = dt $message->{ts};
@@ -223,6 +223,8 @@ sub _add_notification {
   my ($self, $obj, $ts, $message) = @_;
   my $file = $self->_notifications_file($obj->connection->user);
   my $t    = dt $ts;
+
+  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
 
   open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
   warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;

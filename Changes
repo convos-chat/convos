@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.24 Not Released
  - Add chat input field sent messages/commands history #598
+ - Fix rendering notifications with non-unicode characters #596
  - Fix /chat/ will render notifications
  - Fix width of sidebar-header input in Firefox 78.10.0 ESR
  - Changed extended formatting to be stripped frontend code
