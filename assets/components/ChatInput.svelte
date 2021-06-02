@@ -1,4 +1,5 @@
 <script>
+import CommandHistory from '../store/CommandHistory';
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {chatHelper, videoWindow} from '../js/chatHelpers';
@@ -23,6 +24,7 @@ let splitValueAt = 0;
 const api = getContext('api');
 const user = getContext('user');
 const activeChatMenu = generateWriteable('activeChatMenu');
+const commandHistory = new CommandHistory();
 
 $: connection = user.findConversation({connection_id: conversation.connection_id});
 $: conversation && ($activeChatMenu = '');
@@ -30,6 +32,7 @@ $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
+$: commandHistory.update({conversation: $conversation});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
 
@@ -60,6 +63,7 @@ function onChange(inputEl) {
   autocompleteIndex = 0;
   splitValueAt = inputEl.selectionStart;
   conversation.update({userInput: inputEl.value});
+  if (!inputEl.value.length) commandHistory.update({index: -1});
 }
 
 function onReady(el) {
@@ -71,12 +75,15 @@ function onReady(el) {
     if (e.key.length == 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) != -1) onChange(inputEl);
   });
   inputEl.addEventListener('keydown', (e) => {
+    if (e.key == 'ArrowDown' && commandHistory.render(e, -1)) return;
+    if (e.key == 'ArrowUp' && commandHistory.render(e, 1)) return;
     if (e.key == 'ArrowDown') return focusAutocompleteItem(e, e.shiftKey ? 4 : 1);
     if (e.key == 'ArrowUp') return focusAutocompleteItem(e, e.shiftKey ? -4 : -1);
     if (e.key == 'Enter') return selectOptionOrSendMessage(e);
     if (e.key == 'Tab') return focusAutocompleteItem(e, e.shiftKey ? -1 : 1);
   });
 
+  commandHistory.attach(inputEl);
   setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
 }
 
@@ -105,6 +112,7 @@ function selectOptionOrSendMessage(e) {
     const msg = {method: 'send'};
     msg.message = normalizeCommand(inputEl.value);
     if (msg.message.length) conversation.send(msg, handleMessageResponse);
+    commandHistory.add(msg.message);
     if (!conversation.is('search')) setValue('');
     setTimeout(renderInputHeight, 10);
   }
