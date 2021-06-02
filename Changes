@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.24 Not Released
  - Fix /chat/ will render notifications
+ - Fix width of sidebar-header input in Firefox 78.10.0 ESR
  - Changed extended formatting to be stripped frontend code
 
 6.23 2021-05-29T11:55:00+0900
