@@ -5,7 +5,7 @@ Revision history for perl distribution Convos
  - Fix rendering notifications with non-unicode characters #596
  - Fix /chat/ will render notifications
  - Fix width of sidebar-header input in Firefox 78.10.0 ESR
- - Changed extended formatting to be stripped frontend code
+ - Changed extended formatting to be stripped frontend code #600
 
 6.23 2021-05-29T11:55:00+0900
  - Add popover on nick click, closes #566, #591
