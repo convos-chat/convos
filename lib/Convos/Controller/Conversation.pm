@@ -13,7 +13,7 @@ sub mark_as_read {
     return $self->reply->errors('Conversation not found.', 404);
   }
 
-  $conversation->unread(0);
+  $conversation->notifications(0)->unread(0);
   $self->stash('connection')->save_p->then(sub {
     $self->render(openapi => {});
   });
