@@ -9,6 +9,7 @@ has name     => sub { Carp::confess('name required in constructor') };
 has password => '';
 has topic    => '';
 has unread   => 0;
+has notifications => 0;
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
 sub id         { my $from = $_[1] || $_[0]; lc($from->{id} // $from->{name}) }
@@ -17,6 +18,12 @@ sub is_private { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 }
 sub inc_unread_p {
   my $self = shift;
   $self->{unread}++;
+  return Mojo::Promise->resolve($self);
+}
+
+sub inc_notifications_p {
+  my $self = shift;
+  $self->{notifications}++;
   return Mojo::Promise->resolve($self);
 }
 
@@ -35,7 +42,7 @@ sub _calculate_unread_p {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen name topic unread);
+  my %json = map { ($_, $self->$_) } qw(frozen name topic unread notifications);
   $json{connection_id}   = $self->connection->id;
   $json{conversation_id} = $self->id;
   $json{last_read}       = $self->{last_read} if $self->{last_read};    # back compat
@@ -100,6 +107,12 @@ The topic (subject) of the conversation.
 
 Holds the number of unread messages.
 
+=head2 notifications
+
+  $int = $conversation->notifications;
+
+Holds the number of unread notifications.
+
 =head1 METHODS
 
 =head2 inc_unread_p
@@ -107,6 +120,12 @@ Holds the number of unread messages.
   $p = $conversation->inc_unread_p;
 
 Used to increase the unread count.
+
+=head2 inc_notifications_p
+
+  $p = $conversation->inc_notifications_p;
+
+Used to increate the unread notifications count.
 
 =head2 is_private
 
