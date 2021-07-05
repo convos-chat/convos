@@ -81,6 +81,7 @@ function setConversationFromUser(user) {
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
   unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
+  updateNotificationCount(user);
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
@@ -97,6 +98,11 @@ function showPopover(e) {
       if (!$popoverTarget) target.click();
     }
   }, 250);
+}
+
+function updateNotificationCount(user) {
+  user.activeConversation.update({notifications: 0});
+  user.updateNotificationCount();
 }
 </script>
 
