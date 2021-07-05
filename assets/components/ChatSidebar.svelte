@@ -11,7 +11,6 @@ import {route} from '../store/Route';
 export let transition;
 
 const user = getContext('user');
-const notifications = $user.notifications;
 
 let activeLinkIndex = 0;
 let filter = '';
@@ -20,6 +19,7 @@ let searchHasFocus = false;
 let visibleLinks = [];
 
 $: filterNav({filter}); // Passing "filter" in to make sure filterNav() is called on change
+$: notifications = $user.notifications;
 $: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
