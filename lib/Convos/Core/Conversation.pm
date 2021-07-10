@@ -21,11 +21,7 @@ sub inc_unread_p {
   return Mojo::Promise->resolve($self);
 }
 
-sub inc_notifications_p {
-  my $self = shift;
-  $self->{notifications}++;
-  return Mojo::Promise->resolve($self);
-}
+sub inc_notifications { $_[0]->{notifications}++; $_[0] }
 
 sub messages_p {
   my ($self, $query) = @_;
@@ -121,9 +117,9 @@ Holds the number of unread notifications.
 
 Used to increase the unread count.
 
-=head2 inc_notifications_p
+=head2 inc_notifications
 
-  $p = $conversation->inc_notifications_p;
+  $p = $conversation->inc_notifications;
 
 Used to increate the unread notifications count.
 

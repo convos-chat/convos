@@ -75,7 +75,7 @@ sub _setup {
           my ($connection, $target, $msg) = @_;
 
           if ($msg->{highlight} and $target->id and !$target->is_private) {
-            $target->inc_notifications_p->catch(sub { $self->_debug('inc_notifications %s FAIL %s', $target->id, shift) } );
+            $target->inc_notifications();
           }
 
           $self->emit("user:$uid",
