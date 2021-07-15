@@ -16,7 +16,12 @@ sub read {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
-  return $user->unread(0)->save_p->then(sub { $self->render(openapi => {}) });
+  Mojo::Promise->all($user->connections->map(sub {
+      my $conn = shift;
+      $conn->conversations->map( sub { shift->notifications(0); });
+      $conn->save_p();
+    })
+  )->then(sub { $self->render(openapi => {}) });
 }
 
 1;

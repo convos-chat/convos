@@ -14,6 +14,7 @@ sub mark_as_read {
   }
 
   $conversation->unread(0);
+  $conversation->notifications(0);
   $self->stash('connection')->save_p->then(sub {
     $self->render(openapi => {});
   });
