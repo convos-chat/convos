@@ -38,7 +38,7 @@ sub _calculate_unread_p {
 
 sub TO_JSON {
   my ($self, $persist) = @_;
-  my %json = map { ($_, $self->$_) } qw(frozen name topic unread notifications);
+  my %json = map { ($_, $self->$_) } qw(frozen name topic notifications unread);
   $json{connection_id}   = $self->connection->id;
   $json{conversation_id} = $self->id;
   $json{last_read}       = $self->{last_read} if $self->{last_read};    # back compat
