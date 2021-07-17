@@ -1,18 +1,16 @@
+@use '../../abstracts/header';
 @use '../../abstracts/if_screen' as *;
 @use '../../abstracts/next_to_sidebar' as *;
 
-.chat-header,
-.sidebar-header {
-  padding-top: var(--gutter);
-  display: flex;
-  align-items: center;
-  position: absolute;
+.chat-header {
+  @include header.site;
+  @include next_to_sidebar;
+  background: var(--body-bg);
+  padding-bottom: var(--gutter-small);
+  box-shadow: var(--chat-header-box-shadow);
+  justify-content: space-between;
   top: 0;
-  z-index: 1;
-
-  > * {
-    display: block;
-  }
+  z-index: 900;
 
   > a {
     color: inherit;
@@ -24,44 +22,6 @@
       width: var(--gutter-small);
     }
   }
-
-  h1,
-  h2,
-  input {
-    font-size: var(--h1-font-size);
-    margin: 0;
-  }
-
-  .far,
-  .fas {
-    font-size: 1.3rem;
-  }
-
-  @include if_screen("<=two-columns") {
-    padding-top: var(--gutter-small);
-
-    h1 {
-      font-size: calc(var(--h2-font-size) * 1.1);
-      flex: 1 0 0;
-    }
-  }
-}
-
-.sidebar-header {
-  background: var(--sidebar-left-bg);
-
-  @include if_screen("<=two-columns") {
-    display: none;
-  }
-}
-
-.chat-header {
-  @include next_to_sidebar;
-  background: var(--body-bg);
-  padding-bottom: var(--gutter-small);
-  box-shadow: var(--chat-header-box-shadow);
-  justify-content: space-between;
-  z-index: 900;
 
   @include if_screen("<=two-columns") {
     background: var(--sidebar-left-bg);
@@ -79,67 +39,5 @@
 
   @include if_screen("<=two-columns") {
     display: none;
-  }
-}
-
-.sidebar-header {
-  border-bottom: 2px solid transparent;
-  transition: border 0.2s ease-in;
-  position: sticky;
-
-  &.has-focus {
-    border-bottom-color: var(--sidebar-left-text);
-  }
-
-  h2 {
-    flex: 1 0 0;
-  }
-
-  input {
-    background: transparent;
-    border: 0;
-    padding: 0;
-    width: 70%; // Make sure it does not take up too much space
-    max-width: 76%;
-    line-height: 1.25;
-    height: 1.25;
-    flex: 1 0 0;
-    transition: max-width 0.3s ease-in;
-
-    &,
-    &::placeholder {
-      color: var(--sidebar-left-text);
-    }
-
-    &::-moz-placeholder {
-      opacity: 1; // Fix faded color
-    }
-
-    &:focus {
-      outline: 0;
-      max-width: 100%;
-      border-bottom-color: var(--sidebar-left-text);
-
-      &::placeholder {
-        color: var(--sidebar-left-search-placeholder-color);
-      }
-    }
-  }
-
-  .fa-search {
-    -webkit-text-stroke: 1px var(--sidebar-left-bg);
-  }
-
-  .for-notifications {
-    width: 1.6rem;
-    min-width: auto;
-    left: 0.3rem;
-    transition: all 0.2s ease-in;
-  }
-
-  &.has-focus .for-notifications {
-    width: 0;
-    opacity: 0;
-    transform: scale(0.1);
   }
 }

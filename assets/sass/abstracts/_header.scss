@@ -1,0 +1,28 @@
+@use 'if_screen' as *;
+
+@mixin site {
+  padding-top: var(--gutter);
+  display: flex;
+  align-items: center;
+
+  h1,
+  h2,
+  input {
+    font-size: var(--h1-font-size);
+    margin: 0;
+  }
+
+  .far,
+  .fas {
+    font-size: 1.3rem;
+  }
+
+  @include if_screen("<=two-columns") {
+    padding-top: var(--gutter-small);
+
+    h1 {
+      font-size: calc(var(--h2-font-size) * 1.1);
+      flex: 1 0 0;
+    }
+  }
+}
