@@ -119,6 +119,10 @@ export default class User extends Reactive {
     });
   }
 
+  markNotificationsRead() {
+    this.conversations().forEach(conv => conv.update({notifications: 0}));
+  }
+
   removeConversation(params) {
     const conn = this.findConversation({connection_id: params.connection_id});
     if (params.conversation_id) return conn && conn.removeConversation(params);
