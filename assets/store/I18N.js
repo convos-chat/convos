@@ -116,7 +116,7 @@ export default class I18N extends Reactive {
   }
 
   _mdCode(str) {
-    return str.replace(/(\\?)`(\S[^`]+)`/g, (all, esc, text) => {
+    return str.replace(/(\\?)`([^` ][^`]*)`/g, (all, esc, text) => {
       return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
     });
   }

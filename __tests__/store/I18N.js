@@ -55,6 +55,8 @@ test('md - markdown link', () => {
 });
 
 test('md - code', () => {
+  expect(i18n.md('single `a` char'))
+    .toBe('single <code>a</code> char');
   expect(i18n.md('is this \\`not code`, or..?'))
     .toBe('is this `not code`, or..?');
   expect(i18n.md('is this `not code`, or..?'))
