@@ -2,6 +2,7 @@
 import ChatHeader from '../components/ChatHeader.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
+import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
@@ -20,6 +21,7 @@ onMount(() => conversation.load());
 
 <ChatHeader>
   <h1>{$l('Notifications')}</h1>
+  <Link href="/settings/account" class="btn-hallow"><Icon name="user-cog"/><Icon name="times"/></Link>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
