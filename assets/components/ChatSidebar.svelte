@@ -27,6 +27,7 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
 function clearFilter() {
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
+  if (filter.indexOf('+') == 0) return;
 
   setTimeout(() => {
     if (!navEl) return;
@@ -57,7 +58,7 @@ function filterNav() {
   // Show and hide navigation links
   for (let p = 0; p < prefix.length; p++) {
     const filterRe
-      = filter == '+' ? new RegExp(/[1-9]\d*\s*$/)
+      = filter == '+' ? new RegExp(/[1-9]\d*\+?\s*$/)
       : filter == '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\s*$/)
       : filter == '+#' ? new RegExp(/^\s*#.*[1-9]\d*\s*$/)
       : new RegExp(prefix[p] + regexpEscape(filter), 'i');
