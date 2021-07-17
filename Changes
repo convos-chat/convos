@@ -1,6 +1,12 @@
 Revision history for perl distribution Convos
 
 6.25 Not Released
+ - Add support for raw messages #592
+ - Add support for a single character within backticks #602
+ - Add settings icon to Notifications page #606
+ - Add confirmation before deleting a connection #610
+ - Made "+" filter in search bar sticky and also filter "60+" #607 #609
+ - Fix not showing double quotes in previews #608
  - Fix animation when focusing sidebar-header search field
 
 6.24 2021-06-02T10:28:00+0900
