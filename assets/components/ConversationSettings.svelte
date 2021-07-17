@@ -8,10 +8,10 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {activeMenu, viewport} from '../store/writable';
-import {channelModeCharToModeName, getChannelMode} from '../js/constants';
+import {getChannelMode} from '../js/constants';
 import {createForm} from '../store/form';
 import {fly} from 'svelte/transition';
-import {getContext, onMount, tick} from 'svelte';
+import {onMount, tick} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {modeClassNames, ucFirst} from '../js/util';
 
@@ -19,7 +19,6 @@ export let conversation;
 export let transition;
 
 const form = createForm({password: ''});
-const user = getContext('user');
 const saveConversationSettingsOp = new Operation({api: false, id: 'saveConversationSettings'});
 
 const toggleModes = [
@@ -33,7 +32,7 @@ const toggleModes = [
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
-$: modes = Object.keys($conversation.modes).sort().filter(k => conversation.modes[k]);
+$: conversation.messages.update({raw: $form.raw_messages});
 
 onMount(async () => {
   form.set({topic: conversation.topic, want_notifications: conversation.wantNotifications});
@@ -118,6 +117,10 @@ async function saveConversationSettings() {
         <span slot="label">{$l('Notify me on new messages')}</span>
       </Checkbox>
     {/if}
+
+    <Checkbox name="raw_messages" form="{form}">
+      <span slot="label">{$l('Show raw messages')}</span>
+    </Checkbox>
 
     {#if !isPrivate}
       <nav class="sidebar-left__nav">

@@ -15,6 +15,7 @@ export default class Messages extends Reactive {
     this.prop('ro', 'length', () => this.messages.length);
     this.prop('ro', 'messages', []);
     this.prop('rw', 'expandUrlToMedia', true);
+    this.prop('rw', 'raw', false);
     this.embedCache = EMBED_CACHE;
   }
 
@@ -52,7 +53,7 @@ export default class Messages extends Reactive {
       msg.dayChanged = this._dayChanged(msg, prev);
       msg.className = this._className(msg, prev);
       msg.embeds = [];
-      msg.markdown = msg.vars ? i18n.lmd(msg.message, ...msg.vars) : i18n.md(msg.message);
+      msg.markdown = this.raw ? msg.message : msg.vars ? i18n.lmd(msg.message, ...msg.vars) : i18n.md(msg.message);
 
       return (prev = msg);
     });
@@ -65,6 +66,9 @@ export default class Messages extends Reactive {
   update(params) {
     if (params.hasOwnProperty('expandUrlToMedia') && params.expandUrlToMedia != this.expandUrlToMedia) {
       this.messages.forEach(msg => delete msg.rendered);
+    }
+    if (params.hasOwnProperty('raw') && params.raw != this.raw) {
+      this.messages.forEach(msg => delete msg.className);
     }
 
     return super.update(params);
