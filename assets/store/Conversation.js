@@ -32,6 +32,7 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
+    this.prop('rw', 'notifications', params.notifications || 0);
 
     if (params.hasOwnProperty('conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);

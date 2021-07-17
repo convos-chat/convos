@@ -30,7 +30,9 @@ $server->client($connection)->server_event_ok('_irc_event_nick')->server_write_o
   ->client_event_ok('_irc_event_privmsg')->process_ok;
 
 note 'notifications';
-is $user->unread, 0, 'notifications';
+my $n_count_o = 0;
+$connection->conversations->map(sub { $n_count_o += $_->notifications; });
+is $n_count_o, 0, 'notifications';
 like slurp_log('#convos'), qr{\Q<Supergirl> not a superdupersuperman?\E}m, 'normal message';
 
 $server->server_write_ok(
@@ -60,7 +62,9 @@ my $notifications;
 $core->get_user('superman@example.com')->notifications_p({})->then(sub { $notifications = pop; })
   ->$wait_success('notifications');
 ok delete $notifications->{messages}[0]{ts}, 'notifications has timestamp';
-is $user->unread, 1, 'One unread messages';
+my $n_count = 0;
+$connection->conversations->map(sub { $n_count += $_->notifications; });
+is $n_count, 1, 'One unread messages';
 is_deeply(
   $notifications->{messages},
   [{
@@ -106,7 +110,9 @@ is_deeply(
   ],
   'notifications'
 );
-is $user->unread, 3, 'One unread messages';
+my $n_count_h = 0;
+$connection->conversations->map(sub { $n_count_h += $_->notifications; });
+is $n_count_h, 3, 'Three unread messages';
 
 $server->server_write_ok(":Supergirl!sg\@example.com PRIVMSG superman :does this work?!\r\n")
   ->client_event_ok('_irc_event_privmsg')->process_ok;
