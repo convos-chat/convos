@@ -104,6 +104,7 @@ body.no-js .cms-navbar__links .has-js {
   .is-hamburger {
     font-size: 1.6rem;
     position: absolute;
+    display: block;
     top: 1.2rem;
     right: var(--gutter);
 
@@ -112,7 +113,7 @@ body.no-js .cms-navbar__links .has-js {
       padding: 0.5rem;
       position: absolute;
       top: -0.5rem;
-      transform: translateX(-100%);
+      right: 1.6em;
     }
   }
 
