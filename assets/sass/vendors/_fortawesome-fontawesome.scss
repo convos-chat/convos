@@ -1,0 +1,51 @@
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:string';
+@use 'fortawesome-fontawesome/variables';
+@use 'fortawesome-fontawesome/mixins' as fa;
+
+@forward 'fortawesome-fontawesome/brands';
+@forward 'fortawesome-fontawesome/regular';
+@forward 'fortawesome-fontawesome/solid';
+
+// fa base classes
+.fa,
+.fas,
+.far,
+.fab {
+  @include fa.base;
+}
+
+.fab {
+  font-family: 'Font Awesome 5 Brands';
+}
+
+.fas {
+  font-weight: 900;
+}
+
+// fa icon classes
+@each $name, $icon in meta.module-variables('variables') {
+  @if string.slice($name, 0, 7) == 'fa-var-' {
+    $icon-name: string.slice($name, 8);
+
+    .#{variables.$fa-css-prefix}-#{$icon-name}:before {
+      @include fa.content($icon-name);
+    }
+  }
+}
+
+// fa animation classes
+.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

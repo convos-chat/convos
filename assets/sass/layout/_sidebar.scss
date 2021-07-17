@@ -1,3 +1,6 @@
+@use 'sidebar/sidebar-left';
+@use 'sidebar/sidebar-right';
+
 .sidebar-left__nav,
 .sidebar-right__nav {
   a {
@@ -27,6 +30,3 @@
     }
   }
 }
-
-@import './sidebar/sidebar-left';
-@import './sidebar/sidebar-right';

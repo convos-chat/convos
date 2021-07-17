@@ -1,4 +1,6 @@
-$input-max-width: 24em;
+@use '../abstracts/select_options' as *;
+@use '../abstracts/variables' as *;
+@use '../vendors/fortawesome-fontawesome/mixins' as fa;
 
 label:not([for="nothing"]) {
   cursor: pointer;
@@ -194,8 +196,7 @@ textarea {
   }
 
   &:after {
-    @extend .fas;
-    content: fa-content($fa-var-caret-down);
+    @include fa.icon(caret-down, solid);
     color: var(--input-color);
     position: absolute;
     bottom: 0.6rem;
@@ -204,7 +205,7 @@ textarea {
   }
 
   &.is-open:after {
-    content: fa-content($fa-var-caret-up);
+    @include fa.content(caret-up);
   }
 
   &.is-readonly:after {

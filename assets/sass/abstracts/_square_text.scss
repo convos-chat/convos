@@ -1,0 +1,6 @@
+@mixin square_text($size) {
+  font-size: $size * 0.666667;
+  line-height: $size;
+  height: $size;
+  min-width: $size;
+}

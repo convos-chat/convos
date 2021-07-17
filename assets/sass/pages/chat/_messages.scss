@@ -1,3 +1,6 @@
+@use '../../abstracts/next_to_sidebar' as *;
+@use '../../abstracts/select_options' as *;
+
 %message__from--hidden {
   > i {
     display: none;
@@ -290,7 +293,7 @@
   }
 
   &.for-jump-to-now {
-    @extend %next-to-sidebar;
+    @include next_to_sidebar;
     line-height: 2em;
     border-bottom: 2rem solid var(--body-bg);
     height: 2em;

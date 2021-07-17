@@ -1,34 +1,18 @@
-@import 'variables';
-@import 'fonts';
-@import 'animations';
-@import 'mixins';
+// Want to be more explisit about vendor includes
+@use 'vendors/fortawesome-fontawesome';
+@use 'vendors/google-pt_sans';
+@use 'vendors/google-ubuntu_mono';
+@use 'vendors/hljs';
+@use 'vendors/jsonhtmlify';
+@use 'vendors/link-embedder';
+@use 'vendors/normalize';
 
-@import 'helpers/flex';
+// Not sure why "base/_index.scss" does not work
+@use 'base/root';
+@use 'base/animations';
+@use 'base/flex';
+@use 'base/typography';
 
-@import 'components/reset';
-@import 'components/typography';
-@import 'components/helpers';
-@import 'components/popover';
-@import 'components/buttons';
-@import 'components/form';
-@import 'components/drag-and-drop';
-@import 'components/notify';
-@import 'components/chrome';
-
-@import 'components/hero';
-@import 'components/sidebar';
-@import 'components/conversation-add';
-
-@import 'components/chat-header';
-@import 'components/chat-input';
-@import 'components/chat-messages';
-@import 'components/chat-participants';
-
-@import 'components/json';
-@import 'components/hljs';
-@import 'components/link-embedder';
-@import 'components/fullscreen-media';
-
-@import 'pages/cms';
-@import 'pages/chat';
-@import 'pages/video';
+@use 'components';
+@use 'layout';
+@use 'pages';

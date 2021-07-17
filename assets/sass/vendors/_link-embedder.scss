@@ -1,3 +1,5 @@
+@use "fortawesome-fontawesome/mixins" as fa;
+
 .embed.le-details {
   background: var(--syntax-hl-base-bg);
   color: var(--syntax-hl-base);
@@ -137,8 +139,7 @@
     position: relative;
 
     &:after {
-      @extend .fas;
-      content: fa-content($fa-var-angle-down);
+      @include fa.icon(angle-down, solid);
       font-size: 1.2em;
       position: absolute;
       top: 0.4em;

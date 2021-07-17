@@ -1,3 +1,8 @@
+@use './cms/navbar';
+@use './cms/footer';
+@use './cms/blog';
+@use './cms/cards';
+
 body.for-cms {
   background: var(--cms-bg);
   background-attachment: fixed;
@@ -72,8 +77,3 @@ body.for-cms .footer,
     text-decoration: underline;
   }
 }
-
-@import './cms/navbar';
-@import './cms/footer';
-@import './cms/blog';
-@import './cms/cards';

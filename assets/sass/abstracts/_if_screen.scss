@@ -1,0 +1,25 @@
+@use 'variables';
+
+@mixin if_screen($size) {
+  @if $size == "<=one-column" {
+    @media (max-width: variables.$breakpoint-one-column) { @content; }
+  }
+  @else if $size == ">one-column" {
+    @media (min-width: (variables.$breakpoint-one-column + 1)) { @content; }
+  }
+  @else if $size == "<=two-columns" {
+    @media (max-width: variables.$breakpoint-two-columns) { @content; }
+  }
+  @else if $size == ">two-columns" {
+    @media (min-width: variables.$breakpoint-two-columns + 1) { @content; }
+  }
+  @else if $size == "<=three-columns" {
+    @media (max-width: variables.$breakpoint-three-columns) { @content; }
+  }
+  @else if $size == ">three-columns" {
+    @media (min-width: variables.$breakpoint-three-columns + 1) { @content; }
+  }
+  @else {
+    @media (#{$size}) { @content; }
+  }
+}

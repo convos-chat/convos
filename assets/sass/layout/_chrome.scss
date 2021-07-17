@@ -1,3 +1,5 @@
+@use '../abstracts/next_to_sidebar' as *;
+
 html {
   height: 100%;
   height: -webkit-fill-available;
@@ -34,7 +36,7 @@ body {
 }
 
 .main {
-  @extend %next-to-sidebar;
+  @include next_to_sidebar;
   line-height: 1.5em;
   padding-top: 2rem;
   top: 3rem;

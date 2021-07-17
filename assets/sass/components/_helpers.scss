@@ -1,3 +1,5 @@
+@use '../abstracts/if_screen' as *;
+
 body.with-grid::after {
   content: '';
   background-image: repeating-linear-gradient(0deg, #f00 0px, #f00 1px, transparent 1px, transparent 21px);

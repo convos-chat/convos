@@ -1,5 +1,8 @@
+@use '../../abstracts/if_screen' as *;
+@use '../../abstracts/sidebar_wrapper_chrome' as *;
+
 .sidebar-right {
-  @extend %sidebar-wrapper-chrome;
+  @include sidebar_wrapper_chrome;
   background: var(--sidebar-right-bg);
   padding-top: var(--gutter);
   width: var(--sidebar-right-width);

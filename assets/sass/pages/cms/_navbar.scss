@@ -1,3 +1,5 @@
+@use '../../abstracts/if_screen' as *;
+
 .cms-navbar--wrapper {
   background: var(--sidebar-left-bg);
 

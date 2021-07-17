@@ -1,3 +1,5 @@
+@use '../vendors/fortawesome-fontawesome/mixins' as fa;
+
 .conversation-add-list {
   a {
     background-color: var(--body-bg);
@@ -26,8 +28,7 @@
   display: block;
 
   &:after {
-    @extend .fas;
-    content: fa-content($fa-var-user-friends);
+    @include fa.icon(user-friends, solid);
     display: block;
   }
 }

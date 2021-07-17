@@ -1,3 +1,5 @@
+@use '../vendors/fortawesome-fontawesome/mixins' as fa;
+
 .drop-area {
   background-color: var(--body-bg);
   opacity: 0.8;
@@ -6,8 +8,7 @@
   pointer-events: none;
 
   &:after {
-    @extend .fas;
-    content: fa-content($fa-var-cloud-upload-alt);
+    @include fa.icon(upload-alt, solid);
     font-size: 5rem;
     text-align: center;
     width: 100%;

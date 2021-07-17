@@ -1,5 +1,8 @@
+@use '../../abstracts/if_screen' as *;
+@use '../../abstracts/next_to_sidebar' as *;
+
 .chat-input {
-  @extend %next-to-sidebar;
+  @include next_to_sidebar;
   background: var(--chat-input-bg);
   border: var(--chat-input-border);
   border-radius: var(--chat-input-border-radius);

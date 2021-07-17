@@ -1,0 +1,21 @@
+@use 'if_screen' as *;
+
+@mixin next_to_sidebar {
+  position: absolute;
+  padding-right: var(--gutter);
+  padding-left: var(--gutter);
+
+  @include if_screen("<=two-columns") {
+    right: 0;
+    left: 0;
+  }
+
+  @include if_screen(">two-columns") {
+    right: var(--gutter);
+    left: calc(var(--gutter) + var(--sidebar-left-width));
+  }
+
+  @include if_screen(">three-columns") {
+    right: calc(var(--gutter) + var(--sidebar-right-width));
+  }
+}

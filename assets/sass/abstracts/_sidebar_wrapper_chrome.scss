@@ -1,0 +1,13 @@
+@mixin sidebar_wrapper_chrome {
+  padding: 0 var(--gutter);
+  overflow: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 900;
+  -webkit-overflow-scrolling: touch;
+
+  > :last-child {
+    padding-bottom: 8rem;
+  }
+}

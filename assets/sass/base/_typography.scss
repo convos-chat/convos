@@ -1,3 +1,5 @@
+@use '../abstracts/if_screen' as *;
+
 html,
 body {
   font-family: var(--font-family);

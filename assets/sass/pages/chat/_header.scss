@@ -1,3 +1,6 @@
+@use '../../abstracts/if_screen' as *;
+@use '../../abstracts/next_to_sidebar' as *;
+
 .chat-header,
 .sidebar-header {
   padding-top: var(--gutter);
@@ -53,7 +56,7 @@
 }
 
 .chat-header {
-  @extend %next-to-sidebar;
+  @include next_to_sidebar;
   background: var(--body-bg);
   padding-bottom: var(--gutter-small);
   box-shadow: var(--chat-header-box-shadow);

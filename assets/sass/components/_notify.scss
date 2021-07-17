@@ -1,3 +1,5 @@
+@use '../vendors/fortawesome-fontawesome/mixins' as fa;
+
 .notify-notification {
   background: var(--notify-bg);
   color: var(--notify-color);
@@ -27,8 +29,7 @@
   right: 0.5rem;
 
   &:after {
-    @extend .fas;
-    content: fa-content($fa-var-times-circle);
+    @include fa.icon(times-circle, solid);
   }
 }
 

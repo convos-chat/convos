@@ -1,3 +1,5 @@
+@use '../abstracts/if_screen' as *;
+
 .hero--wrapper {
   background: var(--sidebar-left-bg);
 }
@@ -52,6 +54,6 @@
 
   .hero__text {
     padding-top: var(--gutter);
-    padding-footer: var(--gutter);
+    padding-bottom: var(--gutter);
   }
 }

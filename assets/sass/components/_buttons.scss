@@ -1,3 +1,5 @@
+@use '../abstracts/square_text' as *;
+
 %hallow-child-fill-parent {
   position: absolute;
   top: 0;

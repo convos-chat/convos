@@ -1,5 +1,10 @@
+@use '../../abstracts/if_screen' as *;
+@use '../../abstracts/sidebar_wrapper_chrome' as *;
+@use '../../abstracts/variables' as *;
+@use '../../vendors/fortawesome-fontawesome/mixins' as fa;
+
 .sidebar-left {
-  @extend %sidebar-wrapper-chrome;
+  @include sidebar_wrapper_chrome;
   background: var(--sidebar-left-bg);
   border-right: var(--sidebar-left-border);
   width: var(--sidebar-left-width);
@@ -47,11 +52,11 @@ body.for-cms .sidebar-left {
   position: relative;
 
   &.for-connection .fas:hover:before {
-    content: fa-content($fa-var-cog);
+    @include fa.content(cog);
   }
 
   &.for-conversation .fas:hover:before {
-    content: fa-content($fa-var-users-cog);
+    @include fa.content(users-cog);
   }
 
   &.for-conversation {
