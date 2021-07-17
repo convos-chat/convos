@@ -1,7 +1,6 @@
 <script>
 import Button from '../components/form/Button.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
-import Connection from '../store/Connection';
 import ConnectionURL from '../js/ConnectionURL';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
@@ -145,12 +144,28 @@ async function saveConnection() {
   <div class="form-actions">
     {#if connection_id != 'add'}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
-      <Button icon="trash" type="button" op="{removeConnectionOp}" on:click="{removeConnection}"><span>{$l('Delete')}</span></Button>
     {:else}
       <Button icon="plus-circle" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
     {/if}
   </div>
   <OperationStatus op="{createConnectionOp}"/>
-  <OperationStatus op="{removeConnectionOp}" success="Deleted."/>
   <OperationStatus op="{updateConnectionOp}"/>
+
+  {#if connection_id != 'add'}
+    <h3>{$l('Delete')}</h3>
+    <p>
+      {$l('This will permanently remove chat logs and other connection related data.')}
+      {@html $lmd('Please confirm by entering **%1** before hitting **%2**.', connection_id, $l('Delete'))}
+    </p>
+
+    <TextField name="confirm_connection_id" form="{form}">
+      <span slot="label">{$l('Confirm connection ID')}</span>
+    </TextField>
+
+    <div class="form-actions">
+      <Button icon="trash" op="{removeConnectionOp}" on:click="{removeConnection}" disabled="{$form.confirm_connection_id != connection_id}"><span>{$l('Delete')}</span></Button>
+    </div>
+
+    <OperationStatus op="{removeConnectionOp}" success="Deleted."/>
+  {/if}
 </form>
