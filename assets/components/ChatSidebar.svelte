@@ -19,7 +19,7 @@ let navEl;
 let searchHasFocus = false;
 let visibleLinks = [];
 
-$: filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: if (filter.length) filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
 $: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
