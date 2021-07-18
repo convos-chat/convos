@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.25 Not Released
+ - Add handler for irc:// links #311
  - Add support for raw messages #592
  - Add support for a single character within backticks #602
  - Add settings icon to Notifications page #606

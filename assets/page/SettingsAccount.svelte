@@ -8,20 +8,24 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {createForm} from '../store/form';
 import {getContext, onDestroy} from 'svelte';
-import {i18n, l} from '../store/I18N.js';
+import {i18n, l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
-import {settings, str2array} from '../js/util';
+import {route} from '../store/Route.js';
+import {str2array} from '../js/util';
 
 export const title = 'Account';
 
 const api = getContext('api');
 const form = createForm();
+const registerProtocolHandlerSupported = 'registerProtocolHandler' in navigator;
 const themeManager = getContext('themeManager');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
 $: colorSchemeReadonly = $themeManager.hasColorScheme($form.activeTheme) ? false : true;
 $: i18n.load($form.lang);
+$: if ($form.handle_protocol_irc) registerProtocol('irc');
+$: if ($form.handle_protocol_ircs) registerProtocol('ircs');
 
 form.set({
   activeTheme: themeManager.activeTheme,
@@ -40,6 +44,10 @@ onDestroy(notify.on('update', (notify, changed) => {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
   if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
 }));
+
+function registerProtocol(proto) {
+  navigator.registerProtocolHandler(proto, route.urlFor('/register?uri=%s'), $l('Convos %1 handler', proto));
+}
 
 function saveAccount() {
   const passwords = [$form.password, $form.password_again];
@@ -107,4 +115,24 @@ function saveAccount() {
 
     <OperationStatus op="{updateUserOp}"/>
   </form>
+
+  {#if registerProtocolHandlerSupported}
+    <form on:submit|preventDefault>
+      <h2>Protocol handlers</h2>
+      <p>
+        {$l('Mark the protocols below that you want %1 to handle, and a popup will should ask you for confirmation.', $l('Convos'))}
+        {$l('If you do not see any popup, then it probably means %1 already handles the protocol.', $l('Convos'))}
+      </p>
+
+      <Checkbox name="handle_protocol_irc" form="{form}">
+        <span slot="label">{$l('irc://')}</span>
+      </Checkbox>
+      <p class="help">{@html $lmd('Test it by clicking on %1.', 'irc://localhost:6667')}</p>
+
+      <Checkbox name="handle_protocol_ircs" form="{form}">
+        <span slot="label">{$l('ircs://')}</span>
+      </Checkbox>
+      <p class="help">{@html $lmd('Test it by clicking on %1.', 'irc://irc.libera.chat:6697/%23convos')}</p>
+    </form>
+  {/if}
 </main>

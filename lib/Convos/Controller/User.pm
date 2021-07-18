@@ -272,7 +272,7 @@ sub _register_html_conn_url_redirect {
     return $self->redirect_to($redirect_url);
   }
   else {
-    my $redirect_url = $self->url_for('/settings/connections');
+    my $redirect_url = $self->url_for('/settings/connection/add');
     $redirect_url->query->param(uri => $conn_url);
     return $self->redirect_to($redirect_url);
   }
