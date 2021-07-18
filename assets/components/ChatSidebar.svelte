@@ -19,7 +19,7 @@ let navEl;
 let searchHasFocus = false;
 let visibleLinks = [];
 
-$: if (filter.length) filterNav({filter, type: 'change'}); // Passing "filter" in to make sure filterNav() is called on change
+$: filterNav({filter}); // Passing "filter" in to make sure filterNav() is called on change
 $: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
@@ -27,14 +27,12 @@ $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.ad
 
 function clearFilter() {
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
-  if (filter.indexOf('+') == 0) return;
 
   setTimeout(() => {
     if (!navEl) return;
     filter = '';
     const el = document.activeElement;
     if (el && closestEl(el, navEl)) q(navEl, 'a.has-path', aEl => aEl.focus());
-    searchHasFocus = false;
   }, 100);
 }
 
@@ -49,7 +47,6 @@ function filterNav() {
   if (!navEl) return;
 
   activeLinkIndex = 0;
-  searchHasFocus = true;
   visibleLinks = [];
 
   const prefix = [filter.match(/^\W+/) ? '' : '\\b\\W*'];
@@ -59,8 +56,8 @@ function filterNav() {
   for (let p = 0; p < prefix.length; p++) {
     const filterRe
       = filter == '+' ? new RegExp(/[1-9]\d*\+?\s*$/)
-      : filter == '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\s*$/)
-      : filter == '+#' ? new RegExp(/^\s*#.*[1-9]\d*\s*$/)
+      : filter == '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\+?\s*$/)
+      : filter == '+#' ? new RegExp(/^\s*#.*[1-9]\d*\+?\s*$/)
       : new RegExp(prefix[p] + regexpEscape(filter), 'i');
 
     const seen = {};
@@ -104,6 +101,15 @@ function filterNav() {
   });
 }
 
+function onBlur() {
+  searchHasFocus = false;
+  if (filter.indexOf('+') != 0) clearFilter();
+}
+
+function onFocus() {
+  searchHasFocus = true;
+}
+
 function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
   if (iconName) return setTimeout(() => { $activeMenu = 'settings' }, 50);
@@ -145,8 +151,8 @@ function renderUnread(conversation, max = 60) {
       <input type="text" id="search_input" class="is-primary-menu-item"
         placeholder="{searchHasFocus ? $l('Search...') : $l('Convos')}"
         bind:value="{filter}"
-        on:blur="{clearFilter}"
-        on:focus="{filterNav}"
+        on:blur="{onBlur}"
+        on:focus="{onFocus}"
         on:keydown="{onSearchKeydown}">
       <label for="search_input" class="btn-hallow"><Icon name="search"/></label>
       <Link href="/chat" class="btn-hallow for-notifications">
