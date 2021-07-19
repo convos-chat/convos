@@ -91,6 +91,16 @@ test('markdown', () => {
   expect(predictable(messages.render()[1]).markdown).toBe('Click on <a href=\"/logout\">Logout</a>');
 });
 
+test('raw markdown', () => {
+  const messages = new Messages();
+
+  messages.push([{from: 'superduper', message: 'Funny characters   [are](#are) still escaped, like <script> :)'}]);
+  expect(predictable(messages.render()[0]).markdown).toBe('Funny characters &nbsp; <a href=\"#are\">are</a> still escaped, like &lt;script&gt; :)');
+
+  messages.update({raw: true});
+  expect(predictable(messages.render()[0]).markdown).toBe('Funny characters &nbsp; [are](#are) still escaped, like &lt;script&gt; :)');
+});
+
 test('expandUrlToMedia', () => {
   const messages = new Messages();
   expect(messages.expandUrlToMedia).toBe(true);

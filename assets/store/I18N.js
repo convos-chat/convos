@@ -65,6 +65,17 @@ export default class I18N extends Reactive {
   }
 
   /**
+   * Combination of l() and md(), but will only render some parts.
+   *
+   * @param {String} lexicon.
+   * @param {...String} A list (not array) of lexicon variables.
+   * @return {String} A translated string which might contain HTML.
+   */
+  lmdRaw(lexicon, ...vars) {
+    return this.md(this.l(lexicon, ...vars), {raw: true});
+  }
+
+  /**
    * md() can convert a (subset) of markdown rules into a HTML string.
    *
    * @example
@@ -87,19 +98,20 @@ export default class I18N extends Reactive {
    * i18n.md(':) :/ :( ;D &lt;3 :D :P ;) :heart:');
    *
    * @param {String} str A markdown formatter string.
+   * @param {Object} opt Options for rendering, such as "raw"
    * @return {String} A string that might contain HTML tags.
    */
-  md(str) {
+  md(str, opt = {}) {
     this._state = {};
     str = this._xmlEscape(str);
     str = this._nbsp(str);
-    str = this._mdLink(str);
-    str = this._plainUrlToLink(str);
-    str = this._extendedFormatting(str);
-    str = this._mdCode(str);
-    str = this._mdEmStrong(str);
-    str = this.emojis.markup(str);
-    str = this._mdBlockQuote(str);
+    if (!opt.raw) str = this._mdLink(str);
+    if (!opt.raw) str = this._plainUrlToLink(str);
+    if (!opt.raw) str = this._extendedFormatting(str);
+    if (!opt.raw) str = this._mdCode(str);
+    if (!opt.raw) str = this._mdEmStrong(str);
+    if (!opt.raw) str = this.emojis.markup(str);
+    if (!opt.raw) str = this._mdBlockQuote(str);
     return str;
   }
 

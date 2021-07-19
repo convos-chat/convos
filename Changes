@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 6.26 Not Released
  - Fix clearing the global search
  - Fix "+#" and "+@" in search bar to also filter "60+" #607 #609
+ - Fix security issue with toggling "raw" for messages
 
 6.25 2021-07-18T10:14:00+0900
  - Add handler for irc:// links #311
