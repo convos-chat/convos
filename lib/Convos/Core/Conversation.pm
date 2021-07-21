@@ -4,12 +4,12 @@ use Mojo::Base -base;
 use Convos::Util '$CHANNEL_RE';
 use Mojo::Date;
 
-has frozen   => '';
-has name     => sub { Carp::confess('name required in constructor') };
-has password => '';
-has topic    => '';
-has unread   => 0;
+has frozen        => '';
+has name          => sub { Carp::confess('name required in constructor') };
+has password      => '';
 has notifications => 0;
+has topic         => '';
+has unread        => 0;
 
 sub connection { shift->{connection} or Carp::confess('connection required in constructor') }
 sub id         { my $from = $_[1] || $_[0]; lc($from->{id} // $from->{name}) }

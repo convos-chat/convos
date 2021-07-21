@@ -55,7 +55,7 @@ $server->server_write_ok(
 {
   my $log = slurp_log('#convos');
   like $log, qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}s, 'notification';
-  like $log, qr/\x0307Wikinews:Sandbox\x03/s,                                'colors';
+  like $log, qr/\x0307Wikinews:Sandbox\x03/s, 'colors';
 }
 
 my $notifications;
