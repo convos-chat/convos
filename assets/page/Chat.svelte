@@ -39,7 +39,6 @@ let focusChatInput, fillIn, uploader;
 
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
-$: updateNotificationCount($user);
 $: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
 $: notConnected = $conversation.frozen ? true : false;
 $: title = $conversation.title;
@@ -82,6 +81,7 @@ function setConversationFromUser(user) {
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
   unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
+  updateNotificationCount(user);
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
