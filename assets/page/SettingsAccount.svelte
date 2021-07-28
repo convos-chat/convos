@@ -120,7 +120,7 @@ function saveAccount() {
     <form on:submit|preventDefault>
       <h2>Protocol handlers</h2>
       <p>
-        {$l('Mark the protocols below that you want %1 to handle, and a popup will should ask you for confirmation.', $l('Convos'))}
+        {$l('Mark the protocols below that you want %1 to handle, and a popup should ask you for confirmation.', $l('Convos'))}
         {$l('If you do not see any popup, then it probably means %1 already handles the protocol.', $l('Convos'))}
       </p>
 
@@ -132,7 +132,7 @@ function saveAccount() {
       <Checkbox name="handle_protocol_ircs" form="{form}">
         <span slot="label">{$l('ircs://')}</span>
       </Checkbox>
-      <p class="help">{@html $lmd('Test it by clicking on %1.', 'irc://irc.libera.chat:6697/%23convos')}</p>
+      <p class="help">{@html $lmd('Test it by clicking on %1.', 'ircs://irc.libera.chat:6697/%23convos')}</p>
     </form>
   {/if}
 </main>
