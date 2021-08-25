@@ -6,12 +6,19 @@ use Convos::Date qw(dt);
 use Mojo::JSON qw(false true);
 
 has home   => sub { Carp::confess('home() cannot be built') };
-has sqlite => sub { Mojo::SQLite->new('sqlite:' . shift->home->child('convos.sqlite')) };
+has sqlite => sub {
+  my $self = shift;
+  $self->home->make_path unless -d $self->home;
+
+  my $sqlite = Mojo::SQLite->new('sqlite:' . $self->home->child('convos.sqlite'));
+  $sqlite->migrations->from_file(...)->migrate;
+  return $sqlite;
+};
 
 sub connections_p {
   my ($self, $user) = @_;
 
-  return $self->sqlite->db->select_p('convos_connections')->then(sub {
+  return $self->_db->select_p('convos_connections')->then(sub {
     return shift->hashes->to_array;
   });
 }
@@ -19,8 +26,7 @@ sub connections_p {
 sub delete_messages_p {
   my ($self, $obj) = @_;
   return Mojo::Promise->reject('Unknown target.') unless $obj and $obj->connection;
-  return $self->sqlite->db->delete_p(convos_messages => {conversation_id => $obj->id})
-    ->then(sub {$obj});
+  return $self->_db->delete_p(convos_messages => {conversation_id => $obj->id})->then(sub {$obj});
 }
 
 sub delete_object_p {
@@ -30,13 +36,13 @@ sub delete_object_p {
     $obj->unsubscribe($_) for qw(conversation message state);
   }
 
-  return $self->delete_p($self->_obj_to_table($obj), {id => $obj->id})->then(sub {$obj});
+  return $self->_db->delete_p($self->_obj_to_table($obj), {id => $obj->id})->then(sub {$obj});
 }
 
 sub load_object_p {
   my ($self, $obj) = @_;
 
-  return $self->select_p($self->_obj_to_table($obj), {id => $obj->id})->then(sub {
+  return $self->_db->select_p($self->_obj_to_table($obj), {id => $obj->id})->then(sub {
     return shift->hash;
   });
 }
@@ -68,7 +74,7 @@ sub messages_p {
   push @{$where{ts}}, {$gt => dt $query->{after}}  if $query->{after};
   push @{$where{ts}}, {$lt => dt $query->{before}} if $query->{before};
 
-  return $self->select_p(convos_messages => \%where, \%extra)->then(sub {
+  return $self->_db->select_p(convos_messages => \%where, \%extra)->then(sub {
     return shift->hashes->to_array;
   });
 }
@@ -79,7 +85,7 @@ sub notifications_p {
   my %extra = (limit => $query->{limit} || 60);
   $extra{order_by} = {-desc => 'ts'};
 
-  return $self->select_p(convos_notifications => {}, \%extra)->then(sub {
+  return $self->_db->select_p(convos_notifications => {}, \%extra)->then(sub {
     return shift->hashes->to_array;
   });
 }
@@ -87,13 +93,14 @@ sub notifications_p {
 sub save_object_p {
   my ($self, $obj) = @_;
 
-  return $self->insert_p($self->_obj_to_table($obj), $obj->TO_JSON('private'))->then(sub {$obj});
+  return $self->_db->insert_p($self->_obj_to_table($obj), $obj->TO_JSON('private'))
+    ->then(sub {$obj});
 }
 
 sub users_p {
   my $self = shift;
 
-  return $self->sqlite->db->select_p('convos_users')->then(sub {
+  return $self->_db->select_p('convos_users')->then(sub {
     return shift->hashes->sort(sub {
       $a->{registered} cmp $b->{registered} || $a->{email} cmp $b->{email};
     })->to_array;
@@ -103,7 +110,7 @@ sub users_p {
 sub _add_message_p {
   my ($self, $target, $msg) = @_;
 
-  return $self->sqlite->db->insert_p(
+  return $self->_db->insert_p(
     convos_notifications => {
       connection_id   => $target->connection->id,
       conversation_id => $target->id,
@@ -119,7 +126,7 @@ sub _add_message_p {
 sub _add_notification_p {
   my ($self, $target, $msg) = @_;
 
-  return $self->sqlite->db->insert_p(
+  return $self->_db->insert_p(
     convos_notifications => {
       connection_id   => $target->connection->id,
       conversation_id => $target->id,
@@ -130,6 +137,8 @@ sub _add_notification_p {
     }
   );
 }
+
+sub _db { shift->sqlite->db }
 
 sub _obj_to_table {
   my ($self, $obj) = @_;
