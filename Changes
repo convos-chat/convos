@@ -1,7 +1,10 @@
 Revision history for perl distribution Convos
 
 6.27 Not Released
+ - Changed notifications are now per channel #612
+   Contributor: Jess Robinson
  - Fix not converting %\d+ strings into "undefined" #616
+ - Fix not showing conversation settings header on small screen
 
 6.26 2021-07-20T07:09:00+0900
  - Fix clearing the global search

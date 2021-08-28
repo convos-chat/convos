@@ -133,6 +133,10 @@ body.for-cms .sidebar-left {
   @include header.site;
   border-bottom: 2px solid transparent;
 
+  @include if_screen("<=one-column") {
+    display: none;
+  }
+
   h2 {
     flex: 1 0 0;
   }
