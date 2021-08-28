@@ -52,6 +52,7 @@ $server->server_write_ok(
   ->server_write_ok(
   ":superman!sm\@example.com PRIVMSG #convos :[[\x0307Wikinews:Sandbox\x03]]  \x0302https://en.wikinews.org/w/index.php?diff=4621760&oldid=4621759\x03 \x0305*\x03 \x0303103.48.104.126\x03 \x0305*\x03 (+2) \x0310more test\x03\r\n"
 )->client_event_ok('_irc_event_privmsg')->process_ok;
+Mojo::Promise->timer(0.2)->wait;    # Need a bit of time to write the message to file
 {
   my $log = slurp_log('#convos');
   like $log, qr{\Q<Supergirl> But... SUPERMAN, what about in a channel?\E}s, 'notification';
