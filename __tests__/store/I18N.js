@@ -16,6 +16,10 @@ test('l()', () => {
 
 test('lmd()', () => {
   expect(i18n.lmd('`code` %1 *is* cool.', 42)).toBe('<code>code</code> 42 <em>is</em> cool.');
+
+  // Entities should not be translated into "undefined"
+  expect(i18n.lmd('https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg'))
+    .toBe('<a href="https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg" target="_blank">https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg</a>');
 });
 
 test('md - not lmd', () => {

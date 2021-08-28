@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.27 Not Released
+ - Fix not converting %\d+ strings into "undefined" #616
+
 6.26 2021-07-20T07:09:00+0900
  - Fix clearing the global search
  - Fix "+#" and "+@" in search bar to also filter "60+" #607 #609

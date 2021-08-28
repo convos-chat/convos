@@ -32,8 +32,8 @@ export default class I18N extends Reactive {
   l(lexicon, ...vars) {
     const dictionary = this.dictionaries[this.lang] || {};
     const translated = String(dictionary[lexicon] || lexicon);
-    return translated.replace(/(%?)%(\d+)/g, (a, escaped, i) => {
-      return escaped == '%' ? escaped + i : vars[i - 1];
+    return translated.replace(/%(\d)(\D|$)/g, (all, i, s) => {
+      return typeof vars[i - 1] == 'undefined' ? all : (vars[i - 1] + s);
     });
   }
 
