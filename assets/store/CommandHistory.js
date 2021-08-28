@@ -1,7 +1,7 @@
 import Reactive from '../js/Reactive';
 
 export default class CommandHistory extends Reactive {
-  constructor(params) {
+  constructor() {
     super();
     this.prop('persist', 'history', [], {key: 'command_history'});
     this.prop('rw', 'conversation', null);

@@ -70,9 +70,6 @@ const pickIcons = [
 </script>
 
 <script>
-import {onMount} from 'svelte';
-
-let initialized = false;
 let className = '';
 
 export {className as class};
@@ -81,7 +78,7 @@ export let color = '';
 export let family = '';
 export let name;
 
-function calculateClassName(name, family, initialized) {
+function calculateClassName(name, family) {
   const cn = [];
   const pick = name.match(/^pick:(.+)$/);
 
@@ -101,7 +98,7 @@ function calculateClassName(name, family, initialized) {
   return cn.join(' ');
 }
 
-function calculateStyle(name, family, color, initialized) {
+function calculateStyle(name, color) {
   const rules = [];
   let colorRuleName = 'color:';
 
@@ -132,7 +129,7 @@ function pickIcon(str) {
 }
 </script>
 
-<i class="{calculateClassName(name, family, initialized)}"
-  style="{calculateStyle(name, family, color, initialized)}"
+<i class="{calculateClassName(name, family)}"
+  style="{calculateStyle(name, color)}"
   hidden="{!name}"
   on:click/>

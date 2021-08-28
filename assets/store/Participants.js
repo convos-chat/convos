@@ -1,6 +1,6 @@
 import Reactive from '../js/Reactive';
 import SortedMap from '../js/SortedMap';
-import {calculateModes, camelize, is, str2color} from '../js/util';
+import {calculateModes, is, str2color} from '../js/util';
 import {userModeCharToModeName} from '../js/constants';
 
 export default class Participants extends Reactive {

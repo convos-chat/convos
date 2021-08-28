@@ -29,7 +29,6 @@
  * @exports uuidv4
  */
 
-import features from './features';
 import {getLogger} from './logger';
 
 const log = getLogger('util');
@@ -67,7 +66,7 @@ export function calculateModes(modeMap, modeStr) {
  * @returns {String} Example: fooBarBaz
  */
 export function camelize(str) {
-  return str.replace(/_(\w)/g, (a, b) => b.toUpperCase());
+  return str.replace(/_(\w)/g, (all, b) => b.toUpperCase());
 }
 
 /**

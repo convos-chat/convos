@@ -1,12 +1,8 @@
-let d, w;
-
 export default function(hljs) {
   let isInitialized = false;
 
   hljs.lineNumbersBlock = function(element, options) {
     if (!isInitialized) {
-      d = document;
-      w = window;
       isInitialized = true;
     }
 

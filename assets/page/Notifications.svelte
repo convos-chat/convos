@@ -5,7 +5,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onDestroy, onMount} from 'svelte';
-import {l, lmd} from '../store/I18N';
+import {l} from '../store/I18N';
 
 export const title = 'Notifications';
 
@@ -15,7 +15,7 @@ const conversation = user.notifications;
 $: classNames = ['main', messages.length && 'has-results'].filter(i => i);
 $: messages = $conversation.messages;
 
-  onDestroy(() => user.markNotificationsRead(); });
+onDestroy(() => user.markNotificationsRead());
 onMount(() => conversation.load());
 </script>
 

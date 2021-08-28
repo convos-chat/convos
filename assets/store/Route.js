@@ -1,7 +1,7 @@
 import Reactive from '../js/Reactive';
 import qs from 'qs';
 import {activeMenu} from './writable';
-import {closestEl, is} from '../js/util';
+import {is} from '../js/util';
 import {getLogger} from '../js/logger';
 
 const log = getLogger('route');

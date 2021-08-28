@@ -6,7 +6,6 @@ import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {camelize, extractErrorMessage} from '../js/util';
-import {route} from './Route';
 import {getSocket} from './../js/Socket';
 
 export default class User extends Reactive {
@@ -150,7 +149,8 @@ export default class User extends Reactive {
     return super.update(params);
   }
 
-  updateNotificationCount() {
+  updateNotificationCount(conversations) {
+    if (conversations) conversations.forEach(c => c.update({notifications: 0}));
     this.notifications.update({unread: this._calculateNotifications()});
   }
 

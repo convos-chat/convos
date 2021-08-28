@@ -39,7 +39,7 @@ export function calculateAutocompleteOptions(str, splitValueAt, {conversation, u
   let key = '';
   let afterKey = '';
 
-  const before = str.substring(0, splitValueAt).replace(/(\S)(\S*)$/, (a, b, c) => {
+  const before = str.substring(0, splitValueAt).replace(/(\S)(\S*)$/, (all, b, c) => {
     key = b;
     afterKey = c;
     return '';

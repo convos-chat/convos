@@ -30,7 +30,7 @@ readyStateHuman[WebSocket.CLOSING] = 'closing';
 readyStateHuman[WebSocket.CLOSED] = 'closed';
 
 export default class Socket extends Reactive {
-  constructor(params) {
+  constructor() {
     super();
 
     this.prop('ro', 'readyState', () => this.ws.readyState);

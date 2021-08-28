@@ -1,6 +1,5 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Reactive from '../js/Reactive';
-import SortedMap from '../js/SortedMap';
 import {api} from '../js/Api';
 
 export default class ConnectionProfiles extends Reactive {

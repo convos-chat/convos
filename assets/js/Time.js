@@ -19,7 +19,6 @@ const MONTH_ABBR = {
   '11': 'Dec',
 };
 
-const ONE_DAY = 60 * 60 * 24;
 const STRFTIME = {
   H: '_getPaddedHours',
   M: '_getPaddedMinutes',
@@ -46,7 +45,7 @@ export default class Time extends Date {
    * @returns {String} Example "Sept 15"
    */
   format(format) {
-    return format.replace(/%(\w)/g, (a, p) => STRFTIME[p] ? this[STRFTIME[p]]() : p);
+    return format.replace(/%(\w)/g, (all, p) => STRFTIME[p] ? this[STRFTIME[p]]() : p);
   }
 
   /**
