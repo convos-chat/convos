@@ -67,4 +67,7 @@ $facts->emit(message => {my_nick => 'superbot', message => 'history'});
 is $facts->reply({my_nick => 'superbot', message => q(what is h?)}), undef,
   'do not reply with h is tory';
 
+is $facts->reply({my_nick => 'superbot', message => 'superbot: forget sqlite'}),
+  'I forgot 1 thing about sqlite.', 'forget';
+
 done_testing;

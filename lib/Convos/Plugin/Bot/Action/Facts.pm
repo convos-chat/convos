@@ -4,7 +4,8 @@ use Mojo::Base 'Convos::Plugin::Bot::Action';
 use Mojo::Util qw(trim);
 
 has description => 'Add facts that you can ask for later';
-has usage       => 'Use "foo is ..." to teach and "what is foo?" or "foo?" to retrieve.';
+has usage       =>
+  'Use "x is ..." to teach, "what is x?" or "x?" to retrieve and "forget x" to remove a fact.';
 
 sub register {
   my ($self, $bot, $config) = @_;
@@ -19,6 +20,7 @@ sub register {
 sub reply {
   my ($self, $event) = @_;
   return delete $self->{reply} if $self->{reply};    # reply after learning
+  return $self->_forget($1)    if $event->{message} =~ m!^\W*$event->{my_nick}\W+forget\s+(.+)!;
   return undef unless my @parts = split $self->{copula_re}, $event->{message}, 3;
 
   my $topic  = trim $parts[-1];
@@ -57,6 +59,13 @@ create table if not exists facts (
 HERE
 
   $self->query_db('create unique index if not exists facts__topic_copula on facts (topic, copula)');
+}
+
+sub _forget {
+  my ($self, $topic) = @_;
+  my $res = $self->query_db('delete from facts where topic = ? collate nocase', $topic);
+  my $n   = $res->rows;
+  return $n ? sprintf 'I forgot %s %s about %s.', $n, $n == 1 ? 'thing' : 'things', $topic : '';
 }
 
 sub _learn {
@@ -104,27 +113,27 @@ You need to install L<DBD::SQLite> to use this action:
 
 =over 2
 
-=item * foo are something
+=item * x are something
 
-=item * foo aren't something
+=item * x aren't something
 
-=item * foo is something
+=item * x is something
 
-=item * foo isn't something
+=item * x isn't something
 
-=item * foo says something
+=item * x says something
 
-=item * foo?
+=item * x?
 
-=item * what are foo?
+=item * what are x?
 
-=item * what aren't foo?
+=item * what aren't x?
 
-=item * what is foo?
+=item * what is x?
 
-=item * what isn't foo?
+=item * what isn't x?
 
-=item * what says foo?
+=item * what says x?
 
 =back
 
