@@ -14,19 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Calculate tag name
-      id: calculate_tags
+      id: calculate_tag
       run: |
         if echo $GITHUB_REF | grep -q '^refs/tags/v'; then
           VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
-          TAGS='"convos/convos:'$VERSION'"]'
+          TAG_NAME="convos/convos:$VERSION";
         elif [ "$GITHUB_REF" = "refs/heads/docker" ]; then
-          TAGS='"convos/convos:alpha"]'
+          TAG_NAME="convos/convos:alpha";
         elif [ "$GITHUB_REF" = "refs/heads/master" ]; then
-          TAGS='"convos/convos:alpha"]'
+          TAG_NAME="convos/convos:alpha";
         else
-          TAGS='["convos/convos:stable"]'
+          TAG_NAME="convos/convos:stable";
         fi
-        echo '::set-output name=tags::'$TAGS
+        echo '::set-output name=tag::'$TAG_NAME
 
     - name: Check Out Repo
       uses: actions/checkout@v1
@@ -48,7 +48,7 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: true
-        tags: ${{ fromJson(steps.calculate_tags.outputs.tags) }}
+        tags: ${{ steps.calculate_tag.outputs.tag }}
 
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
