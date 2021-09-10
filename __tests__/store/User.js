@@ -1,6 +1,7 @@
 import Socket from '../../assets/js/Socket';
 import TestWebSocket from '../../assets/js/TestWebSocket';
 import User from '../../assets/store/User';
+import {timer} from '../../assets/js/util';
 
 // Make the test less noisy
 import {getLogger} from '../../assets/js/logger';
@@ -122,11 +123,48 @@ test('load success', async () => {
   expect(user.forced_connection).toBe(true);
   expect(user.highlightKeywords).toEqual(['foo', 'bar']);
   expect(user.status).toBe('success');
+});
 
-  // Notfications
+test('notification count', async () => {
+  const user = new User({});
+  const c1 = user.ensureConversation({connection_id: 'irc-foo', conversation_id: '#convos'});
+  const c2 = user.ensureConversation({connection_id: 'irc-foo', conversation_id: 'superduper'});
+
+  expect(c1.notifications).toBe(0);
+  expect(c1.unread).toBe(0);
+  expect(user.unreadIncludePrivateMessages).toBe(false);
   expect(user.notifications.unread).toBe(0);
-  user.updateNotificationCount();
+
+  c1.update({notifications: 11, unread: 3});
+  c2.update({notifications: 0, unread: 22}); // "unread" ignored when unreadIncludePrivateMessages=false
+  await timer(30);
+  expect(c1.notifications).toBe(11);
+  expect(c1.unread).toBe(3);
+  expect(user.notifications.unread).toBe(11);
+  expect(user.notifications.notifications).toBe(11);
+
+  user.notifications.markAsRead();
+  await timer(30);
+  expect(c1.notifications).toBe(0);
+  expect(c1.unread).toBe(3); // Ignored since public conversation
+  expect(user.notifications.notifications).toBe(0);
+
+  c1.update({notifications: 7, unread: 5});
+  await timer(30);
+  expect(user.notifications.unread).toBe(7);
+  c1.markAsRead();
+  await timer(30);
+  expect(c1.notifications).toBe(0);
+  expect(c1.unread).toBe(0);
   expect(user.notifications.unread).toBe(0);
+
+  user.update({unreadIncludePrivateMessages: true});
+  c1.update({notifications: 14});
+  c2.update({notifications: 1000}); // Ignored since private conversation
+  await timer(30);
+  expect(user.unreadIncludePrivateMessages).toBe(true);
+  expect(user.notifications.notifications).toBe(36);
+  expect(user.notifications.unread).toBe(14);
 });
 
 test('load error', async () => {

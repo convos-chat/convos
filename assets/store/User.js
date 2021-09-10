@@ -5,7 +5,7 @@ import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
-import {camelize} from '../js/util';
+import {camelize, debounce} from '../js/util';
 import {getSocket} from './../js/Socket';
 
 export default class User extends Reactive {
@@ -17,7 +17,6 @@ export default class User extends Reactive {
     this.prop('ro', 'notifications', new Notifications({}));
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
-    this.prop('ro', 'unread', () => this._calculateUnread());
 
     this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'ignoreStatuses', false);
@@ -29,11 +28,15 @@ export default class User extends Reactive {
     this.prop('rw', 'default_connection', 'irc://irc.libera.chat:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
     this.prop('rw', 'status', 'pending');
+    this.prop('rw', 'unreadIncludePrivateMessages', false);
     this.prop('rw', 'videoService', params.videoService || '');
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));
     this.socket.on('update', (socket) => this._onConnectionChange(socket));
+
+    this.notifications.on('cleared', () => this._calculateUnread('clear'));
+    this._calculateUnreadDebounced = debounce(this._calculateUnread, 25);
 
     // setInterval(() => this.socket.close(), 5000); // debug WebSocket reconnect issues
   }
@@ -68,7 +71,8 @@ export default class User extends Reactive {
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('conversationadd', (conversation) => this._maybeUpgradeActiveConversation(conversation));
     conn.on('conversationremove', (conversation) => (conversation == this.activeConversation && this.setActiveConversation(conversation)));
-    conn.on('update', (conn) => this.update({connections: true}));
+    conn.on('update', () => this.update({connections: true}));
+    conn.on('unread', () => this._calculateUnreadDebounced());
     this.connections.set(conn.connection_id, conn);
     this.update({connections: true});
     return _lock ? conn : this._maybeUpgradeActiveConversation(conn);
@@ -102,10 +106,9 @@ export default class User extends Reactive {
     this.connections.clear();
     (data.connections || []).forEach(conn => this.ensureConversation({...conn, status: 'pending'}));
     (data.conversations || []).forEach(conversation => this.ensureConversation({...conversation, status: 'pending'}));
-
-    this.updateNotificationCount();
-
     (data.roles || []).forEach(role => this.roles.add(role));
+
+    this.notifications.update({unread: data.unread || 0});
 
     return this.update({
       email: data.email || '',
@@ -116,11 +119,6 @@ export default class User extends Reactive {
       status: res.errors ? 'error' : 'success',
       videoService: data.video_service || '',
     });
-  }
-
-  markNotificationsRead() {
-    this.conversations().forEach(conv => conv.update({notifications: 0}));
-    this.activeConversation.markAsRead();
   }
 
   removeConversation(params) {
@@ -146,25 +144,24 @@ export default class User extends Reactive {
 
   update(params) {
     if (params.videoService) this.connections.forEach(conn => conn.update({videoService: params.videoService}));
-    return super.update(params);
+    super.update(params);
+    if (params.hasOwnProperty('unreadIncludePrivateMessages')) this._calculateUnreadDebounced();
+    return this;
   }
 
-  updateNotificationCount(conversations) {
-    if (conversations) conversations.forEach(c => c.update({notifications: 0}));
-    this.notifications.update({unread: this._calculateNotifications()});
-  }
+  _calculateUnread(clear) {
+    let [notifications, unread] = [0, 0];
+    for (const connection of this.connections.toArray()) {
+      for (const conversation of connection.conversations.toArray()) {
+        if (clear) conversation.update({notifications: 0});
+        notifications += conversation.is('private') ? (this.unreadIncludePrivateMessages ? conversation.unread : 0) : conversation.notifications;
+        unread += conversation.is('private') ? 0 : conversation.notifications;
+      }
+    }
 
-  _calculateNotifications() {
-    return this.connections.toArray().reduce(
-      (outersum, conn) => outersum + conn.conversations.toArray().reduce(
-        (sum, conv) => sum + conv.notifications, 0), 0);
-  }
-
-  _calculateUnread() {
-    const activeConversation = this.activeConversation;
-    return this.notifications.unread
-      + this.conversations(conversation => conversation.is('private'))
-          .reduce((t, d) => { return t + (d == activeConversation ? 0 : d.unread) }, 0);
+    if (clear) return;
+    this.notifications.update({notifications, unread});
+    this.update({notifications: true});
   }
 
   _dispatchMessage(msg) {
@@ -182,10 +179,9 @@ export default class User extends Reactive {
       conversation[msg.dispatchTo](msg);
     }
 
-    if (msg.highlight) {
+    if (msg.highlight && !conversation.is('private')) {
       this.notifications.addMessages(msg);
       conversation.update({notifications: conversation.notifications + 1});
-      this.updateNotificationCount();
     }
   }
 

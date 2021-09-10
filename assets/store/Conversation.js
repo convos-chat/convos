@@ -120,14 +120,16 @@ export default class Conversation extends Reactive {
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
-    this.update({unread: 0});
+    this.update({notifications: 0, unread: 0});
     await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
     return this;
   }
 
   update(params) {
     this._loadParticipants();
-    return super.update(params);
+    super.update(params);
+    if (params.hasOwnProperty('notifications') || params.hasOwnProperty('unread')) this.emit('unread', params);
+    return this;
   }
 
   wsEventMode(params) {

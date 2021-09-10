@@ -36,6 +36,7 @@ export default class Connection extends Conversation {
     conversation = new Conversation({...params, connection_id: this.connection_id});
     conversation.on('message', params => this.emit('message', params));
     conversation.on('update', () => this.update({conversations: true}));
+    conversation.on('unread', () => this.emit('unread'));
     this._addDefaultParticipants(conversation);
     this.conversations.set(conversation.conversation_id, conversation);
     this.update({conversations: true});

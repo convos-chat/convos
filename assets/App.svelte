@@ -59,15 +59,16 @@ $: features[$themeManager.compactDisplay ? 'add' : 'remove']('compact-display');
 $: routeOrUserChanged($route, $user);
 $: setTitle(title, $user);
 $: viewport.set({width, nColumns: width > 1200 ? 3 : width > 800 ? 2 : 1}); // Need to be in sync with sass/_variables.scss
+$: user.update({unreadIncludePrivateMessages: $viewport.nColumns == 1});
 
 function setTitle(title, $user) {
   if (!document) return;
   const organizationName = settings('organization_name');
+  const unread = $user.notifications.notifications ? '(' + $user.notifications.notifications + ') ' : '';
 
-  title = $user.unread ? '(' + $user.unread + ') ' + i18n.l(title) : i18n.l(title);
   document.title = organizationName == 'Convos'
-    ? i18n.l('%1 - Convos', title)
-    : i18n.l('%1 - Convos for %2', title, organizationName);
+    ? i18n.l('%1 - Convos', unread + i18n.l(title))
+    : i18n.l('%1 - Convos for %2', unread + i18n.l(title), organizationName);
 }
 
 async function registerServiceWorker() {

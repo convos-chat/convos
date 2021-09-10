@@ -4,19 +4,21 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
-import {getContext, onDestroy, onMount} from 'svelte';
+import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
 
 export const title = 'Notifications';
 
 const user = getContext('user');
-const conversation = user.notifications;
+const notifications = user.notifications;
 
 $: classNames = ['main', messages.length && 'has-results'].filter(i => i);
-$: messages = $conversation.messages;
+$: messages = $notifications.messages;
 
-onDestroy(() => user.markNotificationsRead());
-onMount(() => conversation.load());
+onMount(async () => {
+  await notifications.load();
+  await notifications.markAsRead();
+});
 </script>
 
 <ChatHeader>
@@ -25,7 +27,7 @@ onMount(() => conversation.load());
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
-  {#if $messages.length == 0 && !conversation.is('loading')}
+  {#if $messages.length == 0 && !notifications.is('loading')}
     <h2>{$l('No notifications.')}</h2>
   {/if}
 
@@ -42,7 +44,7 @@ onMount(() => conversation.load());
     </div>
   {/each}
 
-  {#if $conversation.is('loading')}
+  {#if $notifications.is('loading')}
     <div class="message__status-line for-loading"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
 </InfinityScroll>

@@ -8,7 +8,6 @@ export default class Notifications extends Conversation {
       connection_id: '',
       conversation_id: 'notifications',
       name: 'Notifications',
-      unread: 0,
     });
   }
 
@@ -18,6 +17,12 @@ export default class Notifications extends Conversation {
     }
 
     this.messages.push(messages);
+    return this;
+  }
+
+  async markAsRead() {
+    await super.markAsRead();
+    this.emit('cleared');
     return this;
   }
 

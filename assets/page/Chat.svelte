@@ -69,7 +69,6 @@ function setConversationFromRoute(connection_id, conversation_id) {
 function setConversationFromUser(user) {
   if (user.activeConversation == conversation) return;
   if (unsubscribe.conversation) unsubscribe.conversation();
-  if (unsubscribe.markAsRead) unsubscribe.markAsRead();
 
   conversation = user.activeConversation;
   messages = conversation.messages;
@@ -77,8 +76,7 @@ function setConversationFromUser(user) {
   connection = user.findConversation({connection_id: conversation.connection_id}) || conversation;
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
-  unsubscribe.markAsRead = conversation.markAsRead.bind(conversation);
-  user.updateNotificationCount([user.activeConversation]);
+  conversation.markAsRead();
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
   if (onLoadHash) return conversation.load({around: onLoadHash});
