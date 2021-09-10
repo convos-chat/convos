@@ -25,7 +25,7 @@ import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
 import {i18n} from './store/I18N';
 import {notify} from './js/Notify';
-import {q, settings} from './js/util';
+import {settings} from './js/util';
 import {route} from './store/Route';
 import {setContext, tick} from 'svelte';
 

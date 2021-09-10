@@ -5,7 +5,7 @@ import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
-import {camelize, extractErrorMessage} from '../js/util';
+import {camelize} from '../js/util';
 import {getSocket} from './../js/Socket';
 
 export default class User extends Reactive {

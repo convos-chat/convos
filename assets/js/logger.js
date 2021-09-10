@@ -6,7 +6,7 @@ const noop = () => {};
 // Need a root logger
 loggers.root = new Logger({name: 'root'});
 
-function defaultLogLevel(log, name) {
+function defaultLogLevel(name) {
   if (nameToLevel.root === undefined) {
     let levels = (location.href.match(/_debug=([a-z,:]+)/) || []).pop();
     if (levels) {
@@ -47,7 +47,7 @@ function Logger({name}) {
     return this;
   };
 
-  this.setLevel(defaultLogLevel(name == 'root' ? this : loggers.root, name));
+  this.setLevel(defaultLogLevel(name));
 }
 
 export function getLogger(name = 'root') {

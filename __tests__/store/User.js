@@ -2,6 +2,10 @@ import Socket from '../../assets/js/Socket';
 import TestWebSocket from '../../assets/js/TestWebSocket';
 import User from '../../assets/store/User';
 
+// Make the test less noisy
+import {getLogger} from '../../assets/js/logger';
+getLogger('socket').setLevel('warn');
+
 global.WebSocket = window.WebSocket = TestWebSocket;
 
 test('ensureConversation connection', () => {

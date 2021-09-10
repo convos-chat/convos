@@ -1,5 +1,4 @@
 <script>
-import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
@@ -10,7 +9,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, generateWriteable, viewport} from '../store/writable';
-import {chatHelper, renderEmbed, topicOrStatus, videoWindow} from '../js/chatHelpers';
+import {chatHelper, renderEmbed, topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -24,7 +23,6 @@ export let conversation_id = '';
 export let title = 'Chat';
 
 const dragAndDrop = new DragAndDrop();
-const socket = getContext('socket');
 const user = getContext('user');
 const popoverTarget = generateWriteable('chat:popoverTarget');
 
@@ -40,7 +38,6 @@ let focusChatInput, fillIn, uploader;
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
 $: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
-$: notConnected = $conversation.frozen ? true : false;
 $: title = $conversation.title;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
