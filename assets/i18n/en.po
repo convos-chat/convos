@@ -926,7 +926,7 @@ msgid "Want to be connected"
 msgstr "Want to be connected"
 
 msgid "What is on your mind %1?"
-msgstr "What is on your mind %1?"
+msgstr "What is on your mind, %1?"
 
 #: assets/page/Help.svelte:46
 msgid "Will be automatically converted into emojis."
