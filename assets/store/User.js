@@ -179,7 +179,8 @@ export default class User extends Reactive {
       conversation[msg.dispatchTo](msg);
     }
 
-    if (msg.highlight && !conversation.is('private')) {
+    if (msg.highlight && !conversation.is('private')
+        && conversation.conversation_id != this.activeConversation.conversation_id) {
       this.notifications.addMessages(msg);
       conversation.update({notifications: conversation.notifications + 1});
     }
