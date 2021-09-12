@@ -64,7 +64,8 @@ body.for-cms .sidebar-left {
     padding-left: 0.6em;
   }
 
-  &.has-errors {
+  &.has-errors,
+  &.has-notifications {
     font-style: italic;
   }
 

@@ -40,6 +40,7 @@ function conversationClassNames(connection, conversation) {
   const cn = [conversation.conversation_id ? 'for-conversation' : 'for-connection'];
   if (conversation.frozen || connection.state != 'connected') cn.push('is-frozen');
   if (conversation.errors) cn.push('has-errors');
+  if (conversation.notifications) cn.push('has-notifications');
   return cn.join(' ');
 }
 

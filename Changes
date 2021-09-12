@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.28 Not Released
  - Will update unread/notifications on conversation load, instead of unload
+ - Drafted styling for conversations with notifications
 
 6.27 2021-08-28T16:52:00+0200
  - Changed notifications are now per channel #612
