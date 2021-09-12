@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.28 Not Released
+6.28 2021-09-12T15:38:00+0200
  - Fix notifications styling when channel changes
  - Add styling for conversations with notifications
  - Will update unread/notifications on conversation load, instead of unload
