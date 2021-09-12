@@ -84,7 +84,8 @@ export default class Messages extends Reactive {
     const classes = ['message'];
     if (msg.type) classes.push('is-type-' + msg.type);
     if (msg.highlight) classes.push('is-highlighted');
-    classes.push(!msg.dayChanged && msg.from == prev.from ? 'has-same-from' : 'has-not-same-from');
+    const sameFrom = msg.from == prev.from && msg.conversation_id == prev.conversation_id && msg.connection_id == prev.connection_id;
+    classes.push(!msg.dayChanged && sameFrom ? 'has-same-from' : 'has-not-same-from');
     return classes.join(' ');
   }
 
