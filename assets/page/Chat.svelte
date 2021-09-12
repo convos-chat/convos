@@ -60,6 +60,10 @@ function conversationToUri() {
   return scheme + '://' + host + '/' + encodeURIComponent($conversation.conversation_id) + '?tls=1';
 }
 
+function onFocus() {
+  if (conversation.notifications || conversation.unread) conversation.markAsRead();
+}
+
 function setConversationFromRoute(connection_id, conversation_id) {
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
@@ -69,6 +73,7 @@ function setConversationFromRoute(connection_id, conversation_id) {
 function setConversationFromUser(user) {
   if (user.activeConversation == conversation) return;
   if (unsubscribe.conversation) unsubscribe.conversation();
+  if (unsubscribe.unread) unsubscribe.unread();
 
   conversation = user.activeConversation;
   messages = conversation.messages;
@@ -76,6 +81,7 @@ function setConversationFromUser(user) {
   connection = user.findConversation({connection_id: conversation.connection_id}) || conversation;
   now = new Time();
   unsubscribe.conversation = conversation.subscribe(d => { conversation = d });
+  unsubscribe.unread = () => conversation.update({unread: 0});
   conversation.markAsRead();
 
   onLoadHash = isISOTimeString(route.hash) && route.hash || '';
@@ -95,6 +101,8 @@ function showPopover(e) {
   }, 250);
 }
 </script>
+
+<svelte:window on:focus={onFocus}/>
 
 <ChatHeader>
   <h1 class="ellipsis"><a href="#settings" on:click="{activeMenu.toggle}">{$l(conversation.name)}</a></h1>

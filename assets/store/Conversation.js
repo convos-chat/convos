@@ -120,7 +120,7 @@ export default class Conversation extends Reactive {
 
   async markAsRead() {
     if (!this.markAsReadOp) return;
-    this.update({notifications: 0, unread: 0});
+    this.update({notifications: 0}); // Cannot clear "unread", since it breaks "New Messages" logic
     await this.markAsReadOp.perform({connection_id: this.connection_id, conversation_id: this.conversation_id});
     return this;
   }

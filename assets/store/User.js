@@ -7,6 +7,7 @@ import Search from './Search';
 import SortedMap from '../js/SortedMap';
 import {camelize, debounce} from '../js/util';
 import {getSocket} from './../js/Socket';
+import {notify} from './../js/Notify';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -181,7 +182,13 @@ export default class User extends Reactive {
 
     if (msg.highlight && !conversation.is('private')) {
       this.notifications.addMessages(msg);
-      conversation.update({notifications: conversation.notifications + 1});
+
+      if (conversation == this.activeConversation && notify.appHasFocus) {
+        conversation.markAsRead();
+      }
+      else {
+        conversation.update({notifications: conversation.notifications + 1});
+      }
     }
   }
 
