@@ -155,7 +155,7 @@ test('notification count', async () => {
   c1.markAsRead();
   await timer(30);
   expect(c1.notifications).toBe(0);
-  expect(c1.unread).toBe(0);
+  expect(c1.unread).toBe(5);
   expect(user.notifications.unread).toBe(0);
 
   user.update({unreadIncludePrivateMessages: true});
