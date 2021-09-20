@@ -18,13 +18,13 @@ jobs:
       run: |
         if echo $GITHUB_REF | grep -q '^refs/tags/v'; then
           VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
-          TAG_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/convos:$VERSION";
+          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:$VERSION";
         elif [ "$GITHUB_REF" = "refs/heads/docker" ]; then
-          TAG_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/convos:alpha";
+          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha";
         elif [ "$GITHUB_REF" = "refs/heads/master" ]; then
-          TAG_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/convos:alpha";
+          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha";
         else
-          TAG_NAME="${{ secrets.DOCKER_HUB_USERNAME }}/convos:stable";
+          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:stable";
         fi
         echo '::set-output name=tag::'$TAG_NAME
     - name: Check Out Repo
