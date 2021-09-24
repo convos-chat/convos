@@ -4,8 +4,6 @@ use t::Helper;
 use Mojo::File 'curfile';
 use Mojo::JSON 'encode_json';
 
-plan skip_all => 'Skip this test on travis' if $ENV{TRAVIS_BUILD_ID};
-
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 $ENV{NODE_ENV}       = 'production';
@@ -17,18 +15,24 @@ SKIP: {
 
 my $t = t::Helper->t;
 
-test_defaults('/' => 200);
+subtest 'path /' => sub {
+  test_defaults('/' => 200);
 
-$t->get_ok('/')->status_is(200)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
-  ->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
+  $t->get_ok('/')->status_is(200)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
+    ->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
+};
 
-test_defaults('/err/404' => 404)->element_exists('a.btn[href="/"]')
-  ->text_is('title', 'Not Found (404) - Convos')->text_is('h1', 'Not Found (404)');
+subtest 'path /err/404' => sub {
+  test_defaults('/err/404' => 404)->element_exists('a.btn[href="/"]')
+    ->text_is('title', 'Not Found (404) - Convos')->text_is('h1', 'Not Found (404)');
+};
 
-test_defaults('/err/500' => 500)
-  ->element_exists('a[href="https://github.com/convos-chat/convos/issues/"]')
-  ->element_exists('a.btn[href="/"]')->text_is('title', 'Internal Server Error (500) - Convos')
-  ->text_is('h1', 'Internal Server Error (500)');
+subtest 'path /err/500' => sub {
+  test_defaults('/err/500' => 500)
+    ->element_exists('a[href="https://github.com/convos-chat/convos/issues/"]')
+    ->element_exists('a.btn[href="/"]')->text_is('title', 'Internal Server Error (500) - Convos')
+    ->text_is('h1', 'Internal Server Error (500)');
+};
 
 done_testing;
 

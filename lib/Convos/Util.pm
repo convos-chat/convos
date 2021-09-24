@@ -1,13 +1,14 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
 
-use Mojo::Collection 'c';
-use Mojo::File 'path';
+use Mojo::Collection qw(c);
+use Mojo::File qw(path);
+use Mojo::URL;
 use Mojo::IOLoop;
 use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
-use Scalar::Util 'blessed';
+use Scalar::Util qw(blessed);
 
 use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
 

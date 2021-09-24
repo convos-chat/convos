@@ -16,43 +16,48 @@ my $core   = $t->app->core;
 my $bot    = $t->app->bot;
 my $connection;
 
-subtest setup => sub {
-  $core->settings->default_connection($server->url);
-  $core->settings->open_to_public(true);
-  $t->post_ok('/api/user/register',
-    json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
+$server->subtest(
+  setup => sub {
+    $core->settings->default_connection($server->url);
+    $core->settings->open_to_public(true);
+    $t->post_ok('/api/user/register',
+      json => {email => 'superman@example.com', password => 'longenough'})->status_is(200);
 
-  # wait for the bot to register
-  Mojo::IOLoop->one_tick until $bot->user;
-};
+    # wait for the bot to register
+    Mojo::IOLoop->one_tick until $bot->user;
+  }
+);
 
-{
-  note 'connect';
-  write_config('connect.yaml');
+$server->subtest(
+  connect => sub {
+    write_config('connect.yaml');
 
-  my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url);
-  Mojo::IOLoop->one_tick until $connection = $bot->user->get_connection($connection_id);
+    my $connection_id = join '-', $server->url->scheme, pretty_connection_name($server->url);
+    Mojo::IOLoop->one_tick until $connection = $bot->user->get_connection($connection_id);
 
-  $server->client($connection)->server_event_ok('_irc_event_nick')
-    ->server_write_ok(['welcome-botman.irc'])->server_event_ok('_irc_event_mode')
-    ->process_ok('connected');
-}
+    $server->client($connection)->server_event_ok('_irc_event_nick')
+      ->server_write_ok(['welcome-botman.irc'])->server_event_ok('_irc_event_mode')
+      ->process_ok('connected');
+  }
+);
 
-{
-  note 'join';
-  $server->client($connection)->server_event_ok('_irc_event_join')
-    ->server_write_ok(['join-convos.irc'])->client_event_ok('_irc_event_join');
-  write_config('join.yaml');
-  $server->process_ok('joined');
-}
+$server->subtest(
+  'join' => sub {
+    $server->client($connection)->server_event_ok('_irc_event_join')
+      ->server_write_ok(['join-convos.irc'])->client_event_ok('_irc_event_join');
+    write_config('join.yaml');
+    $server->process_ok('joined');
+  }
+);
 
-{
-  note 'part';
-  $server->client($connection)->server_event_ok('_irc_event_part')
-    ->server_write_ok(":localhost PART #convos\r\n")->client_event_ok('_irc_event_part');
-  write_config('part.yaml');
-  $server->process_ok('parted');
-}
+$server->subtest(
+  'part' => sub {
+    $server->client($connection)->server_event_ok('_irc_event_part')
+      ->server_write_ok(":localhost PART #convos\r\n")->client_event_ok('_irc_event_part');
+    write_config('part.yaml');
+    $server->process_ok('parted');
+  }
+);
 
 done_testing;
 

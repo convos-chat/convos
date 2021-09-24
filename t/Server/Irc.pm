@@ -4,9 +4,11 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Carp 'confess';
 use Convos::Core::Connection::Irc;
 use Mojo::Loader;
+use Test::Deep;
 
 has auto_connect     => 1;
 has connection_class => 'Convos::Core::Connection::Irc';
+has success          => 0;
 
 has url => sub {
   my $port = Mojo::IOLoop::Server->generate_port;
@@ -19,6 +21,13 @@ sub client {
   my $self = shift;
   return $self->{client} unless @_;
   $self->{client} = shift;
+
+  $self->{client_states} = [];
+  $self->{client}->on(state => sub { shift; push @{$self->{client_states}}, [@_] });
+
+  $self->{client_messages} = [];
+  $self->{client}->on(message => sub { push @{$self->{client_messages}}, $_[2] });
+
   push @{$self->{queue}}, [\&_handle_client_connect, $self->{client}] if $self->auto_connect;
   return $self;
 }
@@ -28,6 +37,33 @@ sub client_event_ok {
   push @{$self->{queue}}, [\&_handle_client_event_item, $self->client, $event, $cb];
   $self->_dequeue unless $self->{outstanding_events}++;
   return $self;
+}
+
+sub client_messages_ok {
+  my ($self, $exp, $desc) = @_;
+  my $got = $self->{client_messages};
+  $self->{client_messages} = [];
+  $self->_test(cmp_deeply => $got, $exp, $desc || 'client messages');
+  Test::More::diag(Test::More::explain($got)) unless $self->success;
+  return $self;
+}
+
+sub client_states_ok {
+  my ($self, $exp, $desc) = @_;
+  my $got = $self->{client_states};
+  $self->{client_states} = [];
+  $self->_test(cmp_deeply => $got, $exp, $desc || 'client states');
+  Test::More::diag(Test::More::explain($got)) unless $self->success;
+  return $self;
+}
+
+sub client_wait_for_states_ok {
+  my ($self, $exp, $desc) = @_;
+  my ($n, $p) = (0, Mojo::Promise->new);
+  my $cb = $self->{client}->on(state => sub { $p->resolve if ++$n >= $exp });
+  Mojo::Promise->race($p, Mojo::Promise->timer(2))->wait;
+  $self->{client}->unsubscribe(state => $cb);
+  return $self->_test(is => $n, $exp, $desc || "client wait for $exp states");
 }
 
 sub close_connections {
@@ -55,7 +91,6 @@ sub process_ok {
     Mojo::IOLoop->remove($tid);
   };
 
-  return $self->_test(subtest => $desc, $run) if $desc;
   return $self->tap($run);
 }
 
@@ -100,6 +135,13 @@ sub start {
   );
 
   return $self->tap('_patch_connection_class');
+}
+
+sub subtest {
+  my ($self, $desc, $cb) = @_;
+  $self->{client_messages} = [];
+  $self->{client_states}   = [];
+  return $self->_test(subtest => $desc, $cb);
 }
 
 sub _data_section {
@@ -200,8 +242,8 @@ sub _handle_server_write_item {
 sub _test {
   my ($self, $name, @args) = @_;
   local $Test::Builder::Level = $Test::Builder::Level + 2;
-  Test::More->can($name)->(@args);
-  return $self;
+  my $tester = Test::Deep->can($name) || Test::More->can($name);
+  return $self->success($tester->(@args));
 }
 
 sub _patch_connection_class {
