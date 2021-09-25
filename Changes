@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.29 Not Released
+6.29 2021-09-25T18:18:00+0900
  - Fix decoding/encoding password and username for connections #620
  - Fix trying to connect if wanted_state is "connected"
  - Fix "Facts" bot action to only reply if the fact ends with "?"
