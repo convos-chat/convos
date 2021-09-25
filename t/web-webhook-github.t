@@ -30,6 +30,7 @@ subtest 'input validation' => sub {
 };
 
 subtest 'delivered' => sub {
+  no warnings qw(once);
   @Convos::Controller::Events::WEBHOOK_NETWORKS = qw(127.0.0.0/24);
   my $json = {
     action     => 'opened',

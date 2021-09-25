@@ -16,7 +16,7 @@ has skip_queue       => sub { shift->url->host eq 'localhost' ? true : false };
 sub url {
   my ($self, $url) = @_;
   return $self->tap(sub { $self->{url} = ref $url ? $url : Mojo::URL->new($url) }) if @_ == 2;
-  return $self->{url} = Mojo::URL->new($self->{url} || 'localhost') unless ref $self->{url};
+  return $self->{url} = Mojo::URL->new($self->{url} || '') unless ref $self->{url};
   return $self->{url};
 }
 

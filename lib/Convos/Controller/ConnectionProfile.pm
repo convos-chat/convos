@@ -32,6 +32,8 @@ sub remove {
   return $self->render(openapi => {message => 'Deleted.'})
     unless my $profile = $core->connection_profile({id => $self->stash('id')});
 
+  return $self->render(openapi => {message => 'Deleted.'}) unless $profile->url->host;
+
   return $self->reply->errors('You cannot delete the default connection.', 400)
     if $core->settings->default_connection->host eq $profile->url->host;
 
