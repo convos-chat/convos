@@ -25,10 +25,10 @@ sub reply {
 
   my $topic  = trim $parts[-1];
   my $direct = $topic =~ s!^\W*$event->{my_nick}\W*!!;
-  $topic =~ s!\?\W*$!!;
-
+  return undef unless $topic =~ s!\?\W*$!!;
   return undef unless $topic =~ m!\w!;
 
+  $topic = trim $topic;
   my $fact = $self->query_db(
     'select topic, copula, explanation from facts where topic = ? collate nocase
       order by case copula when ? then 0 else 1 end', $topic, $parts[1] || 'is',

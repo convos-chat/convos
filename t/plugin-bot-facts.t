@@ -27,9 +27,10 @@ $facts->emit(message => {my_nick => 'superbot', message => 'Convos is an app'});
 is $facts->query_db('select count(*) from facts')->fetchrow_arrayref->[0], 1, 'got one fact';
 
 is $facts->reply({my_nick => 'superbot', message => ''}), undef, 'missing message';
-is $facts->reply({my_nick => 'superbot', message => 'what is convos?'}), 'Convos is an app',
+is $facts->reply({my_nick => 'superbot', message => 'what is   convos ? '}), 'Convos is an app',
   'what is convos?';
-is $facts->reply({my_nick => 'superbot', message => 'CONVOS?'}), 'Convos is an app', 'CONVOS?';
+is $facts->reply({my_nick => 'superbot', message => ' CONVOS? '}), 'Convos is an app', 'CONVOS?';
+is $facts->reply({my_nick => 'superbot', message => 'CONVOS'}),    undef,              'CONVOS';
 
 $facts->emit(message => {my_nick => 'superbot', message => ' superbot:   convos is a web app!'});
 is $facts->reply({my_nick => 'superbot', message => 'whatever'}),
