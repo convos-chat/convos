@@ -97,7 +97,7 @@ Examples:
   convos get /sw.js
   convos get --help
   convos install
-  convos install [--all|--dev|--prod]
+  convos install [--all|--dev|--prod|--bot|--ldap]
   convos version
 
 For developers:
