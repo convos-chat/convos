@@ -7,7 +7,7 @@ test('commands', () => {
 
 test('commandOptions', () => {
   expect(commandOptions({query: '/'}).length).toBe(commands.length);
-  expect(commandOptions({query: '/join'})).toEqual([{text: '/join &lt;<a href=\"./%23channel\">#channel</a>&gt;', val: '/join'}]);
+  expect(commandOptions({query: '/join'})).toEqual([{text: '/join &lt;#channel&gt;', val: '/join'}]);
 });
 
 test('normalizeCommand', () => {
