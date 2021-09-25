@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.30 Not Released
+6.30 2021-09-25T18:30:00+0900
  - Fix not making links inside links when #fragments are seen
 
 6.29 2021-09-25T18:18:00+0900
