@@ -364,10 +364,7 @@ sub _irc_event_privmsg {
   unless ($self->_is_current_nick($nick)) {
     $highlight = grep { $message[0] =~ /\b\Q$_\E\b/i } $self->nick,
       @{$self->user->highlight_keywords};
-
-    # The unread count will be saved periodically by _periodic_events()
-    $target->inc_unread_p->catch(sub { $self->_debug('inc_unread %s FAIL %s', $target->id, shift) }
-    );
+    $target->inc_unread;    # The unread count will be saved periodically by _periodic_events()
   }
 
   # server message or message without a conversation

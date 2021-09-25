@@ -15,13 +15,8 @@ sub connection { shift->{connection} or Carp::confess('connection required in co
 sub id         { my $from = $_[1] || $_[0]; lc($from->{id} // $from->{name}) }
 sub is_private { shift->name =~ /^$CHANNEL_RE/ ? 0 : 1 }
 
-sub inc_unread_p {
-  my $self = shift;
-  $self->{unread}++;
-  return Mojo::Promise->resolve($self);
-}
-
 sub inc_notifications { $_[0]->{notifications}++; $_[0] }
+sub inc_unread        { $_[0]->{unread}++;        $_[0] }
 
 sub messages_p {
   my ($self, $query) = @_;
@@ -111,17 +106,17 @@ Holds the number of unread notifications.
 
 =head1 METHODS
 
-=head2 inc_unread_p
+=head2 inc_unread
 
-  $p = $conversation->inc_unread_p;
+  $conversation = $conversation->inc_unread;
 
-Used to increase the unread count.
+Used to increase the L</unread> count.
 
 =head2 inc_notifications
 
   $p = $conversation->inc_notifications;
 
-Used to increate the unread notifications count.
+Used to increate the unread L</notifications> count.
 
 =head2 is_private
 
