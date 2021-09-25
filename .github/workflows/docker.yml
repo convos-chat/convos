@@ -2,9 +2,11 @@ name: docker
 on:
   push:
     branches:
-      - 'docker'
-      - 'master'
-      - 'stable'
+    - 'docker'
+    - 'master'
+    - 'stable'
+    tags:
+    - "v*.*"
 jobs:
   build:
     runs-on: ubuntu-latest
