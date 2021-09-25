@@ -78,6 +78,11 @@ test('md - nbsp', () => {
   expect(i18n.md('    ___ ___  _  ___   _____  ___')).toBe('&nbsp; &nbsp; ___ ___ &nbsp;_ &nbsp;___ &nbsp; _____ &nbsp;___');
 });
 
+test('md - channel names', () => {
+  expect(i18n.md('#foo #foo-bar#not href="#anchor" #foo.bar'))
+    .toBe('<a href=\"./%23foo\">#foo</a><a href=\"./%20%23foo-bar\"> #foo-bar</a>#not href=&quot;#anchor&quot;<a href=\"./%20%23foo.bar\"> #foo.bar</a>');
+});
+
 function countEmojis(str) {
   return i18n.md(str).match(/class="emoji"/g).length;
 }

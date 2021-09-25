@@ -130,7 +130,7 @@ export default class I18N extends Reactive {
 
   _mdChannelsAndNicks(str) {
     // TODO: Make nicks clickable
-    return str.replace(/(?:^|\s)#[\w.]+/g, (channel) => {
+    return str.replace(/(?:^|\s)#[\w.-]+/g, (channel) => {
       const suffix = channel.match(/\.$/) ? '.' : '';
       if (suffix) channel = channel.replace(/\.$/, '');
       return '<a href="./' + route.urlFor(encodeURIComponent(channel)) + '">' + channel + '</a>' + suffix;
