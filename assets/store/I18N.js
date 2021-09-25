@@ -112,6 +112,7 @@ export default class I18N extends Reactive {
     if (!opt.raw) str = this._mdEmStrong(str);
     if (!opt.raw) str = this.emojis.markup(str);
     if (!opt.raw) str = this._mdBlockQuote(str);
+    if (!opt.raw) str = this._mdChannelsAndNicks(str);
     return str;
   }
 
@@ -125,6 +126,15 @@ export default class I18N extends Reactive {
 
   _mdBlockQuote(str) {
     return str.replace(/^&gt;\s(.*)/, (all, quote) => '<blockquote>' + quote + '</blockquote>');
+  }
+
+  _mdChannelsAndNicks(str) {
+    // TODO: Make nicks clickable
+    return str.replace(/#[\w.]+/g, (channel) => {
+      const suffix = channel.match(/\.$/) ? '.' : '';
+      if (suffix) channel = channel.replace(/\.$/, '');
+      return '<a href="./' + route.urlFor(encodeURIComponent(channel)) + '">' + channel + '</a>' + suffix;
+    });
   }
 
   _mdCode(str) {

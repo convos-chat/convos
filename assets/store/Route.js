@@ -97,6 +97,7 @@ export default class Route extends Reactive {
 
     let href = linkEl.getAttribute('href') || '';
     if (href.indexOf('#') == 0) href = this.path + href;
+    if (href.indexOf('./') == 0) href = '/' + this._pathParts.slice(0, -1).join('/') + href.replace(/^\./, '');
     if (href.indexOf(this.baseUrl) == 0) href = href.substr(this.baseUrl.length);
     if (href.indexOf(this.basePath) == 0) href = href.substr(this.basePath.length);
     if (href.indexOf('/') == 0) {

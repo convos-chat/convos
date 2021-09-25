@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Fix decoding/encoding password and username for connections #620
  - Fix trying to connect if wanted_state is "connected"
  - Fix "Facts" bot action to only reply if the fact ends with "?"
+ - Add channel names are now clickable
  - Add AWAY message to WHOIS response #360
  - Add /away command #360
  - Add more connection states: connecting and disconnecting

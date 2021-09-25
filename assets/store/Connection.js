@@ -3,7 +3,6 @@ import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
 import {extractErrorMessage, is, regexpEscape} from '../js/util';
 import {api} from '../js/Api';
-import {modeMoniker} from '../js/constants';
 import {notify} from '../js/Notify';
 
 const sortConversations = (a, b) => {
@@ -170,11 +169,9 @@ export default class Connection extends Conversation {
   }
 
   wsEventSentWhois(params) {
+    const channels = Object.keys(params.channels).sort();
+    const vars = [params.nick, params.name || params.user];
     let message = '%1 (%2)';
-    let vars = [params.nick, params.name || params.user];
-
-    const channels = Object.keys(params.channels).sort().map(name => (modeMoniker[params.channels[name].mode] || '') + name);
-    params.channels = channels;
 
     if (params.away) {
       message += ' is away (%3) and';
@@ -184,10 +181,10 @@ export default class Connection extends Conversation {
     if (params.idle_for && channels.length) {
       message += ' has been idle for %4s in %5.';
       vars.push(params.idle_for);
-      vars.push(channels.join(', '));
+      vars.push(channels.sort().join(', '));
     }
     else if (params.idle_for && !channels.length) {
-      message += 'has been idle for %4s, and is not in any channels.';
+      message += ' has been idle for %4s, and is not in any channels.';
       vars.push(params.idle_for);
     }
     else if (channels.length) {
