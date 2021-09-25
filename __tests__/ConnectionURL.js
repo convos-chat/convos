@@ -44,14 +44,14 @@ test('toFields', () => {
 });
 
 test('fromFields, toFields', () => {
-  const url = new ConnectionURL('irc://0:0@convos.chat:6697/%23convos?local_address=1.2.3.4&sasl=cool&nick=Super&realname=Clark&tls=1&tls_verify=0');
+  const url = new ConnectionURL('irc://0:z%5E2JhFX99%25r@convos.chat:6697/%23convos?local_address=1.2.3.4&sasl=cool&nick=Super&realname=Clark&tls=1&tls_verify=0');
 
   expect(url.toFields()).toEqual({
     conversation_id: '#convos',
     host: 'convos.chat:6697',
     local_address: '1.2.3.4',
     nick: 'Super',
-    password: '0',
+    password: 'z^2JhFX99%r',
     protocol: 'irc',
     realname: 'Clark',
     sasl: 'cool',
@@ -61,5 +61,5 @@ test('fromFields, toFields', () => {
   });
 
   expect(new ConnectionURL().fromFields(url.toFields()).toString())
-    .toBe('irc://0:0@convos.chat:6697/%23convos?local_address=1.2.3.4&nick=Super&realname=Clark&sasl=cool&tls=1&tls_verify=0');
+    .toBe('irc://0:z%5E2JhFX99%25r@convos.chat:6697/%23convos?local_address=1.2.3.4&nick=Super&realname=Clark&sasl=cool&tls=1&tls_verify=0');
 });

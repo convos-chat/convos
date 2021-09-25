@@ -33,8 +33,8 @@ export default class ConnectionURL {
   fromFields(fields) {
     if (is.string(fields.protocol)) this.protocol = fields.protocol.replace(/:?$/, ':');
     if (is.string(fields.host)) this.host = fields.host;
-    if (is.string(fields.password)) this.password = fields.password;
-    if (is.string(fields.username)) this.username = fields.username;
+    if (is.string(fields.password)) this.password = encodeURIComponent(fields.password);
+    if (is.string(fields.username)) this.username = encodeURIComponent(fields.username);
     if (is.string(fields.conversation_id)) this.pathname = encodeURIComponent(fields.conversation_id);
 
     const searchParams = this.searchParams;
@@ -51,8 +51,8 @@ export default class ConnectionURL {
   toFields(fields = {}) {
     fields.protocol = this.protocol.replace(/:$/, '');
     fields.host = this.host;
-    fields.password = is.string(this.password) ? this.password : '';
-    fields.username = is.string(this.username) ? this.username : '';
+    fields.password = is.string(this.password) ? decodeURIComponent(this.password) : '';
+    fields.username = is.string(this.username) ? decodeURIComponent(this.username) : '';
     fields.conversation_id = decodeURIComponent(this.pathname.split('/').filter(p => p.length)[0] || '');
 
     const searchParams = this.searchParams;
