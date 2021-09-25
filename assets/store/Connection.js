@@ -165,27 +165,36 @@ export default class Connection extends Conversation {
   }
 
   wsEventSentWhois(params) {
-    let message = '%1 (%2@%3, %4)';
-    let vars = [params.nick, params.user, params.host, params.name];
+    let message = '%1 (%2)';
+    let vars = [params.nick, params.name || params.user];
 
     const channels = Object.keys(params.channels).sort().map(name => (modeMoniker[params.channels[name].mode] || '') + name);
     params.channels = channels;
 
+    if (params.away) {
+      message += ' is away (%3) and';
+      vars.push(params.away);
+    }
+
     if (params.idle_for && channels.length) {
-      message += ' has been idle for %5s in %6.';
+      message += ' has been idle for %4s in %5.';
       vars.push(params.idle_for);
       vars.push(channels.join(', '));
     }
     else if (params.idle_for && !channels.length) {
-      message += 'has been idle for %5s, and is not in any channels.';
+      message += 'has been idle for %4s, and is not in any channels.';
       vars.push(params.idle_for);
     }
     else if (channels.length) {
-      message += ' is active in %5.';
+      message += ' is active in %4.';
       vars.push(channels.join(', '));
     }
     else {
       message += ' is not in any channels.';
+    }
+
+    if (!params.away) {
+      message = message.replace(/%(4|5)/g, (a, n) => '%' + (n - 1));
     }
 
     const conversation = this.findConversation(params) || this;

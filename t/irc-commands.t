@@ -365,7 +365,7 @@ $server->subtest(
     is_deeply(
       $res,
       {
-        away        => false,
+        away        => 'Away from keyboard',
         channels    => {'#test123' => {mode => ''}, '#convos' => {mode => 'o'}},
         fingerprint => '27c8d553c199533e882a99659a8f942220281ec6',
         host        => 'irc.example.com',
@@ -486,4 +486,5 @@ __DATA__
 :localhost 378 superman superwoman :is connecting from *@125-12-222-122.rev.home.ne.jp 125.12.222.122
 :localhost 338 superman superwoman 255.255.255.255 :actually using host
 :localhost 317 superman superwoman 17454 1432930742 :seconds idle, signon time
+:localhost 301 superman superwoman Away from keyboard
 :localhost 318 superman superwoman :End of /WHOIS list.

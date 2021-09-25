@@ -660,7 +660,11 @@ sub _make_whois_response {
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
   return $p->resolve($res)              if $msg->{command} eq 'rpl_endofwhois';
 
-  return $res->{away}     = true                         if $msg->{command} eq 'rpl_away';
+  if ($msg->{command} eq 'rpl_away' or $msg->{command} eq '301') {
+    my @msg = @{$msg->{params}};
+    return $res->{away} = join ' ', splice @msg, 2;    # remove nick information
+  }
+
   return $res->{idle_for} = 0 + ($msg->{params}[2] // 0) if $msg->{command} eq 'rpl_whoisidle';
   return @$res{qw(server server_info)} = @{$msg->{params}}[2, 3]
     if $msg->{command} eq 'rpl_whoisserver';
@@ -1076,8 +1080,8 @@ sub _send_whois_p {
   return $invalid_target_p if $invalid_target_p;
   return $self->_write_and_wait_p(
     "WHOIS $target",
-    {away => false, channels => {}, name => '', nick => $target, server => '', user => ''},
-    276               => {1 => $target},
+    {away => '', channels => {}, name => '', nick => $target, server => '', user => ''},
+    276               => {1 => $target},    # tls fingerprint
     err_nosuchnick    => {1 => $target},
     err_nosuchserver  => {1 => $target},
     rpl_away          => {1 => $target},
