@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix trying to connect if wanted_state is "connected"
  - Fix "Facts" bot action to only reply if the fact ends with "?"
  - Add AWAY message to WHOIS response #360
+ - Add /away command #360
  - Add more connection states: connecting and disconnecting
  - Add server messages when connections state changes
  - Add "Retry" button to loading screen

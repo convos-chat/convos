@@ -75,6 +75,11 @@ export default class Connection extends Conversation {
     return super.update(params);
   }
 
+  wsEventSentAway(params) {
+    const conversation = this.findConversation(params) || this;
+    conversation.addMessages({message: params.reason, sent: params, type: 'notice'});
+  }
+
   wsEventConnection(params) {
     this.update({state: params.state});
   }

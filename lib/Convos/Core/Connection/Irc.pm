@@ -63,6 +63,7 @@ sub send_p {
   return $self->_send_list_p($message)               if $cmd eq 'LIST';
   return $self->_send_nick_p($message)               if $cmd eq 'NICK';
   return $self->_send_whois_p($message)              if $cmd eq 'WHOIS';
+  return $self->_send_away_p($message)               if $cmd eq 'AWAY';
 
   return $self->_send_names_p($target) if $cmd eq 'NAMES';
 
@@ -504,6 +505,12 @@ sub _irc_event_rpl_topicwhotime { }
 
 sub _is_current_nick { lc $_[0]->nick eq lc $_[1] }
 
+sub _make_away_response {
+  my ($self, $msg, $res, $p) = @_;
+  $p->resolve(
+    {away => $msg->{command} eq 'rpl_unaway' ? false : true, reason => $msg->{params}[1] // ''});
+}
+
 sub _make_ctcp_string {
   my $self = shift;
   local $_ = join ' ', @_;
@@ -750,6 +757,19 @@ sub _sasl_mechanism {
   my $self = shift;
   my $mech = uc($self->url->query->param('sasl') || '');
   return $mech =~ m!^(EXTERNAL|PLAIN)$! ? $mech : '';
+}
+
+sub _send_away_p {
+  my ($self, $away_message) = @_;
+  $away_message = trim $away_message // '';
+  $away_message = ":$away_message" if length $away_message;
+
+  return $self->_write_and_wait_p(
+    "AWAY $away_message", {away => false},
+    rpl_nowaway => {},
+    rpl_unaway  => {},
+    '_make_away_response',
+  );
 }
 
 sub _send_clear_p {

@@ -36,6 +36,7 @@ add('/shrug', '/shrug <msg>', 'Add a shrug to end of message. Message is optiona
 add('/join', '/join <#channel>', 'Join channel and open up a chat window.');
 add('/close', '/close [nick|#channel]', 'Close conversation.');
 add('/nick', '/nick <nick>', 'Change your wanted nick.');
+add('/away', '/away <message>', 'Add or remove an away message');
 add('/kick', '/kick <nick>', 'Kick a user from the current channel.');
 add('/mode', '/mode [+|-][b|o|v] <user>', 'Change mode of yourself or a user');
 add('/topic', '/topic or /topic <new topic>', 'Show current topic, or set a new one.');

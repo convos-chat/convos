@@ -383,6 +383,20 @@ $server->subtest(
 );
 
 $server->subtest(
+  'away' => sub {
+    $server->server_event_ok('_irc_event_away')->server_write_ok(['away.irc']);
+    $res = $connection->send_p('', '/away foo')->$wait_success;
+    $server->processed_ok;
+    is_deeply($res, {away => true, reason => 'You have been marked as being away'}, 'away');
+
+    $server->server_event_ok('_irc_event_away')->server_write_ok(['unaway.irc']);
+    $res = $connection->send_p('', '/away ')->$wait_success;
+    $server->processed_ok;
+    is_deeply($res, {away => false, reason => 'You are no longer marked as being away'}, 'unaway');
+  }
+);
+
+$server->subtest(
   'close and part' => sub {
     $res = $connection->send_p('#convos', '/close superwoman')->$wait_success;
     is_deeply($res, {}, 'close superwoman response');
@@ -459,6 +473,10 @@ $server->subtest(
 done_testing;
 
 __DATA__
+@@ away.irc
+:localhost 306 testman :You have been marked as being away
+@@ unaway.irc
+:localhost 305 testman :You are no longer marked as being away
 @@ join-invite-only.irc
 :localhost 473 superman #invite_only :Cannot join channel (+i)
 @@ join-protected.irc
