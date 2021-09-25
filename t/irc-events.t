@@ -17,15 +17,19 @@ $server->subtest(
       ->process_ok('welcome');
 
     $server->client_messages_ok([
-      map { superhashof {ts => ignore, %$_} } {from => 'irc-localhost', type => 'notice'},
-      {from => 'irc-localhost', type => 'notice'},
-      {from => 'irc-localhost', type => 'notice'},
-      {from => 'irc-localhost', type => 'notice'},
-      {
-        from    => 'hybrid8.debian.local',
-        type    => 'private',
-        message => 'Welcome to the debian Internet Relay Chat Network superman'
-      },
+      map { superhashof {ts => ignore, type => 'notice', %$_} } (
+        {from => 'irc-localhost', message => re(qr{Connecting to})},
+        {from => 'irc-localhost', message => re(qr{Connected to})},
+        {from => 'irc-localhost'},
+        {from => 'irc-localhost'},
+        {from => 'irc-localhost'},
+        {from => 'irc-localhost'},
+        {
+          from    => 'hybrid8.debian.local',
+          type    => 'private',
+          message => 'Welcome to the debian Internet Relay Chat Network superman'
+        }
+      ),
     ]);
   }
 );
@@ -210,15 +214,6 @@ $server->subtest(
         type      => 'notice',
       })
     ]);
-  }
-);
-
-$server->subtest(
-  'reconnect too fast' => sub {
-    is $connection->{failed_to_connect}, 0, 'failed_to_connect = 0';
-    $server->server_write_ok("ERROR :Trying to reconnect too fast.\r\n")
-      ->client_event_ok('_irc_event_error')->process_ok('error');
-    is $connection->{failed_to_connect}, 1, 'failed_to_connect = 1';
   }
 );
 

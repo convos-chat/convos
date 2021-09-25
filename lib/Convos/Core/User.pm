@@ -84,8 +84,7 @@ sub load_connections_p {
     return %p && Mojo::Promise->all(values %p);
   })->then(sub {
     for my $connection (@connections) {
-      $self->core->connect($connection)
-        if $connection->wanted_state eq 'connected' and !$ENV{CONVOS_SKIP_CONNECT};
+      $self->core->connect($connection) unless $ENV{CONVOS_SKIP_CONNECT};
     }
 
     return $self;

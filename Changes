@@ -1,6 +1,9 @@
 Revision history for perl distribution Convos
 
 6.29 Not Released
+ - Fix trying to connect if wanted_state is "connected"
+ - Add more connection states: connecting and disconnecting
+ - Add server messages when connections state changes
  - Add "Retry" button to loading screen
 
 6.28 2021-09-12T15:38:00+0200

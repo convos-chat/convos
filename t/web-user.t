@@ -79,7 +79,7 @@ subtest 'Unread' => sub {
         name                => 'localhost',
         on_connect_commands => [],
         service_accounts    => [qw(chanserv nickserv)],
-        state               => re(qr{disconnected|queued}),
+        state               => re(qr{connecting|disconnected|queued}),
         url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
         wanted_state        => 'connected',
       }],

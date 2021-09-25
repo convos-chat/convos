@@ -77,10 +77,6 @@ export default class Connection extends Conversation {
 
   wsEventConnection(params) {
     this.update({state: params.state});
-    this.addMessages(params.message
-        ? {message: 'Connection state changed to %1: %2', vars: [params.state, params.message]}
-        : {message: 'Connection state changed to %1.', vars: [params.state]},
-      );
   }
 
   wsEventFrozen(params) {
@@ -212,7 +208,10 @@ export default class Connection extends Conversation {
   _calculateFrozen() {
     switch (this.state) {
       case 'connected': return '';
+      case 'connecting': return 'Connecting...';
       case 'disconnected': return 'Disconnected.';
+      case 'disconnecting': return 'Disconnecting...';
+      case 'queued': return 'Queued.';
       case 'unreachable': return 'Unreachable.';
       default: return 'Connecting...';
     }

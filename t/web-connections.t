@@ -58,7 +58,7 @@ $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:
 $connection->state(disconnected => '');
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://example.com:9999', wanted_state => 'connected'})->status_is(200)
-  ->json_is('/name' => 'localhost')->json_is('/state' => 'queued')
+  ->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
   ->json_is('/url'  => 'irc://example.com:9999?nick=superman&tls=1');
 
 $connection->state(connected => '');
@@ -75,14 +75,14 @@ $t->post_ok(
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(200)
   ->json_is('/url'   => 'irc://foo:bar@example.com:9999?tls=0&nick=superman')
-  ->json_is('/state' => 'queued');
+  ->json_is('/state' => 'disconnected');
 
 $connection->state(connected => '');
 $t->post_ok('/api/connection/irc-localhost',
   json =>
     {url => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman', wanted_state => 'connected'})
   ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman')
-  ->json_is('/state' => 'queued');
+  ->json_is('/state' => 'disconnected');
 
 is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman',
   'to json url';

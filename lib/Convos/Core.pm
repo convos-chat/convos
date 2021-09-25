@@ -1,44 +1,53 @@
 package Convos::Core;
-use Mojo::Base -base;
+use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Backend;
 use Convos::Core::ConnectionProfile;
 use Convos::Core::Settings;
 use Convos::Core::User;
 use Convos::Util qw(DEBUG has_many);
+use List::Util qw(first sum0);
 use Mojo::File;
 use Mojo::Log;
 use Mojo::URL;
 use Mojo::Util qw(trim);
 use Mojolicious::Plugins;
 use Scalar::Util qw(blessed weaken);
+use Time::HiRes qw(time);
 
-has backend  => sub { Convos::Core::Backend->new };
-has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
-has log      => sub { Mojo::Log->new };
-has ready    => 0;
-has settings => sub { Convos::Core::Settings->new(core => shift) };
+has backend       => sub { Convos::Core::Backend->new };
+has connect_delay => sub { $ENV{CONVOS_CONNECT_DELAY} || 4 };
+has home          => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
+has log           => sub { Mojo::Log->new };
+has ready         => 0;
+has settings      => sub { Convos::Core::Settings->new(core => shift) };
 
 sub connect {
-  my ($self, $connection, $reason) = @_;
+  my ($self, $connection, $delay) = @_;
   return $self if $connection->wanted_state eq 'disconnected';
 
-  $connection->state(queued => $reason || 'Connecting soon...');
-
   my $host = $connection->url->host;
-  if ($connection->profile->skip_queue and !$reason) {
-    $connection->connect_p;
+  if ($connection->profile->skip_queue and !$delay) {
+    $connection->connect_p->catch(sub { });
   }
-  elsif ($self->{connect_queue}{$host} or $reason) {
-    push @{$self->{connect_queue}{$host}}, $connection;
-    weaken($self->{connect_queue}{$host}[-1]);
+  elsif ($self->{connect_queue}{$host} or $delay) {
+    my $q = $self->{connect_queue}{$host} ||= [];
+    return $self if first { $_->[1] eq $connection } @$q;
+    $connection->state('queued');
+    push @$q, [$delay ? $delay + time : 0, $connection];
+    weaken($q->[-1][1]);
   }
   else {
     $self->{connect_queue}{$host} ||= [];
-    $connection->connect_p;
+    $connection->connect_p->catch(sub { });
   }
 
   return $self;
+}
+
+sub connect_queue_size {
+  my $self = shift;
+  return sum0 map { int @{$self->{connect_queue}{$_}} } keys %{$self->{connect_queue} || {}};
 }
 
 has_many connection_profiles => 'Convos::Core::ConnectionProfile' => sub {
@@ -105,14 +114,13 @@ sub start {
     $first_user->role(give => 'admin') if $first_user and !$has_admin;
     return @p && Mojo::Promise->all(@p);
   })->then(sub {
-    $self->ready(1);
+    $self->ready(1)->emit('ready');
   })->catch(sub {
     warn "start() FAILED $_[0]\n";
   });
 
   weaken($self);
-  $self->{connect_tid}
-    = Mojo::IOLoop->recurring($ENV{CONVOS_CONNECT_DELAY} || 4, sub { $self->_dequeue });
+  $self->{connect_tid} = Mojo::IOLoop->recurring($self->connect_delay, sub { $self->_dequeue });
 
   return $self;
 }
@@ -142,10 +150,15 @@ sub web_url {
 
 sub _dequeue {
   my $self = shift;
+  my $now  = time;
 
-  for my $host (keys %{$self->{connect_queue} || {}}) {
-    next unless my $connection = shift @{$self->{connect_queue}{$host}};
-    $connection->connect_p if $connection and $connection->wanted_state eq 'connected';
+  for my $host (sort keys %{$self->{connect_queue} || {}}) {
+    my $q = $self->{connect_queue}{$host};
+    delete $self->{connect_queue}{$host} and next unless @$q;
+    next if $q->[0][0] > $now;    # Check if reconnect delay has passed
+    my $i = shift @$q;
+    next unless $i->[1];          # In case the connection has been destroyed
+    $i->[1]->connect_p->catch(sub { }) if $i->[1] and $i->[1]->wanted_state eq 'connected';
   }
 }
 
@@ -222,6 +235,13 @@ the following new ones.
 
 Holds a L<Convos::Core::Backend> object.
 
+=head2 connect_delay
+
+  $int = $self->connect_delay;
+
+How many seconds before attempting to connect the next connection to the same
+IRC server.
+
 =head2 home
 
   $obj = $core->home;
@@ -261,6 +281,12 @@ fails.
 
 C<$cb> is optional, but will be passed on to
 L<Convos::Core::Connection/connect> if defined.
+
+=head2 connect_queue_size
+
+  $i = $core->connect_queue_size;
+
+Returns the number of connections waiting to connect.
 
 =head2 connection_profile
 

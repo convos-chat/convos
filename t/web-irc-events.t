@@ -27,7 +27,17 @@ my %send;
 $server->subtest(
   connect => sub {
     $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
-      ->json_message_like('/message', qr{Connected to})->json_message_is('/state', 'connected');
+      ->json_message_like('/message', qr{Connecting to})
+      ->json_message_is('/state', 'connecting', 'connecting');
+    $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+      ->json_message_like('/message', qr{Connecting to})
+      ->json_message_is('/type', 'notice', 'notice');
+    $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+      ->json_message_like('/message', qr{Connected to})
+      ->json_message_is('/state', 'connected', 'connected');
+    $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
+      ->json_message_like('/message', qr{Connected to})
+      ->json_message_is('/type', 'notice', 'notice');
     $ws->message_ok->json_message_is('/connection_id', 'irc-localhost')
       ->json_message_like('/message', qr{Looking up your hostname});
     $ws->message_ok->json_message_is('/connection_id', 'irc-localhost') for 1 .. 3;

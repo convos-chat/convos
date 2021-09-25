@@ -76,32 +76,40 @@ $server->subtest(
       sub {
         my $connect_args = shift;
         $connection->connect_p;
-        $server->client_wait_for_states_ok(2);
+        $server->client_wait_for_states_ok(5);
 
-        $server->client_states_ok(
-          superbagof(map { [ignore, superhashof({state => $_})] } qw(queued disconnected)));
+        $server->client_states_ok(superbagof(
+          map { [ignore, superhashof({state => $_})] } (
+            qw(disconnecting disconnected),
+            qw(connecting disconnected),
+            qw(connecting disconnected),
+            qw(connecting connected)
+          )
+        ));
 
-        cmp_deeply $connect_args,
-          [
-          {
-            address        => 'irc.example.com',
-            port           => 6667,
-            socket_options => {LocalAddr => '1.1.1.1'},
-            timeout        => 20,
-            tls            => 1,
-            tls_cert       => re(qr{\.cert}),
-            tls_key        => re(qr{\.key}),
-            tls_options    => {SSL_verify_mode => 0x00},
-            tls_options    => {SSL_verify_mode => 0x00},
-          },
-          {
-            address        => 'irc.example.com',
-            port           => 6667,
-            socket_options => {LocalAddr => '1.1.1.1'},
-            timeout        => 20
-          }
-          ],
-          'connect args';
+        cmp_deeply(
+          $connect_args,
+          superbagof(
+            {
+              address        => 'irc.example.com',
+              port           => 6667,
+              socket_options => {LocalAddr => '1.1.1.1'},
+              timeout        => 20,
+              tls            => 1,
+              tls_cert       => re(qr{\.cert}),
+              tls_key        => re(qr{\.key}),
+              tls_options    => {SSL_verify_mode => 0x00},
+              tls_options    => {SSL_verify_mode => 0x00},
+            },
+            {
+              address        => 'irc.example.com',
+              port           => 6667,
+              socket_options => {LocalAddr => '1.1.1.1'},
+              timeout        => 20
+            }
+          ),
+          'connect args'
+        );
 
         ok -s $connect_args->[0]{tls_cert}, 'tls_cert generated';
         ok -s $connect_args->[0]{tls_key},  'tls_key generated';
@@ -115,28 +123,18 @@ $server->subtest(
     mock_connect(
       errors => ['IO::Socket::SSL 1.94+ required for TLS support'],
       sub {
+        $connection->disconnect_p->$wait_success('disconnect');
         $connection->url->query->remove('tls');
         $connection->connect_p;
-        $server->client_wait_for_states_ok(1);
+        $server->client_wait_for_states_ok(3);
 
         is $connection->url->query->param('tls'), 0, 'tls off after missing module';
-        $server->client_states_ok(
-          superbagof(map { [ignore, superhashof({state => $_})] } qw(queued)));
+        $server->client_states_ok(superbagof(
+          map { [ignore, superhashof({state => $_})] }
+            (qw(disconnecting disconnected), qw(connecting disconnected), qw(connecting connected))
+        ));
       }
     );
-  }
-);
-
-$server->subtest(
-  'successful connect' => sub {
-    mock_connect(sub {
-      my $tid = Mojo::IOLoop->recurring(0.1 => sub { $core->_dequeue });
-      cmp_deeply [values %{$core->{connect_queue}}], [[$connection]], 'connect_queue';
-      $server->client_wait_for_states_ok(1);
-      Mojo::IOLoop->remove($tid);
-      $server->client_states_ok(
-        superbagof(map { [ignore, superhashof({state => $_})] } qw(connected)), 'connected');
-    });
   }
 );
 

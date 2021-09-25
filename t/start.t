@@ -3,8 +3,8 @@ use lib '.';
 use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
-use List::Util 'sum';
-use Time::HiRes 'time';
+use List::Util qw(sum);
+use Time::HiRes qw(time);
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
 my $user;
@@ -13,12 +13,12 @@ subtest 'jhthorsen connections' => sub {
   $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
   $user->save_p->$wait_success('save_p');
 
-# 1: oragono.local connects instantly
+  # 1: oragono.local connects instantly
   $core->connection_profile({url => 'irc://oragono.local'})->skip_queue(true)
     ->save_p->$wait_success('save_p');
   $user->connection({url => 'irc://oragono.local'})->save_p->$wait_success('save_p');
 
-# 2: instant or queued
+  # 2: instant or queued
   $user->connection({connection_id => 'irc-magnet'})
     ->tap(sub { shift->url->parse('irc://irc.perl.org') })->save_p->$wait_success('save_p');
   $user->connection({connection_id => 'irc-magnet2'})
@@ -29,44 +29,46 @@ subtest 'mramberg connections' => sub {
   $user = $core->user({email => 'mramberg@cpan.org', uid => 32});
   $user->save_p->$wait_success('save_p');
 
-# 0: will not be connected
+  # 0: will not be connected
   my $conn_0 = $user->connection({url => 'irc://oragono.local'});
   $conn_0->wanted_state('disconnected')->url->parse('irc://127.0.0.1');
   $conn_0->save_p->$wait_success('save_p');
 
-# 2: instant or queued
+  # 2: instant or queued
   $user->connection({url => 'irc://libera'})
     ->tap(sub { shift->url->parse('irc://irc.libera.chat:6697') })->save_p;
   $user->connection({url => 'irc://magnet'})->tap(sub { shift->url->parse('irc://irc.perl.org') })
     ->save_p;
 };
 
-# ^^ total connections to connect
 subtest 'restart core' => sub {
-  my $expected = 5;
-  $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
+  my ($ready_p, %connect) = (Mojo::Promise->new);
+  $core = Convos::Core->new(backend => 'Convos::Core::Backend::File')->connect_delay(0.1);
+  $core->once(ready => sub { $ready_p->resolve });
 
-  my %connect;
   Mojo::Util::monkey_patch(
     'Convos::Core::Connection::Irc',
     connect_p => sub {
       my $host_port = $_[0]->url->host_port;
-      $connect{$host_port}++;
-      note "@{[time]} monkey_patch connect to $host_port\n" if $ENV{HARNESS_IS_VERBOSE};
-      Mojo::IOLoop->stop                                    if sum(values %connect) == $expected;
+      note "$host_port=" . (++$connect{$host_port});
+      $ready_p->resolve if sum(values %connect) >= 5;
+      return Mojo::Promise->resolve({});
     }
   );
 
-  $ENV{CONVOS_CONNECT_DELAY} //= 0.05;
-  $core->start for 0 .. 4;    # calling start() multiple times result in no-op
-  Mojo::IOLoop->one_tick until $core->ready;
+  $core->start for 0 .. 4;    # calling start() multiple times does not do anything
+  $ready_p->wait;
   cmp_deeply $core->{connect_queue},
-    {'irc.libera.chat' => [], 'irc.perl.org' => [(obj_isa('Convos::Core::Connection::Irc')) x 2]},
+    {
+    'irc.libera.chat' => [],
+    'irc.perl.org'    => [map { [ignore, (obj_isa('Convos::Core::Connection::Irc'))] } 1 .. 2]
+    },
     'connect_queue';
   is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 1, 'oragono.local' => 1},
-    'started connections, except disconnected';
+    'skip queue for some connections and skipped wanted_state=disconnected';
 
-  Mojo::IOLoop->start;
+  $ready_p = Mojo::Promise->new;
+  Mojo::Promise->race($ready_p, Mojo::Promise->timer(2))->wait;
   is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
     'started duplicate connection delayed';
 

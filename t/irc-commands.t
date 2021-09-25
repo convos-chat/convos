@@ -429,7 +429,7 @@ $server->subtest(
     my $id = $connection->{stream_id};
     ok !!Mojo::IOLoop->stream($id), 'got stream';
     $server->close_connections;
-    $server->client_wait_for_states_ok(1);
+    $server->client_wait_for_states_ok(4);
     ok !Mojo::IOLoop->stream($id), 'stream was removed';
 
     $server->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
@@ -438,7 +438,8 @@ $server->subtest(
     ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
 
     $server->client_states_ok(superbagof(
-      [connection => superhashof({state           => 'queued'})],
+      [connection => superhashof({state           => 'disconnected'})],
+      [connection => superhashof({state           => 'connecting'})],
       [frozen     => superhashof({conversation_id => '##redirected'})],
       [frozen     => superhashof({conversation_id => '#protected'})],
       [connection => superhashof({state           => 'connected'})],

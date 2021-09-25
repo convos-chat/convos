@@ -26,11 +26,12 @@ sub _available_conversations { $CLASS_DATA{conversations}{$_[0]->url->host} ||= 
 sub disconnect_p {
   my $self = shift;
   my $p    = Mojo::Promise->new;
-  return $p->resolve({}) unless $self->{stream};
+  return $p->resolve({}) if $self->state_is(qw(disconnected disconnecting));
 
   $self->{myinfo}{authenticated} = false;
   $self->{myinfo}{capabilities}  = {};
-  $self->{disconnecting}         = 1;       # Prevent getting queued
+  $self->wanted_state('disconnected');
+  $self->state(disconnecting => 'Quitting...');
   $self->_write("QUIT :$CONVOS_URL", sub { $self->_stream_remove($p) });
   return $p;
 }
@@ -96,22 +97,6 @@ sub _connect_args_p {
   delete $self->{myinfo}{real_host};
 
   return $self->SUPER::_connect_args_p;
-}
-
-sub _failed_to_connect {
-  my $self = shift;
-
-  Scalar::Util::weaken($self);
-  if ($self->{failed_to_connect}) {
-    my $n = 1 + $self->{failed_to_connect};
-    return Mojo::IOLoop->timer(($n > 10 ? 10 : $n) * ($ENV{CONVOS_CONNECT_DELAY} || 4),
-      sub { $self and $self->user->core->connect($self, 'You got disconnected.') });
-  }
-
-  if (!$self->{myinfo}{real_host}) {
-    $self->state(disconnected => 'Got unexpected close. Is the TLS settings correct?');
-    return Mojo::IOLoop->timer(30 => sub { $self and $self->user->core->connect($self) });
-  }
 }
 
 sub _irc_event_900 { goto &_irc_event_sasl_status }    # RPL_LOGGEDIN
@@ -212,7 +197,6 @@ sub _irc_event_err_unknowncommand {
 sub _irc_event_error {
   my ($self, $msg) = @_;
   $self->_irc_event_fallback($msg);
-  $self->{failed_to_connect}++ if $msg->{params}[0] =~ m!Trying to reconnect too fast!i;
 }
 
 sub _irc_event_fallback {
@@ -479,11 +463,11 @@ sub _irc_event_rpl_umodeis {
 sub _irc_event_rpl_welcome {
   my ($self, $msg) = @_;
 
-  $self->{failed_to_connect} = 0;
-  $self->{myinfo}{real_host} ||= $msg->{prefix};
-  $self->{myinfo}{nick} = $msg->{params}[0];
+  $self->{myinfo}{real_host} = $msg->{prefix};
+  $self->{myinfo}{nick}      = $msg->{params}[0];
   $self->_message($msg->{params}[1]);   # Welcome to the debian Internet Relay Chat Network superman
   $self->emit(state => me => $self->{myinfo});
+  $self->reconnect_delay(0);
 
   my @commands = (
     (grep {/\S/} @{$self->on_connect_commands}),
@@ -755,7 +739,7 @@ sub _periodic_events {
 sub _reconnect {
   my $self = shift;
   return $self->disconnect_p->then(
-    sub { $self->wanted_state('connected'); $self->user->core->connect($self, ''); return {} });
+    sub { $self->wanted_state('connected'); $self->user->core->connect($self); return {} });
 }
 
 sub _sasl_mechanism {
@@ -867,7 +851,7 @@ sub _send_kick_p {
 
 sub _send_list_p {
   my ($self, $extra) = @_;
-  return Mojo::Promise->reject('Not connected.') if $self->state ne 'connected';
+  return Mojo::Promise->reject('Not connected.') unless $self->state_is(qw(connected));
 
   my $store = $self->_available_conversations;
   my @found;
@@ -1033,7 +1017,7 @@ sub _send_part_p {
     if $conversation and ($conversation->is_private or $conversation->frozen);
 
   return $self->_remove_conversation($target)->save_p->then(sub { +{} })
-    if $self->state eq 'disconnected';
+    if $self->state_is(qw(disconnected disconnecting));
 
   return $self->_write_and_wait_p(
     "PART $target", {target => $target},
@@ -1109,8 +1093,8 @@ sub _send_whois_p {
 sub _set_wanted_state_p {
   my ($self, $state) = @_;
   $self->wanted_state($state);
-  $self->user->core->connect($self, '') if $state eq 'connected';
-  $self->disconnect_p                   if $state eq 'disconnected';
+  $self->user->core->connect($self) if $state eq 'connected';
+  $self->disconnect_p               if $state eq 'disconnected';
   return Mojo::Promise->resolve({});
 }
 
@@ -1155,6 +1139,7 @@ CHUNK:
     my $msg = $self->_parse($1);
     next unless $msg->{command};
 
+    $self->{myinfo}{real_host} ||= $msg->{prefix} if $msg->{prefix};
     $msg->{command} = IRC::Utils::numeric_to_name($msg->{command}) || $msg->{command}
       if $msg->{command} =~ /^\d+$/;
     $msg->{command} = lc $msg->{command};

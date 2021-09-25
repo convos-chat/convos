@@ -772,7 +772,7 @@ definitions:
           type: string
       state:
         description: Actual connection state
-        enum: [ connected, queued, disconnected ]
+        enum: [ connected, connecting, disconnected, disconnecting, queued ]
         type: string
       url:
         description: 'Example: irc://user:@irc.perl.org?nick=superman (Note: Without password)'
