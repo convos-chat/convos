@@ -2,39 +2,37 @@ name: docker
 on:
   push:
     branches:
-    - 'docker'
+    - 'linux/arm64'
     - 'master'
-    - 'stable'
     tags:
     - "v*.*"
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/arm64 ]
     steps:
     - name: Calculate tag name
       id: calculate_tag
       run: |
         if echo $GITHUB_REF | grep -q '^refs/tags/v'; then
+          PLATFORM="linux/amd64";
           VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
-          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:$VERSION";
-        elif [ "$GITHUB_REF" = "refs/heads/docker" ]; then
-          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha";
-        elif [ "$GITHUB_REF" = "refs/heads/master" ]; then
-          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha";
+          TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:$VERSION";
+        elif [ "$GITHUB_REF" = "refs/heads/linux/arm64" ]; then
+          PLATFORM="linux/arm64";
+          TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:arm64";
         else
-          TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:stable";
+          PLATFORM="linux/amd64";
+          TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:alpha";
         fi
+        echo '::set-output name=platform::'$PLATFORM
         echo '::set-output name=tag::'$TAG_NAME
     - name: Check Out Repo
       uses: actions/checkout@v1
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+        username: ${{secrets.DOCKER_HUB_USERNAME}}
+        password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -47,7 +45,7 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: true
-        platforms: ${{matrix.platform}}
-        tags: ${{ steps.calculate_tag.outputs.tag }}
+        platforms: ${{steps.calculate_tag.outputs.platform}}
+        tags: ${{steps.calculate_tag.outputs.tag}}
     - name: Image digest
-      run: echo ${{ steps.docker_build.outputs.digest }}
+      run: echo ${{steps.docker_build.outputs.digest}}

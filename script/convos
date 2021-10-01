@@ -42,7 +42,7 @@ sub command_build {
   require Convos;    # Must be loaded afterwards to have the correct version
   my $push = 'git push origin';
   print $ENV{RELEASE}
-    ? "\nNow run:\n\$ $push master:master && $push master:stable && $push v$Convos::VERSION\n\n"
+    ? "\nNow run:\n\$ $push master:master && $push master:linux/arm64 && $push master:stable && $push v$Convos::VERSION\n\n"
     : "\nConvos must be restarted to use the new CSS and JavaScript assets.\n\n";
 }
 
