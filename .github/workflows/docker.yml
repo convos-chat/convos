@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - 'linux/arm64'
+    - 'linux/amd64'
     - 'master'
     tags:
     - "v*.*"
@@ -17,6 +18,9 @@ jobs:
           PLATFORM="linux/amd64";
           VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
           TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:$VERSION";
+        elif [ "$GITHUB_REF" = "refs/heads/linux/amd64" ]; then
+          PLATFORM="linux/amd64";
+          TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:alpha";
         elif [ "$GITHUB_REF" = "refs/heads/linux/arm64" ]; then
           PLATFORM="linux/arm64";
           TAG_NAME="${{secrets.DOCKER_HUB_PREFIX}}/convos:arm64";
