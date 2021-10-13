@@ -91,7 +91,7 @@ sub _event_load {
   $self->backend->user->get_p($data->{params} || {})->then(sub {
     my $user     = shift;
     my $settings = $self->app->core->settings;
-    $user->{default_connection} = $settings->default_connection->to_string;
+    $user->{default_connection} = $settings->default_connection_safe->to_string;
     $user->{forced_connection}  = $settings->forced_connection;
     $user->{video_service}      = $settings->video_service;
     $self->send({json => {event => 'load', id => $id, user => $user}});

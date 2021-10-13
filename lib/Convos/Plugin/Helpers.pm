@@ -60,7 +60,9 @@ sub _backend_connection_create_p {
 
   eval {
     my $connection = $user->connection({name => $name, url => $url});
-    $connection->conversation({name => $url->path->[0]}) if $url->path->[0];
+    my ($name, $password) = split /\s+/, ($url->path->[0] || ''), 2;
+    my $conversation = $name && $connection->conversation({name => $name});
+    $conversation->password($password) if length $password;
     return $connection->save_p;
   } or do {
     return Mojo::Promise->reject($@);

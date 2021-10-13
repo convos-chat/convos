@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.32 Not Released
  - Fix vulnerability: Cannot upload svg with javascript #623
+ - Add support for password for default connection channel #621
  - Add progress bar for uploads
 
 6.31 2021-10-02T06:51:00+0900

@@ -67,7 +67,7 @@ sub get {
   return $user->get_p($self->req->url->query->to_hash)->then(sub {
     my $user     = shift;
     my $settings = $self->app->core->settings;
-    $user->{default_connection} = $settings->default_connection->to_string;
+    $user->{default_connection} = $settings->default_connection_safe->to_string;
     $user->{forced_connection}  = $settings->forced_connection;
     $user->{video_service}      = $settings->video_service;
     $self->render(openapi => $user);
@@ -284,14 +284,12 @@ sub _register_html_handle_invite_url {
   my $self = shift;
 
   my $params = {token => $self->param('token'), email => $self->_email, exp => $self->param('exp')};
-
   return unless $params->{token} and $params->{email} and $params->{exp};
   return $self->stash(status => 410) if $params->{exp} =~ m!\D! or $params->{exp} < time;
 
   my $user = $self->app->core->get_user($params->{email});
-  return $self->stash(status => 400) unless $self->_is_valid_invite_token($user, $params);
-
-  $self->stash(existing_user => $user ? 1 : 0);
+  return $self->stash(status        => 400) unless $self->_is_valid_invite_token($user, $params);
+  return $self->stash(existing_user => $user ? 1 : 0);
 }
 
 sub _update_user {

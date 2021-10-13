@@ -7,7 +7,7 @@ use t::Helper;
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 
 my $t                  = t::Helper->t;
-my $default_connection = 'irc://localhost:6123/%23convos';
+my $default_connection = 'irc://localhost:6123/%23convos%20s3cret';
 $t->app->core->settings->default_connection(Mojo::URL->new($default_connection));
 $t->app->core->settings->open_to_public(true);
 

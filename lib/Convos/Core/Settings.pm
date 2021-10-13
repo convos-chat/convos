@@ -20,6 +20,13 @@ has organization_url   => sub { Mojo::URL->new('https://convos.chat') };
 has session_secrets    => sub { shift->_build_session_secrets };
 has video_service      => 'https://meet.jit.si/';
 
+sub default_connection_safe {
+  my $self = shift;
+  my $url  = $self->default_connection->clone;
+  $url->path->[0] =~ s!\s+.*!! if $url->path->[0];    # remove password
+  return $url;
+}
+
 sub load_p {
   my $self = shift;
   return $self->core->backend->load_object_p($self)->then(sub { $self->_set_attributes(shift, 1) });
@@ -189,6 +196,12 @@ stored.
   $settings = $settings->video_service("https://meet.jit.si/");
 
 =head1 METHODS
+
+=head2 default_connection_safe
+
+  $url = $settings->default_connection_safe;
+
+Returns L</default_connection>, but without any channel password.
 
 =head2 id
 
