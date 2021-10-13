@@ -33,7 +33,7 @@ let participants = conversation.participants;
 let now = new Time();
 let onLoadHash = '';
 let unsubscribe = {};
-let focusChatInput, fillIn, uploader;
+let focusChatInput, fillIn, uploader, uploadProgress;
 
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
@@ -224,11 +224,20 @@ function showPopover(e) {
     </div>
   {/if}
 
+  {#if uploadProgress}
+    <div class="message" transition:fade="{{duration: 200}}">
+      <div>{$l('Uploading %1...', uploader.file.name)}</div>
+      <div class="progress">
+        <div class="progress__bar" style="width:{uploadProgress}%;">{uploadProgress}%</div>
+      </div>
+    </div>
+  {/if}
+
   {#if notify.wantNotifications === null}
     <div class="message is-highlighted">
       <div class="message__text"><Icon name="info-circle"/> {@html $lmd('Go to "[account settings](%1)" to enable or disable notifications.', '/settings/account')}</div>
     </div>
-   {/if}
+  {/if}
 
   {#if $conversation.is('loading')}
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
@@ -238,7 +247,7 @@ function showPopover(e) {
   {/if}
 </InfinityScroll>
 
-<ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader/>
+<ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
 {#if $viewport.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">

@@ -11,6 +11,7 @@ import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
 
 export const uploader = uploadFiles;
+export let uploadProgress = 0;
 export let conversation;
 
 let autocompleteIndex = 0;
@@ -142,8 +143,18 @@ function uploadFiles(e) {
 
   const formData = new FormData();
   formData.append('file', files[0]);
-  api('uploadFile').perform({formData}).then(op => {
+  uploadFiles.file = files[0];
+
+  const op = api('uploadFile');
+  op.on('progress', e => {
+    if (uploadProgress < 100) uploadProgress = parseInt(100 * (e.total ? e.loaded / e.total : 0.02), 10);
+    if (uploadProgress >= 100) uploadProgress = 0;
+  });
+
+  uploadProgress = 1;
+  op.perform({formData}).then(op => {
     const res = op.res.body;
+    uploadProgress = 0;
     if (res.files && res.files.length) return fillIn(res.files[0].url, {append: true});
     if (res.errors) conversation.addMessages({message: 'Could not upload file: %1', vars: [$l(extractErrorMessage(res.errors))], type: 'error'});
   });
