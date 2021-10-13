@@ -111,6 +111,11 @@ subtest 'binary' => sub {
     ->header_is('Content-Type' => 'application/octet-stream');
 };
 
+subtest 'svg with javasript' => sub {
+  $t->post_ok('/api/file', form => {file => {file => 't/data/js.svg'}})->status_is(400)
+    ->json_is('/errors/0/message', 'SVG contains script.');
+};
+
 subtest 'write_only' => sub {
   $t->post_ok('/api/file',
     form => {id => 'irc-localhost-key', file => {file => $asset}, write_only => true})

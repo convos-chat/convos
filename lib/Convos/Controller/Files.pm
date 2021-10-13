@@ -30,6 +30,9 @@ sub upload {
   return $self->reply->errors([[$err, '/file']], 400)
     if $err = !$upload ? 'No upload.' : !$upload->filename ? 'Unknown filename.' : '';
 
+  return $self->reply->errors([['SVG contains script.', '/file']], 400)
+    if $upload->asset->contains('<script') != -1;
+
   my %args = (filename => $upload->filename);
   $args{id}         = $self->param('id')         if defined $self->param('id');
   $args{write_only} = $self->param('write_only') if defined $self->param('write_only');

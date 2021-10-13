@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.32 Not Released
+ - Fix vulnerability: Cannot upload svg with javascript #623
+
 6.31 2021-10-02T06:51:00+0900
  - Fix turning channel names with "-" into links
  - Have to build a different tag for arm64 (for now) #464
