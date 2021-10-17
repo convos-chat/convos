@@ -183,6 +183,6 @@ function mockMessagesOpPerform(res) {
   return function(params) {
     this.performed = params;
     this.emit('start', params); // TODO
-    this.parse(res);
+    this.update({res, status: 'success'});
   };
 }
