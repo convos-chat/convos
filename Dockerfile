@@ -19,7 +19,7 @@ RUN apk add --no-cache curl openssl perl perl-io-socket-ssl perl-net-ssleay wget
     apk add --no-cache --virtual builddeps build-base perl-dev && \
     curl -vfsSL --compressed https://git.io/cpm > /tmp/cpm && \
     chmod 0755 /tmp/cpm && \
-    /tmp/cpm install --no-prebuilt --no-show-progress --no-test --show-build-log-on-failure --with-all --feature bot --feature ldap --cpanfile /app/cpanfile -L /app/local && \
+    /tmp/cpm install --no-show-progress --no-test --show-build-log-on-failure --with-all --feature bot --cpanfile /app/cpanfile -g && \
     apk del builddeps && \
     rm -rf /tmp/cpm /root/.cpanm /var/cache/apk/*
 
