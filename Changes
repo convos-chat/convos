@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.35 Not Released
+ - Bumped Alpine version to 3.14
+
 6.34 2021-10-18T11:00:00+0900
  - Going to build docker "stable" and "vX.XX" as linux/amd64 and linux/arm64,
    while "alpha" will be linux/amd64 only
@@ -976,7 +979,7 @@ Revision history for perl distribution Convos
  - Fix bugs related to join/part/mode events
  - Fix support for setting highlight_keywords
  - Fix loading participants list
- - Bumped alpine version in Dockerfile
+ - Bumped Alpine version in Dockerfile
 
 1.00 2019-10-26T13:29:41+0900
  - Changed frontend to use https://svelte.dev/ from Vuejs.
