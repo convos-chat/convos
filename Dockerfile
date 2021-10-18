@@ -15,7 +15,7 @@ COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
 
-RUN apk add --no-cache curl openssl perl perl-io-socket-ssl wget && \
+RUN apk add --no-cache curl openssl perl perl-io-socket-ssl perl-net-ssleay wget && \
     apk add --no-cache --virtual builddeps build-base perl-dev && \
     curl -vfsSL --compressed https://git.io/cpm > /tmp/cpm && \
     chmod 0755 /tmp/cpm && \
