@@ -1,9 +1,12 @@
 import Emojis from '../js/Emojis';
+import XRegExp from 'xregexp';
 import Reactive from '../js/Reactive';
 import {api} from '../js/Api';
 import {derived} from 'svelte/store';
 import {route} from '../store/Route';
 
+const RE = {};
+const STOP = ' ,.:;!"\'';
 const XML_ESCAPE = {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&apos;', '"': '&quot;'};
 
 export default class I18N extends Reactive {
@@ -153,7 +156,8 @@ export default class I18N extends Reactive {
   }
 
   _mdLink(str) {
-    return str.replace(/\[([a-zA-Z][^\]]+)\]\(([^)]+)\)/g, (all, text, href) => {
+    const re = RE.mdLink || (RE.mdLink = XRegExp('\\[ ([a-zA-Z][^\\]]+) \\] \\( ([^)]+) \\)', 'gx'));
+    return XRegExp.replace(str, re, (all, text, href) => {
       const scheme = href.match(/^\s*(\w+):/) || ['', ''];
       if (scheme[1] && ['http', 'https', 'mailto'].indexOf(scheme[1]) == -1) return all; // Avoid XSS links
       this._state.md = true;
@@ -170,12 +174,11 @@ export default class I18N extends Reactive {
   _plainUrlToLink(str) {
     if (this._state.md) return str;
 
-    return str.replace(/\b[a-z]{2,5}:\/\S+/g, (url) => {
-      const parts = url.match(/^(.*?)(&\w+;|\W)?$/);
-      return '<a href="' + parts[1] + '" target="_blank">' + parts[1] + '</a>' + (parts[2] || '');
-    }).replace(/mailto:(\S+)/, (all, email) => {
-      if (all.indexOf('">') != -1) return all;
-      return '<a href="' + all + '" target="_blank">' + email + '</a>';
+    const urlRe = RE.url || (RE.url = XRegExp(`(^|\\s) ( (?:http|https)://\\S+ | mailto:\\S+ )`, 'gx'));
+    const endRe = RE.urlEnd || (RE.urlEnd = XRegExp('^(.*)([' + STOP + '])$'));
+    return XRegExp.replace(str, urlRe, (all, b, url) => {
+      const parts = XRegExp.exec(url, endRe) || [all, url, ''];
+      return b + '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^mailto:/, '') + '</a>' + parts[2];
     });
   }
 

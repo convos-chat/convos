@@ -52,10 +52,12 @@ test('md - em, strong', () => {
 test('md - markdown link', () => {
   expect(i18n.md('some [cool chat](https://convos.chat)'))
     .toBe('some <a href="https://convos.chat" target="_blank">cool chat</a>');
-  expect(i18n.md('A link to https://convos.chat'))
-    .toBe('A link to <a href="https://convos.chat" target="_blank">https://convos.chat</a>');
-  expect(i18n.md('A link to mailto:jhthorsen@cpan.org'))
-    .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>');
+  expect(i18n.md('A link to https://convos.chat, cool ey?'))
+    .toBe('A link to <a href="https://convos.chat" target="_blank">https://convos.chat</a>, cool ey?');
+  expect(i18n.md('A link to mailto:jhthorsen@cpan.org!'))
+    .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>!');
+  expect(i18n.md('https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик last symbol shows as separate outside of the URL? do you reproduce the bug?'))
+    .toBe('<a href=\"https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик\" target=\"_blank\">https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol shows as separate outside of the URL? do you reproduce the bug?');
 });
 
 test('md - code', () => {
@@ -66,7 +68,7 @@ test('md - code', () => {
   expect(i18n.md('is this `not code`, or..?'))
     .toBe('is this <code>not code</code>, or..?');
   expect(i18n.md('not a `https://link.com`'))
-    .toBe('not a <code><a href="https://link.com" target="_blank">https://link.com</a></code>');
+    .toBe('not a <code>https://link.com</code>');
   expect(i18n.md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
     .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
   expect(i18n.md('kikuchi` changed nick to kikuchi```.'))
