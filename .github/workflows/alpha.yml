@@ -2,6 +2,7 @@ name: alpha
 on:
   push:
     branches:
+      - alpine
       - master
 jobs:
   build:

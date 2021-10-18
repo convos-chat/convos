@@ -4,7 +4,7 @@
 #
 # BUILD: docker build --no-cache --rm -t convos/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data convos/convos
-FROM alpine:3.12
+FROM alpine:3.14
 LABEL maintainer="jhthorsen@cpan.org"
 
 RUN mkdir /app
@@ -14,7 +14,8 @@ COPY lib /app/lib
 COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
-RUN apk add --no-cache openssl perl perl-io-socket-ssl wget && \
+
+RUN apk add --no-cache curl openssl perl perl-io-socket-ssl wget && \
     apk add --no-cache --virtual builddeps build-base perl-dev && \
     /app/script/convos install --all && \
     apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
