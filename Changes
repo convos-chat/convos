@@ -1,8 +1,11 @@
 Revision history for perl distribution Convos
 
+6.34 2021-10-18T11:00:00+0900
+ - Going to build docker "stable" and "vX.XX" as linux/amd64 and linux/arm64,
+   while "alpha" will be linux/amd64 only
+
 6.33 2021-10-18T10:48:00+0900
  - Fix parsing links that end with a unicode character #563
- - Going to build docker tags stable and version as linux/amd64 and linux/arm64
 
 6.32 2021-10-14T08:45:00+0900
  - Fix vulnerability: Cannot upload svg with javascript #623
