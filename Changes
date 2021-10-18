@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.35 Not Released
+6.35 2021-10-18T23:27:00+0900
  - Bumped Alpine version to 3.14
  - Fix "ReferenceError: body is not defined" #625
 
