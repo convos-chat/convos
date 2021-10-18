@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.35 Not Released
  - Bumped Alpine version to 3.14
+ - Fix "ReferenceError: body is not defined" #625
 
 6.34 2021-10-18T11:00:00+0900
  - Going to build docker "stable" and "vX.XX" as linux/amd64 and linux/arm64,

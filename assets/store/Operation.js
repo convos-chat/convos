@@ -27,7 +27,7 @@ export default class Operation extends Reactive {
     this.prop('ro', 'id', params.id);
     this.prop('rw', 'err', null);
     this.prop('rw', 'req', {body: null, headers: {}});
-    this.prop('rw', 'res', {body: {}, headers: {}});
+    this.prop('rw', 'res', {body: {}, headers: []});
     this.prop('rw', 'status', 'pending');
   }
 
@@ -44,12 +44,11 @@ export default class Operation extends Reactive {
    * @memberof Operation
    * @param {Array} err A list of error objects.
    * @param {String} err A descriptive error string.
-   * @param {String} source A name of where the error occured.
    * @returns {String} A descriptive error string.
    */
-  error(err, source) {
+  error(err) {
     // Set error
-    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err, source: source}], status: 'error'});
+    if (err) return this.update({err: Array.isArray(err) ? err : [{message: err}], status: 'error'});
 
     // Get error
     if (!this.err || !this.err.length) return '';
@@ -81,19 +80,20 @@ export default class Operation extends Reactive {
     }).then(() => {
       const res = {};
       res.body = xhr.response ? JSON.parse(xhr.response) : {};
-      res.headers = (xhr.getAllResponseHeaders() || '').trim().split(/[\r\n]+/).map(h => h.split(/:\s*/, 2));
-      res.status = xhr.status || '201';
+      res.headers = (xhr.getAllResponseHeaders() || '').trim().split(/[\r\n]+/).filter(l => l.length).map(h => h.split(/:\s*/, 2));
+      res.status = String(xhr.status || '201');
 
       let err = null;
       if (!String(res.status).match(/^[23]/)) {
-        err = body && res.body.errors ? res.body.errors : [{message: xhr.statusText || 'Unknown error.'}];
+        err = res.body && res.body.errors ? res.body.errors : [{message: xhr.statusText || 'Unknown error.'}];
       }
 
       return this.update({err, res, status: err ? 'error' : 'success'});
     }).catch(err => {
       if (err.type) err = err.type;
       console.error(this.req.url + ' FAILED ' + err);
-      return this.error(Array.isArray(err) ? err : 'Failed fetching operationId "' + this.id + '": ' + err, 'fetch');
+      this.update({res: {body: {errors: [{message: String(err)}]}, headers: [], status: '599'}, status: 'error'});
+      return this.error(Array.isArray(err) ? err : 'Failed fetching operationId "' + this.id + '": ' + err);
     }).finally(() => {
       delete this._promise;
     }));

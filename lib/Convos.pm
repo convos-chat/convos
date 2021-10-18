@@ -147,7 +147,7 @@ sub _before_dispatch {
     if $user and $user->remote_address ne $remote_address;
 
   # Used when registering the first user
-  $c->stash(first_user => !$c->session('email') && !$c->app->core->n_users);
+  $c->stash(first_user => !$c->app->core->n_users);
 
   # App settings
   $c->stash($settings->TO_JSON);
