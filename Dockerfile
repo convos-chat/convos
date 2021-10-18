@@ -17,8 +17,11 @@ COPY templates /app/templates
 
 RUN apk add --no-cache curl openssl perl perl-io-socket-ssl wget && \
     apk add --no-cache --virtual builddeps build-base perl-dev && \
-    /app/script/convos install --all && \
-    apk del builddeps && rm -rf /root/.cpanm /var/cache/apk/*
+    curl -vfsSL --compressed https://git.io/cpm > /tmp/cpm && \
+    chmod 0755 /tmp/cpm && \
+    /tmp/cpm install --no-prebuilt --no-show-progress --no-test --show-build-log-on-failure --with-all --feature bot --feature ldap --cpanfile /app/cpanfile -L /app/local && \
+    apk del builddeps && \
+    rm -rf /tmp/cpm /root/.cpanm /var/cache/apk/*
 
 # Do not change these variables unless you know what you're doing
 ENV CONVOS_HOME /data
