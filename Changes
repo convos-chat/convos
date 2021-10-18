@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.33 Not Released
+6.33 2021-10-18T10:48:00+0900
  - Fix parsing links that end with a unicode character #563
  - Going to build docker tags stable and version as linux/amd64 and linux/arm64
 
