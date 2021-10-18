@@ -1,4 +1,4 @@
-name: docker
+name: alpha
 on:
   push:
     branches:
@@ -27,6 +27,6 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64
-          tags: alpha
+          tags: "${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha"
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
