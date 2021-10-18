@@ -1,16 +1,11 @@
 name: docker
 on:
   push:
-    branches:
-      - stable
     tags:
       - v*.*
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [ linux/amd64, linux/arm64 ]
     steps:
       - name: Calculate tag name
         id: calculate_tag
@@ -18,8 +13,6 @@ jobs:
           if echo $GITHUB_REF | grep -q '^refs/tags/v'; then
             VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
             TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:$VERSION";
-          else
-            TAG_NAME="${{ secrets.DOCKER_HUB_PREFIX }}/convos:stable";
           fi
           echo '::set-output name=tag::'$TAG_NAME
       - name: Check Out Repo
@@ -41,7 +34,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          platforms: ${{ matrix.platform }}
-          tags: ${{ steps.calculate_tag.outputs.tag }}
+          platforms: linux/amd64,linux/arm64
+          tags: "${{ secrets.DOCKER_HUB_PREFIX }}/convos:stable,${{ steps.calculate_tag.outputs.tag }}"
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
