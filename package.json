@@ -46,5 +46,8 @@
     "sass": "^1.35.2",
     "svelte": "^3.38.3",
     "twemoji": "^12.1.6"
+  },
+  "dependencies": {
+    "xregexp": "^5.1.0"
   }
 }
