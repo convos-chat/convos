@@ -72,7 +72,7 @@ if ($ENV{RELEASE} and !$failed) {
 
   Now run:
 
-  $ git push origin master:master; git push origin master:stable; git push origin --tags
+  $ git push origin main:main; git push origin main:stable; git push origin --tags
 
 
 HERE

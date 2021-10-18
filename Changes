@@ -938,7 +938,7 @@ Revision history for perl distribution Convos
  - Renamed /settings to /settings/account
 
 1.02 2019-11-13T16:02:05+0900
- - Fix Docker builds for master and tags #401
+ - Fix Docker builds for main and tags #401
    https://hub.docker.com/r/convos/convos
  - Fix service worker so it serves fresh assets #402
  - Fix cleaning user input #403

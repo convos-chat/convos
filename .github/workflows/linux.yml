@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         cpanm -n EV~"!= 4.28"
-        cpanm -n https://github.com/jhthorsen/linkembedder/archive/master.tar.gz
+        cpanm -n https://github.com/jhthorsen/linkembedder/archive/main.tar.gz
         cpanm -n DBD::SQLite Hailo Math::Calc::Parser
         cpanm -n Test::Pod Test::Pod::Coverage
         cpanm -n --installdeps .

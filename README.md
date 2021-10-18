@@ -1,6 +1,6 @@
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
-[![Docker Status](https://github.com/convos-chat/convos/workflows/Docker%20Image%20CI/badge.svg?branch=master)](https://hub.docker.com/r/convos/convos)
-[![Build Status](https://github.com/convos-chat/convos/workflows/Linux%20CI/badge.svg?branch=master)](https://github.com/convos-chat/convos/actions)
+[![Docker Status](https://github.com/convos-chat/convos/workflows/Docker%20Image%20CI/badge.svg?branch=main)](https://hub.docker.com/r/convos/convos)
+[![Build Status](https://github.com/convos-chat/convos/workflows/Linux%20CI/badge.svg?branch=main)](https://github.com/convos-chat/convos/actions)
 [![GitHub issues](https://img.shields.io/github/issues/convos-chat/convos)](https://github.com/convos-chat/convos/issues)
 
 # Convos - Multiuser chat application
@@ -59,24 +59,9 @@ $EDITOR Changes
 
 ## Branch overview
 
-### alpha
+### main
 
-THe "[alpha](https://github.com/convos-chat/convos/tree/alpha)" branch branch
-will be force pushed to when we need to make a new docker build with working
-assets, but with experimental features. Example:
-
-```bash
-git checkout -b user/some-feature
-$EDITOR assets/store/Conversation.js
-./script/convos build
-git add .
-git commit -a -m "made some experimental changes"
-git push origin -f user/some-feature:alpha
-```
-
-### master
-
-"[master](https://github.com/convos-chat/convos/tree/master)" is for
+"[main](https://github.com/convos-chat/convos/tree/main)" is for
 developers. It's mostly stable, but might require extra tools and packages to
 run. This branch might have outdated assets (JavaScript, CSS files), so it
 might not work properly.
@@ -86,9 +71,3 @@ might not work properly.
 "[stable](https://github.com/convos-chat/convos/tree/stable)" is the branch you
 should use, if you want to clone and run Convos. The JavaScript assets and the
 Perl code will be in sync here.
-
-### www.convos.chat
-
-"[www.convos.chat](https://github.com/convos-chat/convos/tree/www.convos.chat)" is the source
-for [http://convos.chat](http://convos.chat), which is powered by the built-in CMS
-In Convos.
