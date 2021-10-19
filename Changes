@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.37 Not Released
+6.37 2021-10-19T20:06:00+0900
  - Fix not having to enable and then disable notifications to disable notifications
 
 6.36 2021-10-19T11:52:00+0900
