@@ -4,7 +4,7 @@
 #
 # BUILD: docker build --no-cache --rm -t convos/convos .
 # RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data convos/convos
-FROM alpine:3.14
+FROM convos/convos:base
 LABEL maintainer="jhthorsen@cpan.org"
 
 RUN mkdir /app
