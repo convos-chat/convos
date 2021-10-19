@@ -53,6 +53,7 @@ function saveAccount() {
   const passwords = [$form.password, $form.password_again];
   if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
 
+  if (!$form.wantNotifications) form.set({wantNotifications: false});
   if ($form.wantNotifications) notify.requestDesktopAccess();
   notify.update(form.get(['wantNotifications']));
 
@@ -82,6 +83,7 @@ function saveAccount() {
     <Checkbox name="wantNotifications" form="{form}">
       <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
+    <p class="help">{@html $lmd('Leave this unchecked, and hit "Save" to disable notifications.')}</p>
     <Checkbox name="ignoreStatuses" form="{form}">
       <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
