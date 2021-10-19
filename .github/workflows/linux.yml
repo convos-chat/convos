@@ -2,7 +2,8 @@ name: linux
 on:
   push:
     branches:
-    - '*'
+    - '**'
+    - '!stable'
 jobs:
   nodejs:
     runs-on: ubuntu-latest
