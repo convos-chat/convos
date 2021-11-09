@@ -41,8 +41,19 @@ subtest 'password' => sub {
   eval { $user->set_password('') };
   like $@, qr{Usage:.*plain}, 'set_password() require plain string';
   ok !$user->password, 'no password';
+
+  my $bcrypt_hash = '$2a$08$0KlK5QzJjzWFNW6JsuT52..GXe1sTRWZU1es8hfo0HcD29tTFzvsi';
+  $user->{password} = $bcrypt_hash;
+
+  ok !$user->validate_password('s3crett'), 'invalid password is not backwards compatible';
+  is $user->password, $bcrypt_hash, 'invalid password did not upgrade bcrypt hash';
+
+  ok $user->validate_password('s3cret'), 'password backwards compatible with bcrypt hash';
+  like $user->password, qr/^\$argon2id/, 'password hash was upgraded to argon2id';
+
   is $user->set_password('s3cret'), $user, 'set_password does not care about password quality';
   ok $user->password, 'password';
+  like $user->password, qr/^\$argon2id/, "password is hashed with argon2id";
 
   ok !$user->validate_password('s3crett'), 'invalid password';
   ok $user->validate_password('s3cret'), 'validate_password';

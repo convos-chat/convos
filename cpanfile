@@ -1,6 +1,8 @@
 # You can install dependencies with ./script/convos install [--all|--prod]
 requires "IO::Socket::SSL"                => "2.009"; # Need to installed first, so "cpanm -M" works
-requires "Crypt::Eksblowfish"             => "0.009";
+requires "Crypt::Passphrase"              => "0.003";
+requires "Crypt::Passphrase::Argon2"      => "0.003";
+requires "Crypt::Passphrase::Bcrypt"      => "0.001";
 requires "File::HomeDir"                  => "1.00";
 requires "File::ReadBackwards"            => "1.05";
 requires "HTTP::AcceptLanguage"           => "0.02";
