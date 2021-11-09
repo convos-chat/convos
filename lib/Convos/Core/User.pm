@@ -3,17 +3,11 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Connection;
 use Convos::Util qw(DEBUG has_many);
-use Crypt::Eksblowfish::Bcrypt ();
+use Crypt::Passphrase;
 use File::Path                 ();
 use Mojo::Date;
 use Mojo::Promise;
 use Mojo::Util qw(camelize trim);
-
-use constant BCRYPT_BASE_SETTINGS => do {
-  my $cost = sprintf '%02i', 8;
-  my $nul  = 'a';
-  join '', '$2', $nul, '$', $cost, '$';
-};
 
 sub core  { shift->{core}  or die 'core is required in constructor' }
 sub email { shift->{email} or die 'email is required in constructor' }
@@ -24,6 +18,13 @@ has remote_address => '127.0.0.1';
 has roles          => sub { +[] };
 has uid            => sub { die 'uid() cannot be built' };
 has unread         => sub {0};
+
+has _crypt => sub {
+  Crypt::Passphrase->new(
+    encoder => { module => 'Argon2', memory_cost => '64M' },
+    validators => [ 'Bcrypt' ]
+  );
+};
 
 has_many connections => 'Convos::Core::Connection' => sub {
   my ($self, $attrs) = @_;
@@ -141,7 +142,7 @@ sub save_p {
 sub set_password {
   my ($self, $plain) = @_;
   die 'Usage: Convos::Core::User->set_password($plain)' unless $plain;
-  $self->{password} = $self->_bcrypt($plain);
+  $self->{password} = $self->_crypt->hash_password($plain);
   $self;
 }
 
@@ -151,19 +152,11 @@ sub validate_password {
   my ($self, $plain) = @_;
 
   return 0 unless $self->password and $plain;
-  return 1 if $self->_bcrypt($plain, $self->password) eq $self->password;
-  return 0;
-}
-
-sub _bcrypt {
-  my ($self, $plain, $settings) = @_;
-
-  unless ($settings) {
-    my $salt = join '', map { chr int rand 256 } 1 .. 16;
-    $settings = BCRYPT_BASE_SETTINGS . Crypt::Eksblowfish::Bcrypt::en_base64($salt);
+  my $valid = $self->_crypt->verify_password($plain, $self->password);
+  if ($valid && $self->_crypt->needs_rehash($plain)) {
+    $self->{password} = $self->_crypt->hash_password($plain);
   }
-
-  Crypt::Eksblowfish::Bcrypt::bcrypt($plain, $settings);
+  return $valid;
 }
 
 sub _normalize_attributes {
