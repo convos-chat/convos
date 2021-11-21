@@ -26,5 +26,7 @@ $: stateIcon = icons[$checked ? 1 : 0];
     on:blur="{() => {hasFocus = false}}"
     on:focus="{() => {hasFocus = true}}"/>
   <Icon family="regular" name="{stateIcon}" on:click="{() => { disabled || ($checked = !$checked) }}"/>
-  <label for="{id}"><slot name="label">Label</slot></label>
+  {#if $$slots.label}
+    <label for="{id}"><slot name="label"></slot></label>
+  {/if}
 </div>

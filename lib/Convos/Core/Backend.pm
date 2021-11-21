@@ -1,6 +1,7 @@
 package Convos::Core::Backend;
 use Mojo::Base 'Mojo::EventEmitter';
 
+use Mojo::Collection;
 use Mojo::JSON qw(false true);
 use Mojo::Promise;
 
@@ -16,6 +17,11 @@ sub delete_messages_p {
 sub delete_object_p {
   my ($self, $obj) = @_;
   return Mojo::Promise->resolve($obj);
+}
+
+sub files_p {
+  my ($self, $obj) = @_;
+  return Mojo::Promise->resolve(Mojo::Collection->new);
 }
 
 sub emit_to_class_p {
@@ -134,6 +140,13 @@ This method will delete all messages for a given conversation.
   $p = $backend->delete_object_p($obj)->then(sub { my $obj = shift });
 
 This method is called to remove a given object from persistent storage.
+
+=head2 files_p
+
+  $p = $backend->files_p($user)->then(sub { my $c = shift });
+
+Gets a list of uploaded files for a L<Convos::Core::User>. C<$c> is a
+L<Mojo::Collection> containing file information.
 
 =head2 emit_to_class_p
 

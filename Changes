@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.38 Not Released
+ - Convos can list uploaded files #426
+
 6.37 2021-10-19T20:06:00+0900
  - Fix not having to enable and then disable notifications to disable notifications
 

@@ -212,9 +212,9 @@ function renderUnread(conversation, max = 60) {
       <Icon name="user-cog"/>
       <span>{$l('Account')}</span>
     </Link>
-    <Link href="/help">
-      <Icon name="question-circle"/>
-      <span>{$l('Help')}</span>
+    <Link href="/settings/files">
+      <Icon name="folder-open"/>
+      <span>{$l('Files')}</span>
     </Link>
     {#if $user.is('admin')}
       <Link href="/settings">
@@ -226,6 +226,10 @@ function renderUnread(conversation, max = 60) {
         <span>{$l('Users')}</span>
       </Link>
     {/if}
+    <Link href="/help">
+      <Icon name="question-circle"/>
+      <span>{$l('Help')}</span>
+    </Link>
     <a href="{route.urlFor('/logout')}" target="_self">
       <Icon name="power-off"/>
       <span>{$l('Log out')}</span>

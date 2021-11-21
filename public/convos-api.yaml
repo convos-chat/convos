@@ -339,6 +339,23 @@ paths:
                       format: uri
                       type: string
 
+  /files:
+    get:
+      operationId: getFiles
+      summary: Retrieve list of uploaded files.
+      tags: [ files ]
+      x-mojo-to: files#list
+      responses:
+        '200':
+          description: Files found
+          schema:
+            type: object
+            properties:
+              files:
+                type: array
+                items:
+                  type: object
+
   /file/{uid}/{fid}:
     get:
       produces:

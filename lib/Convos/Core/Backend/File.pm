@@ -5,6 +5,7 @@ use Convos::Date qw(dt);
 use Convos::Util qw(DEBUG);
 use Fcntl qw(:flock);
 use File::ReadBackwards;
+use Mojo::Collection;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(encode decode);
@@ -62,6 +63,28 @@ sub delete_object_p {
   }
 
   return Mojo::IOLoop->subprocess->run_p(sub { $self->_delete_object($obj) })->then(sub {$obj});
+}
+
+sub files_p {
+  my ($self, $user) = @_;
+  my $files_dir = $self->home->child(@{$user->uri})->dirname->child('upload');
+  my $files     = Mojo::Collection->new;
+
+  return Mojo::Promise->resolve($files) unless -d $files_dir;
+  return Mojo::Promise->reject($!)      unless opendir(my ($FILES), $files_dir);
+
+  return Mojo::IOLoop->subprocess->run_p(sub {
+    my @files;
+    while (my $file = readdir $FILES) {
+      next unless $file =~ m!\.json$!;
+      my $info = Mojo::JSON::decode_json($files_dir->child($file)->slurp);
+      push @files, {map { ($_ => $info->{$_} // '') } qw(ext filename id saved)};
+    }
+
+    return [sort { $b->{saved} cmp $a->{saved} } @files];
+  })->then(sub {
+    return Mojo::Collection->new(@{$_[0]});
+  });
 }
 
 sub load_object_p {
@@ -501,6 +524,10 @@ See L<Convos::Core::Backend/delete_messages_p>.
 =head2 delete_object_p
 
 See L<Convos::Core::Backend/delete_object_p>.
+
+=head2 files_p
+
+See L<Convos::Core::Backend/files_p>.
 
 =head2 load_object_p
 

@@ -68,6 +68,11 @@ sub get_p {
   return @p ? Mojo::Promise->all(@p)->then(sub {$res}) : Mojo::Promise->resolve($res);
 }
 
+sub files_p {
+  my $self = shift;
+  return $self->core->backend->files_p($self, @_);
+}
+
 sub load_connections_p {
   my $self = shift;
 
@@ -272,6 +277,12 @@ Returns a new L<Convos::Core::Connection> object or updates an existing object.
   $objs = $user->connections;
 
 Returns an array-ref of of L<Convos::Core::Connection> objects.
+
+=head2 files_p
+
+  $p = $user->files_p;
+
+Calls L<Convos::Core::Backend/files_p>.
 
 =head2 get_connection
 
