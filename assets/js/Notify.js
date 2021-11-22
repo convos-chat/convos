@@ -52,7 +52,7 @@ export default class Notify extends Reactive {
     }
 
     setTimeout(() => el.classList.add('is-visible'), 1);
-    document.body.insertBefore(el, document.body.querySelector('.notify-notification'));
+    document.body.appendChild(el);
     return notification;
   }
 
