@@ -17,9 +17,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{matrix.node-version}}
-    - run: npm install --no-save pnpm
-    - run: ./node_modules/.bin/pnpm install
-    - run: ./node_modules/.bin/pnpm test
+    - run: npm install
+    - run: npm test
   perl:
     runs-on: ubuntu-latest
     strategy:

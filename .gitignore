@@ -21,7 +21,6 @@
 .perl-version
 assets/sass/.sass-cache/
 node_modules/
-pnpm-debug.log
 .DS_Store
 
 # snapcraft directories

@@ -318,8 +318,7 @@ sub _setup_env {
   $ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
   $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
   $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
-  $ENV{MOJO_NPM_BINARY} = 'pnpm';
-  $ENV{PERL5LIB}        = join ':', @INC;
+  $ENV{PERL5LIB} = join ':', @INC;
 
   my $bin = path_to 'local', 'bin';
   $ENV{PATH} = join ':', grep {$_} $bin, $ENV{PATH} if -d $bin;
