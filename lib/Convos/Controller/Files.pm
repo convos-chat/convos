@@ -30,6 +30,15 @@ sub get {
   });
 }
 
+sub list {
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+
+  my %params = map { ($_ => $self->param($_)) } qw(after before limit);
+  return $user->core->backend->files_p($user, \%params)
+    ->then(sub { $self->render(openapi => shift) });
+}
+
 sub upload {
   my $self = shift;
 
@@ -86,6 +95,10 @@ user files related actions.
 =head2 get
 
 See L<https://convos.chat/api.html#op-get--file--uid--fid>.
+
+=head2 list
+
+See L<https://convos.chat/api.html#op-get--files>.
 
 =head2 upload
 

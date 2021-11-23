@@ -5,6 +5,7 @@ use Convos::Date qw(dt);
 use Convos::Util qw(DEBUG);
 use Fcntl qw(:flock);
 use File::ReadBackwards;
+use Mojo::Collection;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(encode decode);
@@ -62,6 +63,63 @@ sub delete_object_p {
   }
 
   return Mojo::IOLoop->subprocess->run_p(sub { $self->_delete_object($obj) })->then(sub {$obj});
+}
+
+sub files_p {
+  my ($self, $user, $params) = @_;
+
+  my $files_dir = $self->home->child(@{$user->uri})->dirname->child('upload');
+  return Mojo::Promise->resolve(Mojo::Collection->new) unless -d $files_dir;
+  return Mojo::Promise->reject($!) unless opendir my ($FILES), $files_dir;
+
+  return Mojo::IOLoop->subprocess->run_p(sub {
+
+    # NOTE: This might not work as expected if files where moved around
+    # and mtime does not reflect "saved" inside the json file.
+    my @items;
+    while (my $name = readdir $FILES) {
+      next unless $name =~ m!^(.+)\.json$!;
+      my $stat = $files_dir->child("$1.data")->stat;
+      push @items, {id => $1, name => $name, stat => $stat} if $stat;
+    }
+
+    $params->{limit} = 60 if !$params->{limit} or $params->{limit} > 60;
+    @items = sort { $b->{stat}->mtime <=> $a->{stat}->mtime || $a->{name} cmp $b->{name} } @items;
+    my $res = {files => []};
+    my @before;
+    while (my $item = shift @items) {
+      if ($params->{after} and $params->{after} eq $item->{id}) {
+        $res->{after} = $item->{id};
+      }
+      elsif (@{$res->{files}} >= $params->{limit}) {
+        $res->{next} = $item->{id};
+        last;
+      }
+      elsif (!$params->{after} or $res->{after}) {
+        my $info = Mojo::JSON::decode_json($files_dir->child($item->{name})->slurp);
+        push @{$res->{files}},
+          {
+          id    => $item->{id},
+          name  => $info->{filename} || $item->{id},
+          saved => $info->{saved}    || Mojo::Date->new($item->{stat}->mtime)->to_datetime,
+          size  => $item->{stat}->size,
+          };
+      }
+      else {
+        push @before, $item->{id};
+      }
+    }
+
+    if (@{$res->{files}} and @before > $params->{limit}) {
+      $res->{prev} = $before[-$params->{limit}];
+    }
+
+    return $res;
+  })->then(sub {
+    my $res = shift;
+    $res->{files} = Mojo::Collection->new(@{$res->{files}});
+    return $res;
+  });
 }
 
 sub load_object_p {
@@ -501,6 +559,10 @@ See L<Convos::Core::Backend/delete_messages_p>.
 =head2 delete_object_p
 
 See L<Convos::Core::Backend/delete_object_p>.
+
+=head2 files_p
+
+See L<Convos::Core::Backend/files_p>.
 
 =head2 load_object_p
 
