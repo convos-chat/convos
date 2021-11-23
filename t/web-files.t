@@ -15,7 +15,8 @@ my $fid_re = qr/\w{14,16}/;
 my ($connection, $fid);
 
 subtest initial => sub {
-  $t->post_ok('/api/files',      form => {file  => {file => $asset}})->status_is(401);
+  $t->post_ok('/api/files', form => {file => {file => $asset}})->status_is(401);
+  $t->get_ok('/api/files')->status_is(401);
   $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
     ->status_is(200);
 };
@@ -111,9 +112,53 @@ subtest 'write_only' => sub {
 };
 
 subtest 'max_message_size' => sub {
-  $ENV{CONVOS_MAX_UPLOAD_SIZE} = 10;
+  local $ENV{CONVOS_MAX_UPLOAD_SIZE} = 10;
   $t->post_ok('/api/files', form => {file => {file => $asset}})->status_is(400)
     ->json_is('/errors/0/message', 'Maximum message size exceeded');
+};
+
+subtest 'upload more files so we can do proper pagination testing' => sub {
+  for ((sort grep /Convos/, values %INC)[1 .. 10]) {
+    next if !-r or /Controller\/Files\.pm/;
+    my $file = Mojo::Asset::File->new(path => $_);
+    note $file->path;
+    $t->post_ok('/api/files', form => {file => {file => $file}})->status_is(200)
+      ->content_like(qr{"saved"});
+  }
+};
+
+subtest 'list' => sub {
+  my $files = sub { @{$t->tx->res->json->{files}} };
+  $t->get_ok('/api/files')->status_is(200)->json_hasnt('/after')->json_hasnt('/next')
+    ->json_hasnt('/prev')->json_has('/files/4')->json_has('/files/0/name')->json_has('/files/0/id')
+    ->json_like('/files/0/saved', qr{^\d+-\d+-\d+T})->json_has('/files/0/size');
+  my @ids = map { $_->{id} } $files->();
+  is @ids, 14, 'got all files';
+
+  note 'unknown';
+  $t->get_ok('/api/files?limit=1&after=unknown')->status_is(200)->json_is('/files', [])
+    ->json_hasnt('/after')->json_hasnt('/next')->json_hasnt('/prev');
+
+  note 'limit';
+  $t->get_ok('/api/files?limit=2')->status_is(200)->json_hasnt('/after')->json_is('/next', $ids[2])
+    ->json_has('/files/0')->json_hasnt('/prev')->json_hasnt('/files/2');
+  is int($files->()),                              2, 'got two files';
+  is int(grep { $_->{id} eq $ids[2] } $files->()), 0, 'next is not in file list';
+
+  note 'limit and after';
+  $t->get_ok("/api/files?limit=3&after=$ids[5]")->status_is(200)->json_is('/after', $ids[5])
+    ->json_is('/next', $ids[9])->json_is('/prev', $ids[2]);
+  my $first = $t->tx->res->json->{files}[0]{id};
+  my $next  = $t->tx->res->json->{next};
+  my $prev  = $t->tx->res->json->{prev};
+  is int($files->()),                              3, 'got three files';
+  is int(grep { $_->{id} eq $ids[2] } $files->()), 0, 'after is not in file list';
+  is int(grep { $_->{id} eq $next } $files->()),   0, 'next is not in file list';
+  is int(grep { $_->{id} eq $prev } $files->()),   0, 'prev is not in file list';
+
+  note 'go to prev';
+  $t->get_ok("/api/files?limit=3&after=$prev")->status_is(200)->json_is('/after', $prev)
+    ->json_is('/next', $first)->json_is('/files/0/id', $ids[3]);
 };
 
 done_testing;

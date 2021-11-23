@@ -296,6 +296,50 @@ paths:
           description: Information about resource.
 
   /files:
+    get:
+      operationId: getFiles
+      summary: Retrieve list of uploaded files.
+      tags: [ files ]
+      x-mojo-to: files#list
+      parameters:
+      - description: Find files after a file ID, can be "after", "prev" or the last file ID from the response
+        in: query
+        name: after
+        type: string
+      - description: Max number of files to retrieve
+        in: query
+        name: limit
+        type: integer
+      responses:
+        '200':
+          description: Files found
+          schema:
+            type: object
+            properties:
+              after:
+                description: Can be used as "after" query param to get the current page
+                type: string
+              files:
+                type: array
+                items:
+                  type: object
+                  required: [id, name, saved, size]
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    saved:
+                      type: string
+                      format: date-time
+                    size:
+                      type: integer
+              next:
+                description: Indicates if there is a next page
+                type: string
+              prev:
+                description: Can be used as "after" query param to go to the previous page
+                type: string
     post:
       consumes: [ 'application/x-www-form-urlencoded', 'multipart/form-data' ]
       operationId: uploadFile
