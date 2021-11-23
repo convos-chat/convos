@@ -28,6 +28,7 @@ export default class User extends Reactive {
     this.prop('rw', 'forced_connection', false);
     this.prop('rw', 'default_connection', 'irc://irc.libera.chat:6697/%23convos');
     this.prop('rw', 'highlightKeywords', []);
+    this.prop('rw', 'id', '');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'unreadIncludePrivateMessages', false);
     this.prop('rw', 'videoService', params.videoService || '');
@@ -118,6 +119,7 @@ export default class User extends Reactive {
       highlightKeywords: data.highlight_keywords || [],
       roles: true,
       status: res.errors ? 'error' : 'success',
+      id: data.uid || '',
       videoService: data.video_service || '',
     });
   }

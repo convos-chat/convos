@@ -1,0 +1,14 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+
+  > * {
+    text-align: center;
+    padding: 0.3rem;
+  }
+
+  span.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

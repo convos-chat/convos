@@ -53,6 +53,18 @@ body.with-grid::after {
 
 .text-center {
   text-align: center;
+
+  > div {
+    justify-content: center;
+  }
+}
+
+.text-right {
+  text-align: right;
+
+  > div {
+    justify-content: right;
+  }
 }
 
 @include if_screen("<=two-columns") {

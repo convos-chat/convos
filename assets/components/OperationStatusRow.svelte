@@ -11,6 +11,8 @@ export let op;
       <div class="error">{$l($op.error())}</div>
     {:else if $op.is('loading')}
       {$l('Loading...')}
+    {:else}
+      <slot/>
     {/if}
   </td>
 </tr>
