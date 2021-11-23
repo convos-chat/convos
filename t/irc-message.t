@@ -189,8 +189,8 @@ $server->subtest(
 }sx, 'split long word';
 
     my $message_34243 = path('t/data/long-message-34243.txt')->slurp;
-    require Convos::Plugin::Files::File;
-    $core->backend->on(message_to_paste => 'Convos::Plugin::Files::File');
+    require Convos::Core::File;
+    $core->backend->on(message_to_paste => 'Convos::Core::File');
     $connection->send_p('#convos' => $message_34243)->$wait_success('send_p super long message');
     like slurp_log('#convos'), qr{file/1/LDxaQ0MXZpWGTmJm}, 'created paste from long message';
     chomp $message_34243;

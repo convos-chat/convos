@@ -3,11 +3,12 @@ use Mojo::Base 'Mojolicious';
 
 use Cwd ();
 use Convos::Core;
+use Convos::Util qw(require_module);
 use File::HomeDir ();
-use Mojo::File 'path';
+use Mojo::File qw(path);
 use Mojo::JSON qw(false true);
 use Mojo::Util;
-use Scalar::Util 'blessed';
+use Scalar::Util qw(blessed);
 
 use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
 
@@ -68,6 +69,9 @@ sub startup {
   $r->get('/sw/info' => {json => {mode => $self->mode, version => $self->VERSION}});
   $r->get('/video/#domain/:name')->to(cb => sub { shift->render('video') });
 
+  # Friendly alias for /api/file/:uid/:fid
+  $r->get('/file/:uid/:fid', [format => 1])->to('files#get');
+
   # Event channel
   $r->websocket('/events')->to('events#start')->name('events');
 
@@ -94,6 +98,8 @@ sub startup {
   $self->hook(around_action   => \&_around_action);
   $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(before_dispatch => \&_before_dispatch);
+
+  $self->core->backend->on(message_to_paste => $self->config('file_class'));
   $self->core->start;
 }
 
@@ -160,6 +166,10 @@ sub _config {
   my $self   = shift;
   my $config = $self->config;
 
+  # CONVOS_FILE_CLASS is an EXPERIMENTAL feature
+  $config->{file_class} = $ENV{CONVOS_FILE_CLASS} || 'Convos::Core::File';
+  require_module $config->{file_class};
+
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
@@ -201,7 +211,7 @@ sub _plugins {
 
   my @plugins = (
     qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
-    qw(Convos::Plugin::Files Convos::Plugin::I18N Convos::Plugin::Helpers),
+    qw(Convos::Plugin::I18N Convos::Plugin::Helpers),
     qw(Convos::Plugin::Themes),
   );
 

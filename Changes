@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+6.38 Not Released
+ - Converted file upload into a core feature
+ - Removed back compat /paste/:email_hash/:file_hash URL
+
 6.37 2021-10-19T20:06:00+0900
  - Fix not having to enable and then disable notifications to disable notifications
 

@@ -67,22 +67,6 @@ subtest 'handle_message_to_paste_p' => sub {
     ->content_like(qr{\<pre class="paste"\>~\}\|\{zyxwvutsrqponmlkjihgfedcba`_\^\]\\\[});
 };
 
-subtest 'back compat paste route' => sub {
-  my $paste = $user->core->home->child(qw(superman@example.com upload 149545306873033))
-    ->spurt(Mojo::Loader::data_section('main', '149545306873033'));
-  my $user_sha1 = substr Mojo::Util::sha1_sum('superman@example.com'), 0, 20;
-
-  ok -e $paste, 'legacy paste exists';
-  $t->get_ok("/paste/10000000000000000000/149545306873033")->status_is(404);
-  $t->get_ok("/paste/$user_sha1/100000000000000")->status_is(404);
-  $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200)
-    ->header_is('Cache-Control', 'max-age=86400')->text_is('h1', 'paste.txt')
-    ->content_like(qr{\<pre class="paste"\>.*curl -s www}s);
-
-  ok !-e $paste, 'legacy paste was moved';
-  $t->get_ok("/paste/$user_sha1/149545306873033")->status_is(200, '200 OK after moved');
-};
-
 subtest 'iPhone default image name' => sub {
   $t->post_ok('/api/file', form => {file => {file => 't/data/image.jpg'}})->status_is(200)
     ->json_like('/files/0/filename', qr{^IMG_\d+\.jpg$});

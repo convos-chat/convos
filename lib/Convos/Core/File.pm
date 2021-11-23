@@ -1,15 +1,15 @@
-package Convos::Plugin::Files::File;
+package Convos::Core::File;
 use Mojo::Base -base;
 
-use Carp 'confess';
+use Carp qw(confess);
 use Convos::Util qw(DEBUG short_checksum);
 use Digest::MD5 ();
 use Mojo::Asset::File;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Path;
-use Mojo::Util 'encode';
-use Time::HiRes 'time';
+use Mojo::Util qw(encode);
+use Time::HiRes qw(time);
 
 has asset    => sub { Mojo::Asset::File->new };
 has filename => sub { die 'filename() cannot be built' };
@@ -144,11 +144,11 @@ sub TO_JSON {
 
 =head1 NAME
 
-Convos::Plugin::Files::File - Represents a paste
+Convos::Core::File - Represents a file for a user
 
 =head1 DESCRIPTION
 
-L<Convos::Plugin::Files::File> is a class used by represent an uploaded file.
+L<Convos::Core::File> is a class used by represent an uploaded file.
 
 =head1 ATTRIBUTES
 
@@ -207,7 +207,7 @@ of read by visitors on the web.
 
 =head2 handle_message_to_paste_p
 
-  $p = Convos::Plugin::Files::File
+  $p = Convos::Core::File
         ->handle_message_to_paste_p($backend, $connection, $message)
         ->then(sub { my $file = shift });
 
