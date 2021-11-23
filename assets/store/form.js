@@ -59,7 +59,12 @@ export const createForm = (defaultFields = {}) => {
     return (fields[name] = field);
   };
 
-  form.get = (fields) => get(data, fields);
+  form.remove = (names) => {
+    names.forEach(name => (delete data[name], delete fields[name], delete subscribers[name]));
+    for (const subscriber of subscribers) subscriber[0](data);
+  };
+
+  form.get = (names) => get(data, names);
   form.set = (to) => set(form, to);
   form.subscribe = (cb) => { cb(data); return subscribe(subscribers, cb) };
   Object.keys(defaultFields).forEach(k => form.set({[k]: defaultFields[k]}));

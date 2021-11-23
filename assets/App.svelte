@@ -13,6 +13,7 @@ import Search from './page/Search.svelte';
 import SettingsAccount from './page/SettingsAccount.svelte';
 import SettingsAdmin from './page/SettingsAdmin.svelte';
 import SettingsAdminUsers from './page/SettingsAdminUsers.svelte';
+import SettingsFiles from './page/SettingsFiles.svelte';
 
 // Other components and utilties
 import features from './js/features';
@@ -137,6 +138,8 @@ function socketChanged(socket) {
     <SettingsAccount bind:title/>
   {:else if $route.path == '/settings/connections'}
     <Connections bind:title/>
+  {:else if $route.path == '/settings/files'}
+    <SettingsFiles bind:title/>
   {:else if $route.path.indexOf('/settings/connection/') == 0}
     <ConnectionSettings connection_id="{$route.pathParts[2]}" bind:title/>
   {:else if $route.path.indexOf('/settings/connection-profile/') == 0}
