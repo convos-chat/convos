@@ -17,6 +17,7 @@ my ($connection, $fid);
 subtest initial => sub {
   $t->post_ok('/api/files', form => {file => {file => $asset}})->status_is(401);
   $t->get_ok('/api/files')->status_is(401);
+  $t->delete_ok('/api/files/1/x,y,z')->status_is(401);
   $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
     ->status_is(200);
 };
@@ -159,6 +160,20 @@ subtest 'list' => sub {
   note 'go to prev';
   $t->get_ok("/api/files?limit=3&after=$prev")->status_is(200)->json_is('/after', $prev)
     ->json_is('/next', $first)->json_is('/files/0/id', $ids[3]);
+};
+
+subtest 'delete' => sub {
+  $t->get_ok('/api/files')->status_is(200);
+  my $files = $t->tx->res->json->{files};
+  my $n     = @{$t->tx->res->json->{files}};
+
+  $t->delete_ok("/api/files/1/not_found")->status_is(200)->json_is('/deleted', 0);
+  $t->delete_ok("/api/files/1/$files->[0]{id}")->status_is(200)->json_is('/deleted', 1);
+  $t->delete_ok("/api/files/1/$files->[1]{id},$files->[2]{id},x,y")->status_is(200)
+    ->json_is('/deleted', 2);
+
+  $t->get_ok('/api/files')->status_is(200);
+  is @{$t->tx->res->json->{files}}, $n - 3, 'less files returned';
 };
 
 done_testing;
