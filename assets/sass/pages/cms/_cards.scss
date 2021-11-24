@@ -13,7 +13,7 @@
   border: var(--hr-border);
   border-radius: 0.5rem;
   width: 95%;
-  margin: calc(var(--gutter) / 2);
+  margin: calc(var(--gutter) * 0.5);
   padding: 1.5rem var(--gutter);
   display: block;
   transition: filter 0.25s ease-in-out;
@@ -29,7 +29,7 @@
   }
 
   @include if_screen(">two-columns") {
-    max-width: calc(var(--content-max-width) / 3.5);
+    max-width: calc(var(--content-max-width) * 0.286); // * 1 / 3.5
     padding: 2rem var(--gutter);
 
     i {
