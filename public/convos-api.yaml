@@ -415,6 +415,28 @@ paths:
           description: File found and served.
           schema:
             type: string
+    delete:
+      operationId: deleteFiles
+      summary: Delete one (or more) uploaded file.
+      tags: [ files ]
+      x-mojo-to: files#remove
+      parameters:
+      - in: path
+        name: fid
+        required: true
+        type: string
+      - in: path
+        name: uid
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successfully deleted.
+          schema:
+            type: object
+            properties:
+              deleted:
+                type: integer
 
   /i18n/{lang}:
     get:

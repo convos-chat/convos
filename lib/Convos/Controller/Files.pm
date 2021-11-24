@@ -39,6 +39,24 @@ sub list {
     ->then(sub { $self->render(openapi => shift) });
 }
 
+sub remove {
+  my $self = shift->openapi->valid_input or return;
+  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+
+  my @ids = split ',', $self->param('fid');
+  return $self->render(openapi => {deleted => 0}) unless @ids;
+
+  my ($backend, @errors) = ($user->core->backend);
+  return Mojo::Promise->all(
+    map {
+      $backend->delete_object_p($self->_file({id => $_, user => $user}))
+        ->catch(sub { push @errors, shift })
+    } @ids
+  )->then(sub {
+    return $self->render(openapi => {deleted => @ids - @errors});
+  });
+}
+
 sub upload {
   my $self = shift;
 
@@ -99,6 +117,10 @@ See L<https://convos.chat/api.html#op-get--file--uid--fid>.
 =head2 list
 
 See L<https://convos.chat/api.html#op-get--files>.
+
+=head2 remove
+
+See L<https://convos.chat/api.html#op-post--delete-files>.
 
 =head2 upload
 
