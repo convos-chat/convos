@@ -167,7 +167,7 @@ sub _config {
   my $config = $self->config;
 
   # CONVOS_FILE_CLASS is an EXPERIMENTAL feature
-  $config->{file_class} = $ENV{CONVOS_FILE_CLASS} || 'Convos::Core::File';
+  $config->{file_class} = $ENV{CONVOS_FILE_CLASS} || 'Convos::Core::User::File';
   require_module $config->{file_class};
 
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';

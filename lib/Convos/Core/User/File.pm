@@ -1,4 +1,4 @@
-package Convos::Core::File;
+package Convos::Core::User::File;
 use Mojo::Base -base;
 
 use Carp qw(confess);
@@ -144,11 +144,11 @@ sub TO_JSON {
 
 =head1 NAME
 
-Convos::Core::File - Represents a file for a user
+Convos::Core::User::File - Represents a file for a user
 
 =head1 DESCRIPTION
 
-L<Convos::Core::File> is a class used by represent an uploaded file.
+L<Convos::Core::User::File> is a class used by represent an uploaded file.
 
 =head1 ATTRIBUTES
 
@@ -207,7 +207,7 @@ of read by visitors on the web.
 
 =head2 handle_message_to_paste_p
 
-  $p = Convos::Core::File
+  $p = Convos::Core::User::File
         ->handle_message_to_paste_p($backend, $connection, $message)
         ->then(sub { my $file = shift });
 
