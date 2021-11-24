@@ -92,7 +92,7 @@ function setConversationFromUser(user) {
 function showPopover(e) {
   const {relatedTarget, target, type} = e;
   setTimeout(() => {
-    if (type == 'mouseout') {
+    if (type == 'mouseout' || type == 'blur') {
       if (!relatedTarget || !relatedTarget.closest('.popover')) $popoverTarget = null;
     }
     else {
@@ -165,7 +165,7 @@ function showPopover(e) {
     <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
       <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
-      <a href="#popover:{message.id}" on:mouseover="{showPopover}" on:mouseout="{showPopover}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#popover:{message.id}" on:blur="{showPopover}" on:focus="{showPopover}" on:mouseover="{showPopover}" on:mouseout="{showPopover}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
           <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
@@ -183,7 +183,7 @@ function showPopover(e) {
         {/await}
       {/each}
       {#if $popoverTarget == message.id}
-        <div class="popover" transition:fade="{{duration: 200}}" on:mouseout="{showPopover}">
+        <div class="popover" transition:fade="{{duration: 200}}" on:blur="{showPopover}" on:mouseout="{showPopover}">
           <a href="#action:mention:{message.from}" class="on-hover"><Icon name="quote-left"/> {$l('Mention')}</a>
           <a href="#action:join:{message.from}" class="on-hover"><Icon name="comments"/> {$l('Chat')}</a>
           <a href="#action:whois:{message.from}" class="on-hover"><Icon name="address-card"/> {$l('Whois')}</a>
