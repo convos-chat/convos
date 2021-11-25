@@ -15,16 +15,15 @@ my $fid_re = qr/\w{14,16}/;
 my ($connection, $fid);
 
 subtest initial => sub {
-  $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(401);
-
+  $t->post_ok('/api/files',      form => {file  => {file => $asset}})->status_is(401);
   $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
     ->status_is(200);
 };
 
 subtest 'upload' => sub {
-  $t->post_ok('/api/file')->status_is(400)->json_is('/errors/0/path', '/file');
+  $t->post_ok('/api/files')->status_is(400)->json_is('/errors/0/path', '/file');
 
-  $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(200)
+  $t->post_ok('/api/files', form => {file => {file => $asset}})->status_is(200)
     ->json_is('/files/0/ext', 't')->json_is('/files/0/filename', 'web-files.t')
     ->json_is('/files/0/uid', 1)->json_like('/files/0/id', qr{^$fid_re$})
     ->json_like('/files/0/saved', qr{^\d+-\d+})
@@ -39,7 +38,7 @@ subtest 'upload' => sub {
   $t->get_ok("/file/1/$fid.t")->status_is(200)->header_is('Cache-Control', 'max-age=86400')
     ->content_like(qr{use t::Helper}s)->content_unlike(qr{\<pre class="paste"\>.*use t::Helper}s);
 
-  $t->get_ok("/api/file/1/1000000000000000")->status_is(404);
+  $t->get_ok("/api/files/1/1000000000000000")->status_is(404);
   $t->get_ok("/file/1/1000000000000000")->status_is(404);
 };
 
@@ -68,7 +67,7 @@ subtest 'handle_message_to_paste_p' => sub {
 };
 
 subtest 'iPhone default image name' => sub {
-  $t->post_ok('/api/file', form => {file => {file => 't/data/image.jpg'}})->status_is(200)
+  $t->post_ok('/api/files', form => {file => {file => 't/data/image.jpg'}})->status_is(200)
     ->json_like('/files/0/filename', qr{^IMG_\d+\.jpg$});
   isnt $t->tx->res->json('/files/0/id'), $fid, 'image does not have the same id as file';
 };
@@ -86,7 +85,7 @@ subtest 'embedded image' => sub {
 };
 
 subtest 'binary' => sub {
-  $t->post_ok('/api/file', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
+  $t->post_ok('/api/files', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
   my $fid  = $t->tx->res->json('/files/0/id');
   my $url  = $t->tx->res->json('/files/0/url');
   my $name = $t->tx->res->json('/files/0/filename');
@@ -96,12 +95,12 @@ subtest 'binary' => sub {
 };
 
 subtest 'svg with javasript' => sub {
-  $t->post_ok('/api/file', form => {file => {file => 't/data/js.svg'}})->status_is(400)
+  $t->post_ok('/api/files', form => {file => {file => 't/data/js.svg'}})->status_is(400)
     ->json_is('/errors/0/message', 'SVG contains script.');
 };
 
 subtest 'write_only' => sub {
-  $t->post_ok('/api/file',
+  $t->post_ok('/api/files',
     form => {id => 'irc-localhost-key', file => {file => $asset}, write_only => true})
     ->status_is(200);
   $fid = $t->tx->res->json('/files/0/id');
@@ -113,7 +112,7 @@ subtest 'write_only' => sub {
 
 subtest 'max_message_size' => sub {
   $ENV{CONVOS_MAX_UPLOAD_SIZE} = 10;
-  $t->post_ok('/api/file', form => {file => {file => $asset}})->status_is(400)
+  $t->post_ok('/api/files', form => {file => {file => $asset}})->status_is(400)
     ->json_is('/errors/0/message', 'Maximum message size exceeded');
 };
 

@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.38 Not Released
  - Converted file upload into a core feature
+ - Changed "/file" API endpoint to "/files"
  - Removed back compat /paste/:email_hash/:file_hash URL
  - Using "npm" (instead of "pnpm") to install node modules
 

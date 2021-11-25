@@ -295,7 +295,7 @@ paths:
         '200':
           description: Information about resource.
 
-  /file:
+  /files:
     post:
       consumes: [ 'application/x-www-form-urlencoded', 'multipart/form-data' ]
       operationId: uploadFile
@@ -339,7 +339,7 @@ paths:
                       format: uri
                       type: string
 
-  /file/{uid}/{fid}:
+  /files/{uid}/{fid}:
     get:
       produces:
         - application/pdf
