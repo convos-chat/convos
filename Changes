@@ -1,6 +1,8 @@
 Revision history for perl distribution Convos
 
-6.38 Not Released
+6.38 2021-11-26T08:46:00+0900
+ - Use Crypt::Passphrase for password hashing #627
+   Contributor: Stig Palmquist
  - Converted file upload into a core feature
  - Changed "/file" API endpoint to "/files"
  - Removed back compat /paste/:email_hash/:file_hash URL

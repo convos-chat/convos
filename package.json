@@ -1,7 +1,7 @@
 {
   "name": "convos",
   "description": "",
-  "version": "6.37.0",
+  "version": "6.38.0",
   "license": "Artistic-2.0",
   "repository": "https://github.com/convos-chat/convos",
   "scripts": {
