@@ -10,9 +10,9 @@ export let icon = 'square';
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 
-const checked = form.field(name);
 let hasFocus = false;
 
+$: checked = form.field(name);
 $: icons = icon == 'caret' ? ['caret-square-down', 'caret-square-up'] : ['square', 'check-square'];
 $: stateIcon = icons[$checked ? 1 : 0];
 </script>
