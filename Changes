@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.39 2021-11-27T07:08:00+0900
+6.39 2021-11-27T08:50:00+0900
  - Add file management to frontend #426
  - Add GET /files endpoint #426
  - Add DELETE /files/:uid/:fid endpoint #426
