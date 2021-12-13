@@ -3,6 +3,7 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
 import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
+import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
@@ -13,11 +14,20 @@ export const title = 'Search';
 const user = getContext('user');
 const conversation = user.search;
 
-$: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
 $: messages = $conversation.messages;
-$: route.param('q') && search({message: route.param('q')});
+$: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
+$: hasSearch = $route.param('q') || $messages.length;
 
-onMount(() => user.search.on('send', search));
+onMount(() => {
+  user.search.on('send', search);
+  if (route.param('q')) search({message: route.param('q')});
+});
+
+function maybeClear(e) {
+  if (hasSearch) return $messages.clear();
+  e.preventDefault();
+  document.querySelector('.is-primary-input').focus();
+}
 
 function search(msg) {
   const match = msg.message;
@@ -29,6 +39,7 @@ function search(msg) {
 
 <ChatHeader>
   <h1>{$l(conversation.name)}</h1>
+  <Link href="/search" class="btn-hallow {hasSearch ? 'is-active' : ''}" on:click="{maybeClear}"><Icon name="search"/><Icon name="times"/></Link>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">

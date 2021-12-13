@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.40 Not Released
+ - Add clear search button #631
  - Add CSRF-check to /logout #632
    Contributors: Devendra Bhatla and Jamie Slome
 
