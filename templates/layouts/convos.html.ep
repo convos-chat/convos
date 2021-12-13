@@ -55,6 +55,7 @@
     %= tag 'meta', name => 'convos:open_to_public', content => $open_to_public ? 'yes' : 'no'
     %= tag 'meta', name => 'convos:start_app', content => $start_app
     %= tag 'meta', name => 'convos:status', content => stash('status') || 200
+    %= tag 'meta', name => 'csrf', content => csrf_token
     %= tag 'meta', name => 'version', content => Convos->VERSION
 
     <!-- base style + themes -->

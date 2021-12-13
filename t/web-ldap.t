@@ -8,7 +8,9 @@ $ENV{CONVOS_PLUGINS} = 'Convos::Plugin::Auth::LDAP';
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 my $t = t::Helper->t;
 
-$t->get_ok('/api/user')->status_is(401);
+subtest initial => sub {
+  $t->get_ok('/api/user')->status_is(401);
+};
 
 subtest 'not authorized' => sub {
   $t->post_ok('/api/user/login',
@@ -22,7 +24,7 @@ subtest 'authorized' => sub {
   ok $t->app->core->get_user('superman@example.com'), 'superman account was created';
 
   $t->get_ok('/api/user')->status_is(200);
-  $t->get_ok('/api/user/logout')->status_is(302);
+  $t->t::Helper::with_csrf('/logout')->status_is(302);
 };
 
 subtest 'fallback to local user' => sub {

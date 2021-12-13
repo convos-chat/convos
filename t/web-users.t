@@ -29,7 +29,8 @@ subtest 'delete / update other users as admin' => sub {
 };
 
 subtest 'logout first user' => sub {
-  $t->get_ok('/api/user/logout')->status_is(302);
+  $t->get_ok('/api/user/logout')->status_is(500);
+  $t->t::Helper::with_csrf('/api/user/logout')->status_is(302);
 };
 
 subtest 'second user' => sub {
@@ -52,7 +53,7 @@ subtest 'delete / update other users as normal user' => sub {
 };
 
 subtest 'logout second user' => sub {
-  $t->get_ok('/api/user/logout')->status_is(302);
+  $t->t::Helper::with_csrf('/api/user/logout')->status_is(302);
   $server->client($t->app->core->get_user('superwoman@example.com')->connections->[0])
     ->server_event_ok('_irc_event_nick')->process_ok;
   delete $server->{client};

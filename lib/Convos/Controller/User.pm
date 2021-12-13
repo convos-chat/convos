@@ -99,6 +99,9 @@ sub login {
 sub logout {
   my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
 
+  return $self->reply->exception('Invalid csrf token')
+    unless +($self->param('csrf') // 'does_not_match') eq $self->csrf_token;
+
   return $self->auth->logout_p({})->then(sub {
     $self->session({expires => 1});
     return $self->redirect_to('/login');

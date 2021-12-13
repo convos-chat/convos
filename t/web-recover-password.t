@@ -21,7 +21,7 @@ subtest 'Create recover user and recover url' => sub {
 };
 
 subtest 'Log out admin' => sub {
-  $t->get_ok('/api/user/logout')->status_is(302);
+  $t->t::Helper::with_csrf('/logout')->status_is(302);
 };
 
 subtest 'Let recover user do the rest' => sub {

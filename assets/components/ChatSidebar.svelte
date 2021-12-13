@@ -2,7 +2,7 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import {activeMenu} from '../store/writable';
-import {closestEl, q, regexpEscape, tagNameIs} from '../js/util';
+import {closestEl, q, regexpEscape, settings, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
@@ -230,7 +230,7 @@ function renderUnread(conversation, max = 60) {
       <Icon name="question-circle"/>
       <span>{$l('Help')}</span>
     </Link>
-    <a href="{route.urlFor('/logout')}" target="_self">
+    <a href="{route.urlFor('/logout')}?csrf={settings('csrf')}" target="_self">
       <Icon name="power-off"/>
       <span>{$l('Log out')}</span>
     </a>

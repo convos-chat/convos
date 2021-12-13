@@ -30,6 +30,12 @@ sub subprocess_in_main_process {
   );
 }
 
+sub with_csrf {
+  my ($t, $path) = @_;
+  my $token = $t->get_ok('/chat')->tx->res->dom->at('meta[name=csrf]')->{content} // 'undef';
+  return $t->get_ok("$path?csrf=$token");
+}
+
 sub messages {
   my $class    = shift;
   my $ts       = shift || time;

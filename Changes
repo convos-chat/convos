@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+6.40 Not Released
+ - Add CSRF-check to /logout #632
+   Contributors: Devendra Bhatla and Jamie Slome
+
 6.39 2021-11-27T08:50:00+0900
  - Add file management to frontend #426
  - Add GET /files endpoint #426

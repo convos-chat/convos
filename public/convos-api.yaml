@@ -625,6 +625,11 @@ paths:
       summary: Logout a user.
       tags: [ user ]
       x-mojo-to: ["user#logout", ["format", ["html", "json"]]]
+      parameters:
+        - in: query
+          name: csrf
+          required: true
+          type: string
       responses:
         '302':
           description: Successfully logged out.
