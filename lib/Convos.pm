@@ -220,6 +220,9 @@ sub _plugins {
     my ($name, $config) = split '\?', $_, 2;
     $self->plugin($name => Mojo::Parameters->new($config // '')->to_hash);
   }
+
+  my $access_log = $ENV{CONVOS_ACCESS_LOG} // 'v2';
+  $self->plugin(Syslog => {access_log => $access_log, enable => $ENV{CONVOS_SYSLOG} // 0});
 }
 
 1;

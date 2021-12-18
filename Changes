@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+6.41 Not Released
+ - Add support for CONVOS_ACCESS_LOG (EXPERIMENTAL)
+ - Add support for CONVOS_SYSLOG (EXPERIMENTAL)
+
 6.40 2021-12-13T22:32:00+0900
  - Add clear search button #631
  - Add CSRF-check to /logout #632
