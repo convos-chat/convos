@@ -58,6 +58,8 @@ test('md - markdown link', () => {
     .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>!');
   expect(i18n.md('https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик last symbol shows as separate outside of the URL? do you reproduce the bug?'))
     .toBe('<a href=\"https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик\" target=\"_blank\">https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol shows as separate outside of the URL? do you reproduce the bug?');
+  expect(i18n.md('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - https://git.io/JD9ph'))
+    .toBe('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - <a href=\"https://git.io/JD9ph\" target=\"_blank\">https://git.io/JD9ph</a>');
 });
 
 test('md - code', () => {
@@ -81,8 +83,8 @@ test('md - nbsp', () => {
 });
 
 test('md - channel names', () => {
-  expect(i18n.md('#foo #foo-bar#not href="#anchor" #foo.bar'))
-    .toBe('<a href=\"./%23foo\">#foo</a><a href=\"./%20%23foo-bar\"> #foo-bar</a>#not href=&quot;#anchor&quot;<a href=\"./%20%23foo.bar\"> #foo.bar</a>');
+  expect(i18n.md('want to join #foo-1.2 #foo-bar#not href="#anchor" #foo.bar'))
+    .toBe('want to join <a href=\"./%23foo-1.2\">#foo-1.2</a> <a href=\"./%23foo-bar\">#foo-bar</a>#not href=&quot;#anchor&quot; <a href=\"./%23foo.bar\">#foo.bar</a>');
 });
 
 function countEmojis(str) {
