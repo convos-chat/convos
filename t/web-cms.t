@@ -39,6 +39,14 @@ subtest 'empty blog index' => sub {
 };
 
 subtest 'blog too-cool' => sub {
+  my $code = <<'HERE';
+        #!/usr/bin/env perl
+        use Mojo::Base -strict;
+
+        # Avoid double line breaks above this comment
+        exit;
+HERE
+
   $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(404);
   $cms_dir->child(qw(blog 2020))->make_path;
   $cms_dir->child(qw(blog 2020 2020-05-17-too-cool.md))->spurt(<<"HERE");
@@ -65,6 +73,11 @@ And then some!
 
 </div>
 
+1. some list item
+2. another list with code
+
+$code
+
 <div class="is-before-content">Is before content.</div>
 <div class="is-after-content">Is after content.</div>
 <style>
@@ -73,6 +86,9 @@ body {
 }
 </style>
 HERE
+
+  $code =~ s!^        !!mg;
+  chomp $code;
 
   $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(200)->header_is('X-Provider-Name', undef)
     ->element_exists('body.for-cms > article')->text_is('title', 'Cool title - Convos')
@@ -83,8 +99,9 @@ HERE
     ->text_is('.toc li a[href="#cool-sub-title"]',     'Cool sub title')
     ->text_is('.toc li li a[href="#another-heading"]', 'Another heading')
     ->text_like('head > style', qr{background: red})->text_unlike('head > style', qr{<p>})
-    ->text_is('body > .is-before-content', 'Is before content.')
-    ->text_is('body > .is-after-content',  'Is after content.')
+    ->text_is('body > .is-before-content',                            'Is before content.')
+    ->text_is('body > .is-after-content',                             'Is after content.')
+    ->text_is('body > article > ol:nth-of-type(2) li:last-child pre', $code)
     ->text_is('[markdown] h3',  'Another heading')->text_like('[markdown] p', qr{And a paragraph})
     ->text_is('[markdown] pre', 'code inside')->element_exists('[markdown] i[class="fas fa-eye"]')
     ->element_exists('[markdown] i[class="fab fa-github"]')->element_exists_not('attr');

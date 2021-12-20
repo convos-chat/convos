@@ -11,12 +11,11 @@ use Mojo::Util qw(decode slugify trim);
 use Pod::Simple::Search;
 use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
-use Text::Markdown ();
+use Text::Markdown::Hoedown;
 
 $ENV{CONVOS_CMS_SCAN_INTERVAL} ||= 15;
 
 has _cache => sub { Mojo::Cache->new(max_keys => 20) };
-has _md    => sub { Text::Markdown->new(empty_element_suffix => '>', trust_list_start_value => 1) };
 
 sub register {
   my ($self, $app, $config) = @_;
@@ -96,6 +95,13 @@ sub _get_cached_document {
   return $doc if $doc and $doc->{mtime} == $mtime;
 }
 
+sub _markdown {
+  state $extensions
+    = HOEDOWN_EXT_AUTOLINK | HOEDOWN_EXT_MATH | HOEDOWN_EXT_SUPERSCRIPT | HOEDOWN_EXT_SPACE_HEADERS
+    | HOEDOWN_EXT_TABLES;
+  return markdown($_[0], extensions => $extensions);
+}
+
 sub _parse_document {
   my ($self, $file, $params) = @_;
 
@@ -145,14 +151,12 @@ sub _parse_markdown {
     my $markdown = $tag->content;
     my $indent   = $markdown =~ s!^([ ]+)!!m ? $1 : '';
     $markdown =~ s!^$indent!!mg;
-    $tag->content($self->_md->markdown($markdown));
+    $tag->content(_markdown($markdown));
   });
 
   $dom->child_nodes->each(sub {
     my $tag = shift;
-    $tag->replace($self->_md->markdown($tag->content))
-      if $tag->type eq 'text'
-      or $tag->type eq 'raw';
+    $tag->replace(_markdown($tag->content)) if $tag->type eq 'text' or $tag->type eq 'raw';
   });
 
   $dom->find('p:empty')->each('remove');
@@ -230,7 +234,7 @@ sub _rewrite_document {
   my @toc;
   $dom->find('h1, h2, h3')->each(sub {
     my $tag = shift;
-    $tag->{id} ||= slugify(trim $tag->all_text);
+    $tag->{id} = slugify(trim $tag->all_text);
     return if $tag->tag eq 'h1';
     push @toc,           [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
     push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';

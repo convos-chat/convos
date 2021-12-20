@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.42 Not Released
+ - Fix double line breaks inside <pre> in the CMS by changing to Text::Markdown::Hoedown
  - Fix not adding space between channel name links
  - Avoid making #123 turn into channel links, since they are often pull request numbers
 
