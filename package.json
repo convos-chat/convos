@@ -36,7 +36,7 @@
     "js-cookie": "^2.2.1",
     "jsdoc": "^3.6.7",
     "jsonhtmlify": "^0.1.0",
-    "postcss-preset-env": "^6.7.0",
+    "postcss-preset-env": "^7.0.2",
     "querystring": "^0.2.1",
     "rollup": "^2.53.2",
     "rollup-plugin-postcss": "^4.0.0",
