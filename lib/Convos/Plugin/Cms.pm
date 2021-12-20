@@ -11,7 +11,7 @@ use Mojo::Util qw(decode slugify trim);
 use Pod::Simple::Search;
 use Pod::Simple::XHTML;
 use Scalar::Util 'blessed';
-use Text::Markdown;
+use Text::Markdown ();
 
 $ENV{CONVOS_CMS_SCAN_INTERVAL} ||= 15;
 
@@ -179,7 +179,7 @@ sub _perldoc {
     }
     else {
       $tag->tag('h' . ($1 + 1)) if $tag->tag =~ m!(\d+)!;
-      push @toc, [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
+      push @toc,           [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
       push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';
     }
   });
@@ -232,7 +232,7 @@ sub _rewrite_document {
     my $tag = shift;
     $tag->{id} ||= slugify(trim $tag->all_text);
     return if $tag->tag eq 'h1';
-    push @toc, [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
+    push @toc,           [trim($tag->all_text), $tag->{id}, []] if $tag->tag eq 'h2';
     push @{$toc[-1][2]}, [trim($tag->all_text), $tag->{id}, []] if @toc and $tag->tag eq 'h3';
   });
 

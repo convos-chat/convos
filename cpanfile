@@ -14,7 +14,7 @@ requires "Mojolicious::Plugin::OpenAPI"   => "4.02";
 requires "Mojolicious::Plugin::Syslog"    => "0.05";
 requires "Mojolicious::Plugin::Webpack"   => "1.01";
 requires "Parse::IRC"                     => "1.22";
-requires "Text::Markdown"                 => "1.00";
+requires "Text::Markdown::Hoedown"        => "1.03";
 requires "Time::Piece"                    => "1.20";
 requires "Unicode::UTF8"                  => "0.62";
 
