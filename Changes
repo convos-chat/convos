@@ -1,10 +1,10 @@
 Revision history for perl distribution Convos
 
-6.42 Not Released
+6.42 2021-12-21T10:00:00+0900
  - Fix resetting reconnect delay when manually updating connection settings
  - Fix not changing wanted state to "disconnected" when updating connection settings
  - Fix double line breaks inside <pre> in the CMS by changing to Text::Markdown::Hoedown
- - Fix not adding space between channel name links
+ - Fix not adding space before channel name links
  - Avoid making #123 turn into channel links, since they are often pull request numbers
 
 6.41 2021-12-18T14:58:00+0900
