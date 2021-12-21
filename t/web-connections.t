@@ -49,11 +49,17 @@ $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.c
 $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
 
 my $connection = $user->get_connection('irc-localhost');
+$connection->inc_reconnect_delay for 1 .. 10;
+is $connection->reconnect_delay, 10, 'reconnect_delay';
+
 $t->post_ok('/api/connection/irc-localhost', json => {url => "irc://localhost:$port"})
   ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'disconnected');
+is $connection->reconnect_delay, 10, 'reconnect_delay after no change';
+
 $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:9999'})
   ->status_is(200)->json_is('/name' => 'localhost')
   ->json_like('/url' => qr{irc://example\.com:9999});
+is $connection->reconnect_delay, 0, 'reconnect_delay after reconnect';
 
 $connection->state(disconnected => '');
 $t->post_ok('/api/connection/irc-localhost',
@@ -75,14 +81,14 @@ $t->post_ok(
 $t->post_ok('/api/connection/irc-localhost',
   json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(200)
   ->json_is('/url'   => 'irc://foo:bar@example.com:9999?tls=0&nick=superman')
-  ->json_is('/state' => 'disconnected');
+  ->json_is('/state' => 'connecting');
 
 $connection->state(connected => '');
 $t->post_ok('/api/connection/irc-localhost',
   json =>
     {url => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman', wanted_state => 'connected'})
   ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman')
-  ->json_is('/state' => 'disconnected');
+  ->json_is('/state' => 'connecting');
 
 is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman',
   'to json url';

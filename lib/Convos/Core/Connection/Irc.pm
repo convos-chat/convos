@@ -30,7 +30,6 @@ sub disconnect_p {
 
   $self->{myinfo}{authenticated} = false;
   $self->{myinfo}{capabilities}  = {};
-  $self->wanted_state('disconnected');
   $self->state(disconnecting => 'Quitting...');
   $self->_write("QUIT :$CONVOS_URL", sub { $self->_stream_remove($p) });
   return $p;
@@ -746,8 +745,7 @@ sub _periodic_events {
 
 sub _reconnect {
   my $self = shift;
-  return $self->disconnect_p->then(
-    sub { $self->wanted_state('connected'); $self->user->core->connect($self); return {} });
+  return $self->disconnect_p->then(sub { $self->user->core->connect($self); return {} });
 }
 
 sub _sasl_mechanism {

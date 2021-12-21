@@ -99,7 +99,7 @@ sub update {
   }
 
   return Mojo::Promise->all(@p)->then(sub {
-    $self->app->core->connect($connection)
+    $self->app->core->connect($connection->reconnect_delay(0), 0)
       if $wanted_state eq 'connected' or $wanted_state eq 'reconnect';
     $self->render(openapi => $connection);
   });

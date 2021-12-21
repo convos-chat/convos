@@ -32,7 +32,11 @@ sub connect {
   }
   elsif ($self->{connect_queue}{$host} or $delay) {
     my $q = $self->{connect_queue}{$host} ||= [];
-    return $self if first { $_->[1] eq $connection } @$q;
+
+    # Allow changing the $delay, or just return if no $delay is specified and already queued
+    return $self if !defined $delay and first { $_->[1] eq $connection } @$q;
+    @$q = grep { $_->[1] ne $connection } @$q if defined $delay;
+
     $connection->state('queued');
     push @$q, [$delay ? $delay + time : 0, $connection];
     weaken($q->[-1][1]);

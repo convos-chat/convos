@@ -84,11 +84,7 @@ has_many conversations => 'Convos::Core::Conversation' => sub {
   return $conversation;
 };
 
-sub disconnect_p {
-  my ($self) = @_;
-  $self->wanted_state('disconnected');
-  return $self->_stream_remove(Mojo::Promise->new);
-}
+sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
 
 sub id {
   my $from = $_[1] || $_[0];

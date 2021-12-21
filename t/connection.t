@@ -14,9 +14,9 @@ ok !$connection->{conversation}{'#foo'}, 'no conversation on get';
 my $conversation = $connection->get_conversation('#foo');
 ok $connection->{conversations}{'#foo'}, 'conversation on create/update';
 
-$connection = Convos::Core::Connection->new({});
 $connection->disconnect_p->$wait_success('disconnect_p');
 
+$connection = Convos::Core::Connection->new({user => $user});
 eval { $connection->send_p };
 like $@, qr(^Method "send_p" not implemented), 'send_p';
 

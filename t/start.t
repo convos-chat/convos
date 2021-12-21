@@ -7,10 +7,9 @@ use List::Util qw(sum);
 use Time::HiRes qw(time);
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
-my $user;
 
 subtest 'jhthorsen connections' => sub {
-  $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
+  my $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
   $user->save_p->$wait_success('save_p');
 
   # 1: oragono.local connects instantly
@@ -26,7 +25,7 @@ subtest 'jhthorsen connections' => sub {
 };
 
 subtest 'mramberg connections' => sub {
-  $user = $core->user({email => 'mramberg@cpan.org', uid => 32});
+  my $user = $core->user({email => 'mramberg@cpan.org', uid => 32});
   $user->save_p->$wait_success('save_p');
 
   # 0: will not be connected
@@ -73,6 +72,32 @@ subtest 'restart core' => sub {
     'started duplicate connection delayed';
 
   is $core->get_user('mramberg@cpan.org')->uid, 32, 'uid from storage';
+};
+
+subtest 'connect()' => sub {
+  my $cj
+    = $core->user({email => 'jhthorsen@cpan.org'})->connection({connection_id => 'irc-magnet'});
+  my $cm = $core->user({email => 'mramberg@cpan.org'})->connection({connection_id => 'irc-magnet'});
+
+  ok $cj && $cm;
+  $core->connect($cj, 10);
+  $core->connect($cm, 10);
+
+  my $q = $core->{connect_queue}{'irc.perl.org'};
+  is $q->[0][1], $cj, 'cj is first';
+  is $q->[1][1], $cm, 'cm is second';
+
+  my $delay = $q->[0][0];
+  $core->connect($cj);
+  is $q->[0][0], $delay, 'cj did not change the delay';
+  is $q->[0][1], $cj,    'cj is still first';
+
+  $core->connect($cj, 2);
+  ok $q->[1][0] < $delay, "cj got a lower delay ($delay)";
+  is $q->[1][1], $cj, 'cj is last after changing the delay';
+
+  $core->connect($cj, 0);
+  is $q->[1][0], 0, 'cj got an even lower delay (0)';
 };
 
 done_testing;
