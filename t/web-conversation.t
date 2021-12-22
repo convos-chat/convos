@@ -66,7 +66,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
   [
     {
       connection_id       => 'irc-example',
-      me                  => {authenticated => false, capabilities => {}},
+      info                => {authenticated => false, capabilities => {}},
       name                => 'example',
       on_connect_commands => [],
       service_accounts    => [qw(chanserv nickserv)],
@@ -76,7 +76,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
     },
     {
       connection_id       => 'irc-localhost',
-      me                  => {authenticated => false, capabilities => {}},
+      info                => {authenticated => false, capabilities => {}},
       name                => 'localhost',
       on_connect_commands => [],
       service_accounts    => [qw(chanserv nickserv)],

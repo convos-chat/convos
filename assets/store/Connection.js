@@ -25,7 +25,7 @@ export default class Connection extends Conversation {
     this.prop('rw', 'server_op', false);
 
     this.participants.add((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
-    if (params.me) this.wsEventMe(params.me);
+    if (params.info) this.wsEventInfo(params.info);
   }
 
   ensureConversation(params) {
@@ -92,7 +92,7 @@ export default class Connection extends Conversation {
     if (params.frozen && conversation.is('pending')) notify.show(params.frozen, {title: params.name});
   }
 
-  wsEventMe(params) {
+  wsEventInfo(params) {
     if (params.nick) this.wsEventNickChange(params);
     if (params.server_op) this.addMessages({message: 'You are an IRC operator.', vars: [], highlight: true});
     if (params.real_host) this.participants.add({nick: params.real_host});

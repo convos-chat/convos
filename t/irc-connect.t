@@ -79,11 +79,10 @@ $server->subtest(
         $server->client_wait_for_states_ok(5);
 
         $server->client_states_ok(superbagof(
-          map { [ignore, superhashof({state => $_})] } (
+          map { ['connection', {message => ignore, state => $_}] } (
             qw(disconnecting disconnected),
             qw(connecting disconnected),
             qw(connecting disconnected),
-            qw(connecting connected)
           )
         ));
 
@@ -98,7 +97,6 @@ $server->subtest(
               tls            => 1,
               tls_cert       => re(qr{\.cert}),
               tls_key        => re(qr{\.key}),
-              tls_options    => {SSL_verify_mode => 0x00},
               tls_options    => {SSL_verify_mode => 0x00},
             },
             {
@@ -126,7 +124,7 @@ $server->subtest(
         $connection->disconnect_p->$wait_success('disconnect');
         $connection->url->query->remove('tls');
         $connection->connect_p;
-        $server->client_wait_for_states_ok(3);
+        $server->client_wait_for_states_ok(5);
 
         is $connection->url->query->param('tls'), 0, 'tls off after missing module';
         $server->client_states_ok(superbagof(

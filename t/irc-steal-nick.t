@@ -21,8 +21,8 @@ $server->subtest(
       ->server_write_ok(":hybrid8.debian.local 001 nick_young_ :Welcome\r\n")
       ->client_event_ok('_irc_event_rpl_welcome')->process_ok('nick_young_');
 
-    is $connection->url->query->param('nick'), 'nick_young', 'nick_young set in connect url';
-    is $connection->{myinfo}{nick}, 'nick_young_', 'connection nick nick_young_';
+    is $connection->url->query->param('nick'), 'nick_young',  'nick_young set in connect url';
+    is $connection->info->{nick},              'nick_young_', 'connection nick nick_young_';
   }
 );
 
@@ -32,7 +32,7 @@ $server->subtest(
       ->server_write_ok(":nick_young_!superman\@i.love.debian.org NICK :nick_young\r\n")
       ->client_event_ok('_irc_event_nick')->process_ok('nick_young');
     is $connection->url->query->param('nick'), 'nick_young', 'nick_young set in connect url';
-    is $connection->{myinfo}{nick}, 'nick_young', 'connection nick nick_young';
+    is $connection->info->{nick},              'nick_young', 'connection nick nick_young';
   }
 );
 
@@ -44,7 +44,7 @@ $server->subtest(
     $connection->send_p('', '/nick n2')->$wait_success;
     $server->process_ok;
     is $connection->url->query->param('nick'), 'n2', 'n2 set in connect url';
-    is $connection->{myinfo}{nick}, 'n2', 'connection nick n2';
+    is $connection->info->{nick},              'n2', 'connection nick n2';
   }
 );
 

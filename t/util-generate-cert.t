@@ -1,5 +1,5 @@
 use Test::More;
-use Convos::Util qw(generate_cert_p);
+use Convos::Util qw(generate_cert_p get_cert_info);
 use Mojo::File qw(tempdir);
 
 plan skip_all => "openssl: $!"
@@ -92,6 +92,9 @@ subtest 'generate with custom env' => sub {
       organization => 'Cool Beans',
     }
   );
+
+  my $fingerprint = get_cert_info(fingerprint => $tmpdir->child('irc-env.cert'));
+  like $fingerprint, qr/^[0-9a-f]{128}$/, 'fingerprint';
 };
 
 done_testing;

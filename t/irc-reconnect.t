@@ -28,6 +28,7 @@ $server->subtest(
     %connecting = (message => "Connecting to $host...", state => 'connecting');
     $server->client_states_ok([
       [connection => \%connecting],
+      [info       => superhashof({})],
       [connection => {message => "Connected to $host.", state => 'connected'}],
     ]);
 
@@ -53,6 +54,7 @@ $server->subtest(
     is $core->connect_queue_size, 0, 'nothing in queue after reconnect';
     $server->client_states_ok([
       [connection => \%connecting],
+      [info       => superhashof({})],
       [connection => {message => "Connected to $host.", state => 'connected'}],
     ]);
 

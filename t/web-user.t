@@ -86,8 +86,14 @@ subtest 'unread messages' => sub {
         unread          => 42,
       }],
       connections => [{
-        connection_id       => 'irc-localhost',
-        me                  => {authenticated => false, capabilities => {}, nick => 'superman'},
+        connection_id => 'irc-localhost',
+        info          => {
+          authenticated => false,
+          capabilities  => {},
+          certificate   => {fingerprint => re(qr{^[0-9a-f]{128}$})},
+          nick          => 'superman',
+          socket        => ignore
+        },
         name                => 'localhost',
         on_connect_commands => [],
         service_accounts    => [qw(chanserv nickserv)],

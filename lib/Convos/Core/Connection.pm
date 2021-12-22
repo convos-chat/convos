@@ -2,7 +2,7 @@ package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Conversation;
-use Convos::Util qw(DEBUG generate_cert_p has_many is_true pretty_connection_name);
+use Convos::Util qw(DEBUG generate_cert_p get_cert_info has_many is_true pretty_connection_name);
 use Mojo::JSON qw(false true);
 use Mojo::Loader qw(load_class);
 use Mojo::Promise;
@@ -16,6 +16,8 @@ use constant GENERATE_CERT => defined $ENV{CONVOS_GENERATE_CERT}
 
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_TLS_DEBUG} if $ENV{CONVOS_TLS_DEBUG};
 
+has info => sub { +{} };
+
 has messages => sub {
   my $self         = shift;
   my $conversation = Convos::Core::Conversation->new(id => '', name => $self->name);
@@ -25,7 +27,8 @@ has messages => sub {
 
 has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
-has profile             => sub {
+
+has profile => sub {
   my $self    = shift;
   my $profile = $self->user->core->connection_profile({url => $self->url});
 
@@ -73,6 +76,7 @@ sub connect_p {
   $self->_debug('Connecting...') if DEBUG;
   return $self->_connect_args_p->then(sub {
     my $connect_args = shift;
+    $self->_connect_args_to_info($connect_args);
     $self->_debug('connect = %s', Mojo::JSON::encode_json($connect_args)) if DEBUG;
     $self->{stream_id} = Mojo::IOLoop->client($connect_args, sub { $self->_stream(@_) });
     $self->{host_port} = $self->url->host_port;
@@ -102,15 +106,15 @@ sub new {
   my $self          = shift->SUPER::new(@_);
   my $conversations = delete $self->{conversations} || delete $self->{dialogs} || [];  # back compat
   $self->conversation($_) for @$conversations;
-  $self->{myinfo}{authenticated} ||= false;
-  $self->{myinfo}{capabilities}  ||= {};
+  $self->info->{authenticated} ||= false;
+  $self->info->{capabilities}  ||= {};
   $self;
 }
 
 sub nick {
   my $self = shift;
   my $nick;
-  return $nick if $nick = $self->{myinfo}{nick};
+  return $nick if $nick = $self->info->{nick};
   return $nick if $nick = $self->url->query->param('nick');
   $nick = $self->user->email =~ /^([^@]+)/ ? $1 : 'guest';
   $nick =~ s!\W!_!g;
@@ -206,6 +210,19 @@ sub _connect_args_p {
     warn "Failed to generate cert: $_[0]";
     return \%args;
   });
+}
+
+sub _connect_args_to_info {
+  my ($self, $connect_args) = @_;
+  my $info = $self->info;
+
+  $info->{socket}                = {};
+  $info->{socket}{$_}            = $connect_args->{$_} for qw(address port timeout);
+  $info->{socket}{tls}           = $connect_args->{tls} ? true : false;
+  $info->{socket}{local_address} = $connect_args->{socket_options}{LocalAddr};
+  $info->{certificate}{fingerprint}
+    = $connect_args->{tls_cert} && get_cert_info(fingerprint => $connect_args->{tls_cert}) || '';
+  $self->emit(state => info => $info);
 }
 
 sub _debug {
@@ -317,6 +334,7 @@ sub TO_JSON {
   my %json = map { ($_, $self->$_) } qw(name on_connect_commands wanted_state);
 
   $json{connection_id}    = $self->id;
+  $json{info}             = $self->info;
   $json{service_accounts} = $self->profile->service_accounts;
   $json{url}              = $url->to_unsafe_string;
 
@@ -419,11 +437,11 @@ the following new ones.
 
 Returns a unique identifier for a connection.
 
-=head2 inc_reconnect_delay
+=head2 info
 
-  $conn = $conn->inc_reconnect_delay;
+  $hash_ref = $conn->info;
 
-Increases L</reconnect_delay>.
+Holds misc information about the connection.
 
 =head2 messages
 
@@ -516,6 +534,12 @@ Used to disconnect from server. Meant to be overloaded in a subclass.
   $conversation = $conn->get_conversation(\%attrs);
 
 Returns a L<Convos::Core::Conversation> object or undef.
+
+=head2 inc_reconnect_delay
+
+  $conn = $conn->inc_reconnect_delay;
+
+Increases L</reconnect_delay>.
 
 =head2 new
 

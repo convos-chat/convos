@@ -834,6 +834,9 @@ definitions:
       connection_id:
         description: Unique identifier for this connection
         type: string
+      info:
+        description: Extra information about the connection
+        type: object
       name:
         description: Name for this connection
         type: string

@@ -443,7 +443,7 @@ $server->subtest(
     my $id = $connection->{stream_id};
     ok !!Mojo::IOLoop->stream($id), 'got stream';
     $server->close_connections;
-    $server->client_wait_for_states_ok(4);
+    $server->client_wait_for_states_ok(5);
     ok !Mojo::IOLoop->stream($id), 'stream was removed';
 
     $server->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
@@ -457,7 +457,7 @@ $server->subtest(
       [frozen     => superhashof({conversation_id => '##redirected'})],
       [frozen     => superhashof({conversation_id => '#protected'})],
       [connection => superhashof({state           => 'connected'})],
-      [me         => superhashof({nick            => 'superman'})],
+      [info       => superhashof({nick            => 'superman'})],
       [frozen     => superhashof({conversation_id => '##redirected'})],
     ));
   }

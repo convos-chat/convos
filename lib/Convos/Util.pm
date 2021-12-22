@@ -17,8 +17,8 @@ $ENV{OPENSSL_BIN} ||= 'openssl';
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p generate_secret has_many is_true),
-  qw(pretty_connection_name require_module short_checksum yaml),
+  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p get_cert_info generate_secret),
+  qw(has_many is_true pretty_connection_name require_module short_checksum yaml),
 );
 
 sub disk_usage {
@@ -79,6 +79,20 @@ sub generate_cert_p {
     die "$ENV{OPENSSL_BIN} @openssl FAIL $? / $!" if $? or $!;
     return \%params;
   });
+}
+
+sub get_cert_info {
+  my ($what, $cert) = @_;
+  return undef unless $cert and -r $cert;
+  return undef unless $what eq 'fingerprint';
+
+  my @openssl = (qw(x509 -noout -fingerprint -sha512 -in), $cert);
+  my $fingerprint;
+  warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
+  open my $FH, '-|', $ENV{OPENSSL_BIN} => @openssl;
+  /Fingerprint=(.*)/ && ($fingerprint = lc $1) while <$FH>;
+  $fingerprint =~ s!:!!g if $fingerprint;
+  return $fingerprint;
 }
 
 sub generate_secret {
@@ -306,6 +320,13 @@ Returns a SHA1 sum of bytes from "/dev/urandom" or fallback to a SHA1 sum of:
     $<         # Will probably be "0" inside Docker and probably less than 10000 on Linux
     hostname() # Will be unique inside Docker and guessable on Linux
     time()     # Floating seconds since the epoch (Ex: 1592094819.82439)
+
+=head2 get_cert_info
+
+  $fingerprint = get_cert_info fingerprint => $cert_file;
+
+This function can be used to extract information about a certificate.
+Rigth now onlye "fingerprint" is supported.
 
 =head2 has_many
 

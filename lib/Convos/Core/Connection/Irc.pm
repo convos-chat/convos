@@ -28,8 +28,8 @@ sub disconnect_p {
   my $p    = Mojo::Promise->new;
   return $p->resolve({}) if $self->state_is(qw(disconnected disconnecting));
 
-  $self->{myinfo}{authenticated} = false;
-  $self->{myinfo}{capabilities}  = {};
+  $self->info->{authenticated} = false;
+  $self->info->{capabilities}  = {};
   $self->state(disconnecting => 'Quitting...');
   $self->_write("QUIT :$CONVOS_URL", sub { $self->_stream_remove($p) });
   return $p;
@@ -91,10 +91,10 @@ sub _connect_args_p {
   $self->_periodic_events;
   $url->port($params->param('tls') ? 6669 : 6667) unless $url->port;
   $params->param(nick => $self->nick)             unless $params->param('nick');
-  $self->{myinfo}{authenticated} = false;
-  $self->{myinfo}{capabilities}  = {};
-  $self->{myinfo}{nick}          = $params->param('nick');
-  delete $self->{myinfo}{real_host};
+  $self->info->{authenticated} = false;
+  $self->info->{capabilities}  = {};
+  $self->info->{nick}          = $params->param('nick');
+  delete $self->info->{real_host};
 
   return $self->SUPER::_connect_args_p;
 }
@@ -116,8 +116,8 @@ sub _irc_event_sasl_status {
   my ($self, $msg) = @_;
   $msg->{error} = 1 if $msg->{command} =~ m!90[14567]!;
   $self->_irc_event_fallback($msg);
-  $self->{myinfo}{authenticated} = $msg->{command} =~ m!90[03]! ? true : false;
-  $self->emit(state => me => $self->{myinfo});
+  $self->info->{authenticated} = $msg->{command} =~ m!90[03]! ? true : false;
+  $self->emit(state => info => $self->info);
   $self->_write("CAP END\r\n");
 }
 
@@ -126,9 +126,9 @@ sub _irc_event_cap {
   $self->_irc_event_fallback($msg);
 
   if ($msg->{raw_line} =~ m!\s(?:LIST|LS)[^:]+:(.*)!) {
-    $self->{myinfo}{capabilities}{$_} = true for split /\s/, $1;
+    $self->info->{capabilities}{$_} = true for split /\s/, $1;
     my @cap_req;
-    push @cap_req, 'sasl' if $self->{myinfo}{capabilities}{sasl} and $self->_sasl_mechanism;
+    push @cap_req, 'sasl' if $self->info->{capabilities}{sasl} and $self->_sasl_mechanism;
     $self->_write(@cap_req ? sprintf "CAP REQ :%s\r\n", join ' ', @cap_req : "CAP END\r\n");
   }
   elsif ($msg->{raw_line} =~ m!\sACK\W*(.+)!) {
@@ -184,9 +184,9 @@ sub _irc_event_err_nicknameinuse {
   $self->_message("Nickname $nick is already in use.", type => 'error')
     unless $self->{err_nicknameinuse}{$nick}++;
 
-  $self->{myinfo}{nick} = "${nick}_";
-  $self->emit(state => me => $self->{myinfo});
-  Mojo::IOLoop->timer(0.2 => sub { $self and $self->_write("NICK $self->{myinfo}{nick}\r\n") });
+  $self->info->{nick} = "${nick}_";
+  $self->emit(state => info => $self->info);
+  Mojo::IOLoop->timer(0.2 => sub { $self and $self->_write("NICK $self->info->{nick}\r\n") });
 }
 
 sub _irc_event_err_unknowncommand {
@@ -300,9 +300,9 @@ sub _irc_event_nick {
     delete $self->{err_nicknameinuse};    # allow warning on next nick change
   }
 
-  if ($self->{myinfo}{nick} eq $old_nick) {
-    $self->{myinfo}{nick} = $new_nick;
-    $self->emit(state => me => $self->{myinfo});
+  if ($self->info->{nick} eq $old_nick) {
+    $self->info->{nick} = $new_nick;
+    $self->emit(state => info => $self->info);
   }
   else {
     $self->emit(state => nick_change => {new_nick => $new_nick, old_nick => $old_nick});
@@ -407,8 +407,8 @@ sub _irc_event_rpl_myinfo {
   my @keys = qw(nick real_host version available_user_modes available_channel_modes);
   my $i    = 0;
 
-  $self->{myinfo}{$_} = $msg->{params}[$i++] // '' for @keys;
-  $self->emit(state => me => $self->{myinfo});
+  $self->info->{$_} = $msg->{params}[$i++] // '' for @keys;
+  $self->emit(state => info => $self->info);
 }
 
 sub _irc_event_rpl_motdstart { }
@@ -460,10 +460,10 @@ sub _irc_event_rpl_umodeis {
 sub _irc_event_rpl_welcome {
   my ($self, $msg) = @_;
 
-  $self->{myinfo}{real_host} = $msg->{prefix};
-  $self->{myinfo}{nick}      = $msg->{params}[0];
+  $self->info->{real_host} = $msg->{prefix};
+  $self->info->{nick}      = $msg->{params}[0];
   $self->_message($msg->{params}[1]);   # Welcome to the debian Internet Relay Chat Network superman
-  $self->emit(state => me => $self->{myinfo});
+  $self->emit(state => info => $self->info);
   $self->reconnect_delay(0);
 
   my @commands = (
@@ -631,9 +631,9 @@ sub _make_names_response {
 sub _make_oper_response {
   my ($self, $msg, $res, $p) = @_;
   return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  $self->{myinfo}{server_op} = true;
-  $self->emit(state => me => $self->{myinfo});
-  return $p->resolve($self->{myinfo});
+  $self->info->{server_op} = true;
+  $self->emit(state => info => $self->info);
+  return $p->resolve($self->info);
 }
 
 sub _make_part_response {
@@ -697,7 +697,7 @@ sub _make_users_response {
 
 sub _message {
   my ($self, $message) = (shift, shift);
-  my $from = $self->{myinfo}{real_host} || $self->id;
+  my $from = $self->info->{real_host} || $self->id;
   $self->emit(
     message => $self->messages,
     {from => $from, highlight => false, type => 'private', @_, message => $message, ts => time},
@@ -738,7 +738,7 @@ sub _periodic_events {
       $self->_write("NICK $nick\r\n") if $nick and !$self->_is_current_nick($nick);
 
       # Keep the connection alive
-      $self->_write("PING $self->{myinfo}{real_host}\r\n") if $self->{myinfo}{real_host};
+      $self->_write("PING $self->info->{real_host}\r\n") if $self->info->{real_host};
     }
   );
 }
@@ -1005,9 +1005,9 @@ sub _send_nick_p {
   my ($self, $nick) = @_;
   return Mojo::Promise->reject('Missing or invalid nick.') unless $nick;
 
-  $self->{myinfo}{nick} = $nick;
+  $self->info->{nick} = $nick;
   $self->url->query->param(nick => $nick);
-  $self->emit(state => me => $self->{myinfo});
+  $self->emit(state => info => $self->info);
   return $self->_write_p("NICK $nick\r\n") if $self->{stream};
   return Mojo::Promise->resolve({});
 }
@@ -1158,7 +1158,7 @@ CHUNK:
     my $msg = $self->_parse($1);
     next unless $msg->{command};
 
-    $self->{myinfo}{real_host} ||= $msg->{prefix} if $msg->{prefix};
+    $self->info->{real_host} ||= $msg->{prefix} if $msg->{prefix};
     $msg->{command} = IRC::Utils::numeric_to_name($msg->{command}) || $msg->{command}
       if $msg->{command} =~ /^\d+$/;
     $msg->{command} = lc $msg->{command};
@@ -1249,13 +1249,6 @@ sub _write_and_wait_p {
 sub DESTROY {
   my $tid = $_[0]->{periodic_tid};
   Mojo::IOLoop->remove($tid) if $tid;
-}
-
-sub TO_JSON {
-  my $self = shift;
-  my $json = $self->SUPER::TO_JSON(@_);
-  $json->{me} = $self->{myinfo} || {};
-  $json;
 }
 
 1;

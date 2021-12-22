@@ -114,14 +114,22 @@ $server->subtest(
       [nick_change => {new_nick        => 'superduper', old_nick => 'supergirl'}],
       [part        => {conversation_id => '#convos', message => 'I\'m out', nick => 'superduper'}],
       [
-        me => {
+        info => {
           authenticated           => false,
-          capabilities            => {},
           available_channel_modes => 'bciklmnoprstveIMORS',
           available_user_modes    => 'DFGHRSWabcdefgijklnopqrsuwxy',
+          capabilities            => {},
+          certificate             => {fingerprint => ''},
           nick                    => 'superman',
           real_host               => 'hybrid8.debian.local',
           version                 => 'hybrid-1:8.2.0+dfsg.1-2',
+          socket                  => {
+            address       => ignore,
+            local_address => undef,
+            port          => re(qr{^\d+$}),
+            timeout       => 20,
+            tls           => false,
+          },
         }
       ],
       [

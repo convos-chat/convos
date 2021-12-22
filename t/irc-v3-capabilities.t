@@ -33,23 +33,27 @@ $server->subtest(
     )->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
       ->process_ok('capabilities handshake');
 
-    is_deeply $connection->TO_JSON->{me},
+    cmp_deeply(
+      $connection->TO_JSON->{info},
       {
-      authenticated => false,
-      nick          => 'superman',
-      capabilities  => {
-        'account-notify'    => true,
-        'away-notify'       => true,
-        'chghost'           => true,
-        'extended-join'     => true,
-        'invite-notify'     => true,
-        'multi-prefix'      => true,
-        'sasl'              => true,
-        'userhost-in-names' => true,
+        authenticated => false,
+        nick          => 'superman',
+        capabilities  => {
+          'account-notify'    => true,
+          'away-notify'       => true,
+          'chghost'           => true,
+          'extended-join'     => true,
+          'invite-notify'     => true,
+          'multi-prefix'      => true,
+          'sasl'              => true,
+          'userhost-in-names' => true,
+        },
+        certificate => {fingerprint => ''},
+        real_host   => 'hybrid8.debian.local',
+        socket      => superhashof({}),
       },
-      real_host => 'hybrid8.debian.local',
-      },
-      'got capabilities';
+      'got capabilities'
+    );
   }
 );
 

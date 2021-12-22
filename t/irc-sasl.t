@@ -33,8 +33,8 @@ $server->subtest(
     )->client_event_ok('_irc_event_900')->server_write_ok(['welcome.irc'])
       ->client_event_ok('_irc_event_rpl_welcome')->process_ok('capabilities handshake');
 
-    is_deeply(
-      $connection->TO_JSON->{me},
+    cmp_deeply(
+      $connection->TO_JSON->{info},
       {
         authenticated => true,
         capabilities  => {
@@ -47,8 +47,10 @@ $server->subtest(
           'sasl'              => true,
           'userhost-in-names' => true,
         },
-        nick      => 'superman',
-        real_host => 'hybrid8.debian.local',
+        certificate => {fingerprint => ''},
+        nick        => 'superman',
+        real_host   => 'hybrid8.debian.local',
+        socket      => ignore,
       },
       'got capabilities',
     );
@@ -59,7 +61,7 @@ $server->subtest(
   'plain' => sub {
     $connection->url->query->param(sasl => 'plain');
     $connection->disconnect_p->then(sub { $connection->connect_p })->wait;
-    is $connection->TO_JSON->{me}{authenticated}, false, 'not authenticated after reconnect';
+    is $connection->TO_JSON->{info}{authenticated}, false, 'not authenticated after reconnect';
 
     $server->client($connection)->server_event_ok('_irc_event_cap')
       ->server_event_ok('_irc_event_nick')
@@ -74,7 +76,7 @@ $server->subtest(
     )->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
       ->process_ok('capabilities handshake');
 
-    is $connection->TO_JSON->{me}{authenticated}, true, 'authenticated';
+    is $connection->TO_JSON->{info}{authenticated}, true, 'authenticated';
   }
 );
 

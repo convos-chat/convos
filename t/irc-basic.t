@@ -11,7 +11,7 @@ my $settings_file
   = File::Spec->catfile($ENV{CONVOS_HOME}, qw(test.user@example.com irc-localhost connection.json));
 
 subtest 'name and email' => sub {
-  is $connection->name, 'localhost', 'connection.name';
+  is $connection->name,        'localhost',             'connection.name';
   is $connection->user->email, 'test.user@example.com', 'user.email';
 };
 
@@ -26,7 +26,7 @@ subtest TO_JSON => sub {
     $connection->TO_JSON,
     {
       connection_id       => ignore(),
-      me                  => {authenticated => false, capabilities => {}},
+      info                => {authenticated => false, capabilities => {}},
       name                => 'localhost',
       on_connect_commands => [],
       service_accounts    => [qw(chanserv nickserv)],
@@ -43,7 +43,7 @@ subtest remove_connection_p => sub {
   ok -e $settings_file, 'settings_file exists before remove_connection()';
   $user->remove_connection_p($connection->id)->$wait_success('remove_connection_p');
 
-  ok !-e $settings_file, 'settings_file removed after remove_connection()';
+  ok !-e $settings_file,                          'settings_file removed after remove_connection()';
   ok !-e File::Basename::dirname($settings_file), 'all files removed';
 };
 

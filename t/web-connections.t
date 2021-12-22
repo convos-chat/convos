@@ -32,7 +32,7 @@ $t->get_ok('/api/connections')->status_is(200)->json_is(
   {
     connection_id       => 'irc-example',
     name                => 'example',
-    me                  => {authenticated => false, capabilities => {}},
+    info                => {authenticated => false, capabilities => {}},
     on_connect_commands => [],
     service_accounts    => [qw(chanserv nickserv)],
     state               => 'disconnected',
