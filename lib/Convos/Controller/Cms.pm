@@ -1,7 +1,8 @@
 package Convos::Controller::Cms;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Mojo::File 'path';
+use Convos::Util qw(is_true);
+use Mojo::File qw(path);
 use Pod::Simple::Search;
 
 sub blog_entry {
@@ -49,7 +50,7 @@ sub doc {
     $self->stash(module => $module);
     $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
 
-    my $path = $ENV{CONVOS_CMS_PERLDOC}
+    my $path = is_true('ENV:CONVOS_CMS_PERLDOC')
       && Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
     return $self->_render_perldoc($path) if $path and -r $path;
 

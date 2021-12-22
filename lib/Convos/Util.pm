@@ -1,6 +1,7 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
 
+use Carp ();
 use Mojo::Collection qw(c);
 use Mojo::File qw(path);
 use Mojo::URL;
@@ -16,8 +17,8 @@ $ENV{OPENSSL_BIN} ||= 'openssl';
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p generate_secret has_many pretty_connection_name),
-  qw(require_module short_checksum yaml),
+  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p generate_secret has_many is_true),
+  qw(pretty_connection_name require_module short_checksum yaml),
 );
 
 sub disk_usage {
@@ -121,6 +122,19 @@ sub has_many {
     my $id = lc(ref $attrs ? $attrs->{id} || $many_class->id($attrs) : $attrs);
     return delete $self->{$plural_accessor}{$id};
   };
+}
+
+sub is_true {
+  my $input = shift;
+  my $val   = $input && $input =~ m!^ENV:(\w+)$! ? $ENV{$1} : $input;
+  return undef  if !defined $val;
+  return "$val" if blessed $val and $val->isa('JSON::PP::Boolean');
+  return 0      if !$val or $val =~ /^(Off|No|false)$/i;
+  return 1      if $val          =~ /^(1|On|Yes|true)$/i;
+
+  my $name = $input =~ m!^ENV:([A-Z])$! ? $1 : 'Value';
+  Carp::carp(qq($name should be 0, Off, No, false, 1, On, Yes or true, but is set to "$val".));
+  return 0;
 }
 
 sub pretty_connection_name {
@@ -323,6 +337,17 @@ The definition above results in the following methods:
   # Remove a user
   $user = $class->remove_user($id);
   $user = $class->remove_user(\%attrs);
+
+=head2 is_true
+
+  $bool = is_true $any;
+  $bool = is_true "ENV:NAME";
+
+Checks if C<$any> or a given envirnment variable is either "0", "Off", "No",
+"false", "1", "On", "Yes", "true" or a L<JSON::PP::Boolean> object and returns
+the value.
+
+Falls back to warn the user and return false.
 
 =head2 pretty_connection_name
 

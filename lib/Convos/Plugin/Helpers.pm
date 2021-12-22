@@ -1,7 +1,7 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw(pretty_connection_name);
+use Convos::Util qw(is_true pretty_connection_name);
 use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json false true);
@@ -25,7 +25,7 @@ sub register {
   $app->helper('social'                      => \&_social);
   $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
 
-  $app->linkembedder->ua->insecure(1) if $ENV{LINK_EMBEDDER_ALLOW_INSECURE_SSL};
+  $app->linkembedder->ua->insecure(1) if is_true 'ENV:LINK_EMBEDDER_ALLOW_INSECURE_SSL';
   $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
 }
 

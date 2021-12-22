@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+6.43 Not Released
+ - Add is_true() function to check boolean environment variables
+  for "0", "Off", "No", "false", "1", "On", "Yes" or "true".
+ - Setting CONVOS_SYSLOG=1 will disable logging to file
+
 6.42 2021-12-21T10:00:00+0900
  - Fix resetting reconnect delay when manually updating connection settings
  - Fix not changing wanted state to "disconnected" when updating connection settings
@@ -9,6 +14,7 @@ Revision history for perl distribution Convos
 
 6.41 2021-12-18T14:58:00+0900
  - Add support for CONVOS_ACCESS_LOG (EXPERIMENTAL)
+   https://github.com/jhthorsen/mojolicious-plugin-syslog#register
  - Add support for CONVOS_SYSLOG (EXPERIMENTAL)
 
 6.40 2021-12-13T22:32:00+0900

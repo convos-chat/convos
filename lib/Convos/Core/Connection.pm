@@ -2,7 +2,7 @@ package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Conversation;
-use Convos::Util qw(DEBUG generate_cert_p has_many pretty_connection_name);
+use Convos::Util qw(DEBUG generate_cert_p has_many is_true pretty_connection_name);
 use Mojo::JSON qw(false true);
 use Mojo::Loader qw(load_class);
 use Mojo::Promise;
@@ -10,7 +10,9 @@ use Mojo::URL;
 use Mojo::Util qw(term_escape url_escape);
 use Unicode::UTF8;
 
-use constant GENERATE_CERT => $ENV{CONVOS_GENERATE_CERT} // 1;
+use constant GENERATE_CERT => defined $ENV{CONVOS_GENERATE_CERT}
+  ? is_true 'ENV:CONVOS_GENERATE_CERT'
+  : 1;
 
 $IO::Socket::SSL::DEBUG = $ENV{CONVOS_TLS_DEBUG} if $ENV{CONVOS_TLS_DEBUG};
 

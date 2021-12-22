@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious';
 
 use Cwd ();
 use Convos::Core;
-use Convos::Util qw(require_module);
+use Convos::Util qw(is_true require_module);
 use File::HomeDir ();
 use Mojo::File qw(path);
 use Mojo::JSON qw(false true);
@@ -14,8 +14,8 @@ use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
 
 our $VERSION = '6.42';
 
-$ENV{CONVOS_REVERSE_PROXY} //= $ENV{MOJO_REVERSE_PROXY}   || 0;
-$ENV{MOJO_REVERSE_PROXY}   //= $ENV{CONVOS_REVERSE_PROXY} || 0;
+$ENV{CONVOS_REVERSE_PROXY} //= is_true 'ENV:MOJO_REVERSE_PROXY';
+$ENV{MOJO_REVERSE_PROXY}   //= is_true 'ENV:CONVOS_REVERSE_PROXY';
 
 has core => sub {
   my $self = shift;
@@ -133,7 +133,7 @@ sub _before_dispatch {
   if ($base_url) {
     $base_url    = Mojo::URL->new($base_url);
     $env_missing = !$ENV{CONVOS_REVERSE_PROXY};
-    $c->req->url->base($base_url) if $ENV{CONVOS_REVERSE_PROXY};
+    $c->req->url->base($base_url) if is_true 'ENV:CONVOS_REVERSE_PROXY';
   }
   elsif ($ENV{CONVOS_REQUEST_BASE}) {
     $base_url = Mojo::URL->new($ENV{CONVOS_REQUEST_BASE});
@@ -143,7 +143,8 @@ sub _before_dispatch {
   my $settings = $c->app->core->settings;
   $base_url ||= $c->req->url->to_abs->query(Mojo::Parameters->new)->path('/');
   $settings->save_p({base_url => $base_url}) if !CONVOS_GET and $settings->base_url ne $base_url;
-  $c->app->sessions->secure($ENV{CONVOS_SECURE_COOKIES} || $base_url->scheme eq 'https' ? 1 : 0);
+  $c->app->sessions->secure(is_true('ENV:CONVOS_SECURE_COOKIES')
+      || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 
   # Keep track of remote address
@@ -178,6 +179,10 @@ sub _config {
     $self->log->path($config->{log_file});
     delete $self->log->{handle};
   }
+
+  my $access_log = $ENV{CONVOS_ACCESS_LOG} // 'v2';
+  my $enabled    = is_true 'ENV:CONVOS_SYSLOG';
+  $self->plugin(Syslog => {access_log => $access_log, enable => $enabled, only_syslog => $enabled});
 
   $self->log->info(qq(CONVOS_HOME="$config->{home}" # https://convos.chat/doc/config#convos_home"));
 
@@ -220,9 +225,6 @@ sub _plugins {
     my ($name, $config) = split '\?', $_, 2;
     $self->plugin($name => Mojo::Parameters->new($config // '')->to_hash);
   }
-
-  my $access_log = $ENV{CONVOS_ACCESS_LOG} // 'v2';
-  $self->plugin(Syslog => {access_log => $access_log, enable => $ENV{CONVOS_SYSLOG} // 0});
 }
 
 1;
