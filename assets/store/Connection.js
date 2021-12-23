@@ -13,6 +13,7 @@ export default class Connection extends Conversation {
   constructor(params) {
     super(params);
 
+    this.prop('rw', 'certificate', {});
     this.prop('ro', 'conversations', new SortedMap([], {sorter: sortConversations}));
     this.prop('rw', 'on_connect_commands', params.on_connect_commands || []);
     this.prop('rw', 'state', params.state || 'queued');

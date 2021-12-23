@@ -39,6 +39,7 @@ function connectionToForm(connection) {
   if (!fields.nick) fields.nick = user.email.replace(/@.*/, '').replace(/\W/g, '_');
   fields.want_to_be_connected = connection.wanted_state == 'disconnected' ? false : true;
   form.set(fields);
+  form.set({fingerprint: connection.certificate.fingerprint || ''});
 }
 
 function defaultsToForm() {
@@ -128,12 +129,21 @@ async function saveConnection() {
     </Checkbox>
     {#if $form.show_auth_settings}
       <div class="form-group" transition:slide="{{duration: 150}}">
-        <TextField name="username" form="{form}">
+        <TextField name="username" form="{form}" placeholder="{$form.nick}">
           <span slot="label">{$l('Username')}</span>
+          <p class="help" slot="help">{$l('SASL and IRC server username.')}</p>
         </TextField>
-        <TextField type="password" name="password" form="{form}">
-          <span slot="label">{$l('Password')}</span>
-        </TextField>
+        {#if $form.sasl == 'external'}
+          <TextField type="text" name="fingerprint" form="{form}" readonly="{true}">
+            <span slot="label">{$l('Fingerprint')}</span>
+            <p class="help" slot="help">{$l('The certificate fingerprint is used for SASL external authentication.')}</p>
+          </TextField>
+        {:else}
+          <TextField type="password" name="password" form="{form}">
+            <span slot="label">{$l('Password')}</span>
+            <p class="help" slot="help">{$l('SASL plain or IRC server password.')}</p>
+          </TextField>
+        {/if}
         <SelectField name="sasl" options="{saslMechanisms}" form="{form}">
           <span slot="label">{$l('SASL authentication mechanism')}</span>
         </SelectField>

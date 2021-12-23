@@ -1,9 +1,11 @@
 Revision history for perl distribution Convos
 
 6.43 Not Released
+ - Add certificate fingerprint to connection form, when chosing "SASL External"
  - Add support for quotes around **bold**
  - Add is_true() function to check boolean environment variables
-  for "0", "Off", "No", "false", "1", "On", "Yes" or "true".
+   for "0", "Off", "No", "false", "1", "On", "Yes" or "true".
+ - Changed default SASL username to nick
  - Setting CONVOS_SYSLOG=1 will disable logging to file
  - Stop replacing " (quote) with &quot;
 

@@ -419,12 +419,12 @@ sub _irc_event_authenticate {
   return unless $msg->{raw_line} =~ m!AUTHENTICATE \+$!;
 
   my ($mech, $url) = ($self->_sasl_mechanism, $self->url);
+  my $username = $url->username || $self->nick;
   if ($mech eq 'EXTERNAL') {
-    $self->_write(sprintf "AUTHENTICATE %s\r\n", $url->username || $self->user->email);
+    $self->_write("AUTHENTICATE $username\r\n");
   }
   elsif ($mech eq 'PLAIN') {
-    my @auth = grep {length} $url->query->param('authname') || $url->username, $url->username,
-      $url->password;
+    my @auth = grep {length} $url->query->param('authname') || $username, $username, $url->password;
     $self->_write(sprintf "AUTHENTICATE %s\r\n", b64_encode join "\0", @auth) if @auth == 3;
   }
 }
