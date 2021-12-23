@@ -159,7 +159,7 @@ sub _log {
 sub _on_state {
   my ($self, $connection, $type, $event) = @_;
   $self->_log->info("Bot connection @{[$connection->id]} got state event $type");
-  $connection->_write_p("MODE $event->{nick} +B\r\n") if $type eq 'me' and $event->{nick};
+  $connection->_write_p("MODE $event->{nick} +B\r\n") if $type eq 'info' and $event->{nick};
 }
 
 sub _register_user {
