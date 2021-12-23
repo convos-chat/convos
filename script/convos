@@ -130,7 +130,7 @@ sub command_install {
   return $script->command_help if $mode =~ /^--?h/;
 
   # @missing = ([mode, name, version, error], ...)
-  my @missing = grep { $_->[3] } $script->_dependencies;
+  my @missing = grep { $_->[3] } grep { $_->[0] ne 'perl' } $script->_dependencies;
   $mode =~ s!^-+!!;
   @missing = grep { $_->[0] ne 'develop' } @missing  if $mode eq 'all';
   @missing = grep { $_->[0] eq 'requires' } @missing if $mode eq 'prod';
@@ -186,10 +186,10 @@ sub command_version {
   for my $dep (sort { $a->[1] cmp $b->[1] } $script->_dependencies) {
     my ($mode, $module, $wanted, $err) = @$dep;
     my $category = $mode eq 'develop' ? $mode : $mode eq 'requires' ? 'core' : 'optional';
-    my $note     = $mode =~ m!^[A-Z]! ? " # $mode" : '';
-    my $got      = eval { $module->VERSION };
-    push @{$deps{$category}}, sprintf "  %-30s %-10s %-10s%s\n", $module, $got // 'n/a',
-      "($wanted)", $note;
+    my $note     = $mode =~ m!^[A-Z]! ? "For $mode" : $err;
+    my $got      = eval { $module eq 'perl' ? version->parse($^V)->numify : $module->VERSION };
+    push @{$deps{$category}}, sprintf "  %-30s %-10s %-10s%s\n", $module, $got // 'n/a', "$wanted",
+      $note;
   }
 
   unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Perl',   $^V;
@@ -198,6 +198,7 @@ sub command_version {
   for my $category (qw(core optional develop)) {
     next unless $deps{$category};
     print uc "$category\n";
+    printf "  %-30s %-10s %-10s%s\n", 'Name', 'Installed', 'Required', '';
     print for @{$deps{$category}};
     print "\n";
   }
@@ -253,6 +254,12 @@ sub _dependencies {
   my @dependencies;
   my $load = sub {
     my ($mode, $module, $version) = @_;
+
+    if ($module eq 'perl') {
+      my $err = version->parse($^V) < $version ? "You have version $^V" : '';
+      return push @dependencies, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
+    }
+
     local ($@, $!) = ('', 0);
     eval "use $module $version ();1";
     my $err = $@;

@@ -110,10 +110,10 @@ sub test_cert {
     or die "Read $name: $!";
   while (<$OPENSSL>) {
     $cert{bits}         = $1 if /(\d+)\s*bit/;
-    $cert{common_name}  = $1 if /\bCN\s*=\s*([^,]+)/;
-    $cert{country}      = $1 if /\bC\s*=\s*([^,]+)/;
-    $cert{email}        = $1 if /\bemailAddress\s*=\s*([^,]+)/;
-    $cert{organization} = $1 if /\bO\s*=\s*([^,]+)/;
+    $cert{common_name}  = $1 if /\bCN\s*=\s*([^,\/]+)/;
+    $cert{country}      = $1 if /\bC\s*=\s*([^,\/]+)/;
+    $cert{email}        = $1 if /\bemailAddress\s*=\s*([^,\/]+)/;
+    $cert{organization} = $1 if /\bO\s*=\s*([^,\/]+)/;
   }
 
   chomp $cert{$_} for keys %cert;

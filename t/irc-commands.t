@@ -161,7 +161,7 @@ $server->subtest(
 
     $server->server_event_ok('_irc_event_mode')
       ->server_write_ok(
-      ":localhost 367 superman #convos x!*@* superman!~superman@125-12-219-233.rev.home.ne.jp 1577498687\r\n"
+      ":localhost 367 superman #convos x!*\@* superman!~superman\@125-12-219-233.rev.home.ne.jp 1577498687\r\n"
     )->server_write_ok(":localhost 368 superman #convos :End of Channel Ban List\r\n");
     $res = $connection->send_p('#convos', '/mode b')->$wait_success;
     $server->processed_ok;
