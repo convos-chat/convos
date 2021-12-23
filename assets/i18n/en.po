@@ -586,8 +586,8 @@ msgid "Please ask your Convos admin for an invite link to sign up, or sign in if
 msgstr "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
 
 #: assets/page/SettingsAdminUsers.svelte:103
-msgid "Please confirm by entering **%1** before hitting **%2**."
-msgstr "Please confirm by entering **%1** before hitting **%2**."
+msgid "Please confirm by entering \"**%1**\" before hitting **%2**."
+msgstr "Please confirm by entering \"**%1**\" before hitting **%2**."
 
 #: app.html.ep:39
 #: templates/app.html.ep:39

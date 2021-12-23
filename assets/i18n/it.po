@@ -586,8 +586,8 @@ msgstr ""
 "oppure accedi se hai già un account."
 
 #: assets/page/SettingsAdminUsers.svelte:103
-msgid "Please confirm by entering **%1** before hitting **%2**."
-msgstr "Si prega di confermare inserendo **%1** prima di premere **%2**."
+msgid "Please confirm by entering \"**%1**\" before hitting **%2**."
+msgstr "Si prega di confermare inserendo \"**%1**\" prima di premere **%2**."
 
 #: app.html.ep:39 templates/app.html.ep:39 templates/video.html.ep:29
 msgid "Please enable Javascript and try again."

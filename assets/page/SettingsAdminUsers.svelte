@@ -100,7 +100,7 @@ function updateUser() {
     <form id="delete" method="post" on:submit|preventDefault="{deleteUser}">
       <p>
         {$l('This will permanently remove user settings, chat logs, uploaded files and other user related data.')}
-        {@html $lmd('Please confirm by entering **%1** before hitting **%2**.', $form.email, $l('Delete user'))}
+        {@html $lmd('Please confirm by entering "**%1**" before hitting **%2**.', $form.email, $l('Delete user'))}
       </p>
 
       <TextField name="confirm_email" form="{form}">

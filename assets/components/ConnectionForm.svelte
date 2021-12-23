@@ -155,7 +155,7 @@ async function saveConnection() {
     <h3>{$l('Delete')}</h3>
     <p>
       {$l('This will permanently remove chat logs and other connection related data.')}
-      {@html $lmd('Please confirm by entering **%1** before hitting **%2**.', connection_id, $l('Delete'))}
+      {@html $lmd('Please confirm by entering "**%1**" before hitting **%2**.', connection_id, $l('Delete'))}
     </p>
 
     <TextField name="confirm_connection_id" form="{form}">
