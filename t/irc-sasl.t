@@ -20,6 +20,7 @@ $server->subtest(
     $connection->url->query->param(sasl => 'external');
     $connection->save_p->$wait_success;
 
+    my $auth;
     $server->client($connection)->server_event_ok('_irc_event_cap')
       ->server_event_ok('_irc_event_nick')
       ->server_write_ok(":example CAP * LS * :account-notify away-notify chghost extended-join\r\n")
@@ -27,11 +28,14 @@ $server->subtest(
       ->client_event_ok('_irc_event_cap')->server_event_ok('_irc_event_cap')
       ->server_write_ok(":example CAP superwoman ACK :sasl\r\n")
       ->server_event_ok('_irc_event_authenticate')->server_write_ok(":example AUTHENTICATE +\r\n")
-      ->client_event_ok('_irc_event_authenticate')->server_event_ok('_irc_event_authenticate')
+      ->client_event_ok('_irc_event_authenticate')
+      ->server_event_ok('_irc_event_authenticate', sub { $auth = $_[1] })
       ->server_write_ok(
       ":server 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
     )->client_event_ok('_irc_event_900')->server_write_ok(['welcome.irc'])
       ->client_event_ok('_irc_event_rpl_welcome')->process_ok('capabilities handshake');
+
+    is $auth->{raw_line}, 'AUTHENTICATE c3VwZXJ3b21hbg==', 'base64 encoded username';
 
     cmp_deeply(
       $connection->TO_JSON->{info},
@@ -63,6 +67,7 @@ $server->subtest(
     $connection->disconnect_p->then(sub { $connection->connect_p })->wait;
     is $connection->TO_JSON->{info}{authenticated}, false, 'not authenticated after reconnect';
 
+    my $auth;
     $server->client($connection)->server_event_ok('_irc_event_cap')
       ->server_event_ok('_irc_event_nick')
       ->server_write_ok(":example CAP * LS * :account-notify away-notify chghost extended-join\r\n")
@@ -70,12 +75,15 @@ $server->subtest(
       ->client_event_ok('_irc_event_cap')->server_event_ok('_irc_event_cap')
       ->server_write_ok(":example CAP superwoman ACK :sasl\r\n")
       ->server_event_ok('_irc_event_authenticate')->server_write_ok(":example AUTHENTICATE +\r\n")
-      ->client_event_ok('_irc_event_authenticate')->server_event_ok('_irc_event_authenticate')
+      ->client_event_ok('_irc_event_authenticate')
+      ->server_event_ok('_irc_event_authenticate', sub { $auth = $_[1] })
       ->server_write_ok(
       ":server 900 superwoman superwoman!superwoman\@localhost superwoman :You are now logged in as superwoman\r\n"
     )->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')
       ->process_ok('capabilities handshake');
 
+    is $auth->{raw_line}, 'AUTHENTICATE c3VwZXJ3b21hbgBzdXBlcndvbWFuAHN1cGVyZHVwZXI=',
+      'base64 encoded authcid + authzid + password';
     is $connection->TO_JSON->{info}{authenticated}, true, 'authenticated';
   }
 );

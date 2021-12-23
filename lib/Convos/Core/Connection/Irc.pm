@@ -421,7 +421,7 @@ sub _irc_event_authenticate {
   my ($mech, $url) = ($self->_sasl_mechanism, $self->url);
   my $username = $url->username || $self->nick;
   if ($mech eq 'EXTERNAL') {
-    $self->_write("AUTHENTICATE $username\r\n");
+    $self->_write(sprintf "AUTHENTICATE %s\r\n", b64_encode $username);
   }
   elsif ($mech eq 'PLAIN') {
     my @auth = grep {length} $url->query->param('authname') || $username, $username, $url->password;

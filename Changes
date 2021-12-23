@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.44 Not released
+ - Fix SASL EXTERNAL authentication
+
 6.43 2021-12-23T14:29:00+0900
  - Add certificate fingerprint to connection form, when chosing "SASL External"
  - Add support for quotes around **bold**
