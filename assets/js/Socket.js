@@ -202,6 +202,7 @@ export default class Socket extends Reactive {
     while (queue.length) {
       if (this.ws.readyState != WebSocket.OPEN) return;
       const msg = queue.shift();
+      log.trace('<<<', msg);
       this.ws.send(this.deflateMessage(msg));
       msg.waitingForResponse = true;
       if (!msg.ts) msg.ts = new Time();
@@ -242,6 +243,7 @@ export default class Socket extends Reactive {
 
   _onMessage(e) {
     const msg = this.inflateMessage(e.data);
+    log.trace('>>>', msg);
     msg.bubbles = true;
     msg.stopPropagation = () => { msg.bubbles = false };
 

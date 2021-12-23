@@ -8,18 +8,16 @@ loggers.root = new Logger({name: 'root'});
 
 function defaultLogLevel(name) {
   if (nameToLevel.root === undefined) {
-    let levels = (location.href.match(/_debug=([a-z,:]+)/) || []).pop();
-    if (levels) {
-      levels.split(',').forEach(kv => {
-        const [name, value] = kv.split(':');
-        nameToLevel[name] = value || 'debug';
-      });
-      localStorage.setItem('logger:nameToLevel', JSON.stringify(nameToLevel));
-    }
-    else if ((levels = localStorage.getItem('logger:nameToLevel'))) {
-      levels = JSON.parse(levels);
-      Object.keys(levels).forEach((name, value) => (nameToLevel[name] = value || 'debug'));
-    }
+    Object.entries(JSON.parse(localStorage.getItem('logger:nameToLevel') || '{}')).forEach(([k, v]) => {
+      nameToLevel[k] = v || 'debug';
+    });
+
+    ((location.href.match(/_debug=([a-z,:]+)/) || []).pop() || '').split(',').forEach(kv => {
+      const [k, v] = kv.split(':');
+      nameToLevel[k] = v || 'debug';
+    });
+
+    localStorage.setItem('logger:nameToLevel', JSON.stringify(nameToLevel));
   }
 
   return nameToLevel[name] || nameToLevel.root || 'info';
