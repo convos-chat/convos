@@ -147,7 +147,7 @@ export default class I18N extends Reactive {
   }
 
   _mdEmStrong(str) {
-    return str.replace(/(^|\s)(\\?)(\*+)(\w[^<]*?)\3/g, (all, b, esc, md, text) => {
+    return str.replace(/(^|\s|")(\\?)(\*+)(\w[^<]*?)\3/g, (all, b, esc, md, text) => {
       if (md.length == 1) return esc ? all.replace(/^\\/, '') : b + '<em>' + text + '</em>';
       if (md.length == 2) return esc ? all.replace(/^\\/, '') : b + '<strong>' + text + '</strong>';
       if (md.length == 3) return esc ? all.replace(/^\\/, '') : b + '<em><strong>' + text + '</strong></em>';
@@ -183,7 +183,7 @@ export default class I18N extends Reactive {
   }
 
   _xmlEscape(str) {
-    return str.replace(/[&<>"']/g, (m) => XML_ESCAPE[m]);
+    return str.replace(/[&<>']/g, (m) => XML_ESCAPE[m]);
   }
 }
 

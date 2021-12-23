@@ -45,8 +45,8 @@ test('md - emojis', () => {
 });
 
 test('md - em, strong', () => {
-  expect(i18n.md('Hey *foo* **bar** ***baz***!'))
-    .toBe('Hey <em>foo</em> <strong>bar</strong> <em><strong>baz</strong></em>!');
+  expect(i18n.md('Hey *foo* "**bar**" ***baz***!'))
+    .toBe('Hey <em>foo</em> "<strong>bar</strong>" <em><strong>baz</strong></em>!');
 });
 
 test('md - markdown link', () => {
@@ -72,7 +72,7 @@ test('md - code', () => {
   expect(i18n.md('not a `https://link.com`'))
     .toBe('not a <code>https://link.com</code>');
   expect(i18n.md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
-    .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
+    .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\"{}]+|"(?&gt;[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])</code>');
   expect(i18n.md('kikuchi` changed nick to kikuchi```.'))
     .toBe('kikuchi` changed nick to kikuchi```.');
 });
@@ -84,7 +84,7 @@ test('md - nbsp', () => {
 
 test('md - channel names', () => {
   expect(i18n.md('want to join #foo-1.2 #foo-bar#not href="#anchor" #foo.bar'))
-    .toBe('want to join <a href=\"./%23foo-1.2\">#foo-1.2</a> <a href=\"./%23foo-bar\">#foo-bar</a>#not href=&quot;#anchor&quot; <a href=\"./%23foo.bar\">#foo.bar</a>');
+    .toBe('want to join <a href=\"./%23foo-1.2\">#foo-1.2</a> <a href=\"./%23foo-bar\">#foo-bar</a>#not href="#anchor" <a href=\"./%23foo.bar\">#foo.bar</a>');
 });
 
 function countEmojis(str) {

@@ -1,9 +1,11 @@
 Revision history for perl distribution Convos
 
 6.43 Not Released
+ - Add support for quotes around **bold**
  - Add is_true() function to check boolean environment variables
   for "0", "Off", "No", "false", "1", "On", "Yes" or "true".
  - Setting CONVOS_SYSLOG=1 will disable logging to file
+ - Stop replacing " (quote) with &quot;
 
 6.42 2021-12-21T10:00:00+0900
  - Fix resetting reconnect delay when manually updating connection settings
