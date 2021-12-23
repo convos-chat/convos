@@ -45,7 +45,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.35.2",
     "svelte": "^3.44.3",
-    "twemoji": "^12.1.6",
+    "twemoji": "^13.1.0",
     "xregexp": "^5.1.0"
   }
 }
