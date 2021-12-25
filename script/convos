@@ -61,7 +61,7 @@ sub command_dev {
   my $script = shift;
   $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
   my @cmd = $script->_cmd_with_secure_listen(@_);
-  $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_DEBUG);
+  $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_DEBUG CONVOS_CMS_PERLDOC);
   push @cmd, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @cmd;
   warn "\$ mojo webpack script/convos @cmd\n";
   exec qw(mojo webpack), $0, @cmd;
