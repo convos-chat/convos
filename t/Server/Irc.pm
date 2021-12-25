@@ -103,7 +103,7 @@ sub process_ok {
 }
 
 sub processed_ok {
-  return $_[0]->_test(ok => !$_[0]->{outstanding_events}, $_[1] || 'processed');
+  return $_[0]->_test(ok => !$_[0]->{outstanding_events}, $_[1] || 'dialog with t::Server::Irc');
 }
 
 sub server_event_ok {
@@ -200,7 +200,7 @@ sub _handle_client_connect {
     $c_conn->url->host($self->url->host);
     $c_conn->url->port($self->url->port);
     $c_conn->url->query->param($_ => $self->url->query->param($_)) for @{$self->url->query->names};
-    $c_conn->connect_p;
+    $c_conn->connect_p->catch(\&Test::More::diag);
   }
 
   $self->_dequeue;

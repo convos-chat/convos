@@ -1,12 +1,24 @@
 #!perl
 use lib '.';
-use t::Helper;
 use Convos::Core;
 use Convos::Core::Backend::File;
 use List::Util qw(sum);
 use Time::HiRes qw(time);
+use t::Helper;
+
+$ENV{CONVOS_CONNECT_DELAY} = 0.2;
 
 my $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
+my $q    = Convos::Core::Connection->new->queue;
+
+Mojo::Util::monkey_patch(
+  'Mojo::IOLoop',
+  client => sub {
+    my ($loop, $connect_args, $cb) = @_;
+    $core->emit(connect_args => $connect_args);
+    Mojo::IOLoop->next_tick(sub { $loop->$cb('', Mojo::IOLoop::Stream->new) });
+  }
+);
 
 subtest 'jhthorsen connections' => sub {
   my $user = $core->user({email => 'jhthorsen@cpan.org', uid => 42});
@@ -41,63 +53,40 @@ subtest 'mramberg connections' => sub {
 };
 
 subtest 'restart core' => sub {
-  my ($ready_p, %connect) = (Mojo::Promise->new);
-  $core = Convos::Core->new(backend => 'Convos::Core::Backend::File')->connect_delay(0.1);
+  my ($connected_p, $ready_p) = map { Mojo::Promise->new } 1 .. 2;
+  $core = Convos::Core->new(backend => 'Convos::Core::Backend::File');
   $core->once(ready => sub { $ready_p->resolve });
 
-  Mojo::Util::monkey_patch(
-    'Convos::Core::Connection::Irc',
-    connect_p => sub {
-      my $host_port = $_[0]->url->host_port;
-      note "$host_port=" . (++$connect{$host_port});
-      $ready_p->resolve if sum(values %connect) >= 5;
-      return Mojo::Promise->resolve({});
+  my ($t0, @connect) = (time);
+  my $on_connect_args_cb = $core->on(
+    connect_args => sub {
+      my ($core, $connect_args) = @_;
+      push @connect,
+        [$connect_args->{address}, $q->size($connect_args->{address}), 100 * (time - $t0)];
+      $connected_p->resolve if @connect >= 5;
     }
   );
 
   $core->start for 0 .. 4;    # calling start() multiple times does not do anything
-  $ready_p->wait;
-  cmp_deeply $core->{connect_queue},
-    {
-    'irc.libera.chat' => [],
-    'irc.perl.org'    => [map { [ignore, (obj_isa('Convos::Core::Connection::Irc'))] } 1 .. 2]
-    },
-    'connect_queue';
-  is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 1, 'oragono.local' => 1},
-    'skip queue for some connections and skipped wanted_state=disconnected';
+  Mojo::Promise->race(Mojo::Promise->all($ready_p, $connected_p), Mojo::Promise->timeout(2))->wait;
+  cmp_deeply(
+    [@connect[0 .. 2]],
+    bag(
+      ['irc.libera.chat', 1, num(7, 7)],
+      ['irc.perl.org',    3, num(7, 7)],
+      ['oragono.local',   0, num(7, 7)],
+    ),
+    'three first are almost at the same time'
+  ) or diag explain \@connect;
+  cmp_deeply(
+    [@connect[3 .. 4]],
+    bag(['irc.perl.org', 2, num(40, 10)], ['irc.perl.org', 1, num(60, 20)]),
+    'the last two got queued'
+  ) or diag explain \@connect;
 
-  $ready_p = Mojo::Promise->new;
-  Mojo::Promise->race($ready_p, Mojo::Promise->timer(2))->wait;
-  is_deeply \%connect, {'irc.libera.chat:6697' => 1, 'irc.perl.org' => 3, 'oragono.local' => 1},
-    'started duplicate connection delayed';
 
   is $core->get_user('mramberg@cpan.org')->uid, 32, 'uid from storage';
-};
-
-subtest 'connect()' => sub {
-  my $cj
-    = $core->user({email => 'jhthorsen@cpan.org'})->connection({connection_id => 'irc-magnet'});
-  my $cm = $core->user({email => 'mramberg@cpan.org'})->connection({connection_id => 'irc-magnet'});
-
-  ok $cj && $cm;
-  $core->connect($cj, 10);
-  $core->connect($cm, 10);
-
-  my $q = $core->{connect_queue}{'irc.perl.org'};
-  is $q->[0][1], $cj, 'cj is first';
-  is $q->[1][1], $cm, 'cm is second';
-
-  my $delay = $q->[0][0];
-  $core->connect($cj);
-  is $q->[0][0], $delay, 'cj did not change the delay';
-  is $q->[0][1], $cj,    'cj is still first';
-
-  $core->connect($cj, 2);
-  ok $q->[1][0] < $delay, "cj got a lower delay ($delay)";
-  is $q->[1][1], $cj, 'cj is last after changing the delay';
-
-  $core->connect($cj, 0);
-  is $q->[1][0], 0, 'cj got an even lower delay (0)';
+  $core->unsubscribe(connect_args => $on_connect_args_cb);
 };
 
 done_testing;

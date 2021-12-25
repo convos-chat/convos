@@ -25,14 +25,12 @@ sub _available_conversations { $CLASS_DATA{conversations}{$_[0]->url->host} ||= 
 
 sub disconnect_p {
   my $self = shift;
-  my $p    = Mojo::Promise->new;
-  return $p->resolve({}) if $self->state_is(qw(disconnected disconnecting));
+  return Mojo::Promise->resolve if $self->state =~ m!^disconnect!;
 
   $self->info->{authenticated} = false;
   $self->info->{capabilities}  = {};
   $self->state(disconnecting => 'Quitting...');
-  $self->_write("QUIT :$CONVOS_URL", sub { $self->_stream_remove($p) });
-  return $p;
+  return $self->_write_p("QUIT :$CONVOS_URL")->then(sub { $self->_stream_remove_p });
 }
 
 sub send_p {
@@ -78,7 +76,7 @@ sub send_p {
   return $self->_set_wanted_state_p('connected')    if $cmd eq 'CONNECT';
   return $self->_set_wanted_state_p('disconnected') if $cmd eq 'DISCONNECT';
   return $self->_write_p($message)                  if $cmd eq 'QUOTE';
-  return $self->_reconnect                          if $cmd eq 'RECONNECT';
+  return $self->reconnect_p                         if $cmd eq 'RECONNECT';
 
   return Mojo::Promise->reject('Unknown command.');
 }
@@ -743,11 +741,6 @@ sub _periodic_events {
   );
 }
 
-sub _reconnect {
-  my $self = shift;
-  return $self->disconnect_p->then(sub { $self->user->core->connect($self); return {} });
-}
-
 sub _sasl_mechanism {
   my $self = shift;
   my $mech = uc($self->url->query->param('sasl') || '');
@@ -817,7 +810,7 @@ sub _send_join_p {
       my $conversation = shift;
       $conversation->password($password) if $conversation and length $password;
       return $conversation->TO_JSON      if $command =~ m!^\w!;  # A bit more sloppy than is_private
-      return !$conversation->frozen ? $conversation->TO_JSON : $self->_write_and_wait_p(
+      return $self->_write_and_wait_p(
         "JOIN $command", {conversation_id => lc $conversation_id},
         470                 => {1 => $conversation_id},          # Link channel
         479                 => {1 => $conversation_id},          # Illegal channel name
@@ -870,7 +863,7 @@ sub _send_kick_p {
 
 sub _send_list_p {
   my ($self, $extra) = @_;
-  return Mojo::Promise->reject('Not connected.') unless $self->state_is(qw(connected));
+  return Mojo::Promise->reject('Not connected.') unless $self->state eq 'connected';
 
   my $store = $self->_available_conversations;
   my @found;
@@ -1036,7 +1029,7 @@ sub _send_part_p {
     if $conversation and ($conversation->is_private or $conversation->frozen);
 
   return $self->_remove_conversation($target)->save_p->then(sub { +{} })
-    if $self->state_is(qw(disconnected disconnecting));
+    if $self->state =~ m!^disconnect!;
 
   return $self->_write_and_wait_p(
     "PART $target", {target => $target},
@@ -1112,15 +1105,13 @@ sub _send_whois_p {
 sub _set_wanted_state_p {
   my ($self, $state) = @_;
   $self->wanted_state($state);
-  $self->user->core->connect($self) if $state eq 'connected';
-  $self->disconnect_p               if $state eq 'disconnected';
-  return Mojo::Promise->resolve({});
+  my $method = $state eq 'disconnected' ? 'disconnect_p' : 'connect_p';
+  return $self->$method;
 }
 
 sub _stream {
-  my ($self, $loop, $err, $stream) = @_;
-  $self->SUPER::_stream($loop, $err, $stream);
-  return if $err;
+  my ($self, $stream) = @_;
+  $self->SUPER::_stream($stream);
 
   if (my $password = $self->profile->webirc_password) {
 

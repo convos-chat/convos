@@ -48,17 +48,20 @@ $server->subtest(
       ->client_event_ok('_irc_event_rpl_topic')->client_event_ok('_irc_event_rpl_topicwhotime')
       ->client_event_ok('_irc_event_rpl_namreply')->client_event_ok('_irc_event_rpl_endofnames')
       ->server_event_ok('_irc_event_ison')->server_write_ok(['ison.irc'])
-      ->client_event_ok('_irc_event_rpl_ison')->process_ok('on_connect_commands');
+      ->client_event_ok('_irc_event_rpl_ison')->process_ok;
 
     is_deeply($connection->on_connect_commands,
       [@on_connect_commands], 'on_connect_commands still has the same elements');
 
-    $server->client_states_ok(superbagof(
-      [frozen => superhashof({conversation_id => '#convos',      frozen => 'Not connected.'})],
-      [frozen => superhashof({conversation_id => 'private_ryan', frozen => 'Not connected.'})],
-      [frozen => superhashof({conversation_id => '#convos',      frozen => ''})],
-      [frozen => superhashof({conversation_id => 'private_ryan', frozen => ''})],
-    ));
+    $server->client_states_ok([
+      [connection => superhashof({state           => 'connecting'})],
+      [info       => superhashof({nick            => 'superman'})],
+      [connection => superhashof({state           => 'connected'})],
+      [info       => superhashof({nick            => 'superman'})],
+      [frozen     => superhashof({conversation_id => '#convos'})],
+      [frozen     => superhashof({conversation_id => '#convos'})],
+      [frozen     => superhashof({conversation_id => 'private_ryan'})],
+    ]);
   }
 );
 
@@ -75,7 +78,7 @@ $server->subtest(
       ],
       sub {
         my $connect_args = shift;
-        $connection->connect_p;
+        $connection->connect_p->catch(\&Test::More::note);
         $server->client_wait_for_states_ok(5);
 
         $server->client_states_ok(superbagof(
@@ -123,13 +126,20 @@ $server->subtest(
       sub {
         $connection->disconnect_p->$wait_success('disconnect');
         $connection->url->query->remove('tls');
-        $connection->connect_p;
+        $connection->connect_p->catch(\&Test::More::note);
         $server->client_wait_for_states_ok(5);
 
         is $connection->url->query->param('tls'), 0, 'tls off after missing module';
         $server->client_states_ok(superbagof(
-          map { [ignore, superhashof({state => $_})] }
-            (qw(disconnecting disconnected), qw(connecting disconnected), qw(connecting connected))
+          [
+            connection => {
+              message =>
+                re(qr{IO::Socket::SSL 1\.94\+ required for TLS support\. Reconnecting in \S+}),
+              state => 'disconnected'
+            }
+          ],
+          [connection => {message => re(qr{Connecting to \S+}), state => 'connecting'}],
+          [connection => {message => re(qr{Connected to \S+}),  state => 'connected'}],
         ));
       }
     );

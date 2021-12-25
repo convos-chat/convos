@@ -26,6 +26,6 @@ $t->post_ok('/api/connection/irc-example',
 $t->get_ok('/api/connections')->status_is(200)
   ->json_is('/connections/0/connection_id', 'irc-example')
   ->json_is('/connections/0/name',          'example')
-  ->json_is('/connections/0/url', 'irc://chat.example.com:1234?tls=0&tls_verify=0&nick=superduper');
+  ->json_is('/connections/0/url', 'irc://chat.example.com:1234?nick=superduper&tls=0&tls_verify=0');
 
 done_testing;

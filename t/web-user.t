@@ -79,7 +79,7 @@ subtest 'unread messages' => sub {
       conversations => [{
         connection_id   => 'irc-localhost',
         conversation_id => '#convos',
-        frozen          => 'Not connected.',
+        frozen          => '',
         name            => '#convos',
         notifications   => 0,
         topic           => '',
@@ -97,7 +97,7 @@ subtest 'unread messages' => sub {
         name                => 'localhost',
         on_connect_commands => [],
         service_accounts    => [qw(chanserv nickserv)],
-        state               => re(qr{connecting|disconnected|queued}),
+        state               => re(qr{connecting|disconnected}),
         url                 => 'irc://localhost:6123/%23convos?nick=superman&tls=1',
         wanted_state        => 'connected',
       }],

@@ -439,33 +439,7 @@ $server->subtest(
 );
 
 $server->subtest(
-  'server disconnect' => sub {
-    my $id = $connection->{stream_id};
-    ok !!Mojo::IOLoop->stream($id), 'got stream';
-    $server->close_connections;
-    $server->client_wait_for_states_ok(5);
-    ok !Mojo::IOLoop->stream($id), 'stream was removed';
-
-    $server->server_event_ok('_irc_event_nick')->server_write_ok(['welcome.irc'])
-      ->client_event_ok('_irc_event_rpl_welcome')->process_ok;
-    isnt $connection->{stream_id}, $id, 'got new stream id';
-    ok !!Mojo::IOLoop->stream($connection->{stream_id}), 'got new stream';
-
-    $server->client_states_ok(superbagof(
-      [connection => superhashof({state           => 'disconnected'})],
-      [connection => superhashof({state           => 'connecting'})],
-      [frozen     => superhashof({conversation_id => '##redirected'})],
-      [frozen     => superhashof({conversation_id => '#protected'})],
-      [connection => superhashof({state           => 'connected'})],
-      [info       => superhashof({nick            => 'superman'})],
-      [frozen     => superhashof({conversation_id => '##redirected'})],
-    ));
-  }
-);
-
-$server->subtest(
   'reconnect' => sub {
-    Mojo::Promise->timer(0.4)->wait;
     $connection->send_p('', '/reconnect')->$wait_success('reconnect command');
   }
 );

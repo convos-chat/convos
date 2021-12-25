@@ -4,8 +4,11 @@ use t::Helper;
 
 local $TODO = $ENV{TRAVIS_BUILD_ID} && 'Fails on travis for some unknown reason';
 
-$ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
+$ENV{CONVOS_CONNECT_DELAY}   = 0.1;
+$ENV{CONVOS_CONNECT_TIMEOUT} = 0.1;
+$ENV{CONVOS_BACKEND}         = 'Convos::Core::Backend';
 my $t = t::Helper->t;
+$t->app->log->level('fatal');
 
 my $port = $t->ua->server->nb_url->port;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
@@ -53,50 +56,31 @@ subtest 'update connections' => sub {
   $t->post_ok('/api/connection/irc-doesnotexist', json => {url => 'foo://example.com:9999'})
     ->status_is(404);
   $t->post_ok('/api/connection/irc-example', json => {})->status_is(200);
-
-  $connection = $user->get_connection('irc-localhost');
-  $connection->inc_reconnect_delay for 1 .. 10;
-  is $connection->reconnect_delay, 10, 'reconnect_delay';
-
-  $t->post_ok('/api/connection/irc-localhost', json => {url => "irc://localhost:$port"})
-    ->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'disconnected');
-  is $connection->reconnect_delay, 10, 'reconnect_delay after no change';
-
-  $t->post_ok('/api/connection/irc-localhost', json => {url => 'irc://example.com:9999'})
-    ->status_is(200)->json_is('/name' => 'localhost')
-    ->json_like('/url' => qr{irc://example\.com:9999});
-  is $connection->reconnect_delay, 0, 'reconnect_delay after reconnect';
-};
-
-subtest 'set wanted_state=connected' => sub {
-  $connection->state(disconnected => '');
-  $t->post_ok('/api/connection/irc-localhost',
-    json => {url => 'irc://example.com:9999', wanted_state => 'connected'})->status_is(200)
-    ->json_is('/name' => 'localhost')->json_is('/state' => 'connecting')
-    ->json_is('/url'  => 'irc://example.com:9999?nick=superman&tls=1');
 };
 
 subtest 'update on_connect_commands' => sub {
-  $connection->state(connected => '');
-  $t->post_ok(
-    '/api/connection/irc-localhost',
-    json => {
-      on_connect_commands => [' /msg NickServ identify s3cret   ', '/msg too_cool 123'],
-      wanted_state        => 'connected'
-    }
-  )->status_is(200)->json_is('/name' => 'localhost')->json_is('/state' => 'connected')
-    ->json_is('/on_connect_commands', ['/msg NickServ identify s3cret', '/msg too_cool 123'])
-    ->json_is('/url' => 'irc://example.com:9999?tls=1&nick=superman');
+  $connection = $user->get_connection('irc-localhost');
+  $connection->reconnect_delay(100);
+  $t->post_ok('/api/connection/irc-localhost',
+    json => {on_connect_commands => [' /msg NickServ identify s3cret   ', '/msg too_cool 123']})
+    ->status_is(200)->json_is('/name' => 'localhost')
+    ->json_is('/on_connect_commands', ['/msg NickServ identify s3cret', '/msg too_cool 123']);
+  is $connection->reconnect_delay, 0, 'reconnect_delay got reset';
 
   $t->get_ok('/api/connections')->status_is(200)->json_is('/connections/1/on_connect_commands',
     ['/msg NickServ identify s3cret', '/msg too_cool 123']);
 };
 
+subtest 'set wanted_state=connected' => sub {
+  $t->post_ok('/api/connection/irc-localhost',
+    json => {url => 'irc://example.com:9999', wanted_state => 'connected'})->status_is(424)
+    ->json_is('/errors/0/path' => '/wanted_state');
+};
+
 subtest 'update connection url' => sub {
   $t->post_ok('/api/connection/irc-localhost',
-    json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(200)
-    ->json_is('/url'   => 'irc://foo:bar@example.com:9999?tls=0&nick=superman')
-    ->json_is('/state' => 'connecting');
+    json => {url => 'irc://foo:bar@example.com:9999?tls=0&nick=superman'})->status_is(424)
+    ->json_is('/errors/0/path' => '/wanted_state');
 };
 
 subtest 'update connection username and password' => sub {
@@ -104,8 +88,7 @@ subtest 'update connection username and password' => sub {
   $t->post_ok('/api/connection/irc-localhost',
     json =>
       {url => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman', wanted_state => 'connected'})
-    ->status_is(200)->json_is('/url' => 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman')
-    ->json_is('/state' => 'connecting');
+    ->status_is(424)->json_is('/errors/0/path' => '/wanted_state');
 
   is $connection->TO_JSON(1)->{url}, 'irc://foo:s3cret@example.com:9999?tls=0&nick=superman',
     'to json url';

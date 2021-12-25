@@ -140,7 +140,7 @@ sub register {
     $self->backend->connection_create_p($self->app->core->settings->default_connection->clone);
   })->then(sub {
     my $connection = shift;
-    $self->app->core->connect($connection);
+    $connection->connect_p->catch(sub { });
     $self->render(openapi => $user);
   });
 }

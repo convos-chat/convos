@@ -70,7 +70,7 @@ $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->jso
       name                => 'example',
       on_connect_commands => [],
       service_accounts    => [qw(chanserv nickserv)],
-      state               => 'queued',
+      state               => 'disconnected',
       url                 => 'irc://example',
       wanted_state        => 'connected',
     },

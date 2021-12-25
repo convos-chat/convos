@@ -3,6 +3,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Conversation;
 use Convos::Util qw(DEBUG generate_cert_p get_cert_info has_many is_true pretty_connection_name);
+use Convos::Util::Queue;
 use Mojo::JSON qw(false true);
 use Mojo::Loader qw(load_class);
 use Mojo::Promise;
@@ -27,6 +28,7 @@ has messages => sub {
 
 has name                => sub { pretty_connection_name(shift->url->host) };
 has on_connect_commands => sub { +[] };
+has queue => sub { state $q = Convos::Util::Queue->new(delay => $ENV{CONVOS_CONNECT_DELAY} // 4) };
 
 has profile => sub {
   my $self    = shift;
@@ -55,32 +57,23 @@ sub user { shift->{user} }
 
 sub connect_p {
   my $self = shift;
-  my $lock = $self->state_is(qw(connected connecting disconnecting));
 
-  $self->wanted_state('connected');
+  my $state = $self->state;
+  return Mojo::Promise->resolve                               if $state eq 'connected';
+  return Mojo::Promise->reject(sprintf '%s.', ucfirst $state) if $state ne 'disconnected';
+  return Mojo::Promise->reject('Does not want to be connected.')
+    if $self->wanted_state ne 'connected';
 
-  # Reconnect
-  return $self->disconnect_p->then(sub { $self->connect_p })
-    if $lock and ($self->{host_port} || '') ne $self->url->host_port;
+  my $host       = $self->url->host;
+  my $queue      = $self->queue;
+  my $skip_queue = $self->profile->skip_queue;
+  my $delay      = $skip_queue ? 0 : $queue->delay * $queue->size($host);
 
-  # Already connected/connecting
-  return Mojo::Promise->resolve({})                          if $lock eq 'connected';
-  return Mojo::Promise->reject(sprintf '%s.', ucfirst $lock) if $lock;
-
-  $self->state(connecting => "Connecting to @{[$self->url->host]}...");
-  $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
-    for grep { !$_->frozen } @{$self->conversations};
-
-  # Connect
+  $self->state(connecting => "Connecting to $host" . ($delay ? " in about ${delay}s." : "."));
   Scalar::Util::weaken($self);
-  $self->_debug('Connecting...') if DEBUG;
-  return $self->_connect_args_p->then(sub {
-    my $connect_args = shift;
-    $self->_connect_args_to_info($connect_args);
-    $self->_debug('connect = %s', Mojo::JSON::encode_json($connect_args)) if DEBUG;
-    $self->{stream_id} = Mojo::IOLoop->client($connect_args, sub { $self->_stream(@_) });
-    $self->{host_port} = $self->url->host_port;
-  });
+  return $skip_queue
+    ? $self->_connect_p
+    : $queue->enqueue_p($host => sub { $self && $self->_connect_p });
 }
 
 has_many conversations => 'Convos::Core::Conversation' => sub {
@@ -90,7 +83,7 @@ has_many conversations => 'Convos::Core::Conversation' => sub {
   return $conversation;
 };
 
-sub disconnect_p { shift->_stream_remove(Mojo::Promise->new) }
+sub disconnect_p { shift->_stream_remove_p }
 
 sub id {
   my $from = $_[1] || $_[0];
@@ -99,8 +92,6 @@ sub id {
     join '-', $url->scheme, pretty_connection_name($url->host);
   };
 }
-
-sub inc_reconnect_delay { $_[0]->{reconnect_delay}++; $_[0] }
 
 sub new {
   my $self          = shift->SUPER::new(@_);
@@ -121,6 +112,11 @@ sub nick {
   return $nick;
 }
 
+sub reconnect_p {
+  my $self = shift;
+  return $self->disconnect_p->then(sub { $self->connect_p });
+}
+
 sub save_p {
   my $self = shift;
   return $self->user->core->backend->save_object_p($self, @_);
@@ -130,7 +126,7 @@ sub send_p { die 'Method "send_p" not implemented.' }
 
 sub state {
   my ($self, $state, $message) = @_;
-  $self->{state} ||= $self->wanted_state eq 'connected' ? 'queued' : 'disconnected';
+  $self->{state} ||= 'disconnected';
 
   # Get
   return $self->{state} if @_ == 1;
@@ -140,15 +136,13 @@ sub state {
 
   # Set to new value
   die "Invalid state: $state"
-    unless grep { $state eq $_ } qw(connected connecting disconnected disconnecting queued);
+    unless grep { $state eq $_ } qw(connected connecting disconnected disconnecting);
+  my $prev = $self->{state};
   $self->{state} = $state;
 
-  if ($message and $state eq 'disconnected' and $self->wanted_state eq 'connected') {
-    my $connect_delay = $self->user->core->connect_delay;
-    my $delay         = $connect_delay * $self->inc_reconnect_delay->reconnect_delay;
-    $message = "$message." unless $message =~ m!(\!|\.)$!;
-    $message = sprintf '%s Reconnecting after %s seconds...', $message, int($delay) || 1;
-    $self->user->core->connect($self, $delay);
+  if ($state eq 'disconnected' && $prev ne 'disconnecting' && $self->wanted_state eq 'connected') {
+    $self->_reconnect_later_p;
+    $message =~ s/([.!?]?)$/{($1 || '.') . " Reconnecting in $self->{reconnect_delay}s..."}/e;
   }
 
   if ($message) {
@@ -165,12 +159,6 @@ sub state {
   return $self;
 }
 
-sub state_is {
-  my $self  = shift;
-  my $state = $self->state;
-  return +(grep { $_ eq $state } @_)[0] // '';
-}
-
 sub uri { Mojo::Path->new(sprintf '%s/%s/connection.json', $_[0]->user->email, $_[0]->id) }
 
 sub _connect_args_p {
@@ -183,7 +171,7 @@ sub _connect_args_p {
   $args{socket_options}{LocalAddr} = $params->param('local_address')
     if $params->param('local_address');
   $args{port}    = $url->port;
-  $args{timeout} = 20;
+  $args{timeout} = $ENV{CONVOS_CONNECT_TIMEOUT} || 20;
 
   $params->param(tls => 1)              unless defined $params->param('tls');
   return Mojo::Promise->resolve(\%args) unless $params->param('tls');
@@ -234,12 +222,48 @@ sub _debug {
 #warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
 }
 
+sub _connect_p {
+  my $self = shift;
+
+  return $self->_connect_args_p->then(sub {
+    my $connect_args = shift;
+    return Mojo::Promise->reject(sprintf '%s.', $self->state) unless $self->state eq 'connecting';
+
+    my $p = Mojo::Promise->new;
+    $self->_connect_args_to_info($connect_args);
+    $self->_debug('connect = %s', Mojo::JSON::encode_json($connect_args)) if DEBUG;
+    $self->{stream_id}
+      = Mojo::IOLoop->client($connect_args, sub { $_[1] ? $p->reject($_[1]) : $p->resolve($_[2]) });
+
+    return $p;
+  })->then(sub {
+    $self->_stream(shift);
+  })->catch(sub {
+    my $err = shift;
+    Mojo::IOLoop->remove(delete $self->{stream_id}) if $self->{stream_id};
+
+    my $q = $self->url->query;
+    $q->param(tls => 0) if $q->param('tls') and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/);
+
+    $self->state(disconnected => $err);
+    return Mojo::Promise->reject($err);
+  });
+}
+
 sub _notice {
   my ($self, $message) = (shift, shift);
   $self->emit(
     message => $self->messages,
     {from => $self->id, highlight => false, type => 'notice', @_, message => $message, ts => time},
   );
+}
+
+sub _reconnect_later_p {
+  my $self = shift;
+  $self->reconnect_delay($self->reconnect_delay ? $self->reconnect_delay * 2 : $self->queue->delay);
+  $self->reconnect_delay(900) if $self->reconnect_delay > 900;    # TODO
+  Scalar::Util::weaken($self);
+  Mojo::Promise->timer($self->reconnect_delay)->then(sub { $self->connect_p })->catch(sub { });
 }
 
 sub _remove_conversation {
@@ -250,41 +274,25 @@ sub _remove_conversation {
 }
 
 sub _stream {
-  my ($self, $loop, $err, $stream) = @_;
-  return $self->_stream_on_error($stream, $err) if $err;
-
-  $stream->timeout(0);
+  my ($self, $stream) = @_;
   $self->{pid} //= $$;
-  $self->{buffer}  = '';
-  $self->{delayed} = 0;
+  $self->{buffer} = '';
   $self->state(connected => "Connected to @{[$self->url->host]}.");
 
   Scalar::Util::weaken($self);
   Scalar::Util::weaken($self->{stream} = $stream);
   $stream->on(read    => sub { $self and $self->_stream_on_read(@_) });
   $stream->on(close   => sub { $self and $self->_stream_on_close(@_) });
-  $stream->on(error   => sub { $self and $self->_stream_on_error(@_) });
-  $stream->on(timeout => sub { $self and $self->_stream_on_error($_[0], 'Timeout!') });
+  $stream->on(error   => sub { $self and $self->state(disconnected => $_[1]) });
+  $stream->on(timeout => sub { $self and $self->state(disconnected => 'Connection timeout!') });
+  $stream->timeout(0);
 }
 
 sub _stream_on_close {
   my ($self, $stream) = @_;
   return unless $self->{pid} == $$;
   delete @$self{qw(stream stream_id)};
-  return $self->state(disconnected => 'Connection closed.')
-    unless $self->state_is(qw(disconnected queued));
-}
-
-sub _stream_on_error {
-  my ($self, $stream, $err) = @_;
-  my $url = $self->url;
-  $url->query->param(tls => 0)
-    if $url->query->param('tls')
-    and ($err =~ /IO::Socket::SSL/ or $err =~ /SSL.*HELLO/);
-  $self->state(disconnected => $err);
-
-  # This will cause _stream_on_close() to be called
-  Mojo::IOLoop->remove(delete $self->{stream_id}) if $self->{stream_id};
+  $self->state(disconnected => 'Connection closed.');
 }
 
 sub _stream_on_read {
@@ -292,12 +300,12 @@ sub _stream_on_read {
   die 'Method "_stream_on_read" not implemented.';
 }
 
-sub _stream_remove {
-  my ($self, $p) = @_;
+sub _stream_remove_p {
+  my $self   = shift;
   my $stream = delete $self->{stream};
-  $self->state(disconnected => 'Disconnected.');
   $stream->close if $stream;
-  return $p->resolve({});
+  $self->state(disconnected => 'Disconnected.');
+  return Mojo::Promise->resolve({});
 }
 
 sub _write_p {
@@ -308,7 +316,6 @@ sub _write_p {
   return $p->resolve({})                  unless length $buf;
   return $p->reject('Not connected.')     unless $self->{stream_id};
   return $p->reject('Not yet connected.') unless $self->{stream};
-  return $p->reject('Disconnecting.') if $self->state eq 'disconnecting';
 
   $self->_write("$buf\r\n", sub { $p->resolve({}) });
 
@@ -472,10 +479,10 @@ L<Convos::Core/connection_settings>.
 
 =head2 reconnect_delay
 
-  $n = $conn->reconnect_delay;
+  $num = $conn->reconnect_delay;
+  $conn = $conn->reconnect_delay(4);
 
-This value will be used together with L<Convos::Core/connect_delay> to figure
-out when to reconnect.
+When the next automatic reconnect should happen after a failed L</connect_p>.
 
 =head2 url
 
@@ -535,12 +542,6 @@ Used to disconnect from server. Meant to be overloaded in a subclass.
 
 Returns a L<Convos::Core::Conversation> object or undef.
 
-=head2 inc_reconnect_delay
-
-  $conn = $conn->inc_reconnect_delay;
-
-Increases L</reconnect_delay>.
-
 =head2 new
 
   $conn = Convos::Core::Connection->new(\%attrs);
@@ -552,6 +553,12 @@ Creates a new connection object.
   $str = $connection->nick;
 
 Returns the current nick.
+
+=head2 reconnect_p
+
+  $p = $connection->reconnect_p;
+
+Same as calling L</disconnect_p> and then L</connect_p>.
 
 =head2 save_p
 
@@ -575,15 +582,7 @@ Meant to be overloaded in a subclass.
   $state = $conn->state;
 
 Holds the state of this object. C<$state> can be "disconnecting",
-"disconnected", "connecting", "connected" or "queued".
-
-=head2 state_is
-
-  $str = $conn->state_is(@str);
-  $str = $conn->state_is(qw(disconnected disconnecting connected connecting queued));
-
-Check if L</state> match any of C<@str> and return the matched state name, or
-empty string if none match.
+"disconnected", "connecting" or "connected".
 
 =head2 uri
 

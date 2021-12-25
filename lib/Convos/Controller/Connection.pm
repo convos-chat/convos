@@ -18,13 +18,12 @@ sub create {
   }
 
   return $self->reply->errors('Missing "host" in URL', 400) unless $url->host;
-
   return $self->backend->connection_create_p($url)->then(
     sub {
       my $connection = shift;
       $connection->on_connect_commands($json->{on_connect_commands} || []);
       $connection->wanted_state($json->{wanted_state}) if $json->{wanted_state};
-      $self->app->core->connect($connection);
+      $connection->connect_p->catch(sub { });
       $self->render(openapi => $connection);
     },
     sub {
@@ -59,7 +58,7 @@ sub update {
   my $user         = $self->backend->user        or return $self->reply->errors([], 401);
   my $json         = $self->req->json;
   my $wanted_state = $json->{wanted_state} || '';
-  my $connection;
+  my ($connection, $nick);
 
   eval {
     $connection = $user->get_connection($self->stash('connection_id'));
@@ -85,37 +84,43 @@ sub update {
       for grep { defined $url->query->param($_) } qw(nick realname sasl tls tls_verify);
     $url = $default;
   }
-  elsif ($wanted_state ne 'disconnected' and not _same_url($url, $connection->url)) {
+  elsif ($connection->wanted_state eq 'connected' and _url_has_changed($url, $connection->url)) {
     $wanted_state = 'reconnect';
   }
 
-  my @p = ($connection->url($url)->save_p);
-  $wanted_state = '' if $connection->state eq 'connected' and $wanted_state eq 'connected';
-  if ($wanted_state eq 'disconnected' or $wanted_state eq 'reconnect') {
-    push @p, $connection->disconnect_p;
-  }
-  elsif ($url->query->param('nick')) {
-    push @p, $connection->send_p('', sprintf '/nick %s', $url->query->param('nick'));
+  if ($wanted_state eq 'connected' and $connection->state eq 'connected') {
+    $nick = $url->query->param('nick');
+    $nick = '' if $nick && $connection->nick eq $nick;
   }
 
-  return Mojo::Promise->all(@p)->then(sub {
-    $self->app->core->connect($connection->reconnect_delay(0), 0)
-      if $wanted_state eq 'connected' or $wanted_state eq 'reconnect';
+  return $connection->reconnect_delay(0)->url($url)->save_p->then(sub {
+    return
+        $wanted_state eq 'connected'    ? $connection->connect_p->catch(\&_err_failed_dependency)
+      : $wanted_state eq 'disconnected' ? $connection->disconnect_p->catch(\&_err_failed_dependency)
+      : $wanted_state eq 'reconnect'    ? $connection->reconnect_p->catch(\&_err_failed_dependency)
+      :                                   undef;
+  })->then(sub {
+    $connection->send_p('', "/nick $nick")->catch(sub { }) if $nick;
     $self->render(openapi => $connection);
   });
 }
 
-sub _same_url {
-  my ($u1, $u2) = @_;
+sub _err_failed_dependency {
+  die {errors => [{message => "$_[0]", path => '/wanted_state'}], status => 424};
+}
 
-  return 0 unless $u1->host_port eq $u2->host_port;
-  return 0 unless +($u1->query->param('realname') || '') eq +($u2->query->param('realname') || '');
-  return 0 unless +($u1->query->param('sasl')     || '') eq +($u2->query->param('sasl')     || '');
-  return 0 unless +($u1->query->param('tls')      || '0') eq +($u2->query->param('tls')     || '0');
-  return 0
-    unless +($u1->query->param('tls_verify') || '0') eq +($u2->query->param('tls_verify') || '0');
-  return 0 unless +($u1->userinfo // '') eq +($u2->userinfo // '');
-  return 1;
+sub _url_has_changed {
+  my ($u1, $u2) = @_;
+  my ($q1, $q2) = ($u1->query, $u2->query);
+  return 1 if $u1->host_port ne $u2->host_port;
+  return 1 if +($u1->username            // '') ne +($u2->username             // '');
+  return 1 if +($u1->password            // '') ne +($u2->password             // '');
+  return 1 if +($q1->param('realname')   // '') ne +($q2->param('realname')    // '');
+  return 1 if +($q1->param('sasl')       // '') ne +($q2->param('sasl')        // '');
+  return 1 if +($q1->param('tls')        // '0') ne +($q2->param('tls')        // '0');
+  return 1 if +($q1->param('tls_verify') // '0') ne +($q2->param('tls_verify') // '0');
+  return 1 if +($u1->userinfo            // '') ne +($u2->userinfo             // '');
+  return 0;
 }
 
 1;

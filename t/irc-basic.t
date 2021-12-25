@@ -30,7 +30,7 @@ subtest TO_JSON => sub {
       name                => 'localhost',
       on_connect_commands => [],
       service_accounts    => [qw(chanserv nickserv)],
-      state               => 'queued',
+      state               => 'disconnected',
       url                 => 'irc://127.0.0.1',
       wanted_state        => 'connected',
     },

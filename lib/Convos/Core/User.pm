@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Convos::Core::Connection;
 use Convos::Util qw(DEBUG has_many);
 use Crypt::Passphrase;
-use File::Path                 ();
+use File::Path ();
 use Mojo::Date;
 use Mojo::Promise;
 use Mojo::Util qw(camelize trim);
@@ -21,8 +21,8 @@ has unread         => sub {0};
 
 has _crypt => sub {
   Crypt::Passphrase->new(
-    encoder => { module => 'Argon2', memory_cost => '64M' },
-    validators => [ 'Bcrypt' ]
+    encoder    => {module => 'Argon2', memory_cost => '64M'},
+    validators => ['Bcrypt']
   );
 };
 
@@ -71,10 +71,11 @@ sub get_p {
 
 sub load_connections_p {
   my $self = shift;
-
   my @connections;
+
   return $self->core->backend->connections_p($self)->then(sub {
-    my ($connections, %p) = (shift);    # data structures
+    my $connections = shift;    # data structures
+    my %p;
 
     for (@$connections) {
       my $connection = $self->connection($_);
@@ -82,13 +83,11 @@ sub load_connections_p {
       $p{$connection->id} ||= $connection->profile->load_p unless $connection->profile->loaded;
     }
 
-    return %p && Mojo::Promise->all(values %p);
+    return %p && Mojo::Promise->all(values %p)->then(sub {$self}) || $self;
   })->then(sub {
-    for my $connection (@connections) {
-      $self->core->connect($connection) unless $ENV{CONVOS_SKIP_CONNECT};
-    }
-
-    return $self;
+    return $self if $ENV{CONVOS_SKIP_CONNECT} or !@connections;
+    return Mojo::Promise->all(map { $_->connect_p->catch(\&IGNORE) } @connections)
+      ->then(sub {$self});
   });
 }
 
@@ -126,7 +125,7 @@ sub remove_connection_p {
   my $connection = Scalar::Util::blessed($id) ? $id : $self->{connections}{$id};
   return Mojo::Promise->resolve(undef) unless $connection;
 
-  return $connection->disconnect_p->then(sub {
+  return $connection->wanted_state('disconnected')->disconnect_p->then(sub {
     return $self->core->backend->delete_object_p($connection);
   })->then(sub {
     delete $self->{connections}{$id};
@@ -166,6 +165,8 @@ sub _normalize_attributes {
     && !ref $self->{registered} ? Mojo::Date->new($self->{registered}) : Mojo::Date->new;
   return $self;
 }
+
+sub IGNORE { }
 
 sub TO_JSON {
   my ($self, $persist) = @_;
