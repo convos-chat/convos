@@ -72,10 +72,23 @@ sub _backend_connection_create_p {
 sub _exception {
   my ($c, $err) = @_;
   $c->stash->{lang} ||= 'en';
-  return $EXCEPTION_HELPER->($c, $err) unless $c->openapi->spec;
-  $c->app->log->error($err);
-  $err =~ s!\sat\s\S+.*!!s;
-  return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
+
+  if (ref $err eq 'HASH') {
+    $c->app->log->error(Mojo::JSON::encode_json($err));
+    return $c->render(
+      status  => delete $err->{status} || 500,
+      openapi =>
+        {errors => $err->{errors} || [{message => $err->{message} || "$err", path => '/'}]},
+    );
+  }
+  elsif ($c->openapi->spec) {
+    $c->app->log->error($err);
+    $err =~ s!\sat\s\S+.*!!s;
+    return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
+  }
+  else {
+    return $EXCEPTION_HELPER->($c, $err);
+  }
 }
 
 sub _js_session {
