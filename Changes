@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 6.45 Not Released
+ - Add "Check for updates" button to Settings page #585
  - Trying to fix connect queue issues with Convos::Util::Queue
    * Removed connect queue logic from Convos::Core
  - Removed "queued" connection state

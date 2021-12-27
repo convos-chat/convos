@@ -15,10 +15,14 @@ const api = getContext('api');
 const form = createForm();
 const user = getContext('user');
 
+const checkForUpdatesOp = api('checkForUpdates');
 const getSettingsOp = api('getSettings');
 const updateSettingsOp = api('updateSettings');
 
 let diskUsage = null;
+
+$: latestVersion = $checkForUpdatesOp.res.body.available;
+$: hasLatests = latestVersion == settings('version');
 
 onMount(async () => {
   await getSettingsOp.perform();
@@ -90,6 +94,18 @@ function updateSettingsFromForm() {
     </div>
 
     <OperationStatus op="{updateSettingsOp}"/>
+  </form>
+
+  <h2>{$l('Check for updates')}</h2>
+  <form id="convos-updates" method="post" on:submit|preventDefault="{() => checkForUpdatesOp.perform()}">
+    {#if $checkForUpdatesOp.is('error')}
+      <div class="error">{$l($checkForUpdatesOp.error())}</div>
+    {:else if $checkForUpdatesOp.is('success')}
+      <p>{$lmd((hasLatests ? 'You have Convos v%1, which is the latest version.' : 'Convos v%1 is available.'), latestVersion)}</p>
+    {:else}
+      <p>{$lmd('You currently have Convos v%1 installed.', settings('version'))}</p>
+    {/if}
+    <Button icon="sync-alt" op="{checkForUpdatesOp}"><span>{$l('Check for updates')}</span></Button>
   </form>
 
   {#if diskUsage}

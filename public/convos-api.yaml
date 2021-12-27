@@ -20,6 +20,22 @@ consumes: [ 'application/json' ]
 produces: [ 'application/json' ]
 
 paths:
+  /check-for-updates:
+    get:
+      operationId: checkForUpdates
+      summary: Check if a new update is available
+      x-mojo-to: url#check_for_updates
+      responses:
+        '200':
+          description: Version information
+          schema:
+            type: object
+            properties:
+              available:
+                type: number
+              running:
+                type: number
+
   /connection/{connection_id}:
     delete:
       operationId: removeConnection

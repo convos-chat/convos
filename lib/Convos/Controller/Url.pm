@@ -1,6 +1,24 @@
 package Convos::Controller::Url;
 use Mojo::Base 'Mojolicious::Controller';
 
+sub check_for_updates {
+  my $self = shift->openapi->valid_input or return;
+  $self->backend->user                   or return $self->stash(status => 401);
+
+  my $user_agent = $self->req->headers->user_agent;
+  my $ua         = $self->linkembedder->ua;
+  $ua->transactor->name($user_agent) if $user_agent;
+
+  my $running = $self->app->VERSION;
+  return $ua->get_p('https://convos.chat/api', {'X-Convos-Version' => $running})->then(sub {
+    my $json      = shift->res->json;
+    my $available = 0 + $json->{info}{version};
+    $available = $running if $available < $running;
+
+    return $self->render(openapi => {available => $available, running => $running});
+  });
+}
+
 sub err {
   my $self = shift;
   my $code = $self->stash('code') || '404';
@@ -62,6 +80,10 @@ L<Convos::Controller::Url> is a L<Mojolicious::Controller> that can retrieve
 information about resources online.
 
 =head1 METHODS
+
+=head2 check_for_updates
+
+Used to check if a newer version is available.
 
 =head2 err
 

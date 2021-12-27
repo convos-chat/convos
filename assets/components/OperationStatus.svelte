@@ -1,14 +1,12 @@
 <script>
 import Operation from '../store/Operation';
 import {fade} from 'svelte/transition';
-import {is} from '../js/util';
 import {l} from '../store/I18N';
 import {onDestroy} from 'svelte';
 
 export let op = new Operation({});
 export let success = 'Saved.';
 
-let pct = 0;
 let showSuccess = false;
 let tid;
 
