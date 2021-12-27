@@ -72,9 +72,9 @@ subtest 'restart core' => sub {
   cmp_deeply(
     [@connect[0 .. 2]],
     bag(
-      ['irc.libera.chat', 1, num(7, 7)],
-      ['irc.perl.org',    3, num(7, 7)],
-      ['oragono.local',   0, num(7, 7)],
+      ['irc.libera.chat', 1, num(7,  7)],
+      ['irc.perl.org',    3, num(8,  8)],
+      ['oragono.local',   0, num(10, 10)],
     ),
     'three first are almost at the same time'
   ) or diag explain \@connect;
