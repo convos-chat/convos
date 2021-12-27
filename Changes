@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.45 Not Released
+6.45 2021-12-27T22:17:00+0900
  - Add "Check for updates" button to Settings page #585
  - Trying to fix connect queue issues with Convos::Util::Queue
    * Removed connect queue logic from Convos::Core
