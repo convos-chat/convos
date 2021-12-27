@@ -1,7 +1,8 @@
 package Convos::Core::Connection::Irc;
 use Mojo::Base 'Convos::Core::Connection';
 
-no warnings 'utf8';
+no warnings qw(utf8);
+use feature qw(current_sub);
 use Convos::Util qw($CHANNEL_RE DEBUG);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
@@ -9,7 +10,7 @@ use Mojo::Parameters;
 use Mojo::Util qw(b64_encode term_escape trim);
 use Parse::IRC ();
 use Socket;
-use Time::HiRes 'time';
+use Time::HiRes qw(time);
 
 use constant IS_TESTING       => $ENV{HARNESS_ACTIVE}              || 0;
 use constant PERIDOC_INTERVAL => $ENV{CONVOS_IRC_PERIDOC_INTERVAL} || 60;
@@ -474,17 +475,16 @@ sub _irc_event_rpl_welcome {
   );
 
   Scalar::Util::weaken($self);
-  my ($i, $write) = (0);
-  $write = sub {
+  my $i = (0);
+  (sub {
     $i++;
     return unless $self and @commands;
     my $command = shift @commands;
-    return Mojo::IOLoop->timer($1, $write) if $command =~ m!^/sleep\s+(\d+\.?\d*)!i;
+    return Mojo::IOLoop->timer($1, __SUB__) if $command =~ m!^/sleep\s+(\d+\.?\d*)!i;
     return $self->send_p('', $command)
       ->catch(sub { $self->_message("On-connect command #$i failed: @_", type => 'error') })
-      ->finally($write);
-  };
-  $self->$write;
+      ->finally(__SUB__);
+  })->();
 }
 
 sub _irc_event_topic {
@@ -810,7 +810,7 @@ sub _send_join_p {
       my $conversation = shift;
       $conversation->password($password) if $conversation and length $password;
       return $conversation->TO_JSON      if $command =~ m!^\w!;  # A bit more sloppy than is_private
-      return $self->_write_and_wait_p(
+      return !$conversation->frozen ? $conversation->TO_JSON : $self->_write_and_wait_p(
         "JOIN $command", {conversation_id => lc $conversation_id},
         470                 => {1 => $conversation_id},          # Link channel
         479                 => {1 => $conversation_id},          # Illegal channel name
@@ -1055,9 +1055,8 @@ sub _send_query_p {
 
   # New conversation. Note that it needs to be frozen, so join_channel will be issued
   $conversation ||= $self->conversation({name => $target});
-  $conversation->frozen('Not active in this room.')
+  $self->emit(state => frozen => $conversation->frozen('Not active in this room.')->TO_JSON)
     if !$conversation->is_private and !$conversation->frozen;
-  $self->emit(state => frozen => $conversation->TO_JSON);
   return $p->resolve($conversation);
 }
 

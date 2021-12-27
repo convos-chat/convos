@@ -69,6 +69,9 @@ sub connect_p {
   my $skip_queue = $self->profile->skip_queue;
   my $delay      = $skip_queue ? 0 : $queue->delay * $queue->size($host);
 
+  $self->emit(state => frozen => $_->frozen('Not connected.')->TO_JSON)
+    for grep { !$_->frozen } @{$self->conversations};
+
   $self->state(connecting => "Connecting to $host" . ($delay ? " in about ${delay}s." : "."));
   Scalar::Util::weaken($self);
   return $skip_queue
@@ -313,9 +316,8 @@ sub _write_p {
 
   my $buf = join ' ', @data;
   my $p   = Mojo::Promise->new;
-  return $p->resolve({})                  unless length $buf;
-  return $p->reject('Not connected.')     unless $self->{stream_id};
-  return $p->reject('Not yet connected.') unless $self->{stream};
+  return $p->resolve({})              unless length $buf;
+  return $p->reject('Not connected.') unless $self->{stream_id} and $self->{stream};
 
   $self->_write("$buf\r\n", sub { $p->resolve({}) });
 

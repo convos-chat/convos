@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.46 Not Released
+ - Fix joining already joined conversations
+
 6.45 2021-12-27T22:17:00+0900
  - Add "Check for updates" button to Settings page #585
  - Trying to fix connect queue issues with Convos::Util::Queue

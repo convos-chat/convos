@@ -54,13 +54,15 @@ $server->subtest(
       [@on_connect_commands], 'on_connect_commands still has the same elements');
 
     $server->client_states_ok([
+      [frozen     => superhashof({conversation_id => '#convos',      frozen => 'Not connected.'})],
+      [frozen     => superhashof({conversation_id => 'private_ryan', frozen => 'Not connected.'})],
       [connection => superhashof({state           => 'connecting'})],
       [info       => superhashof({nick            => 'superman'})],
       [connection => superhashof({state           => 'connected'})],
       [info       => superhashof({nick            => 'superman'})],
-      [frozen     => superhashof({conversation_id => '#convos'})],
-      [frozen     => superhashof({conversation_id => '#convos'})],
-      [frozen     => superhashof({conversation_id => 'private_ryan'})],
+      [frozen     => superhashof({conversation_id => '#convos',      frozen => '', topic => ''})],
+      [frozen     => superhashof({conversation_id => '#convos',      topic  => 'some cool topic'})],
+      [frozen     => superhashof({conversation_id => 'private_ryan', frozen => ''})],
     ]);
   }
 );
