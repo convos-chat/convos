@@ -8,6 +8,7 @@ use lib '.';
 use t::Helper;
 
 my $t = t::Helper->t;
+$t->app->log->level('fatal');
 
 $t->app->routes->get(
   '/t/base-url' => sub {

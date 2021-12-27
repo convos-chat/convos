@@ -5,6 +5,7 @@ use t::Server::Irc;
 
 my $server = t::Server::Irc->new->start;
 my $t      = t::Helper->t;
+$t->app->log->level('fatal');
 $t->app->core->settings->default_connection(Mojo::URL->new($server->url))->open_to_public(true);
 
 subtest 'no user' => sub {

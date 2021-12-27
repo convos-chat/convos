@@ -46,7 +46,7 @@ sub _clean_json {
   if ($clean{organization_url}) {
     $clean{organization_url} = Mojo::URL->new(trim $clean{organization_url});
     push @err, ['Organization URL require a scheme and host.', '/organization_url']
-      unless $clean{organization_url}->scheme =~ m!^http! and $clean{organization_url}->host;
+      unless $clean{organization_url}->scheme and $clean{organization_url}->host;
   }
 
   if ($clean{video_service}) {

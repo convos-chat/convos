@@ -119,7 +119,7 @@ subtest 'max_message_size' => sub {
 };
 
 subtest 'upload more files so we can do proper pagination testing' => sub {
-  for ((sort grep /Convos/, values %INC)[1 .. 10]) {
+  for ((sort grep { $_ && /Convos/ } values %INC)[1 .. 10]) {
     next if !-r or /Controller\/Files\.pm/;
     my $file = Mojo::Asset::File->new(path => $_);
     note $file->path;

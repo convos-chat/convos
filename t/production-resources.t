@@ -14,6 +14,7 @@ SKIP: {
 }
 
 my $t = t::Helper->t;
+$t->app->log->level('fatal');
 
 subtest 'path /' => sub {
   test_defaults('/' => 200);
