@@ -60,9 +60,17 @@ sub client_states_ok {
 sub client_wait_for_states_ok {
   my ($self, $exp, $desc) = @_;
   my ($n, $p) = (0, Mojo::Promise->new);
-  my $cb = $self->{client}->on(state => sub { $p->resolve if ++$n >= $exp });
+
+  my $cb;
+  $cb = $self->{client}->on(
+    state => sub {
+      return if (++$n) < $exp;
+      $self->{client}->unsubscribe(state => $cb);
+      $p->resolve;
+    }
+  );
+
   Mojo::Promise->race($p, Mojo::Promise->timer(2))->wait;
-  $self->{client}->unsubscribe(state => $cb);
   return $self->_test(is => $n, $exp, $desc || "client wait for $exp states");
 }
 
