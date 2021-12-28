@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.47 Not Released
+6.47 2021-12-28T12:32:00+0900
  - Add more rules for potentially evil svg files
    Contributor: KhanhCM
 
