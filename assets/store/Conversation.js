@@ -27,6 +27,7 @@ export default class Conversation extends Reactive {
 
     this.prop('rw', 'historyStartAt', null);
     this.prop('rw', 'historyStopAt', null);
+    this.prop('rw', 'info', params.info || {});
     this.prop('rw', 'modes', {});
     this.prop('rw', 'name', params.name || params.conversation_id || params.connection_id || 'ERR');
     this.prop('rw', 'notifications', params.notifications || 0);
@@ -126,7 +127,7 @@ export default class Conversation extends Reactive {
   }
 
   update(params) {
-    this._loadParticipants();
+    this._loadInformation();
     super.update(params);
     if (params.hasOwnProperty('notifications') || params.hasOwnProperty('unread')) this.emit('unread', params);
     return this;
@@ -207,12 +208,13 @@ export default class Conversation extends Reactive {
     return '';
   }
 
-  _loadParticipants() {
+  _loadInformation() {
     if (this.participantsLoaded || !this.conversation_id || !this.messagesOp) return;
     if (this.is('frozen') || !this.messagesOp.is('success')) return;
     this.participantsLoaded = true;
 
     if (this.is('private')) {
+      if (this.info.ts && this.info.ts > new Time().toEpoch() - 300) return;
       this.send('/whois ' + this.conversation_id, (e) => {
         e.stopPropagation();
         this.update({frozen: e.errors && e.errors.length ? e.errors[0].message : ''});

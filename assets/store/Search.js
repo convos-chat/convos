@@ -52,5 +52,5 @@ export default class Search extends Conversation {
     this.prop('ro', 'markAsReadOp', null);
   }
 
-  _loadParticipants() { }
+  _loadInformation() { }
 }

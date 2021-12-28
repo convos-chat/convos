@@ -7,6 +7,7 @@ import Operation from '../store/Operation';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {awayMessage} from '../js/chatHelpers';
 import {activeMenu, viewport} from '../store/writable';
 import {getChannelMode} from '../js/constants';
 import {createForm} from '../store/form';
@@ -19,6 +20,7 @@ export let conversation;
 export let transition;
 
 const form = createForm({password: ''});
+const info = createForm({});
 const saveConversationSettingsOp = new Operation({api: false, id: 'saveConversationSettings'});
 
 const toggleModes = [
@@ -36,6 +38,7 @@ $: conversation.messages.update({raw: $form.raw_messages});
 
 onMount(async () => {
   form.set({topic: conversation.topic, want_notifications: conversation.wantNotifications});
+  info.set(conversation.info);
   if (Object.keys(conversation.modes).length == 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
   await tick();
   const fields = {};
@@ -78,6 +81,16 @@ async function saveConversationSettings() {
   await tick();
   saveConversationSettingsOp.update({status: 'success'});
 }
+
+function updateInfo() {
+  if (info.get('loading')) return;
+  info.set({loading: true});
+  conversation.send('/whois ' + conversation.name, (e) => {
+    e.stopPropagation();
+    setTimeout(() => info.set({loading: false}), 1000);
+    info.set(e);
+  });
+}
 </script>
 
 <div class="sidebar-left" transition:fly="{transition}">
@@ -90,7 +103,8 @@ async function saveConversationSettings() {
     {#if conversation.frozen}
       {$l('Conversation with %1 is frozen. Reason: %2', conversation.name, $l(conversation.frozen))}
     {:else if isPrivate}
-      {$l('Private conversation with %1.', conversation.name)}
+      <span class:fade-in="{$info.loading}">{@html $lmd(...awayMessage($info))}</span>
+      <br><small><a href="#update" on:click|preventDefault="{updateInfo}">{$l('Update information')}</a></small>
     {:else if isOperator}
       {$l('You are channel operator in %1.', conversation.name)}
     {:else}
@@ -143,7 +157,7 @@ async function saveConversationSettings() {
     {/if}
 
     <div class="form-actions">
-      <Button icon="save"><span>{$l('Update')}</span></Button>
+      <Button icon="save"><span>{$l('Save')}</span></Button>
       <Button type="button" on:click="{partConversation}" icon="sign-out-alt"><span>{$l('Leave')}</span></Button>
     </div>
     <OperationStatus op="{saveConversationSettingsOp}"/>

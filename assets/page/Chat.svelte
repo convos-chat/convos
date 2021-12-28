@@ -9,7 +9,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, generateWriteable, viewport} from '../store/writable';
-import {chatHelper, renderEmbed, topicOrStatus} from '../js/chatHelpers';
+import {awayMessage, chatHelper, renderEmbed, topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -251,14 +251,19 @@ function showPopover(e) {
 
 {#if $viewport.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
+    <h3>{$l('Participants (%1)', $participants.length)}</h3>
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">
-      <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}
         <a href="#action:join:{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
           <span>{participant.nick}</span>
         </a>
       {/each}
-    <nav>
+    </nav>
+
+    {#if $conversation.is('private') && $conversation.info.nick}
+      <h3>{$l('Information')}</h3>
+      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
+    {/if}
   </div>
 {/if}

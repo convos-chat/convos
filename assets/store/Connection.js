@@ -1,6 +1,7 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
+import {awayMessage} from '../js/chatHelpers';
 import {extractErrorMessage, is, regexpEscape} from '../js/util';
 import {api} from '../js/Api';
 import {notify} from '../js/Notify';
@@ -170,36 +171,7 @@ export default class Connection extends Conversation {
   }
 
   wsEventSentWhois(params) {
-    const channels = Object.keys(params.channels).sort();
-    const vars = [params.nick, params.name || params.user];
-    let message = '%1 (%2)';
-
-    if (params.away) {
-      message += ' is away (%3) and';
-      vars.push(params.away);
-    }
-
-    if (params.idle_for && channels.length) {
-      message += ' has been idle for %4s in %5.';
-      vars.push(params.idle_for);
-      vars.push(channels.sort().join(', '));
-    }
-    else if (params.idle_for && !channels.length) {
-      message += ' has been idle for %4s, and is not in any channels.';
-      vars.push(params.idle_for);
-    }
-    else if (channels.length) {
-      message += ' is active in %4.';
-      vars.push(channels.join(', '));
-    }
-    else {
-      message += ' is not in any channels.';
-    }
-
-    if (!params.away) {
-      message = message.replace(/%(4|5)/g, (a, n) => '%' + (n - 1));
-    }
-
+    const [message, ...vars] = awayMessage(params);
     const conversation = this.findConversation(params) || this;
     conversation.addMessages({message, vars, sent: params});
   }

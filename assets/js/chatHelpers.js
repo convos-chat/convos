@@ -1,6 +1,7 @@
 import Time from '../js/Time';
 import {extractErrorMessage, q, showFullscreen, tagNameIs} from '../js/util';
 import {get, writable} from 'svelte/store';
+import {i18n} from '../store/I18N';
 import {route} from '../store/Route';
 
 export const videoWindow = writable(null);
@@ -14,6 +15,42 @@ videoWindow.open = function(url) {
   ['beforeunload', 'close'].forEach(name => w.addEventListener(name, () => this.set(null)));
   this.set(w);
 };
+
+export function awayMessage(params) {
+  if (!params.nick) return ['Loading...'];
+
+  const channels = Object.keys(params.channels || {}).sort();
+  const vars = [params.nick, params.name || params.user];
+  let message = '%1 (%2)';
+
+  if (params.away) {
+    message += ' is away (%3) and';
+    vars.push(params.away);
+  }
+
+  if (params.idle_for && channels.length) {
+    message += ' has been idle for %4s in %5.';
+    vars.push(params.idle_for);
+    vars.push(channels.sort().join(', '));
+  }
+  else if (params.idle_for && !channels.length) {
+    message += ' has been idle for %4s, and is not in any channels.';
+    vars.push(params.idle_for);
+  }
+  else if (channels.length) {
+    message += ' is active in %4.';
+    vars.push(channels.join(', '));
+  }
+  else {
+    message += ' is not in any channels.';
+  }
+
+  if (!params.away) {
+    message = message.replace(/%(4|5)/g, (a, n) => '%' + (n - 1));
+  }
+
+  return [message, ...vars];
+}
 
 // Exports other functions
 export function chatHelper(method, state) {
@@ -205,6 +242,8 @@ export function topicOrStatus(connection, conversation) {
   if (conversation.is('not_found')) return '';
   if (connection.frozen) return connection.frozen;
   if (connection == conversation) return 'Connection messages.';
+  if (conversation.info.away) return conversation.info.away;
+  if (conversation.info.idle_for) return i18n.l('User has been idle for %1s.', conversation.info.idle_for);
   const str = conversation.frozen ? conversation.frozen : conversation.topic;
   return str || (conversation.is('private') ? 'Private conversation.' : 'No topic is set.');
 }
