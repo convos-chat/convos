@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.46 Not Released
  - Fix joining already joined conversations
+ - Using WHOIS instead of ISON to check if a user is online
 
 6.45 2021-12-27T22:17:00+0900
  - Add "Check for updates" button to Settings page #585

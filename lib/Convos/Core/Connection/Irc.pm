@@ -468,9 +468,9 @@ sub _irc_event_rpl_welcome {
   my @commands = (
     (grep {/\S/} @{$self->on_connect_commands}),
     map {
-          $_->is_private ? "/ISON $_->{name}"
-        : $_->password   ? "/JOIN $_->{name} $_->{password}"
-        : "/JOIN $_->{name}"
+          $_->is_private ? [_send_whois_p => $_->{name}]
+        : $_->password   ? [_send_join_p  => "$_->{name} $_->{password}"]
+        : [_send_join_p => $_->{name}]
     } sort { $a->id cmp $b->id } @{$self->conversations}
   );
 
@@ -480,10 +480,21 @@ sub _irc_event_rpl_welcome {
     $i++;
     return unless $self and @commands;
     my $command = shift @commands;
-    return Mojo::IOLoop->timer($1, __SUB__) if $command =~ m!^/sleep\s+(\d+\.?\d*)!i;
-    return $self->send_p('', $command)
-      ->catch(sub { $self->_message("On-connect command #$i failed: @_", type => 'error') })
-      ->finally(__SUB__);
+
+    my $p;
+    if (ref $command eq 'ARRAY') {
+      my $method = shift @$command;
+      $p = $self->$method(@$command);
+    }
+    elsif ($command =~ m!^/sleep\s+(\d+\.?\d*)!i) {
+      $p = Mojo::Promise->timer($1);
+    }
+    else {
+      $p = $self->send_p('', $command)
+        ->catch(sub { $self->_message("On-connect command #$i failed: @_", type => 'error') });
+    }
+
+    $p->finally(__SUB__);
   })->();
 }
 
@@ -658,8 +669,25 @@ sub _make_topic_response {
 
 sub _make_whois_response {
   my ($self, $msg, $res, $p) = @_;
-  return $p->reject($msg->{params}[-1]) if $msg->{command} =~ m!^err_!;
-  return $p->resolve($res)              if $msg->{command} eq 'rpl_endofwhois';
+
+  if ($msg->{command} =~ m!^err_!) {
+    my $conversation = $self->get_conversation($msg->{params}[1]);
+    $self->emit(state => frozen => $conversation->frozen($msg->{params}[-1])->TO_JSON)
+      if $conversation;
+    return $p->reject($msg->{params}[-1]);
+  }
+
+  if ($msg->{command} eq 'rpl_endofwhois') {
+    my $conversation = $self->get_conversation($msg->{params}[1]);
+    my $info         = $conversation && $conversation->info || {};
+    $res->{$_}       //= '' for qw(away fingerprint host name nick server server_info user);
+    $res->{channels} //= [];
+    $res->{idle_for} //= 0;
+    $res->{ts} = time;
+    $info->{$_} = $res->{$_} for keys %$res;
+    $self->emit(state => frozen => $conversation->frozen('')->TO_JSON) if $conversation;
+    return $p->resolve($res);
+  }
 
   if ($msg->{command} eq 'rpl_away' or $msg->{command} eq '301') {
     my @msg = @{$msg->{params}};
@@ -674,7 +702,6 @@ sub _make_whois_response {
 
   if ($msg->{command} eq '276') {
     $res->{fingerprint} = $1 if $msg->{raw_line} =~ m!fingerprint\s(\S+)!;
-    $res->{secure}      = true;
   }
   if ($msg->{command} eq 'rpl_whoischannels') {
     for (split /\s+/, $msg->{params}[2] || '') {

@@ -5,6 +5,7 @@ use Convos::Util '$CHANNEL_RE';
 use Mojo::Date;
 
 has frozen        => '';
+has info          => sub { +{} };
 has name          => sub { Carp::confess('name required in constructor') };
 has password      => '';
 has notifications => 0;
@@ -36,6 +37,7 @@ sub TO_JSON {
   my %json = map { ($_, $self->$_) } qw(frozen name notifications topic unread);
   $json{connection_id}   = $self->connection->id;
   $json{conversation_id} = $self->id;
+  $json{info}            = $self->info;
   $json{last_read}       = $self->{last_read} if $self->{last_read};    # back compat
   $json{password}        = $self->password    if $persist;
   return \%json;
@@ -73,6 +75,13 @@ no longer part of it.
   $str = $class->id(\%attr);
 
 Returns a unique identifier for a conversation.
+
+=head2 info
+
+  $hash_ref = $conversation->info;
+  $conversation = $conversation->info({away => 1});
+
+Extra information about the conversation. Might come from a "WHOIS" reply.
 
 =head2 name
 

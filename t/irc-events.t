@@ -145,6 +145,7 @@ $server->subtest(
           connection_id   => 'irc-localhost',
           conversation_id => '#convos',
           frozen          => '',
+          info            => {},
           name            => '#convos',
           topic           => 'Too cool!',
           unread          => 0,

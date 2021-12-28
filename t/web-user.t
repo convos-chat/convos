@@ -80,6 +80,7 @@ subtest 'unread messages' => sub {
         connection_id   => 'irc-localhost',
         conversation_id => '#convos',
         frozen          => 'Not connected.',
+        info            => {},
         name            => '#convos',
         notifications   => 0,
         topic           => '',

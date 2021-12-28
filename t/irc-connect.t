@@ -47,8 +47,8 @@ $server->subtest(
       ->server_write_ok(['join-convos.irc'])->client_event_ok('_irc_event_join')
       ->client_event_ok('_irc_event_rpl_topic')->client_event_ok('_irc_event_rpl_topicwhotime')
       ->client_event_ok('_irc_event_rpl_namreply')->client_event_ok('_irc_event_rpl_endofnames')
-      ->server_event_ok('_irc_event_ison')->server_write_ok(['ison.irc'])
-      ->client_event_ok('_irc_event_rpl_ison')->process_ok;
+      ->server_event_ok('_irc_event_whois')->server_write_ok(['whois.irc'])
+      ->client_event_ok('_irc_event_rpl_endofwhois')->process_ok;
 
     is_deeply($connection->on_connect_commands,
       [@on_connect_commands], 'on_connect_commands still has the same elements');
@@ -173,3 +173,8 @@ sub mock_connect {
   };
   $cb->(\@connect_args);
 }
+
+__DATA__
+@@ whois.irc
+:localhost 311 superman private_ryan private_ryan irc.example.com * :Convos v10.01
+:localhost 318 superman private_ryan :End of /WHOIS list.

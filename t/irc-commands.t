@@ -362,7 +362,7 @@ $server->subtest(
     $server->server_event_ok('_irc_event_whois')->server_write_ok(['whois-superwoman.irc']);
     $res = $connection->send_p('', '/whois superwoman ')->$wait_success;
     $server->processed_ok;
-    is_deeply(
+    cmp_deeply(
       $res,
       {
         away        => 'Away from keyboard',
@@ -372,9 +372,9 @@ $server->subtest(
         idle_for    => 17454,
         name        => 'Convos v10.01',
         nick        => 'superwoman',
-        secure      => true,
         server      => 'localhost',
         server_info => 'ircd-hybrid 8.1-debian',
+        ts          => num(time, 10),
         user        => 'SuperWoman',
       },
       'whois'
