@@ -52,6 +52,7 @@ $server->subtest(
       ['#convos',   '/close'],                          # CLOSE
       ['#convos',   '/close superwoman'],               # CLOSE
       ['#convos',   '/names'],                          # NAMES
+      ['#convos',   '/nick foo'],                       # NICK
       ['#convos',   '/topic'],                          # TOPIC get
       ['#convos',   '/topic New topic'],                # TOPIC set
       ['whatever',  '/ison'],                           # ISON
@@ -66,9 +67,6 @@ $server->subtest(
     }
 
     is $connection->get_conversation('#convos')->password, 's3cret', 'password is set';
-
-    $connection->send_p('', '/nick superduper')->$wait_success('nick');
-    is $connection->url->query->param('nick'), 'superduper', 'change nick offline';
 
     ok !$connection->get_conversation('superwoman'), 'superwoman does not exist';
     $connection->send_p('', '/query superwoman ')->$wait_success('query');
@@ -204,6 +202,29 @@ $server->subtest(
       'names response',
     );
   }
+);
+
+$server->subtest(
+  'nick' => sub {
+    $connection->send_p('#convos', '/nick')->$wait_reject('Missing or invalid nick.');
+
+    $res = $connection->send_p('#convos', '/nick superman')->$wait_success;
+    is $res->{nick}, 'superman', 'no change';
+
+    $server->server_event_ok('_irc_event_nick')->server_write_ok(['nick-erroneusnickname.irc']);
+    $connection->send_p('#convos', '/nick foo!')->$wait_reject('Erroneous nickname: foo!');
+    $server->processed_ok;
+
+    $server->server_event_ok('_irc_event_nick')->server_write_ok(['nick-superduper.irc']);
+    $res = $connection->send_p('#convos', '/nick superduper')->$wait_success;
+    $server->processed_ok;
+    is_deeply $res, {nick => 'superduper'}, 'nick response';
+
+    note 'change back';
+    $server->server_event_ok('_irc_event_nick')->server_write_ok(['nick-superman.irc']);
+    $res = $connection->send_p('#convos', '/nick superman')->$wait_success;
+    $server->processed_ok;
+  },
 );
 
 $server->subtest(
@@ -467,6 +488,12 @@ __DATA__
 :localhost 353 superman = #convos :superwoman ~superman &robin
 :localhost 353 superman = #convos :%batboy @superboy +robyn
 :localhost 366 superman #convos :End of /NAMES list.
+@@ nick-superduper.irc
+:superman!whatever NICK superduper
+@@ nick-superman.irc
+:superman!whatever NICK superman
+@@ nick-erroneusnickname.irc
+:lcoalhost 432 superman foo! :Erroneous nickname
 @@ oper.irc
 :localhost 381 superman :You are now an IRC operator
 @@ whois-superwoman.irc

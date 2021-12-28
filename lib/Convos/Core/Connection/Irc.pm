@@ -171,15 +171,18 @@ sub _irc_event_err_cannotsendtochan {
 
 sub _irc_event_err_erroneusnickname {
   my ($self, $msg) = @_;
+  return if $msg->{handled};
+
   my $nick = $msg->{params}[1] || 'unknown';
   $self->_message("Invalid nickname $nick.", type => 'error');
 }
 
 sub _irc_event_err_nicknameinuse {
   my ($self, $msg) = @_;
-  my $nick = $msg->{params}[1];
+  return if $msg->{handled};
 
   # do not want to flod frontend with these messages
+  my $nick = $msg->{params}[1];
   $self->_message("Nickname $nick is already in use.", type => 'error')
     unless $self->{err_nicknameinuse}{$nick}++;
 
@@ -299,7 +302,8 @@ sub _irc_event_nick {
     delete $self->{err_nicknameinuse};    # allow warning on next nick change
   }
 
-  if ($self->info->{nick} eq $old_nick) {
+  if ($self->nick eq $old_nick) {
+    $self->url->query->param(nick => $new_nick);
     $self->info->{nick} = $new_nick;
     $self->emit(state => info => $self->info);
   }
@@ -635,6 +639,13 @@ sub _make_names_response {
   return $p->resolve($res)              if $msg->{command} eq 'rpl_endofnames';
   return $self->_make_users_response($msg, $res->{participants} ||= [])
     if $msg->{command} eq 'rpl_namreply';
+}
+
+sub _make_nick_response {
+  my ($self, $msg, $res, $p) = @_;
+  return $p->reject(sprintf '%s: %s', $msg->{params}[-1], $res->{nick})
+    if $msg->{command} =~ m!^err_!;
+  return $p->resolve($res);
 }
 
 sub _make_oper_response {
@@ -1024,12 +1035,15 @@ sub _send_names_p {
 sub _send_nick_p {
   my ($self, $nick) = @_;
   return Mojo::Promise->reject('Missing or invalid nick.') unless $nick;
-
-  $self->info->{nick} = $nick;
-  $self->url->query->param(nick => $nick);
-  $self->emit(state => info => $self->info);
-  return $self->_write_p("NICK $nick\r\n") if $self->{stream};
-  return Mojo::Promise->resolve({});
+  return Mojo::Promise->resolve({nick => $nick}) if $self->nick eq $nick;
+  return $self->_write_and_wait_p(
+    "NICK $nick", {nick => $nick},
+    err_erroneusnickname => {1 => $nick},
+    err_nickcollision    => {1 => $nick},
+    err_nicknameinuse    => {1 => $nick},
+    nick                 => {0 => $nick},
+    '_make_nick_response',
+  );
 }
 
 sub _send_oper_p {
@@ -1183,7 +1197,6 @@ CHUNK:
 
     # @wait_for is to avoid "Use of freed value in iteration"
     my @wait_for = values %{$self->{wait_for}{$msg->{command}} || {}};
-    my $handled  = 0;
 
   WAIT_FOR:
     for (@wait_for) {
@@ -1196,14 +1209,14 @@ CHUNK:
 
       $self->_debug('->%s(...)', $make_response_method) if DEBUG;
       $self->$make_response_method($msg, $res, $p);
-      $handled++;
+      $msg->{handled}++;
     }
 
     if (my $cb = $self->can($method)) {
       $self->_debug('->%s(...)', $method) if DEBUG;
       $self->$cb($msg);
     }
-    elsif (!$handled) {
+    elsif (!$msg->{handled}) {
       $self->_debug('->%s(...) (fallback)', $method) if DEBUG;
       $self->_irc_event_fallback($msg);
     }
