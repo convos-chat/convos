@@ -96,9 +96,18 @@ subtest 'binary' => sub {
     ->header_is('Content-Type' => 'application/octet-stream');
 };
 
-subtest 'svg with javasript' => sub {
-  $t->post_ok('/api/files', form => {file => {file => 't/data/js.svg'}})->status_is(400)
-    ->json_is('/errors/0/message', 'SVG contains script.');
+subtest 'svg with javascript' => sub {
+  note 'with-script-tag.svg';
+  $t->post_ok('/api/files', form => {file => {file => 't/data/with-script-tag.svg'}})
+    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
+
+  note 'with-javascript-event.svg';
+  $t->post_ok('/api/files', form => {file => {file => 't/data/with-javascript-event.svg'}})
+    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
+
+  note 'with-javascript-link.svg';
+  $t->post_ok('/api/files', form => {file => {file => 't/data/with-javascript-link.svg'}})
+    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
 };
 
 subtest 'write_only' => sub {

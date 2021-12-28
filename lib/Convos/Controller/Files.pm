@@ -73,27 +73,41 @@ sub upload {
   return $self->reply->errors([[$err, '/file']], 400)
     if $err = !$upload ? 'No upload.' : !$upload->filename ? 'Unknown filename.' : '';
 
-  return $self->reply->errors([['SVG contains script.', '/file']], 400)
-    if $upload->asset->contains('<script') != -1;
+  return $self->_validate_upload_p($upload)->then(sub {
+    my %meta = (filename => $upload->filename);
+    $meta{id}         = $self->param('id')         if defined $self->param('id');
+    $meta{write_only} = $self->param('write_only') if defined $self->param('write_only');
 
-  my %meta = (filename => $upload->filename);
-  $meta{id}         = $self->param('id')         if defined $self->param('id');
-  $meta{write_only} = $self->param('write_only') if defined $self->param('write_only');
+    my $asset = $upload->asset;
+    $asset = $asset->to_file unless $asset->is_file;
 
-  my $asset = $upload->asset;
-  $asset = $asset->to_file unless $asset->is_file;
+    # The iPhone uploads every photo as "image.jpg"
+    if ($meta{filename} =~ /^image.jpe?g$/i) {
+      my $n = time % 10000;
+      $meta{filename} = "IMG_$n.jpg";
+    }
 
-  # The iPhone uploads every photo as "image.jpg"
-  if ($meta{filename} =~ /^image.jpe?g$/i) {
-    my $n = time % 10000;
-    $meta{filename} = "IMG_$n.jpg";
-  }
-
-  return $self->_file(%meta, asset => $asset, user => $self->backend->user)
-    ->save_p->then(sub { $self->render(openapi => {files => [shift]}) });
+    return $self->_file(%meta, asset => $asset, user => $self->backend->user)->save_p;
+  })->then(sub {
+    return $self->render(openapi => {files => [shift]});
+  });
 }
 
 sub _file { shift->app->config('file_class')->new(@_) }
+
+sub _validate_upload_p {
+  my ($self, $upload) = @_;
+  state $RULES = {svg => qr{<script\b|\bjavascript\W|\son\w+=}i};
+
+  return Mojo::Promise->reject('Cannot upload file without extension.')
+    unless my $ext = $upload->filename =~ m!\.(\w+)$!i && lc $1;
+  return Mojo::Promise->resolve unless my $re = $RULES->{$ext};
+
+  return Mojo::IOLoop->subprocess->run_p(sub {
+    die {message => "Uploaded $ext looks like a xss attack.", status => 400}
+      if $upload->asset->slurp =~ $re;
+  });
+}
 
 1;
 

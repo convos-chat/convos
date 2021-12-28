@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+6.47 Not Released
+ - Add more rules for potentially evil svg files
+   Contributor: KhanhCM
+
 6.46 2021-12-28T11:27:00+0900
  - Using WHOIS instead of ISON to check if a user is online #360
  - Presenting WHOIS information in conversation #360
