@@ -86,7 +86,8 @@ subtest 'embedded image' => sub {
     ->header_is('Content-Type' => 'image/jpeg')->header_exists_not('Content-Disposition');
 };
 
-subtest 'binary' => sub {
+subtest 'attachment' => sub {
+  note 'binary';
   $t->post_ok('/api/files', form => {file => {file => 't/data/binary.bin'}})->status_is(200);
   my $fid  = $t->tx->res->json('/files/0/id');
   my $url  = $t->tx->res->json('/files/0/url');
@@ -94,6 +95,28 @@ subtest 'binary' => sub {
   $t->get_ok("/file/1/$fid")->header_is('Cache-Control', 'max-age=86400')
     ->header_is('Content-Disposition', 'attachment; filename="binary.bin"')
     ->header_is('Content-Type' => 'application/octet-stream');
+
+  note 'html';
+  $t->post_ok('/api/files', form => {file => {file => 't/data/markup.html'}})->status_is(200);
+  $fid = $t->tx->res->json('/files/0/id');
+  $t->get_ok("/file/1/$fid.html")
+    ->header_is('Content-Disposition', 'attachment; filename="markup.html"')
+    ->header_is('Content-Type' => 'text/html;charset=UTF-8')->content_like(qr{^<!DOCTYPE html>});
+  $t->get_ok("/file/1/$fid")->header_is('Content-Disposition', undef)
+    ->header_is('Content-Type' => 'text/html;charset=UTF-8')->text_is('h1', 'markup.html');
+  like $t->tx->res->dom->at('div.le-paste'), qr{&lt;!DOCTYPE}, 'embedded and escaped html';
+
+  note 'xhtml';
+  $t->post_ok('/api/files', form => {file => {file => 't/data/markup.xhtml'}})->status_is(200);
+  $fid = $t->tx->res->json('/files/0/id');
+  $t->get_ok("/file/1/$fid.xhtml")
+    ->header_is('Content-Disposition', 'attachment; filename="markup.xhtml"')
+    ->header_is('Content-Type' => 'application/xhtml+xml')
+    ->content_like(qr{^<!DOCTYPE html PUBLIC});
+  $t->get_ok("/file/1/$fid")->header_is('Content-Disposition', undef)
+    ->header_is('Content-Type' => 'text/html;charset=UTF-8')->text_is('h1', 'markup.xhtml');
+  like $t->tx->res->dom->at('div.le-paste'), qr{&lt;!DOCTYPE html PUBLIC},
+    'embedded and escaped xhtml';
 };
 
 subtest 'svg with javascript' => sub {
@@ -143,7 +166,7 @@ subtest 'list' => sub {
     ->json_hasnt('/prev')->json_has('/files/4')->json_has('/files/0/name')->json_has('/files/0/id')
     ->json_like('/files/0/saved', qr{^\d+-\d+-\d+T})->json_has('/files/0/size');
   my @ids = map { $_->{id} } $files->();
-  is @ids, 14, 'got all files';
+  is @ids, 16, 'got all files';
 
   note 'unknown';
   $t->get_ok('/api/files?limit=1&after=unknown')->status_is(200)->json_is('/files', [])

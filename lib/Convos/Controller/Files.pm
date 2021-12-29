@@ -4,12 +4,14 @@ use Mojo::Base 'Mojolicious::Controller';
 sub get {
   my $self = shift;
   my $user = $self->app->core->get_user_by_uid($self->stash('uid'));
-  my $file = $self->_file(id => $self->stash('fid'), user => $user, types => $self->app->types);
+  my $file = $self->_file(id => $self->stash('fid'), user => $user);
 
   # Make sure we don't get 501 Not implemented if this is an API request
   $self->stash(handler => 'ep', openapi => 'Should never be rendered.');
 
-  state $type_can_be_embedded = qr{^(application/javascript|application/json|image|text)};
+  state $type_can_be_embedded
+    = qr{^(application/javascript|application/(json|xhtml|xml)|image|text)};
+  state $type_can_be_viewed = qr{^(application/javascript|audio/|image/|text/plain|video/)};
 
   return $self->reply->not_found unless $file->user;    # invalid uid
   return $file->load_p->then(sub {
@@ -25,7 +27,7 @@ sub get {
 
     $h->content_type($ct);
     $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"])
-      unless $ct =~ m!$type_can_be_embedded!;
+      unless $ct =~ m!$type_can_be_viewed!;
     return $self->reply->asset($file->asset);
   });
 }

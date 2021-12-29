@@ -2,6 +2,9 @@ Revision history for perl distribution Convos
 
 6.48 Not Released
  - Fix catching invalid nick change #628
+ - Add more rules for files with Content-Disposition
+   Contributor: Pocas
+   Reference: https://huntr.dev/bounties/ae424798-de01-4972-b73b-2db674f82368/
 
 6.47 2021-12-28T12:32:00+0900
  - Add more rules for potentially evil svg files

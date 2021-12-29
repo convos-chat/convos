@@ -28,9 +28,9 @@ has path => sub {
   return $self->user->core->home->child(@uri);
 };
 
-has saved      => sub { Mojo::Date->new->to_datetime };
-has types      => sub { Mojolicious::Types->new };
-has user       => undef;
+has saved => sub { Mojo::Date->new->to_datetime };
+has types => sub { state $types = Mojolicious::Types->new->type(xhtml => 'application/xhtml+xml') };
+has user  => undef;
 has write_only => sub {false};
 
 sub handle_message_to_paste_p {
