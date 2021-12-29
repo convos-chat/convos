@@ -1,9 +1,10 @@
 msgid ""
-msgstr "POT-Creation-Date: 2021-01-14 00:33:00+0100"
-
-#: assets/components/ConversationSettings.svelte:144
-msgid " "
-msgstr " "
+msgstr ""
+"POT-Creation-Date: 2021-01-14 00:33:00+0100\n"
+"PO-Revision-Date: 2021-12-29 14:28:40+0100\n"
+"Last-Translator: SerHack <27734319+serhack@users.noreply.github.com>\n"
+"Language-Team: Italiano <lang-it@convos.chat>\n"
+"Plural-Forms: ;\n"
 
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
@@ -1213,6 +1214,9 @@ msgstr "Utenti"
 #: assets/page/Help.svelte:54
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Usando \"*\" intorno a del testo, lo convertirà in *corsivo*, **grassetto** o ***grassetto corsivo***."
+
+msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+msgstr "Utilizar \"\*\" alrededor de un texto, lo convertirá en *cursivas*, **negritas** o ***negritas cursivas***."
 
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."

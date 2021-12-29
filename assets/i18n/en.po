@@ -1,9 +1,10 @@
 msgid ""
-msgstr "POT-Creation-Date: 2020-07-02 11:34:58+0900"
-
-#: assets/components/ConversationSettings.svelte:144
-msgid " "
-msgstr " "
+msgstr ""
+"POT-Creation-Date: 2020-07-02 11:34:58+0900\n"
+"PO-Revision-Date: 2021-12-30 08:13:00+0900\n"
+"Last-Translator: Jan Henning Thorsen <jhthorsen@cpan.org>\n"
+"Language-Team: English <lang-en@convos.chat>\n"
+"Plural-Forms: ;\n"
 
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
@@ -1021,9 +1022,6 @@ msgstr "Source code"
 #: assets/components/ChatInput.svelte:199
 msgid "Start a video conference"
 msgstr "Start a video conference"
-
-msgid "Start video conference"
-msgstr "Start video conference"
 
 #: assets/page/Fallback.svelte:30
 msgid "Started Convos."

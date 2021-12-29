@@ -60,12 +60,12 @@ sub _load_dictionaries {
     next unless $file =~ m!([\w-]+)\.po$!;
     my $lang = $1;
     next if $load_lang and $load_lang ne $lang;
-    _parse_po_file($file->realpath,
-      sub { $dictionaries->{$lang}{$_[0]->{msgid}} = $_[0]->{msgstr} });
-    my $l = $dictionaries->{$lang}{_l} = $lang;
-    my $n = $dictionaries->{$lang}{_n} = int(keys %{$dictionaries->{$lang}}) - 1;
+    my $dictionary = $dictionaries->{$lang} ||= {};
+    _parse_po_file($file->realpath, sub { $dictionary->{$_[0]->{msgid}} = $_[0]->{msgstr} });
+    my $l = $dictionary->{_l} = $lang;
+    my $n = $dictionary->{_n} = int(keys %$dictionary) - 1;
 
-    for (split /\n/, $dictionaries->{$lang}{''} // '') {
+    for (split /\n/, $dictionary->{''} // '') {
       my ($key, $value) = split /:\s+/, $_, 2;
       $value =~ s!;\s*$!!;
       $key   =~ s!-!_!g;

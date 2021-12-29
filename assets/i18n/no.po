@@ -1,9 +1,10 @@
 msgid ""
-msgstr "POT-Creation-Date: 2021-01-14 00:52:00+0100"
-
-#: assets/components/ConversationSettings.svelte:144
-msgid " "
-msgstr " "
+msgstr ""
+"POT-Creation-Date: 2021-01-14 00:52:00+0100\n"
+"PO-Revision-Date: 2021-01-19 13:20:00+0100\n"
+"Last-Translator: Marcus Ramberg <marcus.ramberg@gmail.com>\n"
+"Language-Team: Norsk <lang-no@convos.chat>\n"
+"Plural-Forms: ;\n"
 
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
@@ -564,9 +565,6 @@ msgstr "Kopierte invitasjonslenke"
 msgid "Invite or recover password"
 msgstr "Inviter eller nullstill passord"
 
-msgid "It is also possible to use `\"from:some_nick\"` to filter out messages from a given user."
-msgstr "Det er også mulig å bruke `\"from:some_nick\"` for å filtrere meldinger fra en spesifikke bruker."
-
 #: partial/noscript.html.ep:3
 #: templates/partial/noscript.html.ep:3
 msgid "Javascript is disabled"
@@ -1024,9 +1022,6 @@ msgstr "Kildekode"
 #: assets/components/ChatInput.svelte:199
 msgid "Start a video conference"
 msgstr "Start a video conference"
-
-msgid "Start video conference"
-msgstr "Start videokonferanse"
 
 #: assets/page/Fallback.svelte:30
 msgid "Started Convos."

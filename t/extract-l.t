@@ -67,12 +67,13 @@ while (<$CAPTURED>) {
   push @{$lexicons{$3}{comments}}, "$file:$line";
 }
 
-note 'Parse existing files in ./assets/i18n';
 for my $po_file (path(qw(assets i18n))->list->each) {
   next unless $po_file =~ m!([\w-]+)\.po$!;
   my $lang       = $1;
   my $translated = 0;
   my %has;
+
+  note "Parse $po_file";
   Convos::Plugin::I18N::_parse_po_file(
     $po_file,
     sub {
@@ -85,6 +86,7 @@ for my $po_file (path(qw(assets i18n))->list->each) {
     },
   );
 
+  note "Generate $po_file";
   open my $PO, '>:encoding(UTF-8)', $po_file or die $!;
   for my $entry (sort { $a->{msgid} cmp $b->{msgid} } values %lexicons) {
     next if blacklisted($entry->{msgid});
@@ -95,11 +97,14 @@ for my $po_file (path(qw(assets i18n))->list->each) {
       printf $PO qq[#: %s\n], $_ for sort { $a cmp $b } uniq @{$entry->{comments}};
     }
     else {
-      note "Translation ($entry->{msgid}) not found." if $ENV{TEST_I18N} > 1;
+      state $reported = {};
+      note "Translation ($entry->{msgid}) not found."
+        if $ENV{TEST_I18N} > 1 and !$reported->{$entry->{msgid}}++;
       $translated--;
     }
-    printf $PO qq[msgid "%s"\n],    escape($entry->{msgid});
-    printf $PO qq[msgstr "%s"\n\n], escape($entry->{msgstr});
+
+    printf $PO qq[msgid %s\n],    escape($entry->{msgid});
+    printf $PO qq[msgstr %s\n\n], escape($entry->{msgstr});
   }
 
   my $pct = int($translated / $total * 100);
@@ -114,6 +119,7 @@ sub blacklisted {
   return 1 if $_[0] =~ m!\.(jpe?g|t|txt)\b!;
   return 1 if $_[0] =~ m!^#\S*$!;
   return 1 if $_[0] =~ m!^https?:!;
+  return 1 if $_[0] =~ m!^\W+$!;               # Skip " ", but not "" (the header entry)
 
   $_[0] eq $_ and return 1
     for ('convos-chat', 'base_url', 'contact', 'existing_user',
@@ -126,5 +132,6 @@ sub blacklisted {
 sub escape {
   local $_ = "$_[0]";
   s!"!\\"!g;
-  return $_;
+  return qq("$_") unless /\n/;
+  return sprintf qq(""\n%s), join "\n", map {qq("$_\\n")} split /\n/;
 }
