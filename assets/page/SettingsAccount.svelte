@@ -36,6 +36,7 @@ form.set({
   highlightKeywords: user.highlightKeywords.join(', '),
   ignoreStatuses: user.ignoreStatuses,
   lang: i18n.lang,
+  volume: notify.volume,
   wantNotifications: notify.wantNotifications,
 });
 
@@ -55,7 +56,7 @@ function saveAccount() {
 
   if (!$form.wantNotifications) form.set({wantNotifications: false});
   if ($form.wantNotifications) notify.requestDesktopAccess();
-  notify.update(form.get(['wantNotifications']));
+  notify.update(form.get(['volume', 'wantNotifications']));
 
   if (colorSchemeReadonly) form.set({colorScheme: 'auto'});
   themeManager.update(form.get(['activeTheme', 'colorScheme', 'compactDisplay']));
@@ -84,11 +85,22 @@ function saveAccount() {
       <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
     <p class="help">{@html $lmd('Leave this unchecked, and hit "Save" to disable notifications.')}</p>
+    <div class="inputs-side-by-side">
+      <SelectField name="volume" form="{form}" options="{notify.volumeOptions}">
+        <span slot="label">{$l('Notification sound volume')}</span>
+      </SelectField>
+      <div class="flex-basis-30">
+        <Button icon="play" disabled="{!parseInt($form.volume, 10)}" type="button" on:click="{() => notify.play({volume: $form.volume})}"><span>{$l('Test')}</span></Button>
+      </div>
+    </div>
     <Checkbox name="ignoreStatuses" form="{form}">
       <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
     <Checkbox name="expandUrlToMedia" form="{form}">
       <span slot="label">{$l('Expand URL to media')}</span>
+    </Checkbox>
+    <Checkbox name="compactDisplay" form="{form}">
+      <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
     <SelectField name="activeTheme" form="{form}" options="{themeManager.themeOptions}">
       <span slot="label">{$l('Theme')}</span>
@@ -96,9 +108,6 @@ function saveAccount() {
     <SelectField name="colorScheme" form="{form}" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}">
       <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
-    <Checkbox name="compactDisplay" form="{form}">
-      <span slot="label">{$l('Enable compact message display')}</span>
-    </Checkbox>
     <SelectField name="lang" form="{form}" options="{$i18n.languageOptions}">
       <span slot="label">{$l('Language')} <Icon name="globe"/></span>
     </SelectField>

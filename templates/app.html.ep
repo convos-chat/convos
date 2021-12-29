@@ -33,3 +33,4 @@
 
 %= include 'partial/noscript'
 %= include 'partial/app_footer'
+%= include 'partial/notification'

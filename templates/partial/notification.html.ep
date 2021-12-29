@@ -1,0 +1,3 @@
+<audio muted class="non-interactive" id="audio_notification">
+  <source src="<%= url_for '/sounds/536748__egomassive__phone.ogg' %>" type="audio/ogg">
+</audio>

@@ -4,10 +4,20 @@ export default class Notify extends Reactive {
   constructor() {
     super();
     this.Notification = window.Notification || {permission: 'denied'};
+    this.prop('persist', 'volume', 0); // {0..100}
     this.prop('persist', 'notificationCloseDelay', 5000);
     this.prop('persist', 'wantNotifications', this.Notification.requestPermission ? null : false);
     this.prop('ro', 'appHasFocus', () => document.hasFocus());
+    this.prop('ro', 'volumeOptions', [['0', 'Muted'], ['25', 'Low'], ['50', 'Medium'], ['100', 'Max']]);
     this.prop('rw', 'desktopAccess', this.Notification.permission);
+  }
+
+  play(params = this) {
+    const el = document.getElementById('audio_notification');
+    if (!el) return;
+    el.muted = false;
+    el.volume = parseInt(params.volume, 10) / 100;
+    el.play();
   }
 
   requestDesktopAccess() {
@@ -19,6 +29,7 @@ export default class Notify extends Reactive {
   show(message, params = {}) {
     if (!params.title) params.title = document.title;
     if (!this.wantNotifications) return this._showInConsole(message, params);
+    if (this.volume) this.play();
     if (this.desktopAccess != 'granted') return this.showInApp(message, params);
 
     const notification = new Notification(params.title, {...params, body: message});
