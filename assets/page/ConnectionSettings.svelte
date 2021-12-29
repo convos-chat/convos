@@ -4,6 +4,7 @@ import ConnectionForm from '../components/ConnectionForm.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import {l} from '../store/I18N';
+import {nbsp} from '../js/util';
 
 export let connection_id = 'add';
 export const title = connection_id == 'add' ? 'Add connection' : 'Edit connection';
@@ -11,7 +12,10 @@ export const title = connection_id == 'add' ? 'Add connection' : 'Edit connectio
 
 <ChatHeader>
   <h1>{connection_id == 'add' ? $l('Add connection') : $l('Edit connection')}</h1>
-  <Link href="/settings/connections" class="btn-hallow is-active" data-tooltip="{$l('See all connections')}"><Icon name="list"/><Icon name="times"/></Link>
+  <Link href="/settings/connections" class="btn-hallow has-tooltip is-active">
+    <Icon name="list"/><Icon name="times"/>
+    <span class="tooltip is-left">{nbsp($l('See all connections'))}</span>
+  </Link>
 </ChatHeader>
 
 <main class="main">

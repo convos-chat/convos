@@ -1,0 +1,23 @@
+@use '../abstracts/tooltip';
+
+.has-tooltip {
+  position: relative;
+
+  &:focus > .tooltip,
+  &:hover > .tooltip {
+    @include tooltip.visible;
+  }
+}
+
+.tooltip {
+  @include tooltip.base;
+
+  &.is-above {
+    top: -1px;
+    transform: translateY(-100%);
+  }
+
+  &.is-left {
+    right: -2px;
+  }
+}

@@ -15,7 +15,6 @@ export {className as class};
 export let disabled = false;
 export let icon = '';
 export let op = new Operation({api: false, id: ''});
-export let tooltip = '';
 export let type = '';
 
 $: $op.is('loading') && loadingState(true);
@@ -31,7 +30,7 @@ function loadingState(loading) {
 }
 </script>
 
-<button class="{classNames.join(' ')}" class:has-tooltip="{!!tooltip.length}" disabled="{disabledProp}" {type} data-tooltip="{tooltip}" on:click>
+<button class="{classNames.join(' ')}" disabled="{disabledProp}" type="{type}" on:click>
   <Icon {animation} name="{icon}"/>
   <slot/>
 </button>

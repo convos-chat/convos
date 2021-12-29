@@ -5,6 +5,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onMount} from 'svelte';
+import {nbsp} from '../js/util';
 import {l} from '../store/I18N';
 
 export const title = 'Notifications';
@@ -38,7 +39,10 @@ onMount(async () => {
 
     <div class="{message.className}" on:click="{gotoConversation}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
-      <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
+      <div class="message__ts has-tooltip">
+        <span>{message.ts.format('%H:%M')}</span>
+        <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
+      </div>
       <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</a>
       <div class="message__text">{@html message.markdown}</div>
     </div>

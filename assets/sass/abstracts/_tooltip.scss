@@ -1,22 +1,22 @@
-@mixin popup {
+@mixin base {
   font-size: 0.9rem;
   font-weight: normal;
   line-height: 1.1em;
   border-radius: 3px;
-  padding: 3px;
+  padding: 3px 5px;
   opacity: 0;
   display: block;
   position: absolute;
-  width: 1px;
+  max-width: 0;
   overflow: hidden;
-  transition: opacity 250ms ease-in-out;
+  transition: all 350ms ease-in-out;
   pointer-events: none;
 }
 
-@mixin popup_visible {
+@mixin visible {
   background: var(--tooltip-background);
   color: var(--tooltip-color);
   opacity: 0.85;
-  width: auto;
+  max-width: 300px;
   z-index: 1000;
 }

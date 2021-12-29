@@ -14,7 +14,7 @@ import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
-import {modeClassNames} from '../js/util';
+import {modeClassNames, nbsp} from '../js/util';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
@@ -164,12 +164,15 @@ function showPopover(e) {
 
     <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{onMessageClick}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
-      <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
+      <div class="message__ts has-tooltip">
+        <span>{message.ts.format('%H:%M')}</span>
+        <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
+      </div>
       <a href="#popover:{message.id}" on:blur="{showPopover}" on:focus="{showPopover}" on:mouseover="{showPopover}" on:mouseout="{showPopover}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.waitingForResponse === false}
-          <a href="#action:remove" class="pull-right has-tooltip" data-tooltip="{$l('Remove')}"><Icon name="times-circle"/></a>
-          <a href="#action:resend" class="pull-right has-tooltip " data-tooltip="{$l('Resend')}"><Icon name="sync-alt"/></a>
+          <a href="#action:remove" class="pull-right has-tooltip"><Icon name="times-circle"/><span class="tooltip">{$l('Remove')}</span></a>
+          <a href="#action:resend" class="pull-right has-tooltip "><Icon name="sync-alt"/><span class="tooltip">{$l('Resend')}</span></a>
         {:else if !message.waitingForResponse && message.details}
           <a href="#action:details:{message.index}"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}

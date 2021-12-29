@@ -39,6 +39,7 @@ function clearFilter() {
 function conversationClassNames(connection, conversation) {
   const cn = [conversation.conversation_id ? 'for-conversation' : 'for-connection'];
   if (conversation.frozen || connection.state != 'connected') cn.push('is-frozen');
+  if (conversation.frozen) cn.push('has-tooltip');
   if (conversation.errors) cn.push('has-errors');
   if (conversation.notifications) cn.push('has-notifications');
   return cn.join(' ');
@@ -175,6 +176,7 @@ function renderUnread(conversation, max = 60) {
       <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}">
         <Icon name="network-wired"/>
         <span>{connection.name || connection.connection_id}</span>
+        <span class="tooltip">{$l(connection.frozen)}</span>
         <b class="badge" hidden="{!connection.unread}">{renderUnread(connection)}</b>
       </Link>
       {#each connection.conversations.toArray() as conversation}
@@ -185,6 +187,7 @@ function renderUnread(conversation, max = 60) {
             <Icon name="{conversation.is('private') ? 'user' : 'user-friends'}"/>
           {/if}
           <span>{conversation.name}</span>
+          <span class="tooltip">{$l(conversation.frozen)}</span>
           <b class="badge" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
         </Link>
       {/each}

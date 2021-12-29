@@ -7,6 +7,7 @@ import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
+import {nbsp} from '../js/util';
 import {route} from '../store/Route';
 
 export const title = 'Search';
@@ -39,7 +40,10 @@ function search(msg) {
 
 <ChatHeader>
   <h1>{$l(conversation.name)}</h1>
-  <Link href="/search" class="btn-hallow {hasSearch ? 'is-active' : ''}" on:click="{maybeClear}"><Icon name="search"/><Icon name="times"/></Link>
+  <Link href="/search" class="btn-hallow {hasSearch ? 'has-tooltip is-active' : ''}" on:click="{maybeClear}">
+    <Icon name="search"/><Icon name="times"/>
+    <span class="tooltip is-left">{$l('Clear')}</span>
+  </Link>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
@@ -61,7 +65,10 @@ function search(msg) {
 
     <div class="{message.className}" on:click="{gotoConversation}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
-      <div class="message__ts has-tooltip" data-content="{message.ts.format('%H:%M')}"><div>{message.ts.toLocaleString()}</div></div>
+      <div class="message__ts has-tooltip">
+        <span>{message.ts.format('%H:%M')}</span>
+        <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
+      </div>
       <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</a>
       <div class="message__text">{@html message.markdown}</div>
     </div>

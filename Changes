@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 6.48 Not Released
  - Fix catching invalid nick change #628
+ - Fix showing tooltips on desktop
  - Add notification sound #589
    Contributor: egomassive
    Reference: https://freesound.org/people/egomassive/sounds/536748/

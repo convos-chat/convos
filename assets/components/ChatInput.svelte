@@ -3,7 +3,7 @@ import CommandHistory from '../store/CommandHistory';
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {chatHelper, videoWindow} from '../js/chatHelpers';
-import {extractErrorMessage, is} from '../js/util';
+import {extractErrorMessage, is, nbsp} from '../js/util';
 import {fly} from 'svelte/transition';
 import {generateWriteable, viewport} from '../store/writable';
 import {getContext} from 'svelte';
@@ -33,6 +33,7 @@ $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
+$: tooltip = conversation.is('search') ? $l('Search') : $l('Send');
 $: commandHistory.update({conversation: $conversation});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
@@ -167,9 +168,15 @@ function uploadFiles(e) {
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
   {#if $viewport.nColumns > 1 && $conversation.is('conversation')}
-    <label for="upload_files" class="btn-hallow upload"><Icon name="cloud-upload-alt"/></label>
+    <label for="upload_files" class="btn-hallow upload has-tooltip">
+      <Icon name="cloud-upload-alt"/>
+      <span class="tooltip is-above is-left">{nbsp($l('Upload a file'))}</span>
+    </label>
     {#if $user.videoService}
-      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn-hallow has-tooltip" tooltip="{$l('Start a video conference')}"><Icon name="{$videoWindow ? 'video-slash' : 'video'}"/></a>
+      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn-hallow has-tooltip">
+        <Icon name="{$videoWindow ? 'video-slash' : 'video'}"/>
+        <span class="tooltip is-above is-left">{nbsp($l('Start a video conference'))}</span>
+      </a>
     {/if}
   {/if}
 
@@ -180,7 +187,10 @@ function uploadFiles(e) {
     </a>
   {/if}
 
-  <button type="buttton" on:click="{selectOptionOrSendMessage}" class="btn-hallow chat-input__send"><Icon name="{sendIcon}"/></button>
+  <button type="buttton" on:click="{selectOptionOrSendMessage}" class="btn-hallow has-tooltip chat-input__send">
+    <Icon name="{sendIcon}"/>
+    <span class="tooltip is-above is-left">{nbsp($l(tooltip))}</span>
+  </button>
 
   {#if $activeChatMenu == 'actions' && conversation.is('conversation')}
     <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenu.toggle}">

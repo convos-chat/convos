@@ -16,6 +16,7 @@
  * @exports is
  * @exports loadScript
  * @exports modeClassNames
+ * @exports nbsp
  * @exports q
  * @exports regexpEscape
  * @exports removeChildNodes
@@ -327,6 +328,17 @@ export function loadScript(src) {
  */
 export function modeClassNames(modes) {
   return Object.keys(modes).filter(m => modes[m]).sort().map(m => { return 'has-mode-' + m }).join(' ');
+}
+
+/**
+ * Replaces spaces with nbsp characters.
+ *
+ * @param {String} str The string with whitespace
+ * @param {String} space The space character
+ * @returns {String} String without spaces
+ */
+export function nbsp(str, space = '\u00a0') {
+  return str.replace(/\s/g, space);
 }
 
 /**

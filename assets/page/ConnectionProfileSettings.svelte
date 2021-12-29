@@ -9,10 +9,10 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {createForm} from '../store/form';
 import {getContext, onMount, tick} from 'svelte';
-import {l, lmd} from '../store/I18N';
+import {l} from '../store/I18N';
+import {nbsp, str2array} from '../js/util';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
-import {str2array} from '../js/util';
 
 export let profile_id = 'add';
 export const title = profile_id == 'add' ? 'Add connection profile' : 'Edit connection profile';
@@ -53,7 +53,10 @@ async function saveConnectionProfile() {
 
 <ChatHeader>
   <h1>{profile_id == 'add' ? $l('Add connection profile') : $l('Edit connection profile')}</h1>
-  <Link href="/settings/connections" class="btn-hallow is-active" data-tooltip="{$l('See all connection profiles')}"><Icon name="list"/><Icon name="times"/></Link>
+  <Link href="/settings/connections" class="btn-hallow has-tooltip is-active">
+    <Icon name="list"/><Icon name="times"/>
+    <span class="tooltip is-left">{nbsp($l('See all connection profiles'))}</span>
+  </Link>
 </ChatHeader>
 
 <main class="main">

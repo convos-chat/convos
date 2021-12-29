@@ -8,7 +8,7 @@ import OperationStatusRow from '../components/OperationStatusRow.svelte';
 import SimpleField from '../components/form/SimpleField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
-import {copyToClipboard, str2array} from '../js/util';
+import {copyToClipboard, nbsp, str2array} from '../js/util';
 import {createForm} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
@@ -19,7 +19,6 @@ export let title = 'Users';
 
 const api = getContext('api');
 const form = createForm();
-const user = getContext('user');
 
 const deleteUserOp = api('deleteUser');
 const getUsersOp = api('getUsers');
@@ -76,7 +75,10 @@ function updateUser() {
 
 <ChatHeader>
   <h1>{$l($form.uid ? 'Account' : 'Users')}</h1>
-  <Link href="/settings/users" class="btn-hallow {$form.uid ? 'is-active' : ''}" data-tooltip="{$l('See all users')}"><Icon name="list"/><Icon name="times"/></Link>
+  <Link href="/settings/users" class="btn-hallow has-tooltip {$form.uid ? 'is-active' : ''}">
+    <Icon name="list"/><Icon name="times"/>
+    <span class="tooltip is-left">{nbsp($l('See all users'))}</span>
+  </Link>
 </ChatHeader>
 
 <main class="main">

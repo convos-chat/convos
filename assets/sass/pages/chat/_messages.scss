@@ -120,11 +120,6 @@
   a.pull-right {
     padding-left: 0.3rem;
     position: relative;
-
-    &.has-tooltip[data-tooltip]:after {
-      position: absolute;
-      right: 0;
-    }
   }
 
   .emoji {
@@ -254,6 +249,10 @@
 
   > div {
     white-space: pre;
+  }
+
+  > .tooltip {
+    right: 0;
   }
 
   &:focus > div,
