@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.48 Not Released
+6.48 2021-12-29T19:40:00+0900
  - Fix catching invalid nick change #628
  - Fix showing tooltips on desktop
  - Add notification sound #589
