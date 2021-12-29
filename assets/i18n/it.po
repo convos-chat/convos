@@ -107,7 +107,7 @@ msgstr "Email dell'amministratore"
 #: assets/components/ConnectionForm.svelte:110
 #: assets/page/ConnectionProfileSettings.svelte:92
 msgid "Advanced settings"
-msgstr "Advanced settings"
+msgstr "Impostazioni avanzate"
 
 #: assets/page/Help.svelte:62
 msgid "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
@@ -115,7 +115,7 @@ msgstr "Ogni messaggio che inizia con a-z è preceduto da \"`/quote`\", quando s
 
 #: assets/page/Help.svelte:33
 msgid "Any other combination"
-msgstr "Any other combination"
+msgstr "Qualsiasi altra combinazione"
 
 #: assets/page/Login.svelte:82
 msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
@@ -123,11 +123,11 @@ msgstr "Siccome sei il primo utente, non avrai bisogno di alcun link per l'invit
 
 #: assets/components/ChatInput.svelte:203
 msgid "Attach a file"
-msgstr "Attach a file"
+msgstr "Allega un file"
 
 #: assets/components/ConnectionForm.svelte:128
 msgid "Authentication settings"
-msgstr "Authentication settings"
+msgstr "Impostazioni di autenticazione"
 
 #: assets/page/Help.svelte:37
 msgid "Autocomplete"
@@ -159,7 +159,7 @@ msgstr "Tracker di problemi o bug"
 
 #: assets/page/SettingsFiles.svelte:127
 msgid "By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time."
-msgstr "By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time."
+msgstr "Eliminado i files, tu e chiunque altro con il link *dovrebbe* perdere l'accesso al file: una robusta cache nei browser o eventuali proxies tra Convos e gli altri utenti potrebbero mantenere ancora il file per un po' di tempo."
 
 #: assets/page/SettingsAdmin.svelte:73
 msgid "Can be changed if you want to add a touch of your organization."
@@ -179,11 +179,11 @@ msgstr "Chat"
 #: assets/page/SettingsAdmin.svelte:108
 #: assets/page/SettingsAdmin.svelte:99
 msgid "Check for updates"
-msgstr "Check for updates"
+msgstr "Controlla nuovi aggiornamenti"
 
 #: assets/page/Search.svelte:45
 msgid "Clear"
-msgstr "Clear"
+msgstr "Pulisci"
 
 msgid "Clicking on the icon next to the conversation name will take you to settings."
 msgstr "Premendo l'icona vicino al nome della conversazione, andrai nelle impostazioni."
@@ -194,7 +194,7 @@ msgstr "Schema dei colori"
 
 #: assets/components/ConnectionForm.svelte:172
 msgid "Confirm connection ID"
-msgstr "Confirm connection ID"
+msgstr "Conferma l'ID della connessione"
 
 #: assets/page/SettingsAdminUsers.svelte:109
 msgid "Confirm email"
@@ -221,17 +221,17 @@ msgstr "Non è stato possibile trovare la connessione."
 
 #: assets/page/Connections.svelte:54
 msgid "Connection profiles"
-msgstr "Connection profiles"
+msgstr "Profili per la connessione"
 
 #: assets/page/Connections.svelte:55
 msgid "Connection profiles are used to set up global values for every connection that connect to the same host."
-msgstr "Connection profiles are used to set up global values for every connection that connect to the same host."
+msgstr "I profili per la connessione sono utilizzati per impostare valori globali per ogni connessione che si connette allo stesso host."
 
 #: assets/components/ChatSidebar.svelte:212
 #: assets/page/Connections.svelte:25
 #: assets/page/Connections.svelte:29
 msgid "Connections"
-msgstr "Connections"
+msgstr "Connessioni"
 
 #: app.html.ep:29
 #: assets/page/Fallback.svelte:37
@@ -255,7 +255,7 @@ msgstr "Conversazione"
 
 #: assets/components/ConversationSettings.svelte:141
 msgid "Conversation modes"
-msgstr "Conversation modes"
+msgstr "Modalità di conversazione"
 
 #: assets/components/ConnectionForm.svelte:99
 #: assets/page/ConnectionProfileSettings.svelte:75
@@ -279,7 +279,7 @@ msgstr "Convos"
 #: app.html.ep:18
 #: templates/app.html.ep:18
 msgid "Convos is the simplest way to use IRC and it is always online."
-msgstr "Convos è il modo più semplice di usare IRC ed è sempre online."
+msgstr "Convos è il modo più semplice per usare IRC ed è sempre online."
 
 #: assets/page/SettingsAdmin.svelte:68
 msgid "Convos settings"
@@ -291,7 +291,7 @@ msgstr "Convos supporta alcuni metodi per formattare il testo:"
 
 #: assets/page/SettingsAdmin.svelte:104
 msgid "Convos v%1 is available."
-msgstr "Convos v%1 is available."
+msgstr "Convos v%1 è disponibile."
 
 #: assets/page/SettingsAdminUsers.svelte:129
 msgid "Copy and send the link to your *existing* user."
@@ -330,7 +330,7 @@ msgstr "Default"
 
 #: assets/page/ConnectionProfileSettings.svelte:82
 msgid "Default connection"
-msgstr "Default connection"
+msgstr "Connessione di default"
 
 msgid "Default connection URL"
 msgstr "URL di connessione di default"
@@ -344,7 +344,7 @@ msgstr "Rimuovi"
 
 #: assets/page/SettingsFiles.svelte:122
 msgid "Delete selected files"
-msgstr "Delete selected files"
+msgstr "Rimuovi i file selezionati"
 
 #: assets/page/SettingsAdminUsers.svelte:105
 #: assets/page/SettingsAdminUsers.svelte:113
@@ -353,7 +353,7 @@ msgstr "Rimuovi utente"
 
 #: assets/page/Help.svelte:84
 msgid "Demo error pages"
-msgstr "Pagine \"demo\" degli errori "
+msgstr "Pagine \"prototipo\" degli errori "
 
 #: partial/error.html.ep:16
 #: templates/partial/error.html.ep:16
@@ -367,7 +367,7 @@ msgstr "Disconnesso. La tua connessione %1 può essere modificata nelle [imposta
 #: assets/page/SettingsAdmin.svelte:113
 #: assets/page/SettingsAdmin.svelte:117
 msgid "Disk usage"
-msgstr "Uso del disco"
+msgstr "Utilizzo in percentuale del disco"
 
 #: assets/page/Chat.svelte:208
 msgid "Do you want to chat with \"%1\"?"
@@ -379,7 +379,7 @@ msgstr "Vuoi creare la connessione con \"%1\"?"
 
 #: assets/page/Chat.svelte:219
 msgid "Do you want to join?"
-msgstr "Do you want to join?"
+msgstr "Vuoi unirti?"
 
 #: app.html.ep:25
 #: assets/page/Fallback.svelte:29
@@ -390,11 +390,11 @@ msgstr "Convos scaricato."
 
 #: assets/page/ConnectionSettings.svelte:14
 msgid "Edit connection"
-msgstr "Edit connection"
+msgstr "Modifica la connessione"
 
 #: assets/page/ConnectionProfileSettings.svelte:55
 msgid "Edit connection profile"
-msgstr "Edit connection profile"
+msgstr "Modifica il profilo della connessione"
 
 #: assets/page/Login.svelte:107
 #: assets/page/Login.svelte:88
@@ -448,7 +448,7 @@ msgid "Ex: superman"
 msgstr "Esempio: superman"
 
 msgid "Example: %1"
-msgstr "Example: %1"
+msgstr "Esempio: %1"
 
 #: assets/page/SettingsAccount.svelte:100
 msgid "Expand URL to media"
@@ -456,7 +456,7 @@ msgstr "Espandi URL con la preview dei media"
 
 #: assets/page/SettingsFiles.svelte:38
 msgid "File URL copied"
-msgstr "File URL copied"
+msgstr "URL del file copiato"
 
 #: assets/components/ChatSidebar.svelte:220
 #: assets/page/SettingsFiles.svelte:73
@@ -465,19 +465,19 @@ msgstr "Files"
 
 #: assets/page/Help.svelte:32
 msgid "Filter channels with unread messages."
-msgstr "Filter channels with unread messages."
+msgstr "Filtra i canali con messaggi non letti."
 
 #: assets/page/Help.svelte:34
 msgid "Filter channels, private conversations or search for a string."
-msgstr "Filter channels, private conversations or search for a string."
+msgstr "Filtra i canali, le conversazioni private oppure cerca una stringa."
 
 #: assets/page/Help.svelte:28
 msgid "Filter conversations with unread messages."
-msgstr "Filter conversations with unread messages."
+msgstr "Filtra le conversazioni con messaggi non letti."
 
 #: assets/page/Help.svelte:30
 msgid "Filter private conversations with unread messages."
-msgstr "Filter private conversations with unread messages."
+msgstr "Filtra le conversazioni private con messaggi non letti."
 
 #: assets/components/ConnectionForm.svelte:138
 msgid "Fingerprint"
@@ -489,7 +489,7 @@ msgstr "Forza la connessione di default"
 
 #: assets/page/Connections.svelte:62
 msgid "Forced"
-msgstr "Forced"
+msgstr "Forzata"
 
 #: assets/page/SettingsAdminUsers.svelte:137
 msgid "Generate link"
@@ -501,7 +501,7 @@ msgstr "Impostazioni globali"
 
 #: assets/page/Chat.svelte:241
 msgid "Go to \"[account settings](%1)\" to enable or disable notifications."
-msgstr "Go to \"[account settings](%1)\" to enable or disable notifications."
+msgstr "Vai nelle \"[impostazioni dell'account](%1)\" per abilitare o disabilitare le notifiche."
 
 #: partial/error.html.ep:26
 msgid "Go to landing page"
@@ -541,7 +541,7 @@ msgstr "Ignora i messaggi join/part"
 
 #: assets/page/Chat.svelte:268
 msgid "Information"
-msgstr "Information"
+msgstr "Informazione"
 
 #: assets/page/SettingsAdmin.svelte:121
 msgid "Inode usage"
@@ -592,11 +592,11 @@ msgstr "Lascia i campi per la password vuoti per tenere la password attuale."
 
 #: assets/components/ConnectionForm.svelte:120
 msgid "Leave this blank, unless you know what you are doing."
-msgstr "Leave this blank, unless you know what you are doing."
+msgstr "Lascia questo vuoto, salvo che tu sappia cosa stai facendo."
 
 #: assets/page/SettingsAccount.svelte:87
 msgid "Leave this unchecked, and hit \"Save\" to disable notifications."
-msgstr "Leave this unchecked, and hit \"Save\" to disable notifications."
+msgstr "Lascia questa opzione non selezionata, e premi su \"Salva\" per disabilitare le notifiche."
 
 #: partial/app_footer.html.ep:5
 #: templates/partial/app_footer.html.ep:5
@@ -634,30 +634,30 @@ msgstr "Esci"
 
 #: assets/page/ConnectionProfileSettings.svelte:101
 msgid "Max message length"
-msgstr "Max message length"
+msgstr "Massima lunghezza del messaggio"
 
 #: assets/page/ConnectionProfileSettings.svelte:97
 msgid "Max number of pasted lines"
-msgstr "Max number of pasted lines"
+msgstr "Massimo numero di linee"
 
 #: assets/page/Chat.svelte:190
 msgid "Mention"
-msgstr "Mention"
+msgstr "Menziona"
 
 #: partial/app_header.html.ep:13
 #: partial/cms_header.html.ep:11
 #: templates/partial/app_header.html.ep:13
 #: templates/partial/cms_header.html.ep:11
 msgid "Menu"
-msgstr "Menu"
+msgstr "Menù"
 
 #: assets/page/ConnectionProfileSettings.svelte:79
 msgid "Messages from these nicks will be shown in the connection conversation."
-msgstr "Messages from these nicks will be shown in the connection conversation."
+msgstr "I messaggi da questi nicks saranno visibili nella conversazione."
 
 #: assets/page/ConnectionProfileSettings.svelte:102
 msgid "Messages longer than this will be split into multiple messages."
-msgstr "Messages longer than this will be split into multiple messages."
+msgstr "Messaggi più lunghi verranno separati in più messaggi."
 
 #: assets/page/Help.svelte:21
 msgid "More information can also be found on https://convos.chat."
@@ -665,7 +665,7 @@ msgstr "Ulteriori informazioni possono essere trovate anche su https://convos.ch
 
 #: assets/page/SettingsFiles.svelte:82
 msgid "Name"
-msgstr "Name"
+msgstr "Nome"
 
 #: assets/page/Chat.svelte:162
 msgid "New messages"
@@ -674,7 +674,7 @@ msgstr "Nuovi messaggi"
 #: assets/page/SettingsFiles.svelte:115
 #: assets/page/SettingsFiles.svelte:117
 msgid "Next"
-msgstr "Next"
+msgstr "Prossimo"
 
 #: assets/page/Connections.svelte:35
 msgid "Nick"
@@ -700,7 +700,7 @@ msgstr "Nessuna conversazione"
 
 #: assets/page/SettingsFiles.svelte:99
 msgid "No files."
-msgstr "No files."
+msgstr "Nessun file."
 
 #: assets/page/Notifications.svelte:32
 msgid "No notifications."
@@ -730,7 +730,7 @@ msgstr "Parole per notifica"
 
 #: assets/page/SettingsAccount.svelte:90
 msgid "Notification sound volume"
-msgstr "Notification sound volume"
+msgstr "Volume del suono per la notifica"
 
 #: assets/components/ChatSidebar.svelte:199
 #: assets/page/Notifications.svelte:26
@@ -747,11 +747,11 @@ msgstr "Comandi di connessione"
 
 #: assets/page/ConnectionProfileSettings.svelte:115
 msgid "Only administrators can edit this section."
-msgstr "Only administrators can edit this section."
+msgstr "Solo gli amministratori possono modificare questa sezione."
 
 #: assets/components/ConversationSettings.svelte:154
 msgid "Only operators can change modes."
-msgstr "Only operators can change modes."
+msgstr "Solo gli operatori possono cambiare modalità."
 
 msgid "Open conversation or connection settings"
 msgstr "Apri le impostazioni di conversazione o di connessione"
@@ -812,12 +812,12 @@ msgstr "Inviato da %1"
 
 #: assets/page/Help.svelte:25
 msgid "Pressing `shift+enter` will shift focus between chat input and search in sidebar."
-msgstr "Pressing `shift+enter` will shift focus between chat input and search in sidebar."
+msgstr "Premendo `shift+enter` si passerà tra l'input per la chat e la barra di ricerca nel menù laterale."
 
 #: assets/page/SettingsFiles.svelte:110
 #: assets/page/SettingsFiles.svelte:112
 msgid "Previous"
-msgstr "Previous"
+msgstr "Precedente"
 
 msgid "Private conversation with %1."
 msgstr "Conversazione privata con %1."
@@ -827,7 +827,7 @@ msgstr "Conversazione privata."
 
 #: assets/page/Help.svelte:73
 msgid "Project homepage"
-msgstr "Pagina iniziale del progetto"
+msgstr "Sito web del progetto"
 
 #: assets/components/ConnectionForm.svelte:114
 msgid "Put each command on a new line."
@@ -835,7 +835,7 @@ msgstr "Metti ogni comando su una nuova linea."
 
 #: assets/page/Help.svelte:24
 msgid "Quick search"
-msgstr "Quick search"
+msgstr "Ricerca veloce"
 
 #: file.html.ep:19
 msgid "Raw"
@@ -900,7 +900,7 @@ msgstr "SASL plain or IRC server password."
 
 #: assets/components/ConversationSettings.svelte:160
 msgid "Save"
-msgstr "Save"
+msgstr "Salva"
 
 #: assets/page/SettingsAccount.svelte:124
 #: assets/page/SettingsAdmin.svelte:93
@@ -925,7 +925,7 @@ msgstr "Cerca..."
 #: assets/page/Connections.svelte:34
 #: assets/page/Connections.svelte:60
 msgid "Secure"
-msgstr "Secure"
+msgstr "Sicura"
 
 #: assets/components/ConnectionForm.svelte:104
 #: assets/page/ConnectionProfileSettings.svelte:69
@@ -934,11 +934,11 @@ msgstr "Connessione sicura (TLS)"
 
 #: assets/page/ConnectionProfileSettings.svelte:58
 msgid "See all connection profiles"
-msgstr "See all connection profiles"
+msgstr "Vedi tutti i profili delle connessioni"
 
 #: assets/page/ConnectionSettings.svelte:17
 msgid "See all connections"
-msgstr "See all connections"
+msgstr "Vedi tutte le connessioni"
 
 #: assets/page/SettingsAdminUsers.svelte:80
 msgid "See all users"
@@ -950,14 +950,14 @@ msgstr "Seleziona"
 
 #: assets/page/ConnectionProfileSettings.svelte:78
 msgid "Service accounts"
-msgstr "Service accounts"
+msgstr "Account di servizio"
 
 msgid "Set new password"
 msgstr "Imposta una nuova password"
 
 #: assets/page/ConnectionProfileSettings.svelte:98
 msgid "Setting this value too high might get you banned from the server."
-msgstr "Setting this value too high might get you banned from the server."
+msgstr "Impostare questo valore troppo alto potrebbe risultare in un ban dal server."
 
 #: assets/components/ChatSidebar.svelte:225
 msgid "Settings"
@@ -1003,15 +1003,15 @@ msgstr "Registrati"
 
 #: assets/page/SettingsFiles.svelte:83
 msgid "Size"
-msgstr "Size"
+msgstr "Dimensione"
 
 #: assets/page/ConnectionProfileSettings.svelte:108
 msgid "Skip connection queue"
-msgstr "Skip connection queue"
+msgstr "Salta la coda di connessione"
 
 #: assets/components/ConnectionForm.svelte:119
 msgid "Source IP"
-msgstr "Source IP"
+msgstr "IP sorgente"
 
 #: assets/page/Help.svelte:75
 msgid "Source code"
@@ -1020,9 +1020,6 @@ msgstr "Codice sorgente"
 #: assets/components/ChatInput.svelte:178
 #: assets/components/ChatInput.svelte:199
 msgid "Start a video conference"
-msgstr "Start a video conference"
-
-msgid "Start video conference"
 msgstr "Inizia una videoconferenza"
 
 #: assets/page/Fallback.svelte:30
@@ -1053,7 +1050,7 @@ msgstr "Test"
 #: assets/page/SettingsAccount.svelte:141
 #: assets/page/SettingsAccount.svelte:146
 msgid "Test it by clicking on %1."
-msgstr "Test it by clicking on %1."
+msgstr "Fai il test, premendo su %1."
 
 #: assets/page/Help.svelte:46
 msgid "Text formatting"
@@ -1070,7 +1067,7 @@ msgstr "Il backend si sta avviando. Si prega di riprovare più tardi."
 
 #: assets/components/ConnectionForm.svelte:139
 msgid "The certificate fingerprint is used for SASL external authentication."
-msgstr "The certificate fingerprint is used for SASL external authentication."
+msgstr "Il fingerprint del certificato è utilizzato per l'autenticazione esterna SASL."
 
 #: assets/page/Help.svelte:38
 msgid "The following rules apply when typing a message:"
@@ -1121,7 +1118,7 @@ msgstr "Questa è la connessione predefinita a cui si collegheranno i nuovi uten
 
 #: assets/page/ConnectionProfileSettings.svelte:110
 msgid "This might result in flood ban."
-msgstr "This might result in flood ban."
+msgstr "Questo può risultare in un ban per flood."
 
 #: partial/error.html.ep:19
 #: templates/partial/error.html.ep:19
@@ -1133,11 +1130,11 @@ msgstr "Questo dovrebbe indicare un'istanza %1."
 
 #: assets/page/SettingsAdmin.svelte:85
 msgid "This should point to a [%1](%2) instance."
-msgstr "This should point to a [%1](%2) instance."
+msgstr "Questo dovrebbe indicare un'istanza [%1](%2)."
 
 #: assets/components/ConnectionForm.svelte:167
 msgid "This will permanently remove chat logs and other connection related data."
-msgstr "This will permanently remove chat logs and other connection related data."
+msgstr "Questo rimuoverà permanentemente i log della chat e ogni altro dato relativo a questa connessione."
 
 #: assets/page/SettingsAdminUsers.svelte:104
 msgid "This will permanently remove user settings, chat logs, uploaded files and other user related data."
@@ -1181,11 +1178,11 @@ msgstr "Aggiornamento"
 
 #: assets/components/ConversationSettings.svelte:107
 msgid "Update information"
-msgstr "Update information"
+msgstr "Aggiorna informazioni"
 
 #: assets/components/ChatInput.svelte:173
 msgid "Upload a file"
-msgstr "Upload a file"
+msgstr "Carica un file"
 
 #: assets/page/SettingsFiles.svelte:80
 msgid "Uploaded"
@@ -1193,7 +1190,7 @@ msgstr "Uploaded"
 
 #: assets/page/Chat.svelte:232
 msgid "Uploading %1..."
-msgstr "Uploading %1..."
+msgstr "Caricamento di %1..."
 
 #: assets/page/SettingsAdmin.svelte:77
 msgid "Used together with \"Organization name\" to add a link to your organization on the login screen."
@@ -1216,9 +1213,6 @@ msgstr "Utenti"
 #: assets/page/Help.svelte:54
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Usando \"*\" intorno a del testo, lo convertirà in *corsivo*, **grassetto** o ***grassetto corsivo***."
-
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Utilizar \"\*\" alrededor de un texto, lo convertirá en *cursivas*, **negritas** o ***negritas cursivas***."
 
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
@@ -1292,7 +1286,7 @@ msgstr "Sei l'unico partecipante in questa conversazione."
 
 #: assets/page/Search.svelte:56
 msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
-msgstr "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "Puoi scrivere il nome di un canale come #cool_beans per approfondire la ricerca, o scrivere un nick @some_nick per filtrare i messaggi inviati da un certo utente."
 
 #: assets/components/ConnectionForm.svelte:84
 msgid "You cannot create custom connections."
@@ -1300,11 +1294,11 @@ msgstr "Non è possibile creare connessioni personalizzate."
 
 #: assets/page/SettingsAdmin.svelte:106
 msgid "You currently have Convos v%1 installed."
-msgstr "You currently have Convos v%1 installed."
+msgstr "Attualmente hai installato la versione v%1 di Convos."
 
 #: assets/page/SettingsAdmin.svelte:104
 msgid "You have Convos v%1, which is the latest version."
-msgstr "You have Convos v%1, which is the latest version."
+msgstr "Hai l'ultima versione di Convos (v%1)."
 
 msgid "You have enabled notifications."
 msgstr "Hai abilitato le notifiche."
