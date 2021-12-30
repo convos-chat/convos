@@ -1,7 +1,6 @@
 package Convos::Plugin::I18N;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw(DEBUG);
 use HTTP::AcceptLanguage;
 use Mojo::Date;
 use Mojo::File qw(path);
@@ -39,8 +38,7 @@ sub _around_action {
   }
 
   $dict ||= $dictionaries->{en};
-  $c->i18n->load_dictionaries($dict->{_l})                          if RELOAD;
-  warn qq([Convos::Plugin::I18N] Using dictionary "$dict->{_l}".\n) if DEBUG >= 2;
+  $c->i18n->load_dictionaries($dict->{_l}) if RELOAD;
   $c->stash(dictionary => $dict, lang => $dict->{_l});
   $next->();
 }
@@ -83,7 +81,7 @@ sub _load_dictionaries {
     $meta->{$lang}{project_id_version}   ||= $Convos::VERSION;
     $meta->{$lang}{report_msgid_bugs_to} ||= 'https://github.com/convos-chat/convos/issues';
 
-    warn qq([Convos::Plugin::I18N] Loaded $n lexicons for dictionary "$l" from $file.\n) if DEBUG;
+    $c->log->debug(qq(Loaded $n lexicons for dictionary "$l" from $file.));
   }
 }
 

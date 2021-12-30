@@ -1,7 +1,7 @@
 package Convos::Plugin::Auth::LDAP;
 use Mojo::Base 'Convos::Plugin::Auth';
 
-use Convos::Util qw(DEBUG require_module);
+use Convos::Util qw(require_module);
 use Mojo::Promise;
 
 has _ldap_options => undef;
@@ -65,9 +65,8 @@ sub _login_p {
     my $core     = $c->app->core;
     my $user     = $core->get_user($params);
 
-    warn sprintf "[LDAP/%s] code=%s, exists=%s\n", $params->{email}, $ldap_msg->code,
-      $user ? 'yes' : 'no'
-      if DEBUG;
+    $c->log->debug(sprintf "[LDAP/%s] code=%s, exists=%s",
+      $params->{email}, $ldap_msg->code, $user ? 'yes' : 'no');
 
     # Try to fallback to local user on error
     if ($ldap_msg->code) {
@@ -79,7 +78,7 @@ sub _login_p {
     return $user if $user;
 
     # Create new user, since authenticated by LDAP
-    warn sprintf "[LDAP/%s] code=%s, created=yes\n", $params->{email}, $ldap_msg->code if DEBUG;
+    $c->log->debug(sprintf '[LDAP/%s] code=%s, created=yes', $params->{email}, $ldap_msg->code);
     $user = $core->user($params);
     $user->set_password($params->{password});
     return $user->save_p;

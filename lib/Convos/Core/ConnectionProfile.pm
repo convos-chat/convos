@@ -1,7 +1,7 @@
 package Convos::Core::ConnectionProfile;
 use Mojo::Base -base;
 
-use Convos::Util qw(pretty_connection_name);
+use Convos::Util qw(logf pretty_connection_name);
 use List::Util qw(first);
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(trim);

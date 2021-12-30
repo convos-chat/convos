@@ -61,7 +61,9 @@ sub command_dev {
   my $script = shift;
   $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
   my @cmd = $script->_cmd_with_secure_listen(@_);
-  $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_DEBUG CONVOS_CMS_PERLDOC);
+  $ENV{$_}               //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_CMS_PERLDOC);
+  $ENV{CONVOS_LOG_LEVEL} //= 'trace';
+  $ENV{MOJO_LOG_COLOR}   //= 1;
   push @cmd, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @cmd;
   warn "\$ mojo webpack script/convos @cmd\n";
   exec qw(mojo webpack), $0, @cmd;
@@ -315,9 +317,9 @@ sub _setup_env {
 
   $ENV{CONVOS_CPAN_FILE} ||= path_to 'cpanfile';
   $ENV{CONVOS_LOCAL_LIB} ||= path_to 'local';
+  $ENV{CONVOS_LOG_LEVEL} ||= 'fatal' if grep { $command eq $_ } qw(get version);
   $ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
-  $ENV{MOJO_LOG_LEVEL} ||= 'fatal'      if grep { $command eq $_ } qw(get version);
-  $ENV{MOJO_MODE}      ||= 'production' if $command eq 'daemon';
+  $ENV{MOJO_MODE} ||= 'production' if $command eq 'daemon';
   $ENV{PERL5LIB} = join ':', @INC;
 
   my $bin = path_to 'local', 'bin';

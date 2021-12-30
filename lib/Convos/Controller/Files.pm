@@ -51,7 +51,7 @@ sub remove {
   my ($backend, @errors) = ($user->core->backend);
   return Mojo::Promise->all(
     map {
-      $backend->delete_object_p($self->_file({id => $_, user => $user}))
+      $backend->delete_object_p($self->_file(id => $_, user => $user))
         ->catch(sub { push @errors, shift })
     } @ids
   )->then(sub {
@@ -95,7 +95,10 @@ sub upload {
   });
 }
 
-sub _file { shift->app->config('file_class')->new(@_) }
+sub _file {
+  my $self = shift;
+  return $self->app->config('file_class')->new(log => $self->log, @_);
+}
 
 sub _validate_upload_p {
   my ($self, $upload) = @_;

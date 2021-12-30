@@ -24,7 +24,7 @@ has core => sub {
   return Convos::Core->new(
     backend => $self->config('backend'),
     home    => path(split '/', $home),
-    log     => $self->log
+    log     => $self->log,
   );
 };
 
@@ -184,6 +184,7 @@ sub _config {
   my $enabled    = is_true 'ENV:CONVOS_SYSLOG';
   $self->plugin(Syslog => {access_log => $access_log, enable => $enabled, only_syslog => $enabled});
 
+  $self->log->level($ENV{CONVOS_LOG_LEVEL});
   $self->log->info(qq(CONVOS_HOME="$config->{home}" # https://convos.chat/doc/config#convos_home"));
 
   my $settings = $self->core->settings;

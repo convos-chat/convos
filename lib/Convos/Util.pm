@@ -11,14 +11,13 @@ use Sys::Hostname ();
 use Time::HiRes   ();
 use Scalar::Util qw(blessed);
 
-use constant DEBUG => $ENV{CONVOS_DEBUG} || 0;
-
-$ENV{OPENSSL_BIN} ||= 'openssl';
+$ENV{OPENSSL_BIN}      ||= 'openssl';
+$ENV{CONVOS_LOG_LEVEL} ||= $ENV{MOJO_LOG_LEVEL} || ($ENV{HARNESS_IS_VERBOSE} ? 'trace' : 'error');
 
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
-  qw($CHANNEL_RE DEBUG disk_usage generate_cert_p get_cert_info generate_secret),
-  qw(has_many is_true pretty_connection_name require_module short_checksum yaml),
+  qw($CHANNEL_RE disk_usage generate_cert_p get_cert_info generate_secret),
+  qw(has_many is_true logf pretty_connection_name require_module short_checksum yaml),
 );
 
 sub disk_usage {
@@ -71,7 +70,6 @@ sub generate_cert_p {
     -subj => sprintf '/C=%s/O=%s/CN=%s/emailAddress=%s',
     @params{qw(country organization common_name email)};
 
-  warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
   return Mojo::IOLoop->subprocess->run_p(sub {
     open STDERR, '>', File::Spec->devnull;
     local ($!, $?);
@@ -88,7 +86,6 @@ sub get_cert_info {
 
   my @openssl = (qw(x509 -noout -fingerprint -sha512 -in), $cert);
   my $fingerprint;
-  warn "\$ $ENV{OPENSSL_BIN} @openssl\n" if DEBUG;
   open my $FH, '-|', $ENV{OPENSSL_BIN} => @openssl;
   /Fingerprint=(.*)/ && ($fingerprint = lc $1) while <$FH>;
   $fingerprint =~ s!:!!g if $fingerprint;
@@ -149,6 +146,24 @@ sub is_true {
   my $name = $input =~ m!^ENV:([A-Z])$! ? $1 : 'Value';
   Carp::carp(qq($name should be 0, Off, No, false, 1, On, Yes or true, but is set to "$val".));
   return 0;
+}
+
+sub logf {
+  my ($self, $level, $format, @args) = @_;
+  my $log = $self->{log}
+    //= Mojo::Log->new(level => $ENV{CONVOS_LOG_LEVEL})->context(sprintf '[fallback]');
+
+  my $context = $self->{log_context} //= ($self->can('uri') ? $self->uri : ref $self);
+  return $log->is_level($level) && $log->$level(
+    sprintf "[%s] $format",
+    $context,
+    map {
+      chomp;
+      blessed $_ && $_->can('to_string') ? $_->to_string
+        : ref $_                         ? Mojo::JSON::encode_json($_)
+        : $_
+    } @args
+  );
 }
 
 sub pretty_connection_name {
@@ -233,7 +248,7 @@ Convos::Util - Utility functions
 =head1 SYNOPSIS
 
   package Convos::Core::Core;
-  use Convos::Util qw(DEBUG has_many);
+  use Convos::Util qw(has_many);
 
 =head1 DESCRIPTION
 
@@ -369,6 +384,12 @@ Checks if C<$any> or a given envirnment variable is either "0", "Off", "No",
 the value.
 
 Falls back to warn the user and return false.
+
+=head2 logf
+
+  $obj->logf($level => $format => @args);
+
+Can be imported as a L<Mojo::Log> helper.
 
 =head2 pretty_connection_name
 

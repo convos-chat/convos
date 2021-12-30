@@ -2,7 +2,7 @@ package Convos::Core::Settings;
 use Mojo::Base -base;
 
 use Convos::Core::Connection;
-use Convos::Util 'generate_secret';
+use Convos::Util qw(generate_secret logf);
 use Mojo::JSON qw(false true);
 use Mojo::Path;
 use Mojo::URL;

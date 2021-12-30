@@ -3,7 +3,7 @@ use Mojo::Base 'Convos::Core::Connection';
 
 no warnings qw(utf8);
 use feature qw(current_sub);
-use Convos::Util qw($CHANNEL_RE DEBUG);
+use Convos::Util qw($CHANNEL_RE);
 use IRC::Utils ();
 use Mojo::JSON qw(false true);
 use Mojo::Parameters;
@@ -1185,7 +1185,7 @@ sub _stream_on_read {
 
 CHUNK:
   while ($self->{buffer} =~ s/^([^\015\012]+)[\015\012]//m) {
-    $self->_debug('>>> %s', term_escape $1) if DEBUG;
+    $self->logf(trace => '>>> %s', term_escape $1);
     my $msg = $self->_parse($1);
     next unless $msg->{command};
 
@@ -1207,17 +1207,15 @@ CHUNK:
         next WAIT_FOR unless lc $v eq lc $rules->{$k};
       }
 
-      $self->_debug('->%s(...)', $make_response_method) if DEBUG;
       $self->$make_response_method($msg, $res, $p);
       $msg->{handled}++;
     }
 
     if (my $cb = $self->can($method)) {
-      $self->_debug('->%s(...)', $method) if DEBUG;
       $self->$cb($msg);
     }
     elsif (!$msg->{handled}) {
-      $self->_debug('->%s(...) (fallback)', $method) if DEBUG;
+      $self->logf(trace => '->%s(...) (fallback)', $method);
       $self->_irc_event_fallback($msg);
     }
 

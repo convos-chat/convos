@@ -2,7 +2,7 @@ package Convos::Core::Connection;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Conversation;
-use Convos::Util qw(DEBUG generate_cert_p get_cert_info has_many is_true pretty_connection_name);
+use Convos::Util qw(generate_cert_p get_cert_info has_many is_true logf pretty_connection_name);
 use Convos::Util::Queue;
 use Mojo::JSON qw(false true);
 use Mojo::Loader qw(load_class);
@@ -81,6 +81,7 @@ sub connect_p {
 
 has_many conversations => 'Convos::Core::Conversation' => sub {
   my ($self, $attrs) = @_;
+  $attrs->{log} = $self->{log};
   my $conversation = Convos::Core::Conversation->new($attrs);
   Scalar::Util::weaken($conversation->{connection} = $self);
   return $conversation;
@@ -156,9 +157,10 @@ sub state {
     );
   }
 
-  $self->_debug('state = %s, wanted_state = %s (%s)', $state, $self->wanted_state, $message // '')
-    if DEBUG;
-
+  $self->logf(
+    debug => 'state = %s, wanted_state = %s (%s)',
+    $state, $self->wanted_state, $message // ''
+  );
   return $self;
 }
 
@@ -216,15 +218,6 @@ sub _connect_args_to_info {
   $self->emit(state => info => $info);
 }
 
-sub _debug {
-  my ($self, $format, @args) = @_;
-  chomp for @args;
-  warn sprintf "[%s/%s] [$$/%s] $format\n", $self->user->email, $self->id, (time - $^T), @args;
-
-#my @caller = caller 1;
-#warn sprintf "[%s/%s] $format at %s line %s\n", $self->user->email, $self->id, @args, @caller[1, 2];
-}
-
 sub _connect_p {
   my $self = shift;
 
@@ -234,7 +227,7 @@ sub _connect_p {
 
     my $p = Mojo::Promise->new;
     $self->_connect_args_to_info($connect_args);
-    $self->_debug('connect = %s', Mojo::JSON::encode_json($connect_args)) if DEBUG;
+    $self->logf(debug => 'connect = %s', $connect_args);
     $self->{stream_id}
       = Mojo::IOLoop->client($connect_args, sub { $_[1] ? $p->reject($_[1]) : $p->resolve($_[2]) });
 
@@ -333,7 +326,7 @@ sub _write {
     return;
   }
 
-  $self->_debug('<<< %s', term_escape $buf) if DEBUG;
+  $self->logf(trace => '<<< %s', term_escape $buf);
   $self->{stream}->write(Unicode::UTF8::encode_utf8($buf, sub { $_[0] }), $cb ? ($cb) : ());
 }
 

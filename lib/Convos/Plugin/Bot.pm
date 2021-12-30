@@ -2,7 +2,7 @@ package Convos::Plugin::Bot;
 use Mojo::Base 'Convos::Plugin';
 
 use Convos::Core::Connection;
-use Convos::Util qw($CHANNEL_RE DEBUG generate_secret pretty_connection_name require_module yaml);
+use Convos::Util qw($CHANNEL_RE generate_secret pretty_connection_name require_module yaml);
 use Mojo::JSON::Pointer;
 use Mojo::Util qw(camelize);
 

@@ -2,7 +2,7 @@ package Convos::Core::User;
 use Mojo::Base 'Mojo::EventEmitter';
 
 use Convos::Core::Connection;
-use Convos::Util qw(DEBUG has_many);
+use Convos::Util qw(has_many logf);
 use Crypt::Passphrase;
 use File::Path ();
 use Mojo::Date;
@@ -20,9 +20,9 @@ has uid            => sub { die 'uid() cannot be built' };
 has unread         => sub {0};
 
 has _crypt => sub {
-  Crypt::Passphrase->new(
+  return Crypt::Passphrase->new(
     encoder    => {module => 'Argon2', memory_cost => '64M'},
-    validators => ['Bcrypt']
+    validators => ['Bcrypt'],
   );
 };
 
@@ -42,9 +42,10 @@ has_many connections => 'Convos::Core::Connection' => sub {
   die qq($connection_class is not supported: $@)
     if !$connection_class->can('new')
     and !eval "require $connection_class;1";
+  $attrs->{log} = $self->{log};
   my $connection = $connection_class->new($attrs);
   Scalar::Util::weaken($connection->{user} = $self);
-  warn "[@{[$self->email]}] Emit connection for id=@{[$connection->id]}\n" if DEBUG;
+  $self->logf(debug => 'Emit connection for id=%s', $connection->id);
   $self->core->backend->emit(connection => $connection);
   return $connection;
 };

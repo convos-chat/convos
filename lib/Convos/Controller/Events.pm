@@ -1,9 +1,9 @@
 package Convos::Controller::Events;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Convos::Util qw(DEBUG);
+use Convos::Util qw(logf);
 use List::Util qw(any);
-use Mojo::JSON qw(encode_json false true);
+use Mojo::JSON qw(false true);
 use Mojo::Util qw(network_contains);
 use Scalar::Util qw(blessed weaken);
 use Time::HiRes qw(time);
@@ -21,6 +21,9 @@ sub start {
   return $self->_err('Need to log in first.', {method => 'handshake'})->finish(1008)
     unless my $user = $self->backend->user;
 
+  # Used by Convos::Util->logf()
+  $self->{log} = $self->log;
+
   weaken $self;
   my $uid     = $user->id;
   my $backend = $self->app->core->backend;
@@ -28,14 +31,14 @@ sub start {
     "user:$uid" => sub {
       my ($backend, $event, $data) = @_;
       my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
-      warn "[Convos::Controller::Events] >>> $event @{[encode_json $data]}\n" if DEBUG >= 2;
+      $self->logf(trace => '[ws] >>> $event %s', $data);
       $self->send({json => {%$data, ts => $ts, event => $event}});
     }
   );
 
   $self->on(
     finish => sub {
-      warn "[Convos::Controller::Events] !!! Finish\n" if DEBUG >= 2;
+      $self->logf(debug => '!!! WebSocket finish.');
       $backend->unsubscribe("user:$uid" => $cb);
     }
   );
@@ -46,7 +49,7 @@ sub start {
       $data->{method} ||= 'ping';
       my $method = sprintf '_event_%s', $data->{method};
       $data->{id} //= Mojo::Util::steady_time();
-      warn "[Convos::Controller::Events] <<< @{[Mojo::JSON::encode_json($data)]}\n" if DEBUG >= 2;
+      $self->logf(trace => '[ws] <<< $event %s', $data);
       my $res = $self->can($method) ? $self->$method($data) : $self->_err('Invalid method.', $data);
       $res->catch(sub { $self->_err(shift, $data) }) if blessed $res and $res->can('catch');
     }
@@ -75,13 +78,6 @@ sub _err {
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = $RESPONSE_EVENT_NAME{$data->{method}} || $data->{method} || 'unknown';
   $self->send({json => $res});
-}
-
-sub _event_debug {
-  my ($self, $data) = @_;
-  my $id = $data->{id} || time;
-  $self->log->warn('[ws] <<< ' . encode_json $data) if DEBUG;
-  $self->send({json => {event => 'debug', id => $id}});
 }
 
 sub _event_load {
@@ -176,15 +172,6 @@ to always include a "method". See L</Methods> for a list of supported methods.
 =back
 
 =head2 Methods
-
-=head3 debug
-
-This method is only useful if the C<CONVOS_DEBUG> environment variable is set.
-If so, this event will simply log whatever data is passed in. This is useful if
-you are trying to debug a client where you do not have access to a developer
-console. Example message:
-
-  ws.send(JSON.stringify({method: "debug", whatEver: 42, ts: new Date().toISOString()}));
 
 =head3 ping
 

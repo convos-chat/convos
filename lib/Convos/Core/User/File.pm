@@ -2,7 +2,7 @@ package Convos::Core::User::File;
 use Mojo::Base -base;
 
 use Carp qw(confess);
-use Convos::Util qw(DEBUG short_checksum);
+use Convos::Util qw(logf short_checksum);
 use Digest::MD5 ();
 use Mojo::Asset::File;
 use Mojo::File;
@@ -82,7 +82,7 @@ sub save_p {
     my $dir = $self->path->dirname;
     $dir->make_path unless -d $dir;
     $asset->move_to($self->path);
-    warn "[@{[$self->id]}] Moved asset to @{[$self->path]}\n" if DEBUG;
+    $self->logf(debug => 'Moved asset to %s', $self->path);
   }
 
   return $core->backend->save_object_p($self);

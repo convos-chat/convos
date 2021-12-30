@@ -1,8 +1,8 @@
 package Convos::Plugin::Bot::Action;
 use Mojo::Base 'Mojo::EventEmitter';
 
-use Carp 'confess';
-use Mojo::Util 'decamelize';
+use Carp qw(confess);
+use Mojo::Util qw(decamelize);
 
 has bot         => undef, weak => 1;
 has config      => sub { Mojo::JSON::Pointer->new({}) };

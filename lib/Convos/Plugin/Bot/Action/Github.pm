@@ -1,7 +1,6 @@
 package Convos::Plugin::Bot::Action::Github;
 use Mojo::Base 'Convos::Plugin::Bot::Action';
 
-use Convos::Util qw(DEBUG);
 use List::Util qw(any);
 use Mojo::File qw(path);
 
@@ -13,19 +12,12 @@ sub handle_webhook_github_event {
 
   my $event  = $headers->header('X-GitHub-Event') || 'unknown';
   my $method = $self->can("_github_event_$event");
-  unless ($method) {
-    warn qq([GitHub] Action cannot handle event $event.\n) if DEBUG;
-    return;
-  }
+  return unless $method;
 
   my $class        = ref $self;
   my $repo_name    = $payload->{repository}{full_name}                 || 'default';
   my $repositories = $self->config->get("/action/$class/repositories") || {};
-  my $rules        = $repositories->{$repo_name};
-  unless ($rules) {
-    warn qq([GitHub] Action has no config for $repo_name.\n) if DEBUG;
-    return;
-  }
+  return unless my $rules = $repositories->{$repo_name};
 
   my @status;
   for my $rule (@$rules) {

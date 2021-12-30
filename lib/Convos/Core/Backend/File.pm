@@ -2,7 +2,6 @@ package Convos::Core::Backend::File;
 use Mojo::Base 'Convos::Core::Backend';
 
 use Convos::Date qw(dt);
-use Convos::Util qw(DEBUG);
 use Fcntl qw(:flock);
 use File::ReadBackwards;
 use Mojo::Collection;
@@ -141,8 +140,7 @@ sub messages_p {
   if ($query->{around}) {
     my %query_before = (%$query, around => undef, before => $query->{around});
     my %query_after  = (%$query, around => undef, after  => $query->{around}, include => 1);
-
-    warn sprintf "[%s] Getting messages around %s\n", $obj->id, $query->{around} if DEBUG;
+    $obj->logf(trace => 'Getting messages around %s', $query->{around});
 
     return Mojo::Promise->all(
       $self->messages_p($obj, \%query_before),
@@ -201,10 +199,11 @@ sub messages_p {
   return Mojo::Promise->reject('"before" - "after" is longer than 12 months.')
     if $args{before} - $args{after} > $args{before} - $args{before}->add_months(-12);
 
-  warn sprintf "[%s] Getting messages from %s to %s (i=%s, l=%s, c=%s)\n", $obj->id,
+  $obj->logf(
+    trace => 'Getting messages from %s to %s (i=%s, l=%s, c=%s)',
     $args{after}->datetime, $args{before}->datetime, @args{qw(inc_by limit)},
     $args{cursor}->datetime,
-    if DEBUG;
+  );
 
   return Mojo::IOLoop->subprocess->run_p(
     sub { $self->_messages_response($self->_messages($obj, \%args)) });
@@ -216,12 +215,12 @@ sub notifications_p {
 
   my ($file, $FH) = ($self->_notifications_file($user));
   unless ($FH = File::ReadBackwards->new($file)) {
-    warn "[@{[$user->id]}] Read $file: $!\n" if DEBUG >= 3;
+    $user->logf(trace => 'Read $file: %s', $!);
     return Mojo::Promise->resolve({messages => []});
   }
 
   my ($re, @notifications) = qr/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}) (\S+) (\S+) (.*)$/;
-  warn "[@{[$user->id]}] Gettings notifications from $file...\n" if DEBUG;
+  $user->logf(trace => 'Gettings notifications from %s...', $file);
   while (my $line = $FH->getline) {
     $line = decode('UTF-8', $line) || $line;
     next unless $line =~ $re;
@@ -247,10 +246,10 @@ sub save_object_p {
     $swap_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
     die "Failed to write $swap_file" unless -s $swap_file;
     $swap_file->move_to($storage_file);
-    warn "[@{[$obj->id]}] Save success. ($storage_file)\n" if DEBUG;
+    $obj->logf(debug => 'Save success. (%s)', $storage_file);
     $p->resolve($obj);
   } or do {
-    warn "[@{[$obj->id]}] Save $@ ($storage_file)\n" if DEBUG;
+    $obj->logf(warn => 'Save %s. (%s)', $@, $storage_file);
     $p->reject($@ || 'Unknown error.');
   };
 
@@ -285,7 +284,6 @@ sub _add_notification {
   $message = encode 'UTF-8', $message if utf8::is_utf8($message);
 
   open my $FH, '>>', $file or die "Can't open notifications file $file: $!";
-  warn "[@{[$obj->id]}] $file <<< ($message)\n" if DEBUG >= 3;
   flock $FH, LOCK_EX;
   printf $FH "%s %s %s %s\n", $t->datetime, $obj->connection->id, $obj->id, $message;
   flock $FH, LOCK_UN;
@@ -302,25 +300,9 @@ sub _delete_messages {
 sub _delete_object {
   my ($self, $obj) = @_;
   my $path = $self->home->child(@{$obj->uri});
-
-  if (grep { $obj->isa($_) } qw(Convos::Core::Connection Convos::Core::User)) {
-    $path = $path->dirname;
-  }
-
-  if (-d $path) {
-    $path->remove_tree({verbose => DEBUG});
-  }
-  else {
-    unlink $path or die "unlink $path: $!";
-  }
-}
-
-sub _format {
-  my ($self, $type) = @_;
-  my $format = $FORMAT{$type};
-  return @$format                                                    if $format;
-  warn "[Convos::Core::Backend::File] No format defined for $type\n" if $type ne 'error' and DEBUG;
-  return;
+  $path = $path->dirname if grep { $obj->isa($_) } qw(Convos::Core::Connection Convos::Core::User);
+  return $path->remove_tree if -d $path;
+  die unless unlink $path;
 }
 
 sub _log {
@@ -334,7 +316,6 @@ sub _log {
 
   $dir->make_path unless -d $dir;
   open my $FH, '>>', $file or die "Can't open log file $file: $!";
-  warn "[@{[$obj->id]}:@{[$t->datetime]}] $file <<< ($message)\n" if DEBUG >= 3;
   flock $FH, LOCK_EX;
   $FH->syswrite($t->datetime . " $message\n") or die "Write $file: $!";
   flock $FH, LOCK_UN;
@@ -380,10 +361,9 @@ sub _messages {
     my $file = $self->_log_file($obj, $cursor);
     $FH = $args->{inc_by} > 0 ? _open($file) : File::ReadBackwards->new($file);
     die qq{Can't read "$file": $!\n} unless $FH;
-    warn "[@{[$obj->id]}] Reading $file\n" if DEBUG;
+    $obj->logf(trace => 'Reading %s', $file);
     1;
   } or do {
-    warn "[@{[$obj->id]}] $@" if DEBUG >= 2;
     return $self->_messages($obj, $args);
   };
 
@@ -463,7 +443,7 @@ sub _setup {
       $connection->on(
         message => sub {
           my ($connection, $target, $msg) = @_;
-          my ($format, @keys) = $self->_format($msg->{type}) or return;
+          return unless my ($format, @keys) = @{$FORMAT{$msg->{type}} || []};
           my $message = sprintf $format, map { $msg->{$_} } @keys;
           my $flag    = FLAG_NONE;
 

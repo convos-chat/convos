@@ -16,8 +16,7 @@ our $CONVOS_HOME;
 $ENV{CONVOS_I18N_CAPTURE_LEXICONS} ||= 1;
 $ENV{CONVOS_GENERATE_CERT} //= 0;
 $ENV{CONVOS_SECRETS} = 'not-very-secret';
-$ENV{MOJO_LOG_LEVEL} = 'error' unless $ENV{HARNESS_IS_VERBOSE};
-$ENV{OPENSSL_BITS} //= 1024;
+$ENV{OPENSSL_BITS} ||= 1024;
 
 sub subprocess_in_main_process {
   require Mojo::IOLoop::Subprocess;
@@ -59,8 +58,6 @@ sub messages {
       ts        => "$ts",
       type      => $event,
     };
-
-    Test::More::diag("$ts <$from> $msg\n") if $ENV{CONVOS_DEBUG} and $ENV{CONVOS_DEBUG} > 1;
 
     $ts += $interval;
   }
@@ -149,7 +146,7 @@ HERE
 
 END {
   # $ENV{CONVOS_HOME} might have been changed to a directory which should not be removed
-  if (!$ENV{CONVOS_DEBUG} and $CONVOS_HOME and -d $CONVOS_HOME) {
+  if ($CONVOS_HOME and -d $CONVOS_HOME) {
     Test::More::note("remove_tree $CONVOS_HOME");
     File::Path::remove_tree($CONVOS_HOME);
   }

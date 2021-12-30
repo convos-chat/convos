@@ -1,7 +1,7 @@
 package Convos::Core::Conversation;
 use Mojo::Base -base;
 
-use Convos::Util '$CHANNEL_RE';
+use Convos::Util qw($CHANNEL_RE logf);
 use Mojo::Date;
 
 has frozen        => '';

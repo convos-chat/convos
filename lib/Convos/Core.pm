@@ -5,7 +5,7 @@ use Convos::Core::Backend;
 use Convos::Core::ConnectionProfile;
 use Convos::Core::Settings;
 use Convos::Core::User;
-use Convos::Util qw(DEBUG has_many);
+use Convos::Util qw(has_many);
 use List::Util qw(first sum0);
 use Mojo::File;
 use Mojo::Log;
@@ -15,15 +15,15 @@ use Mojolicious::Plugins;
 use Scalar::Util qw(blessed weaken);
 use Time::HiRes qw(time);
 
-has backend  => sub { Convos::Core::Backend->new };
+has backend  => sub { Convos::Core::Backend->new(log => shift->log) };
 has home     => sub { Mojo::File->new(split '/', $ENV{CONVOS_HOME}); };
-has log      => sub { Mojo::Log->new };
+has log      => sub { Mojo::Log->new(level => $ENV{CONVOS_LOG_LEVEL}) };
 has ready    => 0;
-has settings => sub { Convos::Core::Settings->new(core => shift) };
+has settings => sub { Convos::Core::Settings->new(core => $_[0], log => $_[0]->log) };
 
 has_many connection_profiles => 'Convos::Core::ConnectionProfile' => sub {
   my ($self, $attrs) = @_;
-  return Convos::Core::ConnectionProfile->new(core => $self, %$attrs);
+  return Convos::Core::ConnectionProfile->new(core => $self, log => $self->log, %$attrs);
 };
 
 sub connections_by_id {
@@ -44,7 +44,7 @@ sub new {
 
   if ($self->{backend} and !ref $self->{backend}) {
     eval "require $self->{backend};1" or die $@;
-    $self->{backend} = $self->{backend}->new(home => $self->home);
+    $self->{backend} = $self->{backend}->new(home => $self->home, log => $self->log);
   }
 
   return $self;
@@ -97,6 +97,7 @@ has_many users => 'Convos::Core::User' => sub {
   my ($self, $attrs) = @_;
   $attrs->{email} = trim lc $attrs->{email} || '';
   $attrs->{uid} ||= $self->n_users + 1;
+  $attrs->{log} = $self->log;
   $attrs->{uid}++ while $self->get_user_by_uid($attrs->{uid});
   my $user = Convos::Core::User->new($attrs);
   die "Invalid email $user->{email}. Need to match /.\@./." unless $user->email =~ /.\@./;
