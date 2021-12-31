@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.50 Not Released
+ - Safari does not support look-behind
+
 6.49 2021-12-31T16:43:00+0900
  - Fix XSS vulnerability in links
    Contributor: Pocas

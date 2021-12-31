@@ -140,7 +140,7 @@ export default class I18N extends Reactive {
     rules.push({tag: tagPair(['span']), re: /[\x02\x1d\x1e\x1f\x11]/, rules, handler: '_mdIrcTextFormatting'});
     rules.push({tag: tagPair(['a']), re: /\[([a-zA-Z][^\]]+)\]\(([^)]+)\)/, rules: [], handler: '_mdLink'});
     rules.push({tag: tagPair(['a']), re: /\b(https?|mailto):\S+/, rules: [], handler: '_mdURL'});
-    rules.push({tag: tagPair(['a']), re: /(?<=\s|^)#[a-zA-Z][\w.-]+(?=\W|$)/, rules: [], handler: '_mdChannelname'});
+    rules.push({tag: tagPair(['a']), re: /(\s|^)#[a-zA-Z][\w.-]+(?=\W|$)/, rules: [], handler: '_mdChannelname'});
 
     return rules;
   }
@@ -182,6 +182,11 @@ export default class I18N extends Reactive {
   }
 
   _mdChannelname(tag) {
+    tag.captured = tag.captured.replace(/^\s/, (before) => {
+      tag.before += before;
+      return '';
+    });
+
     tag.content = tag.captured;
     tag.attrs.href = './' + encodeURIComponent(tag.captured);
   }
@@ -235,7 +240,7 @@ export default class I18N extends Reactive {
   }
 
   _mdURL(tag) {
-    tag.captured = tag.captured.replace(/[,.:;!"\']$/, (after) => {
+    tag.captured = tag.captured.replace(/[,.:;!"']$/, (after) => {
       tag.after = after[0] + tag.after;
       return '';
     });
