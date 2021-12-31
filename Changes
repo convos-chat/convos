@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.49 Not Released
+6.49 2021-12-31T16:43:00+0900
  - Fix XSS vulnerability in links
    Contributor: Pocas
    Reference: https://huntr.dev/bounties/4532a0ac-4e7c-4fcf-9fe3-630e132325c0
