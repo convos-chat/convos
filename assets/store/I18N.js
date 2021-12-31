@@ -1,13 +1,31 @@
 import Emojis from '../js/Emojis';
-import XRegExp from 'xregexp';
 import Reactive from '../js/Reactive';
 import {api} from '../js/Api';
 import {derived} from 'svelte/store';
-import {route} from '../store/Route';
 
-const RE = {};
-const STOP = ' ,.:;!"\'';
-const XML_ESCAPE = {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&apos;', '"': '&quot;'};
+const ESCAPE = {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&apos;', '"': '&quot;'};
+const escape = (str, re = /[&<>'"]/g) => str.replace(re, (m) => ESCAPE[m]);
+const nbsp = (str) => str.replace(/\s$/, '&nbsp;').replace(/^\s/, '&nbsp;').replace(/\s{2}/g, ' &nbsp;');
+const tagPair = (tags) => [tags.map(n => `<${n}>`).join(''), tags.reverse().map(n => `</${n}>`).join('')];
+
+const COLORS = {
+   '0': 'white',
+   '1': 'black',
+   '2': 'blue',
+   '3': 'green',
+   '4': 'red',
+   '5': 'brown',
+   '6': 'magenta',
+   '7': 'orange',
+   '8': 'yellow',
+   '9': 'lightgreen',
+  '10': 'cyan',
+  '11': 'lightcyan',
+  '12': 'lightblue',
+  '13': 'pink',
+  '14': 'grey',
+  '15': 'lightgrey',
+};
 
 export default class I18N extends Reactive {
   constructor() {
@@ -21,6 +39,7 @@ export default class I18N extends Reactive {
 
     this._languages = [];
     this._languageOptions = [];
+    this._rules = this._makeRules();
   }
 
   /**
@@ -105,85 +124,136 @@ export default class I18N extends Reactive {
    * @return {String} A string that might contain HTML tags.
    */
   md(str, opt = {}) {
-    this._state = {};
-    str = this._xmlEscape(str);
-    str = this._nbsp(str);
-    if (!opt.raw) str = this._mdLink(str);
-    if (!opt.raw) str = this._plainUrlToLink(str);
-    if (!opt.raw) str = this._extendedFormatting(str);
-    if (!opt.raw) str = this._mdCode(str);
-    if (!opt.raw) str = this._mdEmStrong(str);
-    if (!opt.raw) str = this.emojis.markup(str);
-    if (!opt.raw) str = this._mdBlockQuote(str);
-    if (!opt.raw) str = this._mdChannelsAndNicks(str);
-    return str;
+    return !str.length ? '&nbsp;'
+         : opt.raw ? nbsp(escape(str))
+         : this.emojis.markup(nbsp(this._tagToHTML(this._makeTag(str))));
+  }
+
+  _makeRules() {
+    const rules = [];
+
+    rules.push({tag: tagPair(['code']), re: /`(?=[^`\s])/, rules: [], handler: '_mdTag'});
+    rules.push({tag: tagPair(['em', 'strong']), re: /\*\*\*(?=\S)/, rules, handler: '_mdTag'});
+    rules.push({tag: tagPair(['strong']), re: /\*\*(?=\S)/, rules, handler: '_mdTag'});
+    rules.push({tag: tagPair(['em']), re: /\*(?=\S)/, rules, handler: '_mdTag'});
+    rules.push({tag: tagPair(['span']), re: /\x03\d{1,2}(?:,\d{1,2})?/, rules, handler: '_mdIrcColorFormatting'});
+    rules.push({tag: tagPair(['span']), re: /[\x02\x1d\x1e\x1f\x11]/, rules, handler: '_mdIrcTextFormatting'});
+    rules.push({tag: tagPair(['a']), re: /\[([a-zA-Z][^\]]+)\]\(([^)]+)\)/, rules: [], handler: '_mdLink'});
+    rules.push({tag: tagPair(['a']), re: /\b(https?|mailto):\S+/, rules: [], handler: '_mdURL'});
+    rules.push({tag: tagPair(['a']), re: /(?<=\s|^)#[a-zA-Z][\w.-]+(?=\W|$)/, rules: [], handler: '_mdChannelname'});
+
+    return rules;
+  }
+
+  _makeTag(str, rules = this._rules, depth = 0) {
+    // blockquote
+    if (depth == 0 && str.indexOf('> ') == 0) {
+      return [tagPair(['blockquote']), {}, [this._makeTag(str.replace(/^>\s/, ''), rules, depth + 1)]];
+    }
+
+    const children = [];
+    for (const rule of rules) {
+      const match = str.match(rule.re);
+      if (!match) continue;
+
+      const tag = {
+        attrs: {},
+        after: str.substring(match.index + match[0].length),
+        before: str.substring(0, match.index),
+        captured: match[0],
+        index: match.index,
+        match,
+        tag: rule.tag,
+      };
+
+      this[rule.handler](tag);
+      if (typeof tag.content !== 'string') {
+        str = tag.before + tag.captured + tag.after;
+        continue;
+      }
+
+      if (tag.before.length) children.push(this._makeTag(tag.before, rules, depth + 1));
+      children.push([tag.tag, tag.attrs, [this._makeTag(tag.content, rule.rules, depth + 1)]]);
+      if (tag.after.length) children.push(this._makeTag(tag.after, rules, depth + 1));
+      break;
+    }
+
+    return [null, {}, children.length ? children : [escape(str)]];
+  }
+
+  _mdChannelname(tag) {
+    tag.content = tag.captured;
+    tag.attrs.href = './' + encodeURIComponent(tag.captured);
   }
 
   // https://modern.ircdocs.horse/formatting.html
-  _extendedFormatting(str) {
-    const zeroTo99 = '0[0-9]|[1-9][0-9]';
-    const colorRe = new RegExp('\x03(' + zeroTo99 + ')(?:,(' + zeroTo99 + '))?([^\x03]*)', 'g');
+  _mdIrcColorFormatting(tag) {
+    const end = tag.after.indexOf('\x03');
+    if (end == -1) return;
+    tag.content = tag.after.substring(0, end);
+    tag.after = tag.after.substring(end + tag.captured.length);
 
-    return str.replace(colorRe, (all, fg, bg, text) => text).replace(/[\x02\x03\x1d\x1f\x1e\x11\x16\x0f]/g, '');
+    const style = [];
+    const color = tag.captured.replace(/\x030?(\d{1,2}).*/, '$1');
+    if (COLORS[color]) style.push('color:' + COLORS[color]);
+    const background = tag.captured.replace(/.*,(\d{1,2}).*/, '$1');
+    if (COLORS[background]) style.push('background-color:' + COLORS[background]);
+    if (style.length) tag.attrs.style = style.join(';');
   }
 
-  _mdBlockQuote(str) {
-    return str.replace(/^&gt;\s(.*)/, (all, quote) => '<blockquote>' + quote + '</blockquote>');
+  // https://modern.ircdocs.horse/formatting.html
+  _mdIrcTextFormatting(tag) {
+    const end = tag.after.indexOf(tag.captured);
+    if (end == -1) return;
+
+    tag.content = tag.after.substring(0, end);
+    tag.after = tag.after.substring(end + tag.captured.length);
+    tag.tag = tag.captured == '\x02' ? tagPair(['strong'])
+              : tag.captured == '\x1d' ? tagPair(['em'])
+              : tag.captured == '\x1f' ? tagPair(['u'])
+              : tag.captured == '\x11' ? tagPair(['code'])
+              : tagPair(['span']);
   }
 
-  _mdChannelsAndNicks(str) {
-    // TODO: Make nicks clickable
-    return str.replace(/(^|\s)(#[a-zA-Z][\w.-]+)/g, (all, pre, channel) => {
-      const suffix = channel.match(/\.$/) ? '.' : '';
-      if (suffix) channel = channel.replace(/\.$/, '');
-      return pre + '<a href="./' + route.urlFor(encodeURIComponent(channel)) + '">' + channel + '</a>' + suffix;
+  _mdLink(tag) {
+    tag.content = tag.match[1];
+    tag.attrs.href = escape(tag.match[2]);
+    if (tag.match[2].match(/^\w+:/)) tag.attrs.target = '_blank';
+  }
+
+  _mdTag(tag) {
+    // Check if the matched character was escaped
+    if (tag.before.match(/\\$/)) {
+      tag.before = tag.before.replace(/\\$/, '');
+      return;
+    }
+
+    const end = tag.after.indexOf(tag.captured);
+    if (end == -1) return;
+    tag.content = tag.after.substring(0, end);
+    tag.after = tag.after.substring(end + tag.captured.length);
+  }
+
+  _mdURL(tag) {
+    tag.captured = tag.captured.replace(/[,.:;!"\']$/, (after) => {
+      tag.after = after[0] + tag.after;
+      return '';
     });
+
+    tag.content = tag.captured.replace(/^(https|mailto):(\/\/)?/, '');
+    tag.attrs.href = escape(tag.captured);
+    tag.attrs.target = '_blank';
   }
 
-  _mdCode(str) {
-    return str.replace(/(\\?)`([^` ][^`]*)`/g, (all, esc, text) => {
-      return esc ? all.replace(/^\\/, '') : '<code>' + text + '</code>';
-    });
-  }
+  _tagToHTML(tag) {
+    if (typeof tag === 'string') return tag;
 
-  _mdEmStrong(str) {
-    return str.replace(/(^|\s|")(\\?)(\*+)(\w[^<]*?)\3/g, (all, b, esc, md, text) => {
-      if (md.length == 1) return esc ? all.replace(/^\\/, '') : b + '<em>' + text + '</em>';
-      if (md.length == 2) return esc ? all.replace(/^\\/, '') : b + '<strong>' + text + '</strong>';
-      if (md.length == 3) return esc ? all.replace(/^\\/, '') : b + '<em><strong>' + text + '</strong></em>';
-      return all;
-    });
-  }
+    const inner = typeof tag[2] === 'string' ? escape(tag[2]) : tag[2].map(n => this._tagToHTML(n)).join('');
+    if (!tag[0]) return inner;
 
-  _mdLink(str) {
-    const re = RE.mdLink || (RE.mdLink = XRegExp('\\[ ([a-zA-Z][^\\]]+) \\] \\( ([^)]+) \\)', 'gx'));
-    return XRegExp.replace(str, re, (all, text, href) => {
-      const scheme = href.match(/^\s*(\w+):/) || ['', ''];
-      if (scheme[1] && ['http', 'https', 'mailto'].indexOf(scheme[1]) == -1) return all; // Avoid XSS links
-      this._state.md = true;
-      const first = href.substring(0, 1);
-      const target = ['/', '#'].indexOf(first) != -1 ? '' : ' target="_blank"';
-      return '<a href="' + route.urlFor(href) + '"' + target + '>' + text + '</a>';
-    });
-  }
-
-  _nbsp(str) {
-    return !str.length ? '&nbsp;' : str.replace(/^\s/, '&nbsp;').replace(/\s{2}/g, ' &nbsp;');
-  }
-
-  _plainUrlToLink(str) {
-    if (this._state.md) return str;
-
-    const urlRe = RE.url || (RE.url = XRegExp(`(^|\\s) ( (?:http|https)://\\S+ | mailto:\\S+ )`, 'gx'));
-    const endRe = RE.urlEnd || (RE.urlEnd = XRegExp('^(.*)([' + STOP + '])$'));
-    return XRegExp.replace(str, urlRe, (all, b, url) => {
-      const parts = XRegExp.exec(url, endRe) || [all, url, ''];
-      return b + '<a href="' + parts[1] + '" target="_blank">' + parts[1].replace(/^mailto:/, '') + '</a>' + parts[2];
-    });
-  }
-
-  _xmlEscape(str) {
-    return str.replace(/[&<>']/g, (m) => XML_ESCAPE[m]);
+    const attrs = Object.keys(tag[1]).sort().map(k => `${k}="${tag[1][k]}"`).join(' ');
+    const startTag = !attrs ? tag[0][0] : tag[0][0].replace(/>/, ' ' + attrs + '>');
+    return startTag + inner + tag[0][1];
   }
 }
 

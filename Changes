@@ -1,9 +1,15 @@
 Revision history for perl distribution Convos
 
 6.49 Not Released
- - Replaced CONVOS_DEBUG=1 with CONVOS_LOG_LEVEL=trace
+ - Fix XSS vulnerability in links
+   Contributor: Pocas
+   Reference: https://huntr.dev/bounties/4532a0ac-4e7c-4fcf-9fe3-630e132325c0
+ - Add EXPERIMENTAL support for IRC color and text formatting #281 #600
+ - Changed to hiding "https://" from generated links, but keep "http://"
+ - Changed I18N.md() to be understand recursive tags #601
  - Updated Italian translation #654
    Contributor: SerHack
+ - Replaced CONVOS_DEBUG=1 with CONVOS_LOG_LEVEL=trace
 
 6.48 2021-12-29T19:40:00+0900
  - Fix catching invalid nick change #628

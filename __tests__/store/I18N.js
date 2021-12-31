@@ -19,11 +19,22 @@ test('lmd()', () => {
 
   // Entities should not be translated into "undefined"
   expect(i18n.lmd('https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg'))
-    .toBe('<a href="https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg" target="_blank">https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg</a>');
+    .toBe('<a href="https://commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg" target="_blank">commons.wikimedia.org/wiki/File:HK_WCD_WC_%E7%81%A3%E4%BB%94_Wan_Chai_%E8%BB%92%E5%B0%BC%E8%A9%A9%E9%81%93_Hennessy_Road_tram_body_ads_Tsingtao_Brewery_August_2021_SS2.jpg</a>');
 });
 
-test('md - not lmd', () => {
-  expect(i18n.md('`code` %1 *is* cool.')).toBe('<code>code</code> %1 <em>is</em> cool.');
+test('md - raw', () => {
+  expect(i18n.md('> [not a link](https://convos.chat) `<a href="#cool" onclick=""></a>`', {raw: true}))
+    .toBe('&gt; [not a link](https://convos.chat) `&lt;a href=&quot;#cool&quot; onclick=&quot;&quot;&gt;&lt;/a&gt;`');
+});
+
+test('md - whitespace', () => {
+  expect(i18n.md('')).toBe('&nbsp;');
+  expect(i18n.md('', {})).toBe('&nbsp;');
+  expect(i18n.md('', {raw: true})).toBe('&nbsp;');
+  expect(i18n.md(' f   b a      r ', {raw: true})).toBe('&nbsp;f &nbsp; b a &nbsp; &nbsp; &nbsp;r&nbsp;');
+  expect(i18n.md('')).toBe('&nbsp;');
+  expect(i18n.md('    ___ ___  _  ___   _____  ___'))
+    .toBe('&nbsp; &nbsp; ___ ___ &nbsp;_ &nbsp;___ &nbsp; _____ &nbsp;___');
 });
 
 test('md - unchanged', () => {
@@ -32,7 +43,51 @@ test('md - unchanged', () => {
 });
 
 test('md - blockquote', () => {
-  expect(i18n.md('> Some quote')).toBe('<blockquote>Some quote</blockquote>');
+  expect(i18n.md('> Some quote'))
+    .toBe('<blockquote>Some quote</blockquote>');
+  expect(i18n.md('> escape <a href="#foo">bar</a>'))
+    .toBe('<blockquote>escape &lt;a href=&quot;#foo&quot;&gt;bar&lt;/a&gt;</blockquote>');
+});
+
+test('md - code', () => {
+  expect(i18n.md('> Some `code example` yeah'))
+    .toBe('<blockquote>Some <code>code example</code> yeah</blockquote>');
+  expect(i18n.md('Some `code with **[foo](#bar)**`'))
+    .toBe('Some <code>code with **[foo](#bar)**</code>');
+  expect(i18n.md('single `a` char'))
+    .toBe('single <code>a</code> char');
+  expect(i18n.md('is this \\`not code`, or..?'))
+    .toBe('is this `not code`, or..?');
+  expect(i18n.md('is this `not code`, or..?'))
+    .toBe('is this <code>not code</code>, or..?');
+  expect(i18n.md('not a `https://link.com`'))
+    .toBe('not a <code>https://link.com</code>');
+  expect(i18n.md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
+    .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\&quot;{}]+|&quot;(?&gt;[^\\&quot;]+|\\[\S\s])*&quot;|\\[\S\s]|(?-1))*[}])</code>');
+  expect(i18n.md('kikuchi` changed nick to kikuchi```.'))
+    .toBe('kikuchi` changed nick to kikuchi```.');
+});
+
+test('md - em, strong', () => {
+  expect(i18n.md('> Some *em text* right'))
+    .toBe('<blockquote>Some <em>em text</em> right</blockquote>');
+  expect(i18n.md('Some **strong text** right'))
+    .toBe('Some <strong>strong text</strong> right');
+  expect(i18n.md('Some ***strong em text*** right'))
+    .toBe('Some <em><strong>strong em text</strong></em> right');
+  expect(i18n.md('> Some * em text* right'))
+    .toBe('<blockquote>Some * em text* right</blockquote>');
+
+  // Quotes should always be escaped - Pretect against XSS
+  expect(i18n.md('Hey *foo* \'"**bar**"\' ***baz***!'))
+    .toBe('Hey <em>foo</em> &apos;&quot;<strong>bar</strong>&quot;&apos; <em><strong>baz</strong></em>!');
+});
+
+test('md - colors', () => {
+  expect(i18n.md('\x02bold text\x02')).toBe('<strong>bold text</strong>');
+  expect(i18n.md('\x1ditalic text\x1d')).toBe('<em>italic text</em>');
+  expect(i18n.md('\u00035colored text\x03')).toBe('<span style="color:brown">colored text</span>');
+  expect(i18n.md('\u00034,12colored text and background\u0003')).toBe('<span style="color:red;background-color:lightblue">colored text and background</span>');
 });
 
 test('md - emojis', () => {
@@ -44,47 +99,31 @@ test('md - emojis', () => {
     .toMatch(/but <img.*[^>]+>. turns into an emoji/);
 });
 
-test('md - em, strong', () => {
-  expect(i18n.md('Hey *foo* "**bar**" ***baz***!'))
-    .toBe('Hey <em>foo</em> "<strong>bar</strong>" <em><strong>baz</strong></em>!');
+test('md - url', () => {
+  expect(i18n.md('A link to https://convos.chat, cool ey?'))
+    .toBe('A link to <a href="https://convos.chat" target="_blank">convos.chat</a>, cool ey?');
+  expect(i18n.md('A link to http://convos.chat, cool ey?'))
+    .toBe('A link to <a href="http://convos.chat" target="_blank">http://convos.chat</a>, cool ey?');
+  expect(i18n.md('A link to mailto:jhthorsen@cpan.org!'))
+    .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>!');
+  expect(i18n.md('https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик last symbol shows as separate outside of the URL? do you reproduce the bug?'))
+    .toBe('<a href=\"https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик\" target=\"_blank\">ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol shows as separate outside of the URL? do you reproduce the bug?');
+  expect(i18n.md('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - https://git.io/JD9ph'))
+    .toBe('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - <a href=\"https://git.io/JD9ph\" target=\"_blank\">git.io/JD9ph</a>');
+
+  // Protect against XSS
+  expect(i18n.md('https://x."//onfocus="alert(document.domain)"//autofocus="" b="'))
+    .toBe('<a href="https://x.&quot;//onfocus=&quot;alert(document.domain)&quot;//autofocus=&quot;" target="_blank">x.&quot;//onfocus=&quot;alert(document.domain)&quot;//autofocus=&quot;</a>&quot; b=&quot;');
 });
 
 test('md - markdown link', () => {
   expect(i18n.md('some [cool chat](https://convos.chat)'))
     .toBe('some <a href="https://convos.chat" target="_blank">cool chat</a>');
-  expect(i18n.md('A link to https://convos.chat, cool ey?'))
-    .toBe('A link to <a href="https://convos.chat" target="_blank">https://convos.chat</a>, cool ey?');
-  expect(i18n.md('A link to mailto:jhthorsen@cpan.org!'))
-    .toBe('A link to <a href="mailto:jhthorsen@cpan.org" target="_blank">jhthorsen@cpan.org</a>!');
-  expect(i18n.md('https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик last symbol shows as separate outside of the URL? do you reproduce the bug?'))
-    .toBe('<a href=\"https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик\" target=\"_blank\">https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol shows as separate outside of the URL? do you reproduce the bug?');
-  expect(i18n.md('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - https://git.io/JD9ph'))
-    .toBe('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - <a href=\"https://git.io/JD9ph\" target=\"_blank\">https://git.io/JD9ph</a>');
-});
-
-test('md - code', () => {
-  expect(i18n.md('single `a` char'))
-    .toBe('single <code>a</code> char');
-  expect(i18n.md('is this \\`not code`, or..?'))
-    .toBe('is this `not code`, or..?');
-  expect(i18n.md('is this `not code`, or..?'))
-    .toBe('is this <code>not code</code>, or..?');
-  expect(i18n.md('not a `https://link.com`'))
-    .toBe('not a <code>https://link.com</code>');
-  expect(i18n.md('a regexp: `TShop\.Setup\(\s*([{](?>[^\\"{}]+|"(?>[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])`'))
-    .toBe('a regexp: <code>TShop\.Setup\(\s*([{](?&gt;[^\\"{}]+|"(?&gt;[^\\"]+|\\[\S\s])*"|\\[\S\s]|(?-1))*[}])</code>');
-  expect(i18n.md('kikuchi` changed nick to kikuchi```.'))
-    .toBe('kikuchi` changed nick to kikuchi```.');
-});
-
-test('md - nbsp', () => {
-  expect(i18n.md('')).toBe('&nbsp;');
-  expect(i18n.md('    ___ ___  _  ___   _____  ___')).toBe('&nbsp; &nbsp; ___ ___ &nbsp;_ &nbsp;___ &nbsp; _____ &nbsp;___');
 });
 
 test('md - channel names', () => {
-  expect(i18n.md('want to join #foo-1.2 #foo-bar#not href="#anchor" #foo.bar'))
-    .toBe('want to join <a href=\"./%23foo-1.2\">#foo-1.2</a> <a href=\"./%23foo-bar\">#foo-bar</a>#not href="#anchor" <a href=\"./%23foo.bar\">#foo.bar</a>');
+  expect(i18n.md('want to join #foo-1.2 #foo-bar href="#anchor" #foo.bar'))
+    .toBe('want to join <a href="./%23foo-1.2">#foo-1.2</a> <a href="./%23foo-bar">#foo-bar</a> href=&quot;#anchor&quot; <a href="./%23foo.bar">#foo.bar</a>');
 });
 
 function countEmojis(str) {
