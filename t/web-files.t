@@ -20,6 +20,8 @@ subtest initial => sub {
   $t->delete_ok('/api/files/1/x,y,z')->status_is(401);
   $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
     ->status_is(200);
+  $t->get_ok('/api/files')->status_is(200)->json_hasnt('/after')->json_hasnt('/next')
+    ->json_is('/files', []);
 };
 
 subtest 'upload' => sub {

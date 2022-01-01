@@ -68,9 +68,8 @@ sub files_p {
   my ($self, $user, $params) = @_;
 
   my $files_dir = $self->home->child(@{$user->uri})->dirname->child('upload');
-  return Mojo::Promise->resolve(Mojo::Collection->new) unless -d $files_dir;
+  return Mojo::Promise->resolve({files => []}) unless -d $files_dir;
   return Mojo::Promise->reject($!) unless opendir my ($FILES), $files_dir;
-
   return Mojo::IOLoop->subprocess->run_p(sub {
 
     # NOTE: This might not work as expected if files where moved around
