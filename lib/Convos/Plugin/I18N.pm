@@ -15,7 +15,7 @@ has _meta         => sub { +{} };
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('i18n.dictionary'        => sub { $self->_dictionary(@_) });
+  $app->helper('i18n.dictionary'        => sub { $self->_dictionaries->{$_[1]} });
   $app->helper('i18n.load_dictionaries' => sub { $self->_load_dictionaries(shift, @_) });
   $app->helper('i18n.meta' => sub { $_[1] ? $self->_meta->{$_[1]} || {} : $self->_meta });
   $app->helper('l'         => \&_l);
@@ -34,36 +34,32 @@ sub _around_action {
   my $dict;
   for my $l (HTTP::AcceptLanguage->new($lang)->languages) {
     my ($prefix) = split /-/, $l;
-    $dict = $dictionaries->{$l} || $dictionaries->{$prefix} and last;
+    ($dict, $lang) = ($dictionaries->{$l},      $l)      and last if $dictionaries->{$l};
+    ($dict, $lang) = ($dictionaries->{$prefix}, $prefix) and last if $dictionaries->{$prefix};
   }
 
-  $dict ||= $dictionaries->{en};
-  $c->i18n->load_dictionaries($dict->{_l}) if RELOAD;
-  $c->stash(dictionary => $dict, lang => $dict->{_l});
+  ($dict, $lang) = ($dictionaries->{en}, 'en') unless $dict;
+  $c->i18n->load_dictionaries($lang) if RELOAD;
+  $c->stash(dictionary => $dict, lang => $lang);
   $next->();
-}
-
-sub _dictionary {
-  my ($self, $c, $lang) = @_;
-  return $self->_dictionaries->{$lang} ||= {_l => $lang, _n => 1};
 }
 
 sub _load_dictionaries {
   my ($self, $c, $load_lang) = @_;
-  my $dictionaries = $self->_dictionaries;
-  my $meta         = $self->_meta;
-  my $now          = Mojo::Date->new->to_datetime;
+  my $meta = $self->_meta;
+  my $now  = Mojo::Date->new->to_datetime;
 
   for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->engine->assets_dir) {
     next unless $file =~ m!([\w-]+)\.po$!;
+
     my $lang = $1;
     next if $load_lang and $load_lang ne $lang;
-    my $dictionary = $dictionaries->{$lang} ||= {};
-    _parse_po_file($file->realpath, sub { $dictionary->{$_[0]->{msgid}} = $_[0]->{msgstr} });
-    my $l = $dictionary->{_l} = $lang;
-    my $n = $dictionary->{_n} = int(keys %$dictionary) - 1;
 
-    for (split /\n/, $dictionary->{''} // '') {
+    my $dictionary = $self->_dictionaries->{$lang} ||= {};
+    _parse_po_file($file->realpath, sub { $dictionary->{$_[0]{msgid}} = $_[0]{msgstr} });
+
+    my $h = delete($dictionary->{''}) // '';
+    for (split /\n/, $h) {
       my ($key, $value) = split /:\s+/, $_, 2;
       $value =~ s!;\s*$!!;
       $key   =~ s!-!_!g;
@@ -81,7 +77,8 @@ sub _load_dictionaries {
     $meta->{$lang}{project_id_version}   ||= $Convos::VERSION;
     $meta->{$lang}{report_msgid_bugs_to} ||= 'https://github.com/convos-chat/convos/issues';
 
-    $c->log->debug(qq(Loaded $n lexicons for dictionary "$l" from $file.));
+    my $n = int keys %$dictionary;
+    $c->log->debug(qq(Loaded $n lexicons for dictionary "$lang" from $file.));
   }
 }
 

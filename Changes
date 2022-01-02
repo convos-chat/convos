@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.52 Not Released
+ - Fix not translating "" - the .po header
+
 6.51 2022-01-02T08:55:00+0900
  - Fix GET /api/files when there are no files
 
