@@ -1,6 +1,0 @@
-<?xml version="1.0" standalone="no"?>
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <a href="javascript&#9;:alert(document.cookie)">
-    <circle cx="0" cy="0" r="300"/>
-  </a>
-</svg>

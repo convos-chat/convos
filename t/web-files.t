@@ -119,20 +119,14 @@ subtest 'attachment' => sub {
     ->header_is('Content-Type' => 'text/html;charset=UTF-8')->text_is('h1', 'markup.xhtml');
   like $t->tx->res->dom->at('div.le-paste'), qr{&lt;!DOCTYPE html PUBLIC},
     'embedded and escaped xhtml';
-};
 
-subtest 'svg with javascript' => sub {
-  note 'with-script-tag.svg';
+  note 'svg';
   $t->post_ok('/api/files', form => {file => {file => 't/data/with-script-tag.svg'}})
-    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
-
-  note 'with-javascript-event.svg';
-  $t->post_ok('/api/files', form => {file => {file => 't/data/with-javascript-event.svg'}})
-    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
-
-  note 'with-javascript-link.svg';
-  $t->post_ok('/api/files', form => {file => {file => 't/data/with-javascript-link.svg'}})
-    ->status_is(400)->json_is('/errors/0/message', 'Uploaded svg looks like a xss attack.');
+    ->status_is(200);
+  $fid = $t->tx->res->json('/files/0/id');
+  $t->get_ok("/file/1/$fid.xhtml")
+    ->header_is('Content-Disposition', 'attachment; filename="with-script-tag.svg"')
+    ->header_is('Content-Type' => 'image/svg+xml');
 };
 
 subtest 'write_only' => sub {
@@ -168,7 +162,7 @@ subtest 'list' => sub {
     ->json_hasnt('/prev')->json_has('/files/4')->json_has('/files/0/name')->json_has('/files/0/id')
     ->json_like('/files/0/saved', qr{^\d+-\d+-\d+T})->json_has('/files/0/size');
   my @ids = map { $_->{id} } $files->();
-  is @ids, 16, 'got all files';
+  is @ids, 17, 'got all files';
 
   note 'unknown';
   $t->get_ok('/api/files?limit=1&after=unknown')->status_is(200)->json_is('/files', [])
