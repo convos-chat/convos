@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-6.52 Not Released
+6.52 2022-01-04T08:16:00+0900
  - Fix not translating "" - the .po header
  - Fix security issue for svg with Content-Disposition header
    Contributor: KhanhCM
