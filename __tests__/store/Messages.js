@@ -1,4 +1,5 @@
 import Messages from '../../assets/store/Messages';
+import {i18n} from '../../assets/store/I18N';
 
 test('constructor', () => {
   const messages = new Messages();
@@ -84,11 +85,19 @@ test('render', () => {
 test('markdown', () => {
   const messages = new Messages();
 
+  i18n.update({lang: 'no'});
+  i18n.dictionaries.no = {
+    'Click on [%1](/logout)': 'Klikk på [%1](/logout)',
+  };
+
   messages.push([{from: 'superduper', message: 'Click on [Help](/help)'}]);
   expect(predictable(messages.render()[0]).markdown).toBe('Click on <a href=\"/help\">Help</a>');
 
   messages.push([{from: 'superduper', message: 'Click on [%1](/logout)', vars: ['Logout']}]);
-  expect(predictable(messages.render()[1]).markdown).toBe('Click on <a href=\"/logout\">Logout</a>');
+  expect(predictable(messages.render()[1]).markdown).toBe('Klikk på <a href=\"/logout\">Logout</a>');
+
+  messages.push([{from: 'superduper', message: 'Click on [logout](/logout)'}]);
+  expect(predictable(messages.render()[2]).markdown).toBe('Click on <a href=\"/logout\">logout</a>');
 });
 
 test('raw markdown', () => {

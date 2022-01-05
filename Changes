@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 6.53 Not Released
  - Fix not "eating" characters after resetting IRC colors #665
+ - Fix not translating private messages
+ - Add support for overriding IRC colors in the theme
 
 6.52 2022-01-04T08:16:00+0900
  - Fix not translating "" - the .po header

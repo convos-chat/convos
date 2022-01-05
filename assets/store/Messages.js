@@ -46,7 +46,6 @@ export default class Messages extends Reactive {
     }
 
     let prev = {};
-    const markdownMethod = this.raw ? 'lmdRaw' : 'lmd';
     return this.messages.map((msg, i) => {
       msg.index = i;
       if (msg.className) return (prev = msg); // already processed
@@ -54,7 +53,8 @@ export default class Messages extends Reactive {
       msg.dayChanged = this._dayChanged(msg, prev);
       msg.className = this._className(msg, prev);
       msg.embeds = [];
-      msg.markdown = i18n[markdownMethod](msg.message, ...(msg.vars || []));
+      msg.markdown = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
+      msg.markdown = this.raw ? i18n.raw(msg.markdown) : i18n.md(msg.markdown);
 
       return (prev = msg);
     });

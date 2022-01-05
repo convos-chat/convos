@@ -23,15 +23,15 @@ test('lmd()', () => {
 });
 
 test('md - raw', () => {
-  expect(i18n.md('> [not a link](https://convos.chat) `<a href="#cool" onclick=""></a>`', {raw: true}))
+  expect(i18n.raw('> [not a link](https://convos.chat) `<a href="#cool" onclick=""></a>`'))
     .toBe('&gt; [not a link](https://convos.chat) `&lt;a href=&quot;#cool&quot; onclick=&quot;&quot;&gt;&lt;/a&gt;`');
 });
 
 test('md - whitespace', () => {
   expect(i18n.md('')).toBe('&nbsp;');
   expect(i18n.md('', {})).toBe('&nbsp;');
-  expect(i18n.md('', {raw: true})).toBe('&nbsp;');
-  expect(i18n.md(' f   b a      r ', {raw: true})).toBe('&nbsp;f &nbsp; b a &nbsp; &nbsp; &nbsp;r&nbsp;');
+  expect(i18n.md('')).toBe('&nbsp;');
+  expect(i18n.raw(' f   b a      r ')).toBe('&nbsp;f &nbsp; b a &nbsp; &nbsp; &nbsp;r&nbsp;');
   expect(i18n.md('')).toBe('&nbsp;');
   expect(i18n.md('    ___ ___  _  ___   _____  ___'))
     .toBe('&nbsp; &nbsp; ___ ___ &nbsp;_ &nbsp;___ &nbsp; _____ &nbsp;___');
