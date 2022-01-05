@@ -86,10 +86,10 @@ test('md - em, strong', () => {
 test('md - colors', () => {
   expect(i18n.md('\x02bold text\x02')).toBe('<strong>bold text</strong>');
   expect(i18n.md('\x1ditalic text\x1d')).toBe('<em>italic text</em>');
-  expect(i18n.md('\u00035colored text\x03')).toBe('<span style="color:brown">colored text</span>');
-  expect(i18n.md('\u00034,12colored text and background\u0003')).toBe('<span style="color:red;background-color:lightblue">colored text and background</span>');
+  expect(i18n.md('\u00035colored text\x03')).toBe('<span class="text-5">colored text</span>');
+  expect(i18n.md('\u00034,12colored text and background\u0003')).toBe('<span class="bg-12 text-4">colored text and background</span>');
   expect(i18n.md('\u000302perl5\u0003 \u000307jdoe\u0003 closed pull request \u000303#19304\u0003: Pod'))
-    .toBe('<span style="color:blue">perl5</span> <span style="color:orange">jdoe</span> closed pull request <span style="color:green">#19304</span>: Pod');
+    .toBe('<span class="text-2">perl5</span> <span class="text-7">jdoe</span> closed pull request <span class="text-3">#19304</span>: Pod');
 });
 
 test('md - emojis', () => {

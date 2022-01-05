@@ -10,6 +10,7 @@
 // Not sure why "base/_index.scss" does not work
 @use 'base/root';
 @use 'base/animations';
+@use 'base/colors';
 @use 'base/flex';
 @use 'base/typography';
 

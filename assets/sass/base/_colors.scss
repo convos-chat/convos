@@ -1,0 +1,28 @@
+$colors: (
+   "0": "white",
+   "1": "black",
+   "2": "blue",
+   "3": "green",
+   "4": "red",
+   "5": "brown",
+   "6": "magenta",
+   "7": "orange",
+   "8": "yellow",
+   "9": "lightgreen",
+  "10": "cyan",
+  "11": "lightcyan",
+  "12": "lightblue",
+  "13": "pink",
+  "14": "grey",
+  "15": "lightgrey",
+);
+
+@each $index, $color in $colors {
+  .bg-#{$index} {
+    background-color: var(--color-#{$color});
+  }
+
+  .text-#{$index} {
+    color: var(--color-#{$color});
+  }
+}

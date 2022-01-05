@@ -8,25 +8,6 @@ const escape = (str, re = /[&<>'"]/g) => str.replace(re, (m) => ESCAPE[m]);
 const nbsp = (str) => str.replace(/\s$/, '&nbsp;').replace(/^\s/, '&nbsp;').replace(/\s{2}/g, ' &nbsp;');
 const tagPair = (tags) => [tags.map(n => `<${n}>`).join(''), tags.reverse().map(n => `</${n}>`).join('')];
 
-const COLORS = {
-   '0': 'white',
-   '1': 'black',
-   '2': 'blue',
-   '3': 'green',
-   '4': 'red',
-   '5': 'brown',
-   '6': 'magenta',
-   '7': 'orange',
-   '8': 'yellow',
-   '9': 'lightgreen',
-  '10': 'cyan',
-  '11': 'lightcyan',
-  '12': 'lightblue',
-  '13': 'pink',
-  '14': 'grey',
-  '15': 'lightgrey',
-};
-
 export default class I18N extends Reactive {
   constructor() {
     super();
@@ -198,12 +179,13 @@ export default class I18N extends Reactive {
     tag.content = tag.after.substring(0, end);
     tag.after = tag.after.substring(end + 1);
 
-    const style = [];
-    const color = tag.captured.replace(/\x030?(\d{1,2}).*/, '$1');
-    if (COLORS[color]) style.push('color:' + COLORS[color]);
-    const background = tag.captured.replace(/.*,(\d{1,2}).*/, '$1');
-    if (COLORS[background]) style.push('background-color:' + COLORS[background]);
-    if (style.length) tag.attrs.style = style.join(';');
+    const classNames = [];
+    tag.captured.replace(/\x030?(\d{1,2}),?(\d{1,2})?/, (_, fg, bg) => {
+      if (bg) classNames.push('bg-' + bg);
+      if (fg) classNames.push('text-' + fg);
+    });
+
+    if (classNames.length) tag.attrs.class = classNames.join(' ');
   }
 
   // https://modern.ircdocs.horse/formatting.html
