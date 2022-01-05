@@ -196,7 +196,7 @@ export default class I18N extends Reactive {
     const end = tag.after.indexOf('\x03');
     if (end == -1) return;
     tag.content = tag.after.substring(0, end);
-    tag.after = tag.after.substring(end + tag.captured.length);
+    tag.after = tag.after.substring(end + 1);
 
     const style = [];
     const color = tag.captured.replace(/\x030?(\d{1,2}).*/, '$1');
