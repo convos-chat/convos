@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+6.54 Not Released
+ - Updated representation of IRC colors
+
 6.53 2022-01-05T21:55:00+0900
  - Fix not "eating" characters after resetting IRC colors #665
  - Fix not translating private messages
