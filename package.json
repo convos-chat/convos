@@ -34,7 +34,7 @@
     "highlight.js": "^11.4.0",
     "jest": "^27.4.7",
     "js-cookie": "^3.0.1",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^3.6.10",
     "jsonhtmlify": "^0.1.0",
     "postcss-preset-env": "^7.2.3",
     "querystring": "^0.2.1",
