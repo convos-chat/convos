@@ -37,6 +37,7 @@
     "jsdoc": "^3.6.10",
     "jsonhtmlify": "^0.1.0",
     "postcss-preset-env": "^7.2.3",
+    "qs": "^6.10.3",
     "querystring": "^0.2.1",
     "rollup": "^2.63.0",
     "rollup-plugin-postcss": "^4.0.0",
