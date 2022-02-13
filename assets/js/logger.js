@@ -1,4 +1,5 @@
-const levels = ['trace', 'debug', 'info', 'warn', 'error'];
+const level = typeof process == 'undefined' || typeof process.env != 'object' ? 'info' : (process.env.LOG_LEVEL || 'quiet');
+const levels = ['trace', 'debug', 'info', 'warn', 'error', 'quiet'];
 const loggers = {};
 const nameToLevel = {};
 const noop = () => {};
@@ -20,7 +21,7 @@ function defaultLogLevel(name) {
     localStorage.setItem('logger:nameToLevel', JSON.stringify(nameToLevel));
   }
 
-  return nameToLevel[name] || nameToLevel.root || 'info';
+  return nameToLevel[name] || nameToLevel.root || level;
 }
 
 function Logger({name}) {

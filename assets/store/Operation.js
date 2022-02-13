@@ -16,7 +16,10 @@
  */
 
 import Reactive from '../js/Reactive';
+import {getLogger} from '../js/logger';
 import {is, regexpEscape} from '../js/util';
+
+const log = getLogger('api');
 
 export default class Operation extends Reactive {
   constructor(params) {
@@ -91,7 +94,7 @@ export default class Operation extends Reactive {
       return this.update({err, res, status: err ? 'error' : 'success'});
     }).catch(err => {
       if (err.type) err = err.type;
-      console.error(this.req.url + ' FAILED ' + err);
+      log.error(this.req.url + ' FAILED ' + err);
       this.update({res: {body: {errors: [{message: String(err)}]}, headers: [], status: '599'}, status: 'error'});
       return this.error(Array.isArray(err) ? err : 'Failed fetching operationId "' + this.id + '": ' + err);
     }).finally(() => {

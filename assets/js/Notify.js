@@ -1,4 +1,7 @@
+import {getLogger} from './logger';
 import Reactive from './Reactive';
+
+const log = getLogger('notify');
 
 export default class Notify extends Reactive {
   constructor() {
@@ -74,7 +77,7 @@ export default class Notify extends Reactive {
   }
 
   _showInConsole(message, params) {
-    console.info('[Notify]', message, params);
+    log.info('[Notify]', message, params);
     return {...params, body: message, close: () => {}, target: 'console'};
   }
 }
