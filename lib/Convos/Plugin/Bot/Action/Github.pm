@@ -85,6 +85,7 @@ sub _github_event_pull_request {
 
   my $action = $payload->{action};
   return unless any { $action eq $_ } qw(closed opened reopened);
+  return if $payload->{sender}{login} =~ m!\bdependabot\b!;
 
   return sprintf '%s %s pull request #%s in %s: %s - %s', $payload->{sender}{login}, $action,
     $payload->{pull_request}{number}, $payload->{repository}{name},
