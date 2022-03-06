@@ -1,5 +1,5 @@
 package Convos::Controller::ConnectionProfile;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Core::Connection;
 use Mojo::JSON qw(false true);
@@ -20,7 +20,7 @@ sub list {
   );
 }
 
-sub remove {
+async sub remove {
   return unless my $self = shift->openapi->valid_input;
   return $self->reply->errors([], 401) unless my $user = $self->backend->user;
   return $self->reply->errors('Only admins can delete connection profiles.', 403)
@@ -40,11 +40,11 @@ sub remove {
   return $self->reply->errors('You must have at least one connection profile.', 400)
     if $core->n_connection_profiles <= 1;
 
-  return $core->remove_connection_profile_p($profile)
-    ->then(sub { $self->render(openapi => {message => 'Deleted.'}) });
+  await $core->remove_connection_profile_p($profile);
+  return $self->render(openapi => {message => 'Deleted.'});
 }
 
-sub save {
+async sub save {
   return unless my $self = shift->openapi->valid_input;
   return $self->reply->errors([], 401) unless my $user = $self->backend->user;
   return $self->reply->errors('Only admins can list users.', 403)
@@ -56,11 +56,11 @@ sub save {
   my $profile = $core->connection_profile({%$json, id => undef, url => $url});
 
   if ($json->{is_default}) {
-    $core->settings->default_connection($url->clone)
+    await $core->settings->default_connection($url->clone)
       ->forced_connection($json->{is_forced} ? true : false)->save_p;
   }
 
-  $profile->save_p($json)->then(sub { $self->render(openapi => shift) });
+  $self->render(openapi => await $profile->save_p($json));
 }
 
 1;

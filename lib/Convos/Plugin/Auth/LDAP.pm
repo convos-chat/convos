@@ -1,5 +1,5 @@
 package Convos::Plugin::Auth::LDAP;
-use Mojo::Base 'Convos::Plugin::Auth';
+use Mojo::Base 'Convos::Plugin::Auth', -async_await;
 
 use Convos::Util qw(require_module);
 use Mojo::Promise;
@@ -52,7 +52,7 @@ sub _ldap {
   return $ldap;
 }
 
-sub _login_p {
+async sub _login_p {
   my ($self, $c, $params) = @_;
 
   my $p    = Mojo::Promise->new;
@@ -60,29 +60,27 @@ sub _login_p {
   $ldap->bind($self->_bind_params($params),
     callback => sub { $self->_disconnect($ldap); $p->resolve(@_) });
 
-  return $p->then(sub {
-    my $ldap_msg = shift;
-    my $core     = $c->app->core;
-    my $user     = $core->get_user($params);
+  my $ldap_msg = await $p;
+  my $core     = $c->app->core;
+  my $user     = $core->get_user($params);
 
-    $c->log->debug(sprintf "[LDAP/%s] code=%s, exists=%s",
-      $params->{email}, $ldap_msg->code, $user ? 'yes' : 'no');
+  $c->log->debug(sprintf "[LDAP/%s] code=%s, exists=%s",
+    $params->{email}, $ldap_msg->code, $user ? 'yes' : 'no');
 
-    # Try to fallback to local user on error
-    if ($ldap_msg->code) {
-      return $user if $user and $user->validate_password($params->{password});
-      return Mojo::Promise->reject('Invalid email or password.');
-    }
+  # Try to fallback to local user on error
+  if ($ldap_msg->code) {
+    return $user if $user and $user->validate_password($params->{password});
+    return Mojo::Promise->reject('Invalid email or password.');
+  }
 
-    # All good if user exists
-    return $user if $user;
+  # All good if user exists
+  return $user if $user;
 
-    # Create new user, since authenticated by LDAP
-    $c->log->debug(sprintf '[LDAP/%s] code=%s, created=yes', $params->{email}, $ldap_msg->code);
-    $user = $core->user($params);
-    $user->set_password($params->{password});
-    return $user->save_p;
-  });
+  # Create new user, since authenticated by LDAP
+  $c->log->debug(sprintf '[LDAP/%s] code=%s, created=yes', $params->{email}, $ldap_msg->code);
+  $user = $core->user($params);
+  $user->set_password($params->{password});
+  return $user->save_p;
 }
 
 sub _disconnect {

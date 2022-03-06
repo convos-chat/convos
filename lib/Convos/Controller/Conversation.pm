@@ -1,10 +1,10 @@
 package Convos::Controller::Conversation;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Date 'dt';
 use Mojo::JSON qw(false true);
 
-sub mark_as_read {
+async sub mark_as_read {
   my $self         = shift->openapi->valid_input or return;
   my $conversation = $self->backend->conversation({});
 
@@ -14,9 +14,8 @@ sub mark_as_read {
   }
 
   $conversation->notifications(0)->unread(0);
-  $self->stash('connection')->save_p->then(sub {
-    $self->render(openapi => {});
-  });
+  await $self->stash('connection')->save_p;
+  $self->render(openapi => {});
 }
 
 sub list {
@@ -33,7 +32,7 @@ sub list {
   $self->render(openapi => {conversations => \@conversations});
 }
 
-sub messages {
+async sub messages {
   my $self         = shift->openapi->valid_input or return;
   my $conversation = $self->backend->conversation({});
   my %query;
@@ -56,7 +55,7 @@ sub messages {
       if abs(dt($query{after}) - dt($query{before})) > 86400 * 365;
   }
 
-  $conversation->messages_p(\%query)->then(sub { $self->render(openapi => shift) });
+  $self->render(openapi => await $conversation->messages_p(\%query));
 }
 
 1;

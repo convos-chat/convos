@@ -1,5 +1,5 @@
 package Convos::Controller::Events;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Util qw(logf);
 use List::Util qw(any);
@@ -74,24 +74,23 @@ sub webhook {
 
 sub _err {
   my ($self, $err, $data) = @_;
+  $err =~ s!\sat\s\S+.*!!s;
+
   my $res = {errors => [{message => $err}]};
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = $RESPONSE_EVENT_NAME{$data->{method}} || $data->{method} || 'unknown';
   $self->send({json => $res});
 }
 
-sub _event_load {
+async sub _event_load {
   my ($self, $data) = @_;
-  my $id = $data->{id} || time;
-
-  $self->backend->user->get_p($data->{params} || {})->then(sub {
-    my $user     = shift;
-    my $settings = $self->app->core->settings;
-    $user->{default_connection} = $settings->default_connection_safe->to_string;
-    $user->{forced_connection}  = $settings->forced_connection;
-    $user->{video_service}      = $settings->video_service;
-    $self->send({json => {event => 'load', id => $id, user => $user}});
-  });
+  my $id       = $data->{id} || time;
+  my $user     = await $self->backend->user->get_p($data->{params} || {});
+  my $settings = $self->app->core->settings;
+  $user->{default_connection} = $settings->default_connection_safe->to_string;
+  $user->{forced_connection}  = $settings->forced_connection;
+  $user->{video_service}      = $settings->video_service;
+  $self->send({json => {event => 'load', id => $id, user => $user}});
 }
 
 sub _event_ping {
@@ -101,7 +100,7 @@ sub _event_ping {
   $self->send({json => {event => 'pong', id => $id, ts => $ts}});
 }
 
-sub _event_send {
+async sub _event_send {
   my ($self, $data) = @_;
 
   return $self->_err('Invalid input.', $data)
@@ -110,16 +109,12 @@ sub _event_send {
   return $self->_err('Connection not found.', $data)
     unless my $connection = $self->backend->user->get_connection($data->{connection_id});
 
-  return $connection->send_p($data->{conversation_id} // '', $data->{message})->then(sub {
-    my $res = shift;
-    $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
-    $res ||= {};
-    $res->{event} = 'sent';
-    $res->{$_} ||= $data->{$_} for keys %$data;
-    $self->send({json => $res});
-  })->catch(sub {
-    $self->_err(shift, $data);
-  });
+  my $res = await $connection->send_p($data->{conversation_id} // '', $data->{message});
+  $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');
+  $res ||= {};
+  $res->{event} = 'sent';
+  $res->{$_} ||= $data->{$_} for keys %$data;
+  $self->send({json => $res});
 }
 
 1;

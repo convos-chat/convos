@@ -73,18 +73,22 @@ sub _exception {
   my ($c, $err) = @_;
   $c->stash->{lang} ||= 'en';
 
+  state $openapi = sub {
+    my $errors = shift;
+    $_->{message} =~ s!\sat\s\S+.*!!s for @$errors;
+    return openapi => {errors => $errors};
+  };
+
   if (ref $err eq 'HASH') {
     $c->app->log->error(Mojo::JSON::encode_json($err));
     return $c->render(
-      status  => delete $err->{status} || 500,
-      openapi =>
-        {errors => $err->{errors} || [{message => $err->{message} || "$err", path => '/'}]},
+      status => delete $err->{status} || 500,
+      $openapi->($err->{errors} || [{message => $err->{message}, path => '/'}]),
     );
   }
   elsif ($c->openapi->spec) {
     $c->app->log->error($err);
-    $err =~ s!\sat\s\S+.*!!s;
-    return $c->render(openapi => {errors => [{message => "$err", path => '/'}]}, status => 500);
+    return $c->render($openapi->([{message => "$err", path => '/'}]), status => 500);
   }
   else {
     return $EXCEPTION_HELPER->($c, $err);

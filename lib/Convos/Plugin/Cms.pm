@@ -1,5 +1,5 @@
 package Convos::Plugin::Cms;
-use Mojo::Base 'Convos::Plugin';
+use Mojo::Base 'Convos::Plugin', -async_await;
 
 use Convos::Date 'dt';
 use Mojo::ByteStream;
@@ -273,10 +273,10 @@ sub _rewrite_document {
   $doc->{toc}            = \@toc;
 }
 
-sub _scan_for_blogs_p {
+async sub _scan_for_blogs_p {
   my ($self, $app) = @_;
 
-  return Mojo::IOLoop->subprocess->run_p(sub {
+  my $blogs = await Mojo::IOLoop->subprocess->run_p(sub {
     my @blogs;
     for my $year ($app->core->home->child(qw(content blog))->list({dir => 1})->each) {
       return unless $year->basename =~ m!^(\d{4})$!;
@@ -284,11 +284,11 @@ sub _scan_for_blogs_p {
     }
 
     return [sort { $b->{ts} <=> $a->{ts} } @blogs];
-  })->then(sub {
-    my $blogs = Mojo::Collection->new(@{$_[0]});
-    $app->defaults('cms.blogs' => $blogs);
-    return $blogs;
   });
+
+  $blogs = Mojo::Collection->new(@$blogs);
+  $app->defaults('cms.blogs' => $blogs);
+  return $blogs;
 }
 
 1;

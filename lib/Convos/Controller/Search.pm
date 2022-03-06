@@ -1,13 +1,14 @@
 package Convos::Controller::Search;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Date qw(dt);
+use List::Util qw(pairs);
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(trim);
 
 use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 365;
 
-sub messages {
+async sub messages {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
@@ -24,24 +25,17 @@ sub messages {
   return $self->render(openapi => {messages => [], end => true}) unless @conversations;
 
   my @p = map { (Mojo::Promise->resolve($_), $_->messages_p($query)) } @conversations;
-  return Mojo::Promise->all(@p)->then(sub {
-    my @messages;
+  my @messages;
+  for (pairs await Mojo::Promise->all(@p)) {
+    my ($conversation, $res) = map { $_->[0] } @$_;
 
-    while (@_) {
-      my ($conversation, $res) = map { $_->[0] } shift @_, shift @_;
-      push @messages, map {
-        +{
-          %$_,
-          connection_id   => $conversation->connection->id,
-          conversation_id => $conversation->id
-        }
-      } @{$res->{messages}};
-    }
+    push @messages, map {
+      +{%$_, connection_id => $conversation->connection->id, conversation_id => $conversation->id};
+    } @{$res->{messages}};
+  }
 
-    @messages = sort { $a->{ts} cmp $b->{ts} } @messages;
-
-    $self->render(openapi => {messages => \@messages, end => false});
-  });
+  @messages = sort { $a->{ts} cmp $b->{ts} } @messages;
+  $self->render(openapi => {messages => \@messages, end => false});
 }
 
 sub _make_query {

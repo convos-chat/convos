@@ -1,10 +1,11 @@
 package Convos::Plugin::Bot;
-use Mojo::Base 'Convos::Plugin';
+use Mojo::Base 'Convos::Plugin', -async_await;
 
 use Convos::Core::Connection;
 use Convos::Util qw($CHANNEL_RE generate_secret pretty_connection_name require_module yaml);
 use Mojo::JSON::Pointer;
 use Mojo::Util qw(camelize);
+use Syntax::Keyword::Try;
 
 use constant LOAD_INTERVAL => $ENV{CONVOS_BOT_LOAD_INTERVAL} || 10;
 
@@ -162,7 +163,7 @@ sub _on_state {
   $connection->_write_p("MODE $event->{nick} +B\r\n") if $type eq 'info' and $event->{nick};
 }
 
-sub _register_user {
+async sub _register_user {
   my ($self, $core, $config) = @_;
 
   # Prevent bot from becoming the admin user
@@ -179,14 +180,16 @@ sub _register_user {
   # Register bot account
   $password ||= generate_secret;
   $user = $core->user({email => $config->{email}})->role(give => 'bot')->set_password($password);
-  $user->save_p->then(sub {
+
+  try {
+    await $user->save_p;
     $core->log->info(qq(Created bot account $config->{email} with password "$password".))
       unless $self->config->get('/generic/password');
     $self->user($user)->_user_is_registered;
-  })->catch(sub {
-    my $err = shift;
+  }
+  catch ($err) {
     $core->log->error(qq(Couln't create bot account $config->{email}: $err));
-  });
+  }
 }
 
 sub _run_actions_with_message {

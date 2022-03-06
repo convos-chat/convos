@@ -1,5 +1,5 @@
 package Convos::Plugin::Auth;
-use Mojo::Base 'Mojolicious::Plugin';
+use Mojo::Base 'Convos::Plugin', -async_await;
 
 use Mojo::JSON qw(encode_json false true);
 use Mojo::Util;
@@ -68,7 +68,7 @@ created a custom plugin.
 
 =head2 auth.login_p
 
-  $p = $c->auth->login_p(\%credentials)->then(sub { my $user = shift });
+  $user = await $c->auth->login_p(\%credentials);
 
 Used to login a user. C<%credentials> normally contains an C<email> and
 C<password>.
@@ -81,7 +81,7 @@ Used to log out a user.
 
 =head2 auth.register
 
-  $p = $c->auth->register(\%credentials)->then(sub { my $user = shift });
+  $user = await $c->auth->register(\%credentials);
 
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.

@@ -1,7 +1,9 @@
 package Convos::Controller::Files;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
-sub get {
+use Syntax::Keyword::Try;
+
+async sub get {
   my $self = shift;
   my $user = $self->app->core->get_user_by_uid($self->stash('uid'));
   my $file = $self->_file(id => $self->stash('fid'), user => $user);
@@ -15,34 +17,34 @@ sub get {
     = qr{^(application/javascript|audio/|image/(gif|jpeg|png)|text/plain|video/)};
 
   return $self->reply->not_found unless $file->user;    # invalid uid
-  return $file->load_p->then(sub {
-    return $self->reply->not_found unless eval { $file->filename };    # invalid fid
-    return $self->reply->not_found if $file->write_only;
+  await $file->load_p;
 
-    my $ct = $file->mime_type;
-    my $h  = $self->res->headers;
-    $h->cache_control('max-age=86400');
+  return $self->reply->not_found unless eval { $file->filename };    # invalid fid
+  return $self->reply->not_found if $file->write_only;
 
-    my $format = $self->stash('format') || '';
-    return $self->render(file => file => $file) if !$format and $ct =~ m!$type_can_be_embedded!;
+  my $ct = $file->mime_type;
+  my $h  = $self->res->headers;
+  $h->cache_control('max-age=86400');
 
-    $h->content_type($ct);
-    $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"])
-      unless $ct =~ m!$type_can_be_viewed!;
-    return $self->reply->asset($file->asset);
-  });
+  my $format = $self->stash('format') || '';
+  return $self->render(file => file => $file) if !$format and $ct =~ m!$type_can_be_embedded!;
+
+  $h->content_type($ct);
+  $h->content_disposition(qq[attachment; filename="@{[$file->filename]}"])
+    unless $ct =~ m!$type_can_be_viewed!;
+  return $self->reply->asset($file->asset);
 }
 
-sub list {
+async sub list {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
   my %params = map { ($_ => $self->param($_)) } qw(after before limit);
-  return $user->core->backend->files_p($user, \%params)
-    ->then(sub { $self->render(openapi => shift) });
+  my $files  = await $user->core->backend->files_p($user, \%params);
+  $self->render(openapi => $files);
 }
 
-sub remove {
+async sub remove {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
@@ -50,17 +52,19 @@ sub remove {
   return $self->render(openapi => {deleted => 0}) unless @ids;
 
   my ($backend, @errors) = ($user->core->backend);
-  return Mojo::Promise->all(
-    map {
-      $backend->delete_object_p($self->_file(id => $_, user => $user))
-        ->catch(sub { push @errors, shift })
-    } @ids
-  )->then(sub {
-    return $self->render(openapi => {deleted => @ids - @errors});
-  });
+  for my $id (@ids) {
+    try {
+      await $backend->delete_object_p($self->_file(id => $id, user => $user));
+    }
+    catch ($err) {
+      push @errors, $err;
+    }
+  }
+
+  return $self->render(openapi => {deleted => @ids - @errors});
 }
 
-sub upload {
+async sub upload {
   my $self = shift;
 
   # TODO: Move this to Mojolicious::Plugin::OpenAPI
@@ -89,9 +93,8 @@ sub upload {
     $meta{filename} = "IMG_$n.jpg";
   }
 
-  return $self->_file(%meta, asset => $asset, user => $self->backend->user)->save_p->then(sub {
-    return $self->render(openapi => {files => [shift]});
-  });
+  my $file = await $self->_file(%meta, asset => $asset, user => $self->backend->user)->save_p;
+  $self->render(openapi => {files => [$file]});
 }
 
 sub _file {

@@ -1,9 +1,12 @@
 package Convos::Controller::Connection;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
+use Syntax::Keyword::Try;
 use Mojo::Util 'trim';
 
-sub create {
+my $dummy_p = Mojo::Promise->resolve;
+
+async sub create {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
   my $json = $self->req->json;
@@ -18,18 +21,17 @@ sub create {
   }
 
   return $self->reply->errors('Missing "host" in URL', 400) unless $url->host;
-  return $self->backend->connection_create_p($url)->then(
-    sub {
-      my $connection = shift;
-      $connection->on_connect_commands($json->{on_connect_commands} || []);
-      $connection->wanted_state($json->{wanted_state}) if $json->{wanted_state};
-      $connection->connect_p->catch(sub { });
-      $self->render(openapi => $connection);
-    },
-    sub {
-      $self->reply->errors(shift || 'Could not create connection.', 400);
-    },
-  );
+
+  try {
+    my $connection = await $self->backend->connection_create_p($url);
+    $connection->on_connect_commands($json->{on_connect_commands} || []);
+    $connection->wanted_state($json->{wanted_state}) if $json->{wanted_state};
+    $connection->connect_p->catch(sub { });
+    $self->render(openapi => $connection);
+  }
+  catch ($err) {
+    $self->reply->errors($err, 400);
+  }
 }
 
 sub list {
@@ -44,30 +46,29 @@ sub list {
   $self->render(openapi => {connections => \@connections});
 }
 
-sub remove {
+async sub remove {
   my $self = shift->openapi->valid_input or return;
   my $user = $self->backend->user        or return $self->reply->errors([], 401);
 
-  return $user->remove_connection_p($self->stash('connection_id'))->then(sub {
-    $self->render(openapi => {});
-  });
+  await $user->remove_connection_p($self->stash('connection_id'));
+  $self->render(openapi => {});
 }
 
-sub update {
+async sub update {
   my $self         = shift->openapi->valid_input or return;
   my $user         = $self->backend->user        or return $self->reply->errors([], 401);
   my $json         = $self->req->json;
   my $wanted_state = $json->{wanted_state} || '';
   my ($connection, $nick);
 
-  eval {
+  try {
     $connection = $user->get_connection($self->stash('connection_id'));
     $connection->url->host or die 'Connection not found.';
     $connection->wanted_state($wanted_state) if $wanted_state;
-    1;
-  } or do {
+  }
+  catch ($err) {
     return $self->reply->errors('Connection not found.', 404);
-  };
+  }
 
   if (my $cmds = $json->{on_connect_commands}) {
     $cmds = [map { trim $_} @$cmds];
@@ -93,20 +94,20 @@ sub update {
     $nick = '' if $nick && $connection->nick eq $nick;
   }
 
-  return $connection->reconnect_delay(0)->url($url)->save_p->then(sub {
-    return
-        $wanted_state eq 'connected'    ? $connection->connect_p->catch(\&_err_failed_dependency)
-      : $wanted_state eq 'disconnected' ? $connection->disconnect_p->catch(\&_err_failed_dependency)
-      : $wanted_state eq 'reconnect'    ? $connection->reconnect_p->catch(\&_err_failed_dependency)
-      :                                   undef;
-  })->then(sub {
-    $connection->send_p('', "/nick $nick")->catch(sub { }) if $nick;
-    $self->render(openapi => $connection);
-  });
-}
+  await $connection->reconnect_delay(0)->url($url)->save_p;
 
-sub _err_failed_dependency {
-  die {errors => [{message => "$_[0]", path => '/wanted_state'}], status => 424};
+  try {
+    await $wanted_state eq 'connected'  ? $connection->connect_p
+      : $wanted_state eq 'disconnected' ? $connection->disconnect_p
+      : $wanted_state eq 'reconnect'    ? $connection->reconnect_p
+      :                                   $dummy_p;
+    $connection->send_p('', "/nick $nick")->catch(sub { }) if $nick;    # Do not care if this fails
+    $self->render(openapi => $connection);
+  }
+  catch ($err) {
+    $self->reply->exception(
+      {errors => [{message => "$err", path => '/wanted_state'}], status => 424});
+  }
 }
 
 sub _url_has_changed {

@@ -1,73 +1,65 @@
 package Convos::Controller::Cms;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Util qw(is_true);
 use Mojo::File qw(path);
 use Pod::Simple::Search;
 
-sub blog_entry {
+async sub blog_entry {
   my $self  = shift;
   my $stash = $self->stash;
   my ($year, $mon, $mday, $name) = @$stash{qw(year mon mday name)};
   my @path = ('blog', $year, sprintf '%04s-%02s-%02s-%s', $year, $mon, $mday, $name);
 
-  return $self->cms->document_p(\@path)->then(sub {
-    my $doc = shift;
-    return $self->reply->not_found unless $doc->{body};
-    $self->_meta_to_social($doc->{meta});
-    $self->_render_doc(blog_entry => $doc);
-  });
+  my $doc = await $self->cms->document_p(\@path);
+  return $self->reply->not_found unless $doc->{body};
+
+  $self->_meta_to_social($doc->{meta});
+  return $self->_render_doc(blog_entry => $doc);
 }
 
-sub blog_list {
-  my $self = shift;
-
-  return $self->cms->blogs_p({page => $self->param('p')})->then(sub {
-    my $blogs = shift;
-    $_->{meta}{url} = $self->url_for('blog_entry', $_->{meta})->to_abs for @$blogs;
-    $self->res->headers->remove('X-Provider-Name');
-    $self->render('blog_list', blogs => $blogs);
-  });
+async sub blog_list {
+  my $self  = shift;
+  my $blogs = await $self->cms->blogs_p({page => $self->param('p')});
+  $_->{meta}{url} = $self->url_for('blog_entry', $_->{meta})->to_abs for @$blogs;
+  $self->res->headers->remove('X-Provider-Name');
+  $self->render('blog_list', blogs => $blogs);
 }
 
-sub doc {
+async sub doc {
   my $self = shift;
   my @path = ('doc', split '/', $self->stash('file'));
   $path[-1] = sprintf 'index.%s', $self->stash('format') || 'html' if $path[-1] eq 'index';
 
-  return $self->cms->document_p(\@path)->then(sub {
-    my $doc = shift;
-    $self->stash(format => $doc->{format})               if $doc->{format};
-    return $self->redirect_to($doc->{meta}{redirect_to}) if $doc->{meta}{redirect_to};
-    return $self->_render_doc(cms => $doc)               if $doc->{body};
+  my $doc = await $self->cms->document_p(\@path);
+  $self->stash(format => $doc->{format})               if $doc->{format};
+  return $self->redirect_to($doc->{meta}{redirect_to}) if $doc->{meta}{redirect_to};
+  return $self->_render_doc(cms => $doc)               if $doc->{body};
 
-    shift @path;    # remove "doc"
-    my $format = $path[-1] =~ s!\.(txt|yaml)$!! ? $1 : 'html';
-    $self->stash(format => $format);
+  shift @path;    # remove "doc"
+  my $format = $path[-1] =~ s!\.(txt|yaml)$!! ? $1 : 'html';
+  $self->stash(format => $format);
 
-    my $module       = join '::', @path;
-    my $metacpan_url = "https://metacpan.org/pod/$module";
-    $self->stash(module => $module);
-    $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
+  my $module       = join '::', @path;
+  my $metacpan_url = "https://metacpan.org/pod/$module";
+  $self->stash(module => $module);
+  $self->social(canonical => $metacpan_url) unless $module =~ m!^Convos!;
 
-    my $path = is_true('ENV:CONVOS_CMS_PERLDOC')
-      && Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
-    return $self->_render_perldoc($path) if $path and -r $path;
+  my $path = is_true('ENV:CONVOS_CMS_PERLDOC')
+    && Pod::Simple::Search->new->find($module, map { $_, "$_/pods" } @INC);
+  return $self->_render_perldoc($path) if $path and -r $path;
 
-    return $self->redirect_to($metacpan_url) if $module =~ m![A-Z]!;
-    return $self->reply->not_found;
-  });
+  return $self->redirect_to($metacpan_url) if $module =~ m![A-Z]!;
+  return $self->reply->not_found;
 }
 
-sub index {
+async sub index {
   my $self   = shift;
   my $format = $self->stash('format') || 'html';
 
-  return $self->cms->document_p(["index.$format"])->then(sub {
-    my $doc = shift;
-    return $self->_render_doc(cms => $doc) if $doc->{body};
-    return $self->render('app');
-  });
+  my $doc = await $self->cms->document_p(["index.$format"]);
+  return $self->_render_doc(cms => $doc) if $doc->{body};
+  return $self->render('app');
 }
 
 sub _meta_to_social {

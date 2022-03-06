@@ -1,5 +1,5 @@
 package Convos::Controller::Admin;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Util qw(disk_usage);
 use Mojo::JSON qw(false true);
@@ -15,13 +15,15 @@ sub settings_get {
   $self->render(openapi => $settings);
 }
 
-sub settings_update {
+async sub settings_update {
   my $self = shift->openapi->valid_input or return;
   return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
 
   my ($err, $json) = $self->_clean_json($self->req->json);
   return $self->reply->errors($err, 400) if @$err;
-  return $self->app->core->settings->save_p($json)->then(sub { $self->render(openapi => shift) });
+
+  my $settings = await $self->app->core->settings->save_p($json);
+  return $self->render(openapi => $settings);
 }
 
 sub _clean_json {

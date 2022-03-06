@@ -1,10 +1,11 @@
 package Convos::Controller::User;
-use Mojo::Base 'Mojolicious::Controller';
+use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Mojo::DOM;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(hmac_sha1_sum trim);
 use Socket qw(inet_aton AF_INET);
+use Syntax::Keyword::Try;
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
 use constant RELOAD                => $ENV{MOJO_WEBPACK_LAZY} ? 1 : 0;
@@ -60,18 +61,15 @@ sub generate_invite_link {
   return $self->render(openapi => {existing => $existing, expires => $expires, url => $invite_url});
 }
 
-sub get {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
-
-  return $user->get_p($self->req->url->query->to_hash)->then(sub {
-    my $user     = shift;
-    my $settings = $self->app->core->settings;
-    $user->{default_connection} = $settings->default_connection_safe->to_string;
-    $user->{forced_connection}  = $settings->forced_connection;
-    $user->{video_service}      = $settings->video_service;
-    $self->render(openapi => $user);
-  });
+async sub get {
+  my $self     = shift->openapi->valid_input or return;
+  my $user     = $self->backend->user        or return $self->reply->errors([], 401);
+  my $info     = await $user->get_p($self->req->url->query->to_hash);
+  my $settings = $self->app->core->settings;
+  $info->{default_connection} = $settings->default_connection_safe->to_string;
+  $info->{forced_connection}  = $settings->forced_connection;
+  $info->{video_service}      = $settings->video_service;
+  $self->render(openapi => $info);
 }
 
 sub list {
@@ -82,33 +80,30 @@ sub list {
   $self->render(openapi => {users => $users});
 }
 
-sub login {
+async sub login {
   my $self = shift->openapi->valid_input or return;
 
-  return $self->auth->login_p($self->_clean_json)->then(
-    sub {
-      my $user = shift;
-      $self->session(email => $user->email)->render(openapi => $user);
-    },
-    sub {
-      $self->reply->errors(shift, 400);
-    },
-  );
+  try {
+    my $user = await $self->auth->login_p($self->_clean_json);
+    $self->session(email => $user->email)->render(openapi => $user);
+  }
+  catch ($err) {
+    $self->reply->exception({message => $err, status => 400});
+  }
 }
 
-sub logout {
+async sub logout {
   my $self = shift;    # Not a big deal if it's ->openapi->valid_input or not
 
   return $self->reply->exception('Invalid csrf token')
     unless +($self->param('csrf') // 'does_not_match') eq $self->csrf_token;
 
-  return $self->auth->logout_p({})->then(sub {
-    $self->session({expires => 1});
-    return $self->redirect_to('/login');
-  });
+  await $self->auth->logout_p({});
+  $self->session({expires => 1});
+  return $self->redirect_to('/login');
 }
 
-sub register {
+async sub register {
   my $self = shift->openapi->valid_input or return;
   my $json = $self->_clean_json;
   my $user = $self->app->core->get_user($json->{email});
@@ -129,20 +124,17 @@ sub register {
     }
 
     # Update existing user
-    return $self->_update_user($json, $user) if $user;
+    return await $self->_update_user_p($json, $user) if $user;
   }
 
   # Register new user
-  return $self->auth->register_p($json)->then(sub {
-    $user = shift;
-    $user->role(give => 'admin') if $self->app->core->n_users == 1;
-    $self->session(email => $user->email);
-    $self->backend->connection_create_p($self->app->core->settings->default_connection->clone);
-  })->then(sub {
-    my $connection = shift;
-    $connection->connect_p->catch(sub { });
-    $self->render(openapi => $user);
-  });
+  $user = await $self->auth->register_p($json);
+  $user->role(give => 'admin') if $self->app->core->n_users == 1;
+  $self->session(email => $user->email);
+  my $connection = await $self->backend->connection_create_p(
+    $self->app->core->settings->default_connection->clone);
+  $connection->connect_p->catch(sub { });    # Do not are if this fails
+  $self->render(openapi => $user);
 }
 
 sub register_html {
@@ -155,20 +147,19 @@ sub register_html {
   $self->render('app');
 }
 
-sub remove {
+async sub remove {
   my $self = shift->openapi->valid_input           or return;
   my $user = $self->_get_user_from_param('delete') or return;
 
   return $self->reply->errors('You are the only user left.', 400)
     if @{$self->app->core->users} <= 1;
 
-  return $self->app->core->remove_user_p($user)->then(sub {
-    delete $self->session->{email} if $user->email eq $self->session('email');
-    $self->render(openapi => {message => 'Deleted.'});
-  });
+  await $self->app->core->remove_user_p($user);
+  delete $self->session->{email} if $user->email eq $self->session('email');
+  $self->render(openapi => {message => 'Deleted.'});
 }
 
-sub update {
+async sub update {
   my $self = shift->openapi->valid_input           or return;
   my $user = $self->_get_user_from_param('update') or return;
   my $json = $self->_clean_json;
@@ -176,7 +167,7 @@ sub update {
   # TODO: Add support for changing email
 
   return $self->render(openapi => $user) unless %$json;
-  return $self->_update_user($json, $user);
+  return await $self->_update_user_p($json, $user);
 }
 
 sub _add_invite_token_to_params {
@@ -295,17 +286,16 @@ sub _register_html_handle_invite_url {
   return $self->stash(existing_user => $user ? 1 : 0);
 }
 
-sub _update_user {
+async sub _update_user_p {
   my ($self, $json, $user) = @_;
 
   $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
   $user->roles($json->{roles})           if $json->{roles} and $self->user_has_admin_rights;
   $user->set_password($json->{password}) if $json->{password};
-  $user->save_p->then(sub {
-    my $session_email = $self->session('email');
-    $self->session(email => $user->email) if !$session_email or $user->email eq $session_email;
-    $self->render(openapi => $user);
-  });
+  await $user->save_p;
+  my $session_email = $self->session('email');
+  $self->session(email => $user->email) if !$session_email or $user->email eq $session_email;
+  $self->render(openapi => $user);
 }
 
 1;
