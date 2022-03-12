@@ -37,8 +37,10 @@ sub dictionary {
   );
 }
 
-sub generate_invite_link {
+async sub generate_invite_link {
   my $self = shift->openapi->valid_input or return;
+
+  await $self->backend->user_p;    # Need to load the user before checking for admin rights
   return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
 
   my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
@@ -62,8 +64,8 @@ sub generate_invite_link {
 }
 
 async sub get {
-  my $self     = shift->openapi->valid_input or return;
-  my $user     = $self->backend->user        or return $self->reply->errors([], 401);
+  my $self     = shift->openapi->valid_input  or return;
+  my $user     = await $self->backend->user_p or return $self->reply->errors([], 401);
   my $info     = await $user->get_p($self->req->url->query->to_hash);
   my $settings = $self->app->core->settings;
   $info->{default_connection} = $settings->default_connection_safe->to_string;
@@ -72,10 +74,13 @@ async sub get {
   $self->render(openapi => $info);
 }
 
-sub list {
-  my $self       = shift->openapi->valid_input or return;
+async sub list {
+  my $self = shift->openapi->valid_input or return;
+
+  await $self->backend->user_p;    # Need to load the user before checking for admin rights
   my $admin_from = $self->user_has_admin_rights
     or return $self->reply->errors('Only admins can list users.', 403);
+
   my $users = $self->app->core->users;
   $self->render(openapi => {users => $users});
 }
@@ -128,7 +133,7 @@ async sub register {
   }
 
   # Register new user
-  $user = await $self->auth->register_p($json);
+  $user = $self->stash->{user} = await $self->auth->register_p($json);
   $user->role(give => 'admin') if $self->app->core->n_users == 1;
   $self->session(email => $user->email);
   my $connection = await $self->backend->connection_create_p(
@@ -137,19 +142,19 @@ async sub register {
   $self->render(openapi => $user);
 }
 
-sub register_html {
+async sub register_html {
   my $self = shift;
 
   my $conn_url = $self->param('uri');
-  return if $conn_url and $self->_register_html_conn_url_redirect($conn_url);
+  return if $conn_url and await $self->_register_html_conn_url_redirect_p($conn_url);
 
   $self->_register_html_handle_invite_url;
   $self->render('app');
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input           or return;
-  my $user = $self->_get_user_from_param('delete') or return;
+  my $self = shift->openapi->valid_input                   or return;
+  my $user = await $self->_get_user_from_param_p('delete') or return;
 
   return $self->reply->errors('You are the only user left.', 400)
     if @{$self->app->core->users} <= 1;
@@ -160,8 +165,8 @@ async sub remove {
 }
 
 async sub update {
-  my $self = shift->openapi->valid_input           or return;
-  my $user = $self->_get_user_from_param('update') or return;
+  my $self = shift->openapi->valid_input                   or return;
+  my $user = await $self->_get_user_from_param_p('update') or return;
   my $json = $self->_clean_json;
 
   # TODO: Add support for changing email
@@ -217,12 +222,11 @@ sub _existing_conversation {
   return $conn->get_conversation(lc $conversation_name);
 }
 
-sub _get_user_from_param {
+async sub _get_user_from_param_p {
   my ($self, $op) = @_;
 
-  my $user = $self->backend->user or return $self->reply->errors([], 401);
+  return $self->reply->errors([], 401) unless my $user = await $self->backend->user_p;
   return $user if $user->email eq $self->_email;
-
   return $self->reply->errors("Only admins can $op other users.", 403)
     unless $self->user_has_admin_rights;
 
@@ -244,10 +248,10 @@ sub _is_valid_invite_token {
   return 0;
 }
 
-sub _register_html_conn_url_redirect {
+async sub _register_html_conn_url_redirect_p {
   my $self     = shift;
   my $conn_url = Mojo::URL->new(shift);
-  my $user     = $self->backend->user or return;
+  my $user     = await $self->backend->user_p or return undef;
 
   my $existing_connection = $self->_existing_connection($conn_url, $user);
   my $existing_conversation
@@ -288,6 +292,7 @@ sub _register_html_handle_invite_url {
 
 async sub _update_user_p {
   my ($self, $json, $user) = @_;
+  await $self->backend->user_p;    # Need to load the user before checking for admin rights
 
   $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
   $user->roles($json->{roles})           if $json->{roles} and $self->user_has_admin_rights;

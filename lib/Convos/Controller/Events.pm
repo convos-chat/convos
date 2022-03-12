@@ -16,10 +16,10 @@ our @WEBHOOK_NETWORKS = split /\s*,\s*/,
 
 my %RESPONSE_EVENT_NAME = (ping => 'pong', send => 'sent');
 
-sub start {
+async sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
-  return $self->_err('Need to log in first.', {method => 'handshake'})->finish(1008)
-    unless my $user = $self->backend->user;
+  my $user = await $self->backend->user_p
+    or return $self->_err('Need to log in first.', {method => 'handshake'})->finish(1008);
 
   # Used by Convos::Util->logf()
   $self->{log} = $self->log;
@@ -85,7 +85,7 @@ sub _err {
 async sub _event_load {
   my ($self, $data) = @_;
   my $id       = $data->{id} || time;
-  my $user     = await $self->backend->user->get_p($data->{params} || {});
+  my $user     = await $self->stash('user')->get_p($data->{params} || {});
   my $settings = $self->app->core->settings;
   $user->{default_connection} = $settings->default_connection_safe->to_string;
   $user->{forced_connection}  = $settings->forced_connection;
@@ -107,7 +107,7 @@ async sub _event_send {
     unless $data->{connection_id} and length $data->{message};
 
   return $self->_err('Connection not found.', $data)
-    unless my $connection = $self->backend->user->get_connection($data->{connection_id});
+    unless my $connection = $self->stash('user')->get_connection($data->{connection_id});
 
   my $res = await $connection->send_p($data->{conversation_id} // '', $data->{message});
   $res = $res->TO_JSON if UNIVERSAL::can($res, 'TO_JSON');

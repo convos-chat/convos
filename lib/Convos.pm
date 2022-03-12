@@ -147,12 +147,6 @@ sub _before_dispatch {
       || $base_url->scheme eq 'https' ? 1 : 0);
   $c->res->headers->header('X-Provider-Name', 'ConvosApp');
 
-  # Keep track of remote address
-  my $user           = $c->backend->user;
-  my $remote_address = $user && $c->tx->remote_address;
-  $user->remote_address($remote_address)->save_p
-    if $user and $user->remote_address ne $remote_address;
-
   # Used when registering the first user
   $c->stash(first_user => !$c->app->core->n_users);
 

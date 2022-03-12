@@ -2,8 +2,8 @@ package Convos::Controller::Url;
 use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 async sub check_for_updates {
-  my $self = shift->openapi->valid_input or return;
-  $self->backend->user                   or return $self->stash(status => 401);
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
 
   my $user_agent = $self->req->headers->user_agent;
   my $ua         = $self->linkembedder->ua;
@@ -29,8 +29,9 @@ sub err {
 async sub info {
   my $self = shift->openapi->valid_input or return;
   my $url  = $self->param('url');
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
 
-  if (!$self->backend->user) {
+  if (!$user) {
     return $self->stash(status => 401)
       ->respond_to(json => {json => {errors => []}}, any => {text => ''});
   }

@@ -6,10 +6,11 @@ use Mojo::JSON qw(false true);
 
 async sub mark_as_read {
   my $self         = shift->openapi->valid_input or return;
+  my $user         = await $self->backend->user_p;
   my $conversation = $self->backend->conversation({});
 
   unless ($conversation) {
-    return $self->reply->errors([],                        401) unless $self->backend->user;
+    return $self->reply->errors([],                        401) unless $user;
     return $self->reply->errors('Conversation not found.', 404);
   }
 
@@ -18,9 +19,9 @@ async sub mark_as_read {
   $self->render(openapi => {});
 }
 
-sub list {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+async sub list {
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
   my @conversations;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
@@ -34,11 +35,12 @@ sub list {
 
 async sub messages {
   my $self         = shift->openapi->valid_input or return;
+  my $user         = await $self->backend->user_p;
   my $conversation = $self->backend->conversation({});
   my %query;
 
   unless ($conversation) {
-    return $self->reply->errors([], 401) unless $self->backend->user;
+    return $self->reply->errors([], 401) unless $user;
     return $self->render(openapi => {messages => [], end => true});
   }
 

@@ -2,16 +2,16 @@ package Convos::Controller::Notifications;
 use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 async sub messages {
-  my $self  = shift->openapi->valid_input or return;
-  my $user  = $self->backend->user        or return $self->reply->errors([], 401);
+  my $self  = shift->openapi->valid_input  or return;
+  my $user  = await $self->backend->user_p or return $self->reply->errors([], 401);
   my %query = map { defined $self->param($_) ? ($_, $self->param($_)) : () } qw(limit match);
   my $res   = await $user->notifications_p(\%query);
   $self->render(openapi => {end => $res->{end}, messages => $res->{messages}});
 }
 
-sub read {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+async sub read {
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
 
   $user->connections->map(sub { shift->conversations->map(notifications => 0) });
   $self->render(openapi => {});

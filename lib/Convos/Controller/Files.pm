@@ -36,8 +36,8 @@ async sub get {
 }
 
 async sub list {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
 
   my %params = map { ($_ => $self->param($_)) } qw(after before limit);
   my $files  = await $user->core->backend->files_p($user, \%params);
@@ -45,8 +45,8 @@ async sub list {
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input or return;
-  my $user = $self->backend->user        or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
 
   my @ids = split ',', $self->param('fid');
   return $self->render(openapi => {deleted => 0}) unless @ids;
@@ -70,11 +70,10 @@ async sub upload {
   # TODO: Move this to Mojolicious::Plugin::OpenAPI
   # Handle "Maximum message size exceeded"
   my $error = $self->req->error;
-  $self->reply->errors([[$error->{message}, '/file']], 400) if $error;
-
+  return $self->reply->errors([[$error->{message}, '/file']], 400) if $error;
   return unless $self->openapi->valid_input;
-  return $self->reply->errors([], 401) unless my $user = $self->backend->user;
 
+  my $user   = await $self->backend->user_p or return $self->reply->errors([], 401);
   my $upload = $self->req->upload('file');
   my $err;
   return $self->reply->errors([[$err, '/file']], 400)
@@ -93,7 +92,7 @@ async sub upload {
     $meta{filename} = "IMG_$n.jpg";
   }
 
-  my $file = await $self->_file(%meta, asset => $asset, user => $self->backend->user)->save_p;
+  my $file = await $self->_file(%meta, asset => $asset, user => $user)->save_p;
   $self->render(openapi => {files => [$file]});
 }
 

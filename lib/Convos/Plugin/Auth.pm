@@ -10,13 +10,20 @@ sub register {
   $app->helper('auth.login_p'    => \&_login_p);
   $app->helper('auth.logout_p'   => \&_logout_p);
   $app->helper('auth.register_p' => \&_register_p);
-  $app->helper('backend.user'    => \&_backend_user);
+  $app->helper('backend.user_p'  => \&_backend_user_p);
 }
 
-sub _backend_user {
-  my $c = shift;
-  return undef unless my $email = shift || $c->session('email');
-  return $c->app->core->get_user({email => $email});
+async sub _backend_user_p {
+  my $c     = shift;
+  my $email = shift || $c->session('email')              or return undef;
+  my $user  = $c->app->core->get_user({email => $email}) or return undef;
+
+  # Keep track of remote address
+  my $remote_address = $user && $c->tx->remote_address;
+  $user->remote_address($remote_address)->save_p unless $user->remote_address eq $remote_address;
+
+  # Save the user to stash for easier access later on
+  return $c->stash->{user} = $user;
 }
 
 sub _login_p {
@@ -93,13 +100,14 @@ Used to log out a user.
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.
 
-=head2 backend.user
+=head2 backend.user_p
 
-  $user = $c->backend->user($email);
-  $user = $c->backend->user;
+  $user = await $c->backend->user_p($email);
+  $user = await $c->backend->user_p;
 
 Used to return a L<Convos::User> object representing the logged in user
-or a user with email C<$email>.
+or a user with email C<$email>. This helper will also store the user
+object in L<Mojolicious::Controller/stash> under the "user" key.
 
 =head1 METHODS
 

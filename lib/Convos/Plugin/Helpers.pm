@@ -6,6 +6,7 @@ use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json false true);
 use Mojo::Util qw(b64_decode url_unescape);
+use Syntax::Keyword::Try;
 
 my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
 my $EXCEPTION_HELPER;
@@ -30,7 +31,7 @@ sub register {
 
 sub _backend_conversation {
   my ($c, $args) = @_;
-  my $user            = $c->backend->user($args->{email}) or return;
+  my $user            = $c->stash('user') or return;
   my $conversation_id = url_unescape $args->{conversation_id} || $c->stash('conversation_id') || '';
 
   my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
@@ -43,7 +44,7 @@ sub _backend_conversation {
 
 sub _backend_connection_create_p {
   my ($c, $url) = @_;
-  my $user = $c->backend->user;
+  return Mojo::Promise->reject('User required.') unless my $user = $c->stash('user');
 
   return Mojo::Promise->reject('URL need a valid host.')
     unless my $name = pretty_connection_name($url);
@@ -144,7 +145,7 @@ sub _user_has_admin_rights {
 
   # Normal request from web
   unless ($x_local_secret) {
-    my $admin_user = $c->backend->user;
+    my $admin_user = $c->stash('user');
     return +($admin_user && $admin_user->role(has => 'admin')) ? 'user' : '';
   }
 

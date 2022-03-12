@@ -4,11 +4,11 @@ use Mojo::Base 'Mojolicious::Controller', -async_await;
 use Convos::Core::Connection;
 use Mojo::JSON qw(false true);
 
-sub list {
-  return unless my $self = shift->openapi->valid_input;
-  return $self->reply->errors([], 401) unless $self->backend->user;
-
+async sub list {
+  my $self       = shift->openapi->valid_input  or return;
+  my $user       = await $self->backend->user_p or return $self->reply->errors([], 401);
   my $admin_from = $self->user_has_admin_rights;
+
   return $self->render(
     openapi => {
       profiles => $self->app->core->connection_profiles->map(sub {
@@ -21,8 +21,8 @@ sub list {
 }
 
 async sub remove {
-  return unless my $self = shift->openapi->valid_input;
-  return $self->reply->errors([], 401) unless my $user = $self->backend->user;
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can delete connection profiles.', 403)
     unless $self->user_has_admin_rights;
 
@@ -45,8 +45,8 @@ async sub remove {
 }
 
 async sub save {
-  return unless my $self = shift->openapi->valid_input;
-  return $self->reply->errors([], 401) unless my $user = $self->backend->user;
+  my $self = shift->openapi->valid_input  or return;
+  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can list users.', 403)
     unless $self->user_has_admin_rights;
 
