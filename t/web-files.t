@@ -52,7 +52,7 @@ subtest 'set up connection' => sub {
     ->server_write_ok(['welcome.irc'])->client_event_ok('_irc_event_rpl_welcome')->process_ok;
 };
 
-subtest 'handle_message_to_paste_p' => sub {
+subtest 'message_to_paste' => sub {
   my %send = (connection_id => $connection->id, conversation_id => 'superwoman', method => 'send');
   $send{message} = substr +(join('', map {chr} reverse 20 .. 126) x 13), 0, 512 * 3;
   $t->websocket_ok('/events')->send_ok({json => \%send})

@@ -98,8 +98,6 @@ sub startup {
   $self->hook(around_action   => \&_around_action);
   $self->hook(after_build_tx  => \&_after_build_tx);
   $self->hook(before_dispatch => \&_before_dispatch);
-
-  $self->core->backend->on(message_to_paste => $self->config('file_class'));
   $self->core->start;
 }
 
@@ -161,10 +159,6 @@ sub _config {
   my $self   = shift;
   my $config = $self->config;
 
-  # CONVOS_FILE_CLASS is an EXPERIMENTAL feature
-  $config->{file_class} = $ENV{CONVOS_FILE_CLASS} || 'Convos::Core::User::File';
-  require_module $config->{file_class};
-
   $config->{backend} ||= $ENV{CONVOS_BACKEND} || 'Convos::Core::Backend::File';
   $config->{home}    ||= $ENV{CONVOS_HOME}
     ||= path(File::HomeDir->my_home, qw(.local share convos))->to_string;
@@ -211,11 +205,12 @@ sub _plugins {
 
   my @plugins = (
     qw(Convos::Plugin::Auth Convos::Plugin::Bot Convos::Plugin::Cms),
-    qw(Convos::Plugin::I18N Convos::Plugin::Helpers),
+    qw(Convos::Plugin::I18N Convos::Plugin::Helpers Convos::Plugin::Paste),
     qw(Convos::Plugin::Themes),
   );
 
   push @plugins, split /,/, $ENV{CONVOS_PLUGINS} if $ENV{CONVOS_PLUGINS};
+
   for (@plugins) {
     my ($name, $config) = split '\?', $_, 2;
     $self->plugin($name => Mojo::Parameters->new($config // '')->to_hash);

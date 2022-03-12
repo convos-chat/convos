@@ -953,8 +953,8 @@ sub _send_message_p {
   return Mojo::Promise->reject('Cannot send empty message.') unless @$messages;
 
   if ($self->profile->too_long_messages($messages)) {
-    return $self->user->core->backend->emit_to_class_p(message_to_paste => $self, $message)
-      ->then(sub { $self->_send_message_p($target, shift->to_message) });
+    return $self->user->core->backend->emit_p(message_to_paste => $self, $message)
+      ->then(sub { $self->_send_message_p($target, shift) });
   }
 
   for (@$messages) {

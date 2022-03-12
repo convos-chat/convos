@@ -6,7 +6,7 @@ use Syntax::Keyword::Try;
 async sub get {
   my $self = shift;
   my $user = $self->app->core->get_user_by_uid($self->stash('uid'));
-  my $file = $self->_file(id => $self->stash('fid'), user => $user);
+  my $file = $self->user->file(id => $self->stash('fid'), user => $user);
 
   # Make sure we don't get 501 Not implemented if this is an API request
   $self->stash(handler => 'ep', openapi => 'Should never be rendered.');
@@ -54,7 +54,7 @@ async sub remove {
   my ($backend, @errors) = ($user->core->backend);
   for my $id (@ids) {
     try {
-      await $backend->delete_object_p($self->_file(id => $id, user => $user));
+      await $backend->delete_object_p($self->user->file(id => $id, user => $user));
     }
     catch ($err) {
       push @errors, $err;
@@ -92,13 +92,8 @@ async sub upload {
     $meta{filename} = "IMG_$n.jpg";
   }
 
-  my $file = await $self->_file(%meta, asset => $asset, user => $user)->save_p;
+  my $file = await $self->user->file(%meta, asset => $asset, user => $user)->save_p;
   $self->render(openapi => {files => [$file]});
-}
-
-sub _file {
-  my $self = shift;
-  return $self->app->config('file_class')->new(log => $self->log, @_);
 }
 
 1;

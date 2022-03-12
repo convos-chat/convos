@@ -35,16 +35,4 @@ my $deleted;
 $backend->delete_object_p($user)->then(sub { $deleted = shift })->$wait_success('delete_object_p');
 is $deleted, $user, 'delete_object_p';
 
-my $err;
-$backend->emit_to_class_p('foo')->catch(sub { $err = shift })->$wait_success('emit_to_class_p');
-is $err, 'No event handler for foo.', 'emit_to_class_p';
-
-my @args;
-sub handle_foo_p { shift; @args = @_; return Mojo::Promise->resolve }
-
-$backend->on(foo => 'main');
-$backend->emit_to_class_p(foo => 3, 4)->$wait_success('emit_to_class_p');
-isa_ok shift(@args), 'Convos::Core::Backend';
-is_deeply \@args, [3, 4], 'emit_to_class_p arguments';
-
 done_testing;

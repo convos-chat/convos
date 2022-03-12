@@ -4,6 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Mojo::Collection;
 use Mojo::JSON qw(false true);
 use Mojo::Promise;
+use Scalar::Util qw(blessed);
 
 sub connections_p {
   return Mojo::Promise->resolve([]);
@@ -19,17 +20,22 @@ sub delete_object_p {
   return Mojo::Promise->resolve($obj);
 }
 
+sub emit_p {
+  my ($self, $name) = (shift, shift);
+  my $s = $self->{events}{$name} || [];
+  return Mojo::Promise->reject("Nothing is subscribing to $name") unless @$s;
+
+  for my $cb (reverse @$s) {
+    my $p = $self->$cb(@_);
+    return $p if $p and blessed $p and $p->isa('Mojo::Promise');
+  }
+
+  return Mojo::Promise->reject("No promise was returned for $name") unless @$s;
+}
+
 sub files_p {
   my ($self, $obj) = @_;
   return Mojo::Promise->resolve(Mojo::Collection->new);
-}
-
-sub emit_to_class_p {
-  my ($self, $name, @args) = @_;
-  return Mojo::Promise->reject("No event handler for $name.")
-    unless my $class = $self->{event_to_class}{$name};
-  my $method = "handle_${name}_p";
-  return $class->$method($self, @args);
 }
 
 sub load_object_p {
@@ -43,13 +49,6 @@ sub messages_p {
 }
 
 sub new { shift->SUPER::new(@_)->tap('_setup') }
-
-sub on {
-  my ($self, $name, $target) = @_;
-  return $self->SUPER::on($name, $target) if ref $target eq 'CODE';
-  $self->{event_to_class}{$name} = $target;
-  return $self;
-}
 
 sub notifications_p {
   my ($self, $user, $query) = @_;
@@ -141,6 +140,17 @@ This method will delete all messages for a given conversation.
 
 This method is called to remove a given object from persistent storage.
 
+=head2 emit_p
+
+  $p = $backend->emit_p($name => @args);
+
+Will call each event handler registered in reverse, and return the first
+promise returned by a callback. A rejected promise will be returned if no event
+is registered or no callbacks returns a promise.
+
+  $backend->on(cool_beans => sub { return Mojo::Promise->resolve if rand > 0.5 });
+  $backend->emit_p('cool_beans')->then(sub { ... });
+
 =head2 files_p
 
   $p = $backend->files_p($user, {after => '...', limit => 60})->then(sub { my $c = shift });
@@ -149,39 +159,11 @@ Gets a list of uploaded files for a L<Convos::Core::User>. C<after> optional,
 but can be set to a given file C<id> to provide pagination. C<$c> is a
 L<Mojo::Collection> containing file information.
 
-=head2 emit_to_class_p
-
-  $p = $backend->emit_to_class_p($name => @params);
-
-Used instead of L<Mojo::EventEmitter/emit> when you want to call a method in a
-class, registered with L</on>.
-
-  # Register a handler
-  $backend->on(message_to_paste => "Convos::Plugin::Files::File");
-
-  # Dispatch to the handler
-  # Will call Convos::Plugin::Files::File->handle_message_to_paste_p()
-  # with arguments ("Convos::Plugin::Files::File", $backend, @args)
-  $backend->emit_to_class_p(message_to_paste => @args);
-
-See L<Convos::Plugin::Files::File/handle_message_to_paste_p> for example
-handler.
-
 =head2 load_object_p
 
   $p = $backend->load_object_p($obj)->then(sub { my $obj = shift });
 
 This method will load C<$data> for C<$obj>.
-
-=head2 on
-
-  $backend->on(event_name => sub { my ($backend, @args) = @_ });
-  $backend->on(event_name => "Some::Class::Name");
-
-Used to register either a class or callback to be used on an event.
-
-See L<Mojo::EventEmitter/on> for the callback version, and L</emit_to_class_p>
-for the class version.
 
 =head2 messages_p
 

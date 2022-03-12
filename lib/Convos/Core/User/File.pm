@@ -8,8 +8,6 @@ use Mojo::Asset::File;
 use Mojo::File;
 use Mojo::JSON qw(false true);
 use Mojo::Path;
-use Mojo::Util qw(encode);
-use Time::HiRes qw(time);
 
 has asset    => sub { Mojo::Asset::File->new };
 has filename => sub { die 'filename() cannot be built' };
@@ -32,19 +30,6 @@ has saved => sub { Mojo::Date->new->to_datetime };
 has types => sub { state $types = Mojolicious::Types->new->type(xhtml => 'application/xhtml+xml') };
 has user  => undef;
 has write_only => sub {false};
-
-sub handle_message_to_paste_p {
-  my ($class, $backend, $connection, $message) = @_;
-  my $self = $class->new(user => $connection->user);
-
-  my $filename = $message =~ m!(\w.{4,})!m ? lc substr $1, 0, 28 : 'paste';
-  $filename =~ s![^A-Za-z-]+!_!g;
-  $filename = 'paste' if 5 > length $filename;
-  $self->filename("$filename.txt");
-  $self->asset->add_chunk(encode 'UTF-8', $message);
-
-  return $self->save_p;
-}
 
 sub load_p {
   my $self = shift;
@@ -86,10 +71,6 @@ sub save_p {
   }
 
   return $core->backend->save_object_p($self);
-}
-
-sub to_message {
-  shift->public_url->to_string;
 }
 
 sub uri {
@@ -205,15 +186,6 @@ of read by visitors on the web.
 
 =head1 METHODS
 
-=head2 handle_message_to_paste_p
-
-  $p = Convos::Core::User::File
-        ->handle_message_to_paste_p($backend, $connection, $message)
-        ->then(sub { my $file = shift });
-
-This method will be called when a L<Convos::Core::Connection> wants to create a
-paste.
-
 =head2 load_p
 
   $p = $file->load_p->then(sub { my $file = shift });
@@ -235,12 +207,6 @@ Returns a L<Mojo::Path> object useful for making a public URL.
 =head2 save_p
 
   $p = $file->save_p->then(sub { my $file = shift });
-
-=head2 to_message
-
-  $str = $file->to_message;
-
-Converts this objcet into a message you can send to a channel or user.
 
 =head2 uri
 
