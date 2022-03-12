@@ -16,7 +16,6 @@ sub register {
   $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
   $app->helper('backend.conversation'        => \&_backend_conversation);
-  $app->helper('backend.user'                => \&_backend_user);
   $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
   $app->helper('js_session'                  => \&_js_session);
   $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
@@ -40,12 +39,6 @@ sub _backend_conversation {
   my $conversation
     = $conversation_id ? $connection->get_conversation($conversation_id) : $connection->messages;
   return $c->stash(connection => $connection, conversation => $conversation)->stash('conversation');
-}
-
-sub _backend_user {
-  my $c = shift;
-  return undef unless my $email = shift || $c->session('email');
-  return $c->app->core->get_user({email => $email});
 }
 
 sub _backend_connection_create_p {
@@ -191,14 +184,6 @@ C<%args>:
     conversation_id     => "#superheroes",      # $c->stash("connection_id")
     email         => "superwoman@dc.com", # $c->session('email')
   }
-
-=head2 backend.user
-
-  $user = $c->backend->user($email);
-  $user = $c->backend->user;
-
-Used to return a L<Convos::User> object representing the logged in user
-or a user with email C<$email>.
 
 =head2 reply.errors
 

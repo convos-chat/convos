@@ -10,6 +10,13 @@ sub register {
   $app->helper('auth.login_p'    => \&_login_p);
   $app->helper('auth.logout_p'   => \&_logout_p);
   $app->helper('auth.register_p' => \&_register_p);
+  $app->helper('backend.user'    => \&_backend_user);
+}
+
+sub _backend_user {
+  my $c = shift;
+  return undef unless my $email = shift || $c->session('email');
+  return $c->app->core->get_user({email => $email});
 }
 
 sub _login_p {
@@ -85,6 +92,14 @@ Used to log out a user.
 
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.
+
+=head2 backend.user
+
+  $user = $c->backend->user($email);
+  $user = $c->backend->user;
+
+Used to return a L<Convos::User> object representing the logged in user
+or a user with email C<$email>.
 
 =head1 METHODS
 
