@@ -34,6 +34,7 @@ const socket = getSocket('/events');
 const themeManager = new ThemeManager().start();
 const user = new User({});
 
+let prevPath = route.path;
 let width = 0;
 let readyStateNotification = {closed: true};
 let title = i18n.l('Chat');
@@ -88,6 +89,11 @@ async function routeOrUserChanged(route, user) {
   await tick();
   const appOrCms = user.is(['loading', 'pending']) || document.querySelector('.cms-main') ? 'cms' : 'app';
   document.body.className = document.body.className.replace(/for-\w+/, 'for-' + appOrCms);
+
+  if (prevPath != route.path) {
+    prevPath = route.path;
+    $activeMenu = '';
+  }
 
   if (route.pathParts.length == 0) { // path = "/" or path = ""
     const url = !user.email ? '/login' : user.lastUrl || '/chat';

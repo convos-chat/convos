@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Changed to async/await
  - Replaced backend.user helper to user.load_p
  - Brought back Convos::Plugin::Paste to simplify overriding multiline message handling
+ - Fix not hiding the sidebar settings when scrolling up #689
  - Going to ignore pull requests from "dependabot" in Convos::Plugin::Bot::Action::Github
 
 6.54 2022-01-07T19:16:00+0900

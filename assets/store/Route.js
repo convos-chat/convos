@@ -1,6 +1,5 @@
 import Reactive from '../js/Reactive';
 import qs from 'qs';
-import {activeMenu} from './writable';
 import {is} from '../js/util';
 import {getLogger} from '../js/logger';
 
@@ -44,7 +43,6 @@ export default class Route extends Reactive {
     const url = this.baseUrl + path;
     if (url == this._location.href) return this;
     this._history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
-    if (!params.replace) activeMenu.set('');
     this.update({path: true})._onLocationChange({});
   }
 
@@ -108,7 +106,6 @@ export default class Route extends Reactive {
 
   _onLocationChange(e) {
     if (!this.enabled) return;
-    activeMenu.set('');
     const abs = this._location.href;
     const pathname = abs.substr(this.baseUrl.length);
     const url = pathname.split('#')[0].split('?');
