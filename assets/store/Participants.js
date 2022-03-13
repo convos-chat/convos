@@ -8,7 +8,8 @@ export default class Participants extends Reactive {
     super();
 
     function sorter(a, b) {
-      return b.modes.operator || false - a.modes.operator || false
+      return b.modes.admin || false - a.modes.admin || false
+          || b.modes.operator || false - a.modes.operator || false
           || b.modes.voice || false - a.modes.voice || false
           || a.nick.localeCompare(b.nick);
     }

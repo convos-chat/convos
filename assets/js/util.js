@@ -327,7 +327,7 @@ export function loadScript(src) {
  * @returns {String} Example: "has-mode-operator has-mode-voice"
  */
 export function modeClassNames(modes) {
-  return Object.keys(modes).filter(m => modes[m]).sort().map(m => { return 'has-mode-' + m }).join(' ');
+  return Object.keys(modes).filter(m => modes[m]).sort().map(m => 'has-mode-' + m).join(' ');
 }
 
 /**
