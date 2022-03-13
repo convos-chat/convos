@@ -6,7 +6,7 @@ use Mojo::JSON qw(false true);
 
 async sub mark_as_read {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->backend->user_p;
+  my $user         = await $self->user->load_p;
   my $conversation = $self->backend->conversation({});
 
   unless ($conversation) {
@@ -20,8 +20,8 @@ async sub mark_as_read {
 }
 
 async sub list {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   my @conversations;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
@@ -35,7 +35,7 @@ async sub list {
 
 async sub messages {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->backend->user_p;
+  my $user         = await $self->user->load_p;
   my $conversation = $self->backend->conversation({});
   my %query;
 

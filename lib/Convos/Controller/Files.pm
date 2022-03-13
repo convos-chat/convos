@@ -36,8 +36,8 @@ async sub get {
 }
 
 async sub list {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
 
   my %params = map { ($_ => $self->param($_)) } qw(after before limit);
   my $files  = await $user->core->backend->files_p($user, \%params);
@@ -45,8 +45,8 @@ async sub list {
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
 
   my @ids = split ',', $self->param('fid');
   return $self->render(openapi => {deleted => 0}) unless @ids;
@@ -73,7 +73,7 @@ async sub upload {
   return $self->reply->errors([[$error->{message}, '/file']], 400) if $error;
   return unless $self->openapi->valid_input;
 
-  my $user   = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $user   = await $self->user->load_p or return $self->reply->errors([], 401);
   my $upload = $self->req->upload('file');
   my $err;
   return $self->reply->errors([[$err, '/file']], 400)

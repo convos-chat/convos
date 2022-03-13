@@ -10,20 +10,7 @@ sub register {
   $app->helper('auth.login_p'    => \&_login_p);
   $app->helper('auth.logout_p'   => \&_logout_p);
   $app->helper('auth.register_p' => \&_register_p);
-  $app->helper('backend.user_p'  => \&_backend_user_p);
-}
-
-async sub _backend_user_p {
-  my $c     = shift;
-  my $email = shift || $c->session('email')              or return undef;
-  my $user  = $c->app->core->get_user({email => $email}) or return undef;
-
-  # Keep track of remote address
-  my $remote_address = $user && $c->tx->remote_address;
-  $user->remote_address($remote_address)->save_p unless $user->remote_address eq $remote_address;
-
-  # Save the user to stash for easier access later on
-  return $c->stash->{user} = $user;
+  $app->helper('user.load_p'     => \&_user_load_p);
 }
 
 sub _login_p {
@@ -59,6 +46,19 @@ sub _register_p {
 
   return Mojo::Promise->reject('Email is taken.') if $core->get_user($args);
   return $core->user($args)->set_password($args->{password})->save_p;
+}
+
+async sub _user_load_p {
+  my $c     = shift;
+  my $email = shift || $c->session('email')              or return undef;
+  my $user  = $c->app->core->get_user({email => $email}) or return undef;
+
+  # Keep track of remote address
+  my $remote_address = $user && $c->tx->remote_address;
+  $user->remote_address($remote_address)->save_p unless $user->remote_address eq $remote_address;
+
+  # Save the user to stash for easier access later on
+  return $c->stash->{user} = $user;
 }
 
 1;
@@ -100,10 +100,10 @@ Used to log out a user.
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.
 
-=head2 backend.user_p
+=head2 user.load_p
 
-  $user = await $c->backend->user_p($email);
-  $user = await $c->backend->user_p;
+  $user = await $c->user->load_p($email);
+  $user = await $c->user->load_p;
 
 Used to return a L<Convos::User> object representing the logged in user
 or a user with email C<$email>. This helper will also store the user

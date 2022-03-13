@@ -7,8 +7,8 @@ use Mojo::Util 'trim';
 my $dummy_p = Mojo::Promise->resolve;
 
 async sub create {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   my $json = $self->req->json;
 
   my $url = Mojo::URL->new($json->{url} || '');
@@ -35,8 +35,8 @@ async sub create {
 }
 
 async sub list {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   my @connections;
 
   for my $connection (sort { $a->name cmp $b->name } @{$user->connections}) {
@@ -47,16 +47,16 @@ async sub list {
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
 
   await $user->remove_connection_p($self->stash('connection_id'));
   $self->render(openapi => {});
 }
 
 async sub update {
-  my $self         = shift->openapi->valid_input  or return;
-  my $user         = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self         = shift->openapi->valid_input or return;
+  my $user         = await $self->user->load_p   or return $self->reply->errors([], 401);
   my $json         = $self->req->json;
   my $wanted_state = $json->{wanted_state} || '';
   my ($connection, $nick);

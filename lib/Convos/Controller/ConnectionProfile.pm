@@ -5,8 +5,8 @@ use Convos::Core::Connection;
 use Mojo::JSON qw(false true);
 
 async sub list {
-  my $self       = shift->openapi->valid_input  or return;
-  my $user       = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self       = shift->openapi->valid_input or return;
+  my $user       = await $self->user->load_p   or return $self->reply->errors([], 401);
   my $admin_from = $self->user_has_admin_rights;
 
   return $self->render(
@@ -21,8 +21,8 @@ async sub list {
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can delete connection profiles.', 403)
     unless $self->user_has_admin_rights;
 
@@ -45,8 +45,8 @@ async sub remove {
 }
 
 async sub save {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can list users.', 403)
     unless $self->user_has_admin_rights;
 

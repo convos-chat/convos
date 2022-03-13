@@ -8,7 +8,7 @@ use Mojo::Util qw(trim);
 async sub settings_get {
   my $self = shift->openapi->valid_input or return;
 
-  await $self->backend->user_p;    # Need to load the user before checking for admin rights
+  await $self->user->load_p;    # Need to load the user before checking for admin rights
   return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
 
   my $core     = $self->app->core;
@@ -20,7 +20,7 @@ async sub settings_get {
 async sub settings_update {
   my $self = shift->openapi->valid_input or return;
 
-  await $self->backend->user_p;    # Need to load the user before checking for admin rights
+  await $self->user->load_p;    # Need to load the user before checking for admin rights
   return $self->reply->errors([], 401) unless $self->user_has_admin_rights;
 
   my ($err, $json) = $self->_clean_json($self->req->json);

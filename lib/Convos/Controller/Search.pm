@@ -9,8 +9,8 @@ use Mojo::Util qw(trim);
 use constant DEFAULT_AFTER => $ENV{CONVOS_DEFAULT_SEARCH_AFTER} || 86400 * 365;
 
 async sub messages {
-  my $self = shift->openapi->valid_input  or return;
-  my $user = await $self->backend->user_p or return $self->reply->errors([], 401);
+  my $self = shift->openapi->valid_input or return;
+  my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
 
   my $query = $self->_make_query;
   return $self->render(openapi => {messages => [], end => true}) if 2 >= keys %$query;

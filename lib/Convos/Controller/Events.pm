@@ -18,7 +18,7 @@ my %RESPONSE_EVENT_NAME = (ping => 'pong', send => 'sent');
 
 async sub start {
   my $self = shift->inactivity_timeout(INACTIVE_TIMEOUT);
-  my $user = await $self->backend->user_p
+  my $user = await $self->user->load_p
     or return $self->_err('Need to log in first.', {method => 'handshake'})->finish(1008);
 
   # Used by Convos::Util->logf()
