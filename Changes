@@ -1,14 +1,45 @@
 Revision history for perl distribution Convos
 
-6.55 Not Released
+7.00 2022-03-13T17:39:00+0900
  - Bumped required Perl to 5.20
  - Changed to using async/await in the Perl code
  - Changed "raw messages" to a persistent setting
+ - Add Convos::Plugin::Auth::Header #696
  - Add styling for more user modes: "admin", "bot" and "half operator"
  - Replaced backend.user helper to user.load_p
  - Brought back Convos::Plugin::Paste to simplify overriding multiline message handling
  - Fix not hiding the sidebar settings when scrolling up #689
  - Going to ignore pull requests from "dependabot" in Convos::Plugin::Bot::Action::Github
+ - Highlights since 6.00
+   * Add /shrug command
+   * Add Dracula and GNOME color theme
+   * Add arm64 docker image
+   * Add better feedback in case TLS settings are incorrect
+   * Add connection profiles
+   * Add handler for irc:// links
+   * Add handling of AWAY
+   * Add management of paste and uploaded files
+   * Add notification sound
+   * Add support for Github Webhooks, through the bot system
+   * Add support for logging to syslog
+   * Add support for raw messages
+   * Add support for rendering IRC colors and formatting
+   * Changed from freenode to https://libera.chat
+   * Changed password handling for improved security and privacy
+   * Fix SASL EXTERNAL authentication
+   * Fix several vulnerabilities reported on https://huntr.dev/
+   * Improved handling of notification
+ - Contributors:
+   * Bryce Torcello
+   * Eugene de Beste
+   * Jan Henning Thorsen
+   * Jess Robinson
+   * Joel Berger
+   * Marcus Ramberg
+   * PeGaSuS
+   * SerHack
+   * Stig Palmquist
+   * compeak
 
 6.54 2022-01-07T19:16:00+0900
  - Updated representation of IRC colors
