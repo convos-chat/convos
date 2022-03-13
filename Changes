@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+7.01 Not Released
+ - Add option to pin a conversation
+
 7.00 2022-03-13T17:39:00+0900
  - Bumped required Perl to 5.20
  - Changed to using async/await in the Perl code

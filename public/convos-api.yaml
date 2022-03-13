@@ -80,6 +80,29 @@ paths:
           schema:
             $ref: '#/definitions/Connection'
 
+  /connection/{connection_id}/conversation/{conversation_id}:
+    post:
+      operationId: updateConversation
+      summary: Update settings for a conversation
+      tags: [ conversation ]
+      x-mojo-to: conversation#update
+      parameters:
+      - $ref: '#/parameters/connection_id'
+      - $ref: '#/parameters/conversation_id'
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            pinned:
+              type: boolean
+      responses:
+        '200':
+          description: The updated conversation object
+          schema:
+            $ref: '#/definitions/Conversation'
+
   /connection/{connection_id}/conversation/{conversation_id}/messages:
     get:
       operationId: conversationMessages
@@ -909,6 +932,9 @@ definitions:
       conversation_id:
         description: Unique identifier for the conversation
         type: string
+      pinned:
+        description: If the conversation is pinned or not
+        type: boolean
       name:
         description: Name of the room or person
         type: string

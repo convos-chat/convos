@@ -2,12 +2,14 @@ package Convos::Core::Conversation;
 use Mojo::Base -base;
 
 use Convos::Util qw($CHANNEL_RE logf);
+use Mojo::JSON qw(false true);
 use Mojo::Date;
 
 has frozen        => '';
 has info          => sub { +{} };
 has name          => sub { Carp::confess('name required in constructor') };
 has password      => '';
+has pinned        => sub {false};
 has notifications => 0;
 has topic         => '';
 has unread        => 0;
@@ -40,6 +42,7 @@ sub TO_JSON {
   $json{info}            = $self->info;
   $json{last_read}       = $self->{last_read} if $self->{last_read};    # back compat
   $json{password}        = $self->password    if $persist;
+  $json{pinned}          = $self->pinned;
   return \%json;
 }
 
@@ -94,6 +97,12 @@ The name of this conversation.
   $str = $conversation->password;
 
 The password used to join this conversation.
+
+=head2 pinned
+
+  $bool = $conversation->pinned;
+
+Allow a conversation to be sorted above other conversations.
 
 =head2 topic
 

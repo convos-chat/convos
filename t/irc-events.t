@@ -147,6 +147,7 @@ $server->subtest(
           frozen          => '',
           info            => {},
           name            => '#convos',
+          pinned          => false,
           topic           => 'Too cool!',
           unread          => 0,
           notifications   => 0,

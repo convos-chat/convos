@@ -83,6 +83,7 @@ subtest 'unread messages' => sub {
         info            => {},
         name            => '#convos',
         notifications   => 0,
+        pinned          => false,
         topic           => '',
         unread          => 42,
       }],

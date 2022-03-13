@@ -6,13 +6,9 @@ use Mojo::JSON qw(false true);
 
 async sub mark_as_read {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->user->load_p;
-  my $conversation = $self->backend->conversation({});
-
-  unless ($conversation) {
-    return $self->reply->errors([],                        401) unless $user;
-    return $self->reply->errors('Conversation not found.', 404);
-  }
+  my $user         = await $self->user->load_p   or return return $self->reply->errors([], 401);
+  my $conversation = $self->backend->conversation({})
+    or return $self->reply->errors('Conversation not found.', 404);
 
   $conversation->notifications(0)->unread(0);
   await $self->stash('connection')->save_p;
@@ -35,15 +31,11 @@ async sub list {
 
 async sub messages {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->user->load_p;
-  my $conversation = $self->backend->conversation({});
+  my $user         = await $self->user->load_p   or return return $self->reply->errors([], 401);
+  my $conversation = $self->backend->conversation({})
+    or return $self->reply->errors('Conversation not found.', 404);
+
   my %query;
-
-  unless ($conversation) {
-    return $self->reply->errors([], 401) unless $user;
-    return $self->render(openapi => {messages => [], end => true});
-  }
-
   $query{$_} = $self->param($_)
     for grep { defined $self->param($_) } qw(after around before level limit match);
   $query{limit} ||= $query{after} && $query{before} ? 200 : 60;
@@ -58,6 +50,18 @@ async sub messages {
   }
 
   $self->render(openapi => await $conversation->messages_p(\%query));
+}
+
+async sub update {
+  my $self         = shift->openapi->valid_input or return;
+  my $user         = await $self->user->load_p   or return return $self->reply->errors([], 401);
+  my $conversation = $self->backend->conversation({})
+    or return $self->reply->errors('Conversation not found.', 404);
+
+  my $json = $self->req->json;
+  $conversation->pinned($json->{pinned}) if defined $json->{pinned};
+  await $self->stash('connection')->save_p;
+  $self->render(openapi => $conversation);
 }
 
 1;
@@ -86,6 +90,10 @@ See L<https://convos.chat/api.html#op-post--connection--connection_id--conversat
 =head2 messages
 
 See L<https://convos.chat/api.html#op-get--connection--connection_id--conversation--conversation_id--messages>
+
+=head2 update
+
+See L<https://convos.chat/api.html#op-get--connection--connection_id--conversation--conversation_id--update>
 
 =head1 SEE ALSO
 

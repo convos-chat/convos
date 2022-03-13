@@ -6,147 +6,168 @@ use Mojo::Util qw(encode);
 
 my $t    = t::Helper->t;
 my $user = $t->app->core->user({email => 'superman@example.com'})->set_password('s3cret');
-$user->save_p->$wait_success('save_p');
+my $connection;
 
-$t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
-  ->status_is(200);
+subtest 'setup' => sub {
+  $user->save_p->$wait_success('save_p');
+  $t->post_ok('/api/user/login', json => {email => 'superman@example.com', password => 's3cret'})
+    ->status_is(200);
+  $user->connection({url => 'irc://localhost'})->state(connected => '');
+  $connection = $user->connection({url => 'irc://localhost'});
+};
 
-$user->connection({url => 'irc://localhost'})->state(connected => '');
+subtest 'unread count' => sub {
+  $connection->conversation({name => '#Convos', frozen => ''})->unread(42);
+  $t->get_ok('/api/conversations')->status_is(200)->json_is(
+    '/conversations' => [
+      {
+        connection_id   => 'irc-localhost',
+        conversation_id => '#convos',
+        frozen          => '',
+        info            => {},
+        name            => '#Convos',
+        pinned          => false,
+        topic           => '',
+        unread          => 42,
+        notifications   => 0,
+      },
+    ]
+  );
+};
 
-my $connection = $user->connection({url => 'irc://localhost'});
-$connection->_irc_event_privmsg({
-  command => 'privmsg',
-  prefix  => 'Supergirl!super.girl@i.love.debian.org',
-  params  => ['#Convos', 'not a superdupersuperman?']
-});
-$connection->conversation({name => '#Convos', frozen => ''})->unread(42);
-$t->get_ok('/api/conversations')->status_is(200)->json_is(
-  '/conversations' => [
-    {
-      connection_id   => 'irc-localhost',
-      conversation_id => '#convos',
-      frozen          => '',
-      info            => {},
-      name            => '#Convos',
-      topic           => '',
-      unread          => 42,
-      notifications   => 0,
-    },
-  ]
-);
+subtest 'notifications per conversation' => sub {
+  $connection->conversation({name => '#Notified', frozen => ''})->notifications(2);
+  $t->get_ok('/api/conversations')->status_is(200)->json_is(
+    '/conversations' => [
+      {
+        connection_id   => 'irc-localhost',
+        conversation_id => '#convos',
+        frozen          => '',
+        info            => {},
+        name            => '#Convos',
+        pinned          => false,
+        topic           => '',
+        unread          => 42,
+        notifications   => 0,
+      },
+      {
+        connection_id   => 'irc-localhost',
+        conversation_id => '#notified',
+        frozen          => '',
+        info            => {},
+        name            => '#Notified',
+        pinned          => false,
+        topic           => '',
+        unread          => 0,
+        notifications   => 2,
+      },
+    ]
+  );
+};
 
-$connection->conversation({name => '#Notified', frozen => ''})->notifications(2);
-$t->get_ok('/api/conversations')->status_is(200)->json_is(
-  '/conversations' => [
-    {
-      connection_id   => 'irc-localhost',
-      conversation_id => '#convos',
-      frozen          => '',
-      info            => {},
-      name            => '#Convos',
-      topic           => '',
-      unread          => 42,
-      notifications   => 0,
-    },
-    {
-      connection_id   => 'irc-localhost',
-      conversation_id => '#notified',
-      frozen          => '',
-      info            => {},
-      name            => '#Notified',
-      topic           => '',
-      unread          => 0,
-      notifications   => 2,
-    },
-  ]
-);
+subtest 'mark as read' => sub {
+  $user->connection({url => 'irc://example'})->conversation({name => '#superheroes', frozen => ''})
+    ->unread(34);
+  $t->post_ok('/api/connection/irc-localhost/conversation/%23convos/read')->status_is(200);
+  $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->json_is(
+    '/connections',
+    [
+      {
+        connection_id       => 'irc-example',
+        info                => {authenticated => false, capabilities => {}},
+        name                => 'example',
+        on_connect_commands => [],
+        service_accounts    => [qw(chanserv nickserv)],
+        state               => 'disconnected',
+        url                 => 'irc://example',
+        wanted_state        => 'connected',
+      },
+      {
+        connection_id       => 'irc-localhost',
+        info                => {authenticated => false, capabilities => {}},
+        name                => 'localhost',
+        on_connect_commands => [],
+        service_accounts    => [qw(chanserv nickserv)],
+        state               => 'connected',
+        url                 => 'irc://localhost',
+        wanted_state        => 'connected',
+      }
+    ],
+    'user connections'
+  )->json_is(
+    '/conversations',
+    [
+      {
+        connection_id   => 'irc-localhost',
+        conversation_id => '#convos',
+        frozen          => '',
+        info            => {},
+        name            => '#Convos',
+        pinned          => false,
+        topic           => '',
+        unread          => 0,
+        notifications   => 0,
+      },
+      {
+        connection_id   => 'irc-localhost',
+        conversation_id => '#notified',
+        frozen          => '',
+        info            => {},
+        name            => '#Notified',
+        pinned          => false,
+        topic           => '',
+        unread          => 0,
+        notifications   => 2,
+      },
+      {
+        connection_id   => 'irc-example',
+        conversation_id => '#superheroes',
+        frozen          => '',
+        info            => {},
+        name            => '#superheroes',
+        pinned          => false,
+        topic           => '',
+        unread          => 34,
+        notifications   => 0,
+      }
+    ],
+    'user conversations'
+  )->json_hasnt('/notifications', 'user notifications');
+};
 
+subtest 'notifications with unicode' => sub {
+  $t->get_ok('/api/notifications')->status_is(200)->json_is('/messages', []);
+  my $backend = $t->app->core->backend;
+  my $target  = $connection->get_conversation('#convos');
+  for (split /\n/, data_section qw(main notifications.log)) {
+    my ($ts, $message) = split /\s/, $_, 2;
+    $message = encode 'UTF-8', $message if utf8::is_utf8($message);
+    $backend->_add_notification($target, $ts, $message);
+  }
 
-$user->connection({url => 'irc://example'})->conversation({name => '#superheroes', frozen => ''})
-  ->unread(34);
-$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)->json_is(
-  '/connections',
-  [
-    {
-      connection_id       => 'irc-example',
-      info                => {authenticated => false, capabilities => {}},
-      name                => 'example',
-      on_connect_commands => [],
-      service_accounts    => [qw(chanserv nickserv)],
-      state               => 'disconnected',
-      url                 => 'irc://example',
-      wanted_state        => 'connected',
-    },
-    {
-      connection_id       => 'irc-localhost',
-      info                => {authenticated => false, capabilities => {}},
-      name                => 'localhost',
-      on_connect_commands => [],
-      service_accounts    => [qw(chanserv nickserv)],
-      state               => 'connected',
-      url                 => 'irc://localhost',
-      wanted_state        => 'connected',
-    }
-  ],
-  'user connections'
-)->json_is(
-  '/conversations',
-  [
-    {
-      connection_id   => 'irc-localhost',
-      conversation_id => '#convos',
-      frozen          => '',
-      info            => {},
-      name            => '#Convos',
-      topic           => '',
-      unread          => 42,
-      notifications   => 0,
-    },
-    {
-      connection_id   => 'irc-localhost',
-      conversation_id => '#notified',
-      frozen          => '',
-      info            => {},
-      name            => '#Notified',
-      topic           => '',
-      unread          => 0,
-      notifications   => 2,
-    },
-    {
-      connection_id   => 'irc-example',
-      conversation_id => '#superheroes',
-      frozen          => '',
-      info            => {},
-      name            => '#superheroes',
-      topic           => '',
-      unread          => 34,
-      notifications   => 0,
-    }
-  ],
-  'user conversations'
-)->json_hasnt('/notifications', 'user notifications');
+  $t->get_ok('/api/notifications')->status_is(200);
+  is @{$t->tx->res->json->{messages}}, 5, 'got all notifications, including utf8';
+};
 
-$t->post_ok('/api/connection/irc-localhost/conversation/%23convos/read')->status_is(200);
+subtest 'pinned' => sub {
+  $t->get_ok('/api/user?conversations=true')->status_is(200)
+    ->json_is('/conversations/0/pinned', false);
+  $t->post_ok('/api/connection/irc-localhost/conversation/%23convos', json => {pinned => 42})
+    ->status_is(400);
+  $t->post_ok('/api/connection/irc-localhost/conversation/%23convos', json => {pinned => true})
+    ->status_is(200)->json_is('/connection_id', 'irc-localhost')->json_is('/name', '#Convos')
+    ->json_is('/pinned', true);
+  $t->get_ok('/api/user?conversations=true')->status_is(200)
+    ->json_is('/conversations/0/name', '#Convos')->json_is('/conversations/0/pinned', true);
+};
 
-note 'notifications';
-$t->get_ok('/api/notifications')->status_is(200)->json_is('/messages', []);
-my $backend = $t->app->core->backend;
-my $target  = $connection->get_conversation('#convos');
-for (split /\n/, data_section qw(main notifications.log)) {
-  my ($ts, $message) = split /\s/, $_, 2;
-  $message = encode 'UTF-8', $message if utf8::is_utf8($message);
-  $backend->_add_notification($target, $ts, $message);
-}
-
-$t->get_ok('/api/notifications')->status_is(200);
-is @{$t->tx->res->json->{messages}}, 5, 'got all notifications, including utf8';
-
-note 'channel with dot';
-$user->connection({url => 'irc://example'})->conversation({name => '#a.js', frozen => ''});
-$t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
-  ->json_is('/conversations/0/name', '#a.js');
-$t->get_ok('/chat/irc-libera/%23convos')->status_is(200);
-$t->get_ok('/chat/irc-libera/%23a.js')->status_is(200);
+subtest 'channel with dot' => sub {
+  $user->connection({url => 'irc://example'})->conversation({name => '#a.js', frozen => ''});
+  $t->get_ok('/api/user?connections=true&conversations=true')->status_is(200)
+    ->json_is('/conversations/0/name', '#a.js');
+  $t->get_ok('/chat/irc-libera/%23convos')->status_is(200);
+  $t->get_ok('/chat/irc-libera/%23a.js')->status_is(200);
+};
 
 done_testing;
 
