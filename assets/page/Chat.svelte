@@ -176,7 +176,7 @@ function showPopover(e) {
         {:else if !message.waitingForResponse && message.details}
           <a href="#action:details:{message.index}"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
-        {@html message.markdown}
+        {@html message.html}
       </div>
       {#each message.embeds as embedPromise}
         {#await embedPromise}

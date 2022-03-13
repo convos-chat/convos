@@ -2,7 +2,7 @@ import Messages from '../../assets/store/Messages';
 import {i18n} from '../../assets/store/I18N';
 
 test('constructor', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   expect(messages.length).toBe(0);
   expect(messages.messages).toEqual([]);
@@ -11,7 +11,7 @@ test('constructor', () => {
 });
 
 test('clear, get, push, unshift', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   expect(messages.get(0)).toBe(undefined);
   expect(messages.get(42)).toBe(undefined);
@@ -46,7 +46,7 @@ test('clear, get, push, unshift', () => {
 });
 
 test('ts', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   messages.push([{message: 'a'}, {message: 'b', ts: '2020-02-05T01:02:03Z'}]);
   expect(messages.get(0).ts.toISOString()).toMatch(/^\d+-\d+-\d+T\d+:\d+:\d/);
@@ -54,7 +54,7 @@ test('ts', () => {
 });
 
 test('render', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   messages.push([{from: 'superduper', message: 'a', type: 'action', ts: '2020-02-01T01:02:03Z'}]);
   expect(messages.render().map(predictable)).toEqual([
@@ -62,11 +62,11 @@ test('render', () => {
       className: 'message is-type-action has-not-same-from',
       color: '#b1b26b',
       dayChanged: false,
+      html: 'a',
       embeds: [],
       from: 'superduper',
       id: 9,
       index: 0,
-      markdown: 'a',
       message: 'a',
       ts: true,
       type: 'action',
@@ -83,7 +83,7 @@ test('render', () => {
 });
 
 test('markdown', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   i18n.update({lang: 'no'});
   i18n.dictionaries.no = {
@@ -91,48 +91,42 @@ test('markdown', () => {
   };
 
   messages.push([{from: 'superduper', message: 'Click on [Help](/help)'}]);
-  expect(predictable(messages.render()[0]).markdown).toBe('Click on <a href=\"/help\">Help</a>');
+  expect(predictable(messages.render()[0]).html).toBe('Click on <a href=\"/help\">Help</a>');
 
   messages.push([{from: 'superduper', message: 'Click on [%1](/logout)', vars: ['Logout']}]);
-  expect(predictable(messages.render()[1]).markdown).toBe('Klikk på <a href=\"/logout\">Logout</a>');
+  expect(predictable(messages.render()[1]).html).toBe('Klikk på <a href=\"/logout\">Logout</a>');
 
   messages.push([{from: 'superduper', message: 'Click on [logout](/logout)'}]);
-  expect(predictable(messages.render()[2]).markdown).toBe('Click on <a href=\"/logout\">logout</a>');
+  expect(predictable(messages.render()[2]).html).toBe('Click on <a href=\"/logout\">logout</a>');
 });
 
 test('raw markdown', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
 
   messages.push([{from: 'superduper', message: 'Funny characters   [are](#are) still escaped, like <script> :)'}]);
-  expect(predictable(messages.render()[0]).markdown).toBe('Funny characters &nbsp; <a href=\"#are\">are</a> still escaped, like &lt;script&gt; :)');
+  expect(predictable(messages.render()[0]).html).toBe('Funny characters &nbsp; <a href=\"#are\">are</a> still escaped, like &lt;script&gt; :)');
 
   messages.update({raw: true});
-  expect(predictable(messages.render()[0]).markdown).toBe('Funny characters &nbsp; [are](#are) still escaped, like &lt;script&gt; :)');
+  expect(predictable(messages.render()[0]).html).toBe('Funny characters &nbsp; [are](#are) still escaped, like &lt;script&gt; :)');
 });
 
 test('expandUrlToMedia', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
   expect(messages.expandUrlToMedia).toBe(true);
 
   messages.push([{from: 'superduper', message: 'a', type: 'private'}]);
   expect(messages.render()[0].embeds.length).toBe(0);
-  expect(messages.get(0).rendered).toBe(undefined);
+  expect(messages.get(0).hasBeenSeen).toBe(undefined);
   expect(messages.render(0)[0].embeds.length).toBe(0);
-  expect(messages.get(0).rendered).toBe(true);
+  expect(messages.get(0).hasBeenSeen).toBe(true);
 
   messages.push([{from: 'superduper', message: 'https://convos.chat', type: 'private'}]);
   expect(messages.render(1)[1].embeds.length).toBe(1);
-  expect(messages.get(1).rendered).toBe(true);
-
-  expect(messages.update({expandUrlToMedia: false})).toBe(messages);
-  expect(messages.get(1).rendered).toBe(undefined);
-
-  expect(messages.render(1)[1].embeds.length).toBe(0);
-  expect(messages.render(1)[1].rendered).toBe(true);
-}); 
+  expect(messages.get(1).hasBeenSeen).toBe(true);
+});
 
 test('details', () => {
-  const messages = new Messages();
+  const messages = new Messages({connection_id: 'foo'});
   messages.push([{from: 'superduper', message: 'a', type: 'private'}]);
   messages.push([{from: 'superduper', message: 'a', type: 'error'}]);
   messages.push([{from: 'superduper', message: 'a', type: 'notice', kicker: 'superwoman'}]);

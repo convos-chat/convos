@@ -70,7 +70,7 @@ function search(msg) {
         <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
       </div>
       <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</a>
-      <div class="message__text">{@html message.markdown}</div>
+      <div class="message__text">{@html message.html}</div>
     </div>
   {/each}
 

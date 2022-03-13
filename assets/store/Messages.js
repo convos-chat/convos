@@ -6,6 +6,11 @@ import {i18n} from './I18N';
 import {jsonhtmlify} from 'jsonhtmlify';
 import {q, str2color} from '../js/util';
 
+function toHtml(raw, msg) {
+  const str = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
+  return raw ? i18n.raw(str) : i18n.md(str);
+}
+
 const EMBED_CACHE = {};
 let ID = 0;
 
@@ -40,9 +45,9 @@ export default class Messages extends Reactive {
   render(msgIndex = -1) {
     if (msgIndex != -1) {
       const msg = this.get(msgIndex);
-      if (msg && !msg.hasBeenVisible) {
+      if (msg && !msg.hasBeenSeen) {
         msg.embeds = this.raw ? [] : this._embeds(msg);
-        msg.hasBeenVisible = true;
+        msg.hasBeenSeen = true;
         this.update({messages: true});
       }
 
@@ -57,8 +62,7 @@ export default class Messages extends Reactive {
       msg.dayChanged = this._dayChanged(msg, prev);
       msg.className = this._className(msg, prev);
       msg.embeds = [];
-      msg.markdown = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
-      msg.markdown = this.raw ? i18n.raw(msg.markdown) : i18n.md(msg.markdown);
+      msg.html = toHtml(this.raw, msg);
 
       return (prev = msg);
     });
@@ -70,9 +74,12 @@ export default class Messages extends Reactive {
 
   update(params) {
     if (this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw')) {
+      const raw = params.hasOwnProperty('raw') ? params.raw : this.raw;
       for (let msg of this.messages) {
-        if (msg.hasBeenVisible) msg.embeds = this._embeds(msg);
+        if (msg.hasBeenSeen) msg.embeds = this._embeds(msg);
+        msg.html = toHtml(raw, msg);
       }
+      this.update({messages: true});
     }
 
     return super.update(params);
@@ -117,7 +124,6 @@ export default class Messages extends Reactive {
 
   _embedsPromises(p) {
     return p.map(p => {
-      console.log('_embedsPromises');
       p.finally(() => this.update({messages: true}));
       return p.catch(err => console.error('[Messages:embed]', msg, err));
     });
@@ -166,12 +172,11 @@ export default class Messages extends Reactive {
     const details = {...(msg.sent || msg)};
 
     [
-      'bubbles',           'className',   'command',    'connection_id',
-      'dispatchTo',        'color',       'dayChanged', 'hasBeenVisible',
-      'embeds',            'event',       'fresh',      'highlight',
-      'id',                'index',       'internal',   'markdown',
-      'method',            'silent',     'stopPropagation',
-      'ts',
+      'bubbles',      'className',   'command',           'connection_id',
+      'dispatchTo',   'color',       'dayChanged',        'hasBeenSeen',
+      'embeds',       'event',       'fresh',             'highlight',
+      'html',         'id',          'index',             'internal',
+      'method',       'silent',      'stopPropagation',   'ts',
     ].forEach(k => delete details[k]);
 
     return Object.keys(details).sort().join(':') == 'from:message:type' ? (msg.details = null) : (msg.details = details);
