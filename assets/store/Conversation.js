@@ -21,7 +21,7 @@ export default class Conversation extends Reactive {
 
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');
-    this.prop('ro', 'messages', new Messages({}));
+    this.prop('ro', 'messages', new Messages(params));
     this.prop('ro', 'participants', new Participants());
     this.prop('ro', 'path', route.conversationPath(params));
 

@@ -34,14 +34,13 @@ const toggleModes = [
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
-$: conversation.messages.update({raw: $form.raw_messages});
 
 onMount(async () => {
   form.set({topic: conversation.topic, want_notifications: conversation.wantNotifications});
   info.set(conversation.info);
   if (Object.keys(conversation.modes).length == 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
   await tick();
-  const fields = {};
+  const fields = {raw_messages: conversation.messages.raw};
   for (const mode of toggleModes) fields['mode_' + mode] = conversation.modes[mode] || false;
   form.set(fields);
 });
@@ -76,6 +75,7 @@ async function saveConversationSettings() {
   saveConversationSettingsOp.update({status: 'loading'});
   await saveConversationSettingsOp.on('update');
   conversation.update({wantNotifications: form.get('want_notifications') || false});
+  conversation.messages.update({raw: $form.raw_messages ? true : false});
   saveChannelModes();
   saveChannelTopic();
   await tick();

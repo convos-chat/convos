@@ -10,12 +10,16 @@ const EMBED_CACHE = {};
 let ID = 0;
 
 export default class Messages extends Reactive {
-  constructor() {
+  constructor(params) {
     super();
+
+    let keyPrefix = params.connection_id;
+    if (params.conversation_id) keyPrefix += ':' + params.conversation_id;
+
     this.prop('ro', 'length', () => this.messages.length);
     this.prop('ro', 'messages', []);
     this.prop('rw', 'expandUrlToMedia', true);
-    this.prop('rw', 'raw', false);
+    this.prop('persist', 'raw', false, {key: keyPrefix + ':raw'});
     this.embedCache = EMBED_CACHE;
   }
 
@@ -36,7 +40,7 @@ export default class Messages extends Reactive {
   render(msgIndex = -1) {
     if (msgIndex != -1) {
       const msg = this.get(msgIndex);
-      if (msg && !msg.rendered) {
+      if (msg && !this.raw && !msg.rendered) {
         msg.embeds = this._embeds(msg);
         msg.rendered = true;
         this.update({messages: true});

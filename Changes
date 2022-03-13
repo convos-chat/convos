@@ -2,7 +2,8 @@ Revision history for perl distribution Convos
 
 6.55 Not Released
  - Bumped required Perl to 5.20
- - Changed to async/await
+ - Changed to using async/await in the Perl code
+ - Changed "raw messages" to a persistent setting
  - Replaced backend.user helper to user.load_p
  - Brought back Convos::Plugin::Paste to simplify overriding multiline message handling
  - Fix not hiding the sidebar settings when scrolling up #689
