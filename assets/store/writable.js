@@ -15,7 +15,8 @@ export function generateWriteable(name, intial = '') {
     e.preventDefault();
 
     const val = aEl.href.replace(/.*#/, '');
-    if (aEl.href.indexOf('#') == 0 || aEl.href.indexOf(location.href) == 0) {
+    const loc = location.href.split('#')[0].split('?')[0];
+    if (aEl.href.indexOf('#') == 0 || aEl.href.indexOf(loc) == 0) {
       store.set(get(store) == val ? '' : val);
     }
     else {

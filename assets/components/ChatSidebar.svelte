@@ -114,8 +114,13 @@ function onFocus() {
 
 function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
-  if (iconName) return setTimeout(() => { $activeMenu = 'settings' }, 50);
-  if (e.target.closest('a')) return setTimeout(() => { $activeMenu = '' }, 50);
+  if (iconName) {
+    e.preventDefault();
+    setTimeout(() => { $activeMenu = 'settings' }, 50);
+  }
+  else if (e.target.closest('a')) {
+    setTimeout(() => { $activeMenu = '' }, 50);
+  }
 }
 
 function onSearchKeydown(e) {
