@@ -1,9 +1,10 @@
 Revision history for perl distribution Convos
 
-6.55 Not Released
+7.00 2022-03-13T17:39:00+0900
  - Bumped required Perl to 5.20
  - Changed to using async/await in the Perl code
  - Changed "raw messages" to a persistent setting
+ - Add Convos::Plugin::Auth::Header #696
  - Add styling for more user modes: "admin", "bot" and "half operator"
  - Replaced backend.user helper to user.load_p
  - Brought back Convos::Plugin::Paste to simplify overriding multiline message handling
