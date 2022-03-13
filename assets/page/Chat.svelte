@@ -182,7 +182,9 @@ function showPopover(e) {
         {#await embedPromise}
           <!-- loading embed -->
         {:then embed}
-          <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
+          {#if !messages.raw}
+            <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
+          {/if}
         {/await}
       {/each}
       {#if $popoverTarget == message.id}

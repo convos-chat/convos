@@ -40,9 +40,9 @@ export default class Messages extends Reactive {
   render(msgIndex = -1) {
     if (msgIndex != -1) {
       const msg = this.get(msgIndex);
-      if (msg && !this.raw && !msg.rendered) {
-        msg.embeds = this._embeds(msg);
-        msg.rendered = true;
+      if (msg && !msg.hasBeenVisible) {
+        msg.embeds = this.raw ? [] : this._embeds(msg);
+        msg.hasBeenVisible = true;
         this.update({messages: true});
       }
 
@@ -52,7 +52,7 @@ export default class Messages extends Reactive {
     let prev = {};
     return this.messages.map((msg, i) => {
       msg.index = i;
-      if (msg.className) return (prev = msg); // already processed
+      if (msg.embeds) return (prev = msg); // already processed
 
       msg.dayChanged = this._dayChanged(msg, prev);
       msg.className = this._className(msg, prev);
@@ -69,11 +69,10 @@ export default class Messages extends Reactive {
   }
 
   update(params) {
-    if (params.hasOwnProperty('expandUrlToMedia') && params.expandUrlToMedia != this.expandUrlToMedia) {
-      this.messages.forEach(msg => delete msg.rendered);
-    }
-    if (params.hasOwnProperty('raw') && params.raw != this.raw) {
-      this.messages.forEach(msg => delete msg.className);
+    if (this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw')) {
+      for (let msg of this.messages) {
+        if (msg.hasBeenVisible) msg.embeds = this._embeds(msg);
+      }
     }
 
     return super.update(params);
@@ -83,6 +82,11 @@ export default class Messages extends Reactive {
     [].unshift.apply(this.messages, this._fill(list));
     return this.update({messages: true});
   }
+
+  _changed(params, paramName) {
+    return params.hasOwnProperty(paramName) && params[paramName] != this[paramName];
+  }
+
 
   _className(msg, prev) {
     const classes = ['message'];
@@ -100,7 +104,7 @@ export default class Messages extends Reactive {
   _embeds(msg) {
     const p = [];
     if (this._msgDetails(msg)) p.push(Promise.resolve({className: 'le-details', details: true, nodes: [jsonhtmlify(msg.details).lastChild]}));
-    if (!this.expandUrlToMedia || msg.type == 'notice') return p;
+    if (!this.expandUrlToMedia || msg.type == 'notice') return this._embedsPromises(p);
 
     (msg.message.match(/https?:\/\/(\S+)/g) || []).forEach(url => {
       url = url.replace(/(\W)?$/, '');
@@ -108,7 +112,15 @@ export default class Messages extends Reactive {
       p.push(this.embedCache[url]);
     });
 
-    return p.map(p => p.catch(err => console.error('[Messages:embed]', msg, err)));
+    return this._embedsPromises(p);
+  }
+
+  _embedsPromises(p) {
+    return p.map(p => {
+      console.log('_embedsPromises');
+      p.finally(() => this.update({messages: true}));
+      return p.catch(err => console.error('[Messages:embed]', msg, err));
+    });
   }
 
   _fill(messages) {
@@ -154,11 +166,11 @@ export default class Messages extends Reactive {
     const details = {...(msg.sent || msg)};
 
     [
-      'bubbles',           'className',   'command',
-      'connection_id',     'dispatchTo',  'color',      'dayChanged',
+      'bubbles',           'className',   'command',    'connection_id',
+      'dispatchTo',        'color',       'dayChanged', 'hasBeenVisible',
       'embeds',            'event',       'fresh',      'highlight',
       'id',                'index',       'internal',   'markdown',
-      'method',            'rendered',    'silent',     'stopPropagation',
+      'method',            'silent',     'stopPropagation',
       'ts',
     ].forEach(k => delete details[k]);
 
