@@ -115,7 +115,8 @@ function onFocus() {
 function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
   if (iconName) {
-    e.preventDefault();
+    const aEl = e.target.closest('a');
+    if (location.href.indexOf(aEl.href) == 0) e.preventDefault();
     setTimeout(() => { $activeMenu = 'settings' }, 50);
   }
   else if (e.target.closest('a')) {
