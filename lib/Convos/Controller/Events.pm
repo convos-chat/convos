@@ -31,7 +31,7 @@ async sub start {
     "user:$uid" => sub {
       my ($backend, $event, $data) = @_;
       my $ts = Mojo::Date->new($data->{ts} || time)->to_datetime;
-      $self->logf(trace => '[ws] >>> $event %s', $data);
+      $self->logf(trace => '[ws] >>> %s %s', $event, $data);
       $self->send({json => {%$data, ts => $ts, event => $event}});
     }
   );
@@ -49,7 +49,7 @@ async sub start {
       $data->{method} ||= 'ping';
       my $method = sprintf '_event_%s', $data->{method};
       $data->{id} //= Mojo::Util::steady_time();
-      $self->logf(trace => '[ws] <<< $event %s', $data);
+      $self->logf(trace => '[ws] <<< %s %s', $method, $data);
       my $res = $self->can($method) ? $self->$method($data) : $self->_err('Invalid method.', $data);
       $res->catch(sub { $self->_err(shift, $data) }) if blessed $res and $res->can('catch');
     }
