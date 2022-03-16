@@ -50,7 +50,7 @@ sub _register_p {
 
 async sub _user_load_p {
   my $c     = shift;
-  my $email = shift || $c->session('email')              or return undef;
+  my $email = $c->session('email')                       or return undef;
   my $user  = $c->app->core->get_user({email => $email}) or return undef;
 
   # Keep track of remote address

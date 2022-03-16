@@ -4,6 +4,7 @@ use t::Helper;
 
 $ENV{CONVOS_PLUGINS} = 'Convos::Plugin::Auth::Header';
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
+$ENV{CONVOS_ADMIN}   = 'admin@convos.chat';
 
 my $t = t::Helper->t;
 
@@ -14,7 +15,6 @@ subtest 'not authorized' => sub {
 };
 
 subtest 'admin is required' => sub {
-  local $ENV{CONVOS_ADMIN} = 'admin@convos.chat';
   my %headers = ('X-Authenticated-User' => 'superman@example.com');
   $t->get_ok('/api/user', \%headers)->status_is(401);
 
@@ -23,6 +23,14 @@ subtest 'admin is required' => sub {
 
   $headers{'X-Authenticated-User'} = 'superman@example.com';
   $t->get_ok('/api/user', \%headers)->status_is(200);
+
+  $headers{'X-Authenticated-User'} = $ENV{CONVOS_ADMIN};
+  $t->websocket_ok('/events')
+    ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.');
+  $t->websocket_ok('/events', \%headers)
+    ->send_ok({json => {method => 'load', object => 'user', params => {}}})
+    ->message_ok->json_message_is('/user/email', $ENV{CONVOS_ADMIN});
+  $t->finish_ok;
 };
 
 subtest 'unable to register or login' => sub {

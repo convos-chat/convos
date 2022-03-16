@@ -21,7 +21,7 @@ async sub _user_load_p {
   return _giveup($c, debug => "Header $header is missing in request.") unless $email;
 
   my $user = $email && $core->get_user({email => $email});
-  return $user if $user;
+  return $c->stash->{user} = $user if $user;
 
   if (!$core->n_users and $self->admin_user and $email ne $self->admin_user) {
     my $admin = $self->admin_user;
@@ -29,7 +29,7 @@ async sub _user_load_p {
   }
 
   $c->app->log->info("Auto-registering user $email from header $header");
-  return $core->user({email => $email})->save_p;
+  return $c->stash->{user} = await $core->user({email => $email})->save_p;
 }
 
 sub _giveup {
@@ -72,7 +72,6 @@ header set in a reverse proxy web server, such as nginx.
 
 =head2 user.load_p
 
-  $user = await $c->user->load_p($email);
   $user = await $c->user->load_p;
 
 See L<Convos::Plugin::Auth/user.load_p> for details.
