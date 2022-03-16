@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+7.01 Not Released
+ - Fix creating connection when using Convos::Plugin::Auth::Header #696
+ - Fix loading /events when using Convos::Plugin::Auth::Header #704
+
 7.00 2022-03-13T17:39:00+0900
  - Bumped required Perl to 5.20
  - Changed to using async/await in the Perl code

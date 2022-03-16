@@ -1,16 +1,20 @@
 package Convos::Plugin::Auth;
 use Mojo::Base 'Convos::Plugin', -async_await;
 
+use Convos::Util qw(pretty_connection_name);
 use Mojo::JSON qw(encode_json false true);
 use Mojo::Util;
+use Syntax::Keyword::Try;
 
 sub register {
   my ($self, $app, $config) = @_;
 
-  $app->helper('auth.login_p'    => \&_login_p);
-  $app->helper('auth.logout_p'   => \&_logout_p);
-  $app->helper('auth.register_p' => \&_register_p);
-  $app->helper('user.load_p'     => \&_user_load_p);
+  $app->helper('auth.login_p'             => \&_login_p);
+  $app->helper('auth.logout_p'            => \&_logout_p);
+  $app->helper('auth.register_p'          => \&_register_p);
+  $app->helper('user.connection_create_p' => \&_user_connection_create_p);
+  $app->helper('user.initial_setup_p'     => \&_user_initial_setup_p);
+  $app->helper('user.load_p'              => \&_user_load_p);
 }
 
 sub _login_p {
@@ -48,6 +52,38 @@ sub _register_p {
   return $core->user($args)->set_password($args->{password})->save_p;
 }
 
+async sub _user_connection_create_p {
+  my ($c, $user, $url) = @_;
+  return Mojo::Promise->reject('URL need a valid host.')
+    unless my $name = pretty_connection_name($url);
+
+  return Mojo::Promise->reject('Connection already exists.')
+    if $user->get_connection({url => $url});
+
+  try {
+    my $connection = $user->connection({name => $name, url => $url});
+    my ($name, $password) = split /\s+/, ($url->path->[0] || ''), 2;
+    my $conversation = $name && $connection->conversation({name => $name});
+    $conversation->password($password) if length $password;
+    return await $connection->save_p;
+  }
+  catch ($err) {
+    return Mojo::Promise->reject($err);
+  }
+}
+
+async sub _user_initial_setup_p {
+  my ($c, $user) = @_;
+  my $core = $c->app->core;
+  $user->role(give => 'admin') if $core->n_users == 1;
+
+  my $url        = $core->settings->default_connection->clone;
+  my $connection = await _user_connection_create_p($c, $user, $url);
+  $connection->connect_p->catch(sub { });    # Do not are if this fails
+
+  return $user;
+}
+
 async sub _user_load_p {
   my $c     = shift;
   my $email = $c->session('email')                       or return undef;
@@ -79,6 +115,18 @@ Note that this plugin is currently EXPERIMENTAL. Let us know if you are/have
 created a custom plugin.
 
 =head1 HELPERS
+
+=head2 user.connection_create_p
+
+  $connection = await $c->auth->login_p($user, $connection_url);
+
+Used to create a new connection for a L<Convos::Core::User>.
+
+=head2 user.initial_setup_p
+
+  $user = await $c->auth->login_p($user);
+
+Sets up a L<Convos::Core::User> object right after registering the first time.
 
 =head2 auth.login_p
 

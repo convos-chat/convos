@@ -133,12 +133,9 @@ async sub register {
   }
 
   # Register new user
-  $user = $self->stash->{user} = await $self->auth->register_p($json);
-  $user->role(give => 'admin') if $self->app->core->n_users == 1;
+  $user = await $self->auth->register_p($json);
   $self->session(email => $user->email);
-  my $connection = await $self->backend->connection_create_p(
-    $self->app->core->settings->default_connection->clone);
-  $connection->connect_p->catch(sub { });    # Do not are if this fails
+  await $self->user->initial_setup_p($user);
   $self->render(openapi => $user);
 }
 

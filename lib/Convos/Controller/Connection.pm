@@ -23,7 +23,7 @@ async sub create {
   return $self->reply->errors('Missing "host" in URL', 400) unless $url->host;
 
   try {
-    my $connection = await $self->backend->connection_create_p($url);
+    my $connection = await $self->user->connection_create_p($user, $url);
     $connection->on_connect_commands($json->{on_connect_commands} || []);
     $connection->wanted_state($json->{wanted_state}) if $json->{wanted_state};
     $connection->connect_p->catch(sub { });

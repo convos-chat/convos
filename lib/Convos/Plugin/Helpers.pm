@@ -1,7 +1,7 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw(is_true pretty_connection_name);
+use Convos::Util qw(is_true);
 use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json false true);
@@ -16,14 +16,13 @@ sub register {
 
   $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
-  $app->helper('backend.conversation'        => \&_backend_conversation);
-  $app->helper('backend.connection_create_p' => \&_backend_connection_create_p);
-  $app->helper('js_session'                  => \&_js_session);
-  $app->helper('linkembedder'                => sub { state $l = LinkEmbedder->new });
-  $app->helper('reply.errors'                => \&_reply_errors);
-  $app->helper('reply.exception'             => \&_exception);
-  $app->helper('social'                      => \&_social);
-  $app->helper('user_has_admin_rights'       => \&_user_has_admin_rights);
+  $app->helper('backend.conversation'  => \&_backend_conversation);
+  $app->helper('js_session'            => \&_js_session);
+  $app->helper('linkembedder'          => sub { state $l = LinkEmbedder->new });
+  $app->helper('reply.errors'          => \&_reply_errors);
+  $app->helper('reply.exception'       => \&_exception);
+  $app->helper('social'                => \&_social);
+  $app->helper('user_has_admin_rights' => \&_user_has_admin_rights);
 
   $app->linkembedder->ua->insecure(1) if is_true 'ENV:LINK_EMBEDDER_ALLOW_INSECURE_SSL';
   $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
@@ -40,27 +39,6 @@ sub _backend_conversation {
   my $conversation
     = $conversation_id ? $connection->get_conversation($conversation_id) : $connection->messages;
   return $c->stash(connection => $connection, conversation => $conversation)->stash('conversation');
-}
-
-sub _backend_connection_create_p {
-  my ($c, $url) = @_;
-  return Mojo::Promise->reject('User required.') unless my $user = $c->stash('user');
-
-  return Mojo::Promise->reject('URL need a valid host.')
-    unless my $name = pretty_connection_name($url);
-
-  return Mojo::Promise->reject('Connection already exists.')
-    if $user->get_connection({url => $url});
-
-  eval {
-    my $connection = $user->connection({name => $name, url => $url});
-    my ($name, $password) = split /\s+/, ($url->path->[0] || ''), 2;
-    my $conversation = $name && $connection->conversation({name => $name});
-    $conversation->password($password) if length $password;
-    return $connection->save_p;
-  } or do {
-    return Mojo::Promise->reject($@);
-  };
 }
 
 sub _exception {
@@ -180,10 +158,10 @@ data from C<%args> or fall back to L<stash|Mojolicious/stash>. Example
 C<%args>:
 
   {
-    # Key         => Example value        # Default value
-    connection_id => "irc-localhost",     # $c->stash("connection_id")
-    conversation_id     => "#superheroes",      # $c->stash("connection_id")
-    email         => "superwoman@dc.com", # $c->session('email')
+    # Key           => Example value        # Default value
+    connection_id   => "irc-localhost",     # $c->stash("connection_id")
+    conversation_id => "#superheroes",      # $c->stash("connection_id")
+    email           => "superwoman@dc.com", # $c->session('email')
   }
 
 =head2 reply.errors

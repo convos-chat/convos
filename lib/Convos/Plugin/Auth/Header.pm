@@ -29,7 +29,9 @@ async sub _user_load_p {
   }
 
   $c->app->log->info("Auto-registering user $email from header $header");
-  return $c->stash->{user} = await $core->user({email => $email})->save_p;
+  $user = await $core->user({email => $email})->save_p;
+  await $c->user->initial_setup_p($user);
+  return $c->stash->{user} = $user;
 }
 
 sub _giveup {
