@@ -31,7 +31,7 @@
     "core-js": "^3.21.1",
     "cssnano": "^5.1.4",
     "eslint-plugin-svelte3": "^3.4.0",
-    "highlight.js": "^11.4.0",
+    "highlight.js": "^11.5.0",
     "jest": "^27.5.1",
     "js-cookie": "^3.0.1",
     "jsdoc": "^3.6.10",
