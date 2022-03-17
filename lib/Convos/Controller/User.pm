@@ -38,10 +38,9 @@ sub dictionary {
 }
 
 async sub generate_invite_link {
-  my $self = shift->openapi->valid_input or return;
-
-  await $self->user->load_p;    # Need to load the user before checking for admin rights
-  return $self->reply->errors([], 401) unless my $admin_from = $self->user_has_admin_rights;
+  my $self       = shift->openapi->valid_input or return;
+  my $admin_from = $self->user->has_admin_rights(await $self->user->load_p)
+    or return $self->reply->errors([], 401);
 
   my $exp      = time + ($self->param('exp') || INVITE_LINK_VALID_FOR) * 3600;
   my $user     = $self->app->core->get_user($self->_email);
@@ -76,10 +75,8 @@ async sub get {
 
 async sub list {
   my $self = shift->openapi->valid_input or return;
-
-  await $self->user->load_p;    # Need to load the user before checking for admin rights
-  my $admin_from = $self->user_has_admin_rights
-    or return $self->reply->errors('Only admins can list users.', 403);
+  return $self->reply->errors('Only admins can list users.', 403)
+    unless $self->user->has_admin_rights(await $self->user->load_p);
 
   my $users = $self->app->core->users;
   $self->render(openapi => {users => $users});
@@ -129,7 +126,7 @@ async sub register {
     }
 
     # Update existing user
-    return await $self->_update_user_p($json, $user) if $user;
+    return await $self->_update_user_p($user, $user, $json) if $user;
   }
 
   # Register new user
@@ -150,8 +147,9 @@ async sub register_html {
 }
 
 async sub remove {
-  my $self = shift->openapi->valid_input                   or return;
-  my $user = await $self->_get_user_from_param_p('delete') or return;
+  my $self  = shift->openapi->valid_input or return;
+  my $admin = await $self->user->load_p   or return $self->reply->errors([], 401);
+  my $user  = await $self->_get_user_from_param_p($admin, 'delete') or return;
 
   return $self->reply->errors('You are the only user left.', 400)
     if @{$self->app->core->users} <= 1;
@@ -162,14 +160,15 @@ async sub remove {
 }
 
 async sub update {
-  my $self = shift->openapi->valid_input                   or return;
-  my $user = await $self->_get_user_from_param_p('update') or return;
-  my $json = $self->_clean_json;
+  my $self  = shift->openapi->valid_input or return;
+  my $admin = await $self->user->load_p   or return $self->reply->errors([], 401);
+  my $user  = await $self->_get_user_from_param_p($admin, 'update') or return;
+  my $json  = $self->_clean_json;
 
   # TODO: Add support for changing email
 
   return $self->render(openapi => $user) unless %$json;
-  return await $self->_update_user_p($json, $user);
+  return await $self->_update_user_p($admin, $user, $json);
 }
 
 sub _add_invite_token_to_params {
@@ -220,15 +219,13 @@ sub _existing_conversation {
 }
 
 async sub _get_user_from_param_p {
-  my ($self, $op) = @_;
-
-  return $self->reply->errors([], 401) unless my $user = await $self->user->load_p;
-  return $user if $user->email eq $self->_email;
+  my ($self, $admin, $op) = @_;
+  return $admin if $admin->email eq $self->_email;
   return $self->reply->errors("Only admins can $op other users.", 403)
-    unless $self->user_has_admin_rights;
+    unless $self->user->has_admin_rights($admin);
 
-  my $target_user = $self->app->core->get_user($self->_email);
-  return $target_user                                                   if $target_user;
+  my $user = $self->app->core->get_user($self->_email);
+  return $user                                                          if $user;
   return +($self->render(openapi => {message => 'Deleted.'}), undef)[1] if $op eq 'delete';
   return $self->reply->errors('No such user.', 404);
 }
@@ -288,11 +285,10 @@ sub _register_html_handle_invite_url {
 }
 
 async sub _update_user_p {
-  my ($self, $json, $user) = @_;
-  await $self->user->load_p;    # Need to load the user before checking for admin rights
+  my ($self, $admin, $user, $json) = @_;
 
   $user->highlight_keywords($json->{highlight_keywords}) if $json->{highlight_keywords};
-  $user->roles($json->{roles})           if $json->{roles} and $self->user_has_admin_rights;
+  $user->roles($json->{roles}) if $json->{roles} and $self->user->has_admin_rights($admin);
   $user->set_password($json->{password}) if $json->{password};
   await $user->save_p;
   my $session_email = $self->session('email');

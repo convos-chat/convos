@@ -2,17 +2,13 @@ package Convos::Controller::Conversation;
 use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Date 'dt';
-use Mojo::JSON qw(false true);
+use Mojo::Util qw(url_unescape);
 
 async sub mark_as_read {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->user->load_p;
-  my $conversation = $self->backend->conversation({});
-
-  unless ($conversation) {
-    return $self->reply->errors([],                        401) unless $user;
-    return $self->reply->errors('Conversation not found.', 404);
-  }
+  my $user         = await $self->user->load_p   or return $self->reply->errors([], 401);
+  my $conversation = $self->_conversation($user)
+    or return $self->reply->errors('Conversation not found.', 404);
 
   $conversation->notifications(0)->unread(0);
   await $self->stash('connection')->save_p;
@@ -35,15 +31,11 @@ async sub list {
 
 async sub messages {
   my $self         = shift->openapi->valid_input or return;
-  my $user         = await $self->user->load_p;
-  my $conversation = $self->backend->conversation({});
+  my $user         = await $self->user->load_p   or return $self->reply->errors([], 401);
+  my $conversation = $self->_conversation($user)
+    or return $self->reply->errors('Conversation not found.', 404);
+
   my %query;
-
-  unless ($conversation) {
-    return $self->reply->errors([], 401) unless $user;
-    return $self->render(openapi => {messages => [], end => true});
-  }
-
   $query{$_} = $self->param($_)
     for grep { defined $self->param($_) } qw(after around before level limit match);
   $query{limit} ||= $query{after} && $query{before} ? 200 : 60;
@@ -58,6 +50,16 @@ async sub messages {
   }
 
   $self->render(openapi => await $conversation->messages_p(\%query));
+}
+
+sub _conversation {
+  my ($c, $user) = @_;
+  return unless my $connection = $user->get_connection($c->stash('connection_id'));
+
+  my $conversation_id = url_unescape $c->stash('conversation_id');
+  my $conversation
+    = $conversation_id ? $connection->get_conversation($conversation_id) : $connection->messages;
+  return $c->stash(connection => $connection, conversation => $conversation)->stash('conversation');
 }
 
 1;

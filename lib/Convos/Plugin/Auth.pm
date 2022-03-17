@@ -6,6 +6,8 @@ use Mojo::JSON qw(encode_json false true);
 use Mojo::Util;
 use Syntax::Keyword::Try;
 
+my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
+
 sub register {
   my ($self, $app, $config) = @_;
 
@@ -13,6 +15,7 @@ sub register {
   $app->helper('auth.logout_p'            => \&_logout_p);
   $app->helper('auth.register_p'          => \&_register_p);
   $app->helper('user.connection_create_p' => \&_user_connection_create_p);
+  $app->helper('user.has_admin_rights'    => \&_user_has_admin_rights);
   $app->helper('user.initial_setup_p'     => \&_user_initial_setup_p);
   $app->helper('user.load_p'              => \&_user_load_p);
 }
@@ -72,6 +75,23 @@ async sub _user_connection_create_p {
   }
 }
 
+sub _user_has_admin_rights {
+  my ($c, $user) = @_;
+  my $x_local_secret = $c->req->headers->header('X-Local-Secret');
+
+  # Normal request from web
+  unless ($x_local_secret) {
+    return +($user && $user->role(has => 'admin')) ? 'user' : '';
+  }
+
+  # Special request for forgotten password
+  my $remote_address = $c->tx->original_remote_address;
+  my $valid     = $x_local_secret eq $c->app->core->settings->local_secret ? 1       : 0;
+  my $valid_str = $valid                                                   ? 'Valid' : 'Invalid';
+  $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
+  return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';
+}
+
 async sub _user_initial_setup_p {
   my ($c, $user) = @_;
   my $core = $c->app->core;
@@ -93,8 +113,7 @@ async sub _user_load_p {
   my $remote_address = $user && $c->tx->remote_address;
   $user->remote_address($remote_address)->save_p unless $user->remote_address eq $remote_address;
 
-  # Save the user to stash for easier access later on
-  return $c->stash->{user} = $user;
+  return $user;
 }
 
 1;
@@ -116,18 +135,6 @@ created a custom plugin.
 
 =head1 HELPERS
 
-=head2 user.connection_create_p
-
-  $connection = await $c->auth->login_p($user, $connection_url);
-
-Used to create a new connection for a L<Convos::Core::User>.
-
-=head2 user.initial_setup_p
-
-  $user = await $c->auth->login_p($user);
-
-Sets up a L<Convos::Core::User> object right after registering the first time.
-
 =head2 auth.login_p
 
   $user = await $c->auth->login_p(\%credentials);
@@ -148,14 +155,31 @@ Used to log out a user.
 Used to register a user. C<%credentials> normally contains an C<email> and
 C<password>.
 
+=head2 user.connection_create_p
+
+  $connection = await $c->user->connection_create_p($user, $connection_url);
+
+Used to create a new connection for a L<Convos::Core::User>.
+
+=head2 user.has_admin_rights
+
+  $user = await $c->user->has_admin_rights($user);
+
+Sets up a L<Convos::Core::User> object right after registering the first time.
+
+=head2 user.initial_setup_p
+
+  $user = await $c->user->initial_setup_p($user);
+
+Sets up a L<Convos::Core::User> object right after registering the first time.
+
 =head2 user.load_p
 
   $user = await $c->user->load_p($email);
   $user = await $c->user->load_p;
 
 Used to return a L<Convos::User> object representing the logged in user
-or a user with email C<$email>. This helper will also store the user
-object in L<Mojolicious::Controller/stash> under the "user" key.
+or a user with email C<$email>.
 
 =head1 METHODS
 

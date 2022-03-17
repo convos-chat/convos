@@ -4,11 +4,10 @@ use Mojo::Base 'Convos::Plugin';
 use Convos::Util qw(is_true);
 use JSON::Validator::Error;
 use LinkEmbedder;
-use Mojo::JSON qw(decode_json false true);
-use Mojo::Util qw(b64_decode url_unescape);
+use Mojo::JSON qw(decode_json);
+use Mojo::Util qw(b64_decode);
 use Syntax::Keyword::Try;
 
-my @LOCAL_ADMIN_REMOTE_ADDR = split /,/, ($ENV{CONVOS_LOCAL_ADMIN_REMOTE_ADDR} || '127.0.0.1,::1');
 my $EXCEPTION_HELPER;
 
 sub register {
@@ -16,29 +15,14 @@ sub register {
 
   $EXCEPTION_HELPER = $app->renderer->get_helper('reply.exception');
 
-  $app->helper('backend.conversation'  => \&_backend_conversation);
-  $app->helper('js_session'            => \&_js_session);
-  $app->helper('linkembedder'          => sub { state $l = LinkEmbedder->new });
-  $app->helper('reply.errors'          => \&_reply_errors);
-  $app->helper('reply.exception'       => \&_exception);
-  $app->helper('social'                => \&_social);
-  $app->helper('user_has_admin_rights' => \&_user_has_admin_rights);
+  $app->helper('js_session'      => \&_js_session);
+  $app->helper('linkembedder'    => sub { state $l = LinkEmbedder->new });
+  $app->helper('reply.errors'    => \&_reply_errors);
+  $app->helper('reply.exception' => \&_exception);
+  $app->helper('social'          => \&_social);
 
   $app->linkembedder->ua->insecure(1) if is_true 'ENV:LINK_EMBEDDER_ALLOW_INSECURE_SSL';
   $app->linkembedder->ua->$_(5) for qw(connect_timeout inactivity_timeout request_timeout);
-}
-
-sub _backend_conversation {
-  my ($c, $args) = @_;
-  my $user            = $c->stash('user') or return;
-  my $conversation_id = url_unescape $args->{conversation_id} || $c->stash('conversation_id') || '';
-
-  my $connection = $user->get_connection($args->{connection_id} || $c->stash('connection_id'));
-  return unless $connection;
-
-  my $conversation
-    = $conversation_id ? $connection->get_conversation($conversation_id) : $connection->messages;
-  return $c->stash(connection => $connection, conversation => $conversation)->stash('conversation');
 }
 
 sub _exception {
@@ -117,24 +101,6 @@ sub _social {
   return $c;
 }
 
-sub _user_has_admin_rights {
-  my $c              = shift;
-  my $x_local_secret = $c->req->headers->header('X-Local-Secret');
-
-  # Normal request from web
-  unless ($x_local_secret) {
-    my $admin_user = $c->stash('user');
-    return +($admin_user && $admin_user->role(has => 'admin')) ? 'user' : '';
-  }
-
-  # Special request for forgotten password
-  my $remote_address = $c->tx->original_remote_address;
-  my $valid     = $x_local_secret eq $c->app->core->settings->local_secret ? 1       : 0;
-  my $valid_str = $valid                                                   ? 'Valid' : 'Invalid';
-  $c->app->log->warn("$valid_str X-Local-Secret from $remote_address (@LOCAL_ADMIN_REMOTE_ADDR)");
-  return +($valid && grep { $remote_address eq $_ } @LOCAL_ADMIN_REMOTE_ADDR) ? 'local' : '';
-}
-
 1;
 
 =encoding utf8
@@ -148,21 +114,6 @@ Convos::Plugin::Helpers - Default helpers for Convos
 This L<Convos::Plugin> contains default helpers for L<Convos>.
 
 =head1 HELPERS
-
-=head2 backend.conversation
-
-  $conversation = $c->backend->conversation(\%args);
-
-Helper to retrieve a L<Convos::Core::Conversation> object. Will use
-data from C<%args> or fall back to L<stash|Mojolicious/stash>. Example
-C<%args>:
-
-  {
-    # Key           => Example value        # Default value
-    connection_id   => "irc-localhost",     # $c->stash("connection_id")
-    conversation_id => "#superheroes",      # $c->stash("connection_id")
-    email           => "superwoman@dc.com", # $c->session('email')
-  }
 
 =head2 reply.errors
 

@@ -21,7 +21,7 @@ async sub _user_load_p {
   return _giveup($c, debug => "Header $header is missing in request.") unless $email;
 
   my $user = $email && $core->get_user({email => $email});
-  return $c->stash->{user} = $user if $user;
+  return $user if $user;
 
   if (!$core->n_users and $self->admin_user and $email ne $self->admin_user) {
     my $admin = $self->admin_user;
@@ -30,8 +30,7 @@ async sub _user_load_p {
 
   $c->app->log->info("Auto-registering user $email from header $header");
   $user = await $core->user({email => $email})->save_p;
-  await $c->user->initial_setup_p($user);
-  return $c->stash->{user} = $user;
+  return await $c->user->initial_setup_p($user);
 }
 
 sub _giveup {

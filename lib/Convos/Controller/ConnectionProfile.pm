@@ -7,7 +7,7 @@ use Mojo::JSON qw(false true);
 async sub list {
   my $self       = shift->openapi->valid_input or return;
   my $user       = await $self->user->load_p   or return $self->reply->errors([], 401);
-  my $admin_from = $self->user_has_admin_rights;
+  my $admin_from = $self->user->has_admin_rights($user);
 
   return $self->render(
     openapi => {
@@ -24,7 +24,7 @@ async sub remove {
   my $self = shift->openapi->valid_input or return;
   my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can delete connection profiles.', 403)
-    unless $self->user_has_admin_rights;
+    unless $self->user->has_admin_rights($user);
 
   my $core = $self->app->core;
   my $json = $self->req->json;
@@ -48,7 +48,7 @@ async sub save {
   my $self = shift->openapi->valid_input or return;
   my $user = await $self->user->load_p   or return $self->reply->errors([], 401);
   return $self->reply->errors('Only admins can list users.', 403)
-    unless $self->user_has_admin_rights;
+    unless $self->user->has_admin_rights($user);
 
   my $core    = $self->app->core;
   my $json    = $self->req->json;

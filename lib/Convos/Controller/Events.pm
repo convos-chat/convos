@@ -23,6 +23,7 @@ async sub start {
 
   # Used by Convos::Util->logf()
   $self->{log} = $self->log;
+  $self->stash(user => $user);
 
   weaken $self;
   my $uid     = $user->id;
