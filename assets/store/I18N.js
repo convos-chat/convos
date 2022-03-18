@@ -218,7 +218,7 @@ export default class I18N extends Reactive {
   }
 
   _mdURL(tag) {
-    tag.captured = tag.captured.replace(/[,.:;!"']$/, (after) => {
+    tag.captured = tag.captured.replace(/[,.:;!"')]$/, (after) => {
       tag.after = after[0] + tag.after;
       return '';
     });

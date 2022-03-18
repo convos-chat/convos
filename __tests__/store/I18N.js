@@ -112,6 +112,8 @@ test('md - url', () => {
     .toBe('<a href=\"https://ru.wikipedia.org/wiki/Участница:Gryllida/Черновик\" target=\"_blank\">ru.wikipedia.org/wiki/Участница:Gryllida/Черновик</a> last symbol shows as separate outside of the URL? do you reproduce the bug?');
   expect(i18n.md('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - https://git.io/JD9ph'))
     .toBe('[mojo] marcusramberg opened pull request #1894: Minor tweaks to Growing guide. - <a href=\"https://git.io/JD9ph\" target=\"_blank\">git.io/JD9ph</a>');
+  expect(i18n.md('Special chars (https://convos.chat) around'))
+    .toBe('Special chars (<a href="https://convos.chat" target="_blank">convos.chat</a>) around');
 
   // Protect against XSS
   expect(i18n.md('https://x."//onfocus="alert(document.domain)"//autofocus="" b="'))
