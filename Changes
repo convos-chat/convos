@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+7.02 Not Released
+ - Fix "recover" sub command
+
 7.01 2022-03-17T08:36:00+0900
  - Fix creating connection when using Convos::Plugin::Auth::Header #696
  - Fix loading /events when using Convos::Plugin::Auth::Header #704

@@ -80,7 +80,7 @@ sub command_exec {
 sub command_recover {
   my ($script, $email) = @_;
   require Convos;
-  my $secret = Convos->new->settings('local_secret');
+  my $secret = Convos->new->core->settings->local_secret;
   die "Usage: $0 recover <email> --secret <secret>\n" unless $email and $secret;
   exec $0 => qw(get -k -M POST -H) => "X-Local-Secret:$secret", "/api/user/$email/invite";
 }
