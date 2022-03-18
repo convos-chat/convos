@@ -15,7 +15,8 @@ our $CONVOS_HOME;
 
 $ENV{CONVOS_I18N_CAPTURE_LEXICONS} ||= 1;
 $ENV{CONVOS_GENERATE_CERT} //= 0;
-$ENV{CONVOS_SECRETS} = 'not-very-secret';
+$ENV{CONVOS_SECRETS}     = 'not-very-secret';
+$ENV{MOJO_PROMISE_CROAK} = 1;                   # Will try to get this into Mojo core
 $ENV{OPENSSL_BITS} ||= 1024;
 
 sub subprocess_in_main_process {

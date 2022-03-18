@@ -1,7 +1,8 @@
 package Convos::Plugin::Bot::Action::Calc;
 use Mojo::Base 'Convos::Plugin::Bot::Action';
 
-use Convos::Util 'require_module';
+use Convos::Util qw(pretty_error require_module);
+use Syntax::Keyword::Try qw(try);
 
 has description => 'Calculate a mathematical expression.';
 has usage       => 'calc 1 + 2';
@@ -16,11 +17,12 @@ sub reply {
   return undef unless $event->{message} =~ m/^calc\S*\s+(.+)/;
 
   my $expr = $1;
-  return eval { sprintf '%s = %s', $expr, Math::Calc::Parser->evaluate($expr) } || do {
-    $@ =~ s!\sat\s\S+.*!!s;
-    chomp $@;
-    $@;
-  };
+  try {
+    return sprintf '%s = %s', $expr, Math::Calc::Parser->evaluate($expr);
+  }
+  catch ($err) {
+    return pretty_error $err;
+  }
 }
 
 1;

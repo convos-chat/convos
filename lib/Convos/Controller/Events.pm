@@ -1,7 +1,7 @@
 package Convos::Controller::Events;
 use Mojo::Base 'Mojolicious::Controller', -async_await;
 
-use Convos::Util qw(logf);
+use Convos::Util qw(logf pretty_error);
 use List::Util qw(any);
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(network_contains);
@@ -75,9 +75,9 @@ sub webhook {
 
 sub _err {
   my ($self, $err, $data) = @_;
-  $err =~ s!\sat\s\S+.*!!s;
+  $self->logf(error => '%s', $err);
 
-  my $res = {errors => [{message => $err}]};
+  my $res = {errors => [{message => pretty_error $err}]};
   $res->{$_} = $data->{$_} for grep { $data->{$_} } qw(connection_id message id);
   $res->{event} = $RESPONSE_EVENT_NAME{$data->{method}} || $data->{method} || 'unknown';
   $self->send({json => $res});

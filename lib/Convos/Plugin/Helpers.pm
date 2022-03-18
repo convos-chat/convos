@@ -1,7 +1,7 @@
 package Convos::Plugin::Helpers;
 use Mojo::Base 'Convos::Plugin';
 
-use Convos::Util qw(is_true);
+use Convos::Util qw(is_true pretty_error);
 use JSON::Validator::Error;
 use LinkEmbedder;
 use Mojo::JSON qw(decode_json);
@@ -31,7 +31,7 @@ sub _exception {
 
   state $openapi = sub {
     my $errors = shift;
-    $_->{message} =~ s!\sat\s\S+.*!!s for @$errors;
+    $_->{message} = pretty_error $_->{message} for @$errors;
     return openapi => {errors => $errors};
   };
 
@@ -44,7 +44,7 @@ sub _exception {
   }
   elsif ($c->openapi->spec) {
     $c->app->log->error($err);
-    return $c->render($openapi->([{message => "$err", path => '/'}]), status => 500);
+    return $c->render($openapi->([{message => pretty_error($err), path => '/'}]), status => 500);
   }
   else {
     return $EXCEPTION_HELPER->($c, $err);

@@ -17,7 +17,8 @@ $ENV{CONVOS_LOG_LEVEL} ||= $ENV{MOJO_LOG_LEVEL} || ($ENV{HARNESS_IS_VERBOSE} ? '
 our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE disk_usage generate_cert_p get_cert_info generate_secret),
-  qw(has_many is_true logf pretty_connection_name require_module short_checksum yaml),
+  qw(has_many is_true logf pretty_connection_name pretty_error),
+  qw(require_module short_checksum yaml),
 );
 
 sub disk_usage {
@@ -188,6 +189,13 @@ sub pretty_connection_name {
   $name =~ s![\W_]+!-!g;                                   # make pretty url
 
   return $name;
+}
+
+sub pretty_error {
+  my $err = shift;
+  $err =~ s!\sat\s\S+.*\.pm.*!!s;
+  chomp $err;
+  return $err;
 }
 
 sub require_module {
@@ -396,6 +404,12 @@ Can be imported as a L<Mojo::Log> helper.
   $str = pretty_connection_name($url);
 
 Will turn a connection URL into a nicer connection name.
+
+=head2 pretty_error
+
+  $str = pretty_error $error;
+
+Returns a string without "at file.pm line...";
 
 =head2 require_module
 

@@ -1,6 +1,6 @@
 use Test::More;
 use Convos::Util qw(disk_usage generate_secret is_true);
-use Convos::Util qw(pretty_connection_name require_module short_checksum);
+use Convos::Util qw(pretty_error pretty_connection_name require_module short_checksum);
 use Mojo::JSON qw(false true);
 use Mojo::Loader qw(data_section);
 use Mojo::Util qw(b64_encode gzip sha1_sum);
@@ -50,6 +50,13 @@ subtest pretty_connection_name => sub {
   is pretty_connection_name('ircs://irc.oftc.net:6697'),              'oftc',    'oftc';
   is pretty_connection_name('irc.oftc.net'),             'oftc',        'oftc without scheme';
   is pretty_connection_name('irc.darkscience.net:6697'), 'darkscience', 'darkscience';
+};
+
+subtest pretty_error => sub {
+  is pretty_error('foo'), 'foo', 'plain';
+  is pretty_error(
+    "Invalid email or password. at /usr/local/lib/perl5/site_perl/5.34.0/Mojo/Promise.pm line 23.\n"
+  ), 'Invalid email or password.', 'plain';
 };
 
 subtest require_module => sub {

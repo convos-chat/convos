@@ -1,6 +1,7 @@
 package Convos;
 use Mojo::Base 'Mojolicious';
 
+use Carp qw(croak);
 use Cwd ();
 use Convos::Core;
 use Convos::Util qw(is_true require_module);
@@ -33,6 +34,7 @@ sub startup {
   my $config = $self->_config;
 
   $self->_home_in_share unless -d $self->home->rel_file('public');
+  $self->_patch_mojo_promise if $ENV{MOJO_PROMISE_CROAK};
   $self->defaults(existing_user => 0, lang => 'en', start_app => '');
   $self->routes->namespaces(['Convos::Controller']);
   $self->sessions->cookie_name('convos');
@@ -197,6 +199,20 @@ sub _home_in_share {
   }
 
   die "Unable to find $rel in @INC";
+}
+
+sub _patch_mojo_promise {
+  require Mojo::Promise;
+
+  Mojo::Util::monkey_patch(
+    'Mojo::Promise',
+    AWAIT_GET => sub {
+      my $self    = shift;
+      my @results = @{$self->{results} // []};
+      croak $results[0] unless $self->{status} eq 'resolve';
+      return wantarray ? @results : $results[0];
+    }
+  );
 }
 
 sub _plugins {
