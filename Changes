@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.02 Not Released
+7.02 2022-04-26T11:51:00+0900
  - Fix "recover" sub command
  - Fix not including ")" in links
  - Improved guessing Convos video links
