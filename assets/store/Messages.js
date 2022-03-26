@@ -143,6 +143,10 @@ export default class Messages extends Reactive {
     return messages;
   }
 
+  _isProbablyConvosVideoLink(url) {
+    return !!url.match(/\/video\/[^/]+\/[^/]+($|\?)/);
+  }
+
   async _loadEmbed(msg, url) {
     const op = await api('/api', 'embed', {url}).perform();
     const embed = op.res.body;
@@ -189,7 +193,7 @@ export default class Messages extends Reactive {
 
   _renderVideoChat(msg, embed, embedEl) {
     const path = new URL(embed.url).pathname.replace(/\/+$/, '').split('/');
-    const isVideoLink = path.length && (embedEl.classList.contains('le-video-chat') || path.includes('video'));
+    const isVideoLink = path.length && (embedEl.classList.contains('le-video-chat') || this._isProbablyConvosVideoLink(embed.url));
     if (!isVideoLink) return;
 
     // Turn "Some-Cool-convosTest" into "Some Cool Convos Test"

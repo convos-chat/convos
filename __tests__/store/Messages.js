@@ -144,6 +144,14 @@ test('details', () => {
   });
 });
 
+test('guess video', () => {
+  const messages = new Messages({connection_id: 'foo'});
+  expect(messages._isProbablyConvosVideoLink('https://whatever/video/domain/name')).toBe(true);
+  expect(messages._isProbablyConvosVideoLink('/video/meet.jit.si/%23convos - libera?nick=batman')).toBe(true);
+  expect(messages._isProbablyConvosVideoLink('https://whatever/video/a/b/c')).toBe(false);
+  expect(messages._isProbablyConvosVideoLink('/video/some-link')).toBe(false);
+});
+
 function predictable(msg) {
   return msg ? {...msg, ts: msg.ts ? true : false} : undefined;
 }

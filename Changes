@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 7.02 Not Released
  - Fix "recover" sub command
  - Fix not including ")" in links
+ - Improved guessing Convos video links
 
 7.01 2022-03-17T08:36:00+0900
  - Fix creating connection when using Convos::Plugin::Auth::Header #696
