@@ -29,7 +29,7 @@
     "@rollup/plugin-eslint": "^8.0.2",
     "@rollup/plugin-node-resolve": "^13.2.1",
     "core-js": "^3.21.1",
-    "cssnano": "^5.1.4",
+    "cssnano": "^5.1.7",
     "eslint-plugin-svelte3": "^3.4.1",
     "highlight.js": "^11.5.1",
     "jest": "^28.0.3",
