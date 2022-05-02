@@ -32,7 +32,7 @@
     "cssnano": "^5.1.4",
     "eslint-plugin-svelte3": "^3.4.1",
     "highlight.js": "^11.5.1",
-    "jest": "^27.5.1",
+    "jest": "^28.0.3",
     "js-cookie": "^3.0.1",
     "jsdoc": "^3.6.10",
     "jsonhtmlify": "^0.1.0",
