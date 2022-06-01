@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+7.03 Not Released
+ - Updated FontAwesome to 5.15.4
+ - Updated Node dependencies
+
 7.02 2022-04-26T11:51:00+0900
  - Fix "recover" sub command
  - Fix not including ")" in links
