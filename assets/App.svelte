@@ -20,7 +20,7 @@ import features from './js/features';
 import ChatSidebar from './components/ChatSidebar.svelte';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
-import {activeMenu, viewport} from './store/writable';
+import {activeMenu, viewport} from './store/viewport';
 import {api} from './js/Api';
 import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
@@ -60,8 +60,8 @@ i18n.load().then(() => user.load());
 $: features[$themeManager.compactDisplay ? 'add' : 'remove']('compact-display');
 $: routeOrUserChanged($route, $user);
 $: setTitle(title, $user);
-$: viewport.set({width, nColumns: width > 1200 ? 3 : width > 800 ? 2 : 1}); // Need to be in sync with sass/_variables.scss
-$: user.update({unreadIncludePrivateMessages: $viewport.nColumns == 1});
+$: viewport.setWidth(width);
+$: user.update({unreadIncludePrivateMessages: $viewport.singleColumn});
 
 function setTitle(title, $user) {
   if (!document) return;
@@ -126,8 +126,8 @@ function socketChanged(socket) {
 {#if $user.is(['loading', 'pending'])}
   <Fallback/>
 {:else if $user.email}
-  {#if $activeMenu == 'nav' || $viewport.nColumns > 1}
-    <ChatSidebar transition="{{duration: $viewport.nColumns > 1 ? 0 : 250, x: width}}"/>
+  {#if $activeMenu == 'nav' || !$viewport.singleColumn}
+    <ChatSidebar transition="{{duration: $viewport.singleColumn ? 250 : 0, x: width}}"/>
   {/if}
 
   {#if $route.path.match(/\/chat\/./)}
@@ -160,7 +160,7 @@ function socketChanged(socket) {
     <Fallback bind:title/>
   {/if}
 
-  {#if $activeMenu && $viewport.nColumns == 1}
+  {#if $activeMenu && $viewport.singleColumn}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => { $activeMenu = '' }}">&nbsp;</div>
   {/if}
 {:else}

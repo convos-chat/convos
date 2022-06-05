@@ -8,9 +8,10 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {activeMenu, generateWriteable, viewport} from '../store/writable';
+import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage, chatHelper, renderEmbed, topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
+import {generateWriteable} from '../store/writable';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
@@ -116,9 +117,9 @@ function showPopover(e) {
 
 {#if $activeMenu == 'settings'}
   {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.nColumns > 1 ? 0 : $viewport.width}}"/>
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.singleColumn ? $viewport.width : 0}}"/>
   {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.nColumns > 1 ? 0 : $viewport.width}}"/>
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.singleColumn ? $viewport.width : 0}}"/>
   {/if}
 {/if}
 
@@ -253,7 +254,7 @@ function showPopover(e) {
 
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
-{#if $viewport.nColumns > 2 && $participants.length && !$conversation.is('not_found')}
+{#if $viewport.rightColumn && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <h3>{$l('Participants (%1)', $participants.length)}</h3>
     <nav class="sidebar-right__nav" on:click="{onMessageClick}">

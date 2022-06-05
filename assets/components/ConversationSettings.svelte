@@ -7,8 +7,8 @@ import Operation from '../store/Operation';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage} from '../js/chatHelpers';
-import {activeMenu, viewport} from '../store/writable';
 import {getChannelMode} from '../js/constants';
 import {createForm} from '../store/form';
 import {fly} from 'svelte/transition';
@@ -165,7 +165,7 @@ function updateInfo() {
     <OperationStatus op="{saveConversationSettingsOp}"/>
   </form>
 
-  {#if !conversation.frozen && $viewport.nColumns < 3}
+  {#if !conversation.frozen && $viewport.rightColumn}
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}

@@ -1,7 +1,7 @@
 <script>
 import ConnectionForm from './ConnectionForm.svelte';
 import Icon from './Icon.svelte';
-import {activeMenu} from '../store/writable';
+import {activeMenu} from '../store/viewport';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';

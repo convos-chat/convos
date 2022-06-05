@@ -1,6 +1,6 @@
 <script>
 import Icon from './Icon.svelte';
-import {activeMenu, viewport} from '../store/writable';
+import {activeMenu, viewport} from '../store/viewport';
 import {getContext} from 'svelte';
 
 const notifications = getContext('user').notifications;
@@ -8,7 +8,7 @@ const notifications = getContext('user').notifications;
 
 <header class="chat-header">
   <slot/>
-  {#if $viewport.nColumns <= 1}
+  {#if !$viewport.leftColumn}
     <a href="#nav" class="btn-hallow can-toggle" class:is-active="{$activeMenu == 'nav'}" on:click="{activeMenu.toggle}">
       <Icon name="bars"/><Icon name="times"/>
       <small class="badge is-important" hidden="{!$notifications.notifications}">{$notifications.notifications}</small>

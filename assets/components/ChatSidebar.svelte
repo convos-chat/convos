@@ -1,7 +1,7 @@
 <script>
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
-import {activeMenu} from '../store/writable';
+import {activeMenu} from '../store/viewport';
 import {closestEl, q, regexpEscape, settings, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
