@@ -53,7 +53,7 @@ async function saveConnectionProfile() {
 
 <ChatHeader>
   <h1>{profile_id == 'add' ? $l('Add connection profile') : $l('Edit connection profile')}</h1>
-  <Link href="/settings/connections" class="btn-hallow has-tooltip is-active">
+  <Link href="/settings/connections" class="btn-hallow can-toggle is-active has-tooltip">
     <Icon name="list"/><Icon name="times"/>
     <span class="tooltip is-left">{nbsp($l('See all connection profiles'))}</span>
   </Link>

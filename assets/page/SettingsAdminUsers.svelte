@@ -75,7 +75,7 @@ function updateUser() {
 
 <ChatHeader>
   <h1>{$l($form.uid ? 'Account' : 'Users')}</h1>
-  <Link href="/settings/users" class="btn-hallow has-tooltip {$form.uid ? 'is-active' : ''}">
+  <Link href="/settings/users" class="btn-hallow can-toggle has-tooltip {$form.uid ? 'is-active' : ''}">
     <Icon name="list"/><Icon name="times"/>
     <span class="tooltip is-left">{nbsp($l('See all users'))}</span>
   </Link>

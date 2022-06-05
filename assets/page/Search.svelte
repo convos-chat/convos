@@ -40,7 +40,7 @@ function search(msg) {
 
 <ChatHeader>
   <h1>{$l(conversation.name)}</h1>
-  <Link href="/search" class="btn-hallow {hasSearch ? 'has-tooltip is-active' : ''}" on:click="{maybeClear}">
+  <Link href="/search" class="btn-hallow can-toggle {hasSearch ? 'has-tooltip is-active' : ''}" on:click="{maybeClear}">
     <Icon name="search"/><Icon name="times"/>
     <span class="tooltip is-left">{$l('Clear')}</span>
   </Link>

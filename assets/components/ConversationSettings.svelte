@@ -96,7 +96,9 @@ function updateInfo() {
 <div class="sidebar-left" transition:fly="{transition}">
   <div class="sidebar-header">
     <h2>{$l('Conversation')}</h2>
-    <a href="#settings" class="btn-hallow is-active" on:click="{activeMenu.toggle}"><Icon name="times"/></a>
+    <a href="#settings" class="btn-hallow can-toggle is-active" on:click="{activeMenu.toggle}">
+      <Icon name="bars"/><Icon name="times"/>
+    </a>
   </div>
 
   <p>

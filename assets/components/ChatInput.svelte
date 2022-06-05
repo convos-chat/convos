@@ -173,9 +173,8 @@ function uploadFiles(e) {
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
   {#if conversation.is('conversation')}
-    <a href="#actions" class="btn-hallow" class:is-active="{activeChatMenu == 'actions'}" on:click="{activeChatMenuToggle}">
-      <Icon name="plus-circle"/>
-      <Icon name="times"/>
+    <a href="#actions" class="btn-hallow can-toggle" class:is-active="{activeChatMenu == 'actions'}" on:click="{activeChatMenuToggle}">
+      <Icon name="plus-circle"/><Icon name="times"/>
     </a>
   {/if}
 

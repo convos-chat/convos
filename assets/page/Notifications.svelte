@@ -24,7 +24,7 @@ onMount(async () => {
 
 <ChatHeader>
   <h1>{$l('Notifications')}</h1>
-  <Link href="/settings/account" class="btn-hallow"><Icon name="user-cog"/><Icon name="times"/></Link>
+  <Link href="/settings/account" class="btn-hallow"><Icon name="user-cog"/></Link>
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">

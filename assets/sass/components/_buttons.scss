@@ -111,15 +111,22 @@
   }
 
   .fa-times {
-    @extend %hallow-child-fill-parent;
-    opacity: 0;
-    transform: scale(0);
+    font-size: 0.75em;
   }
 
   .badge {
     position: absolute;
     bottom: -30%;
     right: -30%;
+  }
+}
+
+.btn-hallow.can-toggle {
+  .far:nth-of-type(2),
+  .fas:nth-of-type(2) {
+    @extend %hallow-child-fill-parent;
+    opacity: 0;
+    transform: scale(0);
   }
 }
 
@@ -135,8 +142,8 @@ input:checked + .btn-hallow,
     transform: scale(0.1);
   }
 
-  .fa-times {
-    font-size: 0.75em;
+  .far:nth-of-type(2),
+  .fas:nth-of-type(2) {
     opacity: 1;
     transform: scale(1);
   }
