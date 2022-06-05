@@ -5,7 +5,6 @@ import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplet
 import {chatHelper, videoWindow} from '../js/chatHelpers';
 import {extractErrorMessage, is, nbsp} from '../js/util';
 import {fly} from 'svelte/transition';
-import {generateWriteable, viewport} from '../store/writable';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
@@ -14,6 +13,7 @@ export const uploader = uploadFiles;
 export let uploadProgress = 0;
 export let conversation;
 
+let activeChatMenu = '';
 let autocompleteIndex = 0;
 let autocompleteOptions = [];
 let autocompleteCategory = 'none';
@@ -24,11 +24,10 @@ let splitValueAt = 0;
 
 const api = getContext('api');
 const user = getContext('user');
-const activeChatMenu = generateWriteable('activeChatMenu');
 const commandHistory = new CommandHistory();
 
+$: if (conversation) activeChatMenu = '';
 $: connection = user.findConversation({connection_id: conversation.connection_id});
-$: conversation && ($activeChatMenu = '');
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
@@ -37,6 +36,12 @@ $: tooltip = conversation.is('search') ? $l('Search') : $l('Send');
 $: commandHistory.update({conversation: $conversation});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
+
+function activeChatMenuToggle(e) {
+  const a = e.target.closest('a');
+  e.preventDefault();
+  activeChatMenu = activeChatMenu ? '' : a.href.replace(/.*#/, '');
+}
 
 export function fillIn(str, params) {
   const {before, middle, after} = _fillIn(str, {...params, cursorPos: inputEl.selectionStart, value: inputEl.value});
@@ -167,21 +172,8 @@ function uploadFiles(e) {
   <textarea class="non-interactive" placeholder="{placeholder}" bind:this="{inputMirror}"></textarea>
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
-  {#if $viewport.nColumns > 1 && $conversation.is('conversation')}
-    <label for="upload_files" class="btn-hallow upload has-tooltip">
-      <Icon name="cloud-upload-alt"/>
-      <span class="tooltip is-above is-left">{nbsp($l('Upload a file'))}</span>
-    </label>
-    {#if $user.videoService}
-      <a href="#action:video" on:click="{onVideoLinkClick}" class="btn-hallow has-tooltip">
-        <Icon name="{$videoWindow ? 'video-slash' : 'video'}"/>
-        <span class="tooltip is-above is-left">{nbsp($l('Start a video conference'))}</span>
-      </a>
-    {/if}
-  {/if}
-
-  {#if $viewport.nColumns == 1 && conversation.is('conversation')}
-    <a href="#actions" class="btn-hallow" class:is-active="{$activeChatMenu == 'actions'}" on:click="{activeChatMenu.toggle}">
+  {#if conversation.is('conversation')}
+    <a href="#actions" class="btn-hallow" class:is-active="{activeChatMenu == 'actions'}" on:click="{activeChatMenuToggle}">
       <Icon name="plus-circle"/>
       <Icon name="times"/>
     </a>
@@ -192,8 +184,8 @@ function uploadFiles(e) {
     <span class="tooltip is-above is-left">{nbsp($l(tooltip))}</span>
   </button>
 
-  {#if $activeChatMenu == 'actions' && conversation.is('conversation')}
-    <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenu.toggle}">
+  {#if activeChatMenu == 'actions' && conversation.is('conversation')}
+    <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenuToggle}">
       <a href="#action:video" on:click="{onVideoLinkClick}">
         <Icon name="{$videoWindow ? 'video-slash' : 'video'}"/>
         {$l('Start a video conference')}
