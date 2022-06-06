@@ -116,7 +116,7 @@ function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
   if (iconName) {
     const aEl = e.target.closest('a');
-    if (location.href.indexOf(aEl.href) == 0) e.preventDefault();
+    if (aEl.pathname == location.pathname) e.preventDefault();
     setTimeout(() => { $activeMenu = 'settings' }, 50);
   }
   else if (e.target.closest('a')) {

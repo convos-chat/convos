@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 7.03 Not Released
  - Changed chat input menu to be visible on big screens
  - Fix picking icons for nicks containing just numbers
+ - Fix being able to jump from conversation to server settings in sidebar
  - Updated FontAwesome to 5.15.4
  - Updated Node dependencies
  - Updated nick popover animation
