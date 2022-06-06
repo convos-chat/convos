@@ -6,6 +6,7 @@
  * @exports camelize
  * @exports clone
  * @exports closestEl
+ * @exports createElement
  * @exports copyToClipboard
  * @exports debounce
  * @exports ensureChildNode
@@ -104,10 +105,8 @@ export function closestEl(el, needle) {
  * @param {HTMLElement} el A DOM node
  */
 export function copyToClipboard(el) {
-  const ta = document.createElement('textarea');
-  ta.value = el.textContent || el.value;
-  ta.style.opacity = 0;
-  ta.style.position = 'absolute';
+  const style = {opacity: 0, position: 'absolute'};
+  const ta = createElement('textarea', {style, value: el.textContent || el.value})
   document.body.appendChild(ta);
 
   try {
@@ -121,6 +120,22 @@ export function copyToClipboard(el) {
 
   document.body.removeChild(ta);
   return ta.value;
+}
+
+/**
+ * createElement() is a shorthand for creating a new HTMLElement with attributes.
+ *
+ * @param {String} name The name of the HTMLElement
+ * @param {Object} attrs Attributes for the HTMLElement
+ * @returns {HTMLElement} A new DOM node
+ */
+export function createElement(name, attrs) {
+  const el = document.createElement(name);
+  for (let attr in attrs) {
+    if (attrs.hasOwnProperty(attr)) el[attr] = attrs[attr];
+  }
+
+  return el;
 }
 
 /**
