@@ -1,8 +1,6 @@
 import Conversation from '../assets/store/Conversation';
 import Time from '../assets/js/Time';
-import User from '../assets/store/User';
-import {conversationUrl, onInfinityVisibility, onMessageClick} from '../assets/js/chatHelpers';
-import {generateWriteable} from '../assets/store/writable';
+import {conversationUrl, onInfinityVisibility} from '../assets/js/chatHelpers';
 
 window.open = (url, name) => {
   const w = {opened: true, events: {}, name, url};
@@ -32,78 +30,6 @@ describe('onInfinityVisibility - load enough messages', () => {
   test('has enough', () => {
     onInfinityVisibility({detail: {infinityEl: {offsetHeight: 900, scrollHeight: 901}}}, {conversation});
     expect(conversation.loaded).toEqual([{before: '2021-02-11T03:04:05.000Z'}]);
-  });
-});
-
-describe('onMessageClick', () => {
-  const conversation = new Conversation({});
-  const popoverTarget = generateWriteable('chat:popoverTarget');
-  const user = new User({videoService: 'https://meet.convos.chat'});
-
-  conversation.send = (message) => (conversation.sent = message);
-
-  test('default click', () => {
-    const e = {target: document.createElement('a')};
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(e.target.target).toBe('');
-  });
-
-  test('inside embed', () => {
-    const e = {target: document.createElement('a')};
-    const embedEl = document.createElement('div');
-    embedEl.className = 'embed';
-    embedEl.appendChild(e.target);
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(e.target.target).toBe('_blank');
-  });
-
-  test('inside le-meta', () => {
-    const e = {target: document.createElement('span')};
-
-    const metaEl = document.createElement('div');
-    metaEl.className = 'le-meta';
-    metaEl.appendChild(e.target);
-
-    const embedEl = document.createElement('div');
-    embedEl.className = 'embed';
-    embedEl.appendChild(metaEl);
-
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(embedEl.className).toBe('embed is-expanded');
-  });
-
-  test('action details', () => {
-    let preventDefault = 0;
-    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-    e.target.href = '#action:details:0';
-    conversation.messages.push([{showDetails: false}]);
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(conversation.messages.get(0).showDetails).toBe(true);
-
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(preventDefault).toBe(2);
-    expect(conversation.messages.get(0).showDetails).toBe(false);
-  });
-
-  test('action join', () => {
-    let preventDefault = 0;
-    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-    e.target.href = '#action:join:foo-bÅ_';
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(preventDefault).toBe(1);
-    expect(conversation.sent).toBe('/join foo-bÅ_');
-  });
-
-  test('fullscreen', () => {
-    let preventDefault = 0;
-    const e = {preventDefault: () => (++preventDefault), target: document.createElement('img')};
-
-    e.target.src = 'image.jpeg';
-    expect(document.querySelector('.fullscreen')).toBeFalsy();
-    onMessageClick(e, {conversation, popoverTarget, user});
-    expect(preventDefault).toBe(1);
-    expect(document.querySelector('.fullscreen')).toBeTruthy();
-    expect(document.querySelector('.fullscreen img[src="image.jpeg"]')).toBeTruthy();
   });
 });
 

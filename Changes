@@ -4,6 +4,8 @@ Revision history for perl distribution Convos
  - Changed chat input menu to be visible on big screens
  - Updated FontAwesome to 5.15.4
  - Updated Node dependencies
+ - Updated nick popover animation
+ - Add <ChatMessage/> component
 
 7.02 2022-04-26T11:51:00+0900
  - Fix "recover" sub command

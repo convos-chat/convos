@@ -1,8 +1,6 @@
-import {extractErrorMessage, q, showFullscreen, tagNameIs} from '../js/util';
-import {get} from 'svelte/store';
+import {q} from '../js/util';
 import {i18n} from '../store/I18N';
 import {route} from '../store/Route';
-import {videoWindow} from '../store/video';
 
 export function awayMessage(params) {
   if (!params.nick) return ['Loading...'];
@@ -83,98 +81,14 @@ export function onInfinityVisibility(e, {conversation, timestampFromUrl}) {
   }
   if (scrollHeightChanged) {
     scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-    renderFocusedEl(infinityEl, timestampFromUrl == route.hash);
+    renderInfinityFocusedEl(infinityEl, timestampFromUrl == route.hash);
   }
   if (visibleElsChanged) {
     visibleEls.forEach(el => messages.render(el.dataset.index));
   }
 }
 
-function onMessageActionClick({conversation, fillIn, focusChatInput, popoverTarget}, e, action) {
-  e.preventDefault();
-  if (action[0] == 'popover') {
-    popoverTarget.set(get(popoverTarget) == action[1] ? null : action[1]);
-  }
-  else if (action[1] == 'details') {
-    const msg = conversation.messages.get(action[2]);
-    msg.showDetails = !msg.showDetails;
-    conversation.messages.update({messages: true});
-  }
-  else if (action[1] == 'close') {
-    conversation.send('/close ' + (action[2] ? decodeURIComponent(action[2]) : conversation.conversation_id));
-    route.go('/settings/conversation');
-  }
-  else if (action[1] == 'join') {
-    popoverTarget.set(null);
-    conversation.send('/join ' + (action[2] ? decodeURIComponent(action[2]) : conversation.conversation_id));
-  }
-  else if (action[1] == 'mention') {
-    popoverTarget.set(null);
-    fillIn(action[2], {});
-    focusChatInput();
-  }
-  else if (action[1] == 'whois') {
-    popoverTarget.set(null);
-    conversation.send('/whois ' + decodeURIComponent(action[2]), (sent) => {
-      const message = extractErrorMessage(sent);
-      if (message) conversation.addMessages({message, sent, type: 'error'});
-    });
-  }
-  else {
-    console.warn('Unhandled onMessageActionClick', action);
-  }
-}
-
-export function onMessageClick(e, params) {
-  const aEl = e.target.closest('a');
-
-  // Make sure embed links are opened in a new tab/window
-  if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
-
-  // Proxy video links
-  const videoEl = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (videoEl) return onVideoLinkClick(params, e, videoEl);
-
-  // Expand/collapse pastebin, except when clicking on a link
-  const pasteMetaEl = e.target.closest('.le-meta');
-  if (pasteMetaEl) return aEl || pasteMetaEl.parentNode.classList.toggle('is-expanded');
-
-  // Special links with actions in #hash
-  const action = aEl && aEl.href.match(/#(action|popover):(\w+):?(.*)/);
-  if (action) return onMessageActionClick(params, e, action.slice(1));
-
-  // Show images in full screen
-  if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
-  if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
-}
-
-function onVideoLinkClick({conversation}, e, aEl) {
-  // https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
-  // https://meet.jit.si/irc-libera-superman-and-superwoman
-  const nick = conversation.participants.me().nick;
-  if (aEl.href.indexOf('/video/') != -1) {
-    const url = new URL(aEl.href);
-    e.preventDefault();
-    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/')), {nick});
-  }
-  else if (aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi')) {
-    const url = new URL(aEl.href);
-    e.preventDefault();
-    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname), {nick});
-  }
-}
-
-export function renderEmbed(el, embed) {
-  const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
-  if (parentNode && parentNode.classList) {
-    const method = parentNode.classList.contains('embed') ? 'add' : 'remove';
-    parentNode.classList[method]('hidden');
-  }
-
-  embed.nodes.forEach(node => el.appendChild(node));
-}
-
-function renderFocusedEl(infinityEl, add) {
+function renderInfinityFocusedEl(infinityEl, add) {
   const focusEl = add && route.hash && infinityEl.querySelector('.message[data-ts="' + route.hash + '"]');
   q(infinityEl, '.has-focus', (el) => el.classList.remove('has-focus'));
   if (focusEl) focusEl.classList.add('has-focus');

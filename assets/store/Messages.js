@@ -2,9 +2,9 @@ import hljs from '../js/hljs';
 import Reactive from '../js/Reactive';
 import Time from '../js/Time';
 import {api} from '../js/Api';
+import {createElement, q, str2color} from '../js/util';
 import {i18n} from './I18N';
 import {jsonhtmlify} from 'jsonhtmlify';
-import {q, str2color} from '../js/util';
 
 function toHtml(raw, msg) {
   const str = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
@@ -186,9 +186,13 @@ export default class Messages extends Reactive {
     return Object.keys(details).sort().join(':') == 'from:message:type' ? (msg.details = null) : (msg.details = details);
   }
 
-  _renderPaste(msg, embed, embedEl) {
+  _renderPaste(msg, _embed, embedEl) {
     const pre = embedEl.querySelector('pre');
-    return pre && [embedEl, hljs.lineNumbersBlock(pre)][0];
+    if (pre) hljs.lineNumbersBlock(pre);
+
+    const meta = embedEl.querySelector('.le-meta');
+    if (meta) meta.appendChild(createElement('a', {href: '#action:expand:' + msg.index, innerHTML: '<i class="fas fa-angle-down"/>'}));
+    return embedEl;
   }
 
   _renderVideoChat(msg, embed, embedEl) {

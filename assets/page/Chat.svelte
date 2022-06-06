@@ -1,6 +1,7 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
+import ChatMessage from '../components/ChatMessage.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import ConversationSettings from '../components/ConversationSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
@@ -9,13 +10,13 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, viewport} from '../store/viewport';
-import {awayMessage, onInfinityScrolled, onInfinityVisibility, onMessageClick, renderEmbed, topicOrStatus} from '../js/chatHelpers';
+import {awayMessage, topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
-import {generateWriteable} from '../store/writable';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
-import {modeClassNames, nbsp} from '../js/util';
+import {modeClassNames} from '../js/util';
+import {onInfinityScrolled, onInfinityVisibility} from '../js/chatHelpers';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
@@ -25,37 +26,45 @@ export let title = 'Chat';
 
 const dragAndDrop = new DragAndDrop();
 const user = getContext('user');
-const popoverTarget = generateWriteable('chat:popoverTarget');
 
 let connection = user.notifications;
 let conversation = user.notifications;
 let messages = conversation.messages;
 let participants = conversation.participants;
 let now = new Time();
-let timestampFromUrl = '';
 let unsubscribe = {};
 let focusChatInput, fillIn, uploader, uploadProgress;
+let timestampFromUrl = '';
 
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
 $: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
-$: onMessageClickParams = {conversation, popoverTarget, user};
+$: conversationName = encodeURIComponent($conversation.name);
 $: title = $conversation.title;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
-onMount(() => {
-  popoverTarget.set('');
-  dragAndDrop.attach(document.querySelector('.main'), uploader);
-});
+onMount(() => dragAndDrop.attach(document.querySelector('.main'), uploader));
 
 onDestroy(() => {
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
 });
 
+export function conversationJoin(e) {
+  e.preventDefault();
+  const aEl = e.target.closest('a');
+  conversation.send('/join ' + decodeURIComponent(aEl.hash.replace(/^#?action:join:/, '')));
+}
+
+export function conversationClose(e) {
+  e.preventDefault();
+  conversation.send('/close ' + conversation.conversation_id);
+  route.go('/settings/conversation');
+}
+
 function conversationToUri() {
   const [scheme, host] = $conversation.connection_id.split('-');
-  return scheme + '://' + host + '/' + encodeURIComponent($conversation.conversation_id) + '?tls=1';
+  return scheme + '://' + host + '/' + conversationName + '?tls=1';
 }
 
 function onFocus() {
@@ -65,7 +74,6 @@ function onFocus() {
 function setConversationFromRoute(connection_id, conversation_id) {
   if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
-  popoverTarget.set('');
 }
 
 function setConversationFromUser(user) {
@@ -85,18 +93,6 @@ function setConversationFromUser(user) {
   timestampFromUrl = isISOTimeString(route.hash) && route.hash || '';
   if (timestampFromUrl) return conversation.load({around: timestampFromUrl});
   if (!conversation.historyStopAt) return conversation.load({around: now.toISOString()});
-}
-
-function showPopover(e) {
-  const {relatedTarget, target, type} = e;
-  setTimeout(() => {
-    if (type == 'mouseout' || type == 'blur') {
-      if (!relatedTarget || !relatedTarget.closest('.popover')) $popoverTarget = null;
-    }
-    else {
-      if (!$popoverTarget) target.click();
-    }
-  }, 250);
 }
 </script>
 
@@ -159,39 +155,7 @@ function showPopover(e) {
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
-    <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:show-details="{!!message.showDetails}" data-index="{i}" data-ts="{message.ts.toISOString()}" on:click="{e => onMessageClick(e, onMessageClickParams)}">
-      <Icon name="pick:{message.from}" color="{message.color}"/>
-      <div class="message__ts has-tooltip">
-        <span>{message.ts.format('%H:%M')}</span>
-        <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
-      </div>
-      <a href="#popover:{message.id}" on:blur="{showPopover}" on:focus="{showPopover}" on:mouseover="{showPopover}" on:mouseout="{showPopover}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
-      <div class="message__text">
-        {#if message.waitingForResponse === false}
-          <a href="#action:remove" class="pull-right has-tooltip"><Icon name="times-circle"/><span class="tooltip">{$l('Remove')}</span></a>
-          <a href="#action:resend" class="pull-right has-tooltip "><Icon name="sync-alt"/><span class="tooltip">{$l('Resend')}</span></a>
-        {:else if !message.waitingForResponse && message.details}
-          <a href="#action:details:{message.index}"><Icon name="{message.showDetails ? 'caret-square-up' : 'caret-square-down'}"/></a>
-        {/if}
-        {@html message.html}
-      </div>
-      {#each message.embeds as embedPromise}
-        {#await embedPromise}
-          <!-- loading embed -->
-        {:then embed}
-          {#if !messages.raw}
-            <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
-          {/if}
-        {/await}
-      {/each}
-      {#if $popoverTarget == message.id}
-        <div class="popover" transition:fade="{{duration: 200}}" on:blur="{showPopover}" on:mouseout="{showPopover}">
-          <a href="#action:mention:{message.from}" class="on-hover"><Icon name="quote-left"/> {$l('Mention')}</a>
-          <a href="#action:join:{message.from}" class="on-hover"><Icon name="comments"/> {$l('Chat')}</a>
-          <a href="#action:whois:{message.from}" class="on-hover"><Icon name="address-card"/> {$l('Whois')}</a>
-        </div>
-      {/if}
-    </div>
+    <ChatMessage conversation="{conversation}" message="{message}" on:mention="{e => fillIn(e.detail)}"/>
   {/each}
 
   <!-- status -->
@@ -206,7 +170,7 @@ function showPopover(e) {
     <h2>{$l('You are not part of this conversation.')}</h2>
     <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
     <p>
-      <Link href="#action:join:{$conversation.name}" class="btn" on:click="{e => onMessageClick(e, onMessageClickParams)}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn" on:click="{conversationJoin}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
       <Link href="/settings/conversation" class="btn is-secondary"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
@@ -217,8 +181,8 @@ function showPopover(e) {
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
     <p>{$l('Do you want to join?')}</p>
     <p>
-      <Link href="#action:join" class="btn" on:click="{e => onMessageClick(e, onMessageClickParams)}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="#action:close" class="btn is-secondary" on:click="{e => onMessageClick(e, onMessageClickParams)}"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn" on:click="{conversationJoin}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="#action:close:{conversationName}" class="btn is-secondary" on:click="{conversationClose}"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <div class="message is-highlighted">
@@ -254,7 +218,7 @@ function showPopover(e) {
 {#if $viewport.rightColumn && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <h3>{$l('Participants (%1)', $participants.length)}</h3>
-    <nav class="sidebar-right__nav" on:click="{e => onMessageClick(e, onMessageClickParams)}">
+    <nav class="sidebar-right__nav" on:click="{conversationJoin}">
       {#each $participants.toArray() as participant}
         <a href="#action:join:{participant.id}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>

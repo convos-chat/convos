@@ -9,10 +9,10 @@
   padding: 0.3rem var(--gutter-small);
   overflow-x: auto;
   display: none;
+}
 
-  .message.show-details & {
-    display: block;
-  }
+.message.is-expanded .embed.le-details {
+  display: block;
 }
 
 .embed iframe {
@@ -135,34 +135,27 @@
     color: var(--text-color);
     padding: 0.3em;
     margin: 0;
-    cursor: zoom-in;
     position: relative;
 
-    &:after {
-      @include fa.icon(angle-down, solid);
+    .fa-angle-down {
       font-size: 1.2em;
       position: absolute;
       top: 0.4em;
       right: 0.4em;
       transition: transform 0.25s;
-      cursor: pointer;
     }
   }
 
   ol {
     margin: 0.2rem 0;
   }
+}
 
-  &.is-expanded {
-    max-height: none;
-    overflow-x: auto;
+.message.is-expanded .le-paste {
+  max-height: none;
+  overflow-x: auto;
 
-    .le-meta {
-      cursor: zoom-out;
-
-      &:after {
-        transform: rotate(180deg);
-      }
-    }
+  .le-meta .fa-angle-down {
+    transform: rotate(180deg);
   }
 }
