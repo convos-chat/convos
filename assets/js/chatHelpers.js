@@ -40,29 +40,19 @@ export function awayMessage(params) {
   return [message, ...vars];
 }
 
-// Exports other functions
-export function chatHelper(method, state) {
-  if (method == 'onInfinityScrolled') return (...params) => onInfinityScrolled(state, ...params);
-  if (method == 'onInfinityVisibility') return (...params) => onInfinityVisibility(state, ...params);
-  if (method == 'onMessageClick') return (...params) => onMessageClick(state, ...params);
-}
-
-// Exported
 export function conversationUrl(message) {
   const path = ['', 'chat', message.connection_id];
   if (message.conversation_id) path.push(message.conversation_id);
   return route.urlFor(path.map(encodeURIComponent).join('/') + '#' + message.ts.toISOString());
 }
 
-// Exported
 export function gotoConversation(e) {
   if (e.target.closest('a')) return;
   e.preventDefault();
   route.go(e.target.closest('.message').querySelector('a').href);
 }
 
-// Available through chatHelper()
-function onInfinityScrolled({conversation}, e) {
+export function onInfinityScrolled(e, {conversation}) {
   const visibleEls = e.detail.visibleEls.filter(el => el.dataset.ts);
   if (!visibleEls.length) return;
 
@@ -83,8 +73,7 @@ function onInfinityScrolled({conversation}, e) {
   }
 }
 
-// Available through chatHelper()
-export function onInfinityVisibility({conversation, onLoadHash}, e) {
+export function onInfinityVisibility(e, {conversation, timestampFromUrl}) {
   const {infinityEl, scrollHeightChanged, scrollTo, visibleEls, visibleElsChanged} = e.detail;
   const messages = conversation.messages;
   const hasScrollbar = infinityEl.scrollHeight > infinityEl.offsetHeight;
@@ -94,14 +83,13 @@ export function onInfinityVisibility({conversation, onLoadHash}, e) {
   }
   if (scrollHeightChanged) {
     scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-    renderFocusedEl(infinityEl, onLoadHash == route.hash);
+    renderFocusedEl(infinityEl, timestampFromUrl == route.hash);
   }
   if (visibleElsChanged) {
     visibleEls.forEach(el => messages.render(el.dataset.index));
   }
 }
 
-// Internal
 function onMessageActionClick({conversation, fillIn, focusChatInput, popoverTarget}, e, action) {
   e.preventDefault();
   if (action[0] == 'popover') {
@@ -137,8 +125,7 @@ function onMessageActionClick({conversation, fillIn, focusChatInput, popoverTarg
   }
 }
 
-// Available through chatHelper()
-function onMessageClick(curried, e) {
+export function onMessageClick(e, params) {
   const aEl = e.target.closest('a');
 
   // Make sure embed links are opened in a new tab/window
@@ -146,7 +133,7 @@ function onMessageClick(curried, e) {
 
   // Proxy video links
   const videoEl = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (videoEl) return onVideoLinkClick(curried, e, videoEl);
+  if (videoEl) return onVideoLinkClick(params, e, videoEl);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -154,14 +141,13 @@ function onMessageClick(curried, e) {
 
   // Special links with actions in #hash
   const action = aEl && aEl.href.match(/#(action|popover):(\w+):?(.*)/);
-  if (action) return onMessageActionClick(curried, e, action.slice(1));
+  if (action) return onMessageActionClick(params, e, action.slice(1));
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
   if (aEl && aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
 }
 
-// Available through chatHelper()
 function onVideoLinkClick({conversation}, e, aEl) {
   // https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
   // https://meet.jit.si/irc-libera-superman-and-superwoman
@@ -178,7 +164,6 @@ function onVideoLinkClick({conversation}, e, aEl) {
   }
 }
 
-// Exported
 export function renderEmbed(el, embed) {
   const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
   if (parentNode && parentNode.classList) {
@@ -189,14 +174,12 @@ export function renderEmbed(el, embed) {
   embed.nodes.forEach(node => el.appendChild(node));
 }
 
-// Internal
 function renderFocusedEl(infinityEl, add) {
   const focusEl = add && route.hash && infinityEl.querySelector('.message[data-ts="' + route.hash + '"]');
   q(infinityEl, '.has-focus', (el) => el.classList.remove('has-focus'));
   if (focusEl) focusEl.classList.add('has-focus');
 }
 
-// Exported
 export function topicOrStatus(connection, conversation) {
   if (conversation.is('not_found')) return '';
   if (connection.frozen) return connection.frozen;
