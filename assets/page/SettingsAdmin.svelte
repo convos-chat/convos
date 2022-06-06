@@ -8,12 +8,12 @@ import {createForm} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
+import {videoService} from '../store/video';
 
 export const title = 'Global settings';
 
 const api = getContext('api');
 const form = createForm();
-const user = getContext('user');
 
 const checkForUpdatesOp = api('checkForUpdates');
 const getSettingsOp = api('getSettings');
@@ -54,7 +54,7 @@ function updateSettingsFromForm() {
   settings('open_to_public', fields.open_to_public);
   settings('organization_name', fields.organization_name);
   settings('organization_url', fields.organization_url);
-  user.update({videoService: fields.video_service});
+  videoService.fromString(fields.video_service);
   updateSettingsOp.perform(fields);
 }
 </script>

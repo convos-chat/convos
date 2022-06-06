@@ -2,12 +2,12 @@
 import CommandHistory from '../store/CommandHistory';
 import Icon from '../components/Icon.svelte';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
-import {chatHelper, videoWindow} from '../js/chatHelpers';
 import {extractErrorMessage, is, nbsp} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
+import {videoService, videoWindow} from '../store/video';
 
 export const uploader = uploadFiles;
 export let uploadProgress = 0;
@@ -31,8 +31,8 @@ $: connection = user.findConversation({connection_id: conversation.connection_id
 $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
-$: onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
 $: tooltip = conversation.is('search') ? $l('Search') : $l('Send');
+$: videoUrl = videoService.conversationToInternalUrl(conversation);
 $: commandHistory.update({conversation: $conversation});
 $: startAutocomplete(splitValueAt);
 $: updateValueWhenConversationChanges(conversation);
@@ -92,6 +92,14 @@ function onReady(el) {
 
   commandHistory.attach(inputEl);
   setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
+}
+
+function onVideoLinkClick(e) {
+  e.preventDefault();
+  videoWindow.open(videoUrl, {nick: conversation.participants.me().nick});
+  const alreadySent = conversation.messages.toArray().slice(-20).find(msg => msg.message.indexOf(videoUrl) != -1);
+  if (alreadySent && alreadySent.ts.toEpoch() > new Time().toEpoch() - 600) return;
+  conversation.send({method: 'send', message: videoService.conversationToExternalUrl(conversation)});
 }
 
 function renderInputHeight() {
@@ -185,10 +193,11 @@ function uploadFiles(e) {
 
   {#if activeChatMenu == 'actions' && conversation.is('conversation')}
     <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenuToggle}">
-      <a href="#action:video" on:click="{onVideoLinkClick}">
-        <Icon name="{$videoWindow ? 'video-slash' : 'video'}"/>
-        {$l('Start a video conference')}
-      </a>
+      {#if videoUrl}
+        <a href="{videoUrl}" on:click="{onVideoLinkClick}">
+          <Icon name="video"/> {$l('Start a video conference')}
+        </a>
+      {/if}
       <label for="upload_files">
         <Icon name="cloud-upload-alt"/>
         {$l('Attach a file')}

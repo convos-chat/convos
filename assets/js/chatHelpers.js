@@ -1,20 +1,8 @@
-import Time from '../js/Time';
 import {extractErrorMessage, q, showFullscreen, tagNameIs} from '../js/util';
-import {get, writable} from 'svelte/store';
+import {get} from 'svelte/store';
 import {i18n} from '../store/I18N';
 import {route} from '../store/Route';
-
-export const videoWindow = writable(null);
-videoWindow.close = function() {
-  const w = get(this);
-  return w ? [true, w.close(), this.set(null)][0] : false;
-};
-
-videoWindow.open = function(url) {
-  const w = window.open(url.toString(), 'convos_video');
-  ['beforeunload', 'close'].forEach(name => w.addEventListener(name, () => this.set(null)));
-  this.set(w);
-};
+import {videoWindow} from '../store/video';
 
 export function awayMessage(params) {
   if (!params.nick) return ['Loading...'];
@@ -46,7 +34,7 @@ export function awayMessage(params) {
   }
 
   if (!params.away) {
-    message = message.replace(/%(4|5)/g, (a, n) => '%' + (n - 1));
+    message = message.replace(/%(4|5)/g, (_all, n) => '%' + (n - 1));
   }
 
   return [message, ...vars];
@@ -57,7 +45,6 @@ export function chatHelper(method, state) {
   if (method == 'onInfinityScrolled') return (...params) => onInfinityScrolled(state, ...params);
   if (method == 'onInfinityVisibility') return (...params) => onInfinityVisibility(state, ...params);
   if (method == 'onMessageClick') return (...params) => onMessageClick(state, ...params);
-  if (method == 'onVideoLinkClick') return (...params) => onVideoLinkClick(state, ...params);
 }
 
 // Exported
@@ -72,15 +59,6 @@ export function gotoConversation(e) {
   if (e.target.closest('a')) return;
   e.preventDefault();
   route.go(e.target.closest('.message').querySelector('a').href);
-}
-
-// Internal
-function maybeSendVideoUrl(conversation, videoUrl) {
-  videoUrl = new URL(videoUrl, location.href).href;
-  const messages = conversation.messages;
-  const alreadySent = messages.toArray().slice(-20).reverse().find(msg => msg.message.indexOf(videoUrl) != -1);
-  if (alreadySent && alreadySent.ts.toEpoch() > new Time().toEpoch() - 600) return;
-  conversation.send({method: 'send', message: videoUrl});
 }
 
 // Available through chatHelper()
@@ -167,8 +145,8 @@ function onMessageClick(curried, e) {
   if (aEl && !aEl.target && e.target.closest('.embed')) aEl.target = '_blank';
 
   // Proxy video links
-  const videoLink = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (videoLink) return onVideoLinkClick(curried, e, videoLink);
+  const videoEl = aEl && document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
+  if (videoEl) return onVideoLinkClick(curried, e, videoEl);
 
   // Expand/collapse pastebin, except when clicking on a link
   const pasteMetaEl = e.target.closest('.le-meta');
@@ -184,38 +162,19 @@ function onMessageClick(curried, e) {
 }
 
 // Available through chatHelper()
-function onVideoLinkClick({conversation, user}, e, aEl) {
-  /*
-   * Example aEl.href:
-   * 1. "#action:video"
-   * 2. https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
-   * 3. https://meet.jit.si/irc-libera-superman-and-superwoman
-   */
-
-  if (!aEl) aEl = e.target.closest('a');
-
-  const videoButtonClicked = aEl.href.indexOf('#action:video') != -1;
-  if (videoWindow.close() && videoButtonClicked) return e.preventDefault();
-
-  const renderInsideConvos = aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi');
-  const chatParams = {nick: conversation.participants.me().nick};
-  if (videoButtonClicked) {
-    const videoUrl = new URL(user.videoService);
-    videoUrl.pathname += '/' + videoName(conversation);
-    videoUrl.pathname = videoUrl.pathname.replace(/\/+/g, '/');
-    maybeSendVideoUrl(conversation, videoUrl.toString());
-    e.preventDefault();
-    videoWindow.open(route.urlFor('/video/' + videoUrl.hostname + '/' + videoName(conversation), chatParams));
-  }
-  else if (aEl.href.indexOf('/video/') != -1) {
+function onVideoLinkClick({conversation}, e, aEl) {
+  // https://convos.chat/video/meet.jit.si/irc-localhost-whatever?nick=superman
+  // https://meet.jit.si/irc-libera-superman-and-superwoman
+  const nick = conversation.participants.me().nick;
+  if (aEl.href.indexOf('/video/') != -1) {
     const url = new URL(aEl.href);
     e.preventDefault();
-    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/'), chatParams));
+    videoWindow.open(route.urlFor(url.pathname.replace(/.*?\/video\//, '/video/')), {nick});
   }
-  else if (renderInsideConvos) {
+  else if (aEl.closest('.le-provider-convosapp') || aEl.closest('.le-provider-jitsi')) {
     const url = new URL(aEl.href);
     e.preventDefault();
-    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname, chatParams));
+    videoWindow.open(route.urlFor('/video/' + url.hostname + url.pathname), {nick});
   }
 }
 
@@ -246,10 +205,4 @@ export function topicOrStatus(connection, conversation) {
   if (conversation.info.idle_for) return i18n.l('User has been idle for %1s.', conversation.info.idle_for);
   const str = conversation.frozen ? conversation.frozen : conversation.topic;
   return str || (conversation.is('private') ? 'Private conversation.' : 'No topic is set.');
-}
-
-// Internal
-function videoName(conversation) {
-  const name = conversation.is('private') ? conversation.participants.nicks().sort().join('-and-') : conversation.title;
-  return encodeURIComponent(name);
 }

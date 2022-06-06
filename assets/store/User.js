@@ -8,6 +8,7 @@ import SortedMap from '../js/SortedMap';
 import {camelize, debounce} from '../js/util';
 import {getSocket} from './../js/Socket';
 import {notify} from './../js/Notify';
+import {videoService} from './video';
 
 export default class User extends Reactive {
   constructor(params) {
@@ -31,7 +32,6 @@ export default class User extends Reactive {
     this.prop('rw', 'id', '');
     this.prop('rw', 'status', 'pending');
     this.prop('rw', 'unreadIncludePrivateMessages', false);
-    this.prop('rw', 'videoService', params.videoService || '');
 
     this.socket = params.socket || getSocket('/events');
     this.socket.on('message', (msg) => this._dispatchMessage(msg));
@@ -56,7 +56,6 @@ export default class User extends Reactive {
   }
 
   ensureConversation(params, _lock) {
-    params = {...params, videoService: this.videoService};
     // Ensure channel or private conversation
     if (params.conversation_id) {
       const conn = this.ensureConversation({connection_id: params.connection_id}, true);
@@ -111,6 +110,7 @@ export default class User extends Reactive {
     (data.roles || []).forEach(role => this.roles.add(role));
 
     this.notifications.update({unread: data.unread || 0});
+    videoService.fromString(data.video_service || '');
 
     return this.update({
       email: data.email || '',
@@ -120,7 +120,6 @@ export default class User extends Reactive {
       roles: true,
       status: res.errors ? 'error' : 'success',
       id: data.uid || '',
-      videoService: data.video_service || '',
     });
   }
 
@@ -146,7 +145,6 @@ export default class User extends Reactive {
   }
 
   update(params) {
-    if (params.videoService) this.connections.forEach(conn => conn.update({videoService: params.videoService}));
     super.update(params);
     if (params.hasOwnProperty('unreadIncludePrivateMessages')) this._calculateUnreadDebounced();
     return this;

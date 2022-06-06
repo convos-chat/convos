@@ -2,7 +2,7 @@ import Conversation from '../assets/store/Conversation';
 import Time from '../assets/js/Time';
 import User from '../assets/store/User';
 import {get} from 'svelte/store';
-import {chatHelper, videoWindow, conversationUrl} from '../assets/js/chatHelpers';
+import {chatHelper, conversationUrl} from '../assets/js/chatHelpers';
 import {generateWriteable} from '../assets/store/writable';
 
 window.open = (url, name) => {
@@ -107,80 +107,6 @@ describe('onMessageClick', () => {
     expect(preventDefault).toBe(1);
     expect(document.querySelector('.fullscreen')).toBeTruthy();
     expect(document.querySelector('.fullscreen img[src="image.jpeg"]')).toBeTruthy();
-  });
-
-  test('videolink', () => {
-    let preventDefault = 0;
-    const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-    e.target.href = 'https://demo.convos.chat/video/meet.convos.chat/whatever';
-
-    // Do nothing
-    onMessageClick(e);
-    expect(preventDefault).toBe(0);
-
-    // Proxy to another link
-    const realLink = document.createElement('a');
-    realLink.href = 'https://demo.convos.chat/video/meet.convos.chat/whatever';
-    realLink.target = 'convos_video';
-    document.body.appendChild(realLink);
-    onMessageClick(e);
-    expect(preventDefault).toBe(1);
-    expect(get(videoWindow).url).toEqual('/video/meet.convos.chat/whatever?nick=');
-
-    // Clean up before next test
-    videoWindow.close();
-  });
-});
-
-describe('onVideoLinkClick', () => {
-  const conversation = new Conversation({connection_id: 'irc-foo', conversation_id: '#convos'});
-  const user = new User({videoService: 'https://meet.convos.chat'});
-  const onVideoLinkClick = chatHelper('onVideoLinkClick', {conversation, user});
-
-  let preventDefault = 0;
-  const e = {preventDefault: () => (++preventDefault), target: document.createElement('a')};
-  e.target.href = '#action:video';
-
-  let w1;
-  test('open video window', () => {
-    conversation.participants.add({nick: 'super_duper', me: true});
-    onVideoLinkClick(e);
-    w1 = get(videoWindow);
-    expect(preventDefault).toBe(1);
-    expect([w1.url, w1.name]).toEqual(['/video/meet.convos.chat/%23convos%20-%20foo?nick=super_duper', 'convos_video']);
-    expect(w1.opened).toBe(true);
-  });
-
-  test('close video window after open', () => {
-    onVideoLinkClick(e);
-    expect(preventDefault).toBe(2);
-    expect(w1.opened).toBe(false);
-  });
-
-  test('close window from outside', () => {
-    onVideoLinkClick(e);
-    const w2 = get(videoWindow);
-    expect(preventDefault).toBe(3);
-    expect(w2).not.toBe(w1);
-    expect(w2.opened).toBe(true);
-    ['beforeunload', 'close'].forEach(name => w2.events[name]());
-    expect(get(videoWindow)).toBe(null);
-  });
-
-  test('internal video link', () => {
-    conversation.participants.rename('super_duper', 'superman')
-    e.target.href = '/whatever/video/meet.convos.chat/%23convos%20-%20foo?nick=superwoman';
-    onVideoLinkClick(e);
-    expect(preventDefault).toBe(4);
-    expect(get(videoWindow).url).toBe('/video/meet.convos.chat/%23convos%20-%20foo?nick=superman');
-  });
-
-  test('external link', () => {
-    e.target.className = 'le-provider-jitsi';
-    e.target.href = 'https://meet2.convos.chat/cool-beans';
-    onVideoLinkClick(e);
-    expect(preventDefault).toBe(5);
-    expect(get(videoWindow).url).toBe('/video/meet2.convos.chat/cool-beans?nick=superman');
   });
 });
 
