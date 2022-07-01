@@ -46,7 +46,7 @@
     "rollup-plugin-scss": "3",
     "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.2",
-    "sass": "^1.52.1",
+    "sass": "^1.53.0",
     "svelte": "^3.48.0",
     "twemoji": "^14.0.2"
   }
