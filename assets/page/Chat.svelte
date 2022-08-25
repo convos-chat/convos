@@ -220,7 +220,7 @@ function setConversationFromUser(user) {
     <h3>{$l('Participants (%1)', $participants.length)}</h3>
     <nav class="sidebar-right__nav" on:click="{conversationJoin}">
       {#each $participants.toArray() as participant}
-        <a href="#action:join:{participant.id}" class="participant {modeClassNames(participant.modes)}">
+        <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
           <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
           <span>{participant.nick}</span>
         </a>
