@@ -1,6 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
-  ]
+    "config:base",
+    "npm:unpublishSafe",
+    "group:fontAwesome",
+    "group:allNonMajor"
+  ],
+  "pinVersions": false
 }
