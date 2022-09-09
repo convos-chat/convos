@@ -55,8 +55,10 @@ subtest 'password' => sub {
   ok $user->password, 'password';
   like $user->password, qr/^\$argon2id/, "password is hashed with argon2id";
 
+  my $password_hash = $user->{password};
   ok !$user->validate_password('s3crett'), 'invalid password';
   ok $user->validate_password('s3cret'), 'validate_password';
+  is $user->password, $password_hash, "validate_password does not needlessly rehash password";
 
   $user->save_p->$wait_success('save_p');
   is $core->get_user('jhthorsen@cpan.org')->password, $user->password, 'password from storage file';

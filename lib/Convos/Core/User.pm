@@ -153,7 +153,7 @@ sub validate_password {
 
   return 0 unless $self->password and $plain;
   my $valid = $self->_crypt->verify_password($plain, $self->password);
-  if ($valid && $self->_crypt->needs_rehash($plain)) {
+  if ($valid && $self->_crypt->needs_rehash($self->password)) {
     $self->{password} = $self->_crypt->hash_password($plain);
   }
   return $valid;
