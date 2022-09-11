@@ -23,7 +23,7 @@
     "@babel/preset-env": "^7.19.0",
     "@babel/runtime": "^7.19.0",
     "@csstools/postcss-sass": "^5.0.1",
-    "@fortawesome/fontawesome-free": "7.3.0",
+    "@fortawesome/fontawesome-free": "6.2.0",
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-eslint": "^8.0.2",
