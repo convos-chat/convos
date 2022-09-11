@@ -6,8 +6,7 @@ import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {createForm} from '../store/form';
-import {getContext, onDestroy} from 'svelte';
+import {getContext, onDestroy, onMount} from 'svelte';
 import {i18n, l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route.js';
@@ -16,28 +15,33 @@ import {str2array} from '../js/util';
 export const title = 'Account';
 
 const api = getContext('api');
-const form = createForm();
 const registerProtocolHandlerSupported = 'registerProtocolHandler' in navigator;
 const themeManager = getContext('themeManager');
 const user = getContext('user');
 const updateUserOp = api('updateUser');
 
-$: colorSchemeReadonly = $themeManager.hasColorScheme($form.activeTheme) ? false : true;
-$: i18n.load($form.lang);
-$: if ($form.handle_protocol_irc) registerProtocol('irc');
-$: if ($form.handle_protocol_ircs) registerProtocol('ircs');
+let form = {};
 
-form.set({
-  activeTheme: themeManager.activeTheme,
-  colorScheme: themeManager.colorScheme,
-  compactDisplay: themeManager.compactDisplay,
-  email: user.email,
-  expandUrlToMedia: user.expandUrlToMedia,
-  highlightKeywords: user.highlightKeywords.join(', '),
-  ignoreStatuses: user.ignoreStatuses,
-  lang: i18n.lang,
-  volume: notify.volume,
-  wantNotifications: notify.wantNotifications,
+$: colorSchemeReadonly = $themeManager.hasColorScheme(form.activeTheme) ? false : true;
+$: i18n.load(form.lang);
+$: if (form.handle_protocol_irc) registerProtocol('irc');
+$: if (form.handle_protocol_ircs) registerProtocol('ircs');
+
+onMount(() => {
+  form = {
+    activeTheme: themeManager.activeTheme,
+    colorScheme: themeManager.colorScheme,
+    compactDisplay: themeManager.compactDisplay,
+    email: user.email,
+    expandUrlToMedia: user.expandUrlToMedia,
+    highlightKeywords: user.highlightKeywords.join(', '),
+    ignoreStatuses: user.ignoreStatuses,
+    lang: i18n.lang,
+    password: '',
+    password_again: '',
+    volume: notify.volume,
+    wantNotifications: notify.wantNotifications,
+  };
 });
 
 // Using onDestroy() to unsubscribe to notify "update" event
@@ -51,20 +55,20 @@ function registerProtocol(proto) {
 }
 
 function saveAccount() {
-  const passwords = [$form.password, $form.password_again];
+  const passwords = [form.password, form.password_again];
   if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
 
-  if (!$form.wantNotifications) form.set({wantNotifications: false});
-  if ($form.wantNotifications) notify.requestDesktopAccess();
-  notify.update(form.get(['volume', 'wantNotifications']));
+  if (!form.wantNotifications) form.wantNotifications = false;
+  if (form.wantNotifications) notify.requestDesktopAccess();
+  notify.update(form);
 
-  if (colorSchemeReadonly) form.set({colorScheme: 'auto'});
-  themeManager.update(form.get(['activeTheme', 'colorScheme', 'compactDisplay']));
+  if (colorSchemeReadonly) form.colorScheme = 'auto';
+  themeManager.update(form);
 
-  const highlightKeywords = str2array(form.get('highlightKeywords'));
+  const highlightKeywords = str2array(form.highlightKeywords);
   const body = {email: user.email, highlight_keywords: highlightKeywords};
   if (passwords[0]) body.password = passwords[0];
-  user.update(form.get(['expandUrlToMedia', 'ignoreStatuses'])).update({highlightKeywords});
+  user.update(form).update({highlightKeywords});
   updateUserOp.perform(body);
 }
 </script>
@@ -75,46 +79,46 @@ function saveAccount() {
 
 <main class="main">
   <form method="post" on:submit|preventDefault="{saveAccount}">
-    <TextField type="email" name="email" form="{form}" readonly>
+    <TextField type="email" name="email" bind:value="{form.email}" readonly>
       <span slot="label">{$l('Email')}</span>
     </TextField>
-    <TextField name="highlightKeywords" form="{form}" placeholder="{$l('whatever, keywords')}">
+    <TextField name="highlightKeywords" bind:value="{form.highlightKeywords}" placeholder="{$l('whatever, keywords')}">
       <span slot="label">{$l('Notification keywords')}</span>
     </TextField>
-    <Checkbox name="wantNotifications" form="{form}">
+    <Checkbox name="wantNotifications" bind:value="{form.wantNotifications}">
       <span slot="label">{$l('Enable notifications')}</span>
     </Checkbox>
     <p class="help">{@html $lmd('Leave this unchecked, and hit "Save" to disable notifications.')}</p>
     <div class="inputs-side-by-side">
-      <SelectField name="volume" form="{form}" options="{notify.volumeOptions}">
+      <SelectField name="volume" bind:value="{form.volume}" options="{notify.volumeOptions}">
         <span slot="label">{$l('Notification sound volume')}</span>
       </SelectField>
       <div class="flex-basis-30">
-        <Button icon="play" disabled="{!parseInt($form.volume, 10)}" type="button" on:click="{() => notify.play({volume: $form.volume})}"><span>{$l('Test')}</span></Button>
+        <Button icon="play" disabled="{!parseInt(form.volume, 10)}" type="button" on:click="{() => notify.play({volume: form.volume})}"><span>{$l('Test')}</span></Button>
       </div>
     </div>
-    <Checkbox name="ignoreStatuses" form="{form}">
+    <Checkbox name="ignoreStatuses" bind:value="{form.ignoreStatuses}">
       <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
-    <Checkbox name="expandUrlToMedia" form="{form}">
+    <Checkbox name="expandUrlToMedia" bind:value="{form.expandUrlToMedia}">
       <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
-    <Checkbox name="compactDisplay" form="{form}">
+    <Checkbox name="compactDisplay" bind:value="{form.compactDisplay}">
       <span slot="label">{$l('Enable compact message display')}</span>
     </Checkbox>
-    <SelectField name="activeTheme" form="{form}" options="{themeManager.themeOptions}">
+    <SelectField name="activeTheme" bind:value="{form.activeTheme}" options="{themeManager.themeOptions}">
       <span slot="label">{$l('Theme')}</span>
     </SelectField>
-    <SelectField name="colorScheme" form="{form}" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}">
+    <SelectField name="colorScheme" bind:value="{form.colorScheme}" readonly="{colorSchemeReadonly}" options="{themeManager.colorSchemeOptions}">
       <span slot="label">{$l('Color scheme')}</span>
     </SelectField>
-    <SelectField name="lang" form="{form}" options="{$i18n.languageOptions}">
+    <SelectField name="lang" bind:value="{form.lang}" options="{$i18n.languageOptions}">
       <span slot="label">{$l('Language')} <Icon name="globe"/></span>
     </SelectField>
-    <TextField type="password" name="password" form="{form}" autocomplete="new-password">
+    <TextField type="password" name="password" bind:value="{form.password}" autocomplete="new-password">
       <span slot="label">{$l('Password')}</span>
     </TextField>
-    <TextField type="password" name="password_again" form="{form}" autocomplete="new-password">
+    <TextField type="password" name="password_again" bind:value="{form.password_again}" autocomplete="new-password">
       <span slot="label">{$l('Repeat password')}</span>
     </TextField>
 
@@ -135,12 +139,12 @@ function saveAccount() {
         {$l('If you do not see any popup, then it probably means %1 already handles the protocol.', $l('Convos'))}
       </p>
 
-      <Checkbox name="handle_protocol_irc" form="{form}">
+      <Checkbox name="handle_protocol_irc" bind:value="{form.handle_protocol_irc}">
         <span slot="label">{$l('irc://')}</span>
       </Checkbox>
       <p class="help">{@html $lmd('Test it by clicking on %1.', 'irc://localhost:6667')}</p>
 
-      <Checkbox name="handle_protocol_ircs" form="{form}">
+      <Checkbox name="handle_protocol_ircs" bind:value="{form.handle_protocol_ircs}">
         <span slot="label">{$l('ircs://')}</span>
       </Checkbox>
       <p class="help">{@html $lmd('Test it by clicking on %1.', 'ircs://irc.libera.chat:6697/%23convos')}</p>

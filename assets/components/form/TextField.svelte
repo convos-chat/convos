@@ -2,19 +2,20 @@
 import Icon from '../Icon.svelte';
 import {uuidv4} from '../../js/util';
 
-const onInput = e => { value.set(type.match(/^(number|range)$/) ? parseInt(e.target.value, 10) : e.target.value) };
 let visible = false;
 
 export let autocomplete = null;
-export let form;
 export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let placeholder = '';
 export let readonly = false;
 export let type = 'text';
+export let value;
 
-const value = form.field(name);
+function onInput(e) {
+  value = type.match(/^(number|range)$/) ? parseInt(e.target.value, 10) : e.target.value;
+}
 </script>
 
 <div class="text-field" class:has-password="{type == 'password'}" hidden="{hidden}">
@@ -25,7 +26,7 @@ const value = form.field(name);
     autocomplete="{autocomplete}"
     placeholder="{placeholder}"
     readonly="{readonly}"
-    value="{$value}"
+    value="{value}"
     on:input={onInput}
     on:keyup/>
   {#if type == 'password' && !readonly}

@@ -4,7 +4,6 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {createForm} from '../store/form';
 import {getContext, onMount} from 'svelte';
 import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
@@ -13,13 +12,13 @@ import {videoService} from '../store/video';
 export const title = 'Global settings';
 
 const api = getContext('api');
-const form = createForm();
 
 const checkForUpdatesOp = api('checkForUpdates');
 const getSettingsOp = api('getSettings');
 const updateSettingsOp = api('updateSettings');
 
 let diskUsage = null;
+let form = {};
 
 $: latestVersion = $checkForUpdatesOp.res.body.available;
 $: hasLatests = latestVersion == settings('version');
@@ -30,7 +29,7 @@ onMount(async () => {
   diskUsage = calculateDiskUsage(fields.disk_usage);
   delete fields.disk_usage;
   fields.contact = fields.contact.replace(/mailto:/, '');
-  form.set(fields);
+  form = {...form, ...fields};
 });
 
 function calculateDiskUsage(usage) {
@@ -48,14 +47,13 @@ function calculateDiskUsage(usage) {
 }
 
 function updateSettingsFromForm() {
-  const fields = form.get();
-  if (fields.contact) fields.contact = 'mailto:' + fields.contact;
-  settings('contact', fields.contact);
-  settings('open_to_public', fields.open_to_public);
-  settings('organization_name', fields.organization_name);
-  settings('organization_url', fields.organization_url);
-  videoService.fromString(fields.video_service);
-  updateSettingsOp.perform(fields);
+  if (form.contact) form.contact = 'mailto:' + form.contact;
+  settings('contact', form.contact);
+  settings('open_to_public', form.open_to_public);
+  settings('organization_name', form.organization_name);
+  settings('organization_url', form.organization_url);
+  videoService.fromString(form.video_service);
+  updateSettingsOp.perform(form);
 }
 </script>
 
@@ -68,23 +66,23 @@ function updateSettingsFromForm() {
     <h2>{$l('Convos settings')}</h2>
     <p>{@html $lmd('These settings control what users experience when they visit [%1](%1).', settings('base_url'))}</p>
 
-    <TextField name="organization_name" form="{form}">
+    <TextField name="organization_name" bind:value="{form.organization_name}">
       <span slot="label">{$l('Organization name')}</span>
       <p class="help" slot="help">{$l('Can be changed if you want to add a touch of your organization.')}</p>
     </TextField>
-    <TextField name="organization_url" form="{form}" placeholder="{$l('https://convos.chat')}">
+    <TextField name="organization_url" bind:value="{form.organization_url}" placeholder="{$l('https://convos.chat')}">
       <span slot="label">{$l('Organization URL')}</span>
       <p class="help" slot="help">{$l('Used together with "Organization name" to add a link to your organization on the login screen.')}</p>
     </TextField>
-    <TextField name="contact" form="{form}" placeholder="{$l('Ex: jhthorsen@cpan.org')}">
+    <TextField name="contact" bind:value="{form.contact}" placeholder="{$l('Ex: jhthorsen@cpan.org')}">
       <span slot="label">{$l('Admin email')}</span>
       <p class="help" slot="help">{$l('This email can be used by users to get in touch with the Convos admin.')}</p>
     </TextField>
-    <TextField name="video_service" form="{form}" placeholder="{$l('Ex: https://meet.jit.si/')}">
+    <TextField name="video_service" bind:value="{form.video_service}" placeholder="{$l('Ex: https://meet.jit.si/')}">
       <span slot="label">{$l('Video service')}</span>
       <p class="help" slot="help">{@html $lmd('This should point to a [%1](%2) instance.', 'https://meet.jit.si/', 'https://github.com/jitsi/jitsi-meet')}</p>
     </TextField>
-    <Checkbox name="open_to_public" form="{form}">
+    <Checkbox name="open_to_public" bind:value="{form.open_to_public}">
       <span slot="label">{$l('Registration is open to public')}</span>
     </Checkbox>
     <p class="help">{$l('Tick this box if you want users to be able to register without an invite URL.')}</p>

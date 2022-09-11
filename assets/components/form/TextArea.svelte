@@ -1,14 +1,12 @@
 <script>
 import {uuidv4} from '../../js/util';
 
-export let form;
 export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let placeholder = '';
 export let readonly = false;
-
-const value = form.field(name);
+export let value;
 </script>
 
 <div class="text-area" hidden="{hidden}">
@@ -18,5 +16,5 @@ const value = form.field(name);
     name="{name}"
     placeholder="{placeholder}"
     readonly="{readonly}"
-    bind:value="{$value}"></textarea>
+    bind:value="{value}"></textarea>
 </div>
