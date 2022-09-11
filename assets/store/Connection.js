@@ -25,20 +25,19 @@ export default class Connection extends Conversation {
     this.prop('rw', 'nick', nick);
     this.prop('rw', 'real_host', this.url.hostname);
     this.prop('rw', 'server_op', false);
-
-    this.participants.add((params.service_accounts || []).map(nick => ({nick})).concat({nick}));
     if (params.info) this.wsEventInfo(params.info);
   }
 
   ensureConversation(params) {
     let conversation = this.conversations.get(params.conversation_id);
     if (conversation) return conversation.update(params);
+    if (!params.frozen && this.frozen) params.frozen = this.frozen;
 
     conversation = new Conversation({...params, connection_id: this.connection_id});
     conversation.on('message', params => this.emit('message', params));
     conversation.on('update', () => this.update({conversations: true}));
     conversation.on('unread', () => this.emit('unread'));
-    this._addDefaultParticipants(conversation);
+    if (!params.frozen) this._addDefaultParticipants(conversation);
     this.conversations.set(conversation.conversation_id, conversation);
     this.update({conversations: true});
     this.emit('conversationadd', conversation);
@@ -89,8 +88,8 @@ export default class Connection extends Conversation {
     const existing = this.findConversation(params);
     const wasFrozen = existing && existing.frozen;
     const conversation = this.ensureConversation(params);
-    conversation.participants.add({nick: this.nick, me: true});
-    if (wasFrozen && !params.frozen) existing.addMessages({message: 'Connected.', vars: []});
+    if (!params.frozen && wasFrozen) existing.addMessages({message: 'Connected.', vars: []});
+    if (!params.frozen) conversation.participants.add({nick: this.nick, me: true});
     if (params.frozen && conversation.is('pending')) notify.show(params.frozen, {title: params.name});
   }
 

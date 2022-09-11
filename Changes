@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 7.04 Not Released
  - Fix showing both toggle icons on small screens
  - Ignore pull requests from "renovate" in Convos::Plugin::Bot::Action::Github
+ - Will not show yourself in the participants list if offline
 
 7.03 2022-09-11T10:10:59+0900
  - Changed chat input menu to be visible on big screens

@@ -215,16 +215,21 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
-{#if $viewport.hasRightColumn && $participants.length && !$conversation.is('not_found')}
+{#if $viewport.hasRightColumn && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <h3>{$l('Participants (%1)', $participants.length)}</h3>
+
     <nav class="sidebar-right__nav" on:click="{conversationJoin}">
-      {#each $participants.toArray() as participant}
-        <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
-          <Icon name="pick:{participant.nick}" family="solid" color="{participant.color}"/>
-          <span>{participant.nick}</span>
-        </a>
-      {/each}
+      {#if $participants.length}
+        {#each $participants.toArray() as participant}
+          <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
+            <Icon name="pick:{participant.nick}" family="solid" color="{participant.color}"/>
+            <span>{participant.nick}</span>
+          </a>
+        {/each}
+      {:else}
+        <a href="#settings" on:click="{activeMenu.toggle}"><Icon name="users-cog"/> {$l('Settings')}</a>
+      {/if}
     </nav>
 
     {#if $conversation.is('private') && $conversation.info.nick}

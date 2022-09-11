@@ -27,7 +27,7 @@ test('ensureConversation connection', () => {
   expect(user.activeConversation.frozen).toBe('Not found.');
   conn.ensureConversation({conversation_id: '#cf'});
   expect(user.activeConversation.conversation_id).toBe('#cf');
-  expect(user.activeConversation.frozen).toBe('');
+  expect(user.activeConversation.frozen).toBe('Disconnected.');
 });
 
 test('ensureConversation conversation', () => {
