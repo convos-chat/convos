@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.03 Not Released
+7.03 2022-09-11T10:10:59+0900
  - Changed chat input menu to be visible on big screens
  - Fix showing the same user icon in the sidebar as in the chat for CamelCaseNick
  - Fix syncing form field data on login page #753
