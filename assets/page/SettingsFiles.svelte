@@ -4,11 +4,9 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
-import OperationStatus from '../components/OperationStatus.svelte';
 import OperationStatusRow from '../components/OperationStatusRow.svelte';
 import Time from '../js/Time.js';
 import {copyToClipboard, humanReadableNumber} from '../js/util';
-import {createForm} from '../store/form';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
@@ -18,19 +16,15 @@ const api = getContext('api');
 const user = getContext('user');
 const deleteFilesOp = api('deleteFiles');
 const getFilesOp = api('getFiles');
-const form = createForm();
 
+let allSelected = false;
 let files = [];
+let form = {};
 let nextId = '';
 let prevId = '';
 
 $: loadFiles($route);
-$: toggleAll($form);
-$: selectedFiles = formFileIds($form).filter(name => !!$form[name]);
-
-function formFileIds($form) {
-  return Object.keys($form).filter(name => name != 'ALL_SELECTED');
-}
+$: toggleAll(form, allSelected);
 
 function copyUrl(e) {
   const link = e.target.closest('tr').querySelector('[target="convos_files_file"]');
@@ -39,33 +33,34 @@ function copyUrl(e) {
 }
 
 async function deleteFiles() {
-  await deleteFilesOp.perform({fid: selectedFiles.join(','), uid: user.id});
-  form.remove(selectedFiles);
-  form.set({ALL_SELECTED: (toggleAll.selected = false)});
-  files = files.filter(i => selectedFiles.indexOf(i.id) == -1);
+  await deleteFilesOp.perform({fid: Object.keys(form).join(','), uid: user.id});
+  files = files.filter(name => !form[name]);
+  form = {};
+  allSelected = false;
   if (files.length == 0) loadFiles(route);
 }
 
 async function loadFiles(route) {
   const after = route.query.after || '';
   await getFilesOp.perform({after, limit: 20});
-  form.remove(formFileIds(form.get()));
-
   files = getFilesOp.res.body.files || [];
+  Object.keys(files).forEach(name => delete form[name]); // Cleanup removed form items
+  allSelected = false;
+
   if (files.length || !after) {
     nextId = $getFilesOp.res.body.next && files.slice(-1)[0].id || '';
     prevId = $getFilesOp.res.body.prev || '';
   }
-
-  form.set({ALL_SELECTED: (toggleAll.selected = false)}); // Uppercase "ALL_SELECTED" should never clash with file.fid
 }
 
-function toggleAll(data) {
-  if (toggleAll.selected == data.ALL_SELECTED) return form.set({ALL_SELECTED: (toggleAll.selected = false)});
-  toggleAll.selected = form.get('ALL_SELECTED');
-  const vals = {};
-  formFileIds(form.get()).forEach(k => (vals[k] = toggleAll.selected));
-  form.set(vals);
+function toggleAll(form, allSelected) {
+  const someUnchecked = files.filter(name => !form[name]);
+  console.log({someUnchecked, allSelected});
+  //if (someUnchecked && $allSelected) return allSelected.set(false);
+  //toggleAll.selected = allSelected;
+  //const fields = {};
+  //Object.keys(form).forEach(k => (fields[k] = toggleAll.selected));
+  //form = {...form, ...fields};
 }
 </script>
 
@@ -81,7 +76,7 @@ function toggleAll(data) {
         <th>&nbsp;</th>
         <th>{$l('Name')}</th>
         <th class="text-right">{$l('Size')}</th>
-        <th class="text-right"><Checkbox form="{form}" name="ALL_SELECTED"/></th>
+        <th class="text-right"><Checkbox bind:value="{allSelected}"/></th>
       </tr>
     </thead>
     <tbody>
@@ -91,7 +86,7 @@ function toggleAll(data) {
           <td><Icon name="copy" on:click="{copyUrl}"/></td>
           <td><a href="{route.urlFor('/file/' + user.id + '/' + file.id)}" target="convos_files_file">{file.name}</a></td>
           <td class="text-right">{humanReadableNumber(file.size, 'B')}</td>
-          <td class="text-right"><Checkbox form="{form}" id="form_{file.id}" name="{file.id}"/></td>
+          <td class="text-right"><Checkbox bind:value="{form['form_' + file.id]}" id="form_{file.id}" name="{file.id}"/></td>
         </tr>
       {/each}
       {#if files.length == 0}
@@ -119,7 +114,7 @@ function toggleAll(data) {
   </div>
 
   <div class="form-actions">
-    <Button icon="trash" op="{deleteFilesOp}" on:click="{deleteFiles}" disabled="{!selectedFiles.length}"><span>{$l('Delete selected files')}</span></Button>
+    <Button icon="trash" op="{deleteFilesOp}" on:click="{deleteFiles}" disabled="{!Object.keys(form).length}"><span>{$l('Delete selected files')}</span></Button>
   </div>
 
   {#if files.length || $route.query.after}

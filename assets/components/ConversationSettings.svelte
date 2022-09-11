@@ -10,39 +10,40 @@ import TextField from '../components/form/TextField.svelte';
 import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage} from '../js/chatHelpers';
 import {getChannelMode} from '../js/constants';
-import {createForm} from '../store/form';
 import {fly} from 'svelte/transition';
 import {onMount, tick} from 'svelte';
 import {l, lmd} from '../store/I18N';
-import {modeClassNames, ucFirst} from '../js/util';
+import {modeClassNames} from '../js/util';
 
 export let conversation;
 export let transition;
 
-const form = createForm({password: ''});
-const info = createForm({});
 const saveConversationSettingsOp = new Operation({api: false, id: 'saveConversationSettings'});
 
-const toggleModes = [
-  'invite_only',
-  'moderated',
-  'password',
-  'prevent_external_send',
-  'topic_protection',
-];
+let checkboxes = {
+  invite_only: false,
+  moderated: false,
+  password: false,
+  prevent_external_send: false,
+  topic_protection: false,
+};
+
+let password = '';
+let rawMessages = false;
+let topic = '';
+let wantNotifications = false;
 
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
 
 onMount(async () => {
-  form.set({topic: conversation.topic, want_notifications: conversation.wantNotifications});
-  info.set(conversation.info);
   if (Object.keys(conversation.modes).length == 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
   await tick();
-  const fields = {raw_messages: conversation.messages.raw};
-  for (const mode of toggleModes) fields['mode_' + mode] = conversation.modes[mode] || false;
-  form.set(fields);
+  checkboxes = Object.assign({}, checkboxes, conversation.modes);
+  rawMessages = conversation.messages.raw;
+  topic = conversation.topic;
+  wantNotifications = conversation.wantNotifications;
 });
 
 function partConversation() {
@@ -51,15 +52,13 @@ function partConversation() {
 
 function saveChannelModes() {
   const setModes = [];
-  for (const mode of toggleModes) {
-    const checked = form.get('mode_' + mode) || false;
-    if (mode == 'password' && checked) {
-      const password = form.get('password');
+  for (const name in checkboxes) {
+    if (name == 'password' && checkboxes[name]) {
       if (password) conversation.send(isOperator ? '/mode +k ' + password : '/join ' + conversation.name + ' ' + password);
-      form.set({password: ''});
+      password = '';
     }
-    else if (checked != (conversation.modes[mode] || false)) {
-      setModes.push((checked ? '+' : '-') + getChannelMode(mode));
+    else if (checkboxes[name] != (conversation.modes[name] || false)) {
+      setModes.push((checkboxes[name] ? '+' : '-') + getChannelMode(name));
     }
   }
 
@@ -68,14 +67,14 @@ function saveChannelModes() {
 
 function saveChannelTopic() {
   if (!isOperator && conversation.modes.topic_protection) return false;
-  return form.get('topic') != conversation.topic && conversation.send('/topic ' + form.get('topic'));
+  return topic != conversation.topic && conversation.send('/topic ' + topic);
 }
 
 async function saveConversationSettings() {
   saveConversationSettingsOp.update({status: 'loading'});
   await saveConversationSettingsOp.on('update');
-  conversation.update({wantNotifications: form.get('want_notifications') || false});
-  conversation.messages.update({raw: $form.raw_messages ? true : false});
+  conversation.update({wantNotifications});
+  conversation.messages.update({raw: rawMessages});
   saveChannelModes();
   saveChannelTopic();
   await tick();
@@ -83,13 +82,7 @@ async function saveConversationSettings() {
 }
 
 function updateInfo() {
-  if (info.get('loading')) return;
-  info.set({loading: true});
-  conversation.send('/whois ' + conversation.name, (e) => {
-    e.stopPropagation();
-    setTimeout(() => info.set({loading: false}), 1000);
-    info.set(e);
-  });
+  conversation.send('/whois ' + conversation.name, (e) => e.stopPropagation());
 }
 </script>
 
@@ -102,10 +95,10 @@ function updateInfo() {
   </div>
 
   <p>
-    {#if conversation.frozen}
+    {#if $conversation.frozen}
       {$l('Conversation with %1 is frozen. Reason: %2', conversation.name, $l(conversation.frozen))}
     {:else if isPrivate}
-      <span class:fade-in="{$info.loading}">{@html $lmd(...awayMessage($info))}</span>
+      <span>{@html $lmd(...awayMessage($conversation.info))}</span>
       <br><small><a href="#update" on:click|preventDefault="{updateInfo}">{$l('Update information')}</a></small>
     {:else if isOperator}
       {$l('You are channel operator in %1.', conversation.name)}
@@ -117,7 +110,7 @@ function updateInfo() {
   <form method="post" on:submit|preventDefault="{saveConversationSettings}">
     {#if !isPrivate}
       {#if isOperator || !$conversation.modes.topic_protection}
-        <TextArea name="topic" form="{form}" placeholder="{$l('No topic is set.')}">
+        <TextArea name="topic" bind:value="{topic}" placeholder="{$l('No topic is set.')}">
           <span slot="label">{$l('Topic')}</span>
         </TextArea>
       {:else}
@@ -128,29 +121,39 @@ function updateInfo() {
       {/if}
     {/if}
 
-    {#if conversation.hasOwnProperty('wantNotifications')}
-      <Checkbox name="want_notifications" form="{form}">
+    {#if $conversation.hasOwnProperty('wantNotifications')}
+      <Checkbox name="want_notifications" bind:value="{wantNotifications}">
         <span slot="label">{$l('Notify me on new messages')}</span>
       </Checkbox>
     {/if}
 
-    <Checkbox name="raw_messages" form="{form}">
+    <Checkbox name="raw_messages" bind:value="{rawMessages}">
       <span slot="label">{$l('Show raw messages')}</span>
     </Checkbox>
 
     {#if !isPrivate}
       <nav class="sidebar-left__nav">
         <h3>{$l('Conversation modes')}</h3>
-        {#each toggleModes as mode}
-          <Checkbox badge name="mode_{mode}" form="{form}" disabled="{!isOperator}">
-            <span slot="label">{$l(ucFirst(mode.replace(/_/g, ' ')))} <b class="badge">{$form['mode_' + mode] ? '+' : '-'}{getChannelMode(mode)}</b></span>
-          </Checkbox>
-          {#if mode == 'password' && $form.mode_password}
-            <TextField type="password" name="password" form="{form}">
-              <span slot="label">{$l('Password')}</span>
-            </TextField>
-          {/if}
-        {/each}
+        <Checkbox badge name="invite_only" bind:value="{checkboxes.invite_only}" disabled="{!isOperator}">
+          <span slot="label">{$l('Invite only')} <b class="badge">{checkboxes.invite_only ? '+' : '-'}{getChannelMode('invite_only')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="moderated" bind:value="{checkboxes.moderated}" disabled="{!isOperator}">
+          <span slot="label">{$l('Moderated')} <b class="badge">{checkboxes.moderated ? '+' : '-'}{getChannelMode('moderated')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="prevent_external_send" bind:value="{checkboxes.prevent_external_send}" disabled="{!isOperator}">
+          <span slot="label">{$l('Prevent external send')} <b class="badge">{checkboxes.prevent_external_send ? '+' : '-'}{getChannelMode('prevent_external_send')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="topic_protection" bind:value="{checkboxes.topic_protection}" disabled="{!isOperator}">
+          <span slot="label">{$l('Protected topic')} <b class="badge">{checkboxes.topic_protection ? '+' : '-'}{getChannelMode('topic_protection')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="password" bind:value="{checkboxes.password}" disabled="{!isOperator}">
+          <span slot="label">{$l('Password')} <b class="badge">{checkboxes.password ? '+' : '-'}{getChannelMode('password')}</b></span>
+        </Checkbox>
+        {#if checkboxes.password}
+          <TextField type="password" name="password" bind:value="{password}">
+            <span slot="label">{$l('Password')}</span>
+          </TextField>
+        {/if}
 
         {#if !isOperator}
           <p><i>{$l('Only operators can change modes.')}</i></p>

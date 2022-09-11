@@ -1,41 +1,38 @@
 <script>
 import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
-import Link from '../components/Link.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {createForm} from '../store/form';
 import {debounce, extractErrorMessage} from '../js/util';
-import {getContext, onMount} from 'svelte';
+import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {route} from '../store/Route';
 
 export const title = 'Add conversation';
 
-const form = createForm();
 const socket = getContext('socket');
 const user = getContext('user');
 
 let availableConversations = {conversations: [], done: null, n_conversations: 0};
+let connectionId = '';
+let conversationId = '';
 let loadConversationsTid;
 
 $: connectionOptions = Array.from($user.connections.keys()).map(id => [id]);
-$: if (!$form.connection_id) renderForm();
+$: if (!connectionId) renderForm();
 
 function addConversation(e) {
   const aEl = e && e.target && e.target.closest('a');
-  if (aEl && aEl.href) form.set({conversation_id: aEl.href.replace(/.*#add:/, '')});
-  const connection = user.findConversation({connection_id: form.get('connection_id')});
-  if (connection && form.get('conversation_id')) connection.send('/join ' + form.get('conversation_id'));
+  if (aEl && aEl.href) conversationId = aEl.href.replace(/.*#add:/, '');
+  const connection = user.findConversation({connection_id: connectionId});
+  if (connection && conversationId) connection.send('/join ' + conversationId);
 }
 
 async function loadConversations(e) {
-  const conversationId = form.get('conversation_id') || '';
   let message = '/list' + (conversationId.length ? ' /' + conversationId + '/' : '');
   if (e.type == 'click' && availableConversations.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
-  const connectionId = form.get('connection_id');
   socket.send({connection_id: connectionId, message, method: 'send'}, (res) => {
     const error = extractErrorMessage(res);
     availableConversations = error ? {conversations: [], done: true, n_conversations: 0, error} : res;
@@ -47,10 +44,8 @@ async function loadConversations(e) {
 }
 
 function renderForm() {
-  form.set({
-    connection_id: route.param('connection_id') || connectionOptions[0] || '',
-    conversation_id: route.param('conversation_id') || '',
-  });
+  connectionId = route.param('connection_id') || connectionOptions[0][0] || '';
+  conversationId = route.param('conversation_id') || '';
 }
 
 const debouncedLoadConversations = debounce(loadConversations, 250);
@@ -65,25 +60,25 @@ const debouncedLoadConversations = debounce(loadConversations, 250);
 
   <form method="post" on:submit|preventDefault="{addConversation}">
     <div class="inputs-side-by-side">
-      <SelectField name="connection_id" form="{form}" options="{connectionOptions}" placeholder="{$l('Select...')}">
+      <SelectField name="connection_id" bind:value="{connectionId}" options="{connectionOptions}" placeholder="{$l('Select...')}">
         <span slot="label">{$l('Connection')}</span>
       </SelectField>
       <div class="flex-basis-30">
-        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!$form.connection_id || availableConversations.done === false}"><span>{$l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
+        <Button type="button" icon="sync-alt" on:click="{loadConversations}" disabled="{!connectionId || availableConversations.done === false}"><span>{$l(availableConversations.conversations.length ? 'Refresh' : 'Load')}</span></Button>
       </div>
     </div>
 
     <div class="inputs-side-by-side">
-      <TextField name="conversation_id" form="{form}" placeholder="{$l('#room or nick')}" autocomplete="off" on:keyup="{debouncedLoadConversations}">
+      <TextField name="conversation_id" bind:value="{conversationId}" placeholder="{$l('#room or nick')}" autocomplete="off" on:keyup="{debouncedLoadConversations}">
         <span slot="label">{$l('Conversation name')}</span>
       </TextField>
       <div class="flex-basis-30">
-        <Button icon="comment" disabled="{!$form.connection_id || !$form.conversation_id}"><span>{$l('Add')}</span></Button>
+        <Button icon="comment" disabled="{!connectionId || !conversationId}"><span>{$l('Add')}</span></Button>
       </div>
     </div>
 
     {#if availableConversations.error}
-      <p class="error">{$form.connection_id}: {availableConversations.error}</p>
+      <p class="error">{connectionId}: {availableConversations.error}</p>
     {/if}
 
     {#if availableConversations.done !== null}

@@ -5,32 +5,30 @@ let activeIndex = 0;
 let humanEl;
 let open = false;
 let typed = '';
-let wrapperEl;
 let visibleOptions = [];
 
-export let form;
 export let hidden = false;
 export let name = '';
 export let id = name ? 'form_' + name : uuidv4();
 export let options; // [["value", "label"], ...]
 export let placeholder = '';
 export let readonly = false;
+export let value;
 
 const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
-const value = form.field(name);
 
 $: calculateVisibleOptions(options, typed);
-$: if (humanEl) renderHuman($value);
+$: if (humanEl) renderHuman(value);
 $: if (open == false) typed = '';
 
 $: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
-  const found = options.find(opt => opt[0] == $value);
+  const found = options.find(opt => opt[0] == value);
   if (found) humanEl.value = found[1] || found[0];
 }
 
 function blur() {
   setTimeout(() => document.activeElement.closest('.select-field__option') || (open = false), 100);
-  renderHuman($value);
+  renderHuman(value);
 }
 
 function calculateVisibleOptions(options, needle) {
@@ -77,7 +75,7 @@ function keyup(e) {
 function selectOption(e) {
   let opt;
   if (e.type == 'keydown') {
-    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] == $value)[0];
+    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] == value)[0];
   }
   else {
     const needle = closestEl(e.target, '.select-field__option').href.replace(/^.*?#\d+:/, '');
@@ -85,7 +83,7 @@ function selectOption(e) {
   }
 
   if (!opt || !opt.length) opt = [''];
-  value.set(opt[0]);
+  value = opt[0];
   open = false;
 }
 
@@ -99,7 +97,7 @@ function toggle(e) {
   const optionEl = e && e.target && closestEl(e.target, '.select-field__option');
 
   if (!open) {
-    activeIndex = visibleOptions.map(o => o[0]).indexOf($value);
+    activeIndex = visibleOptions.map(o => o[0]).indexOf(value);
     humanEl.setSelectionRange(0, 9999);
   }
 
@@ -107,9 +105,9 @@ function toggle(e) {
 }
 </script>
 
-<div class="select-field text-field" class:is-open="{open}" class:is-readonly="{readonly}" hidden="{hidden}" bind:this="{wrapperEl}">
+<div class="select-field text-field" class:is-open="{open}" class:is-readonly="{readonly}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
-  <input type="hidden" name="{name}" bind:value="{$value}" on:keydown="{keydown}"/>
+  <input type="hidden" name="{name}" bind:value="{value}" on:keydown="{keydown}"/>
   <input type="text"
     id="{id}"
     autocomplete="off"
