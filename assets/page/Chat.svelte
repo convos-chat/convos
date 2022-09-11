@@ -110,9 +110,9 @@ function setConversationFromUser(user) {
 
 {#if $activeMenu == 'settings'}
   {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.singleColumn ? $viewport.width : 0}}"/>
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
   {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.singleColumn ? $viewport.width : 0}}"/>
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
   {/if}
 {/if}
 
@@ -215,7 +215,7 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
-{#if $viewport.rightColumn && $participants.length && !$conversation.is('not_found')}
+{#if $viewport.hasRightColumn && $participants.length && !$conversation.is('not_found')}
   <div class="sidebar-right">
     <h3>{$l('Participants (%1)', $participants.length)}</h3>
     <nav class="sidebar-right__nav" on:click="{conversationJoin}">

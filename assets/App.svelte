@@ -61,7 +61,7 @@ $: features[$themeManager.compactDisplay ? 'add' : 'remove']('compact-display');
 $: routeOrUserChanged($route, $user);
 $: setTitle(title, $user);
 $: viewport.setWidth(width);
-$: user.update({unreadIncludePrivateMessages: $viewport.singleColumn});
+$: user.update({unreadIncludePrivateMessages: $viewport.isSingleColumn});
 
 function setTitle(title, $user) {
   if (!document) return;
@@ -126,8 +126,8 @@ function socketChanged(socket) {
 {#if $user.is(['loading', 'pending'])}
   <Fallback/>
 {:else if $user.email}
-  {#if $activeMenu == 'nav' || !$viewport.singleColumn}
-    <ChatSidebar transition="{{duration: $viewport.singleColumn ? 250 : 0, x: width}}"/>
+  {#if $activeMenu == 'nav' || !$viewport.isSingleColumn}
+    <ChatSidebar transition="{{duration: $viewport.isSingleColumn ? 250 : 0, x: width}}"/>
   {/if}
 
   {#if $route.path.match(/\/chat\/./)}
@@ -160,7 +160,7 @@ function socketChanged(socket) {
     <Fallback bind:title/>
   {/if}
 
-  {#if $activeMenu && $viewport.singleColumn}
+  {#if $activeMenu && $viewport.haSingleColumn}
     <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => { $activeMenu = '' }}">&nbsp;</div>
   {/if}
 {:else}

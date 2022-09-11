@@ -165,7 +165,7 @@ function updateInfo() {
     <OperationStatus op="{saveConversationSettingsOp}"/>
   </form>
 
-  {#if !conversation.frozen && $viewport.rightColumn}
+  {#if !conversation.frozen && $viewport.hasRightColumn}
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}

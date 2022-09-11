@@ -9,11 +9,19 @@ export const activeMenu = writable('', {
   },
 });
 
-export const viewport = writable({leftColumn: false, rightColumn: false, singleColumn: true, width: 0}, {
-  setWidth(width) {
-    const leftColumn = width >= 800;
-    const rightColumn = width >= 1200;
-    const singleColumn = leftColumn || rightColumn ? false : true;
-    this.set({leftColumn, rightColumn, singleColumn, width});
+export const viewport = writable(
+  {
+    hasLeftColumn: false,
+    hasRightColumn: false,
+    isSingleColumn: true,
+    width: 0,
   },
-});
+  {
+    setWidth(width) {
+      const hasLeftColumn = width >= 800;
+      const hasRightColumn = width >= 1200;
+      const isSingleColumn = hasLeftColumn || hasRightColumn ? false : true;
+      this.set({hasLeftColumn, hasRightColumn, isSingleColumn, width});
+    },
+  },
+);
