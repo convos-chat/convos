@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+7.04 Not Released
+ - Fix showing both toggle icons on small screens
+ - Ignore pull requests from "renovate" in Convos::Plugin::Bot::Action::Github
+
 7.03 2022-09-11T10:10:59+0900
  - Changed chat input menu to be visible on big screens
  - Fix showing the same user icon in the sidebar as in the chat for CamelCaseNick
@@ -30,7 +34,7 @@ Revision history for perl distribution Convos
  - Replaced backend.user helper to user.load_p
  - Brought back Convos::Plugin::Paste to simplify overriding multiline message handling
  - Fix not hiding the sidebar settings when scrolling up #689
- - Going to ignore pull requests from "dependabot" in Convos::Plugin::Bot::Action::Github
+ - Ignoring pull requests from "dependabot" in Convos::Plugin::Bot::Action::Github
  - Highlights since 6.00
    * Add /shrug command
    * Add Dracula and GNOME color theme

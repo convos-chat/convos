@@ -121,16 +121,16 @@
   }
 }
 
+input[type="checkbox"] + .btn-hallow,
 .btn-hallow.can-toggle {
-  .far:nth-of-type(2),
-  .fas:nth-of-type(2) {
+  .fa-times {
     @extend %hallow-child-fill-parent;
     opacity: 0;
     transform: scale(0);
   }
 }
 
-input:checked + .btn-hallow,
+input[type="checkbox"]:checked + .btn-hallow,
 .btn-hallow.is-active {
   &:after {
     opacity: 1 !important;
@@ -142,8 +142,7 @@ input:checked + .btn-hallow,
     transform: scale(0.1);
   }
 
-  .far:nth-of-type(2),
-  .fas:nth-of-type(2) {
+  .fa-times {
     opacity: 1;
     transform: scale(1);
   }
