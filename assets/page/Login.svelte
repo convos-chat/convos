@@ -57,9 +57,9 @@ function renderForm($route) {
   return mode;
 }
 
-async function submitForm() {
+async function submitForm(e) {
   const op = mode == 'login' ? loginOp : registerOp;
-  await op.perform(form.get());
+  await op.perform(form.load(e.target.closest('form')).get());
   if (mode != 'login') route.update({lastUrl: ''}); // Make sure the old value is forgotten
   if (!op.error()) await user.load(); // Causes redirect() to be called
 }

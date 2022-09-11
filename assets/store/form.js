@@ -9,6 +9,14 @@ function get(data, names) {
   return is.array(names) ? names.reduce((map, name) => { map[name] = data[name]; return map }, {}) : data[names];
 }
 
+function load(form, formEl, fields) {
+  for (const name in fields) {
+    const input = formEl[name];
+    if (input) fields[name].set(input.value);
+  }
+  return form;
+}
+
 function set(form, to) {
   Object.keys(to).forEach(name => form.field(name).set(is.stringable(to[name]) ? String(to[name]) : to[name]));
   return form;
@@ -65,6 +73,7 @@ export const createForm = (defaultFields = {}) => {
   };
 
   form.get = (names) => get(data, names);
+  form.load = (formEl) => load(form, formEl, fields);
   form.set = (to) => set(form, to);
   form.subscribe = (cb) => { cb(data); return subscribe(subscribers, cb) };
   Object.keys(defaultFields).forEach(k => form.set({[k]: defaultFields[k]}));
