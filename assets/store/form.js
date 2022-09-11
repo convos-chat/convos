@@ -11,6 +11,7 @@ function get(data, names) {
 
 function load(form, formEl, fields) {
   for (const name in fields) {
+    if (!Object.hasOwn(fields, name)) continue;
     const input = formEl[name];
     if (input) fields[name].set(input.value);
   }
