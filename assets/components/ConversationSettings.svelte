@@ -169,7 +169,7 @@ function updateInfo() {
     <nav class="sidebar-left__nav">
       <h3>{$l('Participants (%1)', $participants.length)}</h3>
       {#each $participants.toArray() as participant}
-        <Link href="/chat/{conversation.connection_id}/{participant.id}" class="participant {modeClassNames(participant.modes)}">
+        <Link href="/chat/{conversation.connection_id}/{encodeURIComponent(participant.nick)}" class="participant {modeClassNames(participant.modes)}">
           <div>{participant.nick}</div>
         </Link>
       {/each}

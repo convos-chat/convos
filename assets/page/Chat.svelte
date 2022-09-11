@@ -221,7 +221,7 @@ function setConversationFromUser(user) {
     <nav class="sidebar-right__nav" on:click="{conversationJoin}">
       {#each $participants.toArray() as participant}
         <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
-          <Icon name="pick:{participant.id}" family="solid" color="{participant.color}"/>
+          <Icon name="pick:{participant.nick}" family="solid" color="{participant.color}"/>
           <span>{participant.nick}</span>
         </a>
       {/each}

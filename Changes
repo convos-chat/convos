@@ -2,6 +2,7 @@ Revision history for perl distribution Convos
 
 7.03 Not Released
  - Changed chat input menu to be visible on big screens
+ - Fix showing the same user icon in the sidebar as in the chat for CamelCaseNick
  - Fix picking icons for nicks containing just numbers
  - Fix being able to jump from conversation to server settings in sidebar
  - Fix showing the same icon in the sidebar as in the chat
