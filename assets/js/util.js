@@ -106,7 +106,7 @@ export function closestEl(el, needle) {
  */
 export function copyToClipboard(el) {
   const style = {opacity: 0, position: 'absolute'};
-  const ta = createElement('textarea', {style, value: el.textContent || el.value})
+  const ta = createElement('textarea', {style, value: el.textContent || el.value});
   document.body.appendChild(ta);
 
   try {
