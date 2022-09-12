@@ -1,5 +1,5 @@
 import Conversation from './Conversation';
-import {api} from '../js/Api';
+import {convosApi} from '../js/Api';
 
 export default class Notifications extends Conversation {
   constructor(params) {
@@ -34,8 +34,8 @@ export default class Notifications extends Conversation {
   send(params = {}) { return Promise.resolve(params) }
 
   _addOperations() {
-    this.prop('ro', 'markAsReadOp', api('/api', 'markNotificationsAsRead'));
-    this.prop('ro', 'messagesOp', api('/api', 'notificationMessages'));
+    this.prop('ro', 'markAsReadOp', convosApi.op('markNotificationsAsRead'));
+    this.prop('ro', 'messagesOp', convosApi.op('notificationMessages'));
   }
 
   _skipLoad() {

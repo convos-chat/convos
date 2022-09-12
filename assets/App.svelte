@@ -21,7 +21,7 @@ import ChatSidebar from './components/ChatSidebar.svelte';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
 import {activeMenu, viewport} from './store/viewport';
-import {api} from './js/Api';
+import {convosApi} from './js/Api';
 import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
 import {i18n} from './store/I18N';
@@ -43,12 +43,12 @@ let title = i18n.l('Chat');
 socket.update({debug: 'WebSocket'});
 window.convosWebSockeet = socket;
 
+convosApi.url(route.urlFor('/api'));
 route.update({baseUrl: settings('base_url'), enabled: true});
 socket.update({url: route.wsUrlFor('/events')});
 user.on('wsEventSentJoin', e => route.go(route.conversationPath(e)));
 registerServiceWorker().catch(err => console.error('[serviceWorker]', err));
 
-setContext('api', api('/api').update({url: route.urlFor('/api')}).toFunction());
 setContext('socket', socket);
 setContext('themeManager', themeManager);
 setContext('user', user);

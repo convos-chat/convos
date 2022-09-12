@@ -2,9 +2,9 @@ import Messages from './Messages';
 import Participants from '../store/Participants';
 import Reactive from '../js/Reactive';
 import Time from '../js/Time';
-import {api} from '../js/Api';
 import {calculateModes, is, str2color} from '../js/util';
 import {channelModeCharToModeName} from '../js/constants';
+import {convosApi} from '../js/Api';
 import {getSocket} from '../js/Socket';
 import {i18n} from './I18N';
 import {notify} from '../js/Notify';
@@ -200,8 +200,8 @@ export default class Conversation extends Reactive {
   }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', api('/api', 'conversationMessages'));
-    this.prop('ro', 'markAsReadOp', api('/api', 'markConversationAsRead'));
+    this.prop('ro', 'messagesOp', convosApi.op('conversationMessages'));
+    this.prop('ro', 'markAsReadOp', convosApi.op('markConversationAsRead'));
   }
 
   _calculateFrozen() {

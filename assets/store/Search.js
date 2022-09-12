@@ -1,5 +1,5 @@
 import Conversation from './Conversation';
-import {api} from '../js/Api';
+import {convosApi} from '../js/Api';
 import {is} from '../js/util';
 
 export default class Search extends Conversation {
@@ -48,7 +48,7 @@ export default class Search extends Conversation {
   }
 
   _addOperations() {
-    this.prop('ro', 'messagesOp', api('/api', 'searchMessages'));
+    this.prop('ro', 'messagesOp', convosApi.op('searchMessages'));
     this.prop('ro', 'markAsReadOp', null);
   }
 

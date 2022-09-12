@@ -2,8 +2,8 @@ import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
 import {awayMessage} from '../js/chatHelpers';
+import {convosApi} from '../js/Api';
 import {extractErrorMessage, is, regexpEscape} from '../js/util';
-import {api} from '../js/Api';
 import {notify} from '../js/Notify';
 
 const sortConversations = (a, b) => {
@@ -184,8 +184,8 @@ export default class Connection extends Conversation {
   }
 
   _addOperations() {
-    this.prop('ro', 'markAsReadOp', api('/api', 'markConnectionAsRead'));
-    this.prop('ro', 'messagesOp', api('/api', 'connectionMessages'));
+    this.prop('ro', 'markAsReadOp', convosApi.op('markConnectionAsRead'));
+    this.prop('ro', 'messagesOp', convosApi.op('connectionMessages'));
   }
 
   _calculateFrozen() {

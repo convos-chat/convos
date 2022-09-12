@@ -7,20 +7,19 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import OperationStatusRow from '../components/OperationStatusRow.svelte';
 import TextField from '../components/form/TextField.svelte';
 import Time from '../js/Time';
+import {convosApi} from '../js/Api';
 import {copyToClipboard, nbsp, str2array} from '../js/util';
-import {getContext, onMount} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {notify} from '../js/Notify';
+import {onMount} from 'svelte';
 import {route} from '../store/Route';
 
 export let title = 'Users';
 
-const api = getContext('api');
-
-const deleteUserOp = api('deleteUser');
-const getUsersOp = api('getUsers');
-const inviteLinkOp = api('inviteUser');
-const updateUserOp = api('updateUser');
+const deleteUserOp = convosApi.op('deleteUser');
+const getUsersOp = convosApi.op('getUsers');
+const inviteLinkOp = convosApi.op('inviteUser');
+const updateUserOp = convosApi.op('updateUser');
 
 let confirmEmail = '';
 let form = {email: ''};

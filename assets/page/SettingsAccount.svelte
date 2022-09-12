@@ -6,6 +6,7 @@ import Icon from '../components/Icon.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {convosApi} from '../js/Api';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {i18n, l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
@@ -14,11 +15,10 @@ import {str2array} from '../js/util';
 
 export const title = 'Account';
 
-const api = getContext('api');
 const registerProtocolHandlerSupported = 'registerProtocolHandler' in navigator;
 const themeManager = getContext('themeManager');
 const user = getContext('user');
-const updateUserOp = api('updateUser');
+const updateUserOp = convosApi.op('updateUser');
 
 let form = {};
 

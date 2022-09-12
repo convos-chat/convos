@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+7.05 Not Released
+ - Api.js does not have to extend Reactive.js
+
 7.04 2022-09-12T09:25:12+0900
  - Fix showing both toggle icons on small screens
  - Ignore pull requests from "renovate" in Convos::Plugin::Bot::Action::Github

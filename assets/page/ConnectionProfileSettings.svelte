@@ -7,6 +7,7 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {convosApi} from '../js/Api';
 import {getContext, onMount, tick} from 'svelte';
 import {l} from '../store/I18N';
 import {nbsp, str2array} from '../js/util';
@@ -16,11 +17,10 @@ import {slide} from 'svelte/transition';
 export let profile_id = 'add';
 export const title = profile_id == 'add' ? 'Add connection profile' : 'Edit connection profile';
 
-const api = getContext('api');
 const user = getContext('user');
 const connectionProfiles = user.connectionProfiles;
-const removeConnectionProfileOp = api('removeConnectionProfile');
-const saveConnectionProfileOp = api('saveConnectionProfile');
+const removeConnectionProfileOp = convosApi.op('removeConnectionProfile');
+const saveConnectionProfileOp = convosApi.op('saveConnectionProfile');
 
 let form = {};
 let showAdvancedSettings = false;

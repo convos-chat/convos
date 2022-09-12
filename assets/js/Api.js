@@ -11,34 +11,26 @@ import Operation from '../store/Operation';
 import Reactive from './Reactive';
 import {is} from '../js/util';
 
-export const api = (id, operationId, params) => {
-  const singleton = api.singletons[id] || (api.singletons[id] = new Api());
-  return operationId ? singleton.operation(operationId, params) : singleton;
-};
-
-api.singletons = {};
-
-class Api extends Reactive {
+class Api {
   constructor() {
-    super();
-    this.prop('rw', 'protocol', location.protocol || 'http');
-    this.prop('rw', 'url', '');
+    this.protocol = location.protocol || 'http';
+    this._url = '/api';
   }
 
   /**
-   * operation() is used to create a new {@link Operation} object by operation
+   * op() is used to create a new {@link Operation} object by operation
    * ID.
    *
    * @example
-   * const getUserOp = api.operation('getUser');
-   * const getUserOp = api.operation('getUser', {connections: true});
+   * const getUserOp = api.op('getUser');
+   * const getUserOp = api.op('getUser', {connections: true});
    *
    * @memberof Api
    * @param {String} operationId An operation ID in the spec.
    * @param {Object} defaultParams An Object holding default "Operation" parameters. (optional)
    * @returns An Operation object.
    */
-  operation(operationId, defaultParams) {
+  op(operationId, defaultParams) {
     const op = new Operation({api: this, id: operationId, defaultParams});
     op.req.headers = {'Content-Type': 'application/json'};
     return op;
@@ -60,7 +52,7 @@ class Api extends Reactive {
     if (this._ops && operationId) return this._ops[operationId];
     if (this._spec) return this._spec;
 
-    const res = await fetch(this.url);
+    const res = await fetch(this._url);
     const spec = await res.json();
     this._ops = {};
     this._spec = spec;
@@ -84,17 +76,14 @@ class Api extends Reactive {
   }
 
   /**
-   * Turns the object into a function.
+   * url() must be used to set the URL to the API endpoint.
    *
-   * @example
-   * const api = new Api().toFunction();
-   * api('getUser', {}) == api().operation('getUser', {});
-   *
-   * @memberof Api
-   * @returns {Function}
+   * @param {String} operationId An operation ID in the spec.
+   * @returns {Object} The API object
    */
-  toFunction() {
-    return (operationId, params) => operationId ? this.operation(operationId, params) : this;
+  url(url) {
+    this._url = url;
+    return this;
   }
 
   _resolveRef(p) {
@@ -115,3 +104,5 @@ class Api extends Reactive {
     return res;
   }
 }
+
+export const convosApi = new Api();

@@ -4,6 +4,7 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {convosApi} from '../js/Api';
 import {getContext} from 'svelte';
 import {i18n, l, lmd} from '../store/I18N';
 import {q, settings} from '../js/util';
@@ -11,11 +12,10 @@ import {route} from '../store/Route';
 
 export let title = 'Sign in';
 
-const api = getContext('api');
 const user = getContext('user');
 
-const loginOp = api('loginUser');
-const registerOp = api('registerUser');
+const loginOp = convosApi.op('loginUser');
+const registerOp = convosApi.op('registerUser');
 
 let form = {};
 

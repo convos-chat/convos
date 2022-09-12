@@ -6,6 +6,7 @@ import OperationStatus from '../components/OperationStatus.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
+import {convosApi} from '../js/Api';
 import {getContext, onMount} from 'svelte';
 import {is} from '../js/util';
 import {l, lmd} from '../store/I18N';
@@ -16,13 +17,12 @@ let connection_id = 'add';
 export {connection_id as id};
 export let is_page = false;
 
-const api = getContext('api');
 const user = getContext('user');
 const saslMechanisms = [['none', 'None'], ['plain', 'Plain'], ['external', 'External']];
 
-const createConnectionOp = api('createConnection');
-const removeConnectionOp = api('removeConnection');
-const updateConnectionOp = api('updateConnection');
+const createConnectionOp = convosApi.op('createConnection');
+const removeConnectionOp = convosApi.op('removeConnection');
+const updateConnectionOp = convosApi.op('updateConnection');
 
 let confirmConnectionId = '';
 let connection = {};

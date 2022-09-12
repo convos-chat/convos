@@ -1,6 +1,6 @@
 import Emojis from '../js/Emojis';
 import Reactive from '../js/Reactive';
-import {api} from '../js/Api';
+import {convosApi} from '../js/Api';
 import {derived} from 'svelte/store';
 
 const ESCAPE = {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&apos;', '"': '&quot;'};
@@ -49,7 +49,7 @@ export default class I18N extends Reactive {
   async load(lang) {
     if (!lang) lang = this.lang || document.documentElement.getAttribute('lang');
     if (this.dictionaries[lang]) return this.update({lang});
-    const op = await api('/api', 'getDictionary', {lang}).perform();
+    const op = await convosApi.op('getDictionary', {lang}).perform();
     this.dictionaries[lang] = op.res.body.dictionary;
     this._languages = op.res.body.available_languages || {};
     this._languageOptions = Object.keys(this._languages).sort().map(id => [id, this._languages[id].language_team.replace(/\s*<.*/, '')]);

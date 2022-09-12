@@ -1,6 +1,7 @@
 <script>
 import CommandHistory from '../store/CommandHistory';
 import Icon from '../components/Icon.svelte';
+import {convosApi} from '../js/Api';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {extractErrorMessage, is, nbsp} from '../js/util';
 import {fly} from 'svelte/transition';
@@ -22,7 +23,6 @@ let inputEl;
 let inputMirror;
 let splitValueAt = 0;
 
-const api = getContext('api');
 const user = getContext('user');
 const commandHistory = new CommandHistory();
 
@@ -159,7 +159,7 @@ function uploadFiles(e) {
   formData.append('file', files[0]);
   uploadFiles.file = files[0];
 
-  const op = api('uploadFile');
+  const op = convosApi.op('uploadFile');
   op.on('progress', e => {
     if (uploadProgress < 100) uploadProgress = parseInt(100 * (e.total ? e.loaded / e.total : 0.02), 10);
     if (uploadProgress >= 100) uploadProgress = 0;

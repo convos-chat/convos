@@ -1,11 +1,11 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Reactive from '../js/Reactive';
-import {api} from '../js/Api';
+import {convosApi} from '../js/Api';
 
 export default class ConnectionProfiles extends Reactive {
   constructor(params) {
     super(params);
-    this.prop('ro', 'op', api('/api', 'listConnectionProfiles'));
+    this.prop('ro', 'op', convosApi.op('listConnectionProfiles'));
     this.prop('rw', 'profiles', []);
     this.prop('rw', 'status', 'pending');
   }

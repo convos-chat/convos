@@ -4,18 +4,17 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import Checkbox from '../components/form/Checkbox.svelte';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {getContext, onMount} from 'svelte';
+import {convosApi} from '../js/Api';
 import {humanReadableNumber, settings} from '../js/util';
 import {l, lmd} from '../store/I18N';
+import {onMount} from 'svelte';
 import {videoService} from '../store/video';
 
 export const title = 'Global settings';
 
-const api = getContext('api');
-
-const checkForUpdatesOp = api('checkForUpdates');
-const getSettingsOp = api('getSettings');
-const updateSettingsOp = api('updateSettings');
+const checkForUpdatesOp = convosApi.op('checkForUpdates');
+const getSettingsOp = convosApi.op('getSettings');
+const updateSettingsOp = convosApi.op('updateSettings');
 
 let diskUsage = null;
 let form = {};

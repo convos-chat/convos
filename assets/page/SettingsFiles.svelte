@@ -6,16 +6,16 @@ import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
 import OperationStatusRow from '../components/OperationStatusRow.svelte';
 import Time from '../js/Time.js';
+import {convosApi} from '../js/Api';
 import {copyToClipboard, humanReadableNumber} from '../js/util';
 import {getContext} from 'svelte';
 import {l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
 
-const api = getContext('api');
+const deleteFilesOp = convosApi.op('deleteFiles');
+const getFilesOp = convosApi.op('getFiles');
 const user = getContext('user');
-const deleteFilesOp = api('deleteFiles');
-const getFilesOp = api('getFiles');
 
 let allSelected = false;
 let files = [];

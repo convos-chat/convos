@@ -1,7 +1,7 @@
 import hljs from '../js/hljs';
 import Reactive from '../js/Reactive';
 import Time from '../js/Time';
-import {api} from '../js/Api';
+import {convosApi} from '../js/Api';
 import {createElement, q, str2color} from '../js/util';
 import {i18n} from './I18N';
 import {jsonhtmlify} from 'jsonhtmlify';
@@ -148,7 +148,7 @@ export default class Messages extends Reactive {
   }
 
   async _loadEmbed(msg, url) {
-    const op = await api('/api', 'embed', {url}).perform();
+    const op = await convosApi.op('embed', {url}).perform();
     const embed = op.res.body;
 
     embed.nodes = [];
