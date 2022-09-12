@@ -31,17 +31,16 @@ if ($ENV{RELEASE}) {
   untie @f;
 
   tie @f, 'Tie::File', 'package.json' or die $!;
-  s!:\s*"\d+\.\d+.\d+"!: "$node_wanted"! for @f;
+  s!"version":\s*"\d+\.\d+.\d+"!"version": "$node_wanted"! for @f;
   untie @f;
 
   tie @f, 'Tie::File', 'snap/snapcraft.yaml' or die $!;
-  s!:\s*'\d+\.\d+.\d+'!: '$node_wanted'! for @f;
+  s!version:\s*'\d+\.\d+.\d+'!version: '$node_wanted'! for @f;
   untie @f;
 
   tie @f, 'Tie::File', 'public/convos-api.yaml' or die $!;
   s!version:\s*\S+!version: $node_wanted! for @f;
   untie @f;
-
 }
 
 require Convos;
