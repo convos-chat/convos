@@ -28,7 +28,7 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-eslint": "^8.0.2",
     "@rollup/plugin-node-resolve": "^14.0.1",
-    "core-js": "7.4.0",
+    "core-js": "3.25.1",
     "cssnano": "^5.1.13",
     "eslint-plugin-svelte3": "^4.0.0",
     "highlight.js": "^11.6.0",
