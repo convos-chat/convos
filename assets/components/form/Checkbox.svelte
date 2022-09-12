@@ -16,16 +16,15 @@ $: icons = icon == 'caret' ? ['caret-square-down', 'caret-square-up'] : ['square
 $: stateIcon = icons[value ? 1 : 0];
 </script>
 
-<div class="checkbox" class:has-badge="{badge}" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
+<label class="checkbox" class:has-badge="{badge}" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
   <input type="checkbox"
     id="{id}"
     name="{name}"
+    checked="{value ? true : false}"
     disabled="{disabled}"
-    bind:checked="{value}"
     on:blur="{() => {hasFocus = false}}"
+    on:change="{(e) => {value = e.target.checked}}"
     on:focus="{() => {hasFocus = true}}"/>
-  <Icon family="regular" name="{stateIcon}" on:click="{() => { disabled || (value = !value) }}"/>
-  {#if $$slots.label}
-    <label for="{id}"><slot name="label"></slot></label>
-  {/if}
-</div>
+  <Icon family="regular" name="{stateIcon}"/>
+  <slot name="label"/>
+</label>

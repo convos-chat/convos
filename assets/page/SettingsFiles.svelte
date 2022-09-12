@@ -18,6 +18,7 @@ const getFilesOp = convosApi.op('getFiles');
 const user = getContext('user');
 
 let allSelected = false;
+let noneSelected = true;
 let files = [];
 let nextId = '';
 let prevId = '';
@@ -36,6 +37,7 @@ async function deleteFiles() {
   await deleteFilesOp.perform({fid: selected.map(file => file.id).join(','), uid: user.id});
   files = files.filter(file => !file.selected);
   allSelected = false;
+  calculateNoneSelected();
   if (files.length == 0) loadFiles(route);
 }
 
@@ -44,11 +46,16 @@ async function loadFiles(route) {
   await getFilesOp.perform({after, limit: 20});
   files = getFilesOp.res.body.files || [];
   allSelected = false;
+  calculateNoneSelected();
 
   if (files.length || !after) {
     nextId = $getFilesOp.res.body.next && files.slice(-1)[0].id || '';
     prevId = $getFilesOp.res.body.prev || '';
   }
+}
+
+function calculateNoneSelected() {
+  noneSelected = !files.find(file => file.selected);
 }
 
 function toggleSelected(allSelected) {
@@ -61,57 +68,59 @@ function toggleSelected(allSelected) {
 </ChatHeader>
 
 <main class="main">
-  <table>
-    <thead>
-      <tr>
-        <th>{$l('Uploaded')}</th>
-        <th>&nbsp;</th>
-        <th>{$l('Name')}</th>
-        <th class="text-right">{$l('Size')}</th>
-        <th class="text-right"><Checkbox bind:value="{allSelected}"/></th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each files as file}
+  <form method="post" on:change="{calculateNoneSelected}" on:submit|preventDefault>
+    <table>
+      <thead>
         <tr>
-          <td>{new Time(file.saved).getHumanDate({year: true})}</td>
-          <td><Icon name="copy" on:click="{copyUrl}"/></td>
-          <td><a href="{route.urlFor('/file/' + user.id + '/' + file.id)}" target="convos_files_file">{file.name}</a></td>
-          <td class="text-right">{humanReadableNumber(file.size, 'B')}</td>
-          <td class="text-right"><Checkbox name="{file.id}" bind:value="{file.selected}"/></td>
+          <th>{$l('Uploaded')}</th>
+          <th>&nbsp;</th>
+          <th>{$l('Name')}</th>
+          <th class="text-right">{$l('Size')}</th>
+          <th class="text-right"><Checkbox bind:value="{allSelected}"/></th>
         </tr>
-      {/each}
-      {#if files.length == 0}
-        <tr>
-          <td colspan="5">{$l('No files.')}</td>
-        </tr>
+      </thead>
+      <tbody>
+        {#each files as file}
+          <tr>
+            <td>{new Time(file.saved).getHumanDate({year: true})}</td>
+            <td><Icon name="copy" on:click="{copyUrl}"/></td>
+            <td><a href="{route.urlFor('/file/' + user.id + '/' + file.id)}" target="convos_files_file">{file.name}</a></td>
+            <td class="text-right">{humanReadableNumber(file.size, 'B')}</td>
+            <td class="text-right"><Checkbox name="{file.id}" bind:value="{file.selected}"/></td>
+          </tr>
+        {/each}
+        {#if files.length == 0}
+          <tr>
+            <td colspan="5">{$l('No files.')}</td>
+          </tr>
+        {/if}
+        <OperationStatusRow colspan="5" op="{deleteFilesOp}"/>
+        {#if !$deleteFilesOp.is('loading')}
+          <OperationStatusRow colspan="5" op="{getFilesOp}"><div>&nbsp;</div></OperationStatusRow>
+        {/if}
+      </tbody>
+    </table>
+    <div class="pagination">
+      {#if prevId || $route.query.after}
+        <Link href="/settings/files?after={prevId}">{$l('Previous')}</Link>
+      {:else}
+        <span class="disabled">{$l('Previous')}</span>
       {/if}
-      <OperationStatusRow colspan="5" op="{deleteFilesOp}"/>
-      {#if !$deleteFilesOp.is('loading')}
-        <OperationStatusRow colspan="5" op="{getFilesOp}"><div>&nbsp;</div></OperationStatusRow>
+      {#if nextId}
+        <Link href="/settings/files?after={nextId}">{$l('Next')}</Link>
+      {:else}
+        <span class="disabled">{$l('Next')}</span>
       {/if}
-    </tbody>
-  </table>
-  <div class="pagination">
-    {#if prevId || $route.query.after}
-      <Link href="/settings/files?after={prevId}">{$l('Previous')}</Link>
-    {:else}
-      <span class="disabled">{$l('Previous')}</span>
-    {/if}
-    {#if nextId}
-      <Link href="/settings/files?after={nextId}">{$l('Next')}</Link>
-    {:else}
-      <span class="disabled">{$l('Next')}</span>
-    {/if}
-  </div>
+    </div>
 
-  <div class="form-actions">
-    <Button icon="trash" op="{deleteFilesOp}" on:click="{deleteFiles}" disabled="{!!files.find(f => f.selected)}"><span>{$l('Delete selected files')}</span></Button>
-  </div>
+    <div class="form-actions">
+      <Button icon="trash" op="{deleteFilesOp}" on:click="{deleteFiles}" disabled="{noneSelected}"><span>{$l('Delete selected files')}</span></Button>
+    </div>
 
-  {#if files.length || $route.query.after}
-    <p>
-      {@html $lmd('By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time.')}
-    </p>
-  {/if}
+    {#if files.length || $route.query.after}
+      <p>
+        {@html $lmd('By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time.')}
+      </p>
+    {/if}
+  </form>
 </main>
