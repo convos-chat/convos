@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.05 Not Released
+7.05 2022-09-12T12:00:00+0900
  - Api.js does not have to extend Reactive.js
  - Fix Checkbox.svelte to emit "change" events
  - Fix being able to delete files
