@@ -78,7 +78,7 @@ export let color = '';
 export let family = '';
 export let name;
 
-function calculateClassName(name, family) {
+function calculateClassName(name, family, animation) {
   const cn = [];
   const pick = name.match(/^pick:(.+)$/);
 
@@ -127,7 +127,7 @@ function pickIcon(str) {
 }
 </script>
 
-<i class="{calculateClassName(name, family)}"
+<i class="{calculateClassName(name, family, animation)}"
   style="{calculateStyle(name, color)}"
   hidden="{!name}"
   on:click/>

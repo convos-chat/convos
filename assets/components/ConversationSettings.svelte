@@ -162,7 +162,7 @@ function updateInfo() {
     {/if}
 
     <div class="form-actions">
-      <Button icon="save"><span>{$l('Save')}</span></Button>
+      <Button icon="save" op="{saveConversationSettingsOp}"><span>{$l('Save')}</span></Button>
       <Button type="button" on:click="{partConversation}" icon="sign-out-alt"><span>{$l('Leave')}</span></Button>
     </div>
     <OperationStatus op="{saveConversationSettingsOp}"/>
