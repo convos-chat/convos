@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.06 Not Released
+7.06 2022-09-20T07:23:00+0900
  - Fix button loading animation
  - Fix not showing popover menu in new private conversations
  - Fix == vs === bugs
