@@ -5,7 +5,7 @@ export const activeMenu = writable('', {
     e.preventDefault();
     const aEl = e.target.closest('a');
     const name = aEl && aEl.href.replace(/.*#/, '');
-    this.set(this.get() == name ? '' : name);
+    this.set(this.get() === name ? '' : name);
   },
 });
 

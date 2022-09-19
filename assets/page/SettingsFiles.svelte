@@ -38,7 +38,7 @@ async function deleteFiles() {
   files = files.filter(file => !file.selected);
   allSelected = false;
   calculateNoneSelected();
-  if (files.length == 0) loadFiles(route);
+  if (files.length === 0) loadFiles(route);
 }
 
 async function loadFiles(route) {
@@ -89,7 +89,7 @@ function toggleSelected(allSelected) {
             <td class="text-right"><Checkbox name="{file.id}" bind:value="{file.selected}"/></td>
           </tr>
         {/each}
-        {#if files.length == 0}
+        {#if files.length === 0}
           <tr>
             <td colspan="5">{$l('No files.')}</td>
           </tr>

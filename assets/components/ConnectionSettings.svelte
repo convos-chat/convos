@@ -30,9 +30,9 @@ onMount(async () => {
 
   {#if !connection.url}
     <p>{$l('Connection not found.')}</p>
-  {:else if connection.state == 'disconnected'}
+  {:else if connection.state === 'disconnected'}
     <p>{$l('Currently disconnected from %1.', connectionHost)}</p>
-  {:else if connection.state == 'connected'}
+  {:else if connection.state === 'connected'}
     <p>{$l('Currently connected to %1.', connectionHost)}</p>
   {:else}
     <p>{$l('Currently connecting to %1.', connectionHost)}</p>

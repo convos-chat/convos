@@ -68,7 +68,7 @@ function setTitle(title, $user) {
   const organizationName = settings('organization_name');
   const unread = $user.notifications.notifications ? '(' + $user.notifications.notifications + ') ' : '';
 
-  document.title = organizationName == 'Convos'
+  document.title = organizationName === 'Convos'
     ? i18n.l('%1 - Convos', unread + i18n.l(title))
     : i18n.l('%1 - Convos for %2', unread + i18n.l(title), organizationName);
 }
@@ -90,12 +90,12 @@ async function routeOrUserChanged(route, user) {
   const appOrCms = user.is(['loading', 'pending']) || document.querySelector('.cms-main') ? 'cms' : 'app';
   document.body.className = document.body.className.replace(/for-\w+/, 'for-' + appOrCms);
 
-  if (prevPath != route.path) {
+  if (prevPath !== route.path) {
     prevPath = route.path;
     $activeMenu = '';
   }
 
-  if (route.pathParts.length == 0) { // path = "/" or path = ""
+  if (route.pathParts.length === 0) { // path = "/" or path = ""
     const url = !user.email ? '/login' : user.lastUrl || '/chat';
     route.go(url, {replace: true});
   }
@@ -115,7 +115,7 @@ function socketChanged(socket) {
     : socket.is('connecting')    ? i18n.l('Connecting to Convos...')
     :                              i18n.l('Connection to Convos is %1.', i18n.l(socket.readyStateHuman));
 
-  if (readyStateNotification.body == message) return;
+  if (readyStateNotification.body === message) return;
   if (readyStateNotification.close) readyStateNotification.close();
   readyStateNotification = notify.showInApp(message, {closeAfter: -1, title: i18n.l('Status')});
 }
@@ -126,35 +126,35 @@ function socketChanged(socket) {
 {#if $user.is(['loading', 'pending'])}
   <Fallback/>
 {:else if $user.email}
-  {#if $activeMenu == 'nav' || !$viewport.isSingleColumn}
+  {#if $activeMenu === 'nav' || !$viewport.isSingleColumn}
     <ChatSidebar transition="{{duration: $viewport.isSingleColumn ? 250 : 0, x: width}}"/>
   {/if}
 
   {#if $route.path.match(/\/chat\/./)}
     <Chat connection_id={$route.pathParts[1]} conversation_id={$route.pathParts[2]} bind:title/>
-  {:else if $route.path.indexOf('/chat') == 0}
+  {:else if $route.path.indexOf('/chat') === 0}
     <Notifications bind:title/>
-  {:else if $route.path == '/help'}
+  {:else if $route.path === '/help'}
     <Help bind:title/>
-  {:else if $route.path == '/search'}
+  {:else if $route.path === '/search'}
     <Search bind:title/>
-  {:else if $route.path == '/settings'}
+  {:else if $route.path === '/settings'}
     <SettingsAdmin bind:title/>
-  {:else if $route.path == '/settings/account'}
+  {:else if $route.path === '/settings/account'}
     <SettingsAccount bind:title/>
-  {:else if $route.path == '/settings/connections'}
+  {:else if $route.path === '/settings/connections'}
     <Connections bind:title/>
-  {:else if $route.path == '/settings/files'}
+  {:else if $route.path === '/settings/files'}
     <SettingsFiles bind:title/>
-  {:else if $route.path.indexOf('/settings/connection/') == 0}
+  {:else if $route.path.indexOf('/settings/connection/') === 0}
     <ConnectionSettings connection_id="{$route.pathParts[2]}" bind:title/>
-  {:else if $route.path.indexOf('/settings/connection-profile/') == 0}
+  {:else if $route.path.indexOf('/settings/connection-profile/') === 0}
     <ConnectionProfileSettings profile_id="{$route.pathParts[2]}" bind:title/>
-  {:else if $route.path == '/settings/conversation'}
+  {:else if $route.path === '/settings/conversation'}
     <ConversationAdd bind:title/>
-  {:else if $route.path == '/settings/users'}
+  {:else if $route.path === '/settings/users'}
     <SettingsAdminUsers bind:title/>
-  {:else if $route.path == '/login' || $route.path == '/register'}
+  {:else if $route.path === '/login' || $route.path === '/register'}
     <Login bind:title/>
   {:else}
     <Fallback bind:title/>

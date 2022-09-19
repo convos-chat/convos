@@ -33,7 +33,7 @@ export default class Notify extends Reactive {
     if (!params.title) params.title = document.title;
     if (!this.wantNotifications) return this._showInConsole(message, params);
     if (this.volume) this.play();
-    if (this.desktopAccess != 'granted') return this.showInApp(message, params);
+    if (this.desktopAccess !== 'granted') return this.showInApp(message, params);
 
     const notification = new Notification(params.title, {...params, body: message});
     notification.onclick = (e) => this._onClick(e, notification, params);
@@ -58,7 +58,7 @@ export default class Notify extends Reactive {
     el.querySelector('h6').textContent = params.title;
     el.querySelector('div').textContent = message;
 
-    if (params.closeAfter == -1) {
+    if (params.closeAfter === -1) {
       el.querySelector('a').remove();
     }
     else {

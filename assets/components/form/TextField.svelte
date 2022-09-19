@@ -18,7 +18,7 @@ function onInput(e) {
 }
 </script>
 
-<div class="text-field" class:has-password="{type == 'password'}" hidden="{hidden}">
+<div class="text-field" class:has-password="{type === 'password'}" hidden="{hidden}">
   <label for="{id}"><slot name="label">Label</slot></label>
   <input type="{visible ? 'text' : type}"
     id="{id}"
@@ -29,7 +29,7 @@ function onInput(e) {
     value="{value}"
     on:input={onInput}
     on:keyup/>
-  {#if type == 'password' && !readonly}
+  {#if type === 'password' && !readonly}
     <a href="#toggle" class="text-field__toggle" on:click|preventDefault="{() => { visible = !visible }}"><Icon name="{visible ? 'eye-slash' : 'eye'}"/></a>
   {/if}
 </div>

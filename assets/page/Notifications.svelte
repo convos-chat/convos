@@ -28,7 +28,7 @@ onMount(async () => {
 </ChatHeader>
 
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
-  {#if $messages.length == 0 && !notifications.is('loading')}
+  {#if $messages.length === 0 && !notifications.is('loading')}
     <h2>{$l('No notifications.')}</h2>
   {/if}
 

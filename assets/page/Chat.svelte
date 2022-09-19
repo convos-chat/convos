@@ -72,12 +72,12 @@ function onFocus() {
 }
 
 function setConversationFromRoute(connection_id, conversation_id) {
-  if (conversation.connection_id == connection_id && conversation.conversation_id == conversation_id) return;
+  if (conversation.connection_id === connection_id && conversation.conversation_id === conversation_id) return;
   user.setActiveConversation({connection_id, conversation_id}); // Triggers setConversationFromUser()
 }
 
 function setConversationFromUser(user) {
-  if (user.activeConversation == conversation) return;
+  if (user.activeConversation === conversation) return;
   if (unsubscribe.conversation) unsubscribe.conversation();
   if (unsubscribe.unread) unsubscribe.unread();
 
@@ -102,13 +102,13 @@ function setConversationFromUser(user) {
   <h1 class="ellipsis"><a href="#settings" on:click="{activeMenu.toggle}">{$l(conversation.name)}</a></h1>
   <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {#if !$conversation.is('not_found')}
-    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu == 'settings'}" on:click="{activeMenu.toggle}">
+    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu === 'settings'}" on:click="{activeMenu.toggle}">
       <Icon name="users-cog"/><Icon name="times"/>
     </a>
   {/if}
 </ChatHeader>
 
-{#if $activeMenu == 'settings'}
+{#if $activeMenu === 'settings'}
   {#if conversation_id}
     <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
   {:else}
@@ -128,7 +128,7 @@ function setConversationFromUser(user) {
       </p>
       <p>
         <Icon name="info-circle"/> 
-        {#if $participants.length == 1}
+        {#if $participants.length === 1}
           {$l('You are the only participant in this conversation.')}
         {:else}
           {@html $lmd('There are %1 participants in this conversation.', $participants.length)}
@@ -151,7 +151,7 @@ function setConversationFromUser(user) {
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    {#if i && i == $messages.length - $conversation.unread}
+    {#if i && i === $messages.length - $conversation.unread}
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 

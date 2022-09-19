@@ -36,7 +36,7 @@ export default class I18N extends Reactive {
     const dictionary = this.dictionaries[this.lang] || {};
     const translated = String(dictionary[lexicon] || lexicon);
     return translated.replace(/%(\d)(\D|$)/g, (all, i, s) => {
-      return typeof vars[i - 1] == 'undefined' ? all : (vars[i - 1] + s);
+      return typeof vars[i - 1] === 'undefined' ? all : (vars[i - 1] + s);
     });
   }
 
@@ -124,7 +124,7 @@ export default class I18N extends Reactive {
 
   _makeTag(str, rules = this._rules, depth = 0) {
     // blockquote
-    if (depth == 0 && str.indexOf('> ') == 0) {
+    if (depth === 0 && str.indexOf('> ') === 0) {
       return [tagPair(['blockquote']), {}, [this._makeTag(str.replace(/^>\s/, ''), rules, depth + 1)]];
     }
 
@@ -171,7 +171,7 @@ export default class I18N extends Reactive {
   // https://modern.ircdocs.horse/formatting.html
   _mdIrcColorFormatting(tag) {
     const end = tag.after.indexOf('\x03');
-    if (end == -1) return;
+    if (end === -1) return;
     tag.content = tag.after.substring(0, end);
     tag.after = tag.after.substring(end + 1);
 
@@ -187,14 +187,14 @@ export default class I18N extends Reactive {
   // https://modern.ircdocs.horse/formatting.html
   _mdIrcTextFormatting(tag) {
     const end = tag.after.indexOf(tag.captured);
-    if (end == -1) return;
+    if (end === -1) return;
 
     tag.content = tag.after.substring(0, end);
     tag.after = tag.after.substring(end + tag.captured.length);
-    tag.tag = tag.captured == '\x02' ? tagPair(['strong'])
-              : tag.captured == '\x1d' ? tagPair(['em'])
-              : tag.captured == '\x1f' ? tagPair(['u'])
-              : tag.captured == '\x11' ? tagPair(['code'])
+    tag.tag = tag.captured === '\x02' ? tagPair(['strong'])
+              : tag.captured === '\x1d' ? tagPair(['em'])
+              : tag.captured === '\x1f' ? tagPair(['u'])
+              : tag.captured === '\x11' ? tagPair(['code'])
               : tagPair(['span']);
   }
 
@@ -212,7 +212,7 @@ export default class I18N extends Reactive {
     }
 
     const end = tag.after.indexOf(tag.captured);
-    if (end == -1) return;
+    if (end === -1) return;
     tag.content = tag.after.substring(0, end);
     tag.after = tag.after.substring(end + tag.captured.length);
   }

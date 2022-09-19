@@ -4,15 +4,15 @@ import {writable} from '../js/storeGenerator';
 const popoverId = writable(null, {
   click(e) {
     e.preventDefault();
-    const id = e.target.closest('.message').dataset.index;
-    this.set(this.get() == id ? '' : id);
+    const id = parseInt(e.target.closest('.message').dataset.index, 10);
+    this.set(this.get() === id ? -1 : id);
   },
   leave(_e) {
-    this.tid = setTimeout(() => this.set(''), 200);
+    this.tid = setTimeout(() => this.set(-1), 200);
   },
   enter(e) {
     if (this.tid) clearTimeout(this.tid);
-    const id = e.target.closest('.message').dataset.index;
+    const id = parseInt(e.target.closest('.message').dataset.index, 10);
     setTimeout(() => this.set(id), 250);
   },
 });
@@ -39,12 +39,12 @@ function onActionClick(e, aEl) {
   action[2] = decodeURIComponent(action[2]);
   dispatch(action[1], action[2]); // expand, join, mention, whois
 
-  if (action[1] == 'expand') {
+  if (action[1] === 'expand') {
     const msg = conversation.messages.get(action[2]);
     msg.expanded = !msg.expanded;
     conversation.messages.update({messages: true});
   }
-  else if (['join', 'whois'].indexOf(action[1]) != -1) {
+  else if (['join', 'whois'].indexOf(action[1]) !== -1) {
     conversation.send('/' + action[1] + ' ' + action[2]);
   }
 }
@@ -55,7 +55,7 @@ function onMessageClick(e) {
   $popoverId = '';
 
   // #action:x:y links
-  if (!aEl.target && aEl.hash.indexOf('action:') != -1) return onActionClick(e, aEl);
+  if (!aEl.target && aEl.hash.indexOf('action:') !== -1) return onActionClick(e, aEl);
 
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
@@ -67,7 +67,7 @@ function onMessageClick(e) {
 
   // Make sure embed links are opened in a new tab/window
   if (!aEl.target && aEl.closest('.embed')) aEl.target = '_blank';
-  if (aEl.target == '_blank') return;
+  if (aEl.target === '_blank') return;
   e.preventDefault();
 }
 
@@ -107,7 +107,7 @@ function renderEmbed(el, embed) {
       {/if}
     {/await}
   {/each}
-  {#if $popoverId == message.index}
+  {#if $popoverId === message.index}
     <div class="popover" transition:fade="{{duration: 200}}"
       on:focus="{popoverId.enter}" on:mouseenter="{popoverId.enter}"
       on:blur="{popoverId.leave}" on:mouseleave="{popoverId.leave}">

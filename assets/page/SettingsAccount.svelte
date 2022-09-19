@@ -56,7 +56,7 @@ function registerProtocol(proto) {
 
 function saveAccount() {
   const passwords = [form.password, form.password_again];
-  if (passwords.join('').length && passwords[0] != passwords[1]) return updateUserOp.error('Passwords does not match.');
+  if (passwords.join('').length && passwords[0] !== passwords[1]) return updateUserOp.error('Passwords does not match.');
 
   if (!form.wantNotifications) form.wantNotifications = false;
   if (form.wantNotifications) notify.requestDesktopAccess();

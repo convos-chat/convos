@@ -8,7 +8,7 @@ export function commandOptions({query}) {
   const opts = [];
 
   for (let i = 0; i < commands.length; i++) {
-    if (commands[i].cmd.indexOf(query) != 0) continue;
+    if (commands[i].cmd.indexOf(query) !== 0) continue;
     const val = commands[i].alias || commands[i].cmd;
     opts.push({val, text: i18n.md(commands[i].example)});
   }

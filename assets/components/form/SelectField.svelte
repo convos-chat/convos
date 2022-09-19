@@ -19,10 +19,10 @@ const preventKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
 $: calculateVisibleOptions(options, typed);
 $: if (humanEl) renderHuman(value);
-$: if (open == false) typed = '';
+$: if (open === false) typed = '';
 
-$: if (humanEl && !humanEl.value && humanEl != document.activeElement) {
-  const found = options.find(opt => opt[0] == value);
+$: if (humanEl && !humanEl.value && humanEl !== document.activeElement) {
+  const found = options.find(opt => opt[0] === value);
   if (found) humanEl.value = found[1] || found[0];
 }
 
@@ -35,7 +35,7 @@ function calculateVisibleOptions(options, needle) {
   let re = new RegExp('(?:^|\\s|-)' + regexpEscape(needle), 'i'); // TODO: needle need to be safe string
 
   // Match by value exact
-  let found = options.filter(opt => opt[0] == needle);
+  let found = options.filter(opt => String(opt[0]) === needle);
 
   // Match by value sloppy
   if (!found.length) found = options.filter(opt => opt[0].match(re));
@@ -43,8 +43,8 @@ function calculateVisibleOptions(options, needle) {
   // Append other options by text, that has not already been added
   for (let i = 0; i < options.length; i++) {
     const opt = options[i];
-    if (opt.length > 1 && found.indexOf(opt) != -1 && opt[1].match(re)) {
-      if (options.map(o => o[0]).indexOf(opt[0]) == -1) found.push(opt);
+    if (opt.length > 1 && found.indexOf(opt) === -1 && opt[1].match(re)) {
+      found.push(opt);
     }
   }
 
@@ -53,33 +53,33 @@ function calculateVisibleOptions(options, needle) {
 }
 
 function keydown(e) {
-  if (preventKeys.indexOf(e.key) != -1) e.preventDefault();
+  if (preventKeys.indexOf(e.key) !== -1) e.preventDefault();
 
-  if (e.key == 'Tab') {
+  if (e.key === 'Tab') {
     if (open) selectOption(e);
     return;
   }
 
   if (!open) return toggle(e);
-  if (e.key == 'ArrowDown') activeIndex++;
-  if (e.key == 'ArrowUp') activeIndex--;
-  if (e.key == 'Enter') selectOption(e);
+  if (e.key === 'ArrowDown') activeIndex++;
+  if (e.key === 'ArrowUp') activeIndex--;
+  if (e.key === 'Enter') selectOption(e);
   if (activeIndex >= options.length) activeIndex = 0;
   if (activeIndex < 0) activeIndex = options.length - 1;
 }
 
 function keyup(e) {
-  if (e.key.length == 1 || e.key == 'Backspace') typed = humanEl.value;
+  if (e.key.length === 1 || e.key === 'Backspace') typed = humanEl.value;
 }
 
 function selectOption(e) {
   let opt;
-  if (e.type == 'keydown') {
-    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] == value)[0];
+  if (e.type === 'keydown') {
+    opt = visibleOptions.length && visibleOptions[activeIndex] || options.filter(o => o[0] === value)[0];
   }
   else {
     const needle = closestEl(e.target, '.select-field__option').href.replace(/^.*?#\d+:/, '');
-    opt = visibleOptions.filter(opt => opt[0] == needle)[0] || [];
+    opt = visibleOptions.filter(opt => String(opt[0]) === needle)[0] || [];
   }
 
   if (!opt || !opt.length) opt = [''];
@@ -88,7 +88,7 @@ function selectOption(e) {
 }
 
 function renderHuman(needle) {
-  const opt = visibleOptions.filter(opt => opt[0] == needle)[0] || [];
+  const opt = visibleOptions.filter(opt => String(opt[0]) === needle)[0] || [];
   humanEl.value = opt.length > 1 ? opt[1] : opt.length ? opt[0] : needle;
 }
 
@@ -120,7 +120,7 @@ function toggle(e) {
     on:click|preventDefault="{toggle}">
   <div class="select-field__options" on:click|preventDefault="{toggle}">
     {#each visibleOptions as opt, i}
-      <a href="#{i}:{opt[0]}" class="select-field__option" class:is-active="{i == activeIndex}" on:focus="{() => { activeIndex = i }}" on:mouseover="{() => { activeIndex = i }}" tabindex="-1">{opt.length > 1 ? opt[1] : opt[0]}</a>
+      <a href="#{i}:{opt[0]}" class="select-field__option" class:is-active="{i === activeIndex}" on:focus="{() => { activeIndex = i }}" on:mouseover="{() => { activeIndex = i }}" tabindex="-1">{opt.length > 1 ? opt[1] : opt[0]}</a>
     {/each}
   </div>
 </div>

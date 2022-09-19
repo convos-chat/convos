@@ -83,7 +83,7 @@ function calculateClassName(name, family) {
   const pick = name.match(/^pick:(.+)$/);
 
   if (pick) {
-    if (pick[1] == 'Convos') return 'fas fa-info-circle'; // Uppercase "C" is not a typo
+    if (pick[1] === 'Convos') return 'fas fa-info-circle'; // Uppercase "C" is not a typo
     if (contributorIcons[pick[1]]) return 'fas fa-contributor for-' + pick[1].toLowerCase();
     cn.push(pickIcon(pick[1]));
   }

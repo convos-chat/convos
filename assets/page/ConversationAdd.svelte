@@ -30,7 +30,7 @@ function addConversation(e) {
 
 async function loadConversations(e) {
   let message = '/list' + (conversationId.length ? ' /' + conversationId + '/' : '');
-  if (e.type == 'click' && availableConversations.done) message += ' refresh';
+  if (e.type === 'click' && availableConversations.done) message += ' refresh';
   if (loadConversationsTid) clearTimeout(loadConversationsTid);
 
   socket.send({connection_id: connectionId, message, method: 'send'}, (res) => {

@@ -15,7 +15,7 @@ import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
 export let profile_id = 'add';
-export const title = profile_id == 'add' ? 'Add connection profile' : 'Edit connection profile';
+export const title = profile_id === 'add' ? 'Add connection profile' : 'Edit connection profile';
 
 const user = getContext('user');
 const connectionProfiles = user.connectionProfiles;
@@ -54,7 +54,7 @@ async function saveConnectionProfile() {
 </script>
 
 <ChatHeader>
-  <h1>{profile_id == 'add' ? $l('Add connection profile') : $l('Edit connection profile')}</h1>
+  <h1>{profile_id === 'add' ? $l('Add connection profile') : $l('Edit connection profile')}</h1>
   <Link href="/settings/connections" class="btn-hallow can-toggle is-active has-tooltip">
     <Icon name="list"/><Icon name="times"/>
     <span class="tooltip is-left">{nbsp($l('See all connection profiles'))}</span>
@@ -118,7 +118,7 @@ async function saveConnectionProfile() {
     {/if}
 
     <div class="form-actions">
-      {#if profile_id != 'add'}
+      {#if profile_id !== 'add'}
         <Button icon="save" op="{saveConnectionProfileOp}" disabled="{!isAdmin}"><span>{$l('Update')}</span></Button>
         <Button icon="trash" type="button" op="{removeConnectionProfileOp}" disabled="{!isAdmin}" on:click="{removeConnectionProfile}"><span>{$l('Delete')}</span></Button>
       {:else}

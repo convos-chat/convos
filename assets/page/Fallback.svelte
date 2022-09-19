@@ -25,7 +25,7 @@ function calculateStatus($route, user) {
 
 <main class="cms-main">
   <h2>{$l(messages[status])}</h2>
-  {#if status == 'loading'}
+  {#if status === 'loading'}
     <p><Icon name="download"/> {$l('Downloaded Convos.')}</p>
     <p><Icon name="rocket"/> {$l('Started Convos.')}</p>
     {#if $socket.error}
@@ -41,7 +41,7 @@ function calculateStatus($route, user) {
         <a href="{startHref}" target="_self" class="btn is-secondary" transition:fade><Icon name="redo"/> {$l('Retry')}</a>
       {/await}
     </p>
-  {:else if status == 'not_found'}
+  {:else if status === 'not_found'}
     <p>{$l('The Convos Team have been searching and searching, but the requested page could not be found.')}</p>
     <p><a href="{startHref}" target="_self" class="btn"><Icon name="play"/> {$l('Go to start page')}</a></p>
   {:else}

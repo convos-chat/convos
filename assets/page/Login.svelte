@@ -30,7 +30,7 @@ function redirect(user) {
 }
 
 function renderForm($route) {
-  const register = $route.path.indexOf('register') != -1;
+  const register = $route.path.indexOf('register') !== -1;
   const mode
     = !form.mode && settings('status') >= 400            ? 'invalid_invitation' // Only show error the first time
     : $route.param('email') && settings('existing_user') ? 'recover'
@@ -48,7 +48,7 @@ function renderForm($route) {
     token: $route.param('token') || '',
   };
 
-  title = mode == 'login' ? 'Sign in' : 'Sign up';
+  title = mode === 'login' ? 'Sign in' : 'Sign up';
 
   if (!('ontouchstart' in window)) {
     setTimeout(() => q(document, '.text-field input').reverse().map(el => el.readOnly || el.focus()), 1);
@@ -58,7 +58,7 @@ function renderForm($route) {
 }
 
 async function submitForm(e) {
-  const op = mode == 'login' ? loginOp : registerOp;
+  const op = mode === 'login' ? loginOp : registerOp;
 
   // Make sure we get the auto-filled value, in case on:input="..." is not enough
   const formEl = e.target.closest('form');
@@ -66,7 +66,7 @@ async function submitForm(e) {
   form.password = formEl.password.value;
 
   await op.perform(form);
-  if (mode != 'login') route.update({lastUrl: ''}); // Make sure the old value is forgotten
+  if (mode !== 'login') route.update({lastUrl: ''}); // Make sure the old value is forgotten
   if (!op.error()) await user.load(); // Causes redirect() to be called
 }
 </script>
@@ -74,7 +74,7 @@ async function submitForm(e) {
 <main class="cms-main">
   <form method="post" on:submit|preventDefault="{submitForm}">
     <input type="hidden" name="mode" bind:value="{form.mode}"/>
-    {#if mode == 'invalid_invitation'}
+    {#if mode === 'invalid_invitation'}
       <h2>{$l('Invalid invite/recover URL')}</h2>
       <p>{$l(settings('status') == 410 ? 'The link has expired.' : 'The link is invalid.')}</p>
       <p>{$l('Please ask your Convos admin for a new link.')}</p>
@@ -82,17 +82,17 @@ async function submitForm(e) {
         <a class="btn" href="{settings('contact')}">{$l('Contact admin')}</a>
         <Link href="/login">{$l('Sign in')}</Link>
       </p>
-    {:else if ['recover', 'invitation', 'register'].indexOf(mode) != -1}
-      <h2>{mode == 'recover' ? $l('Recover account') : $l('Sign up')}</h2>
+    {:else if ['recover', 'invitation', 'register'].indexOf(mode) !== -1}
+      <h2>{mode === 'recover' ? $l('Recover account') : $l('Sign up')}</h2>
       {#if settings('first_user')}
         <p>{$l('As you are the first user, you do not need any invitation link. Just fill in the form below, hit "Sign up" to start chatting.')}</p>
       {/if}
 
       <input type="hidden" name="exp" bind:value="{form.exp}"/>
       <input type="hidden" name="token" bind:value="{form.token}"/>
-      <TextField type="email" name="email" bind:value="{form.email}" placeholder="{$l('Ex: john@doe.com')}" readonly="{mode != 'register'}">
+      <TextField type="email" name="email" bind:value="{form.email}" placeholder="{$l('Ex: john@doe.com')}" readonly="{mode !== 'register'}">
         <span slot="label">{$l('Email')}</span>
-        <p class="help" slot="help">{mode == 'invitation' ? $l('Your email is from the invite link.') : $l('Your email will be used if you forget your password.')}</p>
+        <p class="help" slot="help">{mode === 'invitation' ? $l('Your email is from the invite link.') : $l('Your email will be used if you forget your password.')}</p>
       </TextField>
       <TextField type="password" name="password" bind:value="{form.password}">
         <span slot="label">{$l('Password')}</span>
@@ -100,14 +100,14 @@ async function submitForm(e) {
       </TextField>
 
       <div class="form-actions">
-        <Button icon="save" op="{registerOp}"><span>{mode == 'recover' ? $l('Set new password') : $l('Sign up')}</span></Button>
+        <Button icon="save" op="{registerOp}"><span>{mode === 'recover' ? $l('Set new password') : $l('Sign up')}</span></Button>
         {#if !settings('first_user')}
           <Link href="/login">{$l('Sign in')}</Link>
         {/if}
       </div>
 
       <OperationStatus op="{registerOp}" success="Loading Convos..."/>
-    {:else if mode == 'login'}
+    {:else if mode === 'login'}
       <h2>{$l('Sign in')}</h2>
       <TextField type="email" name="email" bind:value="{form.email}" placeholder="{$l('Ex: john@doe.com')}">
         <span slot="label">{$l('Email')}</span>

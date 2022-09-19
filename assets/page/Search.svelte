@@ -49,7 +49,7 @@ function search(msg) {
 <InfinityScroll class="{classNames.join(' ')}" on:rendered="{e => e.detail.scrollTo(-1)}">
 
   <!-- welcome messages / status -->
-  {#if $messages.length == 0 && !conversation.is('loading')}
+  {#if $messages.length === 0 && !conversation.is('loading')}
     {#if $route.param('q')}
       <p><Icon name="info-circle"/> {$l('No search results for "%1".', $route.param('q'))}</p>
     {:else}

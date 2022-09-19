@@ -46,10 +46,10 @@ export function calculateAutocompleteOptions(str, splitValueAt, {conversation, u
   });
 
   const autocompleteCategory =
-      key == ':' && afterKey.length ? 'emojis'
-    : key == '/' && !before.length  ? 'commands'
-    : key == '@' && afterKey.length ? 'nicks'
-    : key == '#' || key == '&'      ? 'conversations'
+      key === ':' && afterKey.length ? 'emojis'
+    : key === '/' && !before.length  ? 'commands'
+    : key === '@' && afterKey.length ? 'nicks'
+    : key === '#' || key === '&'     ? 'conversations'
     :                                 'none';
 
   const opts = autocomplete(autocompleteCategory, {conversation, query: key + afterKey, user});
@@ -65,7 +65,7 @@ autocomplete.conversations = ({conversation, query, user}) => {
   const opts = [];
 
   for (let i = 0; i < conversations.length; i++) {
-    if (conversations[i].name.toLowerCase().indexOf(query) == -1) continue;
+    if (conversations[i].name.toLowerCase().indexOf(query) === -1) continue;
     opts.push({text: conversations[i].name, val: conversations[i].conversation_id});
     if (opts.length >= 20) break;
   }

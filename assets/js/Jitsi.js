@@ -33,18 +33,18 @@ export default class Jitsi extends Reactive {
     if (!this.jitsi) return this;
 
     document.addEventListener('keydown', (e) => {
-      if (e.code == 'KeyC') this.jitsi.executeCommand('toggleChat');
-      if (e.code == 'KeyD') this.jitsi.executeCommand('toggleShareScreen');
-      if (e.code == 'KeyF') this.jitsi.executeCommand('toggleFilmStrip');
-      if (e.code == 'KeyM') this.jitsi.executeCommand('toggleAudio');
-      if (e.code == 'KeyR') this.jitsi.executeCommand('toggleRaiseHand');
-      if (e.code == 'KeyV') this.jitsi.executeCommand('toggleVideo');
-      if (e.code == 'KeyW') this.jitsi.executeCommand('toggleTileView');
-      if (e.code == 'Space') this.jitsi.isAudioMuted().then(muted => muted && this.jitsi.executeCommand('toggleAudio'));
+      if (e.code === 'KeyC') this.jitsi.executeCommand('toggleChat');
+      if (e.code === 'KeyD') this.jitsi.executeCommand('toggleShareScreen');
+      if (e.code === 'KeyF') this.jitsi.executeCommand('toggleFilmStrip');
+      if (e.code === 'KeyM') this.jitsi.executeCommand('toggleAudio');
+      if (e.code === 'KeyR') this.jitsi.executeCommand('toggleRaiseHand');
+      if (e.code === 'KeyV') this.jitsi.executeCommand('toggleVideo');
+      if (e.code === 'KeyW') this.jitsi.executeCommand('toggleTileView');
+      if (e.code === 'Space') this.jitsi.isAudioMuted().then(muted => muted && this.jitsi.executeCommand('toggleAudio'));
     });
 
     document.addEventListener('keyup', (e) => {
-      if (e.code == 'Space') this.jitsi.isAudioMuted().then(muted => muted || this.jitsi.executeCommand('toggleAudio'));
+      if (e.code === 'Space') this.jitsi.isAudioMuted().then(muted => muted || this.jitsi.executeCommand('toggleAudio'));
     });
 
     return this;

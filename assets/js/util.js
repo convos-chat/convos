@@ -52,8 +52,8 @@ export function calculateModes(modeMap, modeStr) {
   const modes = {};
   let has = true;
   for (const c of modeStr) {
-    if (c == '+') { has = true }
-    else if (c == '-') { has = false }
+    if (c === '+') { has = true }
+    else if (c === '-') { has = false }
     else { modes[modeMap[c] || c] = has }
   }
 
@@ -92,7 +92,7 @@ export function clone(any) {
  */
 export function closestEl(el, needle) {
   while (el) {
-    if (needle.tagName ? el == needle : el.matches ? el.matches(needle) : false) return el;
+    if (needle.tagName ? el === needle : el.matches ? el.matches(needle) : false) return el;
     el = el.parentNode;
   }
   return null;
@@ -197,7 +197,7 @@ export function findVisibleElements(containerEl, scrollEl = document) {
   // Filter out comments, text nodes, ...
   let i = 0;
   while (i < els.length) {
-    if (els[i].nodeType == Node.ELEMENT_NODE) {
+    if (els[i].nodeType === Node.ELEMENT_NODE) {
       haystack.push([i, els[i]]);
       i++;
     }
@@ -308,7 +308,7 @@ export const is = {
   object: (val) => typeof val === 'object' && val !== null,
   string: (val) => typeof val === 'string',
   stringable: (val) => typeof val === 'number' || typeof val === 'string',
-  true: (val) => is.string(val) ? !!val.length && val != '0' : !!val,
+  true: (val) => is.string(val) ? !!val.length && val !== '0' : !!val,
   undefined: (val) => val === null || typeof val === 'undefined',
 };
 
@@ -369,7 +369,7 @@ export function nbsp(str, space = '\u00a0') {
  * @param {Function} cb Optional callback to call on each found DOM node.
  */
 export function q(parentEl, sel, cb) {
-  const els = sel == ':children' ? parentEl.children : parentEl.querySelectorAll(sel);
+  const els = sel === ':children' ? parentEl.children : parentEl.querySelectorAll(sel);
   if (!cb) return [].slice.call(els, 0);
   if (Array.isArray(cb)) return [].forEach.call(els, el => el.addEventListener(cb[0], cb[1]));
   const res = [];
@@ -405,7 +405,7 @@ export function removeChildNodes(el) {
  * @return {Boolean} True if `url` is from same origin as `loc`.
  */
 export function sameOrigin(url, loc = location) {
-  return url.indexOf('/') == 0 || url.indexOf('://' + loc.hostname) != -1;
+  return url.indexOf('/') === 0 || url.indexOf('://' + loc.hostname) !== -1;
 }
 
 /**
@@ -420,20 +420,20 @@ export function settings(key, value) {
       || document.querySelector('meta[name="' + key + '"]');
 
   // Get
-  if (arguments.length == 1) {
-    if (key == 'organization_name') key = 'contactorganization';
-    if (key == 'organization_url') key = 'contactnetworkaddress';
+  if (arguments.length === 1) {
+    if (key === 'organization_name') key = 'contactorganization';
+    if (key === 'organization_url') key = 'contactnetworkaddress';
     const el = getEl(key);
     if (!el) throw 'Cannot get settings for "' + key + '".';
     const bool = {no: false, yes: true};
-    return key == 'contact' ? atob(el.content || '') : bool.hasOwnProperty(el.content) ? bool[el.content] : el.content;
+    return key === 'contact' ? atob(el.content || '') : bool.hasOwnProperty(el.content) ? bool[el.content] : el.content;
   }
 
   // Set
-  if (key == 'organization_name') key = 'contactorganization';
-  if (key == 'organization_url') key = 'contactnetworkaddress';
-  if (key == 'contact') value = btoa(value);
-  if (typeof value == 'boolean') value = value ? 'yes' : 'no';
+  if (key === 'organization_name') key = 'contactorganization';
+  if (key === 'organization_url') key = 'contactnetworkaddress';
+  if (key === 'contact') value = btoa(value);
+  if (typeof value === 'boolean') value = value ? 'yes' : 'no';
   getEl(key).content = value;
 }
 
@@ -448,7 +448,7 @@ export function showFullscreen(e, contentEl) {
   if (e && e.preventDefault) e.preventDefault();
 
   const mediaWrapper = ensureChildNode(document.body, 'fullscreen', (el) => {
-    el.addEventListener('click', (e) => e.target == el && el.hide());
+    el.addEventListener('click', (e) => e.target === el && el.hide());
     el.hide = () => mediaWrapper.classList.add('hidden');
   });
 
@@ -479,7 +479,7 @@ export function str2array(str) {
  * @returns {String} Example: #138a8f
  */
 export function str2color(str, nColors = 100) {
-  if (str.length == 0) return '#000';
+  if (str.length === 0) return '#000';
 
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -514,7 +514,7 @@ export function tagNameIs(el, tagName) {
 export function timer(ms, res = true) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      typeof res == 'function' ? resolve(res()) : typeof res == 'string' ? reject(res) : resolve(res);
+      typeof res === 'function' ? resolve(res()) : typeof res === 'string' ? reject(res) : resolve(res);
     }, ms);
   });
 }
@@ -527,7 +527,7 @@ export function timer(ms, res = true) {
  */
 export function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 }

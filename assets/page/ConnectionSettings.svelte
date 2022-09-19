@@ -7,11 +7,11 @@ import {l} from '../store/I18N';
 import {nbsp} from '../js/util';
 
 export let connection_id = 'add';
-export const title = connection_id == 'add' ? 'Add connection' : 'Edit connection';
+export const title = connection_id === 'add' ? 'Add connection' : 'Edit connection';
 </script>
 
 <ChatHeader>
-  <h1>{connection_id == 'add' ? $l('Add connection') : $l('Edit connection')}</h1>
+  <h1>{connection_id === 'add' ? $l('Add connection') : $l('Edit connection')}</h1>
   <Link href="/settings/connections" class="btn-hallow can-toggle is-active has-tooltip">
     <Icon name="list"/><Icon name="times"/>
     <span class="tooltip is-left">{nbsp($l('See all connections'))}</span>

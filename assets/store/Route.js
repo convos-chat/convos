@@ -39,9 +39,9 @@ export default class Route extends Reactive {
   }
 
   go(path, params = {}) {
-    if (path.indexOf(this.baseUrl) == 0) path = path.substr(this.baseUrl.length);
+    if (path.indexOf(this.baseUrl) === 0) path = path.substr(this.baseUrl.length);
     const url = this.baseUrl + path;
-    if (url == this._location.href) return this;
+    if (url === this._location.href) return this;
     this._history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
     this.update({path: true})._onLocationChange({});
   }
@@ -86,19 +86,19 @@ export default class Route extends Reactive {
     const linkEl = e.target && e.target.closest('a');
     if (!linkEl || !linkEl.href) return;
 
-    if (linkEl.target == '_self') {
-      let href = linkEl.href.indexOf('/') == 0 ? this.baseUrl + linkEl.href : linkEl.href;
-      if (href == location.href) return location.reload();
+    if (linkEl.target === '_self') {
+      let href = linkEl.href.indexOf('/') === 0 ? this.baseUrl + linkEl.href : linkEl.href;
+      if (href === location.href) return location.reload();
     }
 
     if (linkEl.hasAttribute('download') || linkEl.hasAttribute('target')) return;
 
     let href = linkEl.getAttribute('href') || '';
-    if (href.indexOf('#') == 0) href = this.path + href;
-    if (href.indexOf('./') == 0) href = '/' + this._pathParts.slice(0, -1).join('/') + href.replace(/^\./, '');
-    if (href.indexOf(this.baseUrl) == 0) href = href.substr(this.baseUrl.length);
-    if (href.indexOf(this.basePath) == 0) href = href.substr(this.basePath.length);
-    if (href.indexOf('/') == 0) {
+    if (href.indexOf('#') === 0) href = this.path + href;
+    if (href.indexOf('./') === 0) href = '/' + this._pathParts.slice(0, -1).join('/') + href.replace(/^\./, '');
+    if (href.indexOf(this.baseUrl) === 0) href = href.substr(this.baseUrl.length);
+    if (href.indexOf(this.basePath) === 0) href = href.substr(this.basePath.length);
+    if (href.indexOf('/') === 0) {
       this.go(href, {}, linkEl.hasAttribute('replace'));
       e.preventDefault();
     }
@@ -109,7 +109,7 @@ export default class Route extends Reactive {
     const abs = this._location.href;
     const pathname = abs.substr(this.baseUrl.length);
     const url = pathname.split('#')[0].split('?');
-    this._query = url.length == 2 ? qs.parse(url.pop()) : {};
+    this._query = url.length === 2 ? qs.parse(url.pop()) : {};
     this._path = url[0];
     this._pathParts = url[0].length <= 1 ? [] : url[0].replace(/^\//, '').split('/').map(decodeURIComponent);
     log.info('path="' + this._path + '" ' + JSON.stringify(this._pathParts) + ', query=' + JSON.stringify(this._query));

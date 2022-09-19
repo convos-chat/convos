@@ -39,7 +39,7 @@ function copyInviteLink(e) {
 async function deleteUser() {
   deleteUserOp.reset();
   updateUserOp.reset();
-  if (confirmEmail != form.email) return;
+  if (confirmEmail !== form.email) return;
 
   await deleteUserOp.perform(form);
   if (!deleteUserOp.is('success')) return;
@@ -50,7 +50,7 @@ async function deleteUser() {
 
 function findUser($route, users) {
   const uid = $route.hash;
-  const user = uid && users.filter(user => user.uid == uid)[0];
+  const user = uid && users.filter(user => user.uid === uid)[0];
   form = user ? {...form, confirm_email: '', ...user} : {...form, confirm_email: '', uid: ''};
 }
 
@@ -107,7 +107,7 @@ function updateUser() {
       </TextField>
 
       <div class="form-actions">
-        <Button icon="trash" op="{deleteUserOp}" disabled="{confirmEmail != form.email}"><span>{$l('Delete user')}</span></Button>
+        <Button icon="trash" op="{deleteUserOp}" disabled="{confirmEmail !== form.email}"><span>{$l('Delete user')}</span></Button>
       </div>
 
       <OperationStatus op="{deleteUserOp}" success="Deleted."/>

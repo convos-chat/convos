@@ -49,7 +49,7 @@ export default class Connection extends Conversation {
   }
 
   is(status) {
-    return this.state == status || super.is(status);
+    return this.state === status || super.is(status);
   }
 
   removeConversation(params) {
@@ -63,7 +63,7 @@ export default class Connection extends Conversation {
     if (is.string(message)) message = {message};
 
     const re = new RegExp('^' + this.participants.toArray().map(p => regexpEscape(p.id)).join('|') + ':', 'i');
-    if (message.message.indexOf('/') != 0 && !message.message.match(re)) {
+    if (message.message.indexOf('/') !== 0 && !message.message.match(re)) {
       message.message = '/quote ' + message.message;
     }
 
@@ -101,13 +101,13 @@ export default class Connection extends Conversation {
   }
 
   wsEventMessage(params) {
-    params.yourself = params.from == this.nick;
+    params.yourself = params.from === this.nick;
     return params.conversation_id ? this.ensureConversation(params).addMessages(params) : this.addMessages(params);
   }
 
   wsEventNickChange(params) {
     const nickChangeParams = {old_nick: params.old_nick || this.nick, new_nick: params.new_nick || params.nick, type: params.type};
-    if (params.old_nick == this.nick) nickChangeParams.me = true;
+    if (params.old_nick === this.nick) nickChangeParams.me = true;
     super.wsEventNickChange(nickChangeParams);
     this.conversations.forEach(conversation => conversation.wsEventNickChange(nickChangeParams));
   }
@@ -133,12 +133,12 @@ export default class Connection extends Conversation {
   wsEventJoin(params) {
     const conversation = this.ensureConversation({connection_id: params.connection_id, conversation_id: params.conversation_id});
     const nick = params.nick || this.nick;
-    if (nick != this.nick && !params.silent) conversation.addMessages({message: '%1 joined.', vars: [nick]});
+    if (nick !== this.nick && !params.silent) conversation.addMessages({message: '%1 joined.', vars: [nick]});
     conversation.participants.add({nick});
   }
 
   wsEventPart(params) {
-    if (params.nick == this.nick) return this.removeConversation(params);
+    if (params.nick === this.nick) return this.removeConversation(params);
     if (params.conversation_id) return;
     this.conversations.forEach(conversation => conversation.wsEventPart(params));
   }

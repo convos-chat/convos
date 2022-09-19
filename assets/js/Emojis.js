@@ -17,7 +17,7 @@ export default class Emojis {
    * @return {Promise} The promise will be fulfilled when the databse is fetched and parsed.
    */
   async load() {
-    if (['loading', 'success'].indexOf(this.status) != -1) return this;
+    if (['loading', 'success'].indexOf(this.status) !== -1) return this;
     this.status = 'loading';
     const res = await fetch(route.urlFor('/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json'));
     this._load((await res.json()).emojis);
@@ -53,7 +53,7 @@ export default class Emojis {
     return Object.keys(group)
       .sort((a, b) => group[a] - group[b])
       .map(shortname => this.byShortName[shortname])
-      .filter(emoji => (emoji.shortname + emoji.name).toLowerCase().indexOf(q) != -1);
+      .filter(emoji => (emoji.shortname + emoji.name).toLowerCase().indexOf(q) !== -1);
   }
 
   _buildAliases() {

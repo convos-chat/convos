@@ -32,7 +32,7 @@ export const isISOTimeString = str => !!String(str || '').match(/^\d{4}-\d{2}-\d
 
 export default class Time extends Date {
   constructor(params) {
-    if (typeof params == 'string' && !params.match(/Z$/)) params += 'Z';
+    if (typeof params === 'string' && !params.match(/Z$/)) params += 'Z';
     super(params || new Date());
   }
 
@@ -57,7 +57,7 @@ export default class Time extends Date {
   getHumanDate(params = {}) {
     let str = this.format('%b %e');
     const now = new Time();
-    const sameYear = this.getYear() == now.getYear();
+    const sameYear = this.getYear() === now.getYear();
     if (!sameYear || params.year) str += ', ' + this.getFullYear();
     return str;
   }

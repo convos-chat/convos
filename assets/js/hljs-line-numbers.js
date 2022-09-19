@@ -75,7 +75,7 @@ export default function(hljs) {
         var lastLineNumber = parseInt(tdFocus.dataset.lineNumber, 10);
 
         // multi-lines copied case
-        if (firstLineNumber != lastLineNumber) {
+        if (firstLineNumber !== lastLineNumber) {
 
             var firstLineText = tdAnchor.textContent;
             var lastLineText = tdFocus.textContent;

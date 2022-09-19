@@ -16,8 +16,8 @@ export default class Search extends Conversation {
   }
 
   is(status) {
-    if (status == 'conversation') return false;
-    if (status == 'search') return true;
+    if (status === 'conversation') return false;
+    if (status === 'search') return true;
     return super.is(status);
   }
 

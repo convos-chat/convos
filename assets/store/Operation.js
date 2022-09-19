@@ -110,7 +110,7 @@ export default class Operation extends Reactive {
    * @retuns {Boolean} True/false if the "status" property matches the input "status".
    */
   is(status) {
-    return this.status == status;
+    return this.status === status;
   }
 
   /**
@@ -130,8 +130,8 @@ export default class Operation extends Reactive {
   }
 
   _hasProperty(params, p) {
-    if (p.in == 'body') return true;
-    if (p.in == 'formData') return params.formData.has(p.name);
+    if (p.in === 'body') return true;
+    if (p.in === 'formData') return params.formData.has(p.name);
     return params.hasOwnProperty(p.name);
   }
 
@@ -147,21 +147,21 @@ export default class Operation extends Reactive {
       else if (!this._hasProperty(params, p) && !p.required) {
         return;
       }
-      else if (p.in == 'path') {
+      else if (p.in === 'path') {
         const re = new RegExp('(%7B|\\{)' + regexpEscape(p.name) + '(%7D|\\})', 'i');
         url.pathname = url.pathname.replace(re, encodeURIComponent(this._extractValue(params, p)));
       }
-      else if (p.in == 'query') {
+      else if (p.in === 'query') {
         url.searchParams.set(p.name, this._extractValue(params, p));
       }
-      else if (p.in == 'formData') {
+      else if (p.in === 'formData') {
         delete req.headers['Content-Type'];
         req.body = params.formData;
       }
-      else if (p.in == 'body') {
+      else if (p.in === 'body') {
         req.body = this._extractValue(params, p);
       }
-      else if (p.in == 'header') {
+      else if (p.in === 'header') {
         req.header[p.name] = this._extractValue(params, p.name);
       }
       else {
@@ -179,7 +179,7 @@ export default class Operation extends Reactive {
     xhr.open(req.method.toUpperCase(), req.url);
     Object.keys(req.headers).forEach(k => xhr.setRequestHeader(k, req.headers[k]));
 
-    if (req.method == 'post') {
+    if (req.method === 'post') {
       xhr.upload.addEventListener('progress', e => this.emit('progress', e));
       xhr.send(is.object(req.body) && !is.function(req.body.has) ? JSON.stringify(req.body) : req.body);
     }

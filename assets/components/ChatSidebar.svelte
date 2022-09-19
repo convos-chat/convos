@@ -38,7 +38,7 @@ function clearFilter() {
 
 function conversationClassNames(connection, conversation) {
   const cn = [conversation.conversation_id ? 'for-conversation' : 'for-connection'];
-  if (conversation.frozen || connection.state != 'connected') cn.push('is-frozen');
+  if (conversation.frozen || connection.state !== 'connected') cn.push('is-frozen');
   if (conversation.frozen) cn.push('has-tooltip');
   if (conversation.errors) cn.push('has-errors');
   if (conversation.notifications) cn.push('has-notifications');
@@ -57,9 +57,9 @@ function filterNav() {
   // Show and hide navigation links
   for (let p = 0; p < prefix.length; p++) {
     const filterRe
-      = filter == '+' ? new RegExp(/[1-9]\d*\+?\s*$/)
-      : filter == '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\+?\s*$/)
-      : filter == '+#' ? new RegExp(/^\s*#.*[1-9]\d*\+?\s*$/)
+      = filter === '+' ? new RegExp(/[1-9]\d*\+?\s*$/)
+      : filter === '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\+?\s*$/)
+      : filter === '+#' ? new RegExp(/^\s*#.*[1-9]\d*\+?\s*$/)
       : new RegExp(prefix[p] + regexpEscape(filter), 'i');
 
     const seen = {};
@@ -105,7 +105,7 @@ function filterNav() {
 
 function onBlur() {
   searchHasFocus = false;
-  if (filter.indexOf('+') != 0) clearFilter();
+  if (filter.indexOf('+') !== 0) clearFilter();
 }
 
 function onFocus() {
@@ -116,7 +116,7 @@ function onNavItemClicked(e) {
   const iconName = (e.target.className || '').match(/(network|user)/);
   if (iconName) {
     const aEl = e.target.closest('a');
-    if (aEl.pathname == location.pathname) e.preventDefault();
+    if (aEl.pathname === location.pathname) e.preventDefault();
     setTimeout(() => { $activeMenu = 'settings' }, 50);
   }
   else if (e.target.closest('a')) {

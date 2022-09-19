@@ -11,7 +11,7 @@ export default class ConnectionProfiles extends Reactive {
   }
 
   find(id) {
-    return this.search(p => p.id == id)[0];
+    return this.search(p => p.id === id)[0];
   }
 
   defaultProfile() {
@@ -19,7 +19,7 @@ export default class ConnectionProfiles extends Reactive {
   }
 
   is(status) {
-    return this.status == status;
+    return this.status === status;
   }
 
   async load(params = {}) {

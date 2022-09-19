@@ -51,7 +51,7 @@ export default class Reactive {
 
     const unsubscribe = () => {
       const index = subscribers.indexOf(subscriber);
-      if (index != -1) subscribers.splice(index, 1);
+      if (index !== -1) subscribers.splice(index, 1);
     };
 
     return p ? p.finally(unsubscribe) : unsubscribe;
@@ -85,7 +85,7 @@ export default class Reactive {
     const prop = {...params, defaultValue: value, name, type, value};
     this._props[name] = prop; // this._props must not be set anywhere else!
 
-    prop.updateable = ['cookie', 'persist', 'rw'].indexOf(type) != -1;
+    prop.updateable = ['cookie', 'persist', 'rw'].indexOf(type) !== -1;
 
     switch (type) {
       case 'cookie': return this._cookieProp(prop);
@@ -127,7 +127,7 @@ export default class Reactive {
     Object.keys(params).forEach(name => {
       const prop = this._props[name];
       if (!prop) return log.trace('[' + this.constructor.name + '] Unknown prop "' + name + '".');
-      if (!prop.hasOwnProperty('prev')) prop.prev = prop.type == 'ro' ? undefined : prop.value;
+      if (!prop.hasOwnProperty('prev')) prop.prev = prop.type === 'ro' ? undefined : prop.value;
       if (prop.updateable) prop.value = params[name];
     });
 
@@ -149,10 +149,10 @@ export default class Reactive {
     }
 
     const cookie = store[this.cookieName] || {};
-    if (arguments.length == 1) return cookie[key];
+    if (arguments.length === 1) return cookie[key];
 
     value === prop.defaultValue ? delete cookie[key] : (cookie[key] = value);
-    const secure = location.href.indexOf('https:') == 0;
+    const secure = location.href.indexOf('https:') === 0;
     Cookies.set(this.cookieName, btoa(JSON.stringify(cookie)), {expires: 365, SameSite: 'Lax', secure});
   }
 
@@ -171,9 +171,9 @@ export default class Reactive {
       const prev = prop.prev;
       delete prop.prev;
       if (prop.value === prev) return;
-      if (prop.type == 'cookie') this._cookie(prop, prop.value);
-      if (prop.type == 'persist') this._localStorage(prop, prop.value);
-      changed[name] = prop.type != 'ro';
+      if (prop.type === 'cookie') this._cookie(prop, prop.value);
+      if (prop.type === 'persist') this._localStorage(prop, prop.value);
+      changed[name] = prop.type !== 'ro';
     });
 
     delete this._updatedTid;
@@ -184,7 +184,7 @@ export default class Reactive {
   _localStorage(prop, value) {
     const key = 'convos:' + (prop.key || prop.name);
 
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
       return value === prop.defaultValue ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(value));
     }
 

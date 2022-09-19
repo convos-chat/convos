@@ -53,7 +53,7 @@ function moveFocus(toggle) {
   const firstEl = (sel) => {
     for (let i = 0; i < sel.length; i++) {
       const el = document.querySelector(sel[i]);
-      if (el && el.tabIndex != -1) return el;
+      if (el && el.tabIndex !== -1) return el;
     }
     return null;
   };
@@ -61,7 +61,7 @@ function moveFocus(toggle) {
   // Switch to menu item if main area item has focus
   const menuItem = toggle && firstEl(['input.is-primary-menu-item', 'a.is-primary-menu-item']);
   const targetEl = document.activeElement;
-  if (tagNameIs(targetEl, ['a', 'input', 'textarea']) && menuItem && targetEl != menuItem) {
+  if (tagNameIs(targetEl, ['a', 'input', 'textarea']) && menuItem && targetEl !== menuItem) {
     return menuItem.focus();
   }
 

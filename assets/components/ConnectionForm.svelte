@@ -31,7 +31,7 @@ let showAdvancedSettings = false;
 let showAuthSettings = false;
 
 onMount(() => {
-  connection = connection_id == 'add' ? {} : $user.findConversation({connection_id}) || {};
+  connection = connection_id === 'add' ? {} : $user.findConversation({connection_id}) || {};
   connection.connection_id ? connectionToForm(connection) : defaultsToForm();
 });
 
@@ -39,7 +39,7 @@ function connectionToForm(connection) {
   const fields = connection.url ? connection.url.toFields() : {};
   if (is.array(connection.on_connect_commands)) fields.on_connect_commands = connection.on_connect_commands.join('\n');
   if (!fields.nick) fields.nick = user.email.replace(/@.*/, '').replace(/\W/g, '_');
-  fields.want_to_be_connected = connection.wanted_state == 'disconnected' ? false : true;
+  fields.want_to_be_connected = connection.wanted_state === 'disconnected' ? false : true;
   form = {...form, ...fields, fingerprint: connection.certificate.fingerprint || ''};
 }
 
@@ -89,7 +89,7 @@ async function saveConnection() {
     <span slot="label">{$l('Your name')}</span>
   </TextField>
 
-  {#if connection_id != 'add'}
+  {#if connection_id !== 'add'}
     <Checkbox name="want_to_be_connected" bind:value="{form.want_to_be_connected}">
       <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
@@ -132,7 +132,7 @@ async function saveConnection() {
           <span slot="label">{$l('Username')}</span>
           <p class="help" slot="help">{$l('SASL and IRC server username.')}</p>
         </TextField>
-        {#if form.sasl == 'external'}
+        {#if form.sasl === 'external'}
           <TextField type="text" name="fingerprint" bind:value="{form.fingerprint}" readonly="{true}">
             <span slot="label">{$l('Fingerprint')}</span>
             <p class="help" slot="help">{$l('The certificate fingerprint is used for SASL external authentication.')}</p>
@@ -151,7 +151,7 @@ async function saveConnection() {
   {/if}
 
   <div class="form-actions">
-    {#if connection_id != 'add'}
+    {#if connection_id !== 'add'}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
     {:else}
       <Button icon="plus-circle" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
@@ -160,7 +160,7 @@ async function saveConnection() {
   <OperationStatus op="{createConnectionOp}"/>
   <OperationStatus op="{updateConnectionOp}"/>
 
-  {#if connection_id != 'add'}
+  {#if connection_id !== 'add'}
     <h3>{$l('Delete')}</h3>
     <p>
       {$l('This will permanently remove chat logs and other connection related data.')}
@@ -172,7 +172,7 @@ async function saveConnection() {
     </TextField>
 
     <div class="form-actions">
-      <Button icon="trash" op="{removeConnectionOp}" on:click="{removeConnection}" disabled="{confirmConnectionId != connection_id}"><span>{$l('Delete')}</span></Button>
+      <Button icon="trash" op="{removeConnectionOp}" on:click="{removeConnection}" disabled="{confirmConnectionId !== connection_id}"><span>{$l('Delete')}</span></Button>
     </div>
 
     <OperationStatus op="{removeConnectionOp}" success="Deleted."/>

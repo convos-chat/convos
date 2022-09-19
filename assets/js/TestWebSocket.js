@@ -9,8 +9,8 @@ function TestWebSocket(url) {
 
   this.dispatchEvent = (name, e = {}) => {
     if (e.data) e.data = JSON.stringify(e.data);
-    if (name == 'close') this.readyState = TestWebSocket.CLOSED;
-    if (name == 'open') this.readyState = TestWebSocket.OPEN;
+    if (name === 'close') this.readyState = TestWebSocket.CLOSED;
+    if (name === 'open') this.readyState = TestWebSocket.OPEN;
     this['on' + name](e);
   };
 }

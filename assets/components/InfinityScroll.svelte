@@ -24,12 +24,12 @@ function calculateDetails() {
       : 'middle';
 
   state.pos = pos;
-  state.scrollHeightChanged = state.scrollHeight != scrollHeight;
+  state.scrollHeightChanged = state.scrollHeight !== scrollHeight;
   state.scrollHeight = scrollHeight;
   state.visibleElsChanged = false;
 
   const visibleEls = findVisibleElements(infinityEl.firstElementChild, infinityEl);
-  if (visibleEls.length != state.visibleEls.length || visibleEls[0] != state.visibleEls[0]) {
+  if (visibleEls.length !== state.visibleEls.length || visibleEls[0] !== state.visibleEls[0]) {
     state.visibleEls = visibleEls;
     state.visibleElsChanged = true;
   }
@@ -67,7 +67,7 @@ function onScrolled(infinityEl) {
 
 function scrollTo(pos) {
   if (is.undefined(pos)) return false;
-  if (pos == -1) pos = scrollHeight;
+  if (pos === -1) pos = scrollHeight;
   if (is.string(pos)) pos = state.infinityEl.querySelector(pos);
   if (pos && pos.tagName) pos = pos.offsetTop;
   if (is.undefined(pos)) return false;

@@ -57,7 +57,7 @@ export default class Socket extends Reactive {
    * @returns {Object} Returns invocant
    */
   close(code, reason) {
-    if (typeof code != 'number') [code, reason] = [1000, code];
+    if (typeof code !== 'number') [code, reason] = [1000, code];
     if (this.ws.close) this.ws.close(code, reason);
     this.keepClosed = true;
     this._keepAliveStop();
@@ -102,7 +102,7 @@ export default class Socket extends Reactive {
    * @returns {Array} A list of messages
    */
   getWaitingMessages(ids) {
-    if (arguments.length == 0) return Array.from(this.waiting.values());
+    if (arguments.length === 0) return Array.from(this.waiting.values());
     return ids.map(id => this.waiting.get(id));
   }
 
@@ -135,7 +135,7 @@ export default class Socket extends Reactive {
    * @returns {Boolean} True if the object is in the given state
    */
   is(state) {
-    return this.ws.readyState == WebSocket[state.toUpperCase()];
+    return this.ws.readyState === WebSocket[state.toUpperCase()];
   }
 
   /**
@@ -200,7 +200,7 @@ export default class Socket extends Reactive {
     const queue = this.queue;
     if (queue.length) this.update({waiting: true});
     while (queue.length) {
-      if (this.ws.readyState != WebSocket.OPEN) return;
+      if (this.ws.readyState !== WebSocket.OPEN) return;
       const msg = queue.shift();
       log.trace('<<<', msg);
       this.ws.send(this.deflateMessage(msg));
@@ -212,7 +212,7 @@ export default class Socket extends Reactive {
 
   _keepAliveStart() {
     this._keepAliveStop();
-    this.keepaliveTid = setInterval(() => this.ws.readyState == WebSocket.OPEN && this.ws.send('{}'), this.keepaliveInterval);
+    this.keepaliveTid = setInterval(() => this.ws.readyState === WebSocket.OPEN && this.ws.send('{}'), this.keepaliveInterval);
   }
 
   _keepAliveStop() {
@@ -236,7 +236,7 @@ export default class Socket extends Reactive {
 
   _onError(e) {
     let error = String(e.message || e);
-    if (!error || error.indexOf('[') == 0) error = 'Could not connect.';
+    if (!error || error.indexOf('[') === 0) error = 'Could not connect.';
     log.error('error', error, e);
     this.update({error});
   }
@@ -270,7 +270,7 @@ export default class Socket extends Reactive {
     this._reconnectStop();
     log.info('reconnect in', delay);
     if (delay === true) return this.open();
-    if (typeof delay != 'number') return (this.keepClosed = true);
+    if (typeof delay !== 'number') return (this.keepClosed = true);
     this.reconnectTid = setTimeout(() => this.open(), delay);
   }
 

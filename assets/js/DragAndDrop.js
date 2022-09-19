@@ -54,7 +54,7 @@ export default class dragAndDrop {
     if (!this.uploader) return;
 
     for (let i = 0; i < items.length; i++) {
-      if (items[i].kind != 'file') continue;
+      if (items[i].kind !== 'file') continue;
       return this.uploader({dataTransfer: {files: [items[i].getAsFile()]}});
     }
   }

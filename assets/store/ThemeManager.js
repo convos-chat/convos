@@ -43,7 +43,7 @@ export default class ThemeManager extends Reactive {
     const activeTheme = params.activeTheme || this.activeTheme;
     const colorScheme = params.colorScheme || this.colorScheme;
     const osColorScheme = params.osColorScheme || this.osColorScheme;
-    const schemes = [(colorScheme == 'auto' ? osColorScheme : colorScheme), 'normal', 'light'];
+    const schemes = [(colorScheme === 'auto' ? osColorScheme : colorScheme), 'normal', 'light'];
 
     let selectedEl;
     for (let i = 0; i < schemes.length; i++) {
@@ -54,9 +54,9 @@ export default class ThemeManager extends Reactive {
     q(document, 'link[rel*="style"][title]', el => {
       if (!selectedEl) selectedEl = el; // Fallback
       el.disabled = true; // Not sure why, but this seems to bee required by firefox
-      el.disabled = el.href == selectedEl.href ? false : true;
-      el.setAttribute('media', el == selectedEl ? '' : 'none');
-      el.setAttribute('rel', el == selectedEl ? 'stylesheet' : 'alternate stylesheet');
+      el.disabled = el.href === selectedEl.href ? false : true;
+      el.setAttribute('media', el === selectedEl ? '' : 'none');
+      el.setAttribute('rel', el === selectedEl ? 'stylesheet' : 'alternate stylesheet');
     });
   }
 }

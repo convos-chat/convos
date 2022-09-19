@@ -1,4 +1,4 @@
-const level = typeof process == 'undefined' || typeof process.env != 'object' ? 'info' : (process.env.LOG_LEVEL || 'quiet');
+const level = typeof process === 'undefined' || typeof process.env !== 'object' ? 'info' : (process.env.LOG_LEVEL || 'quiet');
 const levels = ['trace', 'debug', 'info', 'warn', 'error', 'quiet'];
 const loggers = {};
 const nameToLevel = {};
@@ -34,11 +34,11 @@ function Logger({name}) {
 
   this.setLevel = (level) => {
     let numLevel = levels.indexOf(level);
-    if (numLevel == -1) numLevel = 2; // default to "info"
+    if (numLevel === -1) numLevel = 2; // default to "info"
     this.numLevel = numLevel;
 
     levels.forEach((name, i) => {
-      const methodName = name == 'trace' || name == 'debug' ? 'log' : name;
+      const methodName = name === 'trace' || name === 'debug' ? 'log' : name;
       const method = !console || i < numLevel ? noop : console[methodName] || console.log || noop;
       this[name] = method.bind(this, '[' + this.name + ']');
     });

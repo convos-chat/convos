@@ -38,7 +38,7 @@ $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
 
 onMount(async () => {
-  if (Object.keys(conversation.modes).length == 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
+  if (Object.keys(conversation.modes).length === 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
   await tick();
   checkboxes = Object.assign({}, checkboxes, conversation.modes);
   rawMessages = conversation.messages.raw;
@@ -53,11 +53,11 @@ function partConversation() {
 function saveChannelModes() {
   const setModes = [];
   for (const name in checkboxes) {
-    if (name == 'password' && checkboxes[name]) {
+    if (name === 'password' && checkboxes[name]) {
       if (password) conversation.send(isOperator ? '/mode +k ' + password : '/join ' + conversation.name + ' ' + password);
       password = '';
     }
-    else if (checkboxes[name] != (conversation.modes[name] || false)) {
+    else if (checkboxes[name] !== (conversation.modes[name] || false)) {
       setModes.push((checkboxes[name] ? '+' : '-') + getChannelMode(name));
     }
   }
@@ -67,7 +67,7 @@ function saveChannelModes() {
 
 function saveChannelTopic() {
   if (!isOperator && conversation.modes.topic_protection) return false;
-  return topic != conversation.topic && conversation.send('/topic ' + topic);
+  return topic !== conversation.topic && conversation.send('/topic ' + topic);
 }
 
 async function saveConversationSettings() {

@@ -43,7 +43,7 @@ export default class Messages extends Reactive {
   }
 
   render(msgIndex = -1) {
-    if (msgIndex != -1) {
+    if (msgIndex !== -1) {
       const msg = this.get(msgIndex);
       if (msg && !msg.hasBeenSeen) {
         msg.embeds = this.raw ? [] : this._embeds(msg);
@@ -91,7 +91,7 @@ export default class Messages extends Reactive {
   }
 
   _changed(params, paramName) {
-    return params.hasOwnProperty(paramName) && params[paramName] != this[paramName];
+    return params.hasOwnProperty(paramName) && params[paramName] !== this[paramName];
   }
 
 
@@ -99,19 +99,19 @@ export default class Messages extends Reactive {
     const classes = ['message'];
     if (msg.type) classes.push('is-type-' + msg.type);
     if (msg.highlight) classes.push('is-highlighted');
-    const sameFrom = msg.from == prev.from && msg.conversation_id == prev.conversation_id && msg.connection_id == prev.connection_id;
+    const sameFrom = msg.from === prev.from && msg.conversation_id === prev.conversation_id && msg.connection_id === prev.connection_id;
     classes.push(!msg.dayChanged && sameFrom ? 'has-same-from' : 'has-not-same-from');
     return classes.join(' ');
   }
 
   _dayChanged(msg, prev) {
-    return prev.ts && msg.ts.getDate() != prev.ts.getDate() ? true : false;
+    return prev.ts && msg.ts.getDate() !== prev.ts.getDate() ? true : false;
   }
 
   _embeds(msg) {
     const p = [];
     if (this._msgDetails(msg)) p.push(Promise.resolve({className: 'le-details', details: true, nodes: [jsonhtmlify(msg.details).lastChild]}));
-    if (!this.expandUrlToMedia || msg.type == 'notice') return this._embedsPromises(p);
+    if (!this.expandUrlToMedia || msg.type === 'notice') return this._embedsPromises(p);
 
     (msg.message.match(/https?:\/\/(\S+)/g) || []).forEach(url => {
       url = url.replace(/(\W)?$/, '');
@@ -135,7 +135,7 @@ export default class Messages extends Reactive {
       if (!msg.from) [msg.internal, msg.from] = [true, 'Convos'];
       if (!msg.type) msg.type = 'notice';
 
-      msg.color = msg.from == 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
+      msg.color = msg.from === 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
       msg.id = ++ID;
     }
@@ -160,18 +160,18 @@ export default class Messages extends Reactive {
 
     embedEl = this._renderVideoChat(msg, embed, embedEl) || this._renderPaste(msg, embed, embedEl) || embedEl;
     q(embedEl, 'img', ['error', (e) => (e.target.style.display = 'none')]);
-    q(embedEl, '.le-goto-link', (el) => el.parentNode.children.length == 1 && el.parentNode.remove());
+    q(embedEl, '.le-goto-link', (el) => el.parentNode.children.length === 1 && el.parentNode.remove());
 
     delete embed.html;
     embed.className = embedEl.className;
-    embed.nodes = embedEl.tagName.toLowerCase() == 'iframe' ? [embedEl] : [].slice.call(embedEl.childNodes, 0);
+    embed.nodes = embedEl.tagName.toLowerCase() === 'iframe' ? [embedEl] : [].slice.call(embedEl.childNodes, 0);
 
     return embed;
   }
 
   _msgDetails(msg) {
     if (msg.hasOwnProperty('details')) return msg.details;
-    if (msg.type != 'error' && msg.type != 'notice') return (msg.details = null);
+    if (msg.type !== 'error' && msg.type !== 'notice') return (msg.details = null);
 
     const details = {...(msg.sent || msg)};
 
@@ -183,7 +183,7 @@ export default class Messages extends Reactive {
       'method',       'silent',      'stopPropagation',   'ts',
     ].forEach(k => delete details[k]);
 
-    return Object.keys(details).sort().join(':') == 'from:message:type' ? (msg.details = null) : (msg.details = details);
+    return Object.keys(details).sort().join(':') === 'from:message:type' ? (msg.details = null) : (msg.details = details);
   }
 
   _renderPaste(msg, _embed, embedEl) {

@@ -27,7 +27,7 @@ export default class Notifications extends Conversation {
   }
 
   is(status) {
-    return status == 'notifications' ? true : super.is(status);
+    return status === 'notifications' ? true : super.is(status);
   }
 
   // Disabled

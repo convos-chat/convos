@@ -25,21 +25,21 @@ export default class CommandHistory extends Reactive {
     if (index >= this.history.length) index = this.history.length - 1;
 
     const curr = this.inputEl.value;
-    if (this.inputEl.selectionStart != curr.length) {
+    if (this.inputEl.selectionStart !== curr.length) {
       return false; // Disable history mode if the cursor is inside the text
     }
-    if (curr.length && curr != this.history[this.index]) {
+    if (curr.length && curr !== this.history[this.index]) {
       return false; // Disable history mode if the string has been changed
     }
 
     e.preventDefault();
     this.update({index});
-    this.inputEl.value = index == -1 ? '' : this.history[index];
+    this.inputEl.value = index === -1 ? '' : this.history[index];
     return true;
   }
 
   update(params) {
-    if (params.conversation && params.conversation != this.conversation) this.update({index: -1});
+    if (params.conversation && params.conversation !== this.conversation) this.update({index: -1});
     return super.update(params);
   }
 }

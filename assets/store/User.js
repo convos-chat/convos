@@ -71,7 +71,7 @@ export default class User extends Reactive {
 
     // TODO: Figure out how to update Chat.svelte, without updating the user object
     conn.on('conversationadd', (conversation) => this._maybeUpgradeActiveConversation(conversation));
-    conn.on('conversationremove', (conversation) => (conversation == this.activeConversation && this.setActiveConversation(conversation)));
+    conn.on('conversationremove', (conversation) => (conversation === this.activeConversation && this.setActiveConversation(conversation)));
     conn.on('update', () => this.update({connections: true}));
     conn.on('unread', () => this._calculateUnreadDebounced());
     this.connections.set(conn.connection_id, conn);
@@ -87,7 +87,7 @@ export default class User extends Reactive {
   is(statusOrRole) {
     if (Array.isArray(statusOrRole)) return !!statusOrRole.filter(sr => this.is(sr)).length;
     if (this.roles.has(statusOrRole)) return true;
-    return this.status == statusOrRole;
+    return this.status === statusOrRole;
   }
 
   async load() {
@@ -127,7 +127,7 @@ export default class User extends Reactive {
     const conn = this.findConversation({connection_id: params.connection_id});
     if (params.conversation_id) return conn && conn.removeConversation(params);
     this.connections.delete(params.connection_id);
-    if (conn == this.activeConversation) this.setActiveConversation(conn);
+    if (conn === this.activeConversation) this.setActiveConversation(conn);
     this.update({connections: true});
   }
 
@@ -183,7 +183,7 @@ export default class User extends Reactive {
     if (msg.highlight && !conversation.is('private')) {
       this.notifications.addMessages(msg);
 
-      if (conversation == this.activeConversation && notify.appHasFocus) {
+      if (conversation === this.activeConversation && notify.appHasFocus) {
         conversation.markAsRead();
       }
       else {
@@ -194,9 +194,9 @@ export default class User extends Reactive {
 
   _getEventNameFromMessage(msg) {
     if (msg.errors) return 'error';
-    if (msg.event == 'state') return msg.type;
+    if (msg.event === 'state') return msg.type;
 
-    if (msg.event == 'sent' && msg.message.match(/\/\S+/)) {
+    if (msg.event === 'sent' && msg.message.match(/\/\S+/)) {
       msg.command = msg.message.split(/\s+/).filter(s => s.length);
       msg.command[0] = msg.command[0].substring(1);
       return 'sent_' + msg.command[0].toLowerCase();
@@ -208,8 +208,8 @@ export default class User extends Reactive {
   _maybeUpgradeActiveConversation(conversation) {
     const active = this.activeConversation;
     if (!conversation.conversation_id) return conversation;
-    if (conversation.connection_id && conversation.connection_id != active.connection_id) return conversation;
-    if (conversation.conversation_id && conversation.conversation_id != active.conversation_id) return conversation;
+    if (conversation.connection_id && conversation.connection_id !== active.connection_id) return conversation;
+    if (conversation.conversation_id && conversation.conversation_id !== active.conversation_id) return conversation;
     this.update({activeConversation: conversation});
     return conversation;
   }

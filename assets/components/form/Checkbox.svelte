@@ -12,7 +12,7 @@ export let value;
 
 let hasFocus = false;
 
-$: icons = icon == 'caret' ? ['caret-square-down', 'caret-square-up'] : ['square', 'check-square'];
+$: icons = icon === 'caret' ? ['caret-square-down', 'caret-square-up'] : ['square', 'check-square'];
 $: stateIcon = icons[value ? 1 : 0];
 </script>
 

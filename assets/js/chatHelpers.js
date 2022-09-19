@@ -56,12 +56,12 @@ export function onInfinityScrolled(e, {conversation}) {
 
   const go = (hash) => route.go(conversation.path + (hash.length ? '#' + hash : ''), {replace: true});
   const pos = e.detail.pos;
-  if (pos == 'top') {
+  if (pos === 'top') {
     const before = visibleEls[0].dataset.ts;
     if (!conversation.historyStartAt) conversation.load({before});
     go(before);
   }
-  else if (pos == 'bottom') {
+  else if (pos === 'bottom') {
     const after = visibleEls.slice(-1)[0].dataset.ts;
     if (!conversation.historyStopAt) conversation.load({after});
     go(conversation.historyStopAt ? '' : after);
@@ -81,7 +81,7 @@ export function onInfinityVisibility(e, {conversation, timestampFromUrl}) {
   }
   if (scrollHeightChanged) {
     scrollTo(route.hash ? '.message[data-ts="' + route.hash + '"]' : -1);
-    renderInfinityFocusedEl(infinityEl, timestampFromUrl == route.hash);
+    renderInfinityFocusedEl(infinityEl, timestampFromUrl === route.hash);
   }
   if (visibleElsChanged) {
     visibleEls.forEach(el => messages.render(el.dataset.index));
@@ -97,7 +97,7 @@ function renderInfinityFocusedEl(infinityEl, add) {
 export function topicOrStatus(connection, conversation) {
   if (conversation.is('not_found')) return '';
   if (connection.frozen) return connection.frozen;
-  if (connection == conversation) return 'Connection messages.';
+  if (connection === conversation) return 'Connection messages.';
   if (conversation.info.away) return conversation.info.away;
   if (conversation.info.idle_for) return i18n.l('User has been idle for %1s.', conversation.info.idle_for);
   const str = conversation.frozen ? conversation.frozen : conversation.topic;

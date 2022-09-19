@@ -79,15 +79,15 @@ function onReady(el) {
   inputEl.addEventListener('change', () => onChange(inputEl));
   inputEl.addEventListener('input', renderInputHeight);
   inputEl.addEventListener('keyup', (e) => {
-    if (e.key.length == 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) != -1) onChange(inputEl);
+    if (e.key.length === 1 || ['ArrowLeft', 'ArrowRight', 'Backspace'].indexOf(e.key) !== -1) onChange(inputEl);
   });
   inputEl.addEventListener('keydown', (e) => {
-    if (e.key == 'ArrowDown' && commandHistory.render(e, -1)) return;
-    if (e.key == 'ArrowUp' && commandHistory.render(e, 1)) return;
-    if (e.key == 'ArrowDown') return focusAutocompleteItem(e, e.shiftKey ? 4 : 1);
-    if (e.key == 'ArrowUp') return focusAutocompleteItem(e, e.shiftKey ? -4 : -1);
-    if (e.key == 'Enter') return selectOptionOrSendMessage(e);
-    if (e.key == 'Tab') return focusAutocompleteItem(e, e.shiftKey ? -1 : 1);
+    if (e.key === 'ArrowDown' && commandHistory.render(e, -1)) return;
+    if (e.key === 'ArrowUp' && commandHistory.render(e, 1)) return;
+    if (e.key === 'ArrowDown') return focusAutocompleteItem(e, e.shiftKey ? 4 : 1);
+    if (e.key === 'ArrowUp') return focusAutocompleteItem(e, e.shiftKey ? -4 : -1);
+    if (e.key === 'Enter') return selectOptionOrSendMessage(e);
+    if (e.key === 'Tab') return focusAutocompleteItem(e, e.shiftKey ? -1 : 1);
   });
 
   commandHistory.attach(inputEl);
@@ -97,7 +97,7 @@ function onReady(el) {
 function onVideoLinkClick(e) {
   e.preventDefault();
   videoWindow.open(videoUrl, {nick: conversation.participants.me().nick});
-  const alreadySent = conversation.messages.toArray().slice(-20).find(msg => msg.message.indexOf(videoUrl) != -1);
+  const alreadySent = conversation.messages.toArray().slice(-20).find(msg => msg.message.indexOf(videoUrl) !== -1);
   if (alreadySent && alreadySent.ts.toEpoch() > new Time().toEpoch() - 600) return;
   conversation.send({method: 'send', message: videoService.conversationToExternalUrl(conversation)});
 }
@@ -145,7 +145,7 @@ function startAutocomplete(splitValueAt) {
 }
 
 function updateValueWhenConversationChanges(conversation) {
-  if (updateValueWhenConversationChanges.lock == conversation.path) return;
+  if (updateValueWhenConversationChanges.lock === conversation.path) return;
   updateValueWhenConversationChanges.lock = conversation.path;
   setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
 }
@@ -181,7 +181,7 @@ function uploadFiles(e) {
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
   {#if conversation.is('conversation')}
-    <a href="#actions" class="btn-hallow can-toggle" class:is-active="{activeChatMenu == 'actions'}" on:click="{activeChatMenuToggle}">
+    <a href="#actions" class="btn-hallow can-toggle" class:is-active="{activeChatMenu === 'actions'}" on:click="{activeChatMenuToggle}">
       <Icon name="plus-circle"/><Icon name="times"/>
     </a>
   {/if}
@@ -191,7 +191,7 @@ function uploadFiles(e) {
     <span class="tooltip is-above is-left">{nbsp($l(tooltip))}</span>
   </button>
 
-  {#if activeChatMenu == 'actions' && conversation.is('conversation')}
+  {#if activeChatMenu === 'actions' && conversation.is('conversation')}
     <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenuToggle}">
       {#if videoUrl}
         <a href="{videoUrl}" on:click="{onVideoLinkClick}">
@@ -206,7 +206,7 @@ function uploadFiles(e) {
   {:else if autocompleteOptions.length}
     <div class="chat-input_menu for-{autocompleteCategory}" transition:fly="{chatMenuTransition}">
       {#each autocompleteOptions as opt, i}
-        <a href="#index:{i}" class:has-focus="{i == autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
+        <a href="#index:{i}" class:has-focus="{i === autocompleteIndex}" on:click|preventDefault="{selectOption}" tabindex="-1">{@html opt.text || opt.val}</a>
       {/each}
     </div>
   {/if}

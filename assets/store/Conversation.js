@@ -58,7 +58,7 @@ export default class Conversation extends Reactive {
     if (!Array.isArray(messages)) {
       this._maybeIncreaseUnread(messages);
       this._maybeNotify(messages);
-      if (!this.historyStopAt && ['action', 'private'].indexOf(messages.type) != -1) return;
+      if (!this.historyStopAt && ['action', 'private'].indexOf(messages.type) !== -1) return;
       messages.fresh = true;
       messages = [messages];
     }
@@ -68,17 +68,17 @@ export default class Conversation extends Reactive {
   }
 
   is(status) {
-    if (status == 'connection') return !this.conversation_id;
-    if (status == 'conversation') return this.conversation_id && !this.is('notifications');
-    if (status == 'frozen') return this.frozen && true;
-    if (status == 'locked') return this.frozen == 'Invalid password.';
-    if (status == 'not_found') return this.frozen == 'Not found.';
-    if (status == 'notifications') return false;
-    if (status == 'pending') return this.frozen.match(/pending invitation/i);
-    if (status == 'private') return this.conversation_id && !channelRe.test(this.conversation_id) || false;
-    if (status == 'search') return false;
-    if (status == 'unread') return this.unread && true;
-    return this.status == status;
+    if (status === 'connection') return !this.conversation_id;
+    if (status === 'conversation') return this.conversation_id && !this.is('notifications');
+    if (status === 'frozen') return this.frozen && true;
+    if (status === 'locked') return this.frozen === 'Invalid password.';
+    if (status === 'not_found') return this.frozen === 'Not found.';
+    if (status === 'notifications') return false;
+    if (status === 'pending') return this.frozen.match(/pending invitation/i);
+    if (status === 'private') return this.conversation_id && !channelRe.test(this.conversation_id) || false;
+    if (status === 'search') return false;
+    if (status === 'unread') return this.unread && true;
+    return this.status === status;
   }
 
   async load(params = {}) {
@@ -110,7 +110,7 @@ export default class Conversation extends Reactive {
 
   notify(msg) {
     if (notify.appHasFocus) return;
-    const title = msg.from == this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
+    const title = msg.from === this.name ? msg.from : i18n.l('%1 in %2', msg.from, this.name);
     this.lastNotification = notify.show(msg.message, {path: this.path, title});
   }
 
@@ -137,7 +137,7 @@ export default class Conversation extends Reactive {
     const listName = ['banlist', 'exceptlist', 'invitelist', 'quietlist'].filter(n => params[n])[0];
     if (listName) {
       const n = params[listName].length;
-      const entries = n == 1 ? 'entry' : 'entries';
+      const entries = n === 1 ? 'entry' : 'entries';
       this.addMessages({...params, message: '%1 has %2 ' + entries + ' in %3.', vars: [this.name, n, i18n.l(listName)]});
     }
     else if (params.nick) {
@@ -156,9 +156,9 @@ export default class Conversation extends Reactive {
 
   wsEventNickChange(params) {
     if (!this.participants.has(params.old_nick)) return;
-    if (params.old_nick == params.new_nick) return;
+    if (params.old_nick === params.new_nick) return;
     this.participants.rename(params.old_nick, params.new_nick);
-    const message = params.type == 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
+    const message = params.type === 'me' ? 'You (%1) changed nick to %2.' : '%1 changed nick to %2.';
     this.addMessages({message, vars: [params.old_nick, params.new_nick]});
   }
 
@@ -231,13 +231,13 @@ export default class Conversation extends Reactive {
 
   _maybeIncreaseUnread(msg) {
     if (!msg.from || msg.yourself) return this;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return this;
+    if (['action', 'error', 'private'].indexOf(msg.type) === -1) return this;
     this.update({unread: this.unread + 1});
   }
 
   _maybeNotify(msg) {
     if (!msg.from || msg.yourself) return;
-    if (['action', 'error', 'private'].indexOf(msg.type) == -1) return;
+    if (['action', 'error', 'private'].indexOf(msg.type) === -1) return;
     if (!msg.highlight && !this.wantNotifications) return;
     this.notify(msg);
   }
@@ -278,7 +278,7 @@ export default class Conversation extends Reactive {
   _skipLoad(opParams) {
     if (!this.messagesOp || this.is('loading')) return true;
     if (!this.messages.length) return this.is('success');
-    if (opParams.around) return !!this.messages.toArray().find(msg => msg.ts.toISOString() == opParams.around);
+    if (opParams.around) return !!this.messages.toArray().find(msg => msg.ts.toISOString() === opParams.around);
     if (opParams.before && this.historyStartAt) return true;
     if (opParams.after && this.historyStopAt) return true;
     return false;

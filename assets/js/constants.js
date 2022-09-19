@@ -28,7 +28,7 @@ export const channelModeCharToModeName = {
 
 export function getChannelMode(mode) {
   if (channelModeCharToModeName[mode]) return channelModeCharToModeName[mode];
-  return Object.keys(channelModeCharToModeName).filter(k => mode == channelModeCharToModeName[k])[0] || '';
+  return Object.keys(channelModeCharToModeName).filter(k => mode === channelModeCharToModeName[k])[0] || '';
 }
 
 export const modeMoniker = {
