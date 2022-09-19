@@ -1,19 +1,25 @@
 <script context="module">
 import {writable} from '../js/storeGenerator';
 
+let tid = 0;
+let lastClick = Date.now();
+
 const popoverId = writable(null, {
   click(e) {
     e.preventDefault();
     const id = parseInt(e.target.closest('.message').dataset.index, 10);
+    lastClick = Date.now();
     this.set(this.get() === id ? -1 : id);
+    if (tid) clearTimeout(tid);
+  },
+  closeMaybe(_e) {
+    if (lastClick < Date.now() - 300) this.set(-1);
+  },
+  enter(_e) {
+    if (tid) clearTimeout(tid);
   },
   leave(_e) {
-    this.tid = setTimeout(() => this.set(-1), 200);
-  },
-  enter(e) {
-    if (this.tid) clearTimeout(this.tid);
-    const id = parseInt(e.target.closest('.message').dataset.index, 10);
-    setTimeout(() => this.set(id), 250);
+    tid = setTimeout(() => this.set(-1), 300);
   },
 });
 </script>
@@ -52,7 +58,7 @@ function onActionClick(e, aEl) {
 function onMessageClick(e) {
   const aEl = e.target.closest('a');
   if (!aEl) return;
-  $popoverId = '';
+  popoverId.closeMaybe();
 
   // #action:x:y links
   if (!aEl.target && aEl.hash.indexOf('action:') !== -1) return onActionClick(e, aEl);
@@ -88,10 +94,7 @@ function renderEmbed(el, embed) {
     <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
   </div>
   <Icon name="pick:{message.from}" color="{message.color}"/>
-  <a href="#popover" on:click="{popoverId.click}"
-    on:focus="{popoverId.enter}" on:mouseenter="{popoverId.enter}"
-    on:blur="{popoverId.leave}" on:mouseleave="{popoverId.leave}"
-    class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
+  <a href="#popover" on:click="{popoverId.click}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
   <div class="message__text">
     {#if message.details}
       <a href="#action:expand:{message.index}"><Icon name="{message.expanded ? 'caret-square-up' : 'caret-square-down'}"/></a>

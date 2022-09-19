@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 7.06 Not Released
+ - Changed nick actions to only appear on click
  - Fix button loading animation
  - Fix not showing popover menu in new private conversations
  - Fix == vs === bugs
