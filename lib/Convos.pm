@@ -2,18 +2,18 @@ package Convos;
 use Mojo::Base 'Mojolicious';
 
 use Carp qw(croak);
-use Cwd ();
+use Cwd  ();
 use Convos::Core;
-use Convos::Util qw(is_true require_module);
+use Convos::Util  qw(is_true require_module);
 use File::HomeDir ();
-use Mojo::File qw(path);
-use Mojo::JSON qw(false true);
+use Mojo::File    qw(path);
+use Mojo::JSON    qw(false true);
 use Mojo::Util;
 use Scalar::Util qw(blessed);
 
 use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
 
-our $VERSION = '7.05';
+our $VERSION = '7.06';
 
 $ENV{CONVOS_REVERSE_PROXY} //= is_true 'ENV:MOJO_REVERSE_PROXY';
 $ENV{MOJO_REVERSE_PROXY}   //= is_true 'ENV:CONVOS_REVERSE_PROXY';
@@ -243,7 +243,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-7.05
+7.06
 
 =head1 DESCRIPTION
 
