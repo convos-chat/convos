@@ -5,7 +5,8 @@ import Notifications from './Notifications';
 import Reactive from '../js/Reactive';
 import Search from './Search';
 import SortedMap from '../js/SortedMap';
-import {camelize, debounce} from '../js/util';
+import {camelCase} from 'lodash';
+import {debounce} from 'lodash';
 import {getSocket} from './../js/Socket';
 import {notify} from './../js/Notify';
 import {videoService} from './video';
@@ -166,7 +167,7 @@ export default class User extends Reactive {
   }
 
   _dispatchMessage(msg) {
-    msg.dispatchTo = camelize('wsEvent_' + this._getEventNameFromMessage(msg));
+    msg.dispatchTo = camelCase('wsEvent_' + this._getEventNameFromMessage(msg));
     msg.silent = this.ignoreStatuses;
     this.emit(msg.dispatchTo, msg);
 

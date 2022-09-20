@@ -1,5 +1,5 @@
 import twemoji from 'twemoji';
-import {regexpEscape} from './util';
+import {escapeRegExp} from 'lodash';
 import {route} from '../store/Route';
 
 export default class Emojis {
@@ -75,7 +75,7 @@ export default class Emojis {
   _buildRe() {
     // The regexp will match one of :short_code:, :(, :), :/, :D, :P, ;), ;D, <3, ...
     // followed by a space, comma, dot or end of string
-    const re = Object.keys(this.aliases).sort().map(regexpEscape).join('|');
+    const re = Object.keys(this.aliases).sort().map(escapeRegExp).join('|');
     return new RegExp('(^|\\s)(:\\w+:|' + re + ')(?=\\s|\\,|\\.|$)', 'gi');
   }
 

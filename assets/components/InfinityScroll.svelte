@@ -1,4 +1,5 @@
 <script>
+import {now} from 'lodash';
 import {createEventDispatcher} from 'svelte';
 import {findVisibleElements, is} from '../js/util';
 
@@ -6,7 +7,7 @@ const dispatch = createEventDispatcher();
 const state = {scrollDelay: 80, scrollOffset: 80, scrollTop: 0, visibleEls: []};
 
 let className = '';
-let scrolledAt = Date.now();
+let scrolledAt = now();
 let scrollHeight = 0;
 
 export {className as class};
@@ -51,7 +52,7 @@ function onScroll(infinityEl) {
 }
 
 function onScrolled(infinityEl) {
-  if (scrolledAt + 500 > Date.now()) {
+  if (scrolledAt + 500 > now()) {
     // onScrolled() gets triggered when scrollTo() changes infinityEl.scrollTop.
     // Need to cancel the next "scroll" event as well, in case "scrollTop" was not set correctly.
     if (Math.abs(infinityEl.scrollTop - state.scrollTop) > 40) infinityEl.scrollTop = state.scrollTop;
@@ -72,7 +73,7 @@ function scrollTo(pos) {
   if (pos && pos.tagName) pos = pos.offsetTop;
   if (is.undefined(pos)) return false;
   if (pos < 0) return false;
-  scrolledAt = Date.now();
+  scrolledAt = now();
   state.infinityEl.scrollTop = pos;
   state.scrollTop = state.infinityEl.scrollTop;
   return true;

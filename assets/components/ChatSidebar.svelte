@@ -2,7 +2,8 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import {activeMenu} from '../store/viewport';
-import {closestEl, q, regexpEscape, settings, tagNameIs} from '../js/util';
+import {closestEl, q, settings, tagNameIs} from '../js/util';
+import {escapeRegExp} from 'lodash';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
@@ -60,7 +61,7 @@ function filterNav() {
       = filter === '+' ? new RegExp(/[1-9]\d*\+?\s*$/)
       : filter === '+@' ? new RegExp(/^\s*\w.*[1-9]\d*\+?\s*$/)
       : filter === '+#' ? new RegExp(/^\s*#.*[1-9]\d*\+?\s*$/)
-      : new RegExp(prefix[p] + regexpEscape(filter), 'i');
+      : new RegExp(prefix[p] + escapeRegExp(filter), 'i');
 
     const seen = {};
     q(navEl, 'a', (aEl, i) => {

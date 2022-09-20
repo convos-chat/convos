@@ -16,8 +16,9 @@
  */
 
 import Reactive from '../js/Reactive';
+import {escapeRegExp} from 'lodash';
 import {getLogger} from '../js/logger';
-import {is, regexpEscape} from '../js/util';
+import {is} from '../js/util';
 
 const log = getLogger('api');
 
@@ -148,7 +149,7 @@ export default class Operation extends Reactive {
         return;
       }
       else if (p.in === 'path') {
-        const re = new RegExp('(%7B|\\{)' + regexpEscape(p.name) + '(%7D|\\})', 'i');
+        const re = new RegExp('(%7B|\\{)' + escapeRegExp(p.name) + '(%7D|\\})', 'i');
         url.pathname = url.pathname.replace(re, encodeURIComponent(this._extractValue(params, p)));
       }
       else if (p.in === 'query') {

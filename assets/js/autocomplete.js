@@ -1,6 +1,7 @@
 import {commandOptions} from './commands';
+import {escapeRegExp} from 'lodash';
 import {i18n} from '../store/I18N';
-import {is, regexpEscape} from './util';
+import {is} from './util';
 
 export function autocomplete(category, params) {
   return autocomplete[category] ? autocomplete[category](params) : [];
@@ -85,7 +86,7 @@ autocomplete.emojis = ({query}) => {
 };
 
 autocomplete.nicks = ({conversation, query}) => {
-  const re = new RegExp('^' + regexpEscape(query.slice(1)), 'i');
+  const re = new RegExp('^' + escapeRegExp(query.slice(1)), 'i');
   const opts = [];
 
   for (let participant of conversation.participants.toArray()) {

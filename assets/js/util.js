@@ -3,12 +3,9 @@
  *
  * @module util
  * @exports calculateModes
- * @exports camelize
- * @exports clone
  * @exports closestEl
  * @exports createElement
  * @exports copyToClipboard
- * @exports debounce
  * @exports ensureChildNode
  * @exports extractErrorMessage
  * @exports findVisibleElements
@@ -19,7 +16,6 @@
  * @exports modeClassNames
  * @exports nbsp
  * @exports q
- * @exports regexpEscape
  * @exports removeChildNodes
  * @exports sameOrigin
  * @exports settings
@@ -58,27 +54,6 @@ export function calculateModes(modeMap, modeStr) {
   }
 
   return modes;
-}
-
-/**
- * Used to take snake case and turn it into camel case.
- *
- * @param {String} str Example: foo_bar_baz
- * @returns {String} Example: fooBarBaz
- */
-export function camelize(str) {
-  return str.replace(/_(\w)/g, (all, b) => b.toUpperCase());
-}
-
-/**
- * Takes a JSON object or undefined and makes a deep copy.
- *
- * @param {Object} any
- * @returns {Object}
- */
-export function clone(any) {
-  if (any === undefined) return undefined;
-  return JSON.parse(JSON.stringify(any));
 }
 
 /**
@@ -135,26 +110,6 @@ export function createElement(name, attrs) {
   }
 
   return el;
-}
-
-/**
- * debounce() can be used to delay the calling of a function. Each time the the
- * debounced function is called, it will delay number of milliseconds before
- * calling "cb".
- *
- * @param {Function} cb The function to call later.
- * @param {Integer} delay Number of milliseconds to wait before calling "cb".
- * @returns {Function} A debounced version of "cb".
- */
-export function debounce(cb, delay) {
-  const db = function(...args) {
-    const self = this; // eslint-disable-line no-invalid-this
-    if (db.debounceTid) clearTimeout(db.debounceTid);
-    db.debounceTid = setTimeout(function() { cb.apply(self, args); db.debounceTid = 0 }, delay);
-  };
-
-  db.debounceTid = 0;
-  return db;
 }
 
 /**
@@ -375,16 +330,6 @@ export function q(parentEl, sel, cb) {
   const res = [];
   for (let i = 0; i < els.length; i++) res.push(cb(els[i], i));
   return res;
-}
-
-/**
- * regexpEscape() takes a string with unsafe characters and escapes them.
- *
- * @param {String} str Example: "(foo)"
- * @returns {String} Example: "\(foo\)"
- */
-export function regexpEscape(str) {
-  return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
 /**

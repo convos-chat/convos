@@ -1,4 +1,4 @@
-import {calculateModes, closestEl, debounce, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {calculateModes, closestEl, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {modeMoniker} from '../assets/js/constants';
 
 test('calculateModes', () => {
@@ -24,26 +24,6 @@ test('closestEl', () => {
   expect(closestEl(el, '.foo')).toBe(parent);
   el.className = 'foo';
   expect(closestEl(el, '.foo')).toBe(el);
-});
-
-test('debounce, timer', async () => {
-  let res = [];
-  const cb = debounce((a, b) => res.push([a, b]), 50);
-  expect(cb.debounceTid).toBe(0);
-
-  try {
-    cb(1, 2);
-    cb(3, 4);
-    await timer(5, 'Err!');
-  } catch(err) {
-    expect(err).toBe('Err!');
-    cb(5, 6);
-  }
-
-  expect(1 <= cb.debounceTid).toBe(true);
-  expect(await timer(60)).toBe(true);
-  expect(res).toEqual([[5, 6]]);
-  expect(cb.debounceTid).toBe(0);
 });
 
 test('modeClassNames', () => {

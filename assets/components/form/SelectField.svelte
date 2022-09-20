@@ -1,5 +1,6 @@
 <script>
-import {closestEl, regexpEscape, uuidv4} from '../../js/util';
+import {closestEl, uuidv4} from '../../js/util';
+import {escapeRegExp} from 'lodash';
 
 let activeIndex = 0;
 let humanEl;
@@ -32,7 +33,7 @@ function blur() {
 }
 
 function calculateVisibleOptions(options, needle) {
-  let re = new RegExp('(?:^|\\s|-)' + regexpEscape(needle), 'i'); // TODO: needle need to be safe string
+  let re = new RegExp('(?:^|\\s|-)' + escapeRegExp(needle), 'i'); // TODO: needle need to be safe string
 
   // Match by value exact
   let found = options.filter(opt => String(opt[0]) === needle);
