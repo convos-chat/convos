@@ -18,6 +18,7 @@
 /public/docs/fonts/
 /public/docs/scripts/
 /public/docs/styles/
+/assets/rollup.config.d/
 .perl-version
 assets/sass/.sass-cache/
 node_modules/

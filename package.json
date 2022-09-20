@@ -4,6 +4,7 @@
   "version": "7.6.0",
   "license": "Artistic-2.0",
   "repository": "https://github.com/convos-chat/convos",
+  "type": "module",
   "scripts": {
     "build": "ROLLUP_OUT_DIR=public/asset rollup -c --environment production",
     "dev": "./script/convos dev",

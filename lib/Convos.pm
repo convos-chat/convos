@@ -88,13 +88,7 @@ sub startup {
   $user_r->get('/settings/*rest', {rest => ''});
   $user_r->get('/search');
 
-  $self->plugin(
-    Webpack => {
-      engine       => 'Mojo::Alien::rollup',
-      process      => [qw(sass eslint core js svelte)],
-      dependencies => {core => 'rollup', svelte => [qw(rollup-plugin-svelte svelte)]}
-    }
-  );
+  $self->plugin(Webpack => {engine => 'Mojo::Alien::rollup', process => []});
 
   $self->_plugins;
   $self->hook(around_action   => \&_around_action);

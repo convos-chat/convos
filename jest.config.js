@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   collectCoverage: false,
   collectCoverageFrom: ['<rootDir>/assets/**/*.js'],
   moduleFileExtensions: ['js'],
