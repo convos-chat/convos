@@ -98,7 +98,7 @@ export default class Jitsi extends Reactive {
 
   async _load() {
     await loadScript('https://' + this.domain + '/external_api.js');
-    return new JitsiMeetExternalAPI(this.domain, this._options());
+    return new JitsiMeetExternalAPI(this.domain, this._options()); /*eslint no-undef: "off"*/
   }
 
   _options() {

@@ -42,7 +42,7 @@ export default class ConnectionProfiles extends Reactive {
     profile.url.toFields(profile);
 
     const def = this.defaultProfile();
-    Object.keys(def).forEach(k => profile.hasOwnProperty(k) || (profile[k] = def[k]));
+    Object.keys(def).forEach(k => Object.hasOwn(profile, k) || (profile[k] = def[k]));
 
     return profile;
   }

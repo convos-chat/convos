@@ -48,7 +48,7 @@ export default class Route extends Reactive {
 
   param(name, def = '') {
     const query = this.query;
-    if (query.hasOwnProperty(name)) return query[name];
+    if (Object.hasOwn(query, name)) return query[name];
     return def;
   }
 
@@ -104,7 +104,7 @@ export default class Route extends Reactive {
     }
   }
 
-  _onLocationChange(e) {
+  _onLocationChange() {
     if (!this.enabled) return;
     const abs = this._location.href;
     const pathname = abs.substr(this.baseUrl.length);

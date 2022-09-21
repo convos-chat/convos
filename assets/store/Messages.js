@@ -74,7 +74,7 @@ export default class Messages extends Reactive {
 
   update(params) {
     if (this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw')) {
-      const raw = params.hasOwnProperty('raw') ? params.raw : this.raw;
+      const raw = Object.hasOwn(params, 'raw') ? params.raw : this.raw;
       for (let msg of this.messages) {
         if (msg.hasBeenSeen) msg.embeds = this._embeds(msg);
         msg.html = toHtml(raw, msg);
@@ -91,7 +91,7 @@ export default class Messages extends Reactive {
   }
 
   _changed(params, paramName) {
-    return params.hasOwnProperty(paramName) && params[paramName] !== this[paramName];
+    return Object.hasOwn(params, paramName) && params[paramName] !== this[paramName];
   }
 
 
@@ -125,7 +125,7 @@ export default class Messages extends Reactive {
   _embedsPromises(p) {
     return p.map(p => {
       p.finally(() => this.update({messages: true}));
-      return p.catch(err => console.error('[Messages:embed]', msg, err));
+      return p.catch(err => console.error('[Messages:embed]', err));
     });
   }
 
@@ -170,7 +170,7 @@ export default class Messages extends Reactive {
   }
 
   _msgDetails(msg) {
-    if (msg.hasOwnProperty('details')) return msg.details;
+    if (Object.hasOwn(msg, 'details')) return msg.details;
     if (msg.type !== 'error' && msg.type !== 'notice') return (msg.details = null);
 
     const details = {...(msg.sent || msg)};

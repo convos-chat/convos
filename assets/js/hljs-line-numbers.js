@@ -187,7 +187,7 @@ export default function(hljs) {
     function duplicateMultilineNodes (element) {
         var nodes = element.childNodes;
         for (var node in nodes) {
-            if (nodes.hasOwnProperty(node)) {
+            if (Object.hasOwn(nodes, node)) {
                 var child = nodes[node];
                 if (getLinesCount(child.textContent) > 0) {
                     if (child.childNodes.length > 0) {

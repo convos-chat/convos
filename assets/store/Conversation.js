@@ -35,7 +35,7 @@ export default class Conversation extends Reactive {
     this.prop('rw', 'topic', params.topic || '');
     this.prop('rw', 'unread', params.unread || 0);
 
-    if (params.hasOwnProperty('conversation_id')) {
+    if (Object.hasOwn(params, 'conversation_id')) {
       this.prop('ro', 'conversation_id', params.conversation_id);
       this.prop('ro', 'title', () => [this.name, this.connection_id.replace(/^\w+-/, '')].join(' - '));
       this.prop('rw', 'frozen', params.frozen || '');
@@ -129,7 +129,7 @@ export default class Conversation extends Reactive {
   update(params) {
     this._loadInformation();
     super.update(params);
-    if (params.hasOwnProperty('notifications') || params.hasOwnProperty('unread')) this.emit('unread', params);
+    if (Object.hasOwn(params, 'notifications') || Object.hasOwn(params, 'unread')) this.emit('unread', params);
     return this;
   }
 

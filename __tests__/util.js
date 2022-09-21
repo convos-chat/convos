@@ -1,4 +1,4 @@
-import {calculateModes, camelize, clone, closestEl, debounce, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {calculateModes, closestEl, debounce, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {modeMoniker} from '../assets/js/constants';
 
 test('calculateModes', () => {
@@ -7,18 +7,6 @@ test('calculateModes', () => {
   expect(calculateModes(modeMoniker, '+vx')).toEqual({'+': true, 'x': true});
   expect(calculateModes(modeMoniker, '-xo')).toEqual({'@': false, 'x': false});
   expect(calculateModes(modeMoniker, '-im+n')).toEqual({i: false, m: false, n: true});
-});
-
-test('camelize', () => {
-  expect(camelize('foo')).toBe('foo');
-  expect(camelize('foo_bar_baz')).toBe('fooBarBaz');
-});
-
-test('clone', () => {
-  expect(clone('foo')).toBe('foo');
-  expect(clone({})).toEqual({});
-  expect(clone(null)).toEqual(null);
-  expect(clone(undefined)).toEqual(undefined);
 });
 
 test('closestEl', () => {

@@ -140,13 +140,13 @@ export default class User extends Reactive {
 
     // Need to expand params manually, in case we are passing in a reactive object
     const props = {...params, connection_id: params.connection_id || '', frozen: 'Not found.'};
-    ['conversation_id', 'name'] .forEach(k => params.hasOwnProperty(k) && (props[k] = params[k]));
+    ['conversation_id', 'name'] .forEach(k => Object.hasOwn(params, k) && (props[k] = params[k]));
     return this.update({activeConversation: props.conversation_id ? new Conversation(props) : new Connection(props)});
   }
 
   update(params) {
     super.update(params);
-    if (params.hasOwnProperty('unreadIncludePrivateMessages')) this._calculateUnreadDebounced();
+    if (Object.hasOwn(params, 'unreadIncludePrivateMessages')) this._calculateUnreadDebounced();
     return this;
   }
 

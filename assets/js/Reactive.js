@@ -127,7 +127,7 @@ export default class Reactive {
     Object.keys(params).forEach(name => {
       const prop = this._props[name];
       if (!prop) return log.trace('[' + this.constructor.name + '] Unknown prop "' + name + '".');
-      if (!prop.hasOwnProperty('prev')) prop.prev = prop.type === 'ro' ? undefined : prop.value;
+      if (!Object.hasOwn(prop, 'prev')) prop.prev = prop.type === 'ro' ? undefined : prop.value;
       if (prop.updateable) prop.value = params[name];
     });
 
@@ -167,7 +167,7 @@ export default class Reactive {
     const changed = {};
     Object.keys(this._props).forEach(name => {
       const prop = this._props[name];
-      if (!prop.hasOwnProperty('prev')) return;
+      if (!Object.hasOwn(prop, 'prev')) return;
       const prev = prop.prev;
       delete prop.prev;
       if (prop.value === prev) return;
@@ -189,7 +189,7 @@ export default class Reactive {
     }
 
     try {
-      return localStorage.hasOwnProperty(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
+      return Object.hasOwn(localStorage, key) ? JSON.parse(localStorage.getItem(key)) : undefined;
     } catch(err) {
       log.error({[key]: localStorage.getItem(key)}, err);
       return undefined;

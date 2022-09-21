@@ -17,7 +17,7 @@ detectEvent('touchstart', 'touch');
 features.add('js');
 
 function detectEvent(eventName, featureName) {
-  const cb = (e) => {
+  const cb = () => {
     if (eventName !== 'mousemove') features.add(featureName);
     if (eventName === 'mousemove' && !features.has('touch')) features.add(featureName);
     document.removeEventListener(eventName, cb);

@@ -131,7 +131,7 @@ export function copyToClipboard(el) {
 export function createElement(name, attrs) {
   const el = document.createElement(name);
   for (let attr in attrs) {
-    if (attrs.hasOwnProperty(attr)) el[attr] = attrs[attr];
+    if (Object.hasOwn(attrs, attr)) el[attr] = attrs[attr];
   }
 
   return el;
@@ -426,7 +426,7 @@ export function settings(key, value) {
     const el = getEl(key);
     if (!el) throw 'Cannot get settings for "' + key + '".';
     const bool = {no: false, yes: true};
-    return key === 'contact' ? atob(el.content || '') : bool.hasOwnProperty(el.content) ? bool[el.content] : el.content;
+    return key === 'contact' ? atob(el.content || '') : Object.hasOwn(bool, el.content) ? bool[el.content] : el.content;
   }
 
   // Set

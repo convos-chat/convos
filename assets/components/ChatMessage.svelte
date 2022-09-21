@@ -12,13 +12,13 @@ const popoverId = writable(null, {
     this.set(this.get() === id ? -1 : id);
     if (tid) clearTimeout(tid);
   },
-  closeMaybe(_e) {
+  closeMaybe() {
     if (lastClick < Date.now() - 300) this.set(-1);
   },
-  enter(_e) {
+  enter() {
     if (tid) clearTimeout(tid);
   },
-  leave(_e) {
+  leave() {
     tid = setTimeout(() => this.set(-1), 300);
   },
 });
@@ -66,10 +66,6 @@ function onMessageClick(e) {
   // Show images in full screen
   if (tagNameIs(e.target, 'img')) return showFullscreen(e, e.target);
   if (aEl.classList.contains('le-thumbnail')) return showFullscreen(e, aEl.querySelector('img'));
-
-  // Proxy video links
-  const videoLink = document.querySelector('[target="convos_video"][href="' + aEl.href + '"]');
-  if (videoLink) return onVideoLinkClick(e, videoLink); // TODO
 
   // Make sure embed links are opened in a new tab/window
   if (!aEl.target && aEl.closest('.embed')) aEl.target = '_blank';

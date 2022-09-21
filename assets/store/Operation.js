@@ -132,7 +132,7 @@ export default class Operation extends Reactive {
   _hasProperty(params, p) {
     if (p.in === 'body') return true;
     if (p.in === 'formData') return params.formData.has(p.name);
-    return params.hasOwnProperty(p.name);
+    return Object.hasOwn(params, p.name);
   }
 
   _paramsToRequest(opSpec, params) {

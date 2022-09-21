@@ -121,7 +121,7 @@ function updateInfo() {
       {/if}
     {/if}
 
-    {#if $conversation.hasOwnProperty('wantNotifications')}
+    {#if Object.hasOwn($conversation, 'wantNotifications')}
       <Checkbox name="want_notifications" bind:value="{wantNotifications}">
         <span slot="label">{$l('Notify me on new messages')}</span>
       </Checkbox>

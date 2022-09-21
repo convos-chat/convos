@@ -19,15 +19,15 @@ q(document, '.js-close-window', el => {
 if (document.querySelector('meta[name="convos:start_app"][content="chat"]')) {
   document.querySelector('.footer--wrapper').remove();
   document.querySelector('.cms-main').remove();
-  const app = new App({target: document.body});
+  new App({target: document.body});
 }
 else if (document.querySelector('meta[name="convos:start_app"][content="jitsi"]')) {
   document.querySelector('.footer--wrapper').remove();
   const wrapper = document.querySelector('.cms-main');
-  const app = new Jitsi(wrapper.dataset).render(wrapper);
+  new Jitsi(wrapper.dataset).render(wrapper);
 }
 else {
-  document.addEventListener('DOMContentLoaded', function(e) {
+  document.addEventListener('DOMContentLoaded', function() {
     q(document, 'pre', el => hljs.lineNumbersBlock(el));
   });
 }

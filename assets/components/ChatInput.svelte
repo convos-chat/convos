@@ -8,6 +8,7 @@ import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
+import {now} from 'lodash';
 import {videoService, videoWindow} from '../store/video';
 
 export const uploader = uploadFiles;
@@ -98,7 +99,7 @@ function onVideoLinkClick(e) {
   e.preventDefault();
   videoWindow.open(videoUrl, {nick: conversation.participants.me().nick});
   const alreadySent = conversation.messages.toArray().slice(-20).find(msg => msg.message.indexOf(videoUrl) !== -1);
-  if (alreadySent && alreadySent.ts.toEpoch() > new Time().toEpoch() - 600) return;
+  if (alreadySent && alreadySent.ts.toEpoch() > now() - 600) return;
   conversation.send({method: 'send', message: videoService.conversationToExternalUrl(conversation)});
 }
 

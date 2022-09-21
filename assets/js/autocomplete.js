@@ -7,7 +7,7 @@ export function autocomplete(category, params) {
 }
 
 export function fillIn(middle, params) {
-  if (middle && middle.hasOwnProperty('val')) middle = middle.val; // Autocomplete option
+  if (middle && Object.hasOwn(middle, 'val')) middle = middle.val; // Autocomplete option
 
   const cursorPos = params.append ? params.value.length : params.cursorPos;
   let [before, after] = [params.value.substring(0, cursorPos), params.value.substring(cursorPos)];

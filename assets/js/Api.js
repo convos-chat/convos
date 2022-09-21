@@ -8,7 +8,6 @@
  */
 
 import Operation from '../store/Operation';
-import Reactive from './Reactive';
 import {is} from '../js/util';
 
 class Api {

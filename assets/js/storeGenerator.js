@@ -5,7 +5,7 @@ export function writable(val, methods) {
   store.get = () => svelteStore.get(store);
 
   for (let name in methods) {
-    if (methods.hasOwnProperty(name)) store[name] = methods[name].bind(store);
+    if (Object.hasOwn(methods, name)) store[name] = methods[name].bind(store);
   }
 
   return store;

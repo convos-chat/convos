@@ -11,7 +11,7 @@ export default class Notifications extends Conversation {
     });
   }
 
-  addMessages(messages, method) {
+  addMessages(messages) {
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
