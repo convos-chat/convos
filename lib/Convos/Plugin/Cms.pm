@@ -21,8 +21,6 @@ sub register {
   my ($self, $app, $config) = @_;
 
   $app->defaults('cms.blogs' => Mojo::Collection->new);
-  $app->config(
-    'cms.paths' => [$app->core->home->child('content'), $app->asset->engine->assets_dir]);
   unshift @{$app->static->paths},   $app->core->home->child(qw(content public))->to_string;
   unshift @{$app->renderer->paths}, $app->core->home->child(qw(content templates))->to_string;
 
@@ -44,18 +42,13 @@ sub _document_p {
   my ($self, $c, $path) = @_;
 
   # Normalize input
-  $path = [@$path];
-  my $format = $path->[-1] =~ s!\.(html|txt|yaml)$!! ? $1 : 'html';
-  $path->[-1] .= '.md';
-
-  my $file;
-  for my $dir (@{$c->app->config('cms.paths')}) {
-    $file = $dir->child(@$path);
-    last if -r $file;
-  }
+  my @path   = @$path;
+  my $format = $path[-1] =~ s!\.(html|txt|yaml)$!! ? $1 : 'html';
+  $path[-1] .= '.md';
 
   my $p = Mojo::Promise->new;
   eval {
+    my $file = $c->app->core->home->child('content', @path);
     $p->resolve({}) unless -r $file;
     $p->resolve({body => $file->slurp, format => $format}) if $format eq 'txt';
     my $doc = $self->_get_cached_document($file) || $self->_parse_document($file, {});

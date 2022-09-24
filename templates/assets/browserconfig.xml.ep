@@ -2,8 +2,8 @@
 <browserconfig>
     <msapplication>
         <tile>
-            <square150x150logo src="<%= url_for '/asset/mstile-150x150.7223de74.png' %>"/>
-            <square310x310logo src="<%= url_for '/asset/mstile-310x310.e8b9f28a.png' %>"/>
+            <square150x150logo src="<%= url_for '/assets/mstile-150x150.7223de74.png' %>"/>
+            <square310x310logo src="<%= url_for '/assets/mstile-310x310.e8b9f28a.png' %>"/>
             <TileColor>#00451D</TileColor>
         </tile>
     </msapplication>

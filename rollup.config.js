@@ -8,14 +8,12 @@ import svelte from 'rollup-plugin-svelte';
 import {babel} from '@rollup/plugin-babel';
 import {terser} from 'rollup-plugin-terser';
 
-const assetsDir = process.env.ROLLUP_ASSETS_DIR || path.resolve(__dirname, 'assets');
 const isDev = process.env.NODE_ENV !== 'production';
 const fileKey = isDev ? 'development' : parseInt((new Date().getTime() / 1000), 10).toString(16);
-const outDir = process.env.ROLLUP_OUT_DIR || path.resolve(__dirname, 'dist');
 
 const config = {
-  input: path.resolve(assetsDir, 'index.js'),
-  output: {format: 'iife', sourcemap: true, file: path.resolve(outDir, `convos.${fileKey}.js`)},
+  input: path.resolve(__dirname, 'assets', 'index.js'),
+  output: {format: 'iife', sourcemap: true, file: path.resolve(__dirname, 'public', 'assets', `convos.${fileKey}.js`)},
   plugins: [],
   watch: {clearScreen: false},
 };

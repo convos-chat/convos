@@ -1,5 +1,10 @@
 Revision history for perl distribution Convos
 
+7.07 Not Released
+ - Changed static assets directory from /asset/ to /assets/
+ - No need for Mojolicious::Plugin::Webpack anymore
+ - Bumped Mojolicious to 9.27
+
 7.06 2022-09-20T07:44:00+0900
  - Changed nick actions to only appear on click
  - Fix button loading animation

@@ -30,4 +30,4 @@ convos*_source.tar.bz2
 /parts/
 /prime/
 /stage/
-/public/asset/*.development.*
+/public/assets/*.development.*

@@ -62,9 +62,9 @@ sub startup {
   $r->get('/doc/*file', [@format_constraints])->to('cms#doc', file => 'index', format => undef)
     ->name('doc');
   $r->get('/logout', [format => [qw(html json)]])->to('user#logout', format => undef);
-  $r->get('/asset/browserconfig.<:hash>', [format => ['xml']])
-    ->to(template => 'asset/browserconfig');
-  $r->get('/asset/site.<:hash>', [format => ['webmanifest']])->to(template => 'asset/site');
+  $r->get('/assets/browserconfig.<:hash>', [format => ['xml']])
+    ->to(template => 'assets/browserconfig');
+  $r->get('/assets/site.<:hash>', [format => ['webmanifest']])->to(template => 'assets/site');
   $r->get('/err/500')->to(cb => sub { die 'Test 500 page' });
   $r->get('/err/:code')->to('url#err');
   $r->get('/sw'      => [format => 'js']);
@@ -87,8 +87,6 @@ sub startup {
   $user_r->get('/register')->to('user#register_html');
   $user_r->get('/settings/*rest', {rest => ''});
   $user_r->get('/search');
-
-  $self->plugin(Webpack => {engine => 'Mojo::Alien::rollup', process => []});
 
   $self->_plugins;
   $self->hook(around_action   => \&_around_action);

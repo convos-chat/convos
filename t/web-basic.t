@@ -3,7 +3,7 @@ use lib '.';
 use t::Helper;
 
 plan skip_all => '$ NODE_ENV=development npm run build'
-  unless -e 'public/asset/convos.development.js';
+  unless -e 'public/assets/convos.development.js';
 
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'development';

@@ -13,14 +13,15 @@ SKIP: {
   build_assets();
 }
 
-my $t = t::Helper->t;
+my $t        = t::Helper->t;
+my $asset_re = $ENV{BUILD_ASSETS} ? '[0-9a-f]{8}' : '(?:[0-9a-f]{8}|development)';
 $t->app->log->level('fatal');
 
 subtest 'path /' => sub {
   test_defaults('/' => 200);
 
-  $t->get_ok('/')->status_is(200)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"])
-    ->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]);
+  $t->get_ok('/')->status_is(200)->content_like(qr[href="/assets/convos\.$asset_re\.css"])
+    ->content_like(qr[src="/assets/convos\.$asset_re\.js"]);
 };
 
 subtest 'path /err/404' => sub {
@@ -39,14 +40,14 @@ done_testing;
 
 sub build_assets {
   opendir(my $ASSETS, 'public/asset');
-  /^convos\.[0-9a-f]{8}\.(css|js)\b/ and unlink "public/asset/$_" while $_ = readdir $ASSETS;
+  /^convos\.$asset_re\.(css|js)\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
   diag qq(\nPlease consult https://convos.chat/doc/develop for details about "npm".\n\n)
     unless is system('npm run build'), 0, 'run "npm run build"';
 }
 
 sub test_defaults {
   my ($path, $status) = @_;
-  $t->get_ok($path)->status_is($status)->content_like(qr[href="/asset/convos\.[0-9a-f]{8}\.css"]);
-  $t->content_like(qr[src="/asset/convos\.[0-9a-f]{8}\.js"]) unless $status == 500;
+  $t->get_ok($path)->status_is($status)->content_like(qr[href="/assets/convos\.$asset_re\.css"]);
+  $t->content_like(qr[src="/assets/convos\.$asset_re\.js"]) unless $status == 500;
   return $t;
 }

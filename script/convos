@@ -58,16 +58,26 @@ sub command_cpanm {
 }
 
 sub command_dev {
-  my $script = shift;
-  $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
-  my @cmd = $script->_cmd_with_secure_listen(@_);
-  $ENV{$_}               //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL CONVOS_CMS_PERLDOC);
+  my ($script, @argv) = @_;
+  push @argv, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @argv;
+
   $ENV{CONVOS_LOG_LEVEL} //= 'trace';
-  $ENV{MOJO_LOG_COLOR}   //= 1;
-  push @cmd, qw(-w lib -w public/convos-api.yaml -w templates) unless grep {/^-?-w/} @cmd;
-  warn "\$ mojo webpack script/convos @cmd\n";
-  exec qw(mojo webpack), $0, @cmd;
-  die "Could not exec mojo webpack $0 @cmd: $!\n";
+  $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
+  $ENV{$_} //= 1 for qw(CONVOS_CMS_PERLDOC CONVOS_RELOAD_DICTIONARIES);
+  $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL MOJO_LOG_COLOR);
+
+  my $fork = sub { warn "> @_\n"; my $pid = fork // die $!; return $pid if $pid; exec @_; die $! };
+  my @pid;
+  eval {
+    push @pid, $fork->(npm   => qw(run watch));
+    push @pid, $fork->(morbo => $0, $script->_cmd_with_secure_listen(@argv));
+    $SIG{INT}  = sub { warn "> kill INT @pid\n";  kill INT  => @pid };
+    $SIG{TERM} = sub { warn "> kill TERM @pid\n"; kill TERM => @pid };
+    wait;
+  } or do {
+    kill INT => @pid if @pid;
+    die $@;
+  };
 }
 
 sub command_exec {
@@ -206,9 +216,9 @@ sub command_version {
 
 sub run {
   my $script = shift;
-  return $script->command_help if !@_ or $_[0] =~ /^--?h/;
+  return $script->command_help if !$ENV{MOJO_APP_LOADER} and (!@_ or $_[0] =~ /^--?h/);
 
-  my $command = shift;
+  my $command = shift // 'start';
   my $method  = $script->can("command_$command");
   $ENV{CONVOS_COMMAND} = $command;
   $ENV{CONVOS_SKIP_CONNECT} //= 1 if grep { $command eq $_ } qw(eval get);

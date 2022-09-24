@@ -4,11 +4,11 @@ use Mojo::Base 'Mojolicious::Controller', -async_await;
 use Mojo::DOM;
 use Mojo::JSON qw(false true);
 use Mojo::Util qw(hmac_sha1_sum trim);
-use Socket qw(inet_aton AF_INET);
+use Socket     qw(inet_aton AF_INET);
 use Syntax::Keyword::Try;
 
 use constant INVITE_LINK_VALID_FOR => $ENV{CONVOS_INVITE_LINK_VALID_FOR} || 24;
-use constant RELOAD                => $ENV{MOJO_WEBPACK_LAZY} ? 1 : 0;
+use constant RELOAD                => $ENV{CONVOS_RELOAD_DICTIONARIES} && 1;
 
 has _email => sub {
   my $email = shift->param('email') || '';

@@ -6,8 +6,8 @@ use Mojo::Date;
 use Mojo::File qw(path);
 use Mojo::Util qw(decode);
 
-use constant CAPTURE => $ENV{CONVOS_I18N_CAPTURE_LEXICONS} || 0;
-use constant RELOAD => $ENV{CONVOS_RELOAD_DICTIONARIES} || $ENV{MOJO_WEBPACK_LAZY} || 0;
+use constant CAPTURE => $ENV{CONVOS_I18N_CAPTURE_LEXICONS} && 1;
+use constant RELOAD  => $ENV{CONVOS_RELOAD_DICTIONARIES}   && 1;
 
 has _dictionaries => sub { +{} };
 has _meta         => sub { +{} };
@@ -49,7 +49,10 @@ sub _load_dictionaries {
   my $meta = $self->_meta;
   my $now  = Mojo::Date->new->to_datetime;
 
-  for my $file (map { path($_, 'i18n')->list->each } $c->app->asset->engine->assets_dir) {
+  my @files = map { $_->list->each }
+    ($c->app->home->child(qw(assets i18n)), $c->app->core->home->child('i18n'));
+
+  for my $file (@files) {
     next unless $file =~ m!([\w-]+)\.po$!;
 
     my $lang = $1;

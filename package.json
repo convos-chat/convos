@@ -6,12 +6,13 @@
   "repository": "https://github.com/convos-chat/convos",
   "type": "module",
   "scripts": {
-    "build": "ROLLUP_OUT_DIR=public/asset rollup -c --environment production",
+    "build": "rollup -c --environment production",
     "dev": "./script/convos dev",
     "eslint": "eslint",
     "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose",
-    "lint": "ROLLUP_OUT_DIR=public/asset ROLLUP_WATCH=yes rollup -c",
-    "test": "jest"
+    "lint": "ROLLUP_WATCH=yes rollup -c",
+    "test": "jest",
+    "watch": "rollup -c --watch"
   },
   "browserslist": [
     "edge >= 18",

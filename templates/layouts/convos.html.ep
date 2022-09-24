@@ -25,23 +25,23 @@
     <!-- pwa -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" sizes="57x57" href="<%= url_for '/asset/apple-touch-icon-57x57.e024a83e.png' %>">
-    <link rel="apple-touch-icon" sizes="60x60" href="<%= url_for '/asset/apple-touch-icon-60x60.51c5a95b.png' %>">
-    <link rel="apple-touch-icon" sizes="72x72" href="<%= url_for '/asset/apple-touch-icon-72x72.231a66c9.png' %>">
-    <link rel="apple-touch-icon" sizes="76x76" href="<%= url_for '/asset/apple-touch-icon-76x76.5e14b7a1.png' %>">
-    <link rel="apple-touch-icon" sizes="114x114" href="<%= url_for '/asset/apple-touch-icon-114x114.913c43db.png' %>">
-    <link rel="apple-touch-icon" sizes="120x120" href="<%= url_for '/asset/apple-touch-icon-120x120.52c691a9.png' %>">
-    <link rel="apple-touch-icon" sizes="144x144" href="<%= url_for '/asset/apple-touch-icon-144x144.eb857b3e.png' %>">
-    <link rel="apple-touch-icon" sizes="152x152" href="<%= url_for '/asset/apple-touch-icon-152x152.be6c9e4f.png' %>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<%= url_for '/asset/apple-touch-icon-180x180.c1fe73dd.png' %>">
-    <link rel="icon" type="image/png" sizes="32x32" href="<%= url_for '/asset/favicon-32x32.2447df68.png' %>">
-    <link rel="icon" type="image/png" sizes="194x194" href="<%= url_for '/asset/favicon-194x194.77dd0ed4.png' %>">
-    <link rel="icon" type="image/png" sizes="192x192" href="<%= url_for '/asset/android-chrome-192x192.02ee7244.png' %>">
-    <link rel="icon" type="image/png" sizes="16x16" href="<%= url_for '/asset/favicon-16x16.9e1affe1.png' %>">
-    <link rel="manifest" href="<%= url_for '/asset/site.e3ea726b.webmanifest' %>">
-    <link rel="mask-icon" href="<%= url_for '/asset/safari-pinned-tab.cb98a0d7.svg' %>" color="#00451D">
-    <meta name="msapplication-TileImage" content="<%= url_for '/asset/mstile-144x144.a653fdfa.png' %>">
-    <meta name="msapplication-config" content="<%= url_for '/asset/browserconfig.f80fd3df.xml' %>">
+    <link rel="apple-touch-icon" sizes="57x57" href="<%= url_for '/assets/apple-touch-icon-57x57.e024a83e.png' %>">
+    <link rel="apple-touch-icon" sizes="60x60" href="<%= url_for '/assets/apple-touch-icon-60x60.51c5a95b.png' %>">
+    <link rel="apple-touch-icon" sizes="72x72" href="<%= url_for '/assets/apple-touch-icon-72x72.231a66c9.png' %>">
+    <link rel="apple-touch-icon" sizes="76x76" href="<%= url_for '/assets/apple-touch-icon-76x76.5e14b7a1.png' %>">
+    <link rel="apple-touch-icon" sizes="114x114" href="<%= url_for '/assets/apple-touch-icon-114x114.913c43db.png' %>">
+    <link rel="apple-touch-icon" sizes="120x120" href="<%= url_for '/assets/apple-touch-icon-120x120.52c691a9.png' %>">
+    <link rel="apple-touch-icon" sizes="144x144" href="<%= url_for '/assets/apple-touch-icon-144x144.eb857b3e.png' %>">
+    <link rel="apple-touch-icon" sizes="152x152" href="<%= url_for '/assets/apple-touch-icon-152x152.be6c9e4f.png' %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= url_for '/assets/apple-touch-icon-180x180.c1fe73dd.png' %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= url_for '/assets/favicon-32x32.2447df68.png' %>">
+    <link rel="icon" type="image/png" sizes="194x194" href="<%= url_for '/assets/favicon-194x194.77dd0ed4.png' %>">
+    <link rel="icon" type="image/png" sizes="192x192" href="<%= url_for '/assets/android-chrome-192x192.02ee7244.png' %>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<%= url_for '/assets/favicon-16x16.9e1affe1.png' %>">
+    <link rel="manifest" href="<%= url_for '/assets/site.e3ea726b.webmanifest' %>">
+    <link rel="mask-icon" href="<%= url_for '/assets/safari-pinned-tab.cb98a0d7.svg' %>" color="#00451D">
+    <meta name="msapplication-TileImage" content="<%= url_for '/assets/mstile-144x144.a653fdfa.png' %>">
+    <meta name="msapplication-config" content="<%= url_for '/assets/browserconfig.f80fd3df.xml' %>">
     <meta name="msapplication-TileColor" content="#00451D">
     <meta name="theme-color" content="#00451D">
 
@@ -60,7 +60,7 @@
 
     <!-- base style + themes -->
     <noscript><style>.has-js { display: none; }</style></noscript>
-    %= asset 'convos.css'
+    %= asset_tag 'convos.css'
     % my $theme = stash('start_app') ? $c->themes->get(js_session('theme'), js_session('colorScheme')) : $c->themes->get;
     %= tag 'link', rel => 'stylesheet', type => 'text/css', id => 'theme_primary', href => url_for($theme->{url}), title => $theme->{title}
     % for my $theme (@{$c->themes->list}) {
@@ -73,6 +73,6 @@
   % push @classnames, 'has-compact-display' if js_session 'compactDisplay';
   <body class="<%= join ' ', @classnames =%>">
     %= content
-    %= asset 'convos.js' unless stash 'exception'
+    %= asset_tag 'convos.js' unless stash 'exception'
   </body>
 </html>
