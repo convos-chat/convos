@@ -60,7 +60,7 @@
 
     <!-- base style + themes -->
     <noscript><style>.has-js { display: none; }</style></noscript>
-    %= asset_tag 'convos.css'
+    %= asset_tag 'style.css'
     % my $theme = stash('start_app') ? $c->themes->get(js_session('theme'), js_session('colorScheme')) : $c->themes->get;
     %= tag 'link', rel => 'stylesheet', type => 'text/css', id => 'theme_primary', href => url_for($theme->{url}), title => $theme->{title}
     % for my $theme (@{$c->themes->list}) {

@@ -63,6 +63,7 @@ sub command_dev {
 
   $ENV{CONVOS_LOG_LEVEL} //= 'trace';
   $ENV{CONVOS_ROOT} = Cwd::realpath(File::Spec->catdir($FindBin::Bin, File::Spec->updir));
+  $ENV{NODE_ENV} //= 'developemnt';
   $ENV{$_} //= 1 for qw(CONVOS_CMS_PERLDOC CONVOS_RELOAD_DICTIONARIES);
   $ENV{$_} //= 1 for qw(LINK_EMBEDDER_ALLOW_INSECURE_SSL MOJO_LOG_COLOR);
 
