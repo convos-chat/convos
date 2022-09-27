@@ -1,9 +1,9 @@
 import ConnectionURL from '../js/ConnectionURL';
 import Conversation from './Conversation';
 import SortedMap from '../js/SortedMap';
+import escapeRegExp from 'lodash/escapeRegExp';
 import {awayMessage} from '../js/chatHelpers';
 import {convosApi} from '../js/Api';
-import {escapeRegExp} from 'lodash';
 import {extractErrorMessage, is} from '../js/util';
 import {notify} from '../js/Notify';
 

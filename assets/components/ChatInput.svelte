@@ -1,6 +1,7 @@
 <script>
 import CommandHistory from '../store/CommandHistory';
 import Icon from '../components/Icon.svelte';
+import now from 'lodash/now';
 import {convosApi} from '../js/Api';
 import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplete';
 import {extractErrorMessage, is, nbsp} from '../js/util';
@@ -8,7 +9,6 @@ import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
-import {now} from 'lodash';
 import {videoService, videoWindow} from '../store/video';
 
 export const uploader = uploadFiles;

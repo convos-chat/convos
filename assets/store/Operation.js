@@ -16,7 +16,7 @@
  */
 
 import Reactive from '../js/Reactive';
-import {escapeRegExp} from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
 import {getLogger} from '../js/logger';
 import {is} from '../js/util';
 

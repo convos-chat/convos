@@ -1,9 +1,9 @@
 <script>
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
+import escapeRegExp from 'lodash/escapeRegExp';
 import {activeMenu} from '../store/viewport';
 import {closestEl, q, settings, tagNameIs} from '../js/util';
-import {escapeRegExp} from 'lodash';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';

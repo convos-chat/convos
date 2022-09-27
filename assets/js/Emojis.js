@@ -1,5 +1,5 @@
+import escapeRegExp from 'lodash/escapeRegExp';
 import twemoji from 'twemoji';
-import {escapeRegExp} from 'lodash';
 import {route} from '../store/Route';
 
 export default class Emojis {

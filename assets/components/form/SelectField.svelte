@@ -1,6 +1,6 @@
 <script>
+import escapeRegExp from 'lodash/escapeRegExp';
 import {closestEl, uuidv4} from '../../js/util';
-import {escapeRegExp} from 'lodash';
 
 let activeIndex = 0;
 let humanEl;

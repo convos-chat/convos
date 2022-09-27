@@ -1,5 +1,5 @@
 <script>
-import {now} from 'lodash';
+import now from 'lodash/now';
 import {createEventDispatcher} from 'svelte';
 import {findVisibleElements, is} from '../js/util';
 

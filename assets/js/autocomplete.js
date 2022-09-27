@@ -1,5 +1,5 @@
+import escapeRegExp from 'lodash/escapeRegExp';
 import {commandOptions} from './commands';
-import {escapeRegExp} from 'lodash';
 import {i18n} from '../store/I18N';
 import {is} from './util';
 

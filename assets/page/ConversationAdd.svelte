@@ -3,7 +3,7 @@ import Button from '../components/form/Button.svelte';
 import ChatHeader from '../components/ChatHeader.svelte';
 import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
-import {debounce} from 'lodash';
+import debounce from 'lodash/debounce';
 import {extractErrorMessage} from '../js/util';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
