@@ -20,7 +20,7 @@ $t->app->log->level('fatal');
 subtest 'path /' => sub {
   test_defaults('/' => 200);
 
-  $t->get_ok('/')->status_is(200)->content_like(qr[href="/assets/convos\.$asset_re\.css"])
+  $t->get_ok('/')->status_is(200)->content_like(qr[href="/assets/style\.$asset_re\.css"])
     ->content_like(qr[src="/assets/convos\.$asset_re\.js"]);
 };
 
@@ -40,14 +40,15 @@ done_testing;
 
 sub build_assets {
   opendir(my $ASSETS, 'public/asset');
-  /^convos\.$asset_re\.(css|js)\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
+  /^convos\.$asset_re\.js\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
+  /^style\.$asset_re\.css\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
   diag qq(\nPlease consult https://convos.chat/doc/develop for details about "npm".\n\n)
     unless is system('npm run build'), 0, 'run "npm run build"';
 }
 
 sub test_defaults {
   my ($path, $status) = @_;
-  $t->get_ok($path)->status_is($status)->content_like(qr[href="/assets/convos\.$asset_re\.css"]);
+  $t->get_ok($path)->status_is($status)->content_like(qr[href="/assets/style\.$asset_re\.css"]);
   $t->content_like(qr[src="/assets/convos\.$asset_re\.js"]) unless $status == 500;
   return $t;
 }
