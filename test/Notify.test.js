@@ -1,4 +1,5 @@
 import Notify from '../assets/js/Notify';
+import {expect, test} from 'vitest';
 import {timer} from '../assets/js/util';
 
 global.Notification = function(title, params) {

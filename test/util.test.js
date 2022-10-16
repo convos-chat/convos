@@ -1,4 +1,5 @@
 import {calculateModes, closestEl, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {expect, test} from 'vitest';
 import {modeMoniker} from '../assets/js/constants';
 
 test('calculateModes', () => {

@@ -1,4 +1,5 @@
 import Time from '../assets/js/Time';
+import {expect, test} from 'vitest';
 import {isISOTimeString} from '../assets/js/Time';
 
 test('isISOTimeString', () => {

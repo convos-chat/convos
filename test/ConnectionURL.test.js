@@ -1,4 +1,5 @@
 import ConnectionURL from '../assets/js/ConnectionURL';
+import {expect, test} from 'vitest';
 
 test('ConnectionURL http', () => {
   const url = new ConnectionURL('http://convos.chat/');

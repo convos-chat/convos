@@ -20,5 +20,8 @@ export default defineConfig(({mode}) => {
     },
     plugins: [svelte()],
     publicDir: 'public',
+    test: {
+      environment: 'jsdom',
+    },
   };
 })

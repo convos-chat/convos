@@ -1,5 +1,7 @@
 import Cookies from 'js-cookie';
 import Reactive from '../assets/js/Reactive';
+import {expect, test} from 'vitest';
+import {timer} from '../assets/js/util';
 
 test('prop', () => {
   const r = reactive('Superman');
@@ -111,13 +113,12 @@ test('update() tracking props', () => {
   expect(r._delayedUpdate()).toEqual({address: true, age: true, name: false});
 });
 
-test('update() emit updated', (done) => {
+test('update() emit updated', () => {
   const r = reactive('Superwoman');
 
   r.on('update', (obj, updated) => {
     expect(obj).toEqual(r);
     expect(updated).toEqual({address: true, age: true, name: false});
-    done();
   });
 
   r.update({name: 'Superwoman', age: 30});
@@ -125,7 +126,7 @@ test('update() emit updated', (done) => {
   r.update({name: 'Superman', address: 'Metropolis'});
 });
 
-test('subscribe()', (done) => {
+test('subscribe()', async () => {
   const r = reactive('Superduper');
 
   let n = 0;
@@ -144,10 +145,8 @@ test('subscribe()', (done) => {
   r.update({name: 'Superman', age: 31});
   r.update({name: 'Superman', address: 'Metropolis'});
 
-  setTimeout(() => {
-    expect(n).toBe(3);
-    done();
-  }, 100);
+  await timer(100);
+  expect(n).toBe(3);
 });
 
 function reactive(name) {

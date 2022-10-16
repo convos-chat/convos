@@ -1,5 +1,6 @@
 import Socket from '../assets/js/Socket';
 import WebSocket from '../assets/js/TestWebSocket';
+import {expect, test} from 'vitest';
 import {getSocket} from '../assets/js/Socket';
 import {timer} from '../assets/js/util';
 

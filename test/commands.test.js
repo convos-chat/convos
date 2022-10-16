@@ -1,4 +1,5 @@
 import {commandOptions, commands, normalizeCommand} from '../assets/js/commands';
+import {expect, test} from 'vitest';
 
 test('commands', () => {
   expect(commands.length > 15).toBe(true);

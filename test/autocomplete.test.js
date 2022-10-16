@@ -1,6 +1,7 @@
 import Participants from '../assets/store/Participants';
 import {calculateAutocompleteOptions, fillIn} from '../assets/js/autocomplete';
 import {emojis} from '../public/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json';
+import {expect, test} from 'vitest';
 import {i18n} from '../assets/store/I18N';
 
 test('calculateAutocompleteOptions', () => {
