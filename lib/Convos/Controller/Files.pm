@@ -54,7 +54,9 @@ async sub remove {
   my ($backend, @errors) = ($user->core->backend);
   for my $id (@ids) {
     try {
-      await $backend->delete_object_p($self->user->file(id => $id, user => $user));
+      my $file = $self->user->file(id => $id, user => $user);
+      die "Unable to remove file: $!" if -e $file->path and !unlink $file->path;
+      await $backend->delete_object_p($file);
     }
     catch ($err) {
       push @errors, $err;

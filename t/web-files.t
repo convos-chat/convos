@@ -192,8 +192,16 @@ subtest 'list' => sub {
 
 subtest 'delete' => sub {
   $t->get_ok('/api/files')->status_is(200);
-  my $files = $t->tx->res->json->{files};
-  my $n     = @{$t->tx->res->json->{files}};
+  my $files_dir = $user->core->home->child(@{$user->uri})->dirname->child('upload');
+  my $files     = $t->tx->res->json->{files};
+  my $n         = @{$t->tx->res->json->{files}};
+
+  note 'before deletion';
+  $t->get_ok("/api/files/1/$files->[1]{id}")->status_is(200);
+  is $files_dir->list->size, 34, 'listed n uploaded files';
+  my $raw_a = $t->tx->res->dom->at('.cms-meta__raw');
+  ok $raw_a, 'found raw link';
+  $t->get_ok($raw_a->{href})->status_is(200);
 
   $t->delete_ok("/api/files/1/not_found")->status_is(200)->json_is('/deleted', 0);
   $t->delete_ok("/api/files/1/$files->[0]{id}")->status_is(200)->json_is('/deleted', 1);
@@ -202,6 +210,11 @@ subtest 'delete' => sub {
 
   $t->get_ok('/api/files')->status_is(200);
   is @{$t->tx->res->json->{files}}, $n - 3, 'less files returned';
+
+  note 'after deletion';
+  $t->get_ok("/api/files/1/$files->[1]{id}")->status_is(404);
+  $t->get_ok($raw_a->{href})->status_is(404);
+  is $files_dir->list->size, 34 - (3 + 3), 'left with n files';
 };
 
 done_testing;
