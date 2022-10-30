@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.07 Not Released
+7.07 2022-10-30T21:04:00+0900
  - Fix getting to "Account" form for a user
  - Fix "Attach a file" link in chat input
  - Changed "+" menu in chat input to get hidden when clicking elsewhere

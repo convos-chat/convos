@@ -14,7 +14,7 @@ SKIP: {
 }
 
 my $t        = t::Helper->t;
-my $asset_re = $ENV{BUILD_ASSETS} ? '[0-9a-f]{8}' : '(?:[0-9a-f]{8}|development)';
+my $asset_re = '(?:[0-9a-f]{8}|development)';
 $t->app->log->level('fatal');
 
 subtest 'path /' => sub {
