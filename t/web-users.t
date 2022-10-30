@@ -20,6 +20,7 @@ subtest 'first user' => sub {
     ->json_is('/email', 'superman@example.com')->json_like('/registered', qr/^[\d-]+T[\d:]+Z$/);
   $t->get_ok('/api/users')->status_is(200)->json_is('/users/0/email', 'superman@example.com')
     ->json_is('/users/1', undef);
+  like + $t->tx->res->body, qr{"uid":"1"}, 'right type for uid';
 };
 
 subtest 'delete / update other users as admin' => sub {

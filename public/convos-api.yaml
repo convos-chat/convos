@@ -1031,6 +1031,8 @@ definitions:
         description: 'Example: 2015-09-06T10:47:31Z'
         format: date-time
         type: string
+      uid:
+        type: string
       unread:
         description: Number of unread notifications
         type: integer

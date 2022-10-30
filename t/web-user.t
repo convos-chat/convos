@@ -52,6 +52,7 @@ subtest 'update' => sub {
     json => {highlight_keywords => [' ', '-', '.', '  ,', '    ', 'foo ']})->status_is(200);
   $t->get_ok('/api/user')->status_is(200)->json_is('/email', 'superman@example.com')
     ->json_is('/highlight_keywords', ['foo']);
+  like + $t->tx->res->body, qr{"uid":"1"}, 'right type for uid';
 };
 
 subtest 'update password, including unicode' => sub {

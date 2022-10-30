@@ -178,7 +178,7 @@ sub TO_JSON {
   $json->{remote_address}     = $self->remote_address;
   $json->{roles}              = $self->roles;
   $json->{unread}             = $self->unread;
-  $json->{uid}                = $self->uid;
+  $json->{uid}                = sprintf '%s', $self->uid;    # force to a string
   $json;
 }
 

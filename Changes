@@ -1,10 +1,14 @@
 Revision history for perl distribution Convos
 
+7.09 Not Released
+ - Fix listing users
+ - Fix getting to "Account" form for a user
+ - Change type for user "uid" to a string
+
 7.08 2022-10-30T22:57:00+0900
  - Fix deleting data-files when deleting an uploaded file #797
 
 7.07 2022-10-30T21:04:00+0900
- - Fix getting to "Account" form for a user
  - Fix "Attach a file" link in chat input
  - Changed "+" menu in chat input to get hidden when clicking elsewhere
  - Changed static assets directory from /asset/ to /assets/
