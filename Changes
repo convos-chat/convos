@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.08 Not Released
+7.08 2022-10-30T22:57:00+0900
  - Fix deleting data-files when deleting an uploaded file #797
 
 7.07 2022-10-30T21:04:00+0900
