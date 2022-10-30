@@ -40,8 +40,8 @@ $: updateValueWhenConversationChanges(conversation);
 
 function activeChatMenuToggle(e) {
   const a = e.target.closest('a');
-  e.preventDefault();
-  activeChatMenu = activeChatMenu ? '' : a.href.replace(/.*#/, '');
+  const set = !a || activeChatMenu ? '' : a.href.replace(/.*#/, '');
+  setTimeout(() => { activeChatMenu = set }, 1);
 }
 
 export function fillIn(str, params) {
@@ -176,13 +176,15 @@ function uploadFiles(e) {
 }
 </script>
 
+<svelte:window on:click="{() => {activeChatMenu = ''}}"/>
+
 <form class="chat-input" on:submit|preventDefault>
   <input type="file" id="upload_files" name="upload_files" class="non-interactive" on:change="{uploadFiles}"/>
   <textarea class="non-interactive" placeholder="{placeholder}" bind:this="{inputMirror}"></textarea>
   <textarea class="is-primary-input" placeholder="{placeholder}" use:onReady></textarea>
 
   {#if conversation.is('conversation')}
-    <a href="#actions" class="btn-hallow can-toggle" class:is-active="{activeChatMenu === 'actions'}" on:click="{activeChatMenuToggle}">
+    <a href="#actions" class="btn-hallow can-toggle" class:is-active="{activeChatMenu === 'actions'}" on:click|preventDefault="{activeChatMenuToggle}">
       <Icon name="plus-circle"/><Icon name="times"/>
     </a>
   {/if}
@@ -193,7 +195,7 @@ function uploadFiles(e) {
   </button>
 
   {#if activeChatMenu === 'actions' && conversation.is('conversation')}
-    <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}" on:click="{activeChatMenuToggle}">
+    <div class="chat-input_menu for-actions" transition:fly="{chatMenuTransition}">
       {#if videoUrl}
         <a href="{videoUrl}" on:click="{onVideoLinkClick}">
           <Icon name="video"/> {$l('Start a video conference')}
