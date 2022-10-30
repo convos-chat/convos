@@ -49,8 +49,7 @@ async function deleteUser() {
 }
 
 function findUser($route, users) {
-  const uid = $route.hash;
-  const user = uid && users.filter(user => user.uid === uid)[0];
+  const user = uid && users.filter(user => user.uid == uid)[0]; // user.uid might be an integer, while uid is a string
   form = user ? {...form, confirm_email: '', ...user} : {...form, confirm_email: '', uid: ''};
 }
 

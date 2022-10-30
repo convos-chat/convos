@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 7.07 Not Released
+ - Fix getting to "Account" form for a user
  - Fix "Attach a file" link in chat input
  - Changed "+" menu in chat input to get hidden when clicking elsewhere
  - Changed static assets directory from /asset/ to /assets/
