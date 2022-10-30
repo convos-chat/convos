@@ -8,13 +8,14 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 $ENV{NODE_ENV}       = 'production';
 
+my $asset_re = '(?:[0-9a-f]{8}|development)';
+
 SKIP: {
   skip 'BUILD_ASSETS=1 to run "npm run build"', 1 unless $ENV{BUILD_ASSETS} or $ENV{RELEASE};
   build_assets();
 }
 
-my $t        = t::Helper->t;
-my $asset_re = '(?:[0-9a-f]{8}|development)';
+my $t = t::Helper->t;
 $t->app->log->level('fatal');
 
 subtest 'path /' => sub {
@@ -39,7 +40,7 @@ subtest 'path /err/500' => sub {
 done_testing;
 
 sub build_assets {
-  opendir(my $ASSETS, 'public/asset');
+  opendir(my $ASSETS, 'public/assets');
   /^convos\.$asset_re\.js\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
   /^style\.$asset_re\.css\b/ and unlink "public/assets/$_" while $_ = readdir $ASSETS;
   diag qq(\nPlease consult https://convos.chat/doc/develop for details about "npm".\n\n)
