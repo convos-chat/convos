@@ -1,5 +1,9 @@
 Revision history for perl distribution Convos
 
+7.10 Not Released
+ - Add max-height to embedded videos #801
+ - Removed max-height on public file preview #802
+
 7.09 2022-10-30T07:58:00+0900
  - Fix listing users
  - Fix getting to "Account" form for a user

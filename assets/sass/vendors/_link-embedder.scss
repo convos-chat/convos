@@ -1,11 +1,17 @@
 @use "fortawesome-fontawesome/mixins" as fa;
 
-.embed {
+.message .embed {
+  overflow: hidden;
+
   &,
   img,
   video {
     max-width: 100%;
     max-height: 40vh;
+  }
+
+  &.le-paste {
+    max-height: 8.8em;
   }
 }
 
@@ -109,9 +115,7 @@
 .le-paste {
   font-size: 0.9rem;
   border: var(--hr-border);
-  max-height: 8.8em;
   max-width: 100%;
-  overflow: hidden;
 
   &.without-frame {
     &, .hljs {
