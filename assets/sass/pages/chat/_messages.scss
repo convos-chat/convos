@@ -1,5 +1,4 @@
 @use '../../abstracts/next_to_sidebar' as *;
-@use '../../abstracts/select_options' as *;
 
 %message__from--hidden {
   > i {
@@ -194,26 +193,6 @@
     position: absolute;
     top: 0.1rem;
     left: -0.3rem;
-  }
-}
-
-.message .popover {
-  @include select_options;
-  border-radius: 6px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  min-width: 14em;
-  position: absolute;
-  top: -0.2em;
-  left: -0.5em;
-  z-index: 1000;
-
-  a:first-child {
-    font-size: 1.1rem;
-    border-bottom: var(--hr-border);
-
-    i {
-      font-size: 1.2rem;
-    }
   }
 }
 

@@ -80,6 +80,7 @@ export default class Route extends Reactive {
   }
 
   _onClick(e) {
+    this.emit('click', e);
     if (!this.enabled) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.defaultPrevented) return;
 

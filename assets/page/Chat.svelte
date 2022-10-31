@@ -1,7 +1,8 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatMessage from '../components/ChatMessage.svelte';
+import ChatParticipants from '../components/ChatParticipants.svelte';
+import ChatWelcome from '../components/ChatWelcome.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import ConversationSettings from '../components/ConversationSettings.svelte';
 import DragAndDrop from '../js/DragAndDrop';
@@ -10,12 +11,12 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, viewport} from '../store/viewport';
-import {awayMessage, topicOrStatus} from '../js/chatHelpers';
+import {topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
-import {modeClassNames} from '../js/util';
+import {nbsp, showFullscreen} from '../js/util';
 import {onInfinityScrolled, onInfinityVisibility} from '../js/chatHelpers';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
@@ -32,9 +33,12 @@ let conversation = user.notifications;
 let messages = conversation.messages;
 let participants = conversation.participants;
 let now = new Time();
+let popoverIndex = -1;
 let unsubscribe = {};
 let focusChatInput, fillIn, uploader, uploadProgress;
+let raw = false; // Was messages.raw
 let timestampFromUrl = '';
+let onClickUnsubscribe;
 
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
@@ -43,24 +47,16 @@ $: conversationName = encodeURIComponent($conversation.name);
 $: title = $conversation.title;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
-onMount(() => dragAndDrop.attach(document.querySelector('.main'), uploader));
+onMount(() => {
+  dragAndDrop.attach(document.querySelector('.main'), uploader);
+  onClickUnsubscribe = route.on('click', onRouteClick);
+});
 
 onDestroy(() => {
+  onClickUnsubscribe();
   Object.keys(unsubscribe).forEach(name => unsubscribe[name]());
   dragAndDrop.detach();
 });
-
-export function conversationJoin(e) {
-  e.preventDefault();
-  const aEl = e.target.closest('a');
-  conversation.send('/join ' + decodeURIComponent(aEl.hash.replace(/^#?action:join:/, '')));
-}
-
-export function conversationClose(e) {
-  e.preventDefault();
-  conversation.send('/close ' + conversation.conversation_id);
-  route.go('/settings/conversation');
-}
 
 function conversationToUri() {
   const [scheme, host] = $conversation.connection_id.split('-');
@@ -69,6 +65,51 @@ function conversationToUri() {
 
 function onFocus() {
   if (conversation.notifications || conversation.unread) conversation.markAsRead();
+}
+
+function onRouteClick(e) {
+  const aEl = e.target.closest('a[href]');
+  if (!aEl || aEl.href.indexOf('popover:') === -1) popoverIndex = -1;
+  if (!aEl) return;
+
+  const isThumbnail = aEl.classList.contains('le-thumbnail');
+  const preventDefault = aEl.classList.contains('prevent-default');
+  if (isThumbnail || preventDefault) e.preventDefault();
+  if (isThumbnail) return showFullscreen(e, aEl.querySelector('img'));
+
+  const isSafe = preventDefault || aEl.closest('.embed');
+  const action = isSafe && aEl.hash.match(/action:([a-z]+):(.*)$/) || ['all', 'unknown', 'value'];
+  action[2] = decodeURIComponent(action[2]);
+
+  if (['close', 'join', 'whois'].indexOf(action[1]) !== -1) {
+    conversation.send('/' + action[1] + ' ' + action[2]);
+    if (action[1] === 'close') route.go('/settings/conversation');
+  }
+  else if (action[1] === 'expand') {
+    const msg = conversation.messages.get(action[2]);
+    msg.expanded = !msg.expanded;
+    conversation.messages.update({messages: true});
+  }
+  else if (action[1] === 'mention') {
+    fillIn(action[2]);
+  }
+  else if (action[1] === 'popover') {
+    const index = parseInt(action[2], 10);
+    popoverIndex = popoverIndex !== index ? index : -1;
+  }
+  else if (!aEl.target && aEl.getAttribute('href').indexOf('/') !== 0) {
+    aEl.target = '_blank';
+  }
+}
+
+function renderEmbed(el, embed) {
+  const parentNode = embed.nodes[0] && embed.nodes[0].parentNode;
+  if (parentNode && parentNode.classList) {
+    const method = parentNode.classList.contains('embed') ? 'add' : 'remove';
+    parentNode.classList[method]('hidden');
+  }
+
+  embed.nodes.forEach(node => el.appendChild(node));
 }
 
 function setConversationFromRoute(connection_id, conversation_id) {
@@ -81,6 +122,7 @@ function setConversationFromUser(user) {
   if (unsubscribe.conversation) unsubscribe.conversation();
   if (unsubscribe.unread) unsubscribe.unread();
 
+  popoverMessage = null;
   conversation = user.activeConversation;
   messages = conversation.messages;
   participants = conversation.participants;
@@ -117,24 +159,8 @@ function setConversationFromUser(user) {
 {/if}
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{e => onInfinityScrolled(e, {conversation})}" on:visibility="{e => onInfinityVisibility(e, {conversation, timestampFromUrl})}">
-  <!-- welcome message -->
   {#if $messages.length < 10 && !$conversation.is('not_found')}
-    {#if $conversation.is('private')}
-      <p><Icon name="info-circle"/> {@html $lmd('This is a private conversation with "%1".', $conversation.name)}</p>
-    {:else if !$conversation.frozen}
-      <p>
-        <Icon name="info-circle"/> 
-        {@html $lmd($conversation.topic ? 'Topic for %1 is: %2': 'No topic is set for %1.', $conversation.name, $conversation.topic)}
-      </p>
-      <p>
-        <Icon name="info-circle"/> 
-        {#if $participants.length === 1}
-          {$l('You are the only participant in this conversation.')}
-        {:else}
-          {@html $lmd('There are %1 participants in this conversation.', $participants.length)}
-        {/if}
-      </p>
-    {/if}
+    <ChatWelcome conversation="{$conversation}"/>
   {/if}
 
   <!-- status -->
@@ -155,7 +181,39 @@ function setConversationFromUser(user) {
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
-    <ChatMessage conversation="{conversation}" message="{message}" on:mention="{e => fillIn(e.detail)}"/>
+    <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:is-expanded="{!!message.expanded}" data-index="{message.index}" data-ts="{message.ts.toISOString()}">
+      <div class="message__ts has-tooltip">
+        <span>{message.ts.format('%H:%M')}</span>
+        <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
+      </div>
+      <Icon name="pick:{message.from}" color="{message.color}"/>
+      <a href="#action:popover:{message.index}" class="message__from prevent-default" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <div class="message__text">
+        {#if message.details}
+          <a href="#action:expand:{message.index}" class="prevent-default"><Icon name="{message.expanded ? 'caret-square-up' : 'caret-square-down'}"/></a>
+        {/if}
+        {@html message.html}
+      </div>
+      {#each message.embeds as embedPromise}
+        {#await embedPromise}
+          <!-- loading embed -->
+        {:then embed}
+          {#if !raw}
+            <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
+          {/if}
+        {/await}
+      {/each}
+
+      <!-- popover message menu -->
+      {#if popoverIndex === message.index}
+        <div class="popover" transition:fade="{{duration: 200}}">
+          <a href="#action:popover:{message.index}" class="prevent-default"><Icon name="pick:{message.from}" color="{message.color}"/> {message.from}</a>
+          <a href="#action:mention:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="quote-left"/> {$l('Mention')}</a>
+          <a href="#action:join:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="comments"/> {$l('Chat')}</a>
+          <a href="#action:whois:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="address-card"/> {$l('Whois')}</a>
+        </div>
+      {/if}
+    </div>
   {/each}
 
   <!-- status -->
@@ -170,8 +228,8 @@ function setConversationFromUser(user) {
     <h2>{$l('You are not part of this conversation.')}</h2>
     <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
     <p>
-      <Link href="#action:join:{conversationName}" class="btn" on:click="{conversationJoin}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="/settings/conversation" class="btn is-secondary"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn prevent-default"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="/settings/conversation" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <div class="message is-highlighted" on:click="{activeMenu.toggle}">
@@ -181,8 +239,8 @@ function setConversationFromUser(user) {
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
     <p>{$l('Do you want to join?')}</p>
     <p>
-      <Link href="#action:join:{conversationName}" class="btn" on:click="{conversationJoin}"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="#action:close:{conversationName}" class="btn is-secondary" on:click="{conversationClose}"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn prevent-default"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="#action:close:{conversationName}" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <div class="message is-highlighted">
@@ -216,25 +274,5 @@ function setConversationFromUser(user) {
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
 {#if $viewport.hasRightColumn && !$conversation.is('not_found')}
-  <div class="sidebar-right">
-    <h3>{$l('Participants (%1)', $participants.length)}</h3>
-
-    <nav class="sidebar-right__nav" on:click="{conversationJoin}">
-      {#if $participants.length}
-        {#each $participants.toArray() as participant}
-          <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
-            <Icon name="pick:{participant.nick}" family="solid" color="{participant.color}"/>
-            <span>{participant.nick}</span>
-          </a>
-        {/each}
-      {:else}
-        <a href="#settings" on:click="{activeMenu.toggle}"><Icon name="users-cog"/> {$l('Settings')}</a>
-      {/if}
-    </nav>
-
-    {#if $conversation.is('private') && $conversation.info.nick}
-      <h3>{$l('Information')}</h3>
-      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
-    {/if}
-  </div>
+  <ChatParticipants conversation="{conversation}"/>
 {/if}
