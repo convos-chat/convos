@@ -1,5 +1,14 @@
 @use "fortawesome-fontawesome/mixins" as fa;
 
+.embed {
+  &,
+  img,
+  video {
+    max-width: 100%;
+    max-height: 40vh;
+  }
+}
+
 .embed.le-details {
   background: var(--syntax-hl-base-bg);
   color: var(--syntax-hl-base);
@@ -17,7 +26,7 @@
 
 .embed iframe {
   max-width: 90vw;
-  max-height: (0.7494553377 * 90vw) // 344 / 459 = 0.7494553377
+  max-height: (0.7494553377 * 90vw); // 344 / 459 = 0.7494553377
 }
 
 .le-photo img {
@@ -94,13 +103,7 @@
   background: var(--body-bg);
   border: var(--hr-border);
   display: block;
-  width: 100%;
   height: auto;
-}
-
-.le-photo img {
-  max-height: 220px;
-  max-width: 100%;
 }
 
 .le-paste {
