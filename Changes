@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 7.10 Not Released
+ - Fix not rendering embeds when raw messages is selected
  - Fix internal links in the chat are clickable #799
  - Add max-height to embedded videos #801
  - Removed max-height on public file preview #802

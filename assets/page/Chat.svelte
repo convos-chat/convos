@@ -36,7 +36,6 @@ let now = new Time();
 let popoverIndex = -1;
 let unsubscribe = {};
 let focusChatInput, fillIn, uploader, uploadProgress;
-let raw = false; // Was messages.raw
 let timestampFromUrl = '';
 let onClickUnsubscribe;
 
@@ -198,7 +197,7 @@ function setConversationFromUser(user) {
         {#await embedPromise}
           <!-- loading embed -->
         {:then embed}
-          {#if !raw}
+          {#if !$messages.raw}
             <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
           {/if}
         {/await}
