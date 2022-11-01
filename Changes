@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.10 Not Released
+7.10 2022-11-01T13:41:00+0900
  - Fix not rendering embeds when raw messages is selected
  - Fix internal links in the chat are clickable #799
  - Add max-height to embedded videos #801
