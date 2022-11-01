@@ -188,10 +188,11 @@ export default class Messages extends Reactive {
 
   _renderPaste(msg, _embed, embedEl) {
     const pre = embedEl.querySelector('pre');
-    if (pre) hljs.lineNumbersBlock(pre);
+    if (!pre) return;
 
     const meta = embedEl.querySelector('.le-meta');
-    if (meta) meta.appendChild(createElement('a', {href: '#action:expand:' + msg.index, innerHTML: '<i class="fas fa-angle-down"/>'}));
+    if (meta) meta.appendChild(createElement('a', {className: 'prevent-default', href: '#action:expand:' + msg.index, innerHTML: '<i class="fas fa-angle-down"/>'}));
+    hljs.lineNumbersBlock(pre);
     return embedEl;
   }
 
