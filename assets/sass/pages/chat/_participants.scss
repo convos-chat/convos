@@ -13,6 +13,7 @@
   &.has-mode-half_operator span:before { content: '%'; }
   &.has-mode-operator span:before { content: '@'; }
   &.has-mode-admin span:before { content: '&'; }
+  &.has-mode-founder span:before { content: '~'; }
 
   i {
     width: 1.2em;

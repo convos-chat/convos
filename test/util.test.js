@@ -1,14 +1,5 @@
 import {calculateModes, closestEl, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {expect, test} from 'vitest';
-import {modeMoniker} from '../assets/js/constants';
-
-test('calculateModes', () => {
-  expect(calculateModes(modeMoniker, '')).toEqual({});
-  expect(calculateModes(modeMoniker, 'vo')).toEqual({'@': true, '+': true});
-  expect(calculateModes(modeMoniker, '+vx')).toEqual({'+': true, 'x': true});
-  expect(calculateModes(modeMoniker, '-xo')).toEqual({'@': false, 'x': false});
-  expect(calculateModes(modeMoniker, '-im+n')).toEqual({i: false, m: false, n: true});
-});
 
 test('closestEl', () => {
   const el = document.createElement('div');

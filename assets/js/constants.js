@@ -31,14 +31,6 @@ export function getChannelMode(mode) {
   return Object.keys(channelModeCharToModeName).filter(k => mode === channelModeCharToModeName[k])[0] || '';
 }
 
-export const modeMoniker = {
-  a: '&',
-  h: '%',
-  o: '@',
-  q: '~',
-  v: '+',
-};
-
 export const userModeCharToModeName = {
   a: 'admin',
   B: 'bot',
@@ -48,6 +40,7 @@ export const userModeCharToModeName = {
   o: 'operator',
   p: 'whois_hide_channels',
   R: 'privmsg_from_registered_only',
+  q: 'founder',
   r: 'registered',
   S: 'service_bot',
   T: 'ctcp_block',
