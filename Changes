@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.11 Not Released
+7.11 2022-11-07T08:26:00+0900
  - Fix not rendering all embeds as paste
  - Fix rendering user mode "q"
  - Fix showing details embed, even when messages are displayed as raw
