@@ -197,9 +197,7 @@ function setConversationFromUser(user) {
         {#await embedPromise}
           <!-- loading embed -->
         {:then embed}
-          {#if !$messages.raw}
-            <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
-          {/if}
+          <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
         {/await}
       {/each}
 

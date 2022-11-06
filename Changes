@@ -3,6 +3,7 @@ Revision history for perl distribution Convos
 7.11 Not Released
  - Fix not rendering all embeds as paste
  - Fix rendering user mode "q"
+ - Fix showing details embed, even when messages are displayed as raw
 
 7.10 2022-11-01T13:41:00+0900
  - Fix not rendering embeds when raw messages is selected

@@ -46,7 +46,7 @@ export default class Messages extends Reactive {
     if (msgIndex !== -1) {
       const msg = this.get(msgIndex);
       if (msg && !msg.hasBeenSeen) {
-        msg.embeds = this.raw ? [] : this._embeds(msg);
+        msg.embeds = this._embeds(msg);
         msg.hasBeenSeen = true;
         this.update({messages: true});
       }
@@ -111,7 +111,7 @@ export default class Messages extends Reactive {
   _embeds(msg) {
     const p = [];
     if (this._msgDetails(msg)) p.push(Promise.resolve({className: 'le-details', details: true, nodes: [jsonhtmlify(msg.details).lastChild]}));
-    if (!this.expandUrlToMedia || msg.type === 'notice') return this._embedsPromises(p);
+    if (!this.expandUrlToMedia || this.raw || msg.type === 'notice') return this._embedsPromises(p);
 
     (msg.message.match(/https?:\/\/(\S+)/g) || []).forEach(url => {
       url = url.replace(/(\W)?$/, '');
