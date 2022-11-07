@@ -110,6 +110,13 @@
     transition: all 0.2s ease-in;
   }
 
+  .far + .far,
+  .fas + .fas {
+    font-size: 0.9em;
+  }
+
+  .far + .fa-times,
+  .fas + .fa-times,
   .fa-times {
     font-size: 0.75em;
   }
@@ -123,7 +130,7 @@
 
 input[type="checkbox"] + .btn-hallow,
 .btn-hallow.can-toggle {
-  .fa-times {
+  .fas + .fas {
     @extend %hallow-child-fill-parent;
     opacity: 0;
     transform: scale(0);
@@ -142,7 +149,8 @@ input[type="checkbox"]:checked + .btn-hallow,
     transform: scale(0.1);
   }
 
-  .fa-times {
+  .far + .far,
+  .fas + .fas {
     opacity: 1;
     transform: scale(1);
   }

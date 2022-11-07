@@ -1,7 +1,6 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatParticipants from '../components/ChatParticipants.svelte';
 import ChatWelcome from '../components/ChatWelcome.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import ConversationSettings from '../components/ConversationSettings.svelte';
@@ -10,17 +9,17 @@ import Icon from '../components/Icon.svelte';
 import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
-import {activeMenu, viewport} from '../store/viewport';
-import {awayMessage, topicOrStatus} from '../js/chatHelpers';
+import {activeMenu, hasRightColumn, showConversationSettings, showParticipants, viewport} from '../store/viewport';
 import {expandUrlToMedia, rawMessagesStore} from '../store/localstorage';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
 import {l, lmd} from '../store/I18N';
 import {nbsp, showFullscreen} from '../js/util';
-import {onInfinityScrolled, onInfinityVisibility} from '../js/chatHelpers';
 import {notify} from '../js/Notify';
+import {onInfinityScrolled, onInfinityVisibility} from '../js/chatHelpers';
 import {route} from '../store/Route';
+import {topicOrStatus} from '../js/chatHelpers';
 
 export let connection_id = '';
 export let conversation_id = '';
@@ -138,25 +137,23 @@ function setConversationFromUser(user) {
 
 <svelte:window on:focus={onFocus}/>
 
-<ChatHeader>
-  <h1 class="ellipsis"><a href="#settings" on:click="{activeMenu.toggle}">{$l(conversation.name)}</a></h1>
+<ChatHeader actions="{true}">
+  <h1 class="ellipsis">{$l(conversation.name)}</h1>
   {#if !$viewport.isSingleColumn}
     <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {/if}
-  {#if !$conversation.is('not_found')}
-    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu === 'settings'}" on:click="{activeMenu.toggle}">
-      <Icon name="users-cog"/><Icon name="times"/>
+  <div class="chat-header__actions">
+    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$showParticipants}" on:click|preventDefault="{() => $showParticipants = !$showParticipants}">
+      <Icon name="users"/><Icon name="users"/>
     </a>
-  {/if}
+    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$showConversationSettings}" on:click|preventDefault="{() => $showConversationSettings = !$showConversationSettings}">
+      <Icon name="cog"/><Icon name="cog"/>
+    </a>
+    <a href="#close" class="btn-hallow" on:click="{activeMenu.toggle}">
+      <Icon name="sign-out-alt"/>
+    </a>
+  </div>
 </ChatHeader>
-
-{#if $activeMenu === 'settings'}
-  {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {/if}
-{/if}
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{e => onInfinityScrolled(e, {conversation})}" on:visibility="{e => onInfinityVisibility(e, {conversation, timestampFromUrl})}">
   {#if $messages.length < 10 && !$conversation.is('not_found')}
@@ -278,12 +275,10 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
-{#if $viewport.hasRightColumn && !$conversation.is('not_found')}
-  <div class="sidebar-right">
-    <ChatParticipants conversation="{conversation}"/>
-    {#if $conversation.is('private') && $conversation.info.nick}
-      <h3>{$l('Information')}</h3>
-      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
-    {/if}
-  </div>
+{#if $hasRightColumn && !$conversation.is('not_found')}
+  {#if conversation_id}
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
+  {:else}
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
+  {/if}
 {/if}

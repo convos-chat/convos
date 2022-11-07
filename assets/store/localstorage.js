@@ -13,7 +13,7 @@ export const rawMessagesStore = (id) => {
   return rawMessagesStore[id] || (rawMessagesStore[id] = localstorage(id + ':raw', false));
 };
 
-function localstorage(storageKey, initialValue) {
+export function localstorage(storageKey, initialValue) {
   storageKey = LOCAL_STORAGE_PREIFX + storageKey;
 
   const getFromStorage = () => {

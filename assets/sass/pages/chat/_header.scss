@@ -7,12 +7,11 @@
   @include next_to_sidebar;
   background: var(--body-bg);
   padding-bottom: var(--gutter-small);
-  box-shadow: var(--chat-header-box-shadow);
   justify-content: space-between;
   top: 0;
   z-index: 900;
 
-  > a {
+  a {
     color: inherit;
     margin-left: var(--gutter-small);
     flex-basis: auto;
@@ -27,6 +26,15 @@
     background: var(--sidebar-left-bg);
     color: var(--sidebar-left-text);
   }
+}
+
+.chat-header.has-actions {
+  right: 0;
+}
+
+.chat-header__actions {
+  width: var(--sidebar-right-width);
+  text-align: right;
 }
 
 .chat-header__topic {
