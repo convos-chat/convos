@@ -41,7 +41,8 @@ done_testing;
 
 sub build_assets {
   opendir(my $ASSETS, 'public/assets');
-  /^(convos|style)\.\w{8}\.css$/ && unlink "public/assets/$_" while $_ = readdir $ASSETS;
+  /^(convos|style)\.\w{8}\.(css|js)$/ && unlink("public/assets/$_") && note "rm $_"
+    while $_ = readdir $ASSETS;
   diag qq(\nPlease consult https://convos.chat/doc/develop for details about "npm".\n\n)
     unless is system('npm run build'), 0, 'run "npm run build"';
 }
