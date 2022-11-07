@@ -2,7 +2,7 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import escapeRegExp from 'lodash/escapeRegExp';
-import {activeMenu} from '../store/viewport';
+import {activeMenu, viewport} from '../store/viewport';
 import {closestEl, q, settings, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
@@ -154,22 +154,33 @@ function renderUnread(conversation, max = 60) {
 }
 </script>
 
+<style>
+.header-wrapper {
+  background: var(--sidebar-left-bg);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+</style>
+
 <div class="sidebar-left" transition:fly="{transition}">
-  <div class="sidebar-header__wrapper">
-    <form class="sidebar-header" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
-      <input type="text" id="search_input" class="is-primary-menu-item"
-        placeholder="{searchHasFocus ? $l('Search...') : $l('Convos')}"
-        bind:value="{filter}"
-        on:blur="{onBlur}"
-        on:focus="{onFocus}"
-        on:keydown="{onSearchKeydown}">
-      <label for="search_input" class="btn-hallow"><Icon name="search"/></label>
-      <Link href="/chat" class="btn-hallow for-notifications">
-        <Icon family="regular" name="bell"/>
-        <small class="badge is-important" hidden="{!$notifications.unread}">{renderUnread($notifications)}</small>
-      </Link>
-    </form>
-  </div>
+  {#if !viewport.isSingleColumn}
+    <div class="header-wrapper">
+      <form class="sidebar-header" class:has-focus="{searchHasFocus}" on:submit="{e => e.preventDefault()}">
+        <input type="text" id="search_input" class="is-primary-menu-item"
+          placeholder="{searchHasFocus ? $l('Search...') : $l('Convos')}"
+          bind:value="{filter}"
+          on:blur="{onBlur}"
+          on:focus="{onFocus}"
+          on:keydown="{onSearchKeydown}">
+        <label for="search_input" class="btn-hallow"><Icon name="search"/></label>
+        <Link href="/chat" class="btn-hallow for-notifications">
+          <Icon family="regular" name="bell"/>
+          <small class="badge is-important" hidden="{!$notifications.unread}">{renderUnread($notifications)}</small>
+        </Link>
+      </form>
+    </div>
+  {/if}
 
   <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
     <h3>{$l('Conversations')}</h3>

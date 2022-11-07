@@ -1,4 +1,3 @@
-@use '../../abstracts/if_screen' as *;
 @use '../../abstracts/sidebar_wrapper_chrome' as *;
 
 .sidebar-right {
@@ -6,10 +5,6 @@
   background: var(--sidebar-right-bg);
   width: var(--sidebar-right-width);
   right: 0;
-
-  @include if_screen("<=three-columns") {
-    display: none;
-  }
 
   &, a {
     color: var(--sidebar-right-text);

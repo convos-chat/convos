@@ -36,8 +36,4 @@
   flex: 1 0 0;
   opacity: 0.85;
   align-self: flex-end;
-
-  @include if_screen("<=two-columns") {
-    display: none;
-  }
 }

@@ -119,17 +119,6 @@ body.for-cms .sidebar-left {
   }
 }
 
-.sidebar-header__wrapper {
-  background: var(--sidebar-left-bg);
-  position: sticky;
-  left: 0;
-  z-index: 2;
-
-  @include if_screen("<=two-columns") {
-    display: none;
-  }
-}
-
 .sidebar-header {
   @include header.site;
   border-bottom: 2px solid transparent;
