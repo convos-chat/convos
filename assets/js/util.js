@@ -13,7 +13,6 @@
  * @exports humanReadableNumber
  * @exports is
  * @exports loadScript
- * @exports modeClassNames
  * @exports nbsp
  * @exports q
  * @exports removeChildNodes
@@ -287,16 +286,6 @@ export function loadScript(src) {
     el.addEventListener('error', reject);
     el.addEventListener('load', resolve);
   });
-}
-
-/**
- * Used to take a participant mode string and turn it into CSS class names.
- *
- * @param {Object} modes Example: {operator: true}
- * @returns {String} Example: "has-mode-operator has-mode-voice"
- */
-export function modeClassNames(modes) {
-  return Object.keys(modes).filter(m => modes[m]).sort().map(m => 'has-mode-' + m).join(' ');
 }
 
 /**

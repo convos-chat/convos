@@ -1,22 +1,12 @@
 import Reactive from '../js/Reactive';
-import SortedMap from '../js/SortedMap';
 import {calculateModes, is, str2color} from '../js/util';
 import {userModeCharToModeName} from '../js/constants';
 
 export default class Participants extends Reactive {
   constructor() {
     super();
-
-    function sorter(a, b) {
-      return b.modes.founder || false - a.modes.founder || false
-          || b.modes.admin || false - a.modes.admin || false
-          || b.modes.operator || false - a.modes.operator || false
-          || b.modes.voice || false - a.modes.voice || false
-          || a.nick.localeCompare(b.nick);
-    }
-
     this.prop('ro', 'length', () => this._map.size);
-    this.prop('ro', '_map', new SortedMap([], {sorter}));
+    this.prop('ro', '_map', new Map());
   }
 
   clear() {
@@ -63,12 +53,27 @@ export default class Participants extends Reactive {
 
     participant.id = this._id(participant.nick);
     participant.color = str2color(participant.id);
-    if (is.string(participant.mode)) participant.modes = calculateModes(userModeCharToModeName, participant.mode);
+    participant.group = str2color(participant.id);
+    if (is.string(participant.mode)) {
+      participant.modes = calculateModes(userModeCharToModeName, participant.mode);
+      participant.group // Must be in sync with constants.js
+        = participant.modes.founder       ? 7
+        : participant.modes.admin         ? 6
+        : participant.modes.operator      ? 5
+        : participant.modes.half_operator ? 4
+        : participant.modes.voice         ? 3
+        : participant.modes.bot           ? 2
+        : participant.modes.service_bot   ? 1
+        :                         0;
+    }
+    else {
+      participant.modes = {};
+      participant.group = 0;
+    }
 
     const existing = this._map.get(participant.id);
     if (existing) Object.keys(existing).forEach(k => participant[k] || (participant[k] = existing[k]));
 
-    if (!participant.modes) participant.modes = {};
     if (!participant.nick) participant.nick = participant.name;
 
     this._map.set(participant.id, participant);
@@ -76,7 +81,9 @@ export default class Participants extends Reactive {
   }
 
   toArray() {
-    return this._map.toArray();
+    return Array.from(this._map.values()).sort((a, b) => {
+      return b.group - a.group || a.nick.localeCompare(b.nick);
+    });
   }
 
   _defaultParticipant() {

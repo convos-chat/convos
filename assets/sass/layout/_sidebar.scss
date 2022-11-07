@@ -1,9 +1,9 @@
 @use 'sidebar/sidebar-left';
 @use 'sidebar/sidebar-right';
 
-.sidebar-left__nav,
-.sidebar-right__nav {
-  a {
+.sidebar-left,
+.sidebar-right {
+  nav a {
     text-decoration: none;
     line-height: 1.2rem;
     padding: 0.35rem 0;
@@ -17,11 +17,16 @@
     }
   }
 
+  nav i.fas {
+    width: 1.2em;
+  }
+
   h3 {
     font-size: 0.9rem;
     font-weight: normal;
     margin-bottom: 0.3rem;
     margin-top: var(--gutter);
+    border-bottom: 1px solid var(--sidebar-left-border-bottom);
   }
 
   .checkbox.is-disabled {

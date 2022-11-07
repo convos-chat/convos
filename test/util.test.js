@@ -1,4 +1,4 @@
-import {calculateModes, closestEl, modeClassNames, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
+import {closestEl, str2array, str2color, tagNameIs, timer, uuidv4} from '../assets/js/util';
 import {expect, test} from 'vitest';
 
 test('closestEl', () => {
@@ -16,13 +16,6 @@ test('closestEl', () => {
   expect(closestEl(el, '.foo')).toBe(parent);
   el.className = 'foo';
   expect(closestEl(el, '.foo')).toBe(el);
-});
-
-test('modeClassNames', () => {
-  expect(modeClassNames({})).toBe('');
-  expect(modeClassNames({operator: true})).toBe('has-mode-operator');
-  expect(modeClassNames({operator: true, voice: true})).toBe('has-mode-operator has-mode-voice');
-  expect(modeClassNames({operator: false, voice: true})).toBe('has-mode-voice');
 });
 
 test('str2array', () => {

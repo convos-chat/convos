@@ -1,7 +1,6 @@
 @use 'chat/header';
 @use 'chat/input';
 @use 'chat/messages';
-@use 'chat/participants';
 
 .main.is-above-chat-input {
   bottom: 4rem;

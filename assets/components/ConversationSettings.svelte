@@ -1,8 +1,8 @@
 <script>
 import Button from './form/Button.svelte';
+import ChatParticipants from '../components/ChatParticipants.svelte';
 import Checkbox from './form/Checkbox.svelte';
 import Icon from './Icon.svelte';
-import Link from './Link.svelte';
 import Operation from '../store/Operation';
 import OperationStatus from '../components/OperationStatus.svelte';
 import TextArea from '../components/form/TextArea.svelte';
@@ -13,7 +13,6 @@ import {getChannelMode} from '../js/constants';
 import {fly} from 'svelte/transition';
 import {onMount, tick} from 'svelte';
 import {l, lmd} from '../store/I18N';
-import {modeClassNames} from '../js/util';
 
 export let conversation;
 export let transition;
@@ -169,13 +168,6 @@ function updateInfo() {
   </form>
 
   {#if !conversation.frozen && !$viewport.hasRightColumn}
-    <nav class="sidebar-left__nav">
-      <h3>{$l('Participants (%1)', $participants.length)}</h3>
-      {#each $participants.toArray() as participant}
-        <Link href="/chat/{conversation.connection_id}/{encodeURIComponent(participant.nick)}" class="participant {modeClassNames(participant.modes)}">
-          <div>{participant.nick}</div>
-        </Link>
-      {/each}
-    </nav>
+    <ChatParticipants conversation="{conversation}"/>
   {/if}
 </div>

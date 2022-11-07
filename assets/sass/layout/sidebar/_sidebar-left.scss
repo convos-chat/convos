@@ -40,8 +40,8 @@
     }
   }
 
-  h3 {
-    border-bottom: 1px solid var(--sidebar-left-border-bottom);
+  .participants-heading {
+    display: none;
   }
 }
 

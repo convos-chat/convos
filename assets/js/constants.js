@@ -31,6 +31,9 @@ export function getChannelMode(mode) {
   return Object.keys(channelModeCharToModeName).filter(k => mode === channelModeCharToModeName[k])[0] || '';
 }
 
+// Must be in sync with Participants.js
+export const userGroupHeadings = ['Members', 'Bots', 'Bots', 'Voiced', 'Half operators', 'Operators', 'Administrators', 'Founders'];
+
 export const userModeCharToModeName = {
   a: 'admin',
   B: 'bot',

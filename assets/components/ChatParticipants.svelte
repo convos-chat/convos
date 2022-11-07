@@ -1,38 +1,41 @@
 <script>
 import Icon from '../components/Icon.svelte';
 import {activeMenu} from '../store/viewport';
-import {awayMessage} from '../js/chatHelpers';
-import {l, lmd} from '../store/I18N';
-import {modeClassNames} from '../js/util';
+import {l} from '../store/I18N';
+import {userGroupHeadings} from '../js/constants';
 
 export let conversation;
 
 $: participants = conversation.participants;
 
-export function conversationJoin(e) {
-  const aEl = e.target.closest('a');
-  conversation.send('/join ' + decodeURIComponent(aEl.hash.replace(/^#?action:join:/, '')));
+function navItems($participants) {
+  const items = [];
+  let lastGroup = -1;
+
+  for (const p of $participants) {
+    if (lastGroup != p.group) items.push({heading: userGroupHeadings[p.group] || userGroupHeadings[0]});
+    lastGroup = p.group;
+    items.push(p);
+  }
+
+  return items;
 }
 </script>
 
-<div class="sidebar-right">
-  <h3>{$l('Participants (%1)', $participants.length)}</h3>
-
-  <nav class="sidebar-right__nav" on:click|preventDefault="{conversationJoin}">
-    {#if $participants.length}
-      {#each $participants.toArray() as participant}
-        <a href="#action:join:{participant.nick}" class="participant {modeClassNames(participant.modes)}">
-          <Icon name="pick:{participant.nick}" family="solid" color="{participant.color}"/>
-          <span>{participant.nick}</span>
+<h2 class="participants-heading">{$l('Participants (%1)', $participants.length)}</h2>
+<nav class="participants">
+  {#if $participants.length}
+    {#each navItems($participants.toArray()) as item}
+      {#if item.heading}
+        <h3>{$l(item.heading)}</h3>
+      {:else}
+        <a href="#action:join:{item.nick}" class="participant prevent-default">
+          <Icon name="pick:{item.nick}" family="solid" color="{item.color}"/>
+          <span>{item.nick}</span>
         </a>
-      {/each}
-    {:else}
-      <a href="#settings" on:click="{activeMenu.toggle}"><Icon name="users-cog"/> {$l('Settings')}</a>
-    {/if}
-  </nav>
-
-  {#if $conversation.is('private') && $conversation.info.nick}
-    <h3>{$l('Information')}</h3>
-    <p>{@html $lmd(...awayMessage($conversation.info))}</p>
+      {/if}
+    {/each}
+  {:else}
+    <a href="#settings" on:click="{activeMenu.toggle}"><Icon name="users-cog"/> {$l('Settings')}</a>
   {/if}
-</div>
+</nav>

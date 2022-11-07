@@ -11,7 +11,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, viewport} from '../store/viewport';
-import {topicOrStatus} from '../js/chatHelpers';
+import {awayMessage, topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -271,5 +271,11 @@ function setConversationFromUser(user) {
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
 {#if $viewport.hasRightColumn && !$conversation.is('not_found')}
-  <ChatParticipants conversation="{conversation}"/>
+  <div class="sidebar-right">
+    <ChatParticipants conversation="{conversation}"/>
+    {#if $conversation.is('private') && $conversation.info.nick}
+      <h3>{$l('Information')}</h3>
+      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
+    {/if}
+  </div>
 {/if}
