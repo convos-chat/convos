@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.12 Not Released
+7.12 2022-11-07T12:44:00+0900
  - Fix showing user list on small screens
  - Changed usermodes to be actual words instead of symbols
 
