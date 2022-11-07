@@ -40,8 +40,10 @@
     }
   }
 
-  .participants-heading {
-    display: none;
+  .checkbox.is-disabled {
+    i, label {
+      color: var(--sidebar-left-text);
+    }
   }
 }
 
@@ -51,14 +53,6 @@ body.for-cms .sidebar-left {
 
 .sidebar-left__nav a {
   position: relative;
-
-  &.for-connection .fas:hover:before {
-    @include fa.content(cog);
-  }
-
-  &.for-conversation .fas:hover:before {
-    @include fa.content(users-cog);
-  }
 
   &.for-conversation {
     padding-left: 0.6em;

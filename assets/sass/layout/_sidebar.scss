@@ -28,10 +28,4 @@
     margin-top: var(--gutter);
     border-bottom: 1px solid var(--sidebar-left-border-bottom);
   }
-
-  .checkbox.is-disabled {
-    i, label {
-      color: var(--sidebar-left-text);
-    }
-  }
 }

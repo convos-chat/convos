@@ -2,12 +2,12 @@
 import Icon from './Icon.svelte';
 import Link from './Link.svelte';
 import escapeRegExp from 'lodash/escapeRegExp';
-import {activeMenu, viewport} from '../store/viewport';
 import {closestEl, q, settings, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {route} from '../store/Route';
+import {viewport} from '../store/viewport';
 
 export let transition;
 
@@ -113,18 +113,6 @@ function onFocus() {
   searchHasFocus = true;
 }
 
-function onNavItemClicked(e) {
-  const iconName = (e.target.className || '').match(/(network|user)/);
-  if (iconName) {
-    const aEl = e.target.closest('a');
-    if (aEl.pathname === location.pathname) e.preventDefault();
-    setTimeout(() => { $activeMenu = 'settings' }, 50);
-  }
-  else if (e.target.closest('a')) {
-    setTimeout(() => { $activeMenu = '' }, 50);
-  }
-}
-
 function onSearchKeydown(e) {
   // Go to the active link when Enter is pressed
   if (e.keyCode == 13) {
@@ -182,7 +170,7 @@ function renderUnread(conversation, max = 60) {
     </div>
   {/if}
 
-  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
+  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
     <h3>{$l('Conversations')}</h3>
     {#if !$user.connections.size}
       <Link href="/settings/connections">

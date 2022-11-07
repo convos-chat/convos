@@ -1,7 +1,6 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatParticipants from '../components/ChatParticipants.svelte';
 import ChatWelcome from '../components/ChatWelcome.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import ConversationSettings from '../components/ConversationSettings.svelte';
@@ -20,6 +19,35 @@ import {nbsp, showFullscreen} from '../js/util';
 import {onInfinityScrolled, onInfinityVisibility} from '../js/chatHelpers';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route';
+
+
+
+
+
+
+import Button from '../components/form/Button.svelte';
+import Checkbox from '../components/form/Checkbox.svelte';
+import OperationStatus from '../components/OperationStatus.svelte';
+import TextField from '../components/form/TextField.svelte';
+import Operation from '../store/Operation';
+import {getChannelMode} from '../js/constants';
+
+let password = '';
+let rawMessages = false;
+let wantNotifications = false;
+const checkboxes = {};
+const saveConversationSettingsOp = new Operation({api: false, id: 'saveConversationSettings'});
+let isOperator = false;
+let isPrivate = false;
+
+function saveConversationSettings() {}
+function partConversation() {}
+
+
+
+
+
+
 
 export let connection_id = '';
 export let conversation_id = '';
@@ -144,20 +172,7 @@ function setConversationFromUser(user) {
   {#if !$viewport.isSingleColumn}
     <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {/if}
-  {#if !$conversation.is('not_found')}
-    <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu === 'settings'}" on:click="{activeMenu.toggle}">
-      <Icon name="users-cog"/><Icon name="times"/>
-    </a>
-  {/if}
 </ChatHeader>
-
-{#if $activeMenu === 'settings'}
-  {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {/if}
-{/if}
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{e => onInfinityScrolled(e, {conversation})}" on:visibility="{e => onInfinityVisibility(e, {conversation, timestampFromUrl})}">
   {#if $messages.length < 10 && !$conversation.is('not_found')}
@@ -273,11 +288,9 @@ function setConversationFromUser(user) {
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
 {#if $viewport.hasRightColumn && !$conversation.is('not_found')}
-  <div class="sidebar-right">
-    <ChatParticipants conversation="{conversation}"/>
-    {#if $conversation.is('private') && $conversation.info.nick}
-      <h3>{$l('Information')}</h3>
-      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
-    {/if}
-  </div>
+  {#if conversation_id}
+    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
+  {:else}
+    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
+  {/if}
 {/if}

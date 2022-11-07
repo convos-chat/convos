@@ -5,6 +5,7 @@
   background: var(--sidebar-right-bg);
   width: var(--sidebar-right-width);
   right: 0;
+  margin-top: 4rem;
 
   &, a {
     color: var(--sidebar-right-text);
@@ -18,10 +19,7 @@
     }
   }
 
-  .participants-heading {
-    font-size: var(--font-size);
-    font-weight: normal;
-    padding-top: 2rem;
-    margin: 0;
+  label.checkbox + nav {
+    padding-top: 0;
   }
 }
