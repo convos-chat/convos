@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+7.12 Not Released
+ - Fix showing user list on small screens
+
 7.11 2022-11-07T08:26:00+0900
  - Fix not rendering all embeds as paste
  - Fix rendering user mode "q"
