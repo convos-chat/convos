@@ -21,7 +21,7 @@
   ],
   "devDependencies": {
     "@fortawesome/fontawesome-free": "6.2.1",
-    "@sveltejs/vite-plugin-svelte": "^1.0.8",
+    "@sveltejs/vite-plugin-svelte": "^2.0.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "highlight.js": "^11.6.0",
     "js-cookie": "^3.0.1",
