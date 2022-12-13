@@ -32,7 +32,7 @@
     "querystring": "^0.2.1",
     "sass": "^1.55.0",
     "svelte": "^3.50.1",
-    "svelte-preprocess": "^4.10.7",
+    "svelte-preprocess": "^5.0.0",
     "twemoji": "^14.0.2",
     "vite": "^4.0.0",
     "vitest": "^0.25.0"
