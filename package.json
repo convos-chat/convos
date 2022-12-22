@@ -35,6 +35,6 @@
     "svelte-preprocess": "^4.10.7",
     "twemoji": "^14.0.2",
     "vite": "^4.0.0",
-    "vitest": "^0.25.0"
+    "vitest": "^0.26.0"
   }
 }
