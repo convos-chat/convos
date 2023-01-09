@@ -2,7 +2,7 @@
 use lib '.';
 use t::Helper;
 
-plan skip_all => 'CONVOS_AUTH_LDAP_URL=...' unless $ENV{CONVOS_AUTH_LDAP_URL};
+plan skip_all => 'CONVOS_AUTH_LDAP_URL=ldap://localhost:389' unless $ENV{CONVOS_AUTH_LDAP_URL};
 
 $ENV{CONVOS_PLUGINS} = 'Convos::Plugin::Auth::LDAP';
 $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';

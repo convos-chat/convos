@@ -305,6 +305,30 @@ This is the module and documentation structure of L<Convos>:
 
 =back
 
+=item * I<Convos::Plugin>
+
+=over 2
+
+=item * I<Convos::Plugin::Auth>
+
+=item * I<Convos::Plugin::Auth::Header>
+
+=item * I<Convos::Plugin::Auth::LDAP>
+
+=item * I<Convos::Plugin::Bot>
+
+=item * I<Convos::Plugin::Cms>
+
+=item * I<Convos::Plugin::Helpers>
+
+=item * I<Convos::Plugin::I18N>
+
+=item * I<Convos::Plugin::Paste>
+
+=item * I<Convos::Plugin::Themes>
+
+=back
+
 =back
 
 =head1 ATTRIBUTES
