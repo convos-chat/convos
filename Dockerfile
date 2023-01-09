@@ -8,13 +8,14 @@ FROM convos/convos:base
 LABEL maintainer="jhthorsen@cpan.org"
 
 RUN mkdir /app
-COPY Changes cpanfile /app/
+COPY Changes Makefile.PL /app/
 COPY assets /app/assets
 COPY lib /app/lib
 COPY public /app/public
 COPY script /app/script
 COPY templates /app/templates
 
+ENV CONVOS_DEPENDENCIES all
 RUN apk add --no-cache curl openssl perl perl-io-socket-ssl perl-net-ssleay wget && \
     apk add --no-cache --virtual builddeps build-base perl-dev && \
     /app/script/convos install --all && \

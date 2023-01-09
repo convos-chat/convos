@@ -110,7 +110,7 @@ Examples:
   convos get /sw.js
   convos get --help
   convos install
-  convos install [--all|--dev|--prod|--bot|--ldap]
+  convos install [--all|--core|--bot|--ldap]
   convos version
 
 For developers:
@@ -137,20 +137,19 @@ HERE
 }
 
 sub command_install {
-  my ($script, $mode) = (@_, '--prod');
-  return $script->command_help if $mode =~ /^--?h/;
+  my ($script, $group) = (@_, '--core');
+  return $script->command_help if $group =~ /^--?h/;
 
-  # @missing = ([mode, name, version, error], ...)
-  my @missing = grep { $_->[3] } grep { $_->[0] ne 'perl' } $script->_dependencies;
-  $mode =~ s!^-+!!;
-  @missing = grep { $_->[0] ne 'develop' } @missing  if $mode eq 'all';
-  @missing = grep { $_->[0] eq 'requires' } @missing if $mode eq 'prod';
-  @missing = grep { $_->[0] eq $mode } @missing      if $mode =~ /^(ldap|bot)/;
+  # @missing = ([0=$group, 1=$module, 2=$wanted, 3=$got, 4=$err])
+  my @missing = grep { $_->[4] } grep { $_->[1] ne 'perl' } $script->_dependencies;
+  $group =~ s!^-+!!;
+  @missing = grep { $_->[0] eq 'core' } @missing if $group eq 'core';
+  @missing = grep { $_->[0] eq $group } @missing if $group =~ /^(ldap|bot)/;
   $script->command_cpanm(-n => $_->[1]) or die "cpanm failed: $?\n" for @missing;
-  system $0, 'version';
+  system $0, 'version', $group;
   print <<"HERE";
 
-All dependencies are installed for "$mode".
+All dependencies are installed for "$group".
 
 You can now run "$0 daemon --listen http://*:8000" to start Convos,
 or "$0 help" for more information.
@@ -191,28 +190,23 @@ sub command_upgrade {
 }
 
 sub command_version {
-  my $script = shift;
+  my ($script, $group) = (@_, '--core');
+  $group =~ s!^-+!!;
 
-  my %deps;
-  for my $dep (sort { $a->[1] cmp $b->[1] } $script->_dependencies) {
-    my ($mode, $module, $wanted, $err) = @$dep;
-    my $category = $mode eq 'develop' ? $mode : $mode eq 'requires' ? 'core' : 'optional';
-    my $note     = $mode =~ m!^[A-Z]! ? "For $mode" : $err;
-    my $got      = eval { $module eq 'perl' ? version->parse($^V)->numify : $module->VERSION };
-    push @{$deps{$category}}, sprintf "  %-30s %-10s %-10s%s\n", $module, $got // 'n/a', "$wanted",
-      $note;
+  my @dependencies = $script->_dependencies;
+  unshift @dependencies, [core => 'Convos', $VERSION, $VERSION, ''];
+
+  my %seen;
+  for my $dep (reverse @dependencies) {
+    next if $group and $dep->[0] ne $group;
+    unless ($seen{$dep->[0]}++) {
+      printf "\n%s\n", uc $group;
+      printf "  %-30s %-10s %-10s%s\n", 'Name', 'Required', 'Installed', '';
+    }
+    printf "  %-30s %-10s %-10s %s\n", @$dep[1, 2, 3, 4];
   }
 
-  unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Perl',   $^V;
-  unshift @{$deps{requires}}, sprintf "  %-30s %-10s\n", 'Convos', $VERSION;
-
-  for my $category (qw(core optional develop)) {
-    next unless $deps{$category};
-    print uc "$category\n";
-    printf "  %-30s %-10s %-10s%s\n", 'Name', 'Installed', 'Required', '';
-    print for @{$deps{$category}};
-    print "\n";
-  }
+  print "\n";
 }
 
 sub run {
@@ -260,39 +254,40 @@ sub _cmd_with_secure_listen {
 
 sub _dependencies {
   my $script = shift;
+  my @dependencies;    # ([0=$group, 1=$module, 2=$wanted, 3=$got, 4=$err])
   $script->_setup_inc;
 
-  my @dependencies;
-  my $load = sub {
-    my ($mode, $module, $version) = @_;
+  {
+    no warnings qw(once);
+    local $ENV{CONVOS_FEATURES}         = 'all';
+    local $INC{'ExtUtils/MakeMaker.pm'} = 'source';
+    local ($@, $!) = ('', 0);
+    local ($@, $!) = ('', 0);
+    local *Makefile::WriteMakefile = sub {@_};
+
+    @dependencies = do $ENV{CONVOS_MAKEFILE};
+    my $err = $@ || $!;
+    die "Could not source $ENV{CONVOS_MAKEFILE}: $err\n" unless @dependencies;
+  };
+
+  for my $dep (@dependencies) {
+    my ($group, $module, $version) = @$dep;
 
     if ($module eq 'perl') {
       my $err = version->parse($^V) < $version ? "You have version $^V" : '';
-      return push @dependencies, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
+      push @$dep, $^V, $err;
     }
-
-    local ($@, $!) = ('', 0);
-    eval "use $module $version ();1";
-    my $err = $@;
-    $err = 'Not installed.' if $err =~ m!Can't locate!;
-    $err =~ s! at .*!!s;
-    $err =~ s! in \@INC.*!!s;
-    $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
-    push @dependencies, [$script->{cpanfile_mode} || $mode, $module, $version, $err];
-  };
-
-  no warnings 'once';
-  local $script->{cpanfile_mode};
-  local *cpanfile::feature       = sub { local $script->{cpanfile_mode} = $_[1]; pop->() };
-  local *cpanfile::on            = sub { local $script->{cpanfile_mode} = shift; pop->() };
-  local *cpanfile::requires      = sub { $load->(requires => @_) };
-  local *cpanfile::suggests      = sub { $load->(suggests => @_) };
-  local *cpanfile::test_requires = sub { $load->(develop  => @_) };
-
-  local ($@, $!) = ('', 0);
-  { package cpanfile; do $ENV{CONVOS_CPAN_FILE} };
-  my $err = $@ || $!;
-  die "Could not source $ENV{CONVOS_CPAN_FILE}: $err\n" if $err;
+    else {
+      local ($@, $!) = ('', 0);
+      eval "use $module $version ();1";
+      my $err = $@;
+      $err = 'Not installed.' if $err =~ m!Can't locate!;
+      $err =~ s! at .*!!s;
+      $err =~ s! in \@INC.*!!s;
+      $err =~ s!$module.*--.*?([\d\._]+).*!You have version $1!;
+      push @$dep, $err ? '' : $module->VERSION, $err;
+    }
+  }
 
   return @dependencies;
 }
@@ -300,8 +295,8 @@ sub _dependencies {
 sub _dependencies_are_installed {
   my $script = shift;
   return 1 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
-  return 1 unless -e $ENV{CONVOS_CPAN_FILE};
-  return 1 unless grep { $_->[0] eq 'requires' and $_->[3] } $script->_dependencies;
+  return 1 unless -e $ENV{CONVOS_MAKEFILE};
+  return 1 unless grep { $_->[0] eq 'core' and $_->[3] } $script->_dependencies;
   system $0, 'version';
   print <<"HERE";
 
@@ -333,9 +328,9 @@ sub _setup_env {
   my ($script, $command) = @_;
   local ($@, $!) = ('', 0);
 
-  $ENV{CONVOS_CPAN_FILE} ||= path_to 'cpanfile';
   $ENV{CONVOS_LOCAL_LIB} ||= path_to 'local';
   $ENV{CONVOS_LOG_LEVEL} ||= 'fatal' if grep { $command eq $_ } qw(get version);
+  $ENV{CONVOS_MAKEFILE}  ||= path_to 'Makefile.PL';
   $ENV{LINK_EMBEDDER_FORCE_SECURE} //= 1;    # Make sure LinkEmbedder upgrade http to https
   $ENV{MOJO_MODE} ||= 'production' if $command eq 'daemon';
   $ENV{PERL5LIB} = join ':', @INC;
