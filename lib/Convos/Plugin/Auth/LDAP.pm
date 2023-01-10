@@ -130,7 +130,7 @@ The URL to the LDAP server. Default is "ldap://localhost:389". (EXPERIMENTAL)
 You can add LDAP config parameters to the URL. See L<Net::LDAP> for more
 information.
 
-  ldap://ldap.example.com?debug=1&timeout=10
+  ldap://ldap.example.com?debug=1&timeout=10&password=myS3cret
 
 Want to connect securily? Change "ldap://" to "ldaps://"
 
