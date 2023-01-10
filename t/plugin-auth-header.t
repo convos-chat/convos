@@ -26,11 +26,10 @@ subtest 'admin is required' => sub {
 
   $headers{'X-Authenticated-User'} = $ENV{CONVOS_ADMIN};
   $t->websocket_ok('/events')
-    ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.');
+    ->message_ok->json_message_is('/errors/0/message', 'Need to log in first.')->finish_ok;
   $t->websocket_ok('/events', \%headers)
     ->send_ok({json => {method => 'load', object => 'user', params => {}}})
-    ->message_ok->json_message_is('/user/email', $ENV{CONVOS_ADMIN});
-  $t->finish_ok;
+    ->message_ok->json_message_is('/user/email', $ENV{CONVOS_ADMIN})->finish_ok;
 };
 
 subtest 'unable to register or login' => sub {
