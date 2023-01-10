@@ -70,7 +70,7 @@ async sub _login_p {
   # Try to fallback to local user on error
   if ($ldap_msg->code) {
     return $user if $user and $user->validate_password($params->{password});
-    return Mojo::Promise->reject('Invalid email or password.');
+    return die 'Invalid email or password.';
   }
 
   # All good if user exists
