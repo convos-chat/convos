@@ -78,8 +78,8 @@ msgstr "Se generó un link"
 msgid "About"
 msgstr "Acerca de"
 
-#: assets/components/ChatSidebar.svelte:196
-#: assets/components/ChatSidebar.svelte:216
+#: assets/components/MainMenu.svelte:196
+#: assets/components/MainMenu.svelte:216
 #: assets/page/SettingsAccount.svelte:73
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Account"
@@ -96,7 +96,7 @@ msgstr "Añadir"
 msgid "Add connection"
 msgstr "Añadir conexión"
 
-#: assets/components/ChatSidebar.svelte:208
+#: assets/components/MainMenu.svelte:208
 #: assets/page/ConversationAdd.svelte:60
 msgid "Add conversation"
 msgstr "Añadir conversación"
@@ -228,7 +228,7 @@ msgstr "Connection profiles"
 msgid "Connection profiles are used to set up global values for every connection that connect to the same host."
 msgstr "Connection profiles are used to set up global values for every connection that connect to the same host."
 
-#: assets/components/ChatSidebar.svelte:212
+#: assets/components/MainMenu.svelte:212
 #: assets/page/Connections.svelte:25
 #: assets/page/Connections.svelte:29
 msgid "Connections"
@@ -267,11 +267,11 @@ msgstr "Nombre de la conversación"
 msgid "Conversation with %1 is frozen. Reason: %2"
 msgstr "La conversación con %i se ha congelado. Razón: %2"
 
-#: assets/components/ChatSidebar.svelte:168
+#: assets/components/MainMenu.svelte:168
 msgid "Conversations"
 msgstr "Conversaciones"
 
-#: assets/components/ChatSidebar.svelte:154
+#: assets/components/MainMenu.svelte:154
 #: assets/page/SettingsAccount.svelte:134
 #: assets/page/SettingsAccount.svelte:135
 msgid "Convos"
@@ -459,7 +459,7 @@ msgstr "Expandir URL a multimedia"
 msgid "File URL copied"
 msgstr "File URL copied"
 
-#: assets/components/ChatSidebar.svelte:220
+#: assets/components/MainMenu.svelte:220
 #: assets/page/SettingsFiles.svelte:73
 msgid "Files"
 msgstr "Files"
@@ -517,7 +517,7 @@ msgstr "Ir a la página de inicio"
 msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
 msgstr "¿Tienes alguna pregunta? Ven y habla con nosotros en el canal \"#convos\" en https://libera.chat."
 
-#: assets/components/ChatSidebar.svelte:234
+#: assets/components/MainMenu.svelte:234
 #: assets/page/Help.svelte:15
 msgid "Help"
 msgstr "Ayuda"
@@ -629,7 +629,7 @@ msgstr "Cargando video conferencia con \"%1\" via %2"
 msgid "Loading..."
 msgstr "Cargando..."
 
-#: assets/components/ChatSidebar.svelte:238
+#: assets/components/MainMenu.svelte:238
 msgid "Log out"
 msgstr "Cerrar sesión"
 
@@ -695,7 +695,7 @@ msgstr "Nickname"
 msgid "No"
 msgstr "No"
 
-#: assets/components/ChatSidebar.svelte:172
+#: assets/components/MainMenu.svelte:172
 msgid "No conversations"
 msgstr "No hay conversaciones"
 
@@ -733,7 +733,7 @@ msgstr "Palabras clave de notificación"
 msgid "Notification sound volume"
 msgstr "Notification sound volume"
 
-#: assets/components/ChatSidebar.svelte:199
+#: assets/components/MainMenu.svelte:199
 #: assets/page/Notifications.svelte:26
 msgid "Notifications"
 msgstr "Notificaciones"
@@ -912,11 +912,11 @@ msgstr "Guardar ajustes"
 msgid "Save user"
 msgstr "Guardar usuario"
 
-#: assets/components/ChatSidebar.svelte:204
+#: assets/components/MainMenu.svelte:204
 msgid "Search"
 msgstr "Buscar"
 
-#: assets/components/ChatSidebar.svelte:242
+#: assets/components/MainMenu.svelte:242
 msgid "Search for \"%1\""
 msgstr "Buscar por \"%1\" \"%1\""
 
@@ -960,7 +960,7 @@ msgstr "Establecer nueva contraseña"
 msgid "Setting this value too high might get you banned from the server."
 msgstr "Setting this value too high might get you banned from the server."
 
-#: assets/components/ChatSidebar.svelte:225
+#: assets/components/MainMenu.svelte:225
 msgid "Settings"
 msgstr "Ajustes"
 
@@ -1205,7 +1205,7 @@ msgstr "Correo electrónico"
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: assets/components/ChatSidebar.svelte:229
+#: assets/components/MainMenu.svelte:229
 #: assets/page/SettingsAdminUsers.svelte:143
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Users"

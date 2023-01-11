@@ -17,7 +17,7 @@ import SettingsFiles from './page/SettingsFiles.svelte';
 
 // Other components and utilties
 import features from './js/features';
-import ChatSidebar from './components/ChatSidebar.svelte';
+import MainMenu from './components/MainMenu.svelte';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
 import {activeMenu, viewport} from './store/viewport';
@@ -127,7 +127,7 @@ function socketChanged(socket) {
   <Fallback/>
 {:else if $user.email}
   {#if $activeMenu === 'nav' || !$viewport.isSingleColumn}
-    <ChatSidebar transition="{{duration: $viewport.isSingleColumn ? 250 : 0, x: width}}"/>
+    <MainMenu transition="{{duration: $viewport.isSingleColumn ? 250 : 0, x: width}}"/>
   {/if}
 
   {#if $route.path.match(/\/chat\/./)}

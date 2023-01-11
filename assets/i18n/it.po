@@ -78,8 +78,8 @@ msgstr "È stato generato un link"
 msgid "About"
 msgstr "A proposito di"
 
-#: assets/components/ChatSidebar.svelte:196
-#: assets/components/ChatSidebar.svelte:216
+#: assets/components/MainMenu.svelte:196
+#: assets/components/MainMenu.svelte:216
 #: assets/page/SettingsAccount.svelte:73
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Account"
@@ -96,7 +96,7 @@ msgstr "Aggiungi"
 msgid "Add connection"
 msgstr "Aggiungi connessione"
 
-#: assets/components/ChatSidebar.svelte:208
+#: assets/components/MainMenu.svelte:208
 #: assets/page/ConversationAdd.svelte:60
 msgid "Add conversation"
 msgstr "Aggiungi conversazione"
@@ -228,7 +228,7 @@ msgstr "Profili per la connessione"
 msgid "Connection profiles are used to set up global values for every connection that connect to the same host."
 msgstr "I profili per la connessione sono utilizzati per impostare valori globali per ogni connessione che si connette allo stesso host."
 
-#: assets/components/ChatSidebar.svelte:212
+#: assets/components/MainMenu.svelte:212
 #: assets/page/Connections.svelte:25
 #: assets/page/Connections.svelte:29
 msgid "Connections"
@@ -267,11 +267,11 @@ msgstr "Nome della conversazione"
 msgid "Conversation with %1 is frozen. Reason: %2"
 msgstr "La conversazione con %1 è congelata. La ragione è la seguente: %2"
 
-#: assets/components/ChatSidebar.svelte:168
+#: assets/components/MainMenu.svelte:168
 msgid "Conversations"
 msgstr "Conversazioni"
 
-#: assets/components/ChatSidebar.svelte:154
+#: assets/components/MainMenu.svelte:154
 #: assets/page/SettingsAccount.svelte:134
 #: assets/page/SettingsAccount.svelte:135
 msgid "Convos"
@@ -459,7 +459,7 @@ msgstr "Espandi URL con la preview dei media"
 msgid "File URL copied"
 msgstr "URL del file copiato"
 
-#: assets/components/ChatSidebar.svelte:220
+#: assets/components/MainMenu.svelte:220
 #: assets/page/SettingsFiles.svelte:73
 msgid "Files"
 msgstr "Files"
@@ -517,7 +517,7 @@ msgstr "Vai alla pagina iniziale"
 msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
 msgstr "Hai delle domande? Vieni a parlare con noi nel canale \"#convos\" su https://libera.chat."
 
-#: assets/components/ChatSidebar.svelte:234
+#: assets/components/MainMenu.svelte:234
 #: assets/page/Help.svelte:15
 msgid "Help"
 msgstr "Guida"
@@ -629,7 +629,7 @@ msgstr "Caricamento della videoconferenza con \"%1\" tramite %2"
 msgid "Loading..."
 msgstr "Caricamento in corso..."
 
-#: assets/components/ChatSidebar.svelte:238
+#: assets/components/MainMenu.svelte:238
 msgid "Log out"
 msgstr "Esci"
 
@@ -695,7 +695,7 @@ msgstr "Nickname"
 msgid "No"
 msgstr "No"
 
-#: assets/components/ChatSidebar.svelte:172
+#: assets/components/MainMenu.svelte:172
 msgid "No conversations"
 msgstr "Nessuna conversazione"
 
@@ -733,7 +733,7 @@ msgstr "Parole per notifica"
 msgid "Notification sound volume"
 msgstr "Volume del suono per la notifica"
 
-#: assets/components/ChatSidebar.svelte:199
+#: assets/components/MainMenu.svelte:199
 #: assets/page/Notifications.svelte:26
 msgid "Notifications"
 msgstr "Notifiche"
@@ -912,11 +912,11 @@ msgstr "Salva impostazioni"
 msgid "Save user"
 msgstr "Salva utente"
 
-#: assets/components/ChatSidebar.svelte:204
+#: assets/components/MainMenu.svelte:204
 msgid "Search"
 msgstr "Ricerca"
 
-#: assets/components/ChatSidebar.svelte:242
+#: assets/components/MainMenu.svelte:242
 msgid "Search for \"%1\""
 msgstr "Cerca per \"%1\""
 
@@ -960,7 +960,7 @@ msgstr "Imposta una nuova password"
 msgid "Setting this value too high might get you banned from the server."
 msgstr "Impostare questo valore troppo alto potrebbe risultare in un ban dal server."
 
-#: assets/components/ChatSidebar.svelte:225
+#: assets/components/MainMenu.svelte:225
 msgid "Settings"
 msgstr "Impostazioni"
 
@@ -1205,7 +1205,7 @@ msgstr "Email dell'utente"
 msgid "Username"
 msgstr "Nome utente"
 
-#: assets/components/ChatSidebar.svelte:229
+#: assets/components/MainMenu.svelte:229
 #: assets/page/SettingsAdminUsers.svelte:143
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Users"

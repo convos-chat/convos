@@ -78,8 +78,8 @@ msgstr "En lenke ble generert"
 msgid "About"
 msgstr "Om"
 
-#: assets/components/ChatSidebar.svelte:196
-#: assets/components/ChatSidebar.svelte:216
+#: assets/components/MainMenu.svelte:196
+#: assets/components/MainMenu.svelte:216
 #: assets/page/SettingsAccount.svelte:73
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Account"
@@ -96,7 +96,7 @@ msgstr "Legg til"
 msgid "Add connection"
 msgstr "Legg til kobling"
 
-#: assets/components/ChatSidebar.svelte:208
+#: assets/components/MainMenu.svelte:208
 #: assets/page/ConversationAdd.svelte:60
 msgid "Add conversation"
 msgstr "Legg til samtale"
@@ -228,7 +228,7 @@ msgstr "Connection profiles"
 msgid "Connection profiles are used to set up global values for every connection that connect to the same host."
 msgstr "Connection profiles are used to set up global values for every connection that connect to the same host."
 
-#: assets/components/ChatSidebar.svelte:212
+#: assets/components/MainMenu.svelte:212
 #: assets/page/Connections.svelte:25
 #: assets/page/Connections.svelte:29
 msgid "Connections"
@@ -267,11 +267,11 @@ msgstr "Samtale-navn"
 msgid "Conversation with %1 is frozen. Reason: %2"
 msgstr "Samtalen med %1 er frosset. Årsak: %2"
 
-#: assets/components/ChatSidebar.svelte:168
+#: assets/components/MainMenu.svelte:168
 msgid "Conversations"
 msgstr "Samtaler"
 
-#: assets/components/ChatSidebar.svelte:154
+#: assets/components/MainMenu.svelte:154
 #: assets/page/SettingsAccount.svelte:134
 #: assets/page/SettingsAccount.svelte:135
 msgid "Convos"
@@ -459,7 +459,7 @@ msgstr "Ekspander URL til media"
 msgid "File URL copied"
 msgstr "File URL copied"
 
-#: assets/components/ChatSidebar.svelte:220
+#: assets/components/MainMenu.svelte:220
 #: assets/page/SettingsFiles.svelte:73
 msgid "Files"
 msgstr "Files"
@@ -517,7 +517,7 @@ msgstr "Gå til startsiden"
 msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
 msgstr "Har du spørsmål? Kom og snakk med oss i \"#convos\" kanalen på https://libera.chat."
 
-#: assets/components/ChatSidebar.svelte:234
+#: assets/components/MainMenu.svelte:234
 #: assets/page/Help.svelte:15
 msgid "Help"
 msgstr "Hjelp"
@@ -629,7 +629,7 @@ msgstr "Laster videokonferanse med \"%1\" via %2"
 msgid "Loading..."
 msgstr "Laster..."
 
-#: assets/components/ChatSidebar.svelte:238
+#: assets/components/MainMenu.svelte:238
 msgid "Log out"
 msgstr "Logg ut"
 
@@ -695,7 +695,7 @@ msgstr "Kallenavn"
 msgid "No"
 msgstr "Nei"
 
-#: assets/components/ChatSidebar.svelte:172
+#: assets/components/MainMenu.svelte:172
 msgid "No conversations"
 msgstr "Ingen samtaler"
 
@@ -733,7 +733,7 @@ msgstr "Nøkkelord for varsling"
 msgid "Notification sound volume"
 msgstr "Notification sound volume"
 
-#: assets/components/ChatSidebar.svelte:199
+#: assets/components/MainMenu.svelte:199
 #: assets/page/Notifications.svelte:26
 msgid "Notifications"
 msgstr "Varslinger"
@@ -912,11 +912,11 @@ msgstr "Lagre instillinger"
 msgid "Save user"
 msgstr "Lagre bruker"
 
-#: assets/components/ChatSidebar.svelte:204
+#: assets/components/MainMenu.svelte:204
 msgid "Search"
 msgstr "Søk"
 
-#: assets/components/ChatSidebar.svelte:242
+#: assets/components/MainMenu.svelte:242
 msgid "Search for \"%1\""
 msgstr "Søk etter \"%1\""
 
@@ -960,7 +960,7 @@ msgstr "Sett nytt passord"
 msgid "Setting this value too high might get you banned from the server."
 msgstr "Setting this value too high might get you banned from the server."
 
-#: assets/components/ChatSidebar.svelte:225
+#: assets/components/MainMenu.svelte:225
 msgid "Settings"
 msgstr "Instillinger"
 
@@ -1205,7 +1205,7 @@ msgstr "E-post"
 msgid "Username"
 msgstr "Brukernavn"
 
-#: assets/components/ChatSidebar.svelte:229
+#: assets/components/MainMenu.svelte:229
 #: assets/page/SettingsAdminUsers.svelte:143
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Users"
