@@ -2,9 +2,10 @@ Revision history for perl distribution Convos
 
 7.14 Not Released
  - Fix throwing LDAP error on invalid email or password
- - Bumped dependencies
- - Using Makefile.PL instead of cpanfile
+ - Changed to using Makefile.PL instead of cpanfile #810
+ - Changed to system emojis after twemoji.maxcdn.com was shut down #818
  - Changed "convos install --prod" to "convos install --core"
+ - Bumped dependencies
 
 7.13 2022-11-07T23:12:00+0900
  - Fix bug in the build process

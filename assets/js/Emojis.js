@@ -1,5 +1,4 @@
 import escapeRegExp from 'lodash/escapeRegExp';
-import twemoji from 'twemoji';
 import {route} from '../store/Route';
 
 export default class Emojis {
@@ -34,11 +33,11 @@ export default class Emojis {
    * @return {String} A string with HTML markup.
    */
   markup(str) {
-    return twemoji.parse(str.replace(this.re, (all, pre, match) => {
+    return str.replace(this.re, (_all, pre, match) => {
       const shortname = this.aliases[match] || match;
       const emoji = this.byShortName[shortname];
       return pre + (emoji && emoji.emoji || match);
-    }));
+    });
   }
 
   /**
@@ -76,7 +75,7 @@ export default class Emojis {
     // The regexp will match one of :short_code:, :(, :), :/, :D, :P, ;), ;D, <3, ...
     // followed by a space, comma, dot or end of string
     const re = Object.keys(this.aliases).sort().map(escapeRegExp).join('|');
-    return new RegExp('(^|\\s)(:\\w+:|' + re + ')(?=\\s|\\,|\\.|$)', 'gi');
+    return new RegExp('(^|\\s)(:\\w+:|' + re + ')(?=\&|\\s|\\,|\\.|$)', 'gi');
   }
 
   // This is used in unit tests
@@ -88,7 +87,6 @@ export default class Emojis {
       // Normalizing input
       if (!emoji.name) emoji.name = emoji.shortname;
       delete emoji.category;
-      delete emoji.html;
       delete emoji.order;
       delete emoji.unicode;
 
