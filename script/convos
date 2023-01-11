@@ -296,7 +296,7 @@ sub _dependencies_are_installed {
   my $script = shift;
   return 1 if $ENV{CONVOS_SKIP_DEPENDENCIES_CHECK}++;
   return 1 unless -e $ENV{CONVOS_MAKEFILE};
-  return 1 unless grep { $_->[0] eq 'core' and $_->[3] } $script->_dependencies;
+  return 1 unless grep { $_->[0] eq 'core' and $_->[4] } $script->_dependencies;
   system $0, 'version';
   print <<"HERE";
 
