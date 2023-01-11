@@ -1,7 +1,7 @@
 Revision history for perl distribution Convos
 
-7.15 Not Released
- - Fix invalid assets names caused by a change in vite.js
+7.15 2023-01-11T12:50:00+0900
+ - Fix invalid assets names
 
 7.14 2023-01-11T12:37:00+0900
  - Fix throwing LDAP error on invalid email or password
