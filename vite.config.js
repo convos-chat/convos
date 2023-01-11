@@ -8,6 +8,11 @@ export default defineConfig(({mode}) => {
     output.chunkFileNames = 'assets/[name].development[extname]';
     output.entryFileNames = 'assets/[name].development.js';
   }
+  else {
+    output.assetFileNames = 'assets/[name].[hash][extname]';
+    output.chunkFileNames = 'assets/[name].[hash][extname]';
+    output.entryFileNames = 'assets/[name].[hash].js';
+  }
 
   return {
     build: {
