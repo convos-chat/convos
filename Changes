@@ -595,7 +595,7 @@ Revision history for perl distribution Convos
  - Fix not keeping scroll lock forever
  - Fix setting document title
  - Fix showing /names response in same dialog
- - Change any Jitsy link to be rendered inside the /video/... page
+ - Change any Jitsi link to be rendered inside the /video/... page
  - Change Conversation.title to "name@server"
  - Replace renderMessages with Messages store
  - Updated Spanish translation #561
