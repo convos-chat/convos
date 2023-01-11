@@ -2,8 +2,8 @@ package Convos::Controller::Admin;
 use Mojo::Base 'Mojolicious::Controller', -async_await;
 
 use Convos::Util qw(disk_usage);
-use Mojo::JSON qw(false true);
-use Mojo::Util qw(trim);
+use Mojo::JSON   qw(false true);
+use Mojo::Util   qw(trim);
 
 async sub settings_get {
   my $self = shift->openapi->valid_input or return;
@@ -37,10 +37,8 @@ sub _clean_json {
 
   my @err;
   if ($clean{contact}) {
-    push @err, ['Contact URL need to start with "mailto:".', '/email']
-      unless $clean{contact} =~ m!^mailto:.*!;
+    $clean{contact} = trim $clean{contact};
   }
-
   if ($clean{default_connection}) {
     $clean{default_connection} = Mojo::URL->new(trim $clean{default_connection});
     push @err, ['Connection URL require a scheme and host.', '/default_connection']

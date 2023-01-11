@@ -46,13 +46,14 @@ function calculateDiskUsage(usage) {
 }
 
 function updateSettingsFromForm() {
-  if (form.contact) form.contact = 'mailto:' + form.contact;
+  if (form.contact && form.contact.indexOf('@') > 0) form.contact = 'mailto:' + form.contact;
   settings('contact', form.contact);
   settings('open_to_public', form.open_to_public);
   settings('organization_name', form.organization_name);
   settings('organization_url', form.organization_url);
   videoService.fromString(form.video_service);
   updateSettingsOp.perform(form);
+  form.contact = form.contact.replace(/mailto:/, '');
 }
 </script>
 

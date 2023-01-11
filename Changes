@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 7.14 Not Released
  - Fix throwing LDAP error on invalid email or password
+ - Fix not prefixing contact info with "mailto:" #813
+ - Add support for URLs in contact info #813
  - Changed to using Makefile.PL instead of cpanfile #810
  - Changed to system emojis after twemoji.maxcdn.com was shut down #818
  - Changed "convos install --prod" to "convos install --core"

@@ -40,16 +40,10 @@ SKIP: {
 };
 
 subtest 'input validation' => sub {
-  $t->post_ok(
-    '/api/settings',
-    json => {
-      contact            => 'jhthorsen@cpan.org',
-      default_connection => 'localhost:6667',
-      organization_url   => 'convos.chat',
-    }
-  )->status_is(400)->json_is('/errors/0/message', 'Contact URL need to start with "mailto:".')
-    ->json_is('/errors/1/message', 'Connection URL require a scheme and host.')
-    ->json_is('/errors/2/message', 'Organization URL require a scheme and host.');
+  $t->post_ok('/api/settings',
+    json => {default_connection => 'localhost:6667', organization_url => 'convos.chat',})
+    ->status_is(400)->json_is('/errors/0/message', 'Connection URL require a scheme and host.')
+    ->json_is('/errors/1/message', 'Organization URL require a scheme and host.');
 };
 
 subtest 'change only one setting' => sub {
