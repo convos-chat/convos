@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-7.14 Not Released
+7.14 2023-01-11T12:37:00+0900
  - Fix throwing LDAP error on invalid email or password
  - Fix not prefixing contact info with "mailto:" #813
  - Add support for URLs in contact info #813
