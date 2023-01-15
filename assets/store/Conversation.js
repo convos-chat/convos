@@ -16,8 +16,8 @@ export default class Conversation extends Reactive {
   constructor(params) {
     super();
 
-    const keyPrefix = [params.connection_id, params.conversation_id, ''].filter(is.defined).join(':');
-    this.prop('persist', 'userInput', '', {key: keyPrefix + 'userInput'});
+    const id = [params.connection_id, params.conversation_id, ''].filter(is.defined).join(':');
+    this.prop('ro', 'id', () => id);
 
     this.prop('ro', 'color', str2color(params.conversation_id || params.connection_id || ''));
     this.prop('ro', 'connection_id', params.connection_id || '');

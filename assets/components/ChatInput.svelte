@@ -7,6 +7,7 @@ import {calculateAutocompleteOptions, fillIn as _fillIn} from '../js/autocomplet
 import {extractErrorMessage, is, nbsp} from '../js/util';
 import {fly} from 'svelte/transition';
 import {getContext} from 'svelte';
+import {getUserInputStore} from '../store/localstorage';
 import {l} from '../store/I18N';
 import {normalizeCommand} from '../js/commands';
 import {videoService, videoWindow} from '../store/video';
@@ -33,6 +34,7 @@ $: nick = connection && connection.nick;
 $: placeholder = conversation.is('search') ? $l('What are you looking for?') : connection && connection.is('unreachable') ? $l('Connecting...') : $l('What is on your mind %1?', nick);
 $: sendIcon = conversation.is('search') ? 'search' : 'paper-plane';
 $: tooltip = conversation.is('search') ? $l('Search') : $l('Send');
+$: userInput = getUserInputStore(conversation.id);
 $: videoUrl = videoService.conversationToInternalUrl(conversation);
 $: commandHistory.update({conversation: $conversation});
 $: startAutocomplete(splitValueAt);
@@ -70,7 +72,7 @@ function handleMessageResponse(msg) {
 function onChange(inputEl) {
   autocompleteIndex = 0;
   splitValueAt = inputEl.selectionStart;
-  conversation.update({userInput: inputEl.value});
+  $userInput = inputEl.value;
   if (!inputEl.value.length) commandHistory.update({index: -1});
 }
 
@@ -92,7 +94,7 @@ function onReady(el) {
   });
 
   commandHistory.attach(inputEl);
-  setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
+  setValue($userInput);
 }
 
 function onVideoLinkClick(e) {
@@ -136,7 +138,7 @@ function selectOptionOrSendMessage(e) {
 
 function setValue(val) {
   if (inputEl) inputEl.value = val;
-  conversation.update({userInput: val});
+  $userInput = val;
 }
 
 function startAutocomplete(splitValueAt) {
@@ -148,7 +150,7 @@ function startAutocomplete(splitValueAt) {
 function updateValueWhenConversationChanges(conversation) {
   if (updateValueWhenConversationChanges.lock === conversation.path) return;
   updateValueWhenConversationChanges.lock = conversation.path;
-  setValue(is.undefined(conversation.userInput) ? '' : conversation.userInput);
+  setValue($userInput);
 }
 
 function uploadFiles(e) {

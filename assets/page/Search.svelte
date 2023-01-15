@@ -6,6 +6,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import {conversationUrl, gotoConversation} from '../js/chatHelpers';
 import {getContext, onMount} from 'svelte';
+import {getUserInputStore} from '../store/localstorage';
 import {l, lmd} from '../store/I18N';
 import {nbsp} from '../js/util';
 import {route} from '../store/Route';
@@ -18,6 +19,7 @@ const conversation = user.search;
 $: messages = $conversation.messages;
 $: classNames = ['main', messages.length && 'has-results', $conversation.is('search') && 'is-above-chat-input'].filter(i => i);
 $: hasSearch = $route.param('q') || $messages.length;
+$: userInput = getUserInputStore(conversation.id);
 
 onMount(() => {
   user.search.on('send', search);
@@ -32,7 +34,7 @@ function maybeClear(e) {
 
 function search(msg) {
   const match = msg.message;
-  conversation.update({userInput: match});
+  $userInput = match;
   route.go('/search?q=' + encodeURIComponent(match), {replace: true});
   return match ? conversation.load({match}) : messages.clear();
 }
