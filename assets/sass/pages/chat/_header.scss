@@ -1,15 +1,20 @@
 @use '../../abstracts/header';
 @use '../../abstracts/if_screen' as *;
-@use '../../abstracts/next_to_sidebar' as *;
 
 .chat-header {
   @include header.site;
-  @include next_to_sidebar;
-  border-bottom: 1px solid #bbb;
   background: var(--body-bg);
+  border-bottom: 1px solid #bbb;
+  box-shadow: 6px 2px 14px -2px rgba(0, 0, 0, 0.2);
+
   padding-bottom: var(--gutter-small);
-  justify-content: space-between;
+  padding-right: var(--gutter);
+  padding-left: calc(var(--gutter) * 2);
+
+  position: absolute;
   top: 0;
+  left: var(--sidebar-left-width);
+  right: 0;
   z-index: 900;
 
   a {
@@ -26,23 +31,21 @@
   @include if_screen("<=two-columns") {
     background: var(--sidebar-left-bg);
     color: var(--sidebar-left-text);
+    left: 0;
   }
 }
 
-.chat-header.has-actions {
-  right: 0;
-}
-
 .chat-header__actions {
-  width: var(--sidebar-right-width);
   text-align: right;
+  margin-left: calc(var(--gutter) * 2);
+  width: calc(var(--sidebar-right-width) - var(--gutter));
 }
 
 .chat-header__topic {
   padding-left: var(--gutter-small);
   padding-right: var(--gutter-small);
-  margin-bottom: 0.4rem;
-  flex: 1 0 0;
+  padding-bottom: 0.4rem;
+  flex: 1 0 20%;
   opacity: 0.85;
   align-self: flex-end;
 }

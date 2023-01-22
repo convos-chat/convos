@@ -13,7 +13,7 @@
     padding-bottom: 6rem;
   }
 
-  @include if_screen("<=one-column") {
+  @include if_screen("<=two-columns") {
     z-index: 900;
   }
 }

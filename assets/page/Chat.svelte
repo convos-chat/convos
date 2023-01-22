@@ -139,9 +139,7 @@ function setConversationFromUser(user) {
 
 <ChatHeader actions="{true}">
   <h1 class="ellipsis">{$l(conversation.name)}</h1>
-  {#if !$viewport.isSingleColumn}
-    <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
-  {/if}
+  <div class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</div>
   <div class="chat-header__actions">
     <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$showParticipants}" on:click|preventDefault="{() => $showParticipants = !$showParticipants}">
       <Icon name="users"/><Icon name="users"/>

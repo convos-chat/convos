@@ -17,5 +17,9 @@
 
   @include if_screen(">three-columns") {
     right: calc(var(--gutter) + var(--sidebar-right-width));
+
+    body.no-right-column & {
+      right: 0;
+    }
   }
 }

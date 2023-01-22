@@ -20,7 +20,7 @@ import features from './js/features';
 import MainMenu from './components/MainMenu.svelte';
 import ThemeManager from './store/ThemeManager';
 import User from './store/User';
-import {activeMenu, viewport} from './store/viewport';
+import {activeMenu, hasRightColumn, viewport} from './store/viewport';
 import {convosApi} from './js/Api';
 import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
@@ -63,6 +63,7 @@ $: routeOrUserChanged($route, $user);
 $: setTitle(title, $user);
 $: viewport.setWidth(width);
 $: user.update({unreadIncludePrivateMessages: $viewport.isSingleColumn});
+$: $hasRightColumn ? features.add('right-column') : features.remove('right-column');
 
 function setTitle(title, $user) {
   if (!document) return;
