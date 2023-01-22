@@ -84,7 +84,7 @@ export function onInfinityVisibility(e, {conversation, timestampFromUrl}) {
     renderInfinityFocusedEl(infinityEl, timestampFromUrl === route.hash);
   }
   if (visibleElsChanged) {
-    visibleEls.forEach(el => messages.render(el.dataset.index));
+    visibleEls.forEach(el => messages.update({seen: el.dataset.index}));
   }
 }
 

@@ -9,10 +9,11 @@ import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage} from '../js/chatHelpers';
-import {getChannelMode} from '../js/constants';
+import {rawMessagesStore} from '../store/localstorage';
 import {fly} from 'svelte/transition';
-import {onMount, tick} from 'svelte';
+import {getChannelMode} from '../js/constants';
 import {l, lmd} from '../store/I18N';
+import {onMount, tick} from 'svelte';
 
 export let conversation;
 export let transition;
@@ -28,10 +29,10 @@ let checkboxes = {
 };
 
 let password = '';
-let rawMessages = false;
 let topic = '';
 let wantNotifications = false;
 
+$: rawMessages = rawMessagesStore(conversation.id);
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
@@ -40,7 +41,6 @@ onMount(async () => {
   if (Object.keys(conversation.modes).length === 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
   await tick();
   checkboxes = Object.assign({}, checkboxes, conversation.modes);
-  rawMessages = conversation.messages.raw;
   topic = conversation.topic;
   wantNotifications = conversation.wantNotifications;
 });
@@ -73,7 +73,6 @@ async function saveConversationSettings() {
   saveConversationSettingsOp.update({status: 'loading'});
   await saveConversationSettingsOp.on('update');
   conversation.update({wantNotifications});
-  conversation.messages.update({raw: rawMessages});
   saveChannelModes();
   saveChannelTopic();
   await tick();
@@ -126,7 +125,7 @@ function updateInfo() {
       </Checkbox>
     {/if}
 
-    <Checkbox name="raw_messages" bind:value="{rawMessages}">
+    <Checkbox name="raw_messages" bind:value="{$rawMessages}">
       <span slot="label">{$l('Show raw messages')}</span>
     </Checkbox>
 

@@ -32,7 +32,7 @@ onMount(async () => {
     <h2>{$l('No notifications.')}</h2>
   {/if}
 
-  {#each $messages.render() as message, i}
+  {#each $messages.render({expand: false, raw: true}) as message, i}
     {#if !i || message.dayChanged}
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}

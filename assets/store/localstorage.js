@@ -2,8 +2,14 @@ import {get, writable} from 'svelte/store';
 
 const LOCAL_STORAGE_PREIFX = 'convos:';
 
+export const expandUrlToMedia = localstorage('expandUrlToMedia', true);
+
 export const getUserInputStore = (id) => {
   return getUserInputStore[id] || (getUserInputStore[id] = localstorage(id + ':userInput', ''));
+};
+
+export const rawMessagesStore = (id) => {
+  return rawMessagesStore[id] || (rawMessagesStore[id] = localstorage(id + ':raw', false));
 };
 
 function localstorage(storageKey, initialValue) {

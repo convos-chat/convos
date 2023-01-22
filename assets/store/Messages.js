@@ -6,26 +6,14 @@ import {createElement, q, str2color} from '../js/util';
 import {i18n} from './I18N';
 import {jsonhtmlify} from 'jsonhtmlify';
 
-function toHtml(raw, msg) {
-  const str = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
-  return raw ? i18n.raw(str) : i18n.md(str);
-}
-
 const EMBED_CACHE = {};
-let ID = 0;
+let ID = 10000;
 
 export default class Messages extends Reactive {
-  constructor(params) {
+  constructor() {
     super();
-
-    let keyPrefix = params.connection_id;
-    if (params.conversation_id) keyPrefix += ':' + params.conversation_id;
-
     this.prop('ro', 'length', () => this.messages.length);
     this.prop('ro', 'messages', []);
-    this.prop('rw', 'expandUrlToMedia', true);
-    this.prop('persist', 'raw', false, {key: keyPrefix + ':raw'});
-    this.embedCache = EMBED_CACHE;
   }
 
   clear() {
@@ -42,47 +30,33 @@ export default class Messages extends Reactive {
     return this.update({messages: true});
   }
 
-  render(msgIndex = -1) {
-    if (msgIndex !== -1) {
-      const msg = this.get(msgIndex);
-      if (msg && !msg.hasBeenSeen) {
-        msg.embeds = this._embeds(msg);
-        msg.hasBeenSeen = true;
-        this.update({messages: true});
-      }
+  render({expand, raw}) {
+    let prev = {};
 
-      return this.messages;
+    for (const msg of this.messages) {
+      if (typeof msg.className === 'undefined') {
+        msg.details = this._msgDetails(msg); // Must be called before other methods "pollute" msg
+        msg.dayChanged = this._dayChanged(msg, prev);
+        msg.className = this._className(msg, prev);
+        msg.embeds = [];
+        prev = msg;
+      }
+      if (raw !== msg.raw) {
+        let str = msg.vars ? i18n.l(msg.message, ...msg.vars) : msg.message;
+        msg.html = raw ? i18n.raw(str) : i18n.md(str);
+        msg.raw = raw;
+      }
+      if (expand && msg.seen && !msg.expand && msg.type !== 'notice') {
+        msg.embeds = this._expandUrlToMedia(msg);
+        msg.expand = expand;
+      }
     }
 
-    let prev = {};
-    return this.messages.map((msg, i) => {
-      msg.index = i;
-      if (msg.embeds) return (prev = msg); // already processed
-
-      msg.dayChanged = this._dayChanged(msg, prev);
-      msg.className = this._className(msg, prev);
-      msg.embeds = [];
-      msg.html = toHtml(this.raw, msg);
-
-      return (prev = msg);
-    });
+    return this.messages;
   }
 
   toArray() {
     return this.messages;
-  }
-
-  update(params) {
-    if (this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw')) {
-      const raw = Object.hasOwn(params, 'raw') ? params.raw : this.raw;
-      for (let msg of this.messages) {
-        if (msg.hasBeenSeen) msg.embeds = this._embeds(msg);
-        msg.html = toHtml(raw, msg);
-      }
-      this.update({messages: true});
-    }
-
-    return super.update(params);
   }
 
   unshift(list) {
@@ -90,10 +64,17 @@ export default class Messages extends Reactive {
     return this.update({messages: true});
   }
 
+  update(params) {
+    if (Object.hasOwn(params, 'seen') && this.messages[params.seen]) {
+      this.messages[params.seen].seen = true;
+    }
+
+    return super.update(params);
+  }
+
   _changed(params, paramName) {
     return Object.hasOwn(params, paramName) && params[paramName] !== this[paramName];
   }
-
 
   _className(msg, prev) {
     const classes = ['message'];
@@ -108,24 +89,11 @@ export default class Messages extends Reactive {
     return prev.ts && msg.ts.getDate() !== prev.ts.getDate() ? true : false;
   }
 
-  _embeds(msg) {
-    const p = [];
-    if (this._msgDetails(msg)) p.push(Promise.resolve({className: 'le-details', details: true, nodes: [jsonhtmlify(msg.details).lastChild]}));
-    if (!this.expandUrlToMedia || this.raw || msg.type === 'notice') return this._embedsPromises(p);
-
-    (msg.message.match(/https?:\/\/(\S+)/g) || []).forEach(url => {
+  _expandUrlToMedia(msg) {
+    return (msg.message.match(/https?:\/\/(\S+)/g) || []).map(url => {
       url = url.replace(/(\W)?$/, '');
-      if (!this.embedCache[url]) this.embedCache[url] = this._loadEmbed(msg, url);
-      p.push(this.embedCache[url]);
-    });
-
-    return this._embedsPromises(p);
-  }
-
-  _embedsPromises(p) {
-    return p.map(p => {
-      p.finally(() => this.update({messages: true}));
-      return p.catch(err => console.error('[Messages:embed]', err));
+      if (!EMBED_CACHE[url]) EMBED_CACHE[url] = this._loadEmbed(msg, url);
+      return EMBED_CACHE[url].finally(() => this.update({messages: true}));;
     });
   }
 
@@ -137,7 +105,7 @@ export default class Messages extends Reactive {
 
       msg.color = msg.from === 'Convos' ? 'inherit' : str2color(msg.from.toLowerCase());
       msg.ts = new Time(msg.ts);
-      msg.id = ++ID;
+      msg.id = 'M' + String(++ID);
     }
 
     return messages;
@@ -170,20 +138,17 @@ export default class Messages extends Reactive {
   }
 
   _msgDetails(msg) {
-    if (Object.hasOwn(msg, 'details')) return msg.details;
-    if (msg.type !== 'error' && msg.type !== 'notice') return (msg.details = null);
-
+    if (msg.type !== 'error' && msg.type !== 'notice') return null;
     const details = {...(msg.sent || msg)};
 
     [
-      'bubbles',      'className',   'command',           'connection_id',
-      'dispatchTo',   'color',       'dayChanged',        'hasBeenSeen',
-      'embeds',       'event',       'fresh',             'highlight',
-      'html',         'id',          'index',             'internal',
-      'method',       'silent',      'stopPropagation',   'ts',
+      'bubbles',          'command',   'connection_id',  'dispatchTo',
+      'color',            'seen',      'event',          'fresh',
+      'id',               'internal',  'method',         'silent',
+      'stopPropagation',  'ts',                          
     ].forEach(k => delete details[k]);
 
-    return Object.keys(details).sort().join(':') === 'from:message:type' ? (msg.details = null) : (msg.details = details);
+    return jsonhtmlify(details).lastChild?.innerHTML;
   }
 
   _renderPaste(msg, _embed, embedEl) {
@@ -191,7 +156,7 @@ export default class Messages extends Reactive {
     if (!pre) return;
 
     const meta = embedEl.querySelector('.le-meta');
-    if (meta) meta.appendChild(createElement('a', {className: 'prevent-default', href: '#action:expand:' + msg.index, innerHTML: '<i class="fas fa-angle-down"/>'}));
+    if (meta) meta.appendChild(createElement('a', {className: 'prevent-default', href: '#action:expand:' + msg.id, innerHTML: '<i class="fas fa-angle-down"/>'}));
     hljs.lineNumbersBlock(pre);
     return embedEl;
   }

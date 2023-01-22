@@ -8,6 +8,7 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {convosApi} from '../js/Api';
 import {getContext, onDestroy, onMount} from 'svelte';
+import {expandUrlToMedia} from '../store/localstorage';
 import {i18n, l, lmd} from '../store/I18N.js';
 import {notify} from '../js/Notify';
 import {route} from '../store/Route.js';
@@ -33,7 +34,6 @@ onMount(() => {
     colorScheme: themeManager.colorScheme,
     compactDisplay: themeManager.compactDisplay,
     email: user.email,
-    expandUrlToMedia: user.expandUrlToMedia,
     highlightKeywords: user.highlightKeywords.join(', '),
     ignoreStatuses: user.ignoreStatuses,
     lang: i18n.lang,
@@ -100,7 +100,7 @@ function saveAccount() {
     <Checkbox name="ignoreStatuses" bind:value="{form.ignoreStatuses}">
       <span slot="label">{$l('Ignore join/part messages')}</span>
     </Checkbox>
-    <Checkbox name="expandUrlToMedia" bind:value="{form.expandUrlToMedia}">
+    <Checkbox name="expandUrlToMedia" bind:value="{$expandUrlToMedia}">
       <span slot="label">{$l('Expand URL to media')}</span>
     </Checkbox>
     <Checkbox name="compactDisplay" bind:value="{form.compactDisplay}">

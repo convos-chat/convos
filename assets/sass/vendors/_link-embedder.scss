@@ -15,18 +15,19 @@
   }
 }
 
-.embed.le-details {
+.message__details {
   background: var(--syntax-hl-base-bg);
   color: var(--syntax-hl-base);
   font-size: 0.9rem;
-  line-height: 1.4em;
+  line-height: 1.2em;
   border: var(--hr-border);
   padding: 0.3rem var(--gutter-small);
   overflow-x: auto;
+  width: 100%;
   display: none;
 }
 
-.message.is-expanded .embed.le-details {
+.message.is-expanded .message__details {
   display: block;
 }
 

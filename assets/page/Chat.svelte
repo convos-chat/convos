@@ -12,6 +12,7 @@ import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage, topicOrStatus} from '../js/chatHelpers';
+import {expandUrlToMedia, rawMessagesStore} from '../store/localstorage';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -33,17 +34,18 @@ let conversation = user.notifications;
 let messages = conversation.messages;
 let participants = conversation.participants;
 let now = new Time();
-let popoverIndex = -1;
+let expandedId = '';
+let popoverId = '';
 let unsubscribe = {};
 let focusChatInput, fillIn, uploader, uploadProgress;
 let timestampFromUrl = '';
 let onClickUnsubscribe;
 
+$: conversationName = encodeURIComponent($conversation.name);
+$: rawMessages = rawMessagesStore(conversation.id);
+$: title = $conversation.title;
 $: setConversationFromRoute(connection_id, conversation_id);
 $: setConversationFromUser($user);
-$: messages.update({expandUrlToMedia: $user.expandUrlToMedia});
-$: conversationName = encodeURIComponent($conversation.name);
-$: title = $conversation.title;
 $: if (!$route.hash && !$conversation.historyStopAt) conversation.load({});
 
 onMount(() => {
@@ -68,7 +70,7 @@ function onFocus() {
 
 function onRouteClick(e) {
   const aEl = e.target.closest('a[href]');
-  if (!aEl || aEl.href.indexOf('popover:') === -1) popoverIndex = -1;
+  if (!aEl || aEl.href.indexOf('popover:') === -1) popoverId = '';
   if (!aEl) return;
 
   const isThumbnail = aEl.classList.contains('le-thumbnail');
@@ -85,16 +87,13 @@ function onRouteClick(e) {
     if (action[1] === 'close') route.go('/settings/conversation');
   }
   else if (action[1] === 'expand') {
-    const msg = conversation.messages.get(action[2]);
-    msg.expanded = !msg.expanded;
-    conversation.messages.update({messages: true});
+    expandedId = expandedId !== action[2] ? action[2] : '';
   }
   else if (action[1] === 'mention') {
     fillIn(action[2]);
   }
   else if (action[1] === 'popover') {
-    const index = parseInt(action[2], 10);
-    popoverIndex = popoverIndex !== index ? index : -1;
+    popoverId = popoverId !== action[2] ? action[2] : -1;
   }
   else if (!aEl.target && aEl.getAttribute('href').indexOf('/') !== 0) {
     aEl.target = '_blank';
@@ -173,7 +172,7 @@ function setConversationFromUser(user) {
   {/if}
 
   <!-- messages -->
-  {#each $messages.render() as message, i}
+  {#each $messages.render({expand: $expandUrlToMedia, raw: $rawMessages}) as message, i}
     {#if message.dayChanged}
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
@@ -182,31 +181,38 @@ function setConversationFromUser(user) {
       <div class="message__status-line for-last-read"><span><Icon name="comments"/> {$l('New messages')}</span></div>
     {/if}
 
-    <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:is-expanded="{!!message.expanded}" data-index="{message.index}" data-ts="{message.ts.toISOString()}">
+    <div class="{message.className}" class:is-not-present="{!$participants.get(message.from)}" class:is-expanded="{expandedId === message.id}" data-index="{i}" data-ts="{message.ts.toISOString()}">
       <div class="message__ts has-tooltip">
         <span>{message.ts.format('%H:%M')}</span>
         <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
       </div>
       <Icon name="pick:{message.from}" color="{message.color}"/>
-      <a href="#action:popover:{message.index}" class="message__from prevent-default" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#action:popover:{message.id}" class="message__from prevent-default" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.details}
-          <a href="#action:expand:{message.index}" class="prevent-default"><Icon name="{message.expanded ? 'caret-square-up' : 'caret-square-down'}"/></a>
+          <a href="#action:expand:{message.id}" class="prevent-default"><Icon name="{expandedId === message.id ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
         {@html message.html}
       </div>
-      {#each message.embeds as embedPromise}
-        {#await embedPromise}
-          <!-- loading embed -->
-        {:then embed}
-          <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
-        {/await}
-      {/each}
+      {#if message.details}
+        <div class="message__details">
+          {@html message.details}
+        </div>
+      {/if}
+      {#if message.embeds && $expandUrlToMedia}
+        {#each message.embeds as embedPromise}
+          {#await embedPromise}
+            <!-- loading embed -->
+          {:then embed}
+            <div class="embed {embed.className}" use:renderEmbed="{embed}"/>
+          {/await}
+        {/each}
+      {/if}
 
       <!-- popover message menu -->
-      {#if popoverIndex === message.index}
+      {#if popoverId === message.id}
         <div class="popover" transition:fade="{{duration: 200}}">
-          <a href="#action:popover:{message.index}" class="prevent-default"><Icon name="pick:{message.from}" color="{message.color}"/> {message.from}</a>
+          <a href="#action:popover:{message.id}" class="prevent-default"><Icon name="pick:{message.from}" color="{message.color}"/> {message.from}</a>
           <a href="#action:mention:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="quote-left"/> {$l('Mention')}</a>
           <a href="#action:join:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="comments"/> {$l('Chat')}</a>
           <a href="#action:whois:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="address-card"/> {$l('Whois')}</a>

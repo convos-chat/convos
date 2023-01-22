@@ -21,7 +21,6 @@ export default class User extends Reactive {
     this.prop('ro', 'search', new Search({}));
     this.prop('ro', 'roles', new Set());
 
-    this.prop('persist', 'expandUrlToMedia', true);
     this.prop('persist', 'ignoreStatuses', false);
     this.prop('persist', 'lastUrl', '');
 
