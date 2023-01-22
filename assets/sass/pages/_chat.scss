@@ -4,7 +4,6 @@
 @use '../abstracts/header' as *;
 
 .main.is-above-chat-input {
-  @include shadow_under_site_header;
   bottom: 4rem;
   top: 4.2rem;
 

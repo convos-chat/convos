@@ -5,6 +5,7 @@
 .chat-header {
   @include header.site;
   @include next_to_sidebar;
+  border-bottom: 1px solid #bbb;
   background: var(--body-bg);
   padding-bottom: var(--gutter-small);
   justify-content: space-between;

@@ -2,7 +2,6 @@
 @use '../../abstracts/sidebar_wrapper_chrome' as *;
 
 .sidebar-right {
-  @include shadow_under_site_header;
   @include sidebar_wrapper_chrome;
   background: var(--sidebar-right-bg);
   width: var(--sidebar-right-width);

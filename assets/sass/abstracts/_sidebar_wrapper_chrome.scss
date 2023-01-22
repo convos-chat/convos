@@ -1,13 +1,19 @@
+@use 'if_screen' as *;
+
 @mixin sidebar_wrapper_chrome {
   padding: 0 var(--gutter);
   overflow: auto;
   position: absolute;
   top: 0;
   bottom: 0;
-  z-index: 900;
+  z-index: 10;
   -webkit-overflow-scrolling: touch;
 
   > :last-child {
-    padding-bottom: 8rem;
+    padding-bottom: 6rem;
+  }
+
+  @include if_screen("<=one-column") {
+    z-index: 900;
   }
 }
