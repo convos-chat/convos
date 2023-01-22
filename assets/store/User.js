@@ -22,7 +22,6 @@ export default class User extends Reactive {
     this.prop('ro', 'roles', new Set());
 
     this.prop('persist', 'ignoreStatuses', false);
-    this.prop('persist', 'lastUrl', '');
 
     this.prop('rw', 'activeConversation', this.notifications);
     this.prop('rw', 'email', '');

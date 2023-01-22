@@ -25,6 +25,7 @@ import {convosApi} from './js/Api';
 import {fade} from 'svelte/transition';
 import {getSocket} from './js/Socket';
 import {i18n} from './store/I18N';
+import {lastUrl} from './store/localstorage';
 import {notify} from './js/Notify';
 import {settings} from './js/util';
 import {route} from './store/Route';
@@ -96,11 +97,11 @@ async function routeOrUserChanged(route, user) {
   }
 
   if (route.pathParts.length === 0) { // path = "/" or path = ""
-    const url = !user.email ? '/login' : user.lastUrl || '/chat';
+    const url = !user.email ? '/login' : $lastUrl || '/chat';
     route.go(url, {replace: true});
   }
   else if (user.email) {
-    user.update({lastUrl: location.href});
+    $lastUrl = location.href;
   }
 }
 

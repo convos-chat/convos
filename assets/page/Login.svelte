@@ -7,6 +7,7 @@ import TextField from '../components/form/TextField.svelte';
 import {convosApi} from '../js/Api';
 import {getContext} from 'svelte';
 import {i18n, l, lmd} from '../store/I18N';
+import {lastUrl} from '../store/localstorage';
 import {q, settings} from '../js/util';
 import {route} from '../store/Route';
 
@@ -25,7 +26,7 @@ $: mode = renderForm($route);
 function redirect(user) {
   if (user.is('loading') || !user.email) return;
   const conversation = user.conversations()[0];
-  const url = user.lastUrl ? user.lastUrl : conversation ? conversation.path : '/settings/connections';
+  const url = $lastUrl ? $lastUrl : conversation ? conversation.path : '/settings/connections';
   route.go(url, {replace: true});
 }
 
@@ -66,7 +67,7 @@ async function submitForm(e) {
   form.password = formEl.password.value;
 
   await op.perform(form);
-  if (mode !== 'login') route.update({lastUrl: ''}); // Make sure the old value is forgotten
+  if (mode !== 'login') $lastUrl = ''; // Make sure the old value is forgotten
   if (!op.error()) await user.load(); // Causes redirect() to be called
 }
 </script>

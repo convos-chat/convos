@@ -3,6 +3,7 @@ import {get, writable} from 'svelte/store';
 const LOCAL_STORAGE_PREIFX = 'convos:';
 
 export const expandUrlToMedia = localstorage('expandUrlToMedia', true);
+export const lastUrl = localstorage('lastUrl', '');
 
 export const getUserInputStore = (id) => {
   return getUserInputStore[id] || (getUserInputStore[id] = localstorage(id + ':userInput', ''));
