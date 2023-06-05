@@ -4,7 +4,7 @@ use Mojo::Base 'Mojo::EventEmitter';
 use Convos::Core::Conversation;
 use Convos::Util qw(generate_cert_p get_cert_info has_many is_true logf pretty_connection_name);
 use Convos::Util::Queue;
-use Mojo::JSON qw(false true);
+use Mojo::JSON   qw(false true);
 use Mojo::Loader qw(load_class);
 use Mojo::Promise;
 use Mojo::URL;
@@ -173,10 +173,10 @@ sub _connect_args_p {
 
   my %args;
   $args{address} = $url->host;
-  $args{socket_options}{LocalAddr} = $params->param('local_address')
-    if $params->param('local_address');
-  $args{port}    = $url->port;
-  $args{timeout} = $ENV{CONVOS_CONNECT_TIMEOUT} || 20;
+  my $local_address = $params->param('local_address') || $ENV{CONVOS_LOCAL_ADDRESS};
+  $args{socket_options}{LocalAddr} = $local_address if $local_address;
+  $args{port}                      = $url->port;
+  $args{timeout}                   = $ENV{CONVOS_CONNECT_TIMEOUT} || 20;
 
   $params->param(tls => 1)              unless defined $params->param('tls');
   return Mojo::Promise->resolve(\%args) unless $params->param('tls');
