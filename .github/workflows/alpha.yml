@@ -25,6 +25,7 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
+          provenance: false
           push: true
           platforms: linux/amd64
           tags: "${{ secrets.DOCKER_HUB_PREFIX }}/convos:alpha"
