@@ -14,6 +14,7 @@ subtest 'defaults' => sub {
     ->json_is('/available_languages/es/language_team', 'Español <lang-es@convos.chat>')
     ->json_is('/available_languages/it/language_team', 'Italiano <lang-it@convos.chat>')
     ->json_is('/available_languages/no/language_team', 'Norsk <lang-no@convos.chat>')
+    ->json_is('/available_languages/ro/language_team', 'Românã <lang-ro@convos.chat>')
     ->json_is('/dictionary/Autocomplete',              'Autocomplete');
   $t->get_ok('/', {'Accept-Language' => ''})->element_exists('html[lang="en"]');
   $t->get_ok('/', {'Accept-Language' => 'x,y,z'})->element_exists('html[lang="en"]');
@@ -44,6 +45,17 @@ subtest 'spanish' => sub {
   $t->get_ok('/api/i18n/es.json')->status_is(200)
     ->json_is('/dictionary/', undef, 'do not translating empty string - the .po header')
     ->json_is('/dictionary/User email', 'Correo electrónico');
+};
+
+subtest 'romanian' => sub {
+    foreach my $header_val ('ro-RO,ro;q=0.9', 'ro-RO,ro;q=0.5', 'ro-RO') {
+        $t->get_ok('/', {'Accept-Language' => $header_val})
+          ->element_exists('html[lang="ro"]')
+          ->text_is('h2', 'Se încarcă...');
+    }
+    $t->get_ok('/api/i18n/ro.json')->status_is(200)
+        ->json_is('/dictionary/', undef, 'do not translating empty string - the .po header')
+        ->json_is('/dictionary/User email', 'Adresă de email a utilizatorului');
 };
 
 subtest 'reload' => sub {

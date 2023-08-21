@@ -133,7 +133,8 @@ function saveAccount() {
 
   {#if registerProtocolHandlerSupported}
     <form on:submit|preventDefault>
-      <h2>Protocol handlers</h2>
+      <h2>{$l('Protocol handlers')}</h2>
+
       <p>
         {$l('Mark the protocols below that you want %1 to handle, and a popup should ask you for confirmation.', $l('Convos'))}
         {$l('If you do not see any popup, then it probably means %1 already handles the protocol.', $l('Convos'))}
