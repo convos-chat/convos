@@ -55,6 +55,14 @@ body.for-cms .sidebar-left {
   &.for-connection .fas:hover:before {
     @include fa.content(cog);
   }
+  // Don't show cog for chevron, but keep it for the other icon
+  &.for-connection .fa-chevron-right:hover:before {
+    @include fa.content(chevron-right)
+  }
+  // Don't show cog for chevron, but keep it for the other icon
+  &.for-connection .fa-chevron-down:hover:before {
+    @include fa.content(chevron-down)
+  }
 
   &.for-conversation .fas:hover:before {
     @include fa.content(users-cog);
@@ -102,6 +110,29 @@ body.for-cms .sidebar-left {
   position: absolute;
   top: 0.4em;
   right: 0.3em;
+}
+
+.sidebar-left__nav .badge-connection {
+  position: absolute;
+  top: 0.4em;
+  right: 1.7em;
+}
+
+.sidebar-left__nav .collapsedSection {
+  display: none;
+}
+
+.sidebar-left__nav .chevron {
+  position: absolute;
+  top: 0.4em;
+  right: 0em;
+}
+
+.sidebar-left__nav .account-toggle-plus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .sidebar-left__nav .fas {
