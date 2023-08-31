@@ -20,7 +20,7 @@
     ">1%"
   ],
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "6.4.0",
+    "@fortawesome/fontawesome-free": "6.4.2",
     "@sveltejs/vite-plugin-svelte": "^2.0.0",
     "eslint-plugin-svelte3": "^4.0.0",
     "highlight.js": "^11.6.0",
@@ -35,6 +35,6 @@
     "svelte": "^3.50.1",
     "svelte-preprocess": "^4.10.7",
     "vite": "^4.0.0",
-    "vitest": "^0.31.0"
+    "vitest": "^0.34.0"
   }
 }
