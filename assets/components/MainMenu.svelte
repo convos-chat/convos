@@ -232,7 +232,7 @@ function toggleSection(connection_id) {
       <span>{$user.email || $l('Account')}</span>
       <Icon name={collapsedStates[$user.email] ? 'plus' : 'minus'} />
     </h3>
-    <div hidden={!collapsedStates[$user.email]}>
+    <div class={collapsedStates[$user.email] && !filter.length ? 'collapsedSection' : ''}>
       <Link href="/chat">
         <Icon name="bell"/>
           <span>{$l('Notifications')}</span>
