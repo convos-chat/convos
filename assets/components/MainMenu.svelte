@@ -213,7 +213,7 @@ function toggleSection(connection_id) {
         </div>
       </Link>
       <!-- Using a conditional render based on the collapsed state for the conversations of this connection -->
-      {#if !collapsedStates[connection.connection_id]}
+      {#if !collapsedStates[connection.connection_id] || filter.length}
           {#each connection.conversations.toArray() as conversation}
             <Link href="{conversation.path}" class="{conversationClassNames(connection, conversation)}">
               {#if conversation.frozen && !conversation.is('private')}
@@ -232,7 +232,7 @@ function toggleSection(connection_id) {
       <span>{$user.email || $l('Account')}</span>
       <Icon name={collapsedStates[$user.email] ? 'plus' : 'minus'} />
     </h3>
-    <div class="collapsedSection" hidden={!collapsedStates[$user.email]}>
+    <div hidden={!collapsedStates[$user.email]}>
       <Link href="/chat">
         <Icon name="bell"/>
           <span>{$l('Notifications')}</span>
