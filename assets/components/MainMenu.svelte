@@ -156,19 +156,15 @@ function renderUnread(conversation, max = 60) {
 }
 
 function toggleSection(connection_id) {
-    if (collapsedStates[connection_id]) {
-        collapsedStates[connection_id] = !collapsedStates[connection_id];
-    } else {
-        collapsedStates[connection_id] = true; // default to collapsed if not already in the object
-    }
-
-    // Save to localStorage
-    localStorage.setItem('collapsedStates', JSON.stringify(collapsedStates));
+  // Toggle the state; if undefined, !undefined is true
+  collapsedStates[connection_id] = !collapsedStates[connection_id];
+  // Update localStorage
+  localStorage.setItem('collapsedStates', JSON.stringify(collapsedStates));
 }
 
 </script>
 
-<style lang="scss">
+<style>
 .header-wrapper {
   background: var(--sidebar-left-bg);
   position: sticky;
@@ -196,7 +192,7 @@ function toggleSection(connection_id) {
     </div>
   {/if}
 
-  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
+  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}" on:keydown="{onNavItemClicked}">
     <h3>{$l('Conversations')}</h3>
       {#if !$user.connections.size}
         <Link href="/settings/connections">
@@ -209,15 +205,11 @@ function toggleSection(connection_id) {
         <Icon name="network-wired"/>
         <span >{connection.name || connection.connection_id}</span>
         <span class="tooltip">{$l(connection.frozen)}</span>
-        <b class="badge-connection" hidden="{!connection.unread}" on:click={e => {
-          toggleSection(connection.connection_id);
-          }}>{renderUnread(connection)}
-        </b>
+        <b class="badge-connection" hidden="{!connection.unread}" on:click={e => { toggleSection(connection.connection_id); }} on:keydown={e => { if (e.keyCode === 13) { toggleSection(connection.connection_id); } }}>{renderUnread(connection)}</b>
         <!-- Here's an icon indicating collapsed/expanded state -->
-        <div class="chevron"><Icon
-          name={collapsedStates[connection.connection_id] ? 'chevron-right' : 'chevron-down'}
-          on:click={e => {
-          toggleSection(connection.connection_id);}}/>
+        <div class="chevron">
+          <Icon name={collapsedStates[connection.connection_id] ? 'chevron-right' : 'chevron-down'}
+          on:click={e => { toggleSection(connection.connection_id);}}/>
         </div>
       </Link>
       <!-- Using a conditional render based on the collapsed state for the conversations of this connection -->
@@ -236,16 +228,15 @@ function toggleSection(connection_id) {
           {/each}
       {/if}
       {/each}
-
-    <h3 class="account-toggle-plus" on:click={() => toggleSection($user.email)}>
+    <h3 class="account-toggle-plus" on:click={() => toggleSection($user.email)} on:keydown={() => toggleSection($user.email)}>
       <span>{$user.email || $l('Account')}</span>
       <Icon name={collapsedStates[$user.email] ? 'plus' : 'minus'} />
     </h3>
-    <div class={collapsedStates[$user.email] ? 'collapsedSection' : ''}>
+    <div class="collapsedSection" hidden={!collapsedStates[$user.email]}>
       <Link href="/chat">
         <Icon name="bell"/>
-        <span>{$l('Notifications')}</span>
-        <b class="badge" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
+          <span>{$l('Notifications')}</span>
+          <b class="badge" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
       </Link>
       <Link href="/search">
         <Icon name="search"/>
