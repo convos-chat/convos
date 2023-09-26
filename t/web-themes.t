@@ -6,8 +6,8 @@ my $t = t::Helper->t;
 my $v = $t->app->VERSION;
 
 my $user_themes = Mojo::File->new($t->app->config('home'), 'themes');
-$user_themes->child('README.md')->spurt("# skip this\n");
-$user_themes->child('MyTheme.css')->spurt("/* custom theme */");
+$user_themes->child('README.md')->spew("# skip this\n");
+$user_themes->child('MyTheme.css')->spew("/* custom theme */");
 $t->app->themes->detect;
 
 $t->get_ok('/')->status_is(200)->element_exists('link[id$="dark-convos"][title="Convos (dark)"]')

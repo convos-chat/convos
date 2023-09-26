@@ -48,7 +48,7 @@ done_testing;
 sub write_config {
   my $config = data_section('main', shift);
   $config =~ s!\bCONVOS_DEFAULT_CONNECTION\b!{$server->url->to_string}!ge;
-  $core->home->child($ENV{CONVOS_BOT_EMAIL}, 'bot.yaml')->spurt($config);
+  $core->home->child($ENV{CONVOS_BOT_EMAIL}, 'bot.yaml')->spew($config);
 }
 
 __DATA__

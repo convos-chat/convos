@@ -242,7 +242,7 @@ sub save_object_p {
   eval {
     my $dir = $storage_file->dirname;
     $dir->make_path($dir) unless -d $dir;
-    $swap_file->spurt(Mojo::JSON::encode_json($obj->TO_JSON('private')));
+    $swap_file->spew(Mojo::JSON::encode_json($obj->TO_JSON('private')));
     die "Failed to write $swap_file" unless -s $swap_file;
     $swap_file->move_to($storage_file);
     $obj->logf(debug => 'Save success. (%s)', $storage_file);

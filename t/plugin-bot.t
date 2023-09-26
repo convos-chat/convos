@@ -33,7 +33,7 @@ subtest 'register bot' => sub {
 
 subtest 'load two_actions.yaml' => sub {
   my $config_file = config_file();
-  $config_file->spurt(config('two_actions.yaml'));
+  $config_file->spew(config('two_actions.yaml'));
   Mojo::Promise->timer(0.05)->wait;
   ok $bot->action($_), "$_ present" for qw(core karma);
   ok !$bot->action('hailo'), "Convos::Plugin::Bot::Action::Hailo not present";
@@ -53,7 +53,7 @@ subtest 'load all_actions.yaml' => sub {
     ->server_event_ok('_irc_event_mode', sub { $msg = pop })->server_event_ok('_irc_event_join');
 
   my $config_file = config_file();
-  $config_file->spurt(config('all_actions.yaml'));
+  $config_file->spew(config('all_actions.yaml'));
   $server->process_ok('mode +B');
   ok $bot->action('hailo'),                              'action by a-z';
   ok $bot->action('Hailo'),                              'action by A-Z';
@@ -75,7 +75,7 @@ subtest 'make sure we do not reply multiple times when reloading config' => sub 
   my $config_file = config_file();
   for my $name (qw(two_actions.yaml all_actions.yaml all_actions.yaml)) {
     delete $bot->config->data->{ts};
-    $config_file->spurt(config($name));
+    $config_file->spew(config($name));
     Mojo::Promise->timer(0.1)->wait;
   }
   ok 1, 'no tests are run here';

@@ -15,7 +15,7 @@ my $server = t::Server::Irc->new->start;
 my $bot   = $t->app->bot;
 my $spool = Convos::Plugin::Bot::Action::Spool->new;
 $spool->register($bot, {});
-$spool->_dir->child('whatever.yml')->spurt(test_file());
+$spool->_dir->child('whatever.yml')->spew(test_file());
 
 my $connection = $bot->user->connection({url => 'irc://localhost'});
 my $event;
