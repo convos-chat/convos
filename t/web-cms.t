@@ -25,7 +25,7 @@ subtest 'default index file' => sub {
 
 subtest 'custom index file' => sub {
   $cms_dir->make_path;
-  $cms_dir->child('index.md')->spurt("# Custom index\n\nToo cool for school!\n");
+  $cms_dir->child('index.md')->spew("# Custom index\n\nToo cool for school!\n");
   $t->get_ok('/')->status_is(200)->header_is('X-Provider-Name', undef)
     ->element_exists(qq(meta[name="convos:start_app"][content=""]))->element_exists('body.for-cms')
     ->element_exists('body.for-cms > article')->text_is('title', 'Custom index - Convos')
@@ -49,7 +49,7 @@ HERE
 
   $t->get_ok('/blog/2020/5/17/too-cool.html')->status_is(404);
   $cms_dir->child(qw(blog 2020))->make_path;
-  $cms_dir->child(qw(blog 2020 2020-05-17-too-cool.md))->spurt(<<"HERE");
+  $cms_dir->child(qw(blog 2020 2020-05-17-too-cool.md))->spew(<<"HERE");
 ---
 title: Cool title
 author: Jan Henning Thorsen
