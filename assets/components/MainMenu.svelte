@@ -19,8 +19,7 @@ let filter = '';
 let navEl;
 let searchHasFocus = false;
 let visibleLinks = [];
-
-let collapsedStates = JSON.parse(localStorage.getItem('collapsedStates')) || {};
+let collapsedStates = JSON.parse(localStorage.getItem('collapsedStates') || '{}');
 
 $: filterNav({filter}); // Passing "filter" in to make sure filterNav() is called on change
 $: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
