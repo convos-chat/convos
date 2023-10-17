@@ -231,9 +231,9 @@ function setConversationFromUser(user) {
       <Link href="/settings/conversation" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
-    <div class="message is-highlighted" on:click="{activeMenu.toggle}">
+    <a href="#toggle" class="message is-highlighted" on:click="{activeMenu.toggle}">
       <div class="message__text"><Icon name="exclamation-triangle"/> {@html $lmd('Disconnected. Your connection %1 can be edited in [settings](%2).', $connection.name, '/chat/' + $connection.connection_id + '#settings')}</div>
-    </div>
+    </a>
   {:else if $conversation.frozen && $conversation.is('pending')}
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
     <p>{$l('Do you want to join?')}</p>

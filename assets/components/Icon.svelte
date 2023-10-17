@@ -127,7 +127,4 @@ function pickIcon(str) {
 }
 </script>
 
-<i class="{calculateClassName(name, family, animation)}"
-  style="{calculateStyle(name, color)}"
-  hidden="{!name}"
-  on:click/>
+<i class="{calculateClassName(name, family, animation)}" style="{calculateStyle(name, color)}" hidden="{!name}"/>

@@ -83,7 +83,7 @@ function toggleSelected(allSelected) {
         {#each files as file}
           <tr>
             <td>{new Time(file.saved).getHumanDate({year: true})}</td>
-            <td><Icon name="copy" on:click="{copyUrl}"/></td>
+            <td><a href="#copy" on:click={copyUrl}><Icon name="copy"/></a></td>
             <td><a href="{route.urlFor('/file/' + user.id + '/' + file.id)}" target="convos_files_file">{file.name}</a></td>
             <td class="text-right">{humanReadableNumber(file.size, 'B')}</td>
             <td class="text-right"><Checkbox name="{file.id}" bind:value="{file.selected}"/></td>

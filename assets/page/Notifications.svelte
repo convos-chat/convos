@@ -37,15 +37,15 @@ onMount(async () => {
       <div class="message__status-line for-day-changed"><span><Icon name="calendar-alt"/> <i>{message.ts.getHumanDate()}</i></span></div>
     {/if}
 
-    <div class="{message.className}" on:click="{gotoConversation}">
+    <a href="{conversationUrl(message)}" class="{message.className}" on:click="{gotoConversation}">
       <Icon name="pick:{message.from}" color="{message.color}"/>
       <div class="message__ts has-tooltip">
         <span>{message.ts.format('%H:%M')}</span>
         <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
       </div>
-      <a href="{conversationUrl(message)}" class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</a>
+      <span class="message__from" style="color:{message.color}">{$l('%1 in %2', message.from, message.conversation_id)}</span>
       <div class="message__text">{@html message.html}</div>
-    </div>
+    </a>
   {/each}
 
   {#if $notifications.is('loading')}

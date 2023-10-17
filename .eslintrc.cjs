@@ -1,9 +1,9 @@
 module.exports = {
 	root: true,
-	extends: ['eslint:recommended'],
-	plugins: ['svelte3'],
+	extends: ['eslint:recommended', 'plugin:svelte/recommended'],
+	plugins: ['svelte'],
 	ignorePatterns: ['*.cjs'],
-	overrides: [{files: ['*.svelte'], processor: 'svelte3/svelte3'}],
+	overrides: [{files: ['*.svelte'], parser: 'svelte-eslint-parser'}],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020

@@ -119,9 +119,12 @@ function toggle(e) {
     on:keydown="{keydown}"
     on:keyup="{keyup}"
     on:click|preventDefault="{toggle}">
-  <div class="select-field__options" on:click|preventDefault="{toggle}">
+  <div class="select-field__options">
     {#each visibleOptions as opt, i}
-      <a href="#{i}:{opt[0]}" class="select-field__option" class:is-active="{i === activeIndex}" on:focus="{() => { activeIndex = i }}" on:mouseover="{() => { activeIndex = i }}" tabindex="-1">{opt.length > 1 ? opt[1] : opt[0]}</a>
+      <a href="#{i}:{opt[0]}" class="select-field__option" class:is-active="{i === activeIndex}" tabindex="-1"
+        on:click|preventDefault="{toggle}"
+        on:focus="{() => { activeIndex = i }}"
+        on:mouseover="{() => { activeIndex = i }}">{opt.length > 1 ? opt[1] : opt[0]}</a>
     {/each}
   </div>
 </div>

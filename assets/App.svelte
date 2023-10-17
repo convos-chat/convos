@@ -161,7 +161,7 @@ function socketChanged(socket) {
   {/if}
 
   {#if $activeMenu && $viewport.haSingleColumn}
-    <div class="overlay" transition:fade="{{duration: 200}}" on:click="{() => { $activeMenu = '' }}">&nbsp;</div>
+    <a href="#hide" class="overlay" transition:fade="{{duration: 200}}" on:click="{() => activeMenu.set('')}">&nbsp;</a>
   {/if}
 {:else}
   <Login bind:title/>
