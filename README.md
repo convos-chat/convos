@@ -1,5 +1,4 @@
 [![convos](https://snapcraft.io//convos/badge.svg)](https://snapcraft.io/convos)
-[![Docker Status](https://github.com/convos-chat/convos/workflows/Docker%20Image%20CI/badge.svg?branch=main)](https://hub.docker.com/r/convos/convos)
 [![Build Status](https://github.com/convos-chat/convos/workflows/Linux%20CI/badge.svg?branch=main)](https://github.com/convos-chat/convos/actions)
 [![GitHub issues](https://img.shields.io/github/issues/convos-chat/convos)](https://github.com/convos-chat/convos/issues)
 
@@ -36,13 +35,15 @@ That's it! After the two commands above, you can point your browser to
 You can use the command below to pull and run convos:
 
 ```bash
-docker pull convos/convos:stable
+docker pull ghcr.io/convos-chat/convos:alpha
 mkdir -p $HOME/convos/data
-docker run -it -p 8080:3000 -v $HOME/convos/data:/data convos/convos:stable
+docker run -it -p 8080:3000 -v $HOME/convos/data:/data ghcr.io/convos-chat/convos:alpha
 ```
 
-Note that [Nordaaker/convos](hub.docker.com/r/Nordaaker/convos/) will be around
-for a while, but the new official image is "convos/convos".
+Note that [Nordaaker/convos](hub.docker.com/r/Nordaaker/convos/) and
+[convos/convos](https://hub.docker.com/r/convos/convos) will be around
+for a while, but the new official image is now hosted at
+[GitHub](https://github.com/convos-chat/convos/pkgs/container/convos).
 
 ## How to make a release
 

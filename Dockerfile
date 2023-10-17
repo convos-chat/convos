@@ -1,4 +1,4 @@
-# convos/convos
+# docker pull ghcr.io/convos-chat/convos:alpha
 #
 # See https://convos.chat/doc/config.html for details about the environment variables
 #
