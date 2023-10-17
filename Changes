@@ -1,5 +1,16 @@
 Revision history for perl distribution Convos
 
+8.00 Not Released
+ - Add collapsible sidebar sections #840
+   Contributor: Claudiu Ciungan
+ - Add Romanian translation,
+   Contributor: mostlyvirtual
+ - Add support for CONVOS_LOCAL_ADDRESS
+ - Build docker images to ghcr instead of docker hub
+ - Fix some A11y warnings after upgrading to Svelte 4
+ - Upgrade Svelte 3 to Svelte 4
+ - Upgrade JavaScript dependencies
+
 7.15 2023-01-11T12:50:00+0900
  - Fix invalid assets names
 
