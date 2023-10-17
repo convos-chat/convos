@@ -24,7 +24,13 @@ export default defineConfig(({mode}) => {
       rollupOptions: {input: './assets/convos.js', output},
     },
     plugins: [svelte()],
-    publicDir: 'public',
+    publicDir: 'does/not/matter',
+    resolve: {
+      alias: {
+        '../font/fa-5.15.4': './public/font/fa-5.15.4',
+        '../font/google': './public/font/google',
+      },
+    },
     test: {
       environment: 'jsdom',
     },
