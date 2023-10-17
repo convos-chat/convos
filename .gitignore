@@ -3,6 +3,8 @@
 *.old
 *.pem
 *.swp
+.pls_cache/
+.vstags
 /blib/
 /cover_db
 /inc/
