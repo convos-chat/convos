@@ -33,5 +33,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.REGISTRY}}/${{ env.IMAGE_NAME }}:alpha
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:alpha
           labels: ${{ steps.meta.outputs.labels }}
