@@ -11,6 +11,9 @@ Revision history for perl distribution Convos
  - Upgrade Svelte 3 to Svelte 4
  - Upgrade JavaScript dependencies
 
+7.15 2023-10-18T13:55:00+0900
+  - Test release to see if docker images was built correctly
+
 7.15 2023-01-11T12:50:00+0900
  - Fix invalid assets names
 
