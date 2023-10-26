@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-8.00 Not Released
+8.00 2023-10-26T21:30:00+0900
  - Add collapsible sidebar sections #840
    Contributor: Claudiu Ciungan
  - Add Romanian translation,
@@ -11,7 +11,7 @@ Revision history for perl distribution Convos
  - Upgrade Svelte 3 to Svelte 4
  - Upgrade JavaScript dependencies
 
-7.15 2023-10-18T13:55:00+0900
+7.16 2023-10-18T13:55:00+0900
   - Test release to see if docker images was built correctly
 
 7.15 2023-01-11T12:50:00+0900
