@@ -16,6 +16,12 @@ $: icons = icon === 'caret' ? ['caret-square-down', 'caret-square-up'] : ['squar
 $: stateIcon = icons[value ? 1 : 0];
 </script>
 
+<style lang="scss">
+.is-disabled :global(i) {
+  opacity: 0.6;
+}
+</style>
+
 <label class="checkbox" class:has-badge="{badge}" class:has-focus="{hasFocus}" class:is-disabled="{disabled}" hidden="{hidden}">
   <input type="checkbox"
     id="{id}"
