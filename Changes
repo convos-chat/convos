@@ -2,6 +2,8 @@ Revision history for perl distribution Convos
 
 8.02 Not Released
  - Fix rendering embeds when toggling raw messages
+ - Fix showing the actual topic and other settings when changing channel
+ - Removed topic from main heading on desktop
 
 8.01 2023-10-27T11:58:00+0900
  - Merged participant list and settings

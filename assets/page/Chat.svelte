@@ -140,9 +140,6 @@ function setConversationFromUser(user) {
 
 <ChatHeader>
   <h1 class="ellipsis"><a href="#settings" on:click="{activeMenu.toggle}">{$l(conversation.name)}</a></h1>
-  {#if !$viewport.isSingleColumn}
-    <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
-  {/if}
   {#if !$viewport.hasRightColumn && !$conversation.is('not_found')}
     <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu === 'settings'}" on:click="{activeMenu.toggle}">
       <Icon name="users-cog"/><Icon name="times"/>

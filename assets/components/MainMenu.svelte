@@ -144,10 +144,6 @@ function toggleSection(connection_id) {
 </script>
 
 <style lang="scss">
-h3 {
-  padding: 0.4rem 0;
-}
-
 .header-wrapper {
   background: var(--sidebar-left-bg);
   position: sticky;

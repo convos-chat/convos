@@ -4,6 +4,7 @@ import ChatParticipants from '../components/ChatParticipants.svelte';
 import Checkbox from './form/Checkbox.svelte';
 import Operation from '../store/Operation';
 import OperationStatus from '../components/OperationStatus.svelte';
+import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {activeMenu, viewport} from '../store/viewport';
 import {awayMessage} from '../js/chatHelpers';
@@ -24,23 +25,14 @@ let checkboxes = {
   topic_protection: false,
 };
 
+let conversationPath = '';
 let password = '';
-let rawMessages = false;
 let topic = '';
-let wantNotifications = false;
 
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
-
-onMount(async () => {
-  if (Object.keys(conversation.modes).length === 0 && !isPrivate) await new Promise(r => conversation.send('/mode', r));
-  await tick();
-  checkboxes = Object.assign({}, checkboxes, conversation.modes);
-  rawMessages = conversation.messages.raw;
-  topic = conversation.topic;
-  wantNotifications = conversation.wantNotifications;
-});
+$: if (conversation.path != conversationPath) updateState();
 
 function partConversation() {
   conversation.send('/part', (res) => !res.errrors && ($activeMenu = ''));
@@ -69,12 +61,21 @@ function saveChannelTopic() {
 async function saveConversationSettings() {
   saveConversationSettingsOp.update({status: 'loading'});
   await saveConversationSettingsOp.on('update');
-  conversation.update({wantNotifications});
-  conversation.messages.update({raw: rawMessages});
   saveChannelModes();
   saveChannelTopic();
   await tick();
   saveConversationSettingsOp.update({status: 'success'});
+}
+
+async function updateState() {
+  if (Object.keys(conversation.modes).length === 0 && !isPrivate) {
+    await new Promise(r => conversation.send('/mode', r));
+  }
+
+  await tick();
+  checkboxes = Object.assign({}, checkboxes, conversation.modes);
+  conversationPath = conversation.path;
+  topic = conversation.topic;
 }
 
 function updateInfo() {
@@ -86,64 +87,64 @@ function updateInfo() {
   <div transition:fly="{$viewport.sidebarTransition}"
     class:sidebar-left={!$viewport.hasRightColumn}
     class:sidebar-right={$viewport.hasRightColumn}>
-    <p>
-      {#if $conversation.frozen}
-        {$l('Conversation with %1 is frozen. Reason: %2', conversation.name, $l(conversation.frozen))}
-      {:else if isPrivate}
-        <span>{@html $lmd(...awayMessage($conversation.info))}</span>
-        <br><small><a href="#update" on:click|preventDefault="{updateInfo}">{$l('Update information')}</a></small>
-      {/if}
-    </p>
-
     <form method="post" on:submit|preventDefault="{saveConversationSettings}">
       <h3>{$l('Settings')}</h3>
-      {#if !isPrivate}
-        <TextField name="topic" bind:value="{topic}" placeholder="{$l('No topic is set.')}" readonly={!isOperator || !$conversation.modes.topic_protection}>
-          <span slot="label">{$l('Topic')}</span>
-        </TextField>
-      {/if}
       {#if Object.hasOwn($conversation, 'wantNotifications')}
-        <Checkbox name="want_notifications" bind:value="{wantNotifications}">
+        <Checkbox name="want_notifications" bind:value="{conversation.wantNotifications}">
           <span slot="label">{$l('Notify me on new messages')}</span>
         </Checkbox>
       {/if}
 
-      <Checkbox name="raw_messages" bind:value="{rawMessages}">
+      <Checkbox name="raw_messages" bind:value="{conversation.messages.raw}">
         <span slot="label">{$l('Show raw messages')}</span>
       </Checkbox>
 
       {#if !isPrivate}
-        <nav class="sidebar-left__nav">
-          <h3>{$l('Conversation modes')}</h3>
-          <Checkbox badge name="invite_only" bind:value="{checkboxes.invite_only}" disabled="{!isOperator}">
-            <span slot="label">{$l('Invite only')} <b class="badge">{checkboxes.invite_only ? '+' : '-'}{getChannelMode('invite_only')}</b></span>
-          </Checkbox>
-          <Checkbox badge name="moderated" bind:value="{checkboxes.moderated}" disabled="{!isOperator}">
-            <span slot="label">{$l('Moderated')} <b class="badge">{checkboxes.moderated ? '+' : '-'}{getChannelMode('moderated')}</b></span>
-          </Checkbox>
-          <Checkbox badge name="prevent_external_send" bind:value="{checkboxes.prevent_external_send}" disabled="{!isOperator}">
-            <span slot="label">{$l('Prevent external send')} <b class="badge">{checkboxes.prevent_external_send ? '+' : '-'}{getChannelMode('prevent_external_send')}</b></span>
-          </Checkbox>
-          <Checkbox badge name="topic_protection" bind:value="{checkboxes.topic_protection}" disabled="{!isOperator}">
-            <span slot="label">{$l('Protected topic')} <b class="badge">{checkboxes.topic_protection ? '+' : '-'}{getChannelMode('topic_protection')}</b></span>
-          </Checkbox>
-          <Checkbox badge name="password" bind:value="{checkboxes.password}" disabled="{!isOperator}">
-            <span slot="label">{$l('Password')} <b class="badge">{checkboxes.password ? '+' : '-'}{getChannelMode('password')}</b></span>
-          </Checkbox>
-          {#if checkboxes.password}
-            <TextField type="password" name="password" bind:value="{password}">
-              <span slot="label">{$l('Password')}</span>
-            </TextField>
-          {/if}
+        <TextArea name="topic" bind:value="{topic}" placeholder="{$l('No topic is set.')}" readonly={!isOperator || !$conversation.modes.topic_protection}>
+          <span slot="label">{$l('Topic')}</span>
+        </TextArea>
+      {/if}
 
-          {#if !isOperator}
-            <p><i>{$l('Only operators can change modes.')}</i></p>
-          {/if}
-        </nav>
+      <p>
+        {#if $conversation.frozen}
+          {$l('Conversation with %1 is frozen. Reason: %2', conversation.name, $l(conversation.frozen))}
+        {:else if isPrivate}
+          <span>{@html $lmd(...awayMessage($conversation.info))}</span>
+          <br><small><a href="#update" on:click|preventDefault="{updateInfo}">{$l('Update information')}</a></small>
+        {/if}
+      </p>
+
+      {#if !isPrivate}
+        <Checkbox badge name="invite_only" bind:value="{checkboxes.invite_only}" disabled="{!isOperator}">
+          <span slot="label">{$l('Invite only')} <b class="badge">{checkboxes.invite_only ? '+' : '-'}{getChannelMode('invite_only')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="moderated" bind:value="{checkboxes.moderated}" disabled="{!isOperator}">
+          <span slot="label">{$l('Moderated')} <b class="badge">{checkboxes.moderated ? '+' : '-'}{getChannelMode('moderated')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="prevent_external_send" bind:value="{checkboxes.prevent_external_send}" disabled="{!isOperator}">
+          <span slot="label">{$l('Prevent external send')} <b class="badge">{checkboxes.prevent_external_send ? '+' : '-'}{getChannelMode('prevent_external_send')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="topic_protection" bind:value="{checkboxes.topic_protection}" disabled="{!isOperator}">
+          <span slot="label">{$l('Protected topic')} <b class="badge">{checkboxes.topic_protection ? '+' : '-'}{getChannelMode('topic_protection')}</b></span>
+        </Checkbox>
+        <Checkbox badge name="password" bind:value="{checkboxes.password}" disabled="{!isOperator}">
+          <span slot="label">{$l('Password')} <b class="badge">{checkboxes.password ? '+' : '-'}{getChannelMode('password')}</b></span>
+        </Checkbox>
+        {#if checkboxes.password}
+          <TextField type="password" name="password" bind:value="{password}">
+            <span slot="label">{$l('Password')}</span>
+          </TextField>
+        {/if}
+
+        {#if !isOperator}
+          <p><i>{$l('Only operators can change modes.')}</i></p>
+        {/if}
       {/if}
 
       <div class="form-actions">
-        <Button icon="save" op="{saveConversationSettingsOp}"><span>{$l('Save')}</span></Button>
+        {#if !isPrivate}
+          <Button icon="save" op="{saveConversationSettingsOp}"><span>{$l('Save')}</span></Button>
+        {/if}
         <Button type="button" on:click="{partConversation}" icon="sign-out-alt"><span>{$l('Leave')}</span></Button>
       </div>
       <OperationStatus op="{saveConversationSettingsOp}"/>
