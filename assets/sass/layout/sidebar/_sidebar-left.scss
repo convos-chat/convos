@@ -51,15 +51,7 @@ body.for-cms .sidebar-left {
 
 .sidebar-left__nav a {
   position: relative;
-
-  &.for-conversation {
-    padding-left: 0.6em;
-  }
-
-  &.has-errors,
-  &.has-notifications {
-    font-style: italic;
-  }
+  outline: 2px solid transparent;
 
   &.is-frozen {
     color: var(--sidebar-left-frozen-color);

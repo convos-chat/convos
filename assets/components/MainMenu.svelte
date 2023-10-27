@@ -5,14 +5,13 @@ import escapeRegExp from 'lodash/escapeRegExp';
 import {activeMenu, viewport} from '../store/viewport';
 import {closestEl, q, settings, tagNameIs} from '../js/util';
 import {fly} from 'svelte/transition';
-import {getContext} from 'svelte';
+import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
 export let transition;
 
-const duration = 250;
 const user = getContext('user');
 const notifications = user.notifications;
 
@@ -25,9 +24,14 @@ let collapsedStates = JSON.parse(localStorage.getItem('collapsedStates') || '{}'
 
 $: filterNav({filter}); // Passing "filter" in to make sure filterNav() is called on change
 $: addConversationLink = '/settings/conversation?connection_id=' + ($user.activeConversation.connection_id || '');
+$: duration = searchHasFocus ? 0 : 250;
 $: searchQuery = filter.replace(/^\//, '');
 $: if (navEl) clearFilter($route);
 $: if (visibleLinks[activeLinkIndex]) visibleLinks[activeLinkIndex].classList.add('has-focus');
+
+onMount(() => {
+  return route.on('update', (attrs) => attrs.path && activeMenu.set(''));
+});
 
 function clearFilter() {
   q(navEl, 'a', aEl => aEl.classList.remove('has-focus'));
@@ -44,8 +48,6 @@ function conversationClassNames(connection, conversation) {
   const cn = [conversation.conversation_id ? 'for-conversation' : 'for-connection'];
   if (conversation.frozen || connection.state !== 'connected') cn.push('is-frozen');
   if (conversation.frozen) cn.push('has-tooltip');
-  if (conversation.errors) cn.push('has-errors');
-  if (conversation.notifications) cn.push('has-notifications');
   return cn.join(' ');
 }
 
@@ -81,15 +83,6 @@ function filterNav() {
     if (visibleLinks.length) break;
   }
 
-  // Show connections
-  q(navEl, '.for-connection', connEl => {
-    let el = connEl;
-    while ((el = el.nextElementSibling)) {
-      if (!el.classList.contains('for-conversation')) break;
-      if (!el.classList.contains('hidden')) return connEl.classList.remove('hidden');
-    }
-  });
-
   // Allow search in chat history
   const searchEl = navEl.querySelector('.for-search');
   searchEl.classList[filter ? 'remove' : 'add']('hidden');
@@ -114,18 +107,6 @@ function onBlur() {
 
 function onFocus() {
   searchHasFocus = true;
-}
-
-function onNavItemClicked(e) {
-  const iconName = (e.target.className || '').match(/(network|user)/);
-  if (iconName) {
-    const aEl = e.target.closest('a');
-    if (aEl.pathname === location.pathname) e.preventDefault();
-    setTimeout(() => { $activeMenu = 'settings' }, 50);
-  }
-  else if (e.target.closest('a')) {
-    setTimeout(() => { $activeMenu = '' }, 50);
-  }
 }
 
 function onSearchKeydown(e) {
@@ -162,7 +143,7 @@ function toggleSection(connection_id) {
 }
 </script>
 
-<style>
+<style lang="scss">
 h3 {
   padding: 0.4rem 0;
 }
@@ -178,47 +159,28 @@ h3 {
   right: 0;
 }
 
-.l1 {
-  position: relative;
+[href="#toggle"] {
+  :global(i) {
+    transition: transform 150ms linear;
+  }
+
+  &.collapsed :global(i) {
+    transform: rotate(180deg);
+  }
 }
 
-.l1 :global(a.for-connection) {
-  padding-right: 1.3rem;
+nav :global(a.for-search),
+.collapsible :global(a) {
+  padding-left: 0.5em;
+  padding-right: 2px;
   display: flex;
-  gap: 0.4rem;
-}
 
-.l1 :global(a.for-connection),
-.l2 :global(a.for-conversation) {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.l1 :global(a.for-connection span),
-.l2 :global(a.for-conversation span) {
-  flex-grow: 1;
-}
-
-.l1 a[href="#toggle"] {
-  padding: 0.1rem;
-  z-index: 2;
-  position: absolute;
-  right: 0;
-  top: 0.25rem;
-}
-
-.l1 a[href="#toggle"]:focus,
-.l1 a[href="#toggle"]:hover {
-  background: transparent;
-  box-shadow: var(--focus-outline);
-}
-
-.l1 :global(i) {
-  transition: transform 150ms linear;
-}
-
-.collapsed :global(i) {
-  transform: rotate(180deg);
+  :global(.name) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    padding-inline: 0.4rem;
+  }
 }
 </style>
 
@@ -241,9 +203,8 @@ h3 {
     </div>
   {/if}
 
-  <!-- svelte-ignore a11y-no-noninteractive-element-interactions a11y-click-events-have-key-events -->
-  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}" on:click="{onNavItemClicked}">
-    <h3>{$l('Conversations')}</h3>
+  <nav class="sidebar-left__nav" class:is-filtering="{filter.length > 0}" bind:this="{navEl}">
+    <h3 hidden={filter.length > 0}>{$l('Conversations')}</h3>
     {#if !$user.connections.size}
       <Link href="/settings/connections">
         <Icon name="exclamation-circle"/>
@@ -251,18 +212,20 @@ h3 {
       </Link>
     {/if}
     {#each $user.connections.toArray() as connection}
-      <div class="l1">
-        <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}" >
-          <Icon name="network-wired"/>
-          <span>{connection.name || connection.connection_id}</span>
-          <span class="tooltip">{$l(connection.frozen)}</span>
-          <b class="badge" hidden="{connection.unread}">{renderUnread(connection)}</b>
-        </Link>
-        <a href="#toggle" on:click|preventDefault={() => toggleSection(connection.connection_id)}
-          class:collapsed={collapsedStates[connection.connection_id]}><Icon name="chevron-up"/></a>
-      </div>
+      <a href="#toggle" on:click|preventDefault={() => toggleSection(connection.connection_id)}
+        hidden={filter.length > 0}
+        class:collapsed={collapsedStates[connection.connection_id]}>
+        <Icon name="chevron-up"/>
+        <span>{connection.name || connection.connection_id}</span>
+      </a>
       {#if !collapsedStates[connection.connection_id] || filter.length}
-        <div class="l2" transition:slide={{duration}}>
+        <div class="collapsible" transition:slide={{duration}}>
+          <Link href="{connection.path}" class="{conversationClassNames(connection, connection)}">
+            <Icon name="network-wired"/>
+            <span class="name">{filter.length > 0 ? connection.name : $l('Server')}</span>
+            <span class="tooltip">{$l(connection.frozen)}</span>
+            <span class="badge" hidden="{!connection.unread}">{renderUnread(connection)}</span>
+          </Link>
           {#each connection.conversations.toArray() as conversation}
             <Link href="{conversation.path}" class="{conversationClassNames(connection, conversation)}">
               {#if conversation.frozen && !conversation.is('private')}
@@ -270,69 +233,71 @@ h3 {
               {:else}
                 <Icon name="{conversation.is('private') ? 'user' : 'user-friends'}"/>
               {/if}
-              <span>{conversation.name}</span>
+              <span class="name">{conversation.name}</span>
               <span class="tooltip">{$l(conversation.frozen)}</span>
-              <b class="badge" hidden="{!conversation.unread}">{renderUnread(conversation)}</b>
+              <span class="badge" class:is-important={!!conversation.notifications} hidden="{!conversation.unread}">{renderUnread(conversation)}</span>
             </Link>
           {/each}
         </div>
       {/if}
     {/each}
-    <h3 class="l1">
-      <span>{$user.email || $l('Account')}</span>
-      <a href="#toggle" on:click|preventDefault={() => toggleSection('settings')}
-        class:collapsed={collapsedStates.settings}><Icon name="chevron-up"/></a>
-    </h3>
+
+    <h3 hidden={filter.length > 0}>{$l('Settings')}</h3>
+    <a href="#toggle" on:click|preventDefault={() => toggleSection('settings')}
+      hidden={filter.length > 0}
+      class:collapsed={collapsedStates.settings}><Icon name="chevron-up"/>
+      <span>{$user.email}</span>
+    </a>
     {#if !collapsedStates.settings && !filter.length}
-      <div transition:slide={{duration}}>
+      <div class="collapsible" transition:slide={{duration}}>
         <Link href="/chat">
           <Icon name="bell"/>
-          <span>{$l('Notifications')}</span>
-          <b class="badge" hidden="{!$notifications.unread}">{renderUnread($notifications)}</b>
+          <span class="name">{$l('Notifications')}</span>
+          <span class="badge" hidden="{!$notifications.unread}">{renderUnread($notifications)}</span>
         </Link>
         <Link href="/search">
           <Icon name="search"/>
-          <span>{$l('Search')}</span>
+          <span class="name">{$l('Search')}</span>
         </Link>
         <Link href="{addConversationLink}">
           <Icon name="comment"/>
-          <span>{$l('Add conversation')}</span>
+          <span class="name">{$l('Add conversation')}</span>
         </Link>
         <Link href="/settings/connections">
           <Icon name="network-wired"/>
-          <span>{$l('Connections')}</span>
+          <span class="name">{$l('Connections')}</span>
         </Link>
         <Link href="/settings/account">
           <Icon name="user-cog"/>
-          <span>{$l('Account')}</span>
+          <span class="name">{$l('Account')}</span>
         </Link>
         <Link href="/settings/files">
           <Icon name="folder-open"/>
-          <span>{$l('Files')}</span>
+          <span class="name">{$l('Files')}</span>
         </Link>
         {#if $user.is('admin')}
           <Link href="/settings">
             <Icon name="tools"/>
-            <span>{$l('Settings')}</span>
+            <span class="name">{$l('Settings')}</span>
           </Link>
           <Link href="/settings/users">
             <Icon name="users"/>
-            <span>{$l('Users')}</span>
+            <span class="name">{$l('Users')}</span>
           </Link>
         {/if}
         <Link href="/help">
           <Icon name="question-circle"/>
-          <span>{$l('Help')}</span>
+          <span class="name">{$l('Help')}</span>
         </Link>
         <a href="{route.urlFor('/logout')}?csrf={settings('csrf')}" target="_self">
           <Icon name="power-off"/>
-          <span>{$l('Log out')}</span>
+          <span class="name">{$l('Log out')}</span>
         </a>
-        <Link href="/search?q={encodeURIComponent(searchQuery)}" class="for-search hidden">
-          <Icon name="search"/>
-          <span>{$l('Search for "%1"', searchQuery)}</span>
-        </Link>
       </div>
     {/if}
+    <Link href="/search?q={encodeURIComponent(searchQuery)}" class="for-search hidden">
+      <Icon name="search"/>
+      <span class="name">{$l('Search for "%1"', searchQuery)}</span>
+    </Link>
   </nav>
 </div>
