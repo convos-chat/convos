@@ -111,6 +111,14 @@ test('update() tracking props', () => {
   r.update({name: 'Superduper', age: 31});
   r.update({name: 'Superduper', address: 'Metropolis'});
   expect(r._delayedUpdate()).toEqual({address: true, age: true, name: false});
+
+  r.address = 'Gotham';
+  expect(r._delayedUpdate()).toEqual({address: true});
+  expect(r.address).toBe('Gotham');
+
+  r.address = 'Gotham';
+  r.age = 32;
+  expect(r._delayedUpdate()).toEqual({age: true});
 });
 
 test('update() emit updated', () => {

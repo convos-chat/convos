@@ -210,6 +210,10 @@ export default class Reactive {
   }
 
   _updateableProp(prop) {
-    Object.defineProperty(this, prop.name, {get: () => prop.value});
+    const name = prop.name;
+    Object.defineProperty(this, name, {
+      get() { return prop.value },
+      set(value) { prop.value === value || this.update({[name]: value}) },
+    });
   }
 }
