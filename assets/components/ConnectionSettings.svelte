@@ -1,13 +1,12 @@
 <script>
+import ChatParticipants from '../components/ChatParticipants.svelte';
 import ConnectionForm from './ConnectionForm.svelte';
-import Icon from './Icon.svelte';
-import {activeMenu} from '../store/viewport';
+import {activeMenu, viewport} from '../store/viewport';
 import {fly} from 'svelte/transition';
 import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
 
 export let conversation = {};
-export let transition;
 
 const user = getContext('user');
 
@@ -20,23 +19,23 @@ onMount(async () => {
 });
 </script>
 
-<div class="sidebar-left" transition:fly="{transition}">
-  <div class="sidebar-header">
-    <h2>{$l('Connection')}</h2>
-    <a href="#settings" class="btn-hallow can-toggle is-active" on:click="{activeMenu.toggle}">
-      <Icon name="bars"/><Icon name="times"/>
-    </a>
+{#if $viewport.hasRightColumn || $activeMenu === 'settings'}
+  <div transition:fly="{$viewport.sidebarTransition}"
+    class:sidebar-left={!$viewport.hasRightColumn}
+    class:sidebar-right={$viewport.hasRightColumn}>
+    <h3>{$l('Settings')}</h3>
+
+    {#if !connection.url}
+      <p>{$l('Connection not found.')}</p>
+    {:else if connection.state === 'disconnected'}
+      <p>{$l('Currently disconnected from %1.', connectionHost)}</p>
+    {:else if connection.state === 'connected'}
+      <p>{$l('Currently connected to %1.', connectionHost)}</p>
+    {:else}
+      <p>{$l('Currently connecting to %1.', connectionHost)}</p>
+    {/if}
+
+    <ConnectionForm id="{conversation.connection_id}"/>
+    <ChatParticipants conversation="{conversation}"/>
   </div>
-
-  {#if !connection.url}
-    <p>{$l('Connection not found.')}</p>
-  {:else if connection.state === 'disconnected'}
-    <p>{$l('Currently disconnected from %1.', connectionHost)}</p>
-  {:else if connection.state === 'connected'}
-    <p>{$l('Currently connected to %1.', connectionHost)}</p>
-  {:else}
-    <p>{$l('Currently connecting to %1.', connectionHost)}</p>
-  {/if}
-
-  <ConnectionForm id="{conversation.connection_id}"/>
-</div>
+{/if}

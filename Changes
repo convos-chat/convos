@@ -1,6 +1,7 @@
 Revision history for perl distribution Convos
 
 8.01 Not Released
+ - Merged participant list and settings
  - Changed appearance for the main menu toggles
  - Fix not hiding the main menu when toggling the main menu sections
  - Fix not showing "0" notifications counter

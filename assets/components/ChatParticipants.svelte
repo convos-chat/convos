@@ -22,7 +22,6 @@ function navItems($participants) {
 }
 </script>
 
-<h2 class="participants-heading">{$l('Participants (%1)', $participants.length)}</h2>
 <nav class="participants">
   {#if $participants.length}
     {#each navItems($participants.toArray()) as item}

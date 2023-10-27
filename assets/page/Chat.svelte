@@ -1,7 +1,6 @@
 <script>
 import ChatHeader from '../components/ChatHeader.svelte';
 import ChatInput from '../components/ChatInput.svelte';
-import ChatParticipants from '../components/ChatParticipants.svelte';
 import ChatWelcome from '../components/ChatWelcome.svelte';
 import ConnectionSettings from '../components/ConnectionSettings.svelte';
 import ConversationSettings from '../components/ConversationSettings.svelte';
@@ -11,7 +10,7 @@ import InfinityScroll from '../components/InfinityScroll.svelte';
 import Link from '../components/Link.svelte';
 import Time from '../js/Time';
 import {activeMenu, viewport} from '../store/viewport';
-import {awayMessage, topicOrStatus} from '../js/chatHelpers';
+import {topicOrStatus} from '../js/chatHelpers';
 import {fade} from 'svelte/transition';
 import {getContext, onDestroy, onMount} from 'svelte';
 import {isISOTimeString} from '../js/Time';
@@ -144,20 +143,12 @@ function setConversationFromUser(user) {
   {#if !$viewport.isSingleColumn}
     <span class="chat-header__topic ellipsis">{topicOrStatus($connection, $conversation)}</span>
   {/if}
-  {#if !$conversation.is('not_found')}
+  {#if !$viewport.hasRightColumn && !$conversation.is('not_found')}
     <a href="#settings" class="btn-hallow can-toggle" class:is-active="{$activeMenu === 'settings'}" on:click="{activeMenu.toggle}">
       <Icon name="users-cog"/><Icon name="times"/>
     </a>
   {/if}
 </ChatHeader>
-
-{#if $activeMenu === 'settings'}
-  {#if conversation_id}
-    <ConversationSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {:else}
-    <ConnectionSettings conversation="{conversation}" transition="{{duration: 250, x: $viewport.isSingleColumn ? $viewport.width : 0}}"/>
-  {/if}
-{/if}
 
 <InfinityScroll class="main is-above-chat-input" on:scrolled="{e => onInfinityScrolled(e, {conversation})}" on:visibility="{e => onInfinityVisibility(e, {conversation, timestampFromUrl})}">
   {#if $messages.length < 10 && !$conversation.is('not_found')}
@@ -272,12 +263,10 @@ function setConversationFromUser(user) {
 
 <ChatInput conversation="{conversation}" bind:fillIn bind:focus="{focusChatInput}" bind:uploader bind:uploadProgress/>
 
-{#if $viewport.hasRightColumn && !$conversation.is('not_found')}
-  <div class="sidebar-right">
-    <ChatParticipants conversation="{conversation}"/>
-    {#if $conversation.is('private') && $conversation.info.nick}
-      <h3>{$l('Information')}</h3>
-      <p>{@html $lmd(...awayMessage($conversation.info))}</p>
-    {/if}
-  </div>
+{#if !$conversation.is('not_found')}
+  {#if conversation_id}
+    <ConversationSettings conversation="{conversation}"/>
+  {:else}
+    <ConnectionSettings conversation="{conversation}"/>
+  {/if}
 {/if}

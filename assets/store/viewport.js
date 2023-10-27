@@ -14,6 +14,7 @@ export const viewport = writable(
     hasLeftColumn: false,
     hasRightColumn: false,
     isSingleColumn: true,
+    sidebarTransition: {},
     width: 0,
   },
   {
@@ -21,7 +22,8 @@ export const viewport = writable(
       const hasLeftColumn = width >= 800;
       const hasRightColumn = width >= 1200;
       const isSingleColumn = hasLeftColumn || hasRightColumn ? false : true;
-      this.set({hasLeftColumn, hasRightColumn, isSingleColumn, width});
+      const sidebarTransition = {duration: 250, x: isSingleColumn ? width : 0};
+      this.set({hasLeftColumn, hasRightColumn, isSingleColumn, sidebarTransition, width});
     },
   },
 );
