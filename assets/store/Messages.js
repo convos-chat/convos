@@ -73,16 +73,17 @@ export default class Messages extends Reactive {
   }
 
   update(params) {
-    if (this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw')) {
-      const raw = Object.hasOwn(params, 'raw') ? params.raw : this.raw;
+    const updateMessages = this._changed(params, 'expandUrlToMedia') || this._changed(params, 'raw');
+    super.update(params);
+
+    if (updateMessages) {
       for (let msg of this.messages) {
-        if (msg.hasBeenSeen) msg.embeds = this._embeds(msg);
-        msg.html = toHtml(raw, msg);
+        msg.embeds = msg.hasBeenSeen ? this._embeds(msg) : [];
+        msg.html = toHtml(this.raw, msg);
       }
-      this.update({messages: true});
     }
 
-    return super.update(params);
+    return this;
   }
 
   unshift(list) {
@@ -93,7 +94,6 @@ export default class Messages extends Reactive {
   _changed(params, paramName) {
     return Object.hasOwn(params, paramName) && params[paramName] !== this[paramName];
   }
-
 
   _className(msg, prev) {
     const classes = ['message'];
