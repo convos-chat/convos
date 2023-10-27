@@ -5,6 +5,7 @@ Revision history for perl distribution Convos
  - Fix not hiding the main menu when toggling the main menu sections
  - Fix not showing "0" notifications counter
  - Fix annoying animation when searching for conversations
+ - Fix rendering of notifications
 
 8.00 2023-10-26T21:30:00+0900
  - Add collapsible sidebar sections #840
