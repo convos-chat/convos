@@ -1,2 +1,2 @@
-% use Convos::Util qw(yaml);
-%== yaml encode => {excerpt => $doc->{excerpt}, body => "$doc->{body}", meta => $doc->{meta}, mtime => $doc->{mtime}, toc => $doc->{toc} || []};
+% use Convos::Util::YAML qw(encode_yaml);
+%== encode_yaml({excerpt => $doc->{excerpt}, body => "$doc->{body}", meta => $doc->{meta}, mtime => $doc->{mtime}, toc => $doc->{toc} || []})

@@ -2,7 +2,8 @@ package Convos::Plugin::Bot;
 use Mojo::Base 'Convos::Plugin', -async_await;
 
 use Convos::Core::Connection;
-use Convos::Util qw($CHANNEL_RE generate_secret pretty_connection_name require_module yaml);
+use Convos::Util       qw($CHANNEL_RE generate_secret pretty_connection_name require_module);
+use Convos::Util::YAML qw(decode_yaml);
 use Mojo::JSON::Pointer;
 use Mojo::Util qw(camelize);
 use Syntax::Keyword::Try;
@@ -141,7 +142,7 @@ sub _load_config {
   return if $self->config->data->{seen} and $seen == $self->config->data->{seen};
 
   $self->_log->info("Reloading @{[$self->_config_file]}");
-  my $config = yaml decode => $self->_config_file->slurp;
+  my $config = decode_yaml($self->_config_file->slurp);
   @$config{qw(action connection seen)} = ({}, {}, $seen);
   $config->{$_} ||= [] for qw(actions connections);
   my $old_password = $self->config->get('/generic/password') || '';

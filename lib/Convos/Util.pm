@@ -1,15 +1,15 @@
 package Convos::Util;
 use Mojo::Base 'Exporter';
 
-use Carp ();
+use Carp             ();
 use Mojo::Collection qw(c);
-use Mojo::File qw(path);
+use Mojo::File       qw(path);
 use Mojo::URL;
 use Mojo::IOLoop;
-use Mojo::Util qw(b64_decode b64_encode monkey_patch sha1_sum);
+use Mojo::Util    qw(b64_decode b64_encode monkey_patch sha1_sum);
 use Sys::Hostname ();
 use Time::HiRes   ();
-use Scalar::Util qw(blessed);
+use Scalar::Util  qw(blessed);
 
 $ENV{OPENSSL_BIN}      ||= 'openssl';
 $ENV{CONVOS_LOG_LEVEL} ||= $ENV{MOJO_LOG_LEVEL} || ($ENV{HARNESS_IS_VERBOSE} ? 'trace' : 'error');
@@ -18,7 +18,7 @@ our $CHANNEL_RE = qr{[#&]};
 our @EXPORT_OK  = (
   qw($CHANNEL_RE disk_usage generate_cert_p get_cert_info generate_secret),
   qw(has_many is_true logf pretty_connection_name pretty_error),
-  qw(require_module short_checksum yaml),
+  qw(require_module short_checksum),
 );
 
 sub disk_usage {
@@ -160,9 +160,7 @@ sub logf {
     $context,
     map {
       chomp;
-      blessed $_ && $_->can('to_string') ? $_->to_string
-        : ref $_                         ? Mojo::JSON::encode_json($_)
-        : $_
+      blessed $_ && $_->can('to_string') ? $_->to_string : ref $_ ? Mojo::JSON::encode_json($_) : $_
     } @args
   );
 }
@@ -217,20 +215,6 @@ sub short_checksum {
   my $short    = b64_encode pack 'H*', $checksum;
   $short =~ s![eioEIO+=/\n]!!g;
   return substr $short, 0, 16;
-}
-
-if (eval 'use YAML::XS 0.67;1') {
-  *yaml = sub {
-    local $YAML::XS::Boolean = 'JSON::PP';
-    return $_[0] eq 'decode' ? YAML::XS::Load($_[1]) : YAML::XS::Dump($_[1]);
-  };
-}
-else {
-  require YAML::PP;
-  my $pp = YAML::PP->new(boolean => 'JSON::PP');
-  *yaml = sub {
-    return $_[0] eq 'decode' ? $pp->load_string($_[1]) : $pp->dump_string($_[1]);
-  };
 }
 
 sub _generate_secret_fallback {
@@ -425,14 +409,6 @@ Will take a MD5 or SHA1 string and shorten it.
 
   # "7Mvfktc4v4MZ8q68"
   short_checksum "77de68daecd823babbb58edb1c8e14d7106e83bb";
-
-=head2 yaml
-
-  $str  = yaml encode => \%data;
-  $data = yaml decode => "---\nfoo: bar";
-
-Utility function to parse or generate YAML, using either L<YAML::PP> or
-L<YAML::XS>.
 
 =head1 SEE ALSO
 

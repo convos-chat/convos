@@ -32,6 +32,7 @@ my @PREREQS = (
   [core        => 'Text::Markdown::Hoedown'      => '1.03'],     # cms
   [core        => 'Time::Piece'                  => '1.20'],     # core
   [core        => 'Unicode::UTF8'                => '0.62'],     # irc
+  [core        => 'YAML::XS'                     => '0.88'],     # bot core
   [core        => 'perl'                         => '5.020'],    # core
 );
 
