@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+8.03 Not Released
+ - Bumped dependencies
+
 8.02 2023-10-27T22:23:00+0900
  - Added YAML::XS as a dependency
  - Fix rendering embeds when toggling raw messages

@@ -13,22 +13,22 @@ my @PREREQS = (
   [recommended => 'Cpanel::JSON::XS',   '4.09'],                 # speed
   [recommended => 'EV',                 '4.00'],                 # speed
   [recommended => 'IO::Socket::Socks',  '0.64'],                 # non-blocking
-  [core        => 'Crypt::Passphrase'            => '0.004'],    # password
-  [core        => 'Crypt::Passphrase::Argon2'    => '0.003'],    # password
-  [core        => 'Crypt::Passphrase::Bcrypt'    => '0.003'],    # password
+  [core        => 'Crypt::Passphrase'            => '0.016'],    # password
+  [core        => 'Crypt::Passphrase::Argon2'    => '0.009'],    # password
+  [core        => 'Crypt::Passphrase::Bcrypt'    => '0.007'],    # password
   [core        => 'File::HomeDir'                => '1.00'],     # core
   [core        => 'File::ReadBackwards'          => '1.06'],     # backend file
-  [core        => 'Future::AsyncAwait'           => '0.59'],     # core
+  [core        => 'Future::AsyncAwait'           => '0.66'],     # core
   [core        => 'HTTP::AcceptLanguage'         => '0.02'],     # i18n
   [core        => 'IO::Socket::SSL'              => '2.009'],    # cpanm -M ...
   [core        => 'IRC::Utils'                   => '0.12'],     # irc
   [core        => 'LinkEmbedder'                 => '1.20'],     # embed
   [core        => 'Module::Install'              => '1.10'],     # Text::MultiMarkdown
-  [core        => 'Mojolicious'                  => '9.31'],     # core
-  [core        => 'Mojolicious::Plugin::OpenAPI' => '5.07'],     # core
+  [core        => 'Mojolicious'                  => '9.35'],     # core
+  [core        => 'Mojolicious::Plugin::OpenAPI' => '5.09'],     # core
   [core        => 'Mojolicious::Plugin::Syslog'  => '0.06'],     # logging
   [core        => 'Parse::IRC'                   => '1.22'],     # irc
-  [core        => 'Syntax::Keyword::Try'         => '0.27'],     # core
+  [core        => 'Syntax::Keyword::Try'         => '0.29'],     # core
   [core        => 'Text::Markdown::Hoedown'      => '1.03'],     # cms
   [core        => 'Time::Piece'                  => '1.20'],     # core
   [core        => 'Unicode::UTF8'                => '0.62'],     # irc
