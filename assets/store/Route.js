@@ -16,6 +16,7 @@ export default class Route extends Reactive {
     this.prop('ro', 'query', () => this._query);
     this.prop('rw', 'baseUrl', '');
     this.prop('rw', 'enabled', false);
+    this.prop('persist', 'history', []);
 
     this._onClick = this._onClick.bind(this);
     this._onLocationChange = this._onLocationChange.bind(this);
@@ -39,9 +40,11 @@ export default class Route extends Reactive {
   }
 
   go(path, params = {}) {
-    if (path.indexOf(this.baseUrl) === 0) path = path.substr(this.baseUrl.length);
+    if (path.indexOf(this.baseUrl) === 0) path = path.substring(this.baseUrl.length);
     const url = this.baseUrl + path;
     if (url === this._location.href) return this;
+    this._addToHistory(this._location.href);
+    this._addToHistory(url);
     this._history[params.replace ? 'replaceState' : 'pushState']({}, document.title, url);
     this.update({path: true})._onLocationChange({});
   }
@@ -50,6 +53,12 @@ export default class Route extends Reactive {
     const query = this.query;
     if (Object.hasOwn(query, name)) return query[name];
     return def;
+  }
+
+  removeFromHistory(url) {
+    if (url.indexOf(this.baseUrl) === 0) url = url.substring(this.baseUrl.length);
+    const history = this.history.filter(i => i !== url);
+    this.update({history});
   }
 
   subscribe(cb) {
@@ -77,6 +86,14 @@ export default class Route extends Reactive {
   wsUrlFor(url) {
     const wsUrl = url.match(/^\w+:/) ? url : this.baseUrl + url;
     return wsUrl.replace(/^http/, 'ws');
+  }
+
+  _addToHistory(url) {
+    url = url.indexOf(this.baseUrl) === 0 ? url.substring(this.baseUrl.length) : url;
+    const history = this.history.filter(i => i !== url);
+    history.push(url);
+    while (history.length > 10) history.shift();
+    this.update({history});
   }
 
   _onClick(e) {
@@ -108,8 +125,9 @@ export default class Route extends Reactive {
   _onLocationChange() {
     if (!this.enabled) return;
     const abs = this._location.href;
-    const pathname = abs.substr(this.baseUrl.length);
+    const pathname = abs.substring(this.baseUrl.length);
     const url = pathname.split('#')[0].split('?');
+    this._addToHistory(abs);
     this._query = url.length === 2 ? qs.parse(url.pop()) : {};
     this._path = url[0];
     this._pathParts = url[0].length <= 1 ? [] : url[0].replace(/^\//, '').split('/').map(decodeURIComponent);

@@ -11,7 +11,8 @@ import {awayMessage} from '../js/chatHelpers';
 import {fly} from 'svelte/transition';
 import {getChannelMode} from '../js/constants';
 import {l, lmd} from '../store/I18N';
-import {onMount, tick} from 'svelte';
+import {route} from '../store/Route';
+import {tick} from 'svelte';
 
 export let conversation;
 
@@ -35,7 +36,12 @@ $: isOperator = $participants.me().modes.operator;
 $: if (conversation.path != conversationPath) updateState();
 
 function partConversation() {
-  conversation.send('/part', (res) => !res.errrors && ($activeMenu = ''));
+  conversation.send('/part', (res) => {
+    if (res.errrors) return;
+    $activeMenu = '';
+    route.removeFromHistory(location.href);
+    route.go(route.history.slice(-1)[0] || '/settings/conversation?connection_id=' + (conversation.connection_id || ''));
+  });
 }
 
 function saveChannelModes() {

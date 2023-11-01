@@ -227,7 +227,7 @@ function setConversationFromUser(user) {
     <p>{$l('Do you want to join?')}</p>
     <p>
       <Link href="#action:join:{conversationName}" class="btn prevent-default"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="#action:close:{conversationName}" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="/settings/conversation" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <div class="message is-highlighted">
