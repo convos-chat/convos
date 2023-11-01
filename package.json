@@ -1,7 +1,7 @@
 {
   "name": "convos",
   "description": "",
-  "version": "8.3.0",
+  "version": "8.5.0",
   "license": "Artistic-2.0",
   "repository": "https://github.com/convos-chat/convos",
   "type": "module",

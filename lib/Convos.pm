@@ -13,7 +13,7 @@ use Scalar::Util qw(blessed);
 
 use constant CONVOS_GET => +($ENV{CONVOS_COMMAND} || '') eq 'get';
 
-our $VERSION = '8.03';
+our $VERSION = '8.05';
 
 $ENV{CONVOS_REVERSE_PROXY} //= is_true 'ENV:MOJO_REVERSE_PROXY';
 $ENV{MOJO_REVERSE_PROXY}   //= is_true 'ENV:CONVOS_REVERSE_PROXY';
@@ -235,7 +235,7 @@ Convos - Multiuser chat application
 
 =head1 VERSION
 
-8.03
+8.05
 
 =head1 DESCRIPTION
 
