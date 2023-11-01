@@ -1,22 +1,12 @@
 <script>
-import ChatParticipants from '../components/ChatParticipants.svelte';
 import ConnectionForm from './ConnectionForm.svelte';
 import {activeMenu, viewport} from '../store/viewport';
 import {fly} from 'svelte/transition';
-import {getContext, onMount} from 'svelte';
 import {l} from '../store/I18N';
 
-export let conversation = {};
-
-const user = getContext('user');
-
-let connection = {};
+export let connection;
 
 $: connectionHost = connection.real_host || connection.url && connection.url.host;
-
-onMount(async () => {
-  connection = user.findConversation({connection_id: conversation.connection_id}) || {};
-});
 </script>
 
 {#if $viewport.hasRightColumn || $activeMenu === 'settings'}
@@ -35,7 +25,6 @@ onMount(async () => {
       <p>{$l('Currently connecting to %1.', connectionHost)}</p>
     {/if}
 
-    <ConnectionForm id="{conversation.connection_id}"/>
-    <ChatParticipants conversation="{conversation}"/>
+    <ConnectionForm {connection}/>
   </div>
 {/if}

@@ -262,8 +262,8 @@ function setConversationFromUser(user) {
 
 {#if !$conversation.is('not_found')}
   {#if conversation_id}
-    <ConversationSettings conversation="{conversation}"/>
+    <ConversationSettings {conversation}/>
   {:else}
-    <ConnectionSettings conversation="{conversation}"/>
+    <ConnectionSettings {connection} {conversation}/>
   {/if}
 {/if}

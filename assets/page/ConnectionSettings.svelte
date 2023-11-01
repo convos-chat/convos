@@ -19,5 +19,5 @@ export const title = connection_id === 'add' ? 'Add connection' : 'Edit connecti
 </ChatHeader>
 
 <main class="main">
-  <ConnectionForm id="{connection_id}" is_page="{true}"/>
+  <ConnectionForm is_page="{true}"/>
 </main>

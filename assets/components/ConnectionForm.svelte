@@ -7,14 +7,13 @@ import SelectField from '../components/form/SelectField.svelte';
 import TextArea from '../components/form/TextArea.svelte';
 import TextField from '../components/form/TextField.svelte';
 import {convosApi} from '../js/Api';
-import {getContext, onMount} from 'svelte';
+import {getContext} from 'svelte';
 import {is} from '../js/util';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {slide} from 'svelte/transition';
 
-let connection_id = 'add';
-export {connection_id as id};
+export let connection = {};
 export let is_page = false;
 
 const user = getContext('user');
@@ -25,15 +24,11 @@ const removeConnectionOp = convosApi.op('removeConnection');
 const updateConnectionOp = convosApi.op('updateConnection');
 
 let confirmConnectionId = '';
-let connection = {};
 let form = {};
 let showAdvancedSettings = false;
 let showAuthSettings = false;
 
-onMount(() => {
-  connection = connection_id === 'add' ? {} : $user.findConversation({connection_id}) || {};
-  connection.connection_id ? connectionToForm(connection) : defaultsToForm();
-});
+$: connection.connection_id ? connectionToForm(connection) : defaultsToForm();
 
 function connectionToForm(connection) {
   const fields = connection.url ? connection.url.toFields() : {};
@@ -89,7 +84,7 @@ async function saveConnection() {
     <span slot="label">{$l('Your name')}</span>
   </TextField>
 
-  {#if connection_id !== 'add'}
+  {#if connection.connection_id}
     <Checkbox name="want_to_be_connected" bind:value="{form.want_to_be_connected}">
       <span slot="label">{$l('Want to be connected')}</span>
     </Checkbox>
@@ -151,7 +146,7 @@ async function saveConnection() {
   {/if}
 
   <div class="form-actions">
-    {#if connection_id !== 'add'}
+    {#if connection.connection_id}
       <Button icon="save" op="{updateConnectionOp}"><span>{$l('Update')}</span></Button>
     {:else}
       <Button icon="plus-circle" op="{createConnectionOp}"><span>{$l('Add')}</span></Button>
@@ -160,11 +155,11 @@ async function saveConnection() {
   <OperationStatus op="{createConnectionOp}"/>
   <OperationStatus op="{updateConnectionOp}"/>
 
-  {#if connection_id !== 'add'}
+  {#if connection.connection_id}
     <h3>{$l('Delete')}</h3>
     <p>
       {$l('This will permanently remove chat logs and other connection related data.')}
-      {@html $lmd('Please confirm by entering "**%1**" before hitting **%2**.', connection_id, $l('Delete'))}
+      {@html $lmd('Please confirm by entering "**%1**" before hitting **%2**.', connection.connection_id, $l('Delete'))}
     </p>
 
     <TextField name="confirm_connection_id" bind:value="{confirmConnectionId}">
@@ -172,7 +167,7 @@ async function saveConnection() {
     </TextField>
 
     <div class="form-actions">
-      <Button icon="trash" op="{removeConnectionOp}" on:click="{removeConnection}" disabled="{confirmConnectionId !== connection_id}"><span>{$l('Delete')}</span></Button>
+      <Button icon="trash" op="{removeConnectionOp}" on:click="{removeConnection}" disabled="{confirmConnectionId !== connection.connection_id}"><span>{$l('Delete')}</span></Button>
     </div>
 
     <OperationStatus op="{removeConnectionOp}" success="Deleted."/>
