@@ -71,17 +71,14 @@ function onRouteClick(e) {
   if (!aEl) return;
 
   const isThumbnail = aEl.classList.contains('le-thumbnail');
-  const preventDefault = aEl.classList.contains('prevent-default');
-  if (isThumbnail || preventDefault) e.preventDefault();
   if (isThumbnail) return showFullscreen(e, aEl.querySelector('img'));
 
-  const isSafe = preventDefault || aEl.closest('.embed');
-  const action = isSafe && aEl.hash.match(/action:([a-z]+):(.*)$/) || ['all', 'unknown', 'value'];
+  const action = aEl.hash.match(/action:([a-z]+):(.*)$/) || ['all', 'unknown', 'value'];
+  if (action[1] !== 'unknown') e.preventDefault();
   action[2] = decodeURIComponent(action[2]);
 
-  if (['close', 'join', 'whois'].indexOf(action[1]) !== -1) {
+  if (['join', 'whois'].indexOf(action[1]) !== -1) {
     conversation.send('/' + action[1] + ' ' + action[2]);
-    if (action[1] === 'close') route.go('/settings/conversation');
   }
   else if (action[1] === 'expand') {
     const msg = conversation.messages.get(action[2]);
@@ -176,10 +173,10 @@ function setConversationFromUser(user) {
         <span class="tooltip">{nbsp(message.ts.toLocaleString())}</span>
       </div>
       <Icon name="pick:{message.from}" color="{message.color}"/>
-      <a href="#action:popover:{message.index}" class="message__from prevent-default" style="color:{message.color}" tabindex="-1">{message.from}</a>
+      <a href="#action:popover:{message.index}" class="message__from" style="color:{message.color}" tabindex="-1">{message.from}</a>
       <div class="message__text">
         {#if message.details}
-          <a href="#action:expand:{message.index}" class="prevent-default"><Icon name="{message.expanded ? 'caret-square-up' : 'caret-square-down'}"/></a>
+          <a href="#action:expand:{message.index}"><Icon name="{message.expanded ? 'caret-square-up' : 'caret-square-down'}"/></a>
         {/if}
         {@html message.html}
       </div>
@@ -194,10 +191,10 @@ function setConversationFromUser(user) {
       <!-- popover message menu -->
       {#if popoverIndex === message.index}
         <div class="popover" transition:fade="{{duration: 200}}">
-          <a href="#action:popover:{message.index}" class="prevent-default"><Icon name="pick:{message.from}" color="{message.color}"/> {message.from}</a>
-          <a href="#action:mention:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="quote-left"/> {$l('Mention')}</a>
-          <a href="#action:join:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="comments"/> {$l('Chat')}</a>
-          <a href="#action:whois:{encodeURIComponent(message.from)}" class="on-hover prevent-default"><Icon name="address-card"/> {$l('Whois')}</a>
+          <a href="#action:popover:{message.index}"><Icon name="pick:{message.from}" color="{message.color}"/> {message.from}</a>
+          <a href="#action:mention:{encodeURIComponent(message.from)}" class="on-hover"><Icon name="quote-left"/> {$l('Mention')}</a>
+          <a href="#action:join:{encodeURIComponent(message.from)}" class="on-hover"><Icon name="comments"/> {$l('Chat')}</a>
+          <a href="#action:whois:{encodeURIComponent(message.from)}" class="on-hover"><Icon name="address-card"/> {$l('Whois')}</a>
         </div>
       {/if}
     </div>
@@ -215,8 +212,8 @@ function setConversationFromUser(user) {
     <h2>{$l('You are not part of this conversation.')}</h2>
     <p>{$l('Do you want to chat with "%1"?', $conversation.name)}</p>
     <p>
-      <Link href="#action:join:{conversationName}" class="btn prevent-default"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="/settings/conversation" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="/settings/conversation" class="btn is-secondary"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if !$connection.is('unreachable') && $connection.frozen}
     <a href="#toggle" class="message is-highlighted" on:click="{activeMenu.toggle}">
@@ -226,8 +223,8 @@ function setConversationFromUser(user) {
     <h2>{$l('You are invited to join %1.', conversation.name)}</h2>
     <p>{$l('Do you want to join?')}</p>
     <p>
-      <Link href="#action:join:{conversationName}" class="btn prevent-default"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
-      <Link href="/settings/conversation" class="btn is-secondary prevent-default"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
+      <Link href="#action:join:{conversationName}" class="btn"><Icon name="thumbs-up"/> <span>{$l('Yes')}</span></Link>
+      <Link href="/settings/conversation" class="btn is-secondary"><Icon name="thumbs-down"/> <span>{$l('No')}</span></Link>
     </p>
   {:else if $conversation.frozen && !$conversation.is('locked')}
     <div class="message is-highlighted">

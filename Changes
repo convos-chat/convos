@@ -6,6 +6,7 @@ Revision history for perl distribution Convos
  - Fix not fetching channel mode if conversation is frozen
  - Fix not showing channel mode when conversation is loaded
  - Fix updating connection settings when changing connections
+ - Fix "No" button when going to a closed conversation
 
 8.03 2023-10-31T08:39:00+0900
  - Bumped dependencies
