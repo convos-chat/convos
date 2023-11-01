@@ -73,9 +73,10 @@ async function saveConversationSettings() {
   saveConversationSettingsOp.update({status: 'success'});
 }
 
-async function updateState() {
+function updateState() {
   if (Object.keys(conversation.modes).length === 0 && !isPrivate && !conversation.frozen) {
-    conversation.send('/mode', () => {
+    conversation.send('/mode', (msg) => {
+      msg.bubbles = false;
       checkboxes = Object.assign({}, checkboxes, conversation.modes);
       topic = conversation.topic;
     });

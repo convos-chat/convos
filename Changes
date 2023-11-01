@@ -4,6 +4,7 @@ Revision history for perl distribution Convos
  - Leaving a conversation will take you to the previous onc
    (Max 10 items in the history)
  - Fix not fetching channel mode if conversation is frozen
+ - Fix not showing channel mode when conversation is loaded
 
 8.03 2023-10-31T08:39:00+0900
  - Bumped dependencies
