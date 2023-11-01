@@ -33,7 +33,7 @@ let topic = '';
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
-$: if (conversation.path != conversationPath) updateState();
+$: if (conversation.path != conversationPath) { conversationPath = conversation.path; updateState() }
 
 function partConversation() {
   conversation.send('/part', (res) => {
@@ -74,14 +74,12 @@ async function saveConversationSettings() {
 }
 
 async function updateState() {
-  if (Object.keys(conversation.modes).length === 0 && !isPrivate) {
-    await new Promise(r => conversation.send('/mode', r));
+  if (Object.keys(conversation.modes).length === 0 && !isPrivate && !conversation.frozen) {
+    conversation.send('/mode', () => {
+      checkboxes = Object.assign({}, checkboxes, conversation.modes);
+      topic = conversation.topic;
+    });
   }
-
-  await tick();
-  checkboxes = Object.assign({}, checkboxes, conversation.modes);
-  conversationPath = conversation.path;
-  topic = conversation.topic;
 }
 
 function updateInfo() {
