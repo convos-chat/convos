@@ -1,1 +1,8 @@
-Hello {{user}}!
+{% extends "layouts/app" %}
+{% block content %}
+<div class="wrapper">
+  <main role="document">
+    <p>Hello {{user}} user!</p>
+  </main>
+</div>
+{% endblock %}

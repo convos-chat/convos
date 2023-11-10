@@ -1,0 +1,2 @@
+{% include "css/base/root" %}
+{% include "css/base/typography" %}

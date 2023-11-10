@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}} - Convos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>{% include "css/base/index" %}</style>
+    <noscript>
+      <style>{% include "css/base/noscript" %}</style>
+    </noscript>
+  </head>
+  <body>
+    <div class="content-wrapper">
+      {% block content %}{% endblock content %}
+    </div>
+    <noscript>
+      <div class="javascript-not-supported">
+        <h1>Convos will not work without Javascript</h1>
+        <p>Please enable Javascript and reload this page.</p>
+      </div
+    </noscript>
+  </body>
+</html>

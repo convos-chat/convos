@@ -1,0 +1,2 @@
+body > * { display: none; }
+.javascript-not-supported { display: block !important; }
