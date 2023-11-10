@@ -1,0 +1,4 @@
+<form action="post" class="chat-input">
+  <input type="text" name="message">
+  <button>Send</button>
+</form>

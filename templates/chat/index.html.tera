@@ -1,0 +1,14 @@
+{% extends "layouts/app" %}
+
+{% block css %}
+{% include "css/chat/index" %}
+{% endblock css %}
+
+{% block content %}
+<div class="chat-grid">
+  {% include 'chat/messages' %}
+  {% include 'chat/input' %}
+  {% include 'chat/menu' %}
+  {% include 'chat/settings' %}
+</div>
+{% endblock %}

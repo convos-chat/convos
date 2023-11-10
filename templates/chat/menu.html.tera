@@ -1,0 +1,3 @@
+<nav class="chat-menu" hx-boost="true">
+  <h2>Convos</h2>
+</nav>

@@ -4,7 +4,10 @@
     <title>{{title}} - Convos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <style>{% include "css/base/index" %}</style>
+    <style>
+      {% include "css/base/index" %}
+      {% block css %}{% endblock css %}
+    </style>
     <noscript>
       <style>{% include "css/base/noscript" %}</style>
     </noscript>

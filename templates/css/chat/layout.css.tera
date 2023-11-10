@@ -1,0 +1,28 @@
+.chat-grid {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 16rem auto 16rem;
+  grid-template-areas: "chat-menu header aside"
+                       "chat-menu main   aside"
+                       "chat-menu footer aside";
+  h1 {
+    font-size: var(--h1-font-size);
+    margin-block: 0;
+    backdrop-filter: blur(20px);
+    padding: var(--gutter);
+    position: sticky;
+    top: 0;
+  }
+}
+
+.chat-grid > .chat-menu { grid-area: chat-menu; }
+.chat-grid > .chat-input { grid-area: footer; }
+.chat-grid > .chat-messages { grid-area: main; }
+.chat-grid > .chat-settings { grid-area: aside; }
+
+.chat-messages,
+.chat-settings,
+.chat-menu {
+  overflow: auto;
+}
