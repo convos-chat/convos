@@ -33,3 +33,10 @@ convos*_source.tar.bz2
 /prime/
 /stage/
 /public/assets/*.development.*
+
+# rust
+**/*.rs.bk
+*.pdb
+debug/
+local/
+target/
