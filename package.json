@@ -28,7 +28,7 @@
     "highlight.js": "^11.9.0",
     "js-cookie": "^3.0.5",
     "jsdoc": "^4.0.2",
-    "jsdom": "^23.0.0",
+    "jsdom": "^24.0.0",
     "jsonhtmlify": "^0.1.0",
     "lodash": "^4.17.21",
     "qs": "^6.11.2",
