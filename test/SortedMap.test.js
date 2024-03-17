@@ -1,7 +1,7 @@
 import SortedMap from '../assets/js/SortedMap';
-import {expect, test} from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-test('SortedMap', () => {
+describe('SortedMap', () => {
   const m = new SortedMap();
   expect(m).toBe(m);
 
