@@ -1,7 +1,7 @@
 import Conversation from '../assets/store/Conversation';
 import Time from '../assets/js/Time';
 import {conversationUrl, onInfinityVisibility} from '../assets/js/chatHelpers';
-import {expect, test} from 'vitest';
+import {describe, expect, test} from 'vitest';
 
 window.open = (url, name) => {
   const w = {opened: true, events: {}, name, url};
@@ -10,7 +10,7 @@ window.open = (url, name) => {
   return w;
 };
 
-test('onInfinityVisibility - load enough messages', () => {
+describe('onInfinityVisibility - load enough messages', () => {
   const conversation = new Conversation({connection_id: 'irc-foo', conversation_id: '#convos'});
 
   conversation.update({status: 'success'});
@@ -34,7 +34,7 @@ test('onInfinityVisibility - load enough messages', () => {
   });
 });
 
-test('conversationUrl', () => {
+describe('conversationUrl', () => {
   test('conversationUrl', () => {
     const ts = new Time('1983-02-24T05:06:07Z');
     expect(conversationUrl({connection_id: 'irc-foo', ts})).toBe('/chat/irc-foo#1983-02-24T05:06:07.000Z');
