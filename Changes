@@ -1,5 +1,8 @@
 Revision history for perl distribution Convos
 
+8.06 Not Released
+ - Bump dependencies #881 #885
+
 8.05 2023-11-01T10:42:00+0900
  - Something went wrong with the release script
 

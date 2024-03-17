@@ -13,9 +13,9 @@ my @PREREQS = (
   [recommended => 'Cpanel::JSON::XS',   '4.09'],                 # speed
   [recommended => 'EV',                 '4.00'],                 # speed
   [recommended => 'IO::Socket::Socks',  '0.64'],                 # non-blocking
-  [core        => 'Crypt::Passphrase'            => '0.016'],    # password
+  [core        => 'Crypt::Passphrase'            => '0.019'],    # password
   [core        => 'Crypt::Passphrase::Argon2'    => '0.009'],    # password
-  [core        => 'Crypt::Passphrase::Bcrypt'    => '0.007'],    # password
+  [core        => 'Crypt::Passphrase::Bcrypt'    => '0.008'],    # password
   [core        => 'File::HomeDir'                => '1.00'],     # core
   [core        => 'File::ReadBackwards'          => '1.06'],     # backend file
   [core        => 'Future::AsyncAwait'           => '0.66'],     # core
