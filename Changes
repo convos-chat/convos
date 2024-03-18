@@ -1,6 +1,6 @@
 Revision history for perl distribution Convos
 
-8.06 Not Released
+8.06 2024-03-18T10:19:00+0900
  - Bump dependencies #881 #885
  - Fix editing connections #877
  - Fix showing correct text after clicking on "Check for updates" #829
