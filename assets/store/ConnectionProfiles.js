@@ -15,7 +15,20 @@ export default class ConnectionProfiles extends Reactive {
   }
 
   defaultProfile() {
-    return {max_bulk_message_size: 3, max_message_length: 512, url: new ConnectionURL('irc://0.0.0.0')};
+    return {
+      conversation_id: '',
+      host: '',
+      is_default: false,
+      is_forced: true,
+      max_bulk_message_size: 3,
+      max_message_length: 512,
+      service_accounts: 'chanserv, nickserv',
+      skip_queue: false,
+      tls: true,
+      tls_verify: true,
+      webirc_password: '',
+      url: new ConnectionURL('irc://0.0.0.0'),
+    };
   }
 
   is(status) {

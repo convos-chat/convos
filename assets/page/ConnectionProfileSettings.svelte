@@ -22,14 +22,14 @@ const connectionProfiles = user.connectionProfiles;
 const removeConnectionProfileOp = convosApi.op('removeConnectionProfile');
 const saveConnectionProfileOp = convosApi.op('saveConnectionProfile');
 
-let form = {};
+let form = connectionProfiles.defaultProfile();
 let showAdvancedSettings = false;
 
 $: isAdmin = user.roles.has('admin');
 
 onMount(async () => {
   await connectionProfiles.load();
-  form = {...($connectionProfiles.find(profile_id) || $connectionProfiles.defaultProfile())};
+  Object.assign(form, connectionProfiles.defaultProfile(), $connectionProfiles.find(profile_id) || {});
 });
 
 async function removeConnectionProfile() {
