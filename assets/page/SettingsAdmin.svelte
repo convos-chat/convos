@@ -20,7 +20,7 @@ let diskUsage = null;
 let form = {};
 
 $: latestVersion = $checkForUpdatesOp.res.body.available;
-$: hasLatests = latestVersion === settings('version');
+$: hasLatests = latestVersion == settings('version'); // Using "==" since it might be a combination of numbers and strings
 
 onMount(async () => {
   await getSettingsOp.perform();
