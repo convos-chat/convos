@@ -3,11 +3,16 @@ import ChatHeader from '../components/ChatHeader.svelte';
 import ConnectionForm from '../components/ConnectionForm.svelte';
 import Icon from '../components/Icon.svelte';
 import Link from '../components/Link.svelte';
+import {getContext} from 'svelte';
 import {l} from '../store/I18N';
 import {nbsp} from '../js/util';
 
 export let connection_id = 'add';
 export const title = connection_id === 'add' ? 'Add connection' : 'Edit connection';
+
+const user = getContext('user');
+
+$: connection = connection_id === 'add' ? {} : user.findConversation({connection_id});
 </script>
 
 <ChatHeader>
@@ -19,5 +24,5 @@ export const title = connection_id === 'add' ? 'Add connection' : 'Edit connecti
 </ChatHeader>
 
 <main class="main">
-  <ConnectionForm is_page="{true}"/>
+  <ConnectionForm {connection} is_page="{true}"/>
 </main>
