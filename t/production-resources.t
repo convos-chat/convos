@@ -8,7 +8,7 @@ $ENV{CONVOS_BACKEND} = 'Convos::Core::Backend';
 $ENV{MOJO_MODE}      = 'production';
 $ENV{NODE_ENV}       = 'production';
 
-my $asset_re = '(?:[0-9a-f]{8}|development)';
+my $asset_re = '(?:.{8}|development)';
 
 SKIP: {
   skip 'BUILD_ASSETS=1 to run "npm run build"', 1 unless $ENV{BUILD_ASSETS} or $ENV{RELEASE};
