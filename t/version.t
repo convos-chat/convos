@@ -62,9 +62,9 @@ my ($api_version) = path(qw(public convos-api.yaml))->slurp =~ /\sversion:\s*(\S
 $failed += is($api_version, $node_wanted, 'correct version in public/convos-api.yaml') ? 0 : 1;
 
 if ($ENV{RELEASE} and !$failed) {
-  system git => add    => 'public';
-  system git => commit => -a => -m => "Released v$perl_wanted";
-  system git => tag    => "v$perl_wanted";
+  system(git => add    => 'public')                             and exit $?;
+  system(git => commit => -a => -m => "Released v$perl_wanted") and exit $?;
+  system(git => tag    => "v$perl_wanted")                      and exit $?;
   print <<'HERE';
 
   All files updated correctly.
