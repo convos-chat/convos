@@ -23,7 +23,7 @@
   "devDependencies": {
     "@fortawesome/fontawesome-free": "6.5.1",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
-    "eslint": "^8.51.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-svelte": "^2.34.0",
     "highlight.js": "^11.9.0",
     "js-cookie": "^3.0.5",
