@@ -16,6 +16,7 @@ COPY script /app/script
 COPY templates /app/templates
 
 ENV CONVOS_DEPENDENCIES all
+ENV CRYPT_ARGON2_ARCH=NONE
 RUN apk add --no-cache curl openssl perl perl-io-socket-ssl perl-net-ssleay wget && \
   apk add --no-cache --virtual builddeps build-base perl-dev && \
   /app/script/convos install --all && \
