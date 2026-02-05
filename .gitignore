@@ -16,10 +16,10 @@
 /META*
 /MYMETA*
 /pm_to_blib
-/public/docs/*html
-/public/docs/fonts/
-/public/docs/scripts/
-/public/docs/styles/
+/pkg/server/public/docs/*html
+/pkg/server/public/docs/fonts/
+/pkg/server/public/docs/scripts/
+/pkg/server/public/docs/styles/
 /assets/rollup.config.d/
 .perl-version
 assets/sass/.sass-cache/
@@ -32,4 +32,16 @@ convos*_source.tar.bz2
 /parts/
 /prime/
 /stage/
-/public/assets/*.development.*
+/pkg/server/public/assets/*.development.*
+/pkg/server/public/docs/js-modules-visualized.html
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+convos

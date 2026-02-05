@@ -1,0 +1,58 @@
+version: "2"
+run:
+  timeout: "10m"
+linters:
+  enable:
+    - bodyclose
+    - err113
+    - errorlint
+    - forcetypeassert
+    - goconst
+    - gocritic
+    - gosec
+    - makezero
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nonamedreturns
+    - paralleltest
+    - prealloc
+    - predeclared
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+  settings:
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - govet
+        path: (.+)_test\.go
+    # Ignoring HTTP Write errors is common as there is nothing to be done if
+    # Write fails.
+      - path: (.+)\.go$
+        text: Error return value of .(w.Write). is not checked
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

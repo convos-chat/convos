@@ -1,4 +1,4 @@
-import {emojis} from '../../public/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json';
+import {emojis} from '../../pkg/server/public/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json';
 import {i18n} from '../../assets/store/I18N';
 
 test('l()', () => {

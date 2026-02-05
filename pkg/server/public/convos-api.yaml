@@ -926,12 +926,18 @@ definitions:
       from:
         description: Identifier for who sent this message
         type: string
+      highlight:
+        description: Whether this message matched a highlight rule
+        type: boolean
       message:
         description: The message
         type: string
       ts:
         description: 'Example: 2015-09-06T13:49:37Z'
         format: date-time
+        type: string
+      type:
+        description: 'Message type: private, notice, action'
         type: string
 
   Notification:

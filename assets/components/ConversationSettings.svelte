@@ -33,6 +33,8 @@ let topic = '';
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
+// FIXME: This reactive, so while it shows the active modes, it stops us from disabling them.
+$: if (Object.keys($conversation.modes).length > 0) { checkboxes = {...checkboxes, ...$conversation.modes}; updateState() }
 $: if (conversation.path != conversationPath) { conversationPath = conversation.path; updateState() }
 
 function partConversation() {

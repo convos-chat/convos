@@ -1,0 +1,39 @@
+version: "3"
+
+tasks:
+  frontend:install:
+    desc: Install frontend dependencies
+    cmds:
+      - pnpm install
+
+  frontend:build:
+    desc: Build Svelte frontend assets
+    deps: [frontend:install]
+    cmds:
+      - rm -f pkg/server/public/assets/convos.????????.js
+      - pnpm run build
+      - git add pkg/server/public/assets/
+
+  lint:
+    desc: Run linters
+    cmds:
+      - golangci-lint run
+  generate:
+    desc: Regenerate code
+    cmds:
+      - go generate ./...
+  build:
+    desc: Build the standalone Convos binary
+    deps: [frontend:build]
+    cmds:
+      - go build -o convos convos.go
+
+  run:
+    desc: Run Convos
+    cmds:
+      - go run convos.go daemon
+
+  test:
+    desc: Run the tests
+    cmds:
+      - go test -cover ./...

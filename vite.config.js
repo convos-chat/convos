@@ -19,7 +19,7 @@ export default defineConfig(({mode}) => {
       assetsInlineLimit: 0,
       cssCodeSplit: false,
       emptyOutDir: false,
-      outDir: 'public',
+      outDir: 'pkg/server/public',
       minify: mode === 'development' ? false : 'esbuild',
       rollupOptions: {input: './assets/convos.js', output},
     },
@@ -27,8 +27,8 @@ export default defineConfig(({mode}) => {
     publicDir: 'does/not/matter',
     resolve: {
       alias: {
-        '../font/fa-5.15.4': './public/font/fa-5.15.4',
-        '../font/google': './public/font/google',
+        '../font/fa-5.15.4': './pkg/server/public/font/fa-5.15.4',
+        '../font/google': './pkg/server/public/font/google',
       },
     },
     test: {

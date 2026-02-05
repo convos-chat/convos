@@ -68,8 +68,12 @@ sub messages {
 
 sub t {
   require Test::Mojo;
-  my $t = Test::Mojo->new($_[1] || 'Convos');
-  Mojo::IOLoop->one_tick until $t->app->core->ready;
+  my $class_or_url = $ENV{CONVOS_TEST_BACKEND_URL} || $_[1] || 'Convos';
+  Test::More::diag("Test::Mojo->new('$class_or_url')");
+  my $t = Test::Mojo->new($class_or_url);
+  unless ($class_or_url =~ m!^https?://!) {
+    Mojo::IOLoop->one_tick until $t->app->core->ready;
+  }
   return $t;
 }
 

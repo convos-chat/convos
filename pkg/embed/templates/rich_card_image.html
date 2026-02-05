@@ -1,0 +1,9 @@
+<div class="le-rich le-card le-image-card le-provider-{{.Provider}}">
+  <a href="{{.URL}}" class="le-thumbnail"><img src="{{.Thumbnail}}" alt="{{.Alt}}"></a>
+  <h3>{{.Title}}</h3>
+  {{if .Description}}<p class="le-description">{{.Description}}</p>{{end}}
+  <div class="le-meta">
+    {{if .AuthorName}}<span class="le-author-link"><a href="{{.AuthorURL}}">{{.AuthorName}}</a></span>{{end}}
+    <span class="le-goto-link"><a href="{{.URL}}"><span>{{.URL}}</span></a></span>
+  </div>
+</div>

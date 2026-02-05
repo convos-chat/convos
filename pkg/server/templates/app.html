@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{if eq .OrganizationName "Convos"}}Better group chat - Convos{{else}}Better group chat - Convos for {{.OrganizationName}}{{end}}</title>
+    <meta name="description" content="A chat application that runs in your browser">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@convosby">
+    <meta property="og:type" content="object">
+    <meta property="og:site_name" content="{{.OrganizationName}}">
+    <meta property="og:description" content="A chat application that runs in your browser">
+    <meta property="og:image" content="/images/convos_screenshot.jpg">
+    <meta property="og:title" content="Better group chat - Convos">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#00451D">
+    <meta name="msapplication-TileColor" content="#00451D">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.2447df68.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.9e1affe1.png">
+
+    <meta name="contactorganization" content="{{.OrganizationName}}">
+    <meta name="contactnetworkaddress" content="{{.OrganizationURL}}">
+    <meta name="convos:base_url" content="{{.BaseURL}}">
+    <meta name="convos:contact" content="{{.Contact}}">
+    <meta name="convos:existing_user" content="{{.ExistingUser}}">
+    <meta name="convos:first_user" content="{{.FirstUser}}">
+    <meta name="convos:open_to_public" content="{{.OpenToPublic}}">
+    <meta name="convos:start_app" content="{{.StartApp}}">
+    <meta name="convos:status" content="{{.Status}}">
+    <meta name="csrf" content="{{.CSRFToken}}">
+    <meta name="version" content="{{.Version}}">
+
+    <noscript><style>.has-js { display: none; }</style></noscript>
+    {{if .AssetCSS}}<link rel="stylesheet" href="/assets/{{.AssetCSS}}">{{end}}
+    {{if .PrimaryTheme}}<link rel="stylesheet" type="text/css" id="theme_primary" href="{{.PrimaryTheme.URL}}" title="{{.PrimaryTheme.Title}}">{{end}}
+    {{range .Themes}}<link rel="alternate stylesheet" type="text/css" id="theme_alt__{{.ID}}" href="{{.URL}}" title="{{.Title}}">
+    {{end}}
+  </head>
+  <body class="no-js no-notify no-mouse no-touch for-cms">
+    <main class="cms-main has-js">
+      <h2>Loading...</h2>
+      <p><i class="fas fa-download"></i> Downloaded Convos.</p>
+      <p><i class="fas fa-spinner fa-spin"></i> Starting Convos...</p>
+    </main>
+    <div class="footer--wrapper is-small"></div>
+    {{if .AssetJS}}<script src="/assets/{{.AssetJS}}"></script>{{end}}
+  </body>
+</html>

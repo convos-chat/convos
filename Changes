@@ -1,5 +1,16 @@
 Revision history for perl distribution Convos
 
+9.0 TBD
+ - This is a complete rewrite of the Perl backend in Go.
+   We attempt to be as compatible with the existing Perl backend
+   as possible, with the following caveats:
+   - The plugin system is no longer supported as it was tightly
+     coupled to Perl. We will probably look into a new drop in binary
+     based plugin system in the future, but for now there's no plugin support
+     The core plugins from the perl version are now part of the core.
+  - The CMS system is removed. If you need a static site renderer 
+    we recommend using something like Hugo or Jekyll instead.
+
 8.07 2024-03-21T08:25:00+0900
  - Fix version number
 

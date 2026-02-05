@@ -1,0 +1,1278 @@
+---
+openapi: 3.0.1
+info:
+  title: Convos API specification
+  version: 8.5.0
+  description: This document describes the API for Convos, a multiuser persistent IRC proxy with web interface.
+  contact:
+    name: Convos
+    url: https://github.com/convos-chat/convos
+  license:
+    name: Artistic License version 2.0
+    url: http://opensource.org/licenses/Artistic-2.0
+  termsOfService: SSL (HTTPS) is highly suggested, since login credentials and session cookies are transmitted over this API.
+
+servers:
+  - url: /api
+
+paths:
+  /check-for-updates:
+    get:
+      operationId: checkForUpdates
+      summary: Check if a new update is available
+      responses:
+        "200":
+          description: Version information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: number
+                  running:
+                    type: number
+
+  /connection/{connection_id}:
+    delete:
+      operationId: removeConnection
+      summary: Delete a connection and all assosiated data.
+      tags: [connection]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+      responses:
+        "200":
+          description: Remove a connection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: updateConnection
+      summary: Update a connection.
+      tags: [connection]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                on_connect_commands:
+                  description: Commands to be run after the connection is established
+                  type: array
+                  items:
+                    type: string
+                url:
+                  description: "Example: irc://user:pass@irc.perl.org?nick=superman"
+                  format: uri
+                  type: string
+                wanted_state:
+                  description: Connection state
+                  enum: [connected, disconnected]
+                  type: string
+      responses:
+        "200":
+          description: Update a connection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection/{connection_id}/conversation/{conversation_id}/messages:
+    get:
+      operationId: conversationMessages
+      summary: "Get a list of messages. Note: this resource require the user to be authenticated first."
+      tags: [conversation]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+        - $ref: "#/components/parameters/conversation_id"
+        - $ref: "#/components/parameters/after"
+        - $ref: "#/components/parameters/around"
+        - $ref: "#/components/parameters/before"
+        - name: limit
+          in: query
+          description: Max number of messages to retrieve
+          schema:
+            type: integer
+        - name: match
+          in: query
+          description: Messages must match this string
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of messages.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  after:
+                    type: string
+                    format: date-time
+                  before:
+                    type: string
+                    format: date-time
+                  end:
+                    description: Whether there are no more messages to fetch
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection/{connection_id}/conversation/{conversation_id}/read:
+    post:
+      operationId: markConversationAsRead
+      summary: Clears unread for a conversation.
+      tags: [conversation]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+        - $ref: "#/components/parameters/conversation_id"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection/{connection_id}/messages:
+    get:
+      operationId: connectionMessages
+      summary: "Get a list of messages. Note: this resource require the user to be authenticated first."
+      tags: [conversation]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+        - $ref: "#/components/parameters/after"
+        - $ref: "#/components/parameters/around"
+        - $ref: "#/components/parameters/before"
+        - name: limit
+          in: query
+          description: Max number of messages to retrieve
+          schema:
+            type: integer
+        - name: match
+          in: query
+          description: Messages must match this string
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of messages.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  after:
+                    type: string
+                    format: date-time
+                  before:
+                    type: string
+                    format: date-time
+                  end:
+                    description: Whether there are no more messages to fetch
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection/{connection_id}/read:
+    post:
+      operationId: markConnectionAsRead
+      summary: Clears unread for a connection.
+      tags: [connection]
+      parameters:
+        - $ref: "#/components/parameters/connection_id"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connections:
+    get:
+      operationId: listConnections
+      summary: Get all the connections for a user.
+      tags: [connection]
+      responses:
+        "200":
+          description: List of connections.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connections:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Connection"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: createConnection
+      summary: Add a connection.
+      tags: [connection]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [url]
+              type: object
+              properties:
+                conversation_id:
+                  description: "Example: #convos"
+                  type: string
+                on_connect_commands:
+                  description: Commands to be run after the connection is established
+                  type: array
+                  items:
+                    type: string
+                url:
+                  description: "Example: irc://user:pass@irc.perl.org?nick=superman"
+                  type: string
+                wanted_state:
+                  description: Connection state
+                  enum: [connected, disconnected]
+                  type: string
+      responses:
+        "200":
+          description: Connection information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /connection-profiles:
+    get:
+      operationId: listConnectionProfiles
+      summary: List all connection profiles.
+      tags: [connection, connection-profile]
+      responses:
+        "200":
+          description: List of profiles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profiles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ConnectionProfile"
+    post:
+      operationId: saveConnectionProfile
+      summary: Update or create a profile.
+      tags: [connection, connection-profile]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionProfile"
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionProfile"
+
+  /connection-profiles/{id}:
+    delete:
+      operationId: removeConnectionProfile
+      summary: Remove a connection profile.
+      tags: [connection, connection-profile]
+      parameters:
+        - name: id
+          in: path
+          description: A unique profile identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /conversations:
+    get:
+      operationId: listConversations
+      summary: Get a list of all conversations.
+      tags: [conversation]
+      responses:
+        "200":
+          description: List of conversations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Conversation"
+
+  /embed:
+    get:
+      operationId: embed
+      summary: Get information from a URL
+      tags: ["misc"]
+      parameters:
+        - name: url
+          in: query
+          description: URL to resource
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Information about resource.
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /files:
+    get:
+      operationId: getFiles
+      summary: Retrieve list of uploaded files.
+      tags: [files]
+      parameters:
+        - name: after
+          in: query
+          description: Find files after a file ID, can be "after", "prev" or the last file ID from the response
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Max number of files to retrieve
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Files found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  after:
+                    description: Can be used as "after" query param to get the current page
+                    type: string
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, saved, size]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        saved:
+                          type: string
+                          format: date-time
+                        size:
+                          type: integer
+                  next:
+                    description: Indicates if there is a next page
+                    type: string
+                  prev:
+                    description: Can be used as "after" query param to go to the previous page
+                    type: string
+    post:
+      operationId: uploadFile
+      summary: Upload file.
+      tags: [files]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required: [file]
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                id:
+                  type: string
+                write_only:
+                  type: boolean
+      responses:
+        "200":
+          description: Successfully uploaded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      type: object
+                      required: [ext, filename, id, saved, uid, url]
+                      properties:
+                        ext:
+                          type: string
+                        filename:
+                          type: string
+                        id:
+                          type: string
+                        saved:
+                          format: date-time
+                          type: string
+                        uid:
+                          type: string
+                        url:
+                          format: uri
+                          type: string
+
+  /files/{uid}/{fid}:
+    get:
+      operationId: getFile
+      summary: Retrieve uploaded file.
+      tags: [files]
+      parameters:
+        - name: fid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File found and served.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+    delete:
+      operationId: deleteFiles
+      summary: Delete one (or more) uploaded file.
+      tags: [files]
+      parameters:
+        - name: fid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+
+  /i18n/{lang}:
+    get:
+      operationId: getDictionary
+      summary: Retrieve translations.
+      tags: [i18n]
+      parameters:
+        - name: lang
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dictionary.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [dictionary]
+                properties:
+                  dictionary:
+                    type: object
+
+  /notifications:
+    get:
+      description: A notification is added once your name is mentioned in a chat.
+      summary: Get list of notications.
+      tags: [chat]
+      operationId: notificationMessages
+      responses:
+        "200":
+          description: List of notifications.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  end:
+                    description: Whether there are no more notifications to fetch
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Notification"
+
+  /notifications/read:
+    post:
+      operationId: markNotificationsAsRead
+      summary: Mark notications as read.
+      tags: [chat]
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /search:
+    get:
+      operationId: searchMessages
+      summary: Search for historic messages.
+      tags: [search]
+      parameters:
+        - name: connection_id
+          in: query
+          description: An ID for a connection
+          schema:
+            type: string
+        - name: conversation_id
+          in: query
+          description: An ID for a conversation
+          schema:
+            type: string
+        - name: after
+          in: query
+          description: Find messages after a given ISO 8601 timestamp
+          schema:
+            type: string
+            format: date-time
+        - name: before
+          in: query
+          description: Find messages before a given ISO 8601 timestamp
+          schema:
+            type: string
+            format: date-time
+        - name: from
+          in: query
+          description: Sender must match this string
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Max number of messages to retrieve
+          schema:
+            type: integer
+        - name: match
+          in: query
+          description: Messages must match this string
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of messages.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  after:
+                    type: string
+                    format: date-time
+                  before:
+                    type: string
+                    format: date-time
+                  end:
+                    description: Whether there are no more messages to fetch
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+
+  /settings:
+    get:
+      operationId: getSettings
+      summary: Get settings for Convos.
+      tags: [settings]
+      responses:
+        "200":
+          description: ServerSettings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: updateSettings
+      summary: Update settings for Convos.
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServerSettings"
+      responses:
+        "200":
+          description: Server settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerSettings"
+
+  /user:
+    get:
+      operationId: getUser
+      summary: Get user data.
+      tags: [user]
+      parameters:
+        - name: connections
+          in: query
+          description: Retrieve connection list.
+          schema:
+            type: boolean
+        - name: conversations
+          in: query
+          description: Retrieve conversation list.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /user/login:
+    post:
+      operationId: loginUser
+      summary: Log in a user based on email and password.
+      tags: [user]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  description: User email
+                  format: email
+                  type: string
+                password:
+                  description: User password
+                  type: string
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /user/logout:
+    get:
+      operationId: logoutUser
+      summary: Logout a user.
+      tags: [user]
+      parameters:
+        - name: csrf
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Successfully logged out.
+
+  /user/register:
+    post:
+      operationId: registerUser
+      summary: Register a new user.
+      tags: [user]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  description: User email
+                  format: email
+                  type: string
+                exp:
+                  description: Expire time for a token
+                  type: string
+                password:
+                  $ref: "#/components/schemas/Password"
+                token:
+                  description: Checksum generated by inviteUser
+                  type: string
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /user/{email}:
+    delete:
+      operationId: deleteUser
+      summary: Delete a user.
+      tags: [user]
+      parameters:
+        - $ref: "#/components/parameters/email_in_path"
+      responses:
+        "200":
+          description: Successfully deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      operationId: updateUser
+      summary: Update an existing user.
+      tags: [user]
+      parameters:
+        - $ref: "#/components/parameters/email_in_path"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                highlight_keywords:
+                  description: Extra keywords to highlight on
+                  type: array
+                  items:
+                    type: string
+                password:
+                  $ref: "#/components/schemas/Password"
+                roles:
+                  description: User roles, such as admin and bot.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /user/{email}/invite:
+    post:
+      operationId: inviteUser
+      summary: Generate invite link for an existing / new user.
+      tags: [user]
+      parameters:
+        - $ref: "#/components/parameters/email_in_path"
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  existing:
+                    type: boolean
+                  expires:
+                    format: date-time
+                    type: string
+                  url:
+                    type: string
+
+  /users:
+    get:
+      operationId: getUsers
+      summary: List Convos users
+      tags: [user]
+      parameters:
+        - name: after
+          in: query
+          description: Find users after in pagination
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+
+  /webhook/{provider_name}:
+    post:
+      operationId: webhook
+      summary: Forwards the webhook payload to the Convos bot
+      tags: [webhook]
+      parameters:
+        - name: provider_name
+          in: path
+          description: Provider name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Webhook response
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  parameters:
+    after:
+      name: after
+      in: query
+      description: Find messages after a given ISO 8601 timestamp
+      schema:
+        type: string
+        format: date-time
+    around:
+      name: around
+      in: query
+      description: Find messages around a given ISO 8601 timestamp
+      schema:
+        type: string
+        format: date-time
+    before:
+      name: before
+      in: query
+      description: Find messages before a given ISO 8601 timestamp
+      schema:
+        type: string
+        format: date-time
+    connection_id:
+      name: connection_id
+      in: path
+      description: A unique connection identifier
+      required: true
+      schema:
+        type: string
+    conversation_id:
+      name: conversation_id
+      in: path
+      description: The name of the person or room
+      required: true
+      schema:
+        type: string
+    email_in_path:
+      name: email
+      in: path
+      description: User email
+      required: true
+      schema:
+        type: string
+        format: email
+
+  responses:
+    Unauthorized:
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Connection:
+      type: object
+      required: [connection_id, url]
+      properties:
+        connection_id:
+          description: Unique identifier for this connection
+          type: string
+        info:
+          description: Extra information about the connection
+          type: object
+        name:
+          description: Name for this connection
+          type: string
+        on_connect_commands:
+          description: Commands to be run after the connection is established
+          type: array
+          items:
+            type: string
+        state:
+          description: Actual connection state
+          enum: [connected, connecting, disconnected, disconnecting, queued]
+          type: string
+        url:
+          description: "Example: irc://user:@irc.perl.org?nick=superman (Note: Without password)"
+          format: uri
+          type: string
+        wanted_state:
+          description: Wanted connection state
+          enum: [connected, disconnected]
+          type: string
+
+    ConnectionProfile:
+      type: object
+      required: [url]
+      properties:
+        id:
+          description: A unique profile identifier
+          type: string
+          readOnly: true
+        is_default:
+          type: boolean
+        is_forced:
+          type: boolean
+        skip_queue:
+          description: Whether connections using this profile should skip the connection queue
+          type: boolean
+        url:
+          type: string
+          format: uri
+        max_bulk_message_size:
+          type: integer
+          minimum: 1
+          maximum: 32
+        max_message_length:
+          type: integer
+          minimum: 32
+          maximum: 2048
+        service_accounts:
+          type: array
+          items:
+            type: string
+        webirc_password:
+          type: string
+
+    Conversation:
+      type: object
+      required: [connection_id, conversation_id, name, unread]
+      properties:
+        connection_id:
+          description: Unique identifier for the connection this conversation is part of
+          type: string
+        conversation_id:
+          description: Unique identifier for the conversation
+          type: string
+        frozen:
+          description: Reason for why the conversation is frozen (empty string if not frozen)
+          type: string
+        info:
+          description: Extra information about the conversation
+          type: object
+        name:
+          description: Name of the room or person
+          type: string
+        notifications:
+          description: Number of notifications for this conversation
+          type: integer
+        topic:
+          description: The subjec/topic for this room
+          type: string
+        unread:
+          description: Number of unread messages
+          type: integer
+
+    Message:
+      type: object
+      required: [message, from, ts]
+      properties:
+        from:
+          description: Identifier for who sent this message
+          type: string
+        highlight:
+          description: Whether this message matched a highlight rule
+          type: boolean
+        message:
+          description: The message
+          type: string
+        ts:
+          description: "Example: 2015-09-06T13:49:37Z"
+          format: date-time
+          type: string
+        type:
+          description: "Message type: private, notice, action"
+          type: string
+
+    Notification:
+      type: object
+      required: [message, from, ts]
+      properties:
+        connection_id:
+          description: Unique identifier for the connection this notification came from
+          type: string
+        conversation_id:
+          description: Conversation ID
+          type: string
+        from:
+          description: Identifier for who sent this message
+          type: string
+        message:
+          description: The message
+          type: string
+        ts:
+          description: "Example: 2015-09-06T13:49:37Z"
+          format: date-time
+          type: string
+
+    Password:
+      description: User password
+      minLength: 10
+      type: string
+
+    ServerSettings:
+      type: object
+      properties:
+        base_url:
+          description: The base URL of the Convos server
+          type: string
+          format: uri
+          readOnly: true
+        contact:
+          minLength: 3
+          type: string
+        default_connection:
+          format: uri
+          type: string
+        disk_usage:
+          type: object
+          properties:
+            blocks_free:
+              type: integer
+              format: uint64
+            block_size:
+              type: integer
+              format: int64
+            blocks_total:
+              type: integer
+              format: uint64
+            blocks_used:
+              type: integer
+              format: uint64
+            inodes_free:
+              type: integer
+              format: uint64
+            inodes_total:
+              type: integer
+              format: uint64
+            inodes_used:
+              type: integer
+              format: uint64
+        forced_connection:
+          type: boolean
+        open_to_public:
+          type: boolean
+        organization_name:
+          type: string
+        organization_url:
+          type: string
+        video_service:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            required:
+              - message
+            type: object
+            properties:
+              message:
+                type: string
+                description: Human readable description of the error
+              path:
+                type: string
+                description: JSON pointer to the input data where the error occur
+
+    Success:
+      type: object
+      properties:
+        message:
+          description: Human readable description
+          type: string
+
+    User:
+      type: object
+      required: [email, unread]
+      properties:
+        connections:
+          type: array
+          items:
+            $ref: "#/components/schemas/Connection"
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+        default_connection:
+          type: string
+          readOnly: true
+        forced_connection:
+          type: boolean
+          readOnly: true
+        email:
+          description: Unique email identifying a user in Convos
+          type: string
+        highlight_keywords:
+          description: Extra keywords to highlight on
+          type: array
+          items:
+            type: string
+        registered:
+          description: "Example: 2015-09-06T10:47:31Z"
+          format: date-time
+          type: string
+        remote_address:
+          description: The last known remote address for the user
+          type: string
+          readOnly: true
+        roles:
+          description: "User roles, such as admin and bot"
+          type: array
+          items:
+            type: string
+        uid:
+          type: string
+        unread:
+          description: Number of unread notifications
+          type: integer
+        video_service:
+          type: string
