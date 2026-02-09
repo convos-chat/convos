@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"syscall"
 
 	"github.com/convos-chat/convos/pkg/api"
 )
@@ -102,17 +101,11 @@ func (h *Handler) getDiskUsage(path string) *struct {
 	InodesTotal *uint64 `json:"inodes_total,omitempty"`
 	InodesUsed  *uint64 `json:"inodes_used,omitempty"`
 } {
-	var stat syscall.Statfs_t
-	if err := syscall.Statfs(path, &stat); err != nil {
+	blockSize, blocksFree, blocksTotal, inodesFree, inodesTotal, err := getDiskUsage(path)
+	if err != nil {
 		return nil
 	}
-	blockSize := stat.Bsize
-	blocksFree := stat.Bavail
-
-	blocksTotal := stat.Blocks
 	blocksUsed := blocksTotal - blocksFree
-	inodesFree := stat.Ffree
-	inodesTotal := stat.Files
 	inodesUsed := inodesTotal - inodesFree
 
 	return &struct {

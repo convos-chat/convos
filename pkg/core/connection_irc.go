@@ -1297,22 +1297,23 @@ func (c *IRCConnection) handleMode(msg ircmsg.Message) {
 				"nick":            targetNick,
 				"mode":            prefix + string(ch),
 			})
-		} else {
-			// Channel mode — accumulate into a single mode string
-			sign := byte('+')
-			if !add {
-				sign = '-'
-			}
-			if sign != lastSign {
-				channelModes = append(channelModes, sign)
-				lastSign = sign
-			}
-			channelModes = append(channelModes, ch)
+			continue
+		}
 
-			// Consume parameter for modes that require one
-			if (ch == 'k' || (ch == 'l' && add) || ch == 'b' || ch == 'e' || ch == 'I') && argIdx < len(modeArgs) {
-				argIdx++
-			}
+		// Channel mode — accumulate into a single mode string
+		sign := byte('+')
+		if !add {
+			sign = '-'
+		}
+		if sign != lastSign {
+			channelModes = append(channelModes, sign)
+			lastSign = sign
+		}
+		channelModes = append(channelModes, ch)
+
+		// Consume parameter for modes that require one
+		if (ch == 'k' || (ch == 'l' && add) || ch == 'b' || ch == 'e' || ch == 'I') && argIdx < len(modeArgs) {
+			argIdx++
 		}
 	}
 
