@@ -15,6 +15,7 @@ import (
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/embed"
+	"github.com/convos-chat/convos/pkg/i18n"
 	"github.com/gorilla/sessions"
 )
 
@@ -37,6 +38,7 @@ const (
 type Handler struct {
 	Core        *core.Core
 	Embed_      *embed.Client
+	I18n        *i18n.Catalog
 	Store       sessions.Store
 	WebhookNets []*net.IPNet
 }

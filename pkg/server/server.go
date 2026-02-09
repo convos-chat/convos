@@ -27,6 +27,7 @@ import (
 	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/handler"
+	"github.com/convos-chat/convos/pkg/i18n"
 	"github.com/convos-chat/convos/pkg/version"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -200,6 +201,14 @@ func New(c *core.Core, cfg *config.Config) *Server {
 
 	webhookNets := handler.ParseWebhookNetworks(cfg.WebhookNetworks)
 	h := handler.NewHandler(c, store, webhookNets)
+
+	i18nCatalog, err := i18n.NewCatalog()
+	if err != nil {
+		slog.Warn("Failed to load i18n catalog", "error", err)
+	} else {
+		h.I18n = i18nCatalog
+	}
+
 	s.Handler = h
 
 	strictHandler := api.NewStrictHandler(h, []api.StrictMiddlewareFunc{
