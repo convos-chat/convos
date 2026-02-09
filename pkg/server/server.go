@@ -39,6 +39,9 @@ import (
 var embeddedFiles embed.FS
 
 var appTemplate = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
+var swTemplate = template.Must(template.New("sw").ParseFS(embeddedFiles, "templates/sw.js")).Lookup("sw.js")
+var manifestTemplate = template.Must(template.New("manifest").ParseFS(embeddedFiles, "templates/manifest.json")).Lookup("manifest.json")
+var browserconfigTemplate = template.Must(template.New("browserconfig").ParseFS(embeddedFiles, "templates/browserconfig.xml")).Lookup("browserconfig.xml")
 
 func ContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -229,9 +232,11 @@ func New(c *core.Core, cfg *config.Config) *Server {
 	// WebSocket endpoint
 	r.Get("/events", s.eventsHandler)
 
-	// Service worker stubs
+	// PWA: service worker, manifest, browserconfig
 	r.Get("/sw.js", s.serveServiceWorker)
 	r.Get("/sw/info", s.serveServiceWorkerInfo)
+	r.Get("/manifest.json", s.serveManifest)
+	r.Get("/browserconfig.xml", s.serveBrowserconfig)
 
 	// Static file serving
 	fileServer := http.FileServer(http.FS(s.publicFS))
@@ -667,11 +672,51 @@ func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(spec)
 }
 
-// serveServiceWorker serves a minimal service worker script.
+// serveServiceWorker serves the service worker script with caching strategies.
 func (s *Server) serveServiceWorker(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
-	// FIXME: Implement actual service worker functionality (caching, offline support, push notifications, etc.)
-	_, _ = w.Write([]byte("// Convos service worker - not yet implemented\nself.addEventListener('fetch', function(e) {});\n"))
+	w.Header().Set("Cache-Control", "no-cache")
+
+	basePath := "/"
+	if u := s.Core.Settings().BaseURL(); u != nil && u.Path != "" {
+		basePath = u.Path
+		if !strings.HasSuffix(basePath, "/") {
+			basePath += "/"
+		}
+	}
+
+	cacheFirst := "cache_first"
+	if s.Config.IsDevelopment() {
+		cacheFirst = "network_first"
+	}
+
+	data := map[string]string{
+		"Mode":       s.Config.Mode,
+		"Version":    version.Version,
+		"BasePath":   basePath,
+		"CacheFirst": cacheFirst,
+	}
+
+	if err := swTemplate.Execute(w, data); err != nil {
+		slog.Error("Failed to render service worker template", "error", err)
+	}
+}
+
+// serveManifest serves the PWA web app manifest.
+func (s *Server) serveManifest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/manifest+json")
+	data := map[string]string{"BaseURL": s.baseURL()}
+	if err := manifestTemplate.Execute(w, data); err != nil {
+		slog.Error("Failed to render manifest template", "error", err)
+	}
+}
+
+// serveBrowserconfig serves the Microsoft browser configuration XML.
+func (s *Server) serveBrowserconfig(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/xml")
+	if err := browserconfigTemplate.Execute(w, nil); err != nil {
+		slog.Error("Failed to render browserconfig template", "error", err)
+	}
 }
 
 // serveServiceWorkerInfo returns service worker metadata.
