@@ -1425,7 +1425,6 @@ func (c *IRCConnection) handleNotice(msg ircmsg.Message) {
 		"type":            "notice",
 	})
 
-	slog.Info("notice message", "msg", message, "params", msg.Params, "source", msg.Source)
 	c.persistMessage(convID, msg.Source, message, "notice", false)
 }
 
