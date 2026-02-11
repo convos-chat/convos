@@ -1,6 +1,7 @@
 package core
 
 import (
+	"maps"
 	"net"
 	"net/url"
 	"strings"
@@ -273,9 +274,7 @@ func (c *BaseConnection) Info() map[string]any {
 	defer c.mu.RUnlock()
 
 	info := make(map[string]any)
-	for k, v := range c.info {
-		info[k] = v
-	}
+	maps.Copy(info, c.info)
 	return info
 }
 

@@ -1,11 +1,29 @@
 package core
 
 import (
+	"context"
+	"errors"
+	"net"
+	"net/url"
 	"testing"
 	"time"
 
 	"github.com/ergochat/irc-go/ircmsg"
 )
+
+var errDialDisabled = errors.New("dial disabled in test")
+
+var failDialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+	return nil, errDialDisabled
+}
+
+func mustParseURL(raw string) *url.URL {
+	u, err := url.Parse(raw)
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
 
 func TestIRCConnection_Handlers(t *testing.T) {
 	t.Parallel()
@@ -310,6 +328,98 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 		if conn.isHighlight("just a normal message") {
 			t.Error("Should not highlight normal message")
+		}
+	})
+
+	t.Run("Connect_SASL_PLAIN", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.SetURL(mustParseURL("irc://myuser:secret@irc.example.com:6697/?sasl=plain&nick=yolo&tls=0"))
+		conn.DialContext = failDialContext
+
+		_ = conn.Connect() // will fail to dial, but client is configured
+
+		if conn.client == nil {
+			t.Fatal("client should be set")
+		}
+		if !conn.client.UseSASL {
+			t.Error("UseSASL should be true")
+		}
+		if conn.client.SASLMech != "PLAIN" {
+			t.Errorf("SASLMech = %q, want PLAIN", conn.client.SASLMech)
+		}
+		if conn.client.SASLLogin != "myuser" {
+			t.Errorf("SASLLogin = %q, want myuser", conn.client.SASLLogin)
+		}
+		if conn.client.SASLPassword != "secret" {
+			t.Errorf("SASLPassword = %q, want secret", conn.client.SASLPassword)
+		}
+		if conn.client.Password != "" {
+			t.Errorf("Password should be empty when SASL is used, got %q", conn.client.Password)
+		}
+	})
+
+	t.Run("Connect_SASL_PLAIN_no_username", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.SetURL(mustParseURL("irc://:secret2@irc.example.com:6697/?sasl=plain&nick=yolo&tls=0"))
+		conn.DialContext = failDialContext
+
+		_ = conn.Connect()
+
+		if conn.client.SASLLogin != "yolo" {
+			t.Errorf("SASLLogin should fall back to nick, got %q", conn.client.SASLLogin)
+		}
+		if conn.client.SASLPassword != "secret2" {
+			t.Errorf("SASLPassword = %q, want secret2", conn.client.SASLPassword)
+		}
+	})
+
+	t.Run("Connect_SASL_EXTERNAL", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.SetURL(mustParseURL("irc://certuser:@irc.example.com/?sasl=external&nick=yolo&tls=0"))
+		conn.DialContext = failDialContext
+
+		_ = conn.Connect()
+
+		if conn.client.SASLMech != "EXTERNAL" {
+			t.Errorf("SASLMech = %q, want EXTERNAL", conn.client.SASLMech)
+		}
+		if conn.client.SASLLogin != "certuser" {
+			t.Errorf("SASLLogin = %q, want certuser", conn.client.SASLLogin)
+		}
+	})
+
+	t.Run("Connect_no_SASL_with_password", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.SetURL(mustParseURL("irc://:serverpass@irc.example.com/?nick=yolo&tls=0"))
+		conn.DialContext = failDialContext
+
+		_ = conn.Connect()
+
+		if conn.client.UseSASL {
+			t.Error("UseSASL should be false without sasl param")
+		}
+		if conn.client.Password != "serverpass" {
+			t.Errorf("Password = %q, want serverpass", conn.client.Password)
+		}
+	})
+
+	t.Run("Connect_no_auth", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.SetURL(mustParseURL("irc://irc.example.com/?nick=yolo&tls=0"))
+		conn.DialContext = failDialContext
+
+		_ = conn.Connect()
+
+		if conn.client.UseSASL {
+			t.Error("UseSASL should be false")
+		}
+		if conn.client.Password != "" {
+			t.Errorf("Password should be empty, got %q", conn.client.Password)
 		}
 	})
 

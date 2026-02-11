@@ -90,28 +90,47 @@ func (c *IRCConnection) Connect() error {
 	nick := c.BaseConnection.Nick()
 	host := c.url.Host
 	userEmail := c.user.Email()
-	password := c.url.Query().Get("password")
 	useTLS := c.url.Scheme == "ircs"
 	if tlsParam := c.url.Query().Get("tls"); tlsParam != "" {
 		useTLS = tlsParam != "0"
 	} else if !useTLS {
-		// Default TLS to on when not explicitly set (matches Perl behavior)
 		useTLS = true
 	}
 	dialContext := c.DialContext
 
-	// Create IRC client
+	var urlUser, urlPass string
+	if c.url.User != nil {
+		urlUser = c.url.User.Username()
+		urlPass, _ = c.url.User.Password()
+	}
+
+	saslMech := strings.ToUpper(c.url.Query().Get("sasl"))
+
 	c.client = &ircevent.Connection{
 		Server:        host,
 		Nick:          nick,
 		User:          userEmail,
 		RealName:      userEmail,
-		Password:      password,
 		UseTLS:        useTLS,
 		ReconnectFreq: 0,
 		QuitMessage:   "Bye!",
 		Debug:         false,
 		DialContext:   dialContext,
+	}
+
+	if saslMech == "PLAIN" || saslMech == "EXTERNAL" {
+		saslLogin := urlUser
+		if saslLogin == "" {
+			saslLogin = nick
+		}
+		c.client.UseSASL = true
+		c.client.SASLMech = saslMech
+		c.client.SASLLogin = saslLogin
+		c.client.SASLPassword = urlPass
+		c.client.SASLOptional = true
+		c.client.RequestCaps = []string{"sasl"}
+	} else if urlPass != "" {
+		c.client.Password = urlPass
 	}
 
 	if useTLS {
@@ -129,6 +148,23 @@ func (c *IRCConnection) Connect() error {
 		c.nick = c.client.CurrentNick()
 		c.reconnectDelay = 0
 		c.ircMu.Unlock()
+
+		// Store acknowledged capabilities and SASL status
+		caps := c.client.AcknowledgedCaps()
+		if len(caps) > 0 {
+			capList := make([]string, 0, len(caps))
+			for k := range caps {
+				capList = append(capList, k)
+			}
+			c.SetInfo("capabilities", capList)
+		}
+
+		saslMech := strings.ToUpper(c.url.Query().Get("sasl"))
+		if saslMech != "" {
+			_, saslAcked := caps["sasl"]
+			c.SetInfo("authenticated", saslAcked)
+		}
+
 		c.emitState("connected", fmt.Sprintf("Connected to %s.", c.url.Host))
 		c.emitInfo()
 
@@ -233,7 +269,7 @@ func (c *IRCConnection) Connect() error {
 		c.handleTopicWhoTime(msg)
 	})
 
-	for _, code := range []string{"002", "003", "004", "372", "375", "376"} {
+	for _, code := range []string{"002", "003", "004", "372", "375", "376", "903", "904", "905", "906", "907", "908"} {
 		c.client.AddCallback(code, func(msg ircmsg.Message) {
 			c.handleNotice(msg)
 		})
@@ -546,6 +582,7 @@ func (c *IRCConnection) persistNotification(convID, from, message, msgType strin
 func (c *IRCConnection) persistMessage(convID, from, message, msgType string, highlight bool) {
 	conv := c.GetConversation(convID)
 	if conv == nil {
+		slog.Warn("Conversation not found for message", "conversation_id", convID)
 		return
 	}
 
@@ -1364,7 +1401,7 @@ func (c *IRCConnection) handleChannelModeIs(msg ircmsg.Message) {
 
 // handleNotice handles server numerics that should be displayed as notices.
 func (c *IRCConnection) handleNotice(msg ircmsg.Message) {
-	if len(msg.Params) < 2 {
+	if len(msg.Params) < 1 {
 		return
 	}
 	message := msg.Params[len(msg.Params)-1]
@@ -1385,6 +1422,7 @@ func (c *IRCConnection) handleNotice(msg ircmsg.Message) {
 		"type":            "notice",
 	})
 
+	slog.Info("notice message", "msg", message, "params", msg.Params, "source", msg.Source)
 	c.persistMessage(convID, msg.Source, message, "notice", false)
 }
 
@@ -1397,7 +1435,7 @@ func (c *IRCConnection) handleWelcome(msg ircmsg.Message) {
 
 // handleISupport handles RPL_ISUPPORT (005).
 func (c *IRCConnection) handleISupport(msg ircmsg.Message) {
-	// Simple implementation: just store them in info for now
+	// FIXME: Simple implementation: just store them in info for now
 	for i := 1; i < len(msg.Params)-1; i++ {
 		parts := strings.SplitN(msg.Params[i], "=", 2)
 		key := strings.ToLower(parts[0])
