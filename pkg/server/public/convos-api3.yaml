@@ -556,6 +556,13 @@ paths:
                 type: object
                 required: [dictionary]
                 properties:
+                  available_languages:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        language_team:
+                          type: string
                   dictionary:
                     type: object
 
