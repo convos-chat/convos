@@ -1215,12 +1215,6 @@ msgstr "Brukere"
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Usando \"*\" intorno a del testo, lo convertirà in *corsivo*, **grassetto** o ***grassetto corsivo***."
 
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Utilizar \"\*\" alrededor de un texto, lo convertirá en *cursivas*, **negritas** o ***negritas cursivas***."
-
-msgid "Using \"\\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Skriv \"\\*\" rundt tekst for å gjøre den  *kursiv*, **fet** eller ***kursiv fet***."
-
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
 msgstr "Skriv aksent-tegnet rundt teksten for å formattere den som et `kode-fragment`."

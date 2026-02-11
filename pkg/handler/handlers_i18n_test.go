@@ -35,7 +35,7 @@ msgstr "Hello"
 		Lang: "en",
 	})
 
-	r, ok := resp.(dictionaryResponse)
+	r, ok := resp.(api.GetDictionary200JSONResponse)
 	if !ok {
 		t.Errorf("Unexpected response type: %T", resp)
 		return
@@ -48,17 +48,18 @@ msgstr "Hello"
 		t.Errorf("Expected 'Hello', got %v", r.Dictionary["hello"])
 	}
 
-	if len(r.AvailableLanguages) == 0 {
+	if r.AvailableLanguages == nil || len(*r.AvailableLanguages) == 0 {
 		t.Error("Expected available languages")
-	}
-
-	meta, ok := r.AvailableLanguages["en"].(i18n.LangMeta)
-	if !ok {
-		t.Errorf("Expected LangMeta, got %T", r.AvailableLanguages["en"])
 		return
 	}
 
-	if !strings.Contains(meta.LanguageTeam, "English") {
-		t.Errorf("Expected LanguageTeam to contain 'English', got %q", meta.LanguageTeam)
+	meta, ok := (*r.AvailableLanguages)["en"]
+	if !ok {
+		t.Errorf("Expected 'en' in available languages")
+		return
+	}
+
+	if meta.LanguageTeam == nil || !strings.Contains(*meta.LanguageTeam, "English") {
+		t.Errorf("Expected LanguageTeam to contain 'English', got %v", meta.LanguageTeam)
 	}
 }

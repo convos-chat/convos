@@ -1215,9 +1215,6 @@ msgstr "Usuarios"
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Utilizar \"\*\" alrededor de un texto, lo convertirá en *cursivas*, **negritas** o ***negritas cursivas***."
-
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
 msgstr "Utilizar backticks alrededor de un texto, lo va a formatear como un `fragmento de código`."

@@ -1215,9 +1215,6 @@ msgstr "Utilizatori"
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Folosirea „*” în jurul unui text îl va converti în *italic*, **bold** sau ***italic bold***."
 
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Folosirea „\*” în jurul unui text îl va converti în *italic*, **bold** sau ***italic bold***."
-
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
 msgstr "Folosirea ghilimelelor inversate în jurul unui text îl va formata ca un „fragment de cod”."

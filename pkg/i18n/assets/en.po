@@ -1215,9 +1215,6 @@ msgstr "Users"
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 msgstr "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
 
-msgid "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Using \"\*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
 msgstr "Using backticks around some text, will format it as a `code fragment`."
