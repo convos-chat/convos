@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -243,6 +244,9 @@ func (b *FileBackend) DeleteConnection(conn core.Connection) error {
 	return os.RemoveAll(b.connectionDir(conn.User().ID(), conn.ID()))
 }
 
+// logLineRE matches the Perl log format: "TIMESTAMP FLAG_BYTE REST_OF_LINE"
+var logLineRE = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\s+\d+\s+(.*)$`)
+
 // LoadMessages returns messages for a conversation.
 func (b *FileBackend) LoadMessages(conv *core.Conversation, query core.MessageQuery) (core.MessageResult, error) {
 	b.mu.RLock()
@@ -263,46 +267,84 @@ func (b *FileBackend) LoadMessages(conv *core.Conversation, query core.MessageQu
 		query.Before = query.Around
 	}
 
-	// Determine time range (always UTC for consistency with log timestamps)
 	now := time.Now().UTC()
-	before := now
-	if query.Before != "" {
-		if t, err := time.Parse(time.RFC3339, query.Before); err == nil {
-			before = t
-		}
-	}
+	var before, after time.Time
+	var incBy int // -1 = backward (newest first), 1 = forward (oldest first)
 
-	after := before.AddDate(0, -3, 0) // Default to 3 months ago
-	if query.After != "" {
-		if t, err := time.Parse(time.RFC3339, query.After); err == nil {
-			after = t
+	hasBefore := query.Before != ""
+	hasAfter := query.After != ""
+
+	switch {
+	case hasBefore && hasAfter:
+		before, _ = time.Parse(time.RFC3339, query.Before)
+		after, _ = time.Parse(time.RFC3339, query.After)
+		incBy = 1
+	case hasBefore:
+		before, _ = time.Parse(time.RFC3339, query.Before)
+		after = before.AddDate(-1, 0, 0)
+		incBy = -1
+	case hasAfter:
+		after, _ = time.Parse(time.RFC3339, query.After)
+		before = after.AddDate(1, 0, 0)
+		future := now.AddDate(0, 1, 0)
+		if before.After(future) {
+			before = future
 		}
+		incBy = 1
+	default:
+		before = now.Add(10 * time.Second) // small buffer to include messages sent right now
+		after = before.AddDate(-1, 0, 0)
+		incBy = -1
 	}
 
 	userID := conv.Connection().User().ID()
 	connID := conv.Connection().ID()
 	convID := conv.ID()
 
-	// Iterate through months
-	var messages []core.Message
-	current := before
-	for current.After(after) && len(messages) < limit {
-		logFile := b.logFile(userID, connID, convID, current)
-		msgs, err := b.readLogFile(logFile, after, before, limit-len(messages))
-		if err == nil {
-			messages = append(msgs, messages...)
-		}
-
-		// Move to previous month
-		current = current.AddDate(0, -1, 0)
-		if len(msgs) > 0 {
-			result.End = false
-		}
+	// Set cursor to starting point based on direction
+	cursor := before
+	if incBy > 0 {
+		cursor = after
 	}
 
-	// Limit and set result
+	// Iterate through months in the appropriate direction
+	var messages []core.Message
+	for !cursor.Before(after) && !cursor.After(before.AddDate(0, 1, 0)) {
+		// Check if cursor is within search range [after, before+1month]
+
+		remaining := limit + 1 - len(messages)
+		logFile := b.logFile(userID, connID, convID, cursor)
+
+		var msgs []core.Message
+		var err error
+		if incBy > 0 {
+			msgs, err = b.readLogFile(logFile, after, before, remaining)
+		} else {
+			msgs, err = b.readLogFileBackward(logFile, after, before, remaining)
+		}
+
+		if err == nil && len(msgs) > 0 {
+			if incBy > 0 {
+				messages = append(messages, msgs...)
+			} else {
+				messages = append(msgs, messages...)
+			}
+		}
+
+		if len(messages) > limit {
+			break
+		}
+
+		cursor = cursor.AddDate(0, incBy, 0)
+	}
+
+	// Trim to limit from the correct end based on direction
 	if len(messages) > limit {
-		messages = messages[len(messages)-limit:]
+		if incBy > 0 {
+			messages = messages[:limit]
+		} else {
+			messages = messages[len(messages)-limit:]
+		}
 		result.End = false
 	}
 
@@ -310,8 +352,9 @@ func (b *FileBackend) LoadMessages(conv *core.Conversation, query core.MessageQu
 	return result, nil
 }
 
-// readLogFile reads messages from a log file.
-// Perl log format: "TIMESTAMP OFFSET MESSAGE" where OFFSET is a UTC offset (typically 0).
+// readLogFile reads messages forward from a log file, up to limit.
+// Used for forward iteration (incBy > 0). Since log files are chronological,
+// stops early when timestamps exceed the before boundary.
 func (b *FileBackend) readLogFile(path string, after, before time.Time, limit int) ([]core.Message, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -321,11 +364,10 @@ func (b *FileBackend) readLogFile(path string, after, before time.Time, limit in
 
 	var messages []core.Message
 	scanner := bufio.NewScanner(file)
-	lineRE := regexp.MustCompile(`^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\s+\d+\s+(.*)$`)
 
-	for scanner.Scan() && len(messages) < limit {
+	for scanner.Scan() {
 		line := scanner.Text()
-		matches := lineRE.FindStringSubmatch(line)
+		matches := logLineRE.FindStringSubmatch(line)
 		if matches == nil {
 			continue
 		}
@@ -335,16 +377,113 @@ func (b *FileBackend) readLogFile(path string, after, before time.Time, limit in
 			continue
 		}
 
-		if ts.Before(after) || ts.After(before) {
+		// Strict inequality matching Perl: after < ts < before
+		if !ts.After(after) || !ts.Before(before) {
+			// Log files are chronological; if ts >= before, no more matches
+			if !ts.Before(before) {
+				break
+			}
 			continue
 		}
 
 		msg := b.parseMessageLine(matches[2])
 		msg.Timestamp = ts.Unix()
 		messages = append(messages, msg)
+
+		if len(messages) >= limit {
+			break
+		}
 	}
 
 	return messages, scanner.Err()
+}
+
+// readLogFileBackward reads messages from the end of a log file, returning up
+// to limit messages in chronological order.
+func (b *FileBackend) readLogFileBackward(path string, after, before time.Time, limit int) ([]core.Message, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := info.Size()
+	if size == 0 {
+		return nil, nil
+	}
+
+	const chunkSize = 8192
+	var messages []core.Message
+	var remaining string
+	offset := size
+	done := false
+
+	for offset > 0 && len(messages) < limit && !done {
+		readSize := min(int64(chunkSize), offset)
+		offset -= readSize
+
+		buf := make([]byte, readSize)
+		if _, err := file.ReadAt(buf, offset); err != nil {
+			return messages, err
+		}
+
+		chunk := string(buf)
+		lines := strings.Split(chunk, "\n")
+
+		// The last element of this chunk may be the beginning of a line that
+		// continues into the next (already-processed) chunk. Append the saved
+		// remainder to complete it.
+		lines[len(lines)-1] += remaining
+		remaining = ""
+
+		// If we haven't reached the start of the file, the first element is a
+		// partial line — save it for the next iteration.
+		if offset > 0 {
+			remaining = lines[0]
+			lines = lines[1:]
+		}
+
+		// Process lines in reverse (newest first within this chunk)
+		for i := len(lines) - 1; i >= 0 && len(messages) < limit; i-- {
+			line := lines[i]
+			if line == "" {
+				continue
+			}
+
+			matches := logLineRE.FindStringSubmatch(line)
+			if matches == nil {
+				continue
+			}
+
+			ts, err := time.Parse("2006-01-02T15:04:05", matches[1])
+			if err != nil {
+				continue
+			}
+
+			// Strict inequality: after < ts < before
+			if !ts.After(after) || !ts.Before(before) {
+				// Log files are chronological; reading backwards, if ts <= after
+				// then all earlier lines are also <= after — stop scanning.
+				if !ts.After(after) {
+					done = true
+					break
+				}
+				continue
+			}
+
+			msg := b.parseMessageLine(matches[2])
+			msg.Timestamp = ts.Unix()
+			messages = append(messages, msg)
+		}
+	}
+
+	slices.Reverse(messages)
+
+	return messages, nil
 }
 
 // parseMessageLine parses a message from log format.

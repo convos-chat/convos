@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -255,6 +256,98 @@ func TestFileBackendMessageOperations(t *testing.T) {
 	result, _ = b.LoadMessages(conv, core.MessageQuery{Limit: 10})
 	if len(result.Messages) != 0 {
 		t.Errorf("LoadMessages() after delete returned %d, want 0", len(result.Messages))
+	}
+}
+
+// TestFileBackendLoadMessagesReturnsNewest verifies that when there are more
+// messages than the limit, the most recent messages are returned (not the oldest).
+// This was the core bug: readLogFile read forward and stopped at limit, returning
+// the oldest messages from the file instead of the newest.
+func TestFileBackendLoadMessagesReturnsNewest(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	b := NewFileBackend(tmpDir)
+	c := core.New(core.WithBackend(b), core.WithHome(tmpDir))
+	user, _ := c.User(testEmail)
+	conn := core.NewIRCConnection("irc://localhost:6667", user)
+	conv := core.NewConversation("", conn) // server messages (empty conv ID)
+
+	if err := b.SaveUser(user); err != nil {
+		t.Fatalf("SaveUser() error: %v", err)
+	}
+	if err := b.SaveConnection(conn); err != nil {
+		t.Fatalf("SaveConnection() error: %v", err)
+	}
+
+	// Write 100 messages to the current month's log file
+	now := time.Now().UTC()
+	logDir := filepath.Join(tmpDir, testEmail, conn.ID(), now.Format("2006"))
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error: %v", err)
+	}
+	logFile := filepath.Join(logDir, now.Format("01")+".log")
+
+	var lines []string
+	baseTime := now.Add(-100 * time.Minute)
+	for i := 0; i < 100; i++ {
+		ts := baseTime.Add(time.Duration(i) * time.Minute)
+		lines = append(lines, fmt.Sprintf("%s 0 -!- Server message %d", ts.Format("2006-01-02T15:04:05"), i))
+	}
+	if err := os.WriteFile(logFile, []byte(strings.Join(lines, "\n")+"\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile() error: %v", err)
+	}
+
+	// Default query (no params) should return the NEWEST messages
+	result, err := b.LoadMessages(conv, core.MessageQuery{Limit: 20})
+	if err != nil {
+		t.Fatalf("LoadMessages() error: %v", err)
+	}
+
+	if len(result.Messages) != 20 {
+		t.Fatalf("LoadMessages() returned %d messages, want 20", len(result.Messages))
+	}
+
+	// The last message in the result should be close to "Server message 99" (newest)
+	lastMsg := result.Messages[len(result.Messages)-1]
+	if !strings.Contains(lastMsg.Message, "Server message 99") {
+		t.Errorf("Last message = %q, want it to contain 'Server message 99'", lastMsg.Message)
+	}
+
+	// The first message should be "Server message 80" (20 newest = 80-99)
+	firstMsg := result.Messages[0]
+	if !strings.Contains(firstMsg.Message, "Server message 80") {
+		t.Errorf("First message = %q, want it to contain 'Server message 80'", firstMsg.Message)
+	}
+
+	// End should be false since we didn't return all messages
+	if result.End {
+		t.Error("End should be false when there are more messages")
+	}
+
+	// Query with "after" should return oldest-first (forward direction)
+	afterTime := baseTime.Add(-time.Minute)
+	result, err = b.LoadMessages(conv, core.MessageQuery{
+		Limit: 20,
+		After: afterTime.Format(time.RFC3339),
+	})
+	if err != nil {
+		t.Fatalf("LoadMessages(after) error: %v", err)
+	}
+
+	if len(result.Messages) != 20 {
+		t.Fatalf("LoadMessages(after) returned %d messages, want 20", len(result.Messages))
+	}
+
+	// Forward direction: first message should be the oldest
+	firstMsg = result.Messages[0]
+	if !strings.Contains(firstMsg.Message, "Server message 0") {
+		t.Errorf("First message (forward) = %q, want it to contain 'Server message 0'", firstMsg.Message)
+	}
+
+	lastMsg = result.Messages[len(result.Messages)-1]
+	if !strings.Contains(lastMsg.Message, "Server message 19") {
+		t.Errorf("Last message (forward) = %q, want it to contain 'Server message 19'", lastMsg.Message)
 	}
 }
 
