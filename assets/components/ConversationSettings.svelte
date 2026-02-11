@@ -27,15 +27,15 @@ let checkboxes = {
 };
 
 let conversationPath = '';
+let modesInitialized = false;
 let password = '';
 let topic = '';
 
 $: participants = $conversation.participants;
 $: isPrivate = $conversation.is('private');
 $: isOperator = $participants.me().modes.operator;
-// FIXME: This reactive, so while it shows the active modes, it stops us from disabling them.
-$: if (Object.keys($conversation.modes).length > 0) { checkboxes = {...checkboxes, ...$conversation.modes}; updateState() }
-$: if (conversation.path != conversationPath) { conversationPath = conversation.path; updateState() }
+$: if (conversation.path != conversationPath) { conversationPath = conversation.path; modesInitialized = false; updateState() }
+$: if (!modesInitialized && Object.keys($conversation.modes).length > 0) { modesInitialized = true; checkboxes = {...checkboxes, ...$conversation.modes} }
 
 function partConversation() {
   conversation.send('/part', (res) => {
@@ -76,10 +76,14 @@ async function saveConversationSettings() {
 }
 
 function updateState() {
-  if (Object.keys(conversation.modes).length === 0 && !isPrivate && !conversation.frozen) {
+  topic = conversation.topic;
+  if (Object.keys(conversation.modes).length > 0) {
+    checkboxes = {...checkboxes, ...conversation.modes};
+  }
+  else if (!isPrivate && !conversation.frozen) {
     conversation.send('/mode', (msg) => {
       msg.bubbles = false;
-      checkboxes = Object.assign({}, checkboxes, conversation.modes);
+      checkboxes = {...checkboxes, ...conversation.modes};
       topic = conversation.topic;
     });
   }
