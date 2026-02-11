@@ -251,57 +251,60 @@ func (c *IRCConnection) Connect() error {
 		c.handleMode(msg)
 	})
 
-	c.client.AddCallback("001", func(msg ircmsg.Message) {
+	c.client.AddCallback(ircevent.RPL_WELCOME, func(msg ircmsg.Message) {
 		c.handleWelcome(msg)
 	})
 
-	c.client.AddCallback("005", func(msg ircmsg.Message) {
+	c.client.AddCallback(ircevent.RPL_ISUPPORT, func(msg ircmsg.Message) {
 		c.handleISupport(msg)
 	})
 
-	c.client.AddCallback("332", func(msg ircmsg.Message) {
-		// RPL_TOPIC: channel topic on join
+	c.client.AddCallback(ircevent.RPL_TOPIC, func(msg ircmsg.Message) {
 		c.handleTopicReply(msg)
 	})
 
-	c.client.AddCallback("333", func(msg ircmsg.Message) {
-		// RPL_TOPICWHOTIME: topic setter and time
+	c.client.AddCallback(ircevent.RPL_TOPICTIME, func(msg ircmsg.Message) {
 		c.handleTopicWhoTime(msg)
 	})
 
-	for _, code := range []string{"002", "003", "004", "372", "375", "376", "903", "904", "905", "906", "907", "908"} {
+	for _, code := range []string{
+		ircevent.RPL_YOURHOST, ircevent.RPL_CREATED, ircevent.RPL_MYINFO,
+		ircevent.RPL_MOTD, ircevent.RPL_MOTDSTART, ircevent.RPL_ENDOFMOTD,
+		ircevent.RPL_SASLSUCCESS, ircevent.ERR_SASLFAIL, ircevent.ERR_SASLTOOLONG,
+		ircevent.ERR_SASLABORTED, ircevent.ERR_SASLALREADY, ircevent.RPL_SASLMECHS,
+	} {
 		c.client.AddCallback(code, func(msg ircmsg.Message) {
 			c.handleNotice(msg)
 		})
 	}
 
-	c.client.AddCallback("324", func(msg ircmsg.Message) {
-		// RPL_CHANNELMODEIS: channel mode query response
+	c.client.AddCallback(ircevent.RPL_CHANNELMODEIS, func(msg ircmsg.Message) {
 		c.handleChannelModeIs(msg)
 	})
 
-	c.client.AddCallback("353", func(msg ircmsg.Message) {
-		// RPL_NAMREPLY: channel member list
+	c.client.AddCallback(ircevent.RPL_NAMREPLY, func(msg ircmsg.Message) {
 		c.handleNamesReply(msg)
 	})
 
-	c.client.AddCallback("366", func(msg ircmsg.Message) {
-		// RPL_ENDOFNAMES: end of channel member list
+	c.client.AddCallback(ircevent.RPL_ENDOFNAMES, func(msg ircmsg.Message) {
 		c.handleEndOfNames(msg)
 	})
 
-	c.client.AddCallback("433", func(msg ircmsg.Message) {
-		// ERR_NICKNAMEINUSE: append "_" and retry
+	c.client.AddCallback(ircevent.ERR_NICKNAMEINUSE, func(msg ircmsg.Message) {
 		c.handleNickInUse(msg)
 	})
 
 	// WHOIS response numerics
-	for _, code := range []string{"311", "312", "317", "319", "276", "301", "330", "671"} {
+	for _, code := range []string{
+		ircevent.RPL_WHOISUSER, ircevent.RPL_WHOISSERVER, ircevent.RPL_WHOISIDLE,
+		ircevent.RPL_WHOISCHANNELS, ircevent.RPL_WHOISCERTFP, ircevent.RPL_AWAY,
+		ircevent.RPL_WHOISACCOUNT, ircevent.RPL_WHOISSECURE,
+	} {
 		c.client.AddCallback(code, func(msg ircmsg.Message) {
 			c.handleWhoisReply(code, msg)
 		})
 	}
-	c.client.AddCallback("318", func(msg ircmsg.Message) {
+	c.client.AddCallback(ircevent.RPL_ENDOFWHOIS, func(msg ircmsg.Message) {
 		c.handleEndOfWhois(msg)
 	})
 
@@ -1057,7 +1060,7 @@ func (c *IRCConnection) handleWhoisReply(code string, msg ircmsg.Message) {
 	w := c.whoisBuffer[nick]
 
 	switch code {
-	case "311": // RPL_WHOISUSER: <nick> <user> <host> * :<realname>
+	case ircevent.RPL_WHOISUSER: // <nick> <user> <host> * :<realname>
 		if len(msg.Params) >= 4 {
 			w["user"] = msg.Params[2]
 			w["host"] = msg.Params[3]
@@ -1065,21 +1068,21 @@ func (c *IRCConnection) handleWhoisReply(code string, msg ircmsg.Message) {
 		if len(msg.Params) >= 6 {
 			w["name"] = msg.Params[5]
 		}
-	case "312": // RPL_WHOISSERVER: <nick> <server> :<server info>
+	case ircevent.RPL_WHOISSERVER: // <nick> <server> :<server info>
 		if len(msg.Params) >= 3 {
 			w["server"] = msg.Params[2]
 		}
 		if len(msg.Params) >= 4 {
 			w["server_info"] = msg.Params[3]
 		}
-	case "317": // RPL_WHOISIDLE: <nick> <idle_seconds> <signon> :seconds idle
+	case ircevent.RPL_WHOISIDLE: // <nick> <idle_seconds> <signon> :seconds idle
 		if len(msg.Params) >= 3 {
 			var secs int
 			if _, err := fmt.Sscanf(msg.Params[2], "%d", &secs); err == nil {
 				w["idle_for"] = secs
 			}
 		}
-	case "319": // RPL_WHOISCHANNELS: <nick> :<channels>
+	case ircevent.RPL_WHOISCHANNELS: // <nick> :<channels>
 		if len(msg.Params) >= 3 {
 			channels, ok := w["channels"].(map[string]any)
 			if !ok {
@@ -1091,19 +1094,19 @@ func (c *IRCConnection) handleWhoisReply(code string, msg ircmsg.Message) {
 				channels[chName] = map[string]any{"mode": mode}
 			}
 		}
-	case "276": // TLS fingerprint
+	case ircevent.RPL_WHOISCERTFP:
 		if len(msg.Params) >= 3 {
 			w["fingerprint"] = msg.Params[2]
 		}
-	case "301": // RPL_AWAY: <nick> :<away message>
+	case ircevent.RPL_AWAY: // <nick> :<away message>
 		if len(msg.Params) >= 3 {
 			w["away"] = msg.Params[2]
 		}
-	case "330": // RPL_WHOISACCOUNT: <nick> <account> :is logged in as
+	case ircevent.RPL_WHOISACCOUNT: // <nick> <account> :is logged in as
 		if len(msg.Params) >= 3 {
 			w["account"] = msg.Params[2]
 		}
-	case "671": // RPL_WHOISSECURE
+	case ircevent.RPL_WHOISSECURE:
 		w["secure"] = true
 	}
 }
