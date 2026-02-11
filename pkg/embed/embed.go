@@ -173,11 +173,11 @@ func (c *Client) Fetch(ctx context.Context, rawURL, userAgent string) (*Link, er
 	case strings.HasPrefix(ct, "image/"):
 		link.Type = "photo"
 		link.Title = titleFromPath(parsed.Path)
-		link.HTML = renderPhoto(link)
+		link.HTML = RenderPhoto(link)
 	case strings.HasPrefix(ct, "video/"):
 		link.Type = "video"
 		link.Title = titleFromPath(parsed.Path)
-		link.HTML = renderVideo(link, ct)
+		link.HTML = RenderVideo(link, ct)
 	case strings.HasPrefix(ct, "text/html"), strings.HasPrefix(ct, "application/xhtml"):
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 512*1024)) // 512KB max
 		if err != nil {
@@ -186,7 +186,7 @@ func (c *Client) Fetch(ctx context.Context, rawURL, userAgent string) (*Link, er
 		parseHTMLMeta(bytes.NewReader(body), link)
 		link.Type = "rich"
 		if link.Title != "" {
-			link.HTML = renderRichCard(link)
+			link.HTML = RenderRichCard(link)
 		}
 	default:
 		link.Type = "link"
@@ -356,7 +356,8 @@ func execTemplate(t *template.Template, data any) string {
 	return buf.String()
 }
 
-func renderPhoto(l *Link) string {
+// RenderPhoto returns HTML for a photo embed.
+func RenderPhoto(l *Link) string {
 	return execTemplate(photoTmpl, map[string]string{
 		"Provider": strings.ToLower(l.ProviderName),
 		"Src":      l.URL,
@@ -364,7 +365,8 @@ func renderPhoto(l *Link) string {
 	})
 }
 
-func renderVideo(l *Link, mimeType string) string {
+// RenderVideo returns HTML for a video embed.
+func RenderVideo(l *Link, mimeType string) string {
 	// extract just the media type (strip params like charset)
 	if idx := strings.Index(mimeType, ";"); idx >= 0 {
 		mimeType = strings.TrimSpace(mimeType[:idx])
@@ -376,7 +378,8 @@ func renderVideo(l *Link, mimeType string) string {
 	})
 }
 
-func renderRichCard(l *Link) string {
+// RenderRichCard returns HTML for a rich card embed.
+func RenderRichCard(l *Link) string {
 	data := map[string]string{
 		"Provider":    strings.ToLower(l.ProviderName),
 		"URL":         l.URL,
