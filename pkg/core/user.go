@@ -323,7 +323,7 @@ func (u *User) loadConnections() error {
 
 	// Create connections without holding the user lock to avoid deadlock
 	// when NewConnection calls back into User methods (e.g. Email)
-	var createdConns []Connection
+	createdConns := make([]Connection, 0)
 	for _, connData := range conns {
 		conn := u.core.NewConnection(connData.URL, u)
 		if conn == nil {
