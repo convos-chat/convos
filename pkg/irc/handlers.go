@@ -678,9 +678,60 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 		whois = map[string]any{"nick": msg.Params[1]}
 	}
 
+	// Ensure required fields have defaults
+	if whois["away"] == nil {
+		whois["away"] = ""
+	}
+	if whois["fingerprint"] == nil {
+		whois["fingerprint"] = ""
+	}
+	if whois["host"] == nil {
+		whois["host"] = ""
+	}
+	if whois["name"] == nil {
+		whois["name"] = ""
+	}
+	if whois["server"] == nil {
+		whois["server"] = ""
+	}
+	if whois["server_info"] == nil {
+		whois["server_info"] = ""
+	}
+	if whois["user"] == nil {
+		whois["user"] = ""
+	}
+	if whois["idle_for"] == nil {
+		whois["idle_for"] = 0
+	}
+
+	// Update conversation info if this is a private conversation
+	conv := c.GetConversation(msg.Params[1])
+	if conv != nil && conv.IsPrivate() {
+		for key, value := range whois {
+			conv.SetInfo(key, value)
+		}
+		conv.SetInfo("ts", time.Now().Unix())
+		// Clear frozen state if whois succeeded
+		if conv.Frozen() != "" {
+			conv.SetFrozen("")
+		}
+
+		// Emit state update so frontend updates conversation.info
+		c.emitEvent(map[string]any{
+			"event":           "state",
+			"type":            "frozen",
+			"conversation_id": conv.ID(),
+			"frozen":          conv.Frozen(),
+			"info":            conv.Info(),
+		})
+	}
+
 	whois["event"] = "sent"
 	whois["message"] = "/whois"
 	whois["command"] = []string{"whois"}
+	if conv != nil {
+		whois["conversation_id"] = conv.ID()
+	}
 	c.emitEvent(whois)
 }
 
