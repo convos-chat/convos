@@ -30,7 +30,7 @@ func (h *Handler) Embed(ctx context.Context, request api.EmbedRequestObject) (ap
 		userAgent = r.Header.Get("User-Agent")
 	}
 
-	link, err := h.Embed_.Fetch(ctx, request.Params.Url, userAgent)
+	link, err := h.EmbedClient.Fetch(ctx, request.Params.Url, userAgent)
 	if err != nil {
 		return api.Embed200JSONResponse{"errors": []map[string]string{{"message": err.Error()}}}, nil //nolint:nilerr // error communicated in response body
 	}

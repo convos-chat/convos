@@ -42,10 +42,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 	conn := core.NewIRCConnection(request.Body.Url, user)
 	user.AddConnection(conn)
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
-		return api.CreateConnectiondefaultJSONResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse(err.Error()),
-		}, nil
+		return nil, err
 	}
 
 	// Auto-create conversation from conversation_id param or URL path
@@ -58,6 +55,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		conn.AddConversation(conv)
 		if err := h.Core.Backend().SaveConnection(conn); err != nil {
 			slog.Error("Failed to save connection with new conversation", "error", err)
+			return nil, err
 		}
 	}
 
@@ -108,9 +106,18 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 
 	b := request.Body
 	if b.Url != nil && *b.Url != "" {
-		if newURL, err := url.Parse(*b.Url); err == nil {
-			conn.SetURL(newURL)
+		newURL, err := url.Parse(*b.Url)
+		if err != nil {
+			slog.Error("Invalid URL provided for connection update", "error", err)
+			return nil, err
 		}
+		// Ensure password is kept if unchanged
+		if newURL.User == nil {
+			if existing := conn.URL(); existing != nil {
+				newURL.User = existing.User
+			}
+		}
+		conn.SetURL(newURL)
 	}
 	if b.OnConnectCommands != nil {
 		conn.SetOnConnectCommands(*b.OnConnectCommands)
@@ -135,10 +142,7 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 	}
 
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
-		return api.UpdateConnectiondefaultJSONResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse(err.Error()),
-		}, nil
+		return nil, err
 	}
 
 	return api.UpdateConnection200JSONResponse(toAPIConnection(conn)), nil

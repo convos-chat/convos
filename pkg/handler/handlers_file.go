@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/api"
+	"github.com/convos-chat/convos/pkg/core"
 )
 
 var ErrUploadFail = errors.New("upload error")
@@ -127,12 +128,15 @@ func (h *Handler) DeleteFiles(ctx context.Context, request api.DeleteFilesReques
 
 // GetFile implements api.StrictServerInterface.
 func (h *Handler) GetFile(ctx context.Context, request api.GetFileRequestObject) (api.GetFileResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
+	user := h.Core.GetUser(request.Uid)
 	if user == nil {
-		return nil, ErrUnauthorized
+		return api.GetFile404JSONResponse{}, nil
 	}
 	content, filename, err := h.Core.Backend().GetFile(user, request.Fid)
 	if err != nil {
+		if errors.Is(err, core.ErrFileNotFound) {
+			return api.GetFile404JSONResponse{}, nil
+		}
 		return nil, err
 	}
 

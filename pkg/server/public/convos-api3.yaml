@@ -510,6 +510,15 @@ paths:
               schema:
                 type: string
                 format: binary
+        "404":
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
     delete:
       operationId: deleteFiles
       summary: Delete one (or more) uploaded file.

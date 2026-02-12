@@ -37,14 +37,14 @@ const (
 
 type Handler struct {
 	Core        *core.Core
-	Embed_      *embed.Client
+	EmbedClient *embed.Client
 	I18n        *i18n.Catalog
 	Store       sessions.Store
 	WebhookNets []*net.IPNet
 }
 
 func NewHandler(c *core.Core, store sessions.Store, webhookNets []*net.IPNet) *Handler {
-	return &Handler{Core: c, Embed_: embed.NewClient(), Store: store, WebhookNets: webhookNets}
+	return &Handler{Core: c, EmbedClient: embed.NewClient(), Store: store, WebhookNets: webhookNets}
 }
 
 func (h *Handler) getRequest(ctx context.Context) (*http.Request, error) {

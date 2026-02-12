@@ -39,10 +39,12 @@ import (
 //go:embed public templates
 var embeddedFiles embed.FS
 
-var appTemplate = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
-var swTemplate = template.Must(template.New("sw").ParseFS(embeddedFiles, "templates/sw.js")).Lookup("sw.js")
-var manifestTemplate = template.Must(template.New("manifest").ParseFS(embeddedFiles, "templates/manifest.json")).Lookup("manifest.json")
-var browserconfigTemplate = template.Must(template.New("browserconfig").ParseFS(embeddedFiles, "templates/browserconfig.xml")).Lookup("browserconfig.xml")
+var (
+	appTemplate           = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
+	swTemplate            = template.Must(template.New("sw").ParseFS(embeddedFiles, "templates/sw.js")).Lookup("sw.js")
+	manifestTemplate      = template.Must(template.New("manifest").ParseFS(embeddedFiles, "templates/manifest.json")).Lookup("manifest.json")
+	browserconfigTemplate = template.Must(template.New("browserconfig").ParseFS(embeddedFiles, "templates/browserconfig.xml")).Lookup("browserconfig.xml")
+)
 
 func ContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +120,7 @@ func (s *Server) RequireAuthMiddleware(next http.Handler) http.Handler {
 			r.URL.Path == "/api" ||
 			r.URL.Path == "/api/user/login" ||
 			r.URL.Path == "/api/user/register" ||
-			r.URL.Path == "/api/files/" ||
+			(strings.HasPrefix(r.URL.Path, "/api/files/") && r.Method == "GET") ||
 			strings.HasPrefix(r.URL.Path, "/api/i18n/") {
 			next.ServeHTTP(w, r)
 			return
@@ -159,16 +161,6 @@ func New(c *core.Core, cfg *config.Config) *Server {
 
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(ProviderMiddleware)
-	if cfg.ReverseProxy {
-		r.Use(middleware.RealIP)
-		slog.Info("Reverse proxy mode enabled (trusting X-Forwarded-For / X-Real-IP)")
-	}
-	r.Use(ContextMiddleware)
-	r.Use(stripJSONSuffix)
-
 	s := &Server{
 		Router:     r,
 		Core:       c,
@@ -192,11 +184,21 @@ func New(c *core.Core, cfg *config.Config) *Server {
 	store.Options.Path = "/"
 	s.Store = store
 
-	r.Use(s.AuthMiddleware)
-	r.Use(s.RequireAuthMiddleware)
-	r.Use(s.RateLimitMiddleware)
+	// Setup middleware stack
 	if cfg.ReverseProxy {
+		r.Use(middleware.RealIP)
 		r.Use(s.ReverseProxyMiddleware)
+	}
+	r.Use(
+		stripJSONSuffix,
+		ContextMiddleware,
+		middleware.Recoverer,
+		ProviderMiddleware,
+		s.AuthMiddleware,
+		s.RequireAuthMiddleware,
+		s.RateLimitMiddleware)
+	if cfg.IsDevelopment() {
+		r.Use(middleware.Logger)
 	}
 
 	webhookNets := handler.ParseWebhookNetworks(cfg.WebhookNetworks)
@@ -227,7 +229,17 @@ func New(c *core.Core, cfg *config.Config) *Server {
 					_ = json.NewEncoder(w).Encode(handler.ErrResponse("Forbidden"))
 					return nil, nil
 				}
-				return resp, err
+				if err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusInternalServerError)
+					if cfg.IsDevelopment() {
+						_ = json.NewEncoder(w).Encode(handler.ErrResponse("Internal Server Error: " + err.Error()))
+					} else {
+						w.Write([]byte(`{"error":"Internal Server Error"}`))
+					}
+					return nil, nil
+				}
+				return resp, nil
 			}
 		},
 	})
@@ -654,6 +666,9 @@ func stripJSONSuffix(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") && strings.HasSuffix(r.URL.Path, ".json") {
 			r.URL.Path = strings.TrimSuffix(r.URL.Path, ".json")
+		}
+		if strings.HasPrefix(r.URL.RawPath, "/api/") && strings.HasSuffix(r.URL.RawPath, ".json") {
+			r.URL.RawPath = strings.TrimSuffix(r.URL.RawPath, ".json")
 		}
 		next.ServeHTTP(w, r)
 	})
