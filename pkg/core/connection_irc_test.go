@@ -48,18 +48,18 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			t.Errorf("Expected server info, got %v", conn.Info()["server"])
 		}
 
-		// handleWelcome emits me event
+		// handleWelcome emits info event
 		select {
 		case ev := <-sub.Events():
 			m, ok := ev.(map[string]any)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "me" {
+			if m["type"] != "info" {
 				t.Errorf("Unexpected event: %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
-			t.Error("Expected me event")
+			t.Error("Expected info event")
 		}
 
 		// handleWelcome also calls handleNotice which emits a message

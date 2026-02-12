@@ -8,6 +8,9 @@ import (
 	"log/slog"
 	"maps"
 	"net"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -30,7 +33,28 @@ var (
 	ErrUsageSay           = errors.New("usage: /say message")
 	ErrUsageWhois         = errors.New("usage: /whois nick")
 	ErrUsageQuery         = errors.New("usage: /query <nick> [message]")
+	ErrUsageNames         = errors.New("usage: /names #channel")
+	ErrUsageInvite        = errors.New("usage: /invite nick [#channel]")
+	ErrUsageInviteChannel = errors.New("usage: /invite nick #channel")
+	ErrUsageOper          = errors.New("usage: /oper user password")
+	ErrUsageClear          = errors.New("WARNING: /clear history <name> will delete all messages in the backend")
+	ErrUnknownConversation = errors.New("unknown conversation")
 )
+
+// listCache stores cached LIST results for channel discovery.
+type listCache struct {
+	conversations map[string]listEntry // keyed by channel name
+	done          bool
+	ts            time.Time
+}
+
+// listEntry represents a single channel from a LIST response.
+type listEntry struct {
+	Name           string `json:"name"`
+	ConversationID string `json:"conversation_id"`
+	NUsers         int    `json:"n_users"`
+	Topic          string `json:"topic"`
+}
 
 // IRCConnection represents a connection to an IRC server.
 type IRCConnection struct {
@@ -44,6 +68,7 @@ type IRCConnection struct {
 	// Buffers for accumulating multi-message IRC replies
 	namesBuffer map[string][]map[string]any // channel -> participants
 	whoisBuffer map[string]map[string]any   // nick -> whois data
+	listBuf     listCache                   // cached LIST results
 
 	// Reconnect state
 	reconnectDelay time.Duration
@@ -308,6 +333,32 @@ func (c *IRCConnection) Connect() error {
 		c.handleEndOfWhois(msg)
 	})
 
+	// LIST response accumulation
+	c.client.AddCallback(ircevent.RPL_LIST, func(msg ircmsg.Message) {
+		c.handleListReply(msg)
+	})
+	c.client.AddCallback(ircevent.RPL_LISTEND, func(msg ircmsg.Message) {
+		c.handleListEnd()
+	})
+
+	// Common IRC error numerics — surface them so the user gets feedback
+	// when a command fails (e.g., "You're not channel operator").
+	for _, code := range []string{
+		ircevent.ERR_NOSUCHNICK, ircevent.ERR_NOSUCHSERVER, ircevent.ERR_NOSUCHCHANNEL,
+		ircevent.ERR_CANNOTSENDTOCHAN, ircevent.ERR_TOOMANYCHANNELS, ircevent.ERR_TOOMANYTARGETS,
+		ircevent.ERR_UNKNOWNCOMMAND, ircevent.ERR_NEEDMOREPARAMS,
+		ircevent.ERR_USERNOTINCHANNEL, ircevent.ERR_NOTONCHANNEL, ircevent.ERR_USERONCHANNEL,
+		ircevent.ERR_CHANNELISFULL, ircevent.ERR_UNKNOWNMODE,
+		ircevent.ERR_INVITEONLYCHAN, ircevent.ERR_BANNEDFROMCHAN, ircevent.ERR_BADCHANNELKEY,
+		ircevent.ERR_BADCHANMASK, ircevent.ERR_BANLISTFULL,
+		ircevent.ERR_NOPRIVILEGES, ircevent.ERR_CHANOPRIVSNEEDED, ircevent.ERR_UNIQOPPRIVSNEEDED,
+		ircevent.ERR_NOOPERHOST, ircevent.ERR_PASSWDMISMATCH,
+	} {
+		c.client.AddCallback(code, func(msg ircmsg.Message) {
+			c.handleErrorReply(msg)
+		})
+	}
+
 	// Capture client for local use to avoid needing lock
 	client := c.client
 	c.ircMu.Unlock()
@@ -388,16 +439,34 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 		args = parts[1]
 	}
 
+	// Commands that work regardless of connection state.
 	switch command {
-	case "JOIN", "J":
-		if args == "" {
-			return ErrUsageJoin
-		}
-		ch := strings.SplitN(args, " ", 2)[0]
-		if !ChannelRE.MatchString(ch) {
-			return c.openConversation(ch)
-		}
-		return c.client.Join(ch)
+	case "CONNECT":
+		c.SetWantedState(StateConnected)
+		go func() {
+			if err := c.Connect(); err != nil {
+				slog.Error("Failed to connect", "error", err)
+			}
+		}()
+		return nil
+	case "DISCONNECT":
+		c.SetWantedState(StateDisconnected)
+		go func() {
+			if err := c.Disconnect(); err != nil {
+				slog.Error("Failed to disconnect", "error", err)
+			}
+		}()
+		return nil
+	case "RECONNECT":
+		go func() {
+			if err := c.Disconnect(); err != nil {
+				slog.Error("Failed to disconnect", "error", err)
+			}
+			if err := c.Connect(); err != nil {
+				slog.Error("Failed to reconnect", "error", err)
+			}
+		}()
+		return nil
 	case "PART", "LEAVE", "CLOSE":
 		ch := target
 		if args != "" {
@@ -406,7 +475,6 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 		if ch == "" {
 			return ErrUsagePart
 		}
-
 		// For private conversations, frozen conversations, or when disconnected,
 		// just remove locally — there's no channel to PART from on the server.
 		conv := c.GetConversation(ch)
@@ -421,8 +489,58 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 			})
 			return nil
 		}
-
 		return c.client.Part(ch)
+	case "CLEAR":
+		clearParts := strings.Fields(args)
+		if len(clearParts) < 2 || clearParts[0] != "history" {
+			return ErrUsageClear
+		}
+		convTarget := clearParts[1]
+		conv := c.GetConversation(convTarget)
+		if conv == nil {
+			return ErrUnknownConversation
+		}
+		if err := c.user.Core().Backend().DeleteMessages(conv); err != nil {
+			return err
+		}
+		c.emitEvent(map[string]any{
+			"event":           "sent",
+			"command":         []string{"clear"},
+			"conversation_id": conv.ID(),
+		})
+		return nil
+	case "QUERY":
+		qparts := strings.Fields(args)
+		if len(qparts) == 0 {
+			return ErrUsageQuery
+		}
+		if err := c.openConversation(qparts[0]); err != nil {
+			return err
+		}
+		if len(qparts) > 1 {
+			return c.Send(qparts[0], strings.Join(qparts[1:], " "))
+		}
+		return nil
+	}
+
+	// Remaining commands require an active connection.
+	c.ircMu.RLock()
+	connected := c.state == StateConnected && c.client != nil
+	c.ircMu.RUnlock()
+	if !connected {
+		return ErrNotConnected
+	}
+
+	switch command {
+	case "JOIN", "J":
+		if args == "" {
+			return ErrUsageJoin
+		}
+		ch := strings.SplitN(args, " ", 2)[0]
+		if !ChannelRE.MatchString(ch) {
+			return c.openConversation(ch)
+		}
+		return c.client.Join(ch)
 	case "MSG":
 		msgParts := strings.SplitN(args, " ", 2)
 		if len(msgParts) < 2 {
@@ -494,18 +612,40 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 			return ErrUsageWhois
 		}
 		return c.client.Send("WHOIS", nick)
-	case "QUERY":
-		parts := strings.Fields(args)
-		if len(parts) == 0 {
-			return ErrUsageQuery
+	case "NAMES":
+		ch := target
+		if args != "" {
+			ch = args
 		}
-		if err := c.openConversation(parts[0]); err != nil {
-			return err
+		if ch == "" {
+			return ErrUsageNames
 		}
-		if len(parts) > 1 {
-			return c.Send(parts[0], strings.Join(parts[1:], " "))
+		return c.client.Send("NAMES", ch)
+	case "INVITE":
+		inviteParts := strings.Fields(args)
+		if len(inviteParts) == 0 || inviteParts[0] == "" {
+			return ErrUsageInvite
 		}
-		return nil
+		ch := target
+		if len(inviteParts) > 1 {
+			ch = inviteParts[1]
+		}
+		if ch == "" {
+			return ErrUsageInviteChannel
+		}
+		return c.client.Send("INVITE", inviteParts[0], ch)
+	case "AWAY":
+		if args == "" {
+			return c.client.Send("AWAY")
+		}
+		return c.client.Send("AWAY", args)
+	case "OPER":
+		if args == "" {
+			return ErrUsageOper
+		}
+		return c.client.SendRaw("OPER " + args)
+	case "LIST":
+		return c.handleListCommand(args)
 	case "QUIT":
 		msg := "Bye!"
 		if args != "" {
@@ -1161,6 +1301,143 @@ func (c *IRCConnection) handleEndOfWhois(msg ircmsg.Message) {
 	c.emitEvent(whois)
 }
 
+// handleListReply handles RPL_LIST (322) — accumulates channel entries.
+// Format: :server 322 nick #channel n_users :topic
+func (c *IRCConnection) handleListReply(msg ircmsg.Message) {
+	if len(msg.Params) < 4 {
+		return
+	}
+
+	name := msg.Params[1]
+	nUsers, _ := strconv.Atoi(msg.Params[2])
+	topic := msg.Params[3]
+
+	// Strip mode prefix from topic (e.g., "[+nt] actual topic" → "actual topic")
+	topic = regexp.MustCompile(`^\[\+[a-z]+\]\s?`).ReplaceAllString(topic, "")
+
+	c.ircMu.Lock()
+	if c.listBuf.conversations == nil {
+		c.listBuf.conversations = make(map[string]listEntry)
+	}
+	c.listBuf.conversations[name] = listEntry{
+		Name:           name,
+		ConversationID: strings.ToLower(name),
+		NUsers:         nUsers,
+		Topic:          topic,
+	}
+	c.ircMu.Unlock()
+}
+
+// handleListEnd handles RPL_LISTEND (323) — marks LIST results as complete.
+func (c *IRCConnection) handleListEnd() {
+	c.ircMu.Lock()
+	c.listBuf.done = true
+	c.ircMu.Unlock()
+}
+
+// handleListCommand implements the /list command with caching and search.
+// Usage: /list [refresh] [/pattern/[flags]]
+//
+// With no args: returns cached results (or fetches if no cache).
+// "refresh": clears cache and re-fetches from server.
+// /pattern/: searches cached channels by name and topic (case-insensitive).
+// /pattern/n: search by name only. /pattern/t: search by topic only.
+func (c *IRCConnection) handleListCommand(args string) error {
+	c.ircMu.Lock()
+
+	// Refresh if requested or no cache exists
+	if strings.Contains(args, "refresh") || c.listBuf.ts.IsZero() {
+		c.listBuf = listCache{
+			conversations: make(map[string]listEntry),
+			ts:            time.Now(),
+		}
+		c.ircMu.Unlock()
+		return c.client.Send("LIST")
+	}
+
+	// Snapshot the cache under lock
+	entries := make([]listEntry, 0, len(c.listBuf.conversations))
+	for _, e := range c.listBuf.conversations {
+		entries = append(entries, e)
+	}
+	done := c.listBuf.done
+	total := len(c.listBuf.conversations)
+	c.ircMu.Unlock()
+
+	found := c.filterListEntries(entries, args)
+
+	// Cap at 200 results
+	if len(found) > 200 {
+		found = found[:200]
+	}
+
+	// Convert to []any for JSON serialization
+	convList := make([]map[string]any, len(found))
+	for i, e := range found {
+		convList[i] = map[string]any{
+			"name":            e.Name,
+			"conversation_id": e.ConversationID,
+			"n_users":         e.NUsers,
+			"topic":           e.Topic,
+		}
+	}
+
+	c.emitEvent(map[string]any{
+		"event":           "sent",
+		"command":         []string{"list"},
+		"args":            args,
+		"conversations":   convList,
+		"n_conversations": total,
+		"done":            done,
+	})
+	return nil
+}
+
+// listFilterRE matches /pattern/[modifiers] in /list arguments.
+var listFilterRE = regexp.MustCompile(`/(\W?[\w-]+)/(\S*)`)
+
+// filterListEntries searches or sorts cached LIST entries based on args.
+func (c *IRCConnection) filterListEntries(entries []listEntry, args string) []listEntry {
+	m := listFilterRE.FindStringSubmatch(args)
+	if m == nil {
+		// No search — return all, sorted by user count descending
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].NUsers > entries[j].NUsers
+		})
+		return entries
+	}
+
+	pattern := m[1]
+	modifiers := m[2]
+
+	// Determine search scope: n=name, t=topic, default=both
+	byName, byTopic := true, true
+	if strings.Contains(modifiers, "n") {
+		byTopic = false
+	} else if strings.Contains(modifiers, "t") {
+		byName = false
+	}
+
+	re, err := regexp.Compile("(?i)" + regexp.QuoteMeta(pattern))
+	if err != nil {
+		return nil
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name < entries[j].Name
+	})
+
+	var nameMatches, topicMatches []listEntry
+	for _, e := range entries {
+		if byName && re.MatchString(e.Name) {
+			nameMatches = append(nameMatches, e)
+		} else if byTopic && re.MatchString(e.Topic) {
+			topicMatches = append(topicMatches, e)
+		}
+	}
+	return append(nameMatches, topicMatches...)
+}
+
 // handleCTCP responds to CTCP queries (PING, VERSION, TIME).
 func (c *IRCConnection) handleCTCP(nick, ctcp string) {
 	parts := strings.SplitN(ctcp, " ", 2)
@@ -1453,6 +1730,36 @@ func (c *IRCConnection) handleNotice(msg ircmsg.Message) {
 	})
 
 	c.persistMessage(convID, msg.Source, message, "notice", false)
+}
+
+// handleErrorReply handles IRC error numerics (4xx) and surfaces them to the
+// user. It tries to route the error to the relevant conversation when possible.
+// Format: :server 482 yournick #channel :You're not channel operator
+func (c *IRCConnection) handleErrorReply(msg ircmsg.Message) {
+	if len(msg.Params) < 2 {
+		return
+	}
+
+	message := msg.Params[len(msg.Params)-1]
+
+	// Try to find a conversation context from params[1] (often a channel or nick).
+	convID := ""
+	if len(msg.Params) >= 3 {
+		candidate := strings.ToLower(msg.Params[1])
+		if c.GetConversation(candidate) != nil {
+			convID = candidate
+		}
+	}
+
+	c.emitEvent(map[string]any{
+		"event":           "message",
+		"conversation_id": convID,
+		"from":            msg.Source,
+		"message":         message,
+		"type":            "error",
+	})
+
+	c.persistMessage(convID, msg.Source, message, "error", false)
 }
 
 // handleWelcome handles RPL_WELCOME (001).
