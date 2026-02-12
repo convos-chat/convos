@@ -14,7 +14,7 @@ type Config struct {
 	Home             string `envconfig:"CONVOS_HOME"`
 	Listen           string `envconfig:"CONVOS_LISTEN" default:"http://localhost:8080"`
 	Mode             string `envconfig:"CONVOS_MODE" default:"production"`
-	ReverseProxy     bool   `envconfig:"CONVOS_REVERSE_PROXY"`
+	ReverseProxy     string `envconfig:"CONVOS_REVERSE_PROXY"`
 	SecureCookies    *bool  `envconfig:"CONVOS_SECURE_COOKIES"`
 	SessionSecret    string `envconfig:"CONVOS_SESSION_SECRET"`
 	OrganizationName string `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
@@ -28,6 +28,10 @@ type Config struct {
 // IsDevelopment returns true if running in development mode.
 func (c *Config) IsDevelopment() bool {
 	return c.Mode == "development"
+}
+
+func (c *Config) ReverseProxyEnabled() bool {
+	return c.ReverseProxy != ""
 }
 
 // Load loads configuration from environment variables.

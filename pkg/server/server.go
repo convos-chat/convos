@@ -67,23 +67,38 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if s.Config.ReverseProxy == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		if base := r.Header.Get("X-Request-Base"); base != "" {
-			if !s.Config.ReverseProxy {
-				slog.Warn("X-Request-Base header seen but CONVOS_REVERSE_PROXY is not set")
-			} else if u, err := url.Parse(base); err == nil {
-				s.Core.Settings().SetBaseURL(u)
-				// Update secure cookies based on detected scheme
-				if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
-					cookieStore.Options.Secure = u.Scheme == "https"
-				}
+			u, err := url.Parse(base)
+			if err != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+			s.Core.Settings().SetBaseURL(u)
+			// Update secure cookies based on detected scheme
+			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
+				cookieStore.Options.Secure = u.Scheme == "https"
 			}
 		}
-		// Also detect scheme from X-Forwarded-Proto
+		// Also detect base from X-Forwarded
+		scheme := "https"
 		if proto := r.Header.Get("X-Forwarded-Proto"); proto == "https" {
 			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
 				cookieStore.Options.Secure = true
+				scheme = "https"
 			}
 		}
+		if host := r.Header.Get("X-Forwarded-Host"); host != "" {
+			s.Core.Settings().SetBaseURL(&url.URL{
+				Host:   host,
+				Scheme: scheme,
+			})
+		}
+		slog.Debug("Base URL updated from reverse proxy headers", "baseURL", s.Core.Settings().BaseURL())
+
 		next.ServeHTTP(w, r)
 	})
 }
@@ -185,7 +200,8 @@ func New(c *core.Core, cfg *config.Config) *Server {
 	s.Store = store
 
 	// Setup middleware stack
-	if cfg.ReverseProxy {
+	if cfg.ReverseProxy != "" {
+		slog.Debug("Reverse Proxy support enabled")
 		r.Use(middleware.RealIP)
 		r.Use(s.ReverseProxyMiddleware)
 	}
@@ -344,7 +360,7 @@ func (s *Server) themeList() []themeInfo {
 		return nil
 	}
 
-	var themes []themeInfo
+	themes := make([]themeInfo, 0)
 	for _, entry := range entries {
 		filename := entry.Name()
 		if !strings.HasSuffix(filename, ".css") {

@@ -51,7 +51,7 @@ func TestLoad(t *testing.T) { //nolint:paralleltest // modifies environment vari
 	if cfg.Listen != "http://0.0.0.0:3000" {
 		t.Errorf("Listen = %q, want http://0.0.0.0:3000", cfg.Listen)
 	}
-	if !cfg.ReverseProxy {
-		t.Error("ReverseProxy = false, want true")
+	if cfg.ReverseProxy != "true" {
+		t.Error("ReverseProxy = unset, want true")
 	}
 }
