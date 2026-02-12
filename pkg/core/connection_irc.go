@@ -354,17 +354,18 @@ func (c *IRCConnection) Disconnect() error {
 // Send sends a message or command to a target (channel or user).
 // Messages starting with "/" are interpreted as IRC commands.
 func (c *IRCConnection) Send(target, message string) error {
+	// Handle IRC commands (messages starting with /) — some commands like
+	// /connect and /reconnect must work even when disconnected.
+	if strings.HasPrefix(message, "/") {
+		return c.handleCommand(target, message[1:])
+	}
+
 	c.ircMu.RLock()
 	if c.state != StateConnected || c.client == nil {
 		c.ircMu.RUnlock()
 		return ErrNotConnected
 	}
 	c.ircMu.RUnlock()
-
-	// Handle IRC commands (messages starting with /)
-	if strings.HasPrefix(message, "/") {
-		return c.handleCommand(target, message[1:])
-	}
 
 	if target == "" {
 		return ErrNoTarget
@@ -392,7 +393,11 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 		if args == "" {
 			return ErrUsageJoin
 		}
-		return c.client.Join(strings.SplitN(args, " ", 2)[0])
+		ch := strings.SplitN(args, " ", 2)[0]
+		if !ChannelRE.MatchString(ch) {
+			return c.openConversation(ch)
+		}
+		return c.client.Join(ch)
 	case "PART", "LEAVE", "CLOSE":
 		ch := target
 		if args != "" {
@@ -401,6 +406,22 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 		if ch == "" {
 			return ErrUsagePart
 		}
+
+		// For private conversations, frozen conversations, or when disconnected,
+		// just remove locally — there's no channel to PART from on the server.
+		conv := c.GetConversation(ch)
+		if conv != nil && (conv.IsPrivate() || conv.Frozen() != "") || c.State() != StateConnected {
+			c.RemoveConversation(ch)
+			c.saveState()
+			c.emitEvent(map[string]any{
+				"event":           "state",
+				"type":            "part",
+				"conversation_id": strings.ToLower(ch),
+				"nick":            c.Nick(),
+			})
+			return nil
+		}
+
 		return c.client.Part(ch)
 	case "MSG":
 		msgParts := strings.SplitN(args, " ", 2)
@@ -478,27 +499,11 @@ func (c *IRCConnection) handleCommand(target, raw string) error {
 		if len(parts) == 0 {
 			return ErrUsageQuery
 		}
-		nick := parts[0]
-		convID := strings.ToLower(nick)
-		conv := c.GetConversation(convID)
-		if conv == nil {
-			conv = NewConversation(convID, c)
-			c.AddConversation(conv)
+		if err := c.openConversation(parts[0]); err != nil {
+			return err
 		}
-		c.emitEvent(map[string]any{
-			"event":           "state",
-			"type":            "frozen",
-			"conversation_id": conv.ID(),
-			"frozen":          conv.Frozen(),
-			"name":            conv.Name(),
-			"topic":           conv.Topic(),
-			"unread":          conv.Unread(),
-		})
-		c.saveState()
-
 		if len(parts) > 1 {
-			msg := strings.Join(parts[1:], " ")
-			return c.Send(nick, msg)
+			return c.Send(parts[0], strings.Join(parts[1:], " "))
 		}
 		return nil
 	case "QUIT":
@@ -533,6 +538,28 @@ func (c *IRCConnection) SetNick(nick string) {
 	c.ircMu.Lock()
 	defer c.ircMu.Unlock()
 	c.nick = nick
+}
+
+// openConversation creates (or retrieves) a private conversation and emits a
+// frozen-state event so the frontend adds it to the sidebar.
+func (c *IRCConnection) openConversation(nick string) error {
+	convID := strings.ToLower(nick)
+	conv := c.GetConversation(convID)
+	if conv == nil {
+		conv = NewConversation(convID, c)
+		c.AddConversation(conv)
+	}
+	c.emitEvent(map[string]any{
+		"event":           "state",
+		"type":            "frozen",
+		"conversation_id": conv.ID(),
+		"frozen":          conv.Frozen(),
+		"name":            conv.Name(),
+		"topic":           conv.Topic(),
+		"unread":          conv.Unread(),
+	})
+	c.saveState()
+	return nil
 }
 
 // saveState persists the connection (including conversations) to the backend.
@@ -624,7 +651,7 @@ func (c *IRCConnection) emitInfo() {
 	c.ircMu.RLock()
 	info := map[string]any{
 		"event": "state",
-		"type":  "me",
+		"type":  "info",
 		"nick":  c.nick,
 	}
 	maps.Copy(info, c.info)
@@ -1296,7 +1323,7 @@ func (c *IRCConnection) handleMode(msg ircmsg.Message) {
 	if !ChannelRE.MatchString(target) {
 		c.emitEvent(map[string]any{
 			"event": "state",
-			"type":  "me",
+			"type":  "info",
 			"nick":  c.Nick(),
 			"mode":  modeStr,
 		})
