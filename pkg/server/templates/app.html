@@ -1,55 +1,151 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <title>{{if eq .OrganizationName "Convos"}}Better group chat - Convos{{else}}Better group chat - Convos for {{.OrganizationName}}{{end}}</title>
-    <meta name="description" content="A chat application that runs in your browser">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@convosby">
-    <meta property="og:type" content="object">
-    <meta property="og:site_name" content="{{.OrganizationName}}">
-    <meta property="og:description" content="A chat application that runs in your browser">
-    <meta property="og:image" content="/images/convos_screenshot.jpg">
-    <meta property="og:title" content="Better group chat - Convos">
+    <title>
+      {{if eq .OrganizationName "Convos"}}Better group chat -
+      Convos{{else}}Better group chat - Convos for {{.OrganizationName}}{{end}}
+    </title>
+    <meta
+      name="description"
+      content="A chat application that runs in your browser"
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@convosby" />
+    <meta property="og:type" content="object" />
+    <meta property="og:site_name" content="{{.OrganizationName}}" />
+    <meta
+      property="og:description"
+      content="A chat application that runs in your browser"
+    />
+    <meta property="og:image" content="/images/convos_screenshot.jpg" />
+    <meta property="og:title" content="Better group chat - Convos" />
 
     <!-- pwa -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" sizes="57x57" href="/assets/apple-touch-icon-57x57.e024a83e.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/assets/apple-touch-icon-60x60.51c5a95b.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/assets/apple-touch-icon-72x72.231a66c9.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/assets/apple-touch-icon-76x76.5e14b7a1.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/assets/apple-touch-icon-114x114.913c43db.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-touch-icon-120x120.52c691a9.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/assets/apple-touch-icon-144x144.eb857b3e.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-touch-icon-152x152.be6c9e4f.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-180x180.c1fe73dd.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.2447df68.png">
-    <link rel="icon" type="image/png" sizes="194x194" href="/assets/favicon-194x194.77dd0ed4.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/android-chrome-192x192.02ee7244.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.9e1affe1.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="mask-icon" href="/assets/safari-pinned-tab.cb98a0d7.svg" color="#00451D">
-    <meta name="msapplication-TileImage" content="/assets/mstile-144x144.a653fdfa.png">
-    <meta name="msapplication-config" content="/browserconfig.xml">
-    <meta name="msapplication-TileColor" content="#00451D">
-    <meta name="theme-color" content="#00451D">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="/assets/apple-touch-icon-57x57.e024a83e.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="/assets/apple-touch-icon-60x60.51c5a95b.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="/assets/apple-touch-icon-72x72.231a66c9.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="/assets/apple-touch-icon-76x76.5e14b7a1.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="/assets/apple-touch-icon-114x114.913c43db.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="/assets/apple-touch-icon-120x120.52c691a9.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="/assets/apple-touch-icon-144x144.eb857b3e.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/assets/apple-touch-icon-152x152.be6c9e4f.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/apple-touch-icon-180x180.c1fe73dd.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/favicon-32x32.2447df68.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="194x194"
+      href="/assets/favicon-194x194.77dd0ed4.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/assets/android-chrome-192x192.02ee7244.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/favicon-16x16.9e1affe1.png"
+    />
+    <link rel="manifest" href="/manifest.json" />
+    <link
+      rel="mask-icon"
+      href="/assets/safari-pinned-tab.cb98a0d7.svg"
+      color="#00451D"
+    />
+    <meta
+      name="msapplication-TileImage"
+      content="/assets/mstile-144x144.a653fdfa.png"
+    />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="msapplication-TileColor" content="#00451D" />
+    <meta name="theme-color" content="#00451D" />
 
-    <meta name="contactorganization" content="{{.OrganizationName}}">
-    <meta name="contactnetworkaddress" content="{{.OrganizationURL}}">
-    <meta name="convos:base_url" content="{{.BaseURL}}">
-    <meta name="convos:contact" content="{{.Contact}}">
-    <meta name="convos:existing_user" content="{{.ExistingUser}}">
-    <meta name="convos:first_user" content="{{.FirstUser}}">
-    <meta name="convos:open_to_public" content="{{.OpenToPublic}}">
-    <meta name="convos:start_app" content="{{.StartApp}}">
-    <meta name="convos:status" content="{{.Status}}">
-    <meta name="csrf" content="{{.CSRFToken}}">
-    <meta name="version" content="{{.Version}}">
+    <meta name="contactorganization" content="{{.OrganizationName}}" />
+    <meta name="contactnetworkaddress" content="{{.OrganizationURL}}" />
+    <meta name="convos:base_url" content="{{.BaseURL}}" />
+    <meta name="convos:contact" content="{{.Contact}}" />
+    <meta name="convos:existing_user" content="{{.ExistingUser}}" />
+    <meta name="convos:first_user" content="{{.FirstUser}}" />
+    <meta name="convos:open_to_public" content="{{.OpenToPublic}}" />
+    <meta name="convos:start_app" content="{{.StartApp}}" />
+    <meta name="convos:status" content="{{.Status}}" />
+    <meta name="csrf" content="{{.CSRFToken}}" />
+    <meta name="version" content="{{.Version}}" />
 
-    <noscript><style>.has-js { display: none; }</style></noscript>
-    {{if .AssetCSS}}<link rel="stylesheet" href="/assets/{{.AssetCSS}}">{{end}}
-    {{if .PrimaryTheme}}<link rel="stylesheet" type="text/css" id="theme_primary" href="{{.PrimaryTheme.URL}}" title="{{.PrimaryTheme.Title}}">{{end}}
-    {{range .Themes}}<link rel="alternate stylesheet" type="text/css" id="theme_alt__{{.ID}}" href="{{.URL}}" title="{{.Title}}">
+    <noscript
+      ><style>
+        .has-js {
+          display: none;
+        }
+      </style></noscript
+    >
+    {{if .AssetCSS}}
+    <link rel="stylesheet" href="/assets/{{.AssetCSS}}" />
+    {{end}} {{if .PrimaryTheme}}
+    <link
+      rel="stylesheet"
+      type="text/css"
+      id="theme_primary"
+      href="{{.PrimaryTheme.URL}}"
+      title="{{.PrimaryTheme.Title}}"
+    />
+    {{end}} {{range .Themes}}
+    <link
+      rel="alternate stylesheet"
+      type="text/css"
+      id="theme_alt__{{.ID}}"
+      href="{{.URL}}"
+      title="{{.Title}}"
+    />
     {{end}}
   </head>
   <body class="no-js no-notify no-mouse no-touch for-cms">
@@ -59,6 +155,8 @@
       <p><i class="fas fa-spinner fa-spin"></i> Starting Convos...</p>
     </main>
     <div class="footer--wrapper is-small"></div>
-    {{if .AssetJS}}<script src="/assets/{{.AssetJS}}"></script>{{end}}
+    {{if .AssetJS}}
+    <script src="/assets/{{.AssetJS}}"></script>
+    {{end}}
   </body>
 </html>

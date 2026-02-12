@@ -44,10 +44,18 @@ onMount(() => {
   };
 });
 
+const apiUrl = route.urlFor('/api');
+
 // Using onDestroy() to unsubscribe to notify "update" event
 onDestroy(notify.on('update', (notify, changed) => {
   if (!changed.wantNotifications && !changed.desktopAccess) return;
-  if (notify.wantNotifications) notify.show($l('You have enabled notifications.'));
+  if (notify.wantNotifications) {
+    notify.show($l('You have enabled notifications.'));
+    if (notify.desktopAccess === 'granted') notify.subscribeToPush(apiUrl);
+  }
+  else {
+    notify.unsubscribeFromPush(apiUrl);
+  }
 }));
 
 function registerProtocol(proto) {

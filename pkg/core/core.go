@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/SherClockHolmes/webpush-go"
 )
 
 // ConnectionProvider creates a Connection from a raw URL and user.
@@ -232,6 +234,10 @@ func (c *Core) Start() error {
 		user.roles = userData.Roles
 		user.uid = userData.UID
 		user.registered = userData.Registered
+		user.subscriptions = userData.Subscriptions
+		if user.subscriptions == nil {
+			user.subscriptions = make(map[string]webpush.Subscription)
+		}
 		c.users[user.ID()] = user
 
 		// Load connections for user

@@ -97,6 +97,8 @@ type SettingsData struct {
 	OrganizationURL   string   `json:"organization_url,omitempty"`
 	SessionSecrets    []string `json:"session_secrets,omitempty"`
 	VideoService      string   `json:"video_service,omitempty"`
+	VAPIDPrivateKey   string   `json:"vapid_private_key,omitempty"`
+	VAPIDPublicKey    string   `json:"vapid_public_key,omitempty"`
 }
 
 // MessageQuery defines parameters for message searches.

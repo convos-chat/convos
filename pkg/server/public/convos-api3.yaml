@@ -616,6 +616,95 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /push/subscribe:
+    post:
+      operationId: subscribeToPush
+      summary: Subscribe to push notifications.
+      tags: [push]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint, keys]
+              properties:
+                endpoint:
+                  type: string
+                keys:
+                  type: object
+                  required: [auth, p256dh]
+                  properties:
+                    auth:
+                      type: string
+                    p256dh:
+                      type: string
+      responses:
+        "200":
+          description: Subscribed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/unsubscribe:
+    post:
+      operationId: unsubscribeFromPush
+      summary: Unsubscribe from push notifications.
+      tags: [push]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint]
+              properties:
+                endpoint:
+                  type: string
+      responses:
+        "200":
+          description: Unsubscribed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/vapid:
+    get:
+      operationId: getVapidKey
+      summary: Get VAPID public key.
+      tags: [push]
+      responses:
+        "200":
+          description: Public key.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [public_key]
+                properties:
+                  public_key:
+                    type: string
+        default:
+          description: Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /search:
     get:
       operationId: searchMessages

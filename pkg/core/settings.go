@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"slices"
 	"sync"
+
+	"github.com/SherClockHolmes/webpush-go"
 )
 
 // Settings holds core configuration settings.
@@ -20,6 +22,8 @@ type Settings struct {
 	organizationURL   string
 	sessionSecrets    []string
 	videoService      string
+	vapidPrivateKey   string
+	vapidPublicKey    string
 }
 
 // BaseURL returns the base URL for the application.
@@ -168,10 +172,39 @@ func (s *Settings) SetSessionSecrets(secrets []string) {
 	s.sessionSecrets = secrets
 }
 
+// VAPIDKeys returns the VAPID public and private keys, generating them if necessary.
+func (s *Settings) VAPIDKeys() (string, string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.vapidPublicKey != "" && s.vapidPrivateKey != "" {
+		return s.vapidPublicKey, s.vapidPrivateKey, nil
+	}
+
+	privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
+	if err != nil {
+		return "", "", err
+	}
+
+	s.vapidPrivateKey = privateKey
+	s.vapidPublicKey = publicKey
+
+	// Save immediately so we don't lose them
+	if err := s.core.Backend().SaveSettings(s.toDataLocked()); err != nil {
+		return "", "", err
+	}
+
+	return publicKey, privateKey, nil
+}
+
 // ToData converts settings to a serializable format.
 func (s *Settings) ToData() SettingsData {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+	return s.toDataLocked()
+}
+
+func (s *Settings) toDataLocked() SettingsData {
 	data := SettingsData{
 		Contact:           s.contact,
 		DefaultConnection: s.defaultConnection,
@@ -182,6 +215,8 @@ func (s *Settings) ToData() SettingsData {
 		OrganizationURL:   s.organizationURL,
 		SessionSecrets:    s.sessionSecrets,
 		VideoService:      s.videoService,
+		VAPIDPrivateKey:   s.vapidPrivateKey,
+		VAPIDPublicKey:    s.vapidPublicKey,
 	}
 	if s.baseURL != nil {
 		data.BaseURL = s.baseURL.String()
@@ -202,6 +237,8 @@ func (s *Settings) FromData(data SettingsData) {
 	s.organizationURL = data.OrganizationURL
 	s.sessionSecrets = data.SessionSecrets
 	s.videoService = data.VideoService
+	s.vapidPrivateKey = data.VAPIDPrivateKey
+	s.vapidPublicKey = data.VAPIDPublicKey
 	if data.BaseURL != "" {
 		s.baseURL, _ = url.Parse(data.BaseURL)
 	}

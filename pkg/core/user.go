@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/convos-chat/convos/pkg/auth"
 )
 
@@ -23,18 +24,20 @@ type User struct {
 	highlightKeywords []string
 	unread            int
 	connections       map[string]Connection
+	subscriptions     map[string]webpush.Subscription
 }
 
 // UserData represents serialized user data for storage.
 type UserData struct {
-	Email             string    `json:"email"`
-	Password          string    `json:"password,omitempty"`
-	Roles             []string  `json:"roles"`
-	UID               int       `json:"uid,string"`
-	Registered        time.Time `json:"registered"`
-	RemoteAddress     string    `json:"remote_address"`
-	HighlightKeywords []string  `json:"highlight_keywords"`
-	Unread            int       `json:"unread"`
+	Email             string                          `json:"email"`
+	Password          string                          `json:"password,omitempty"`
+	Roles             []string                        `json:"roles"`
+	UID               int                             `json:"uid,string"`
+	Registered        time.Time                       `json:"registered"`
+	RemoteAddress     string                          `json:"remote_address"`
+	HighlightKeywords []string                        `json:"highlight_keywords"`
+	Unread            int                             `json:"unread"`
+	Subscriptions     map[string]webpush.Subscription `json:"subscriptions,omitempty"`
 }
 
 // NewUser creates a new User instance.
@@ -47,6 +50,7 @@ func NewUser(email string, core *Core) *User {
 		remoteAddress:     "127.0.0.1",
 		highlightKeywords: []string{},
 		connections:       make(map[string]Connection),
+		subscriptions:     make(map[string]webpush.Subscription),
 	}
 }
 
@@ -194,6 +198,34 @@ func (u *User) SetUnread(n int) {
 	u.unread = n
 }
 
+// AddSubscription adds a Web Push subscription.
+func (u *User) AddSubscription(sub webpush.Subscription) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	if u.subscriptions == nil {
+		u.subscriptions = make(map[string]webpush.Subscription)
+	}
+	u.subscriptions[sub.Endpoint] = sub
+}
+
+// RemoveSubscription removes a Web Push subscription.
+func (u *User) RemoveSubscription(endpoint string) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	delete(u.subscriptions, endpoint)
+}
+
+// Subscriptions returns all Web Push subscriptions.
+func (u *User) Subscriptions() []webpush.Subscription {
+	u.mu.RLock()
+	defer u.mu.RUnlock()
+	subs := make([]webpush.Subscription, 0, len(u.subscriptions))
+	for _, sub := range u.subscriptions {
+		subs = append(subs, sub)
+	}
+	return subs
+}
+
 // Connection returns an existing connection or creates a new one.
 func (u *User) Connection(id string) Connection {
 	u.mu.Lock()
@@ -270,7 +302,12 @@ func (u *User) ToData(includePassword bool) UserData {
 		RemoteAddress:     u.remoteAddress,
 		HighlightKeywords: slices.Clone(u.highlightKeywords),
 		Unread:            u.unread,
+		Subscriptions:     make(map[string]webpush.Subscription, len(u.subscriptions)),
 	}
+	for k, v := range u.subscriptions {
+		data.Subscriptions[k] = v
+	}
+
 	if includePassword {
 		data.Password = u.password
 	}

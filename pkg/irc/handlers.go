@@ -66,6 +66,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	}
 
 	// Check for highlight
+	isDM := target == c.Nick()
 	highlight := c.isHighlight(message)
 
 	c.emitEvent(map[string]any{
@@ -79,7 +80,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 
 	c.persistMessage(conv.ID(), nick, message, msgType, highlight)
 
-	if highlight {
+	if highlight || isDM {
 		c.persistNotification(conv.ID(), nick, message, msgType)
 	}
 }

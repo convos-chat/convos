@@ -76,6 +76,8 @@ function setTitle(title, $user) {
 async function registerServiceWorker() {
   if (!navigator.serviceWorker) return {};
   const reg = await navigator.serviceWorker.register(route.urlFor('/sw.js'));
+  notify.setServiceWorkerRegistration(reg);
+
   const res = await fetch(route.urlFor('/sw/info'));
   const info = res.status == 200 && await res.json() || {mode: '', version: '0.00'};
   if (info.version == settings('version')) return {};
