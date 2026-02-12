@@ -284,18 +284,21 @@ func (u *User) loadConnections() error {
 		return err
 	}
 
-	u.mu.Lock()
-	defer u.mu.Unlock()
-
+	// Create connections without holding the user lock to avoid deadlock
+	// when NewConnection calls back into User methods (e.g. Email)
+	var createdConns []Connection
 	for _, connData := range conns {
-		conn := NewIRCConnection(connData.URL, u)
+		conn := u.core.NewConnection(connData.URL, u)
+		if conn == nil {
+			slog.Warn("No provider registered for connection URL", "url", connData.URL)
+			continue
+		}
 		conn.SetName(connData.Name)
 		conn.SetWantedState(connData.WantedState)
 		conn.SetOnConnectCommands(connData.OnConnectCommands)
 		for k, v := range connData.Info {
 			conn.SetInfo(k, v)
 		}
-		u.connections[conn.ID()] = conn
 
 		// Load conversations for connection
 		for _, convData := range connData.Conversations {
@@ -304,6 +307,14 @@ func (u *User) loadConnections() error {
 			conv.SetPassword(convData.Password)
 			conn.AddConversation(conv)
 		}
+		createdConns = append(createdConns, conn)
+	}
+
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
+	for _, conn := range createdConns {
+		u.connections[conn.ID()] = conn
 	}
 
 	return nil

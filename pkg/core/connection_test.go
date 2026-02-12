@@ -1,17 +1,32 @@
 package core
 
 import (
-	"os"
 	"testing"
-	"time"
 )
 
-func TestNewIRCConnection(t *testing.T) {
+// testConnection is a minimal Connection implementation for core tests.
+type testConnection struct {
+	*BaseConnection
+}
+
+func newTestConnection(rawURL string, user *User) *testConnection {
+	return &testConnection{
+		BaseConnection: NewBaseConnection(rawURL, user),
+	}
+}
+
+func (c *testConnection) Connect() error    { return nil }
+func (c *testConnection) Disconnect() error { return nil }
+func (c *testConnection) Send(_, _ string) error { return nil }
+
+var _ Connection = (*testConnection)(nil)
+
+func TestNewConnection(t *testing.T) {
 	t.Parallel()
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	if conn.User() != user {
 		t.Error("User() should return the parent user")
@@ -43,7 +58,7 @@ func TestConnectionID(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		conn := NewIRCConnection(tt.url, user)
+		conn := newTestConnection(tt.url, user)
 		if conn.ID() != tt.expected {
 			t.Errorf("ID() for %q = %q, want %q", tt.url, conn.ID(), tt.expected)
 		}
@@ -56,7 +71,7 @@ func TestConnectionName(t *testing.T) {
 	c := New()
 	user := NewUser(testEmail, c)
 
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Auto-generated name from URL
 	if conn.Name() != "libera" {
@@ -75,7 +90,7 @@ func TestConnectionState(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initial state
 	if conn.State() != StateDisconnected {
@@ -112,7 +127,7 @@ func TestConnectionNick(t *testing.T) {
 
 	for _, tt := range tests {
 		user := NewUser(tt.email, c)
-		conn := NewIRCConnection(tt.url, user)
+		conn := newTestConnection(tt.url, user)
 		if conn.Nick() != tt.expected {
 			t.Errorf("Nick() for email=%q, url=%q = %q, want %q",
 				tt.email, tt.url, conn.Nick(), tt.expected)
@@ -125,7 +140,7 @@ func TestConnectionOnConnectCommands(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initially empty
 	if len(conn.OnConnectCommands()) != 0 {
@@ -147,7 +162,7 @@ func TestConnectionConversations(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initially empty
 	if len(conn.Conversations()) != 0 {
@@ -187,7 +202,7 @@ func TestConnectionToData(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName("Libera")
 	conn.SetOnConnectCommands([]string{"/join #test"})
 
@@ -221,23 +236,6 @@ func TestConnectionToData(t *testing.T) {
 	}
 }
 
-func TestConnectionDisconnectWhenWantedDisconnected(t *testing.T) {
-	t.Parallel()
-
-	c := New()
-	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
-
-	// Set wanted state to disconnected
-	conn.SetWantedState(StateDisconnected)
-
-	// Connect should fail
-	err := conn.Connect()
-	if err == nil {
-		t.Error("Connect() should fail when wanted state is disconnected")
-	}
-}
-
 func TestPrettyConnectionName(t *testing.T) {
 	t.Parallel()
 
@@ -260,116 +258,4 @@ func TestPrettyConnectionName(t *testing.T) {
 			t.Errorf("prettyConnectionName(%q) = %q, want %q", tt.host, got, tt.expected)
 		}
 	}
-}
-
-// TestIRCConnectionIntegration tests the IRC connection against a real server
-// when CONVOS_TEST_IRC_SERVER is set (e.g., "irc://localhost:6667")
-func TestIRCConnectionIntegration(t *testing.T) {
-	t.Parallel()
-	serverURL := os.Getenv("CONVOS_TEST_IRC_SERVER")
-	if serverURL == "" {
-		t.Skip("CONVOS_TEST_IRC_SERVER not set, skipping integration test")
-		return
-	}
-
-	t.Log("Testing IRC connection against:", serverURL)
-
-	// Create core and user
-	c := New()
-	user := NewUser("testuser@convos.chat", c)
-
-	// Create connection
-	conn := NewIRCConnection(serverURL, user)
-
-	// Test initial state
-	if conn.State() != StateDisconnected {
-		t.Errorf("Initial state = %q, want %q", conn.State(), StateDisconnected)
-	}
-
-	// Connect to server
-	t.Log("Connecting to IRC server...")
-	if err := conn.Connect(); err != nil {
-		t.Fatalf("Failed to connect: %v", err)
-	}
-
-	// Wait for connection to establish (with timeout)
-	timeout := time.NewTimer(10 * time.Second)
-	connected := make(chan bool, 1)
-
-	go func() {
-		for {
-			if conn.State() == StateConnected {
-				connected <- true
-				return
-			}
-			if conn.State() == StateDisconnected {
-				connected <- false
-				return
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
-
-	select {
-	case success := <-connected:
-		if !success {
-			t.Error("Connection failed to establish")
-		} else {
-			t.Log("Successfully connected to IRC server")
-		}
-	case <-timeout.C:
-		t.Error("Connection timeout")
-	}
-
-	// If we're connected, test joining a channel and sending a message
-	if conn.State() == StateConnected {
-		t.Log("Testing channel join and message sending...")
-
-		target := "#test"
-		t.Logf("Joining %s...", target)
-		if err := conn.client.Join(target); err != nil {
-			t.Errorf("Failed to join %s: %v", target, err)
-		}
-
-		// Wait a bit for JOIN to complete
-		time.Sleep(500 * time.Millisecond)
-
-		if err := conn.Send(target, "Test message from Convos Go integration test"); err != nil {
-			t.Errorf("Failed to send message: %v", err)
-		} else {
-			t.Log("Successfully sent test message")
-		}
-
-		// Wait a bit for message to be processed
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	// Disconnect
-	t.Log("Disconnecting from IRC server...")
-	if err := conn.Disconnect(); err != nil {
-		t.Errorf("Failed to disconnect: %v", err)
-	}
-
-	// Wait for disconnection
-	timeout = time.NewTimer(5 * time.Second)
-	disconnected := make(chan bool, 1)
-
-	go func() {
-		for {
-			if conn.State() == StateDisconnected {
-				disconnected <- true
-				return
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
-
-	select {
-	case <-disconnected:
-		t.Log("Successfully disconnected from IRC server")
-	case <-timeout.C:
-		t.Error("Disconnection timeout")
-	}
-
-	t.Log("Integration test completed successfully")
 }

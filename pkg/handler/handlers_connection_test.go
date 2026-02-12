@@ -9,6 +9,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/gorilla/sessions"
 )
 
@@ -86,7 +87,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Run("ListConnections", func(t *testing.T) {
 		t.Parallel()
 		c, h, user := setup()
-		conn := core.NewIRCConnection("irc://irc.libera.chat", user)
+		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
 		if err := c.Backend().SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)
@@ -108,7 +109,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Run("UpdateConnection", func(t *testing.T) {
 		t.Parallel()
 		c, h, user := setup()
-		conn := core.NewIRCConnection("irc://irc.libera.chat", user)
+		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
 		if err := c.Backend().SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)
@@ -136,7 +137,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Run("RemoveConnection", func(t *testing.T) {
 		t.Parallel()
 		c, h, user := setup()
-		conn := core.NewIRCConnection("irc://irc.libera.chat", user)
+		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
 		if err := c.Backend().SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)

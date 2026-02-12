@@ -20,9 +20,6 @@ var channelModeNames = map[byte]string{
 	't': "topic_protection",
 }
 
-// userModeChars are IRC mode characters that target a specific user (nick) in a channel.
-const userModeChars = "ovhaq"
-
 // Conversation represents a chat conversation (channel or private message).
 type Conversation struct {
 	mu            sync.RWMutex

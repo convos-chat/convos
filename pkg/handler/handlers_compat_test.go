@@ -11,6 +11,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/gorilla/sessions"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -61,7 +62,7 @@ func TestGetUser_QueryParameters(t *testing.T) {
 
 	// Mock connection
 	rawURL := "irc://irc.libera.chat"
-	conn := core.NewIRCConnection(rawURL, u)
+	conn := irc.NewConnection(rawURL, u)
 	u.AddConnection(conn)
 
 	// 1. connections=false, conversations=false
@@ -203,7 +204,7 @@ func TestGetUser_ConversationFields(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	conn := core.NewIRCConnection("irc://irc.libera.chat", u)
+	conn := irc.NewConnection("irc://irc.libera.chat", u)
 	u.AddConnection(conn)
 
 	conv := core.NewConversation("#test", conn)
@@ -305,7 +306,7 @@ func TestConversationMessages_EndField(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	conn := core.NewIRCConnection("irc://irc.libera.chat", u)
+	conn := irc.NewConnection("irc://irc.libera.chat", u)
 	u.AddConnection(conn)
 	conv := core.NewConversation("#test", conn)
 	conn.AddConversation(conv)
@@ -473,7 +474,7 @@ func TestConnectionMessages_ServerConversation(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	conn := core.NewIRCConnection("irc://irc.libera.chat", u)
+	conn := irc.NewConnection("irc://irc.libera.chat", u)
 	u.AddConnection(conn)
 
 	// Create server conversation with empty ID (Perl behavior)

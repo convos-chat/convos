@@ -6,6 +6,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 )
 
 func TestConversationHandlers(t *testing.T) {
@@ -20,7 +21,7 @@ func TestConversationHandlers(t *testing.T) {
 		if err := user.Save(); err != nil {
 			t.Fatalf("Failed to create user: %v", err)
 		}
-		conn := core.NewIRCConnection("irc://irc.libera.chat", user)
+		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
 		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)

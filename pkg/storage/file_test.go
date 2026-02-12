@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 )
 
 const (
@@ -122,7 +123,7 @@ func TestFileBackendConnectionOperations(t *testing.T) {
 	}
 
 	const testConnName = "Libera"
-	conn := core.NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := irc.NewConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName(testConnName)
 	conn.SetOnConnectCommands([]string{"/join #test"})
 
@@ -173,7 +174,7 @@ func TestFileBackendMessageOperations(t *testing.T) {
 	b := NewFileBackend(tmpDir)
 	c := core.New(core.WithBackend(b), core.WithHome(tmpDir))
 	user, _ := c.User(testEmail)
-	conn := core.NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := irc.NewConnection("irc://irc.libera.chat:6697", user)
 	conv := core.NewConversation(testChannel, conn)
 
 	// Create user and connection directories
@@ -270,7 +271,7 @@ func TestFileBackendLoadMessagesReturnsNewest(t *testing.T) {
 	b := NewFileBackend(tmpDir)
 	c := core.New(core.WithBackend(b), core.WithHome(tmpDir))
 	user, _ := c.User(testEmail)
-	conn := core.NewIRCConnection("irc://localhost:6667", user)
+	conn := irc.NewConnection("irc://localhost:6667", user)
 	conv := core.NewConversation("", conn) // server messages (empty conv ID)
 
 	if err := b.SaveUser(user); err != nil {
@@ -359,7 +360,7 @@ func TestFileBackendPerlLogCompat(t *testing.T) {
 	b := NewFileBackend(tmpDir)
 	c := core.New(core.WithBackend(b), core.WithHome(tmpDir))
 	user, _ := c.User(testEmail)
-	conn := core.NewIRCConnection("irc://localhost:6667", user)
+	conn := irc.NewConnection("irc://localhost:6667", user)
 	conv := core.NewConversation(testChannel, conn)
 
 	if err := b.SaveUser(user); err != nil {

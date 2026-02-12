@@ -9,6 +9,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 )
 
 // ListConnections implements api.StrictServerInterface.
@@ -39,7 +40,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		}, nil
 	}
 
-	conn := core.NewIRCConnection(request.Body.Url, user)
+	conn := irc.NewConnection(request.Body.Url, user)
 	user.AddConnection(conn)
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
 		return nil, err

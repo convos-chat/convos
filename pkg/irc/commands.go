@@ -1,0 +1,383 @@
+package irc
+
+import (
+	"log/slog"
+	"regexp"
+	"sort"
+	"strings"
+	"time"
+
+	"github.com/convos-chat/convos/pkg/core"
+)
+
+// handleCommand parses and executes an IRC command from user input.
+func (c *Connection) handleCommand(target, raw string) error {
+	parts := strings.SplitN(raw, " ", 2)
+	command := strings.ToUpper(parts[0])
+	args := ""
+	if len(parts) > 1 {
+		args = parts[1]
+	}
+
+	// Commands that work regardless of connection state.
+	switch command {
+	case "CONNECT":
+		c.SetWantedState(core.StateConnected)
+		go func() {
+			if err := c.Connect(); err != nil {
+				slog.Error("Failed to connect", "error", err)
+			}
+		}()
+		return nil
+	case "DISCONNECT":
+		c.SetWantedState(core.StateDisconnected)
+		go func() {
+			if err := c.Disconnect(); err != nil {
+				slog.Error("Failed to disconnect", "error", err)
+			}
+		}()
+		return nil
+	case "RECONNECT":
+		go func() {
+			if err := c.Disconnect(); err != nil {
+				slog.Error("Failed to disconnect", "error", err)
+			}
+			if err := c.Connect(); err != nil {
+				slog.Error("Failed to reconnect", "error", err)
+			}
+		}()
+		return nil
+	case "PART", "LEAVE", "CLOSE":
+		ch := target
+		if args != "" {
+			ch = strings.SplitN(args, " ", 2)[0]
+		}
+		if ch == "" {
+			return ErrUsagePart
+		}
+		// For private conversations, frozen conversations, or when disconnected,
+		// just remove locally — there's no channel to PART from on the server.
+		conv := c.GetConversation(ch)
+		if conv != nil && (conv.IsPrivate() || conv.Frozen() != "") || c.State() != core.StateConnected {
+			c.RemoveConversation(ch)
+			c.saveState()
+			c.emitEvent(map[string]any{
+				"event":           "state",
+				"type":            "part",
+				"conversation_id": strings.ToLower(ch),
+				"nick":            c.Nick(),
+			})
+			return nil
+		}
+		return c.client.Part(ch)
+	case "CLEAR":
+		clearParts := strings.Fields(args)
+		if len(clearParts) < 2 || clearParts[0] != "history" {
+			return ErrUsageClear
+		}
+		convTarget := clearParts[1]
+		conv := c.GetConversation(convTarget)
+		if conv == nil {
+			return ErrUnknownConversation
+		}
+		if err := c.User().Core().Backend().DeleteMessages(conv); err != nil {
+			return err
+		}
+		c.emitEvent(map[string]any{
+			"event":           "sent",
+			"command":         []string{"clear"},
+			"conversation_id": conv.ID(),
+		})
+		return nil
+	case "QUERY":
+		qparts := strings.Fields(args)
+		if len(qparts) == 0 {
+			return ErrUsageQuery
+		}
+		if err := c.openConversation(qparts[0]); err != nil {
+			return err
+		}
+		if len(qparts) > 1 {
+			return c.Send(qparts[0], strings.Join(qparts[1:], " "))
+		}
+		return nil
+	}
+
+	// Remaining commands require an active connection.
+	c.mu.RLock()
+	connected := c.State() == core.StateConnected && c.client != nil
+	c.mu.RUnlock()
+	if !connected {
+		return ErrNotConnected
+	}
+
+	switch command {
+	case "JOIN", "J":
+		if args == "" {
+			return ErrUsageJoin
+		}
+		ch := strings.SplitN(args, " ", 2)[0]
+		if !core.ChannelRE.MatchString(ch) {
+			return c.openConversation(ch)
+		}
+		return c.client.Join(ch)
+	case "MSG":
+		msgParts := strings.SplitN(args, " ", 2)
+		if len(msgParts) < 2 {
+			return ErrUsageMsg
+		}
+		if err := c.client.Privmsg(msgParts[0], msgParts[1]); err != nil {
+			return err
+		}
+		c.emitSentMessage(msgParts[0], msgParts[1], "private")
+		return nil
+	case "NICK":
+		if args == "" {
+			return ErrUsageNick
+		}
+		return c.client.Send("NICK", args)
+	case "TOPIC":
+		if args != "" {
+			return c.client.Send("TOPIC", target, args)
+		}
+		return c.client.Send("TOPIC", target)
+	case "KICK":
+		kickParts := strings.SplitN(args, " ", 2)
+		if len(kickParts) == 0 || kickParts[0] == "" {
+			return ErrUsageKick
+		}
+		if len(kickParts) == 2 {
+			return c.client.Send("KICK", target, kickParts[0], kickParts[1])
+		}
+		return c.client.Send("KICK", target, kickParts[0])
+	case "MODE":
+		if args != "" {
+			// /mode +o nick → MODE <target> +o nick
+			// /mode #channel +o nick → MODE #channel +o nick
+			parts := strings.SplitN(args, " ", 2)
+			if strings.HasPrefix(parts[0], "#") || strings.HasPrefix(parts[0], "&") {
+				return c.client.SendRaw("MODE " + args)
+			}
+			if target != "" {
+				return c.client.SendRaw("MODE " + target + " " + args)
+			}
+			return c.client.SendRaw("MODE " + args)
+		}
+		// /mode with no args → query mode of current target
+		if target != "" {
+			return c.client.Send("MODE", target)
+		}
+		return nil
+	case "ME":
+		if target == "" || args == "" {
+			return ErrUsageMe
+		}
+		if err := c.client.Privmsg(target, "\x01ACTION "+args+"\x01"); err != nil {
+			return err
+		}
+		c.emitSentMessage(target, args, "action")
+		return nil
+	case "SAY":
+		if target == "" || args == "" {
+			return ErrUsageSay
+		}
+		if err := c.client.Privmsg(target, args); err != nil {
+			return err
+		}
+		c.emitSentMessage(target, args, "private")
+		return nil
+	case "WHOIS":
+		nick := args
+		if nick == "" {
+			return ErrUsageWhois
+		}
+		return c.client.Send("WHOIS", nick)
+	case "NAMES":
+		ch := target
+		if args != "" {
+			ch = args
+		}
+		if ch == "" {
+			return ErrUsageNames
+		}
+		return c.client.Send("NAMES", ch)
+	case "INVITE":
+		inviteParts := strings.Fields(args)
+		if len(inviteParts) == 0 || inviteParts[0] == "" {
+			return ErrUsageInvite
+		}
+		ch := target
+		if len(inviteParts) > 1 {
+			ch = inviteParts[1]
+		}
+		if ch == "" {
+			return ErrUsageInviteChannel
+		}
+		return c.client.Send("INVITE", inviteParts[0], ch)
+	case "AWAY":
+		if args == "" {
+			return c.client.Send("AWAY")
+		}
+		return c.client.Send("AWAY", args)
+	case "OPER":
+		if args == "" {
+			return ErrUsageOper
+		}
+		return c.client.SendRaw("OPER " + args)
+	case "LIST":
+		return c.handleListCommand(args)
+	case "QUIT":
+		msg := "Bye!"
+		if args != "" {
+			msg = args
+		}
+		c.client.QuitMessage = msg
+		c.client.Quit()
+		return nil
+	default:
+		// Send as raw IRC command
+		return c.client.SendRaw(raw)
+	}
+}
+
+// executeCommand runs an on-connect command (e.g., /join #channel, /msg NickServ ...).
+func (c *Connection) executeCommand(cmd string) {
+	cmd = strings.TrimSpace(cmd)
+	if cmd == "" {
+		return
+	}
+
+	// Strip leading /
+	cmd = strings.TrimPrefix(cmd, "/")
+
+	parts := strings.SplitN(cmd, " ", 2)
+	command := strings.ToUpper(parts[0])
+	args := ""
+	if len(parts) > 1 {
+		args = parts[1]
+	}
+
+	switch command {
+	case "JOIN":
+		if args != "" {
+			if err := c.client.Join(args); err != nil {
+				slog.Error("Failed to execute on-connect JOIN command", "channel", args, "error", err)
+			}
+		}
+	case "MSG", "PRIVMSG":
+		msgParts := strings.SplitN(args, " ", 2)
+		if len(msgParts) == 2 {
+			if err := c.client.Privmsg(msgParts[0], msgParts[1]); err != nil {
+				slog.Error("Failed to execute on-connect MSG command", "target", msgParts[0], "error", err)
+			}
+		}
+	default:
+		// Send raw IRC command
+		if err := c.client.SendRaw(cmd); err != nil {
+			slog.Error("Failed to execute on-connect command", "command", cmd, "error", err)
+		}
+	}
+}
+
+// handleListCommand implements the /list command with caching and search.
+// Usage: /list [refresh] [/pattern/[flags]]
+//
+// With no args: returns cached results (or fetches if no cache).
+// "refresh": clears cache and re-fetches from server.
+// /pattern/: searches cached channels by name and topic (case-insensitive).
+// /pattern/n: search by name only. /pattern/t: search by topic only.
+func (c *Connection) handleListCommand(args string) error {
+	c.mu.Lock()
+
+	// Refresh if requested or no cache exists
+	if strings.Contains(args, "refresh") || c.listBuf.ts.IsZero() {
+		c.listBuf = listCache{
+			conversations: make(map[string]listEntry),
+			ts:            time.Now(),
+		}
+		c.mu.Unlock()
+		return c.client.Send("LIST")
+	}
+
+	// Snapshot the cache under lock
+	entries := make([]listEntry, 0, len(c.listBuf.conversations))
+	for _, e := range c.listBuf.conversations {
+		entries = append(entries, e)
+	}
+	done := c.listBuf.done
+	total := len(c.listBuf.conversations)
+	c.mu.Unlock()
+
+	found := c.filterListEntries(entries, args)
+
+	// Cap at 200 results
+	if len(found) > 200 {
+		found = found[:200]
+	}
+
+	// Convert to []any for JSON serialization
+	convList := make([]map[string]any, len(found))
+	for i, e := range found {
+		convList[i] = map[string]any{
+			"name":            e.Name,
+			"conversation_id": e.ConversationID,
+			"n_users":         e.NUsers,
+			"topic":           e.Topic,
+		}
+	}
+
+	c.emitEvent(map[string]any{
+		"event":           "sent",
+		"command":         []string{"list"},
+		"args":            args,
+		"conversations":   convList,
+		"n_conversations": total,
+		"done":            done,
+	})
+	return nil
+}
+
+// listFilterRE matches /pattern/[modifiers] in /list arguments.
+var listFilterRE = regexp.MustCompile(`/(\W?[\w-]+)/(\S*)`)
+
+// filterListEntries searches or sorts cached LIST entries based on args.
+func (c *Connection) filterListEntries(entries []listEntry, args string) []listEntry {
+	m := listFilterRE.FindStringSubmatch(args)
+	if m == nil {
+		// No search — return all, sorted by user count descending
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].NUsers > entries[j].NUsers
+		})
+		return entries
+	}
+
+	pattern := m[1]
+	modifiers := m[2]
+
+	// Determine search scope: n=name, t=topic, default=both
+	byName, byTopic := true, true
+	if strings.Contains(modifiers, "n") {
+		byTopic = false
+	} else if strings.Contains(modifiers, "t") {
+		byName = false
+	}
+
+	re, err := regexp.Compile("(?i)" + regexp.QuoteMeta(pattern))
+	if err != nil {
+		return nil
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name < entries[j].Name
+	})
+
+	var nameMatches, topicMatches []listEntry
+	for _, e := range entries {
+		if byName && re.MatchString(e.Name) {
+			nameMatches = append(nameMatches, e)
+		} else if byTopic && re.MatchString(e.Topic) {
+			topicMatches = append(topicMatches, e)
+		}
+	}
+	return append(nameMatches, topicMatches...)
+}

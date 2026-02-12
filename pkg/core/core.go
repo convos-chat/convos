@@ -9,6 +9,11 @@ import (
 	"sync"
 )
 
+// ConnectionProvider creates a Connection from a raw URL and user.
+type ConnectionProvider interface {
+	NewConnection(rawURL string, user *User) (Connection, error)
+}
+
 // Core is the main entry point for Convos business logic.
 // It manages users, connection profiles, and the storage backend.
 type Core struct {
@@ -18,6 +23,7 @@ type Core struct {
 	settings *Settings
 	users    map[string]*User
 	events   *EventEmitter
+	provider ConnectionProvider
 	ready    bool
 	log      *slog.Logger
 }
@@ -36,6 +42,13 @@ func WithHome(home string) Option {
 func WithBackend(backend Backend) Option {
 	return func(c *Core) {
 		c.backend = backend
+	}
+}
+
+// WithConnectionProvider sets the connection provider.
+func WithConnectionProvider(provider ConnectionProvider) Option {
+	return func(c *Core) {
+		c.provider = provider
 	}
 }
 
@@ -174,6 +187,20 @@ func (c *Core) nextUID() int {
 		}
 		uid++
 	}
+}
+
+// NewConnection creates a connection using the registered provider.
+// Returns nil if no provider is registered or the scheme is not supported.
+func (c *Core) NewConnection(rawURL string, user *User) Connection {
+	if c.provider == nil {
+		return nil
+	}
+	conn, err := c.provider.NewConnection(rawURL, user)
+	if err != nil {
+		c.log.Warn("Failed to create connection", "url", rawURL, "error", err)
+		return nil
+	}
+	return conn
 }
 
 // Start initializes the core by loading users and their connections.

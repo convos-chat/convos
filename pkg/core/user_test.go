@@ -165,7 +165,7 @@ func TestUserConnections(t *testing.T) {
 	}
 
 	// Add connection
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	user.AddConnection(conn)
 
 	conns := user.Connections()

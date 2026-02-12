@@ -1,13 +1,15 @@
-package core
+package irc
 
 import (
 	"context"
 	"errors"
 	"net"
 	"net/url"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/convos-chat/convos/pkg/core"
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
@@ -28,10 +30,10 @@ func mustParseURL(raw string) *url.URL {
 func TestIRCConnection_Handlers(t *testing.T) {
 	t.Parallel()
 
-	setup := func() (*Core, *User, *IRCConnection) {
-		c := New()
-		user := NewUser("test@example.com", c)
-		conn := NewIRCConnection("irc://irc.libera.chat", user)
+	setup := func() (*core.Core, *core.User, *Connection) {
+		c := core.New()
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
 		return c, user, conn
 	}
 
@@ -119,7 +121,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		// Create conversation first
-		conv := NewConversation("#convos", conn)
+		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
 
 		msg := ircmsg.MakeMessage(nil, "op!user@host", "TOPIC", "#convos", "New Topic")
@@ -151,7 +153,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		// Setup a conversation where we are present
-		conv := NewConversation("#test", conn)
+		conv := core.NewConversation("#test", conn)
 		conn.AddConversation(conv)
 		conv.AddParticipant("testnick", map[string]any{"nick": "testnick"})
 
@@ -225,7 +227,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		// Setup: Create conversation and add participant
-		conv := NewConversation("#convos", conn)
+		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
 		conv.AddParticipant("other_", map[string]any{"nick": "other_"})
 
@@ -257,7 +259,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		// Add victim back first - creating conv
-		conv := NewConversation("#convos", conn)
+		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
 		conv.AddParticipant("victim", map[string]any{"nick": "victim"})
 
@@ -289,7 +291,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		// Add alice back to a channel - creating conv first
-		conv := NewConversation("#convos", conn)
+		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
 		conv.AddParticipant("alice", map[string]any{"nick": "alice"})
 
@@ -444,4 +446,116 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestIRCConnectionIntegration tests the IRC connection against a real server
+// when CONVOS_TEST_IRC_SERVER is set (e.g., "irc://localhost:6667")
+func TestIRCConnectionIntegration(t *testing.T) {
+	t.Parallel()
+	serverURL := os.Getenv("CONVOS_TEST_IRC_SERVER")
+	if serverURL == "" {
+		t.Skip("CONVOS_TEST_IRC_SERVER not set, skipping integration test")
+		return
+	}
+
+	t.Log("Testing IRC connection against:", serverURL)
+
+	// Create core and user
+	c := core.New()
+	user := core.NewUser("testuser@convos.chat", c)
+
+	// Create connection
+	conn := NewConnection(serverURL, user)
+
+	// Test initial state
+	if conn.State() != core.StateDisconnected {
+		t.Errorf("Initial state = %q, want %q", conn.State(), core.StateDisconnected)
+	}
+
+	// Connect to server
+	t.Log("Connecting to IRC server...")
+	if err := conn.Connect(); err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+
+	// Wait for connection to establish (with timeout)
+	timeout := time.NewTimer(10 * time.Second)
+	connected := make(chan bool, 1)
+
+	go func() {
+		for {
+			if conn.State() == core.StateConnected {
+				connected <- true
+				return
+			}
+			if conn.State() == core.StateDisconnected {
+				connected <- false
+				return
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
+
+	select {
+	case success := <-connected:
+		if !success {
+			t.Error("Connection failed to establish")
+		} else {
+			t.Log("Successfully connected to IRC server")
+		}
+	case <-timeout.C:
+		t.Error("Connection timeout")
+	}
+
+	// If we're connected, test joining a channel and sending a message
+	if conn.State() == core.StateConnected {
+		t.Log("Testing channel join and message sending...")
+
+		target := "#test"
+		t.Logf("Joining %s...", target)
+		if err := conn.client.Join(target); err != nil {
+			t.Errorf("Failed to join %s: %v", target, err)
+		}
+
+		// Wait a bit for JOIN to complete
+		time.Sleep(500 * time.Millisecond)
+
+		if err := conn.Send(target, "Test message from Convos Go integration test"); err != nil {
+			t.Errorf("Failed to send message: %v", err)
+		} else {
+			t.Log("Successfully sent test message")
+		}
+
+		// Wait a bit for message to be processed
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	// Disconnect
+	t.Log("Disconnecting from IRC server...")
+	if err := conn.Disconnect(); err != nil {
+		t.Errorf("Failed to disconnect: %v", err)
+	}
+
+	// Wait for disconnection
+	timeout = time.NewTimer(5 * time.Second)
+	disconnected := make(chan bool, 1)
+
+	go func() {
+		for {
+			if conn.State() == core.StateDisconnected {
+				disconnected <- true
+				return
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
+
+	select {
+	case <-disconnected:
+		t.Log("Successfully disconnected from IRC server")
+	case <-timeout.C:
+		t.Error("Disconnection timeout")
+	}
+
+	t.Log("Integration test completed successfully")
 }

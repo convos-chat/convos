@@ -10,7 +10,7 @@ func TestMemoryBackend_Search(t *testing.T) {
 	b := NewMemoryBackend()
 	c := New(WithBackend(b))
 	user := NewUser("test@example.com", c)
-	conn := NewIRCConnection("irc://irc.libera.chat", user)
+	conn := newTestConnection("irc://irc.libera.chat", user)
 	conv := NewConversation("#test", conn)
 	user.AddConnection(conn)
 	conn.AddConversation(conv)

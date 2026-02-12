@@ -9,7 +9,7 @@ func TestNewConversation(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	conv := NewConversation(testChannel, conn)
 
@@ -31,7 +31,7 @@ func TestConversationIsPrivate(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	tests := []struct {
 		name      string
@@ -58,7 +58,7 @@ func TestConversationTopic(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Initially empty
@@ -78,7 +78,7 @@ func TestConversationPassword(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation("#secret", conn)
 
 	// Initially empty
@@ -98,7 +98,7 @@ func TestConversationFrozen(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Initially not frozen
@@ -124,7 +124,7 @@ func TestConversationNotifications(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Initially zero
@@ -151,7 +151,7 @@ func TestConversationUnread(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Initially zero
@@ -179,7 +179,7 @@ func TestConversationInfo(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Initially empty
@@ -212,7 +212,7 @@ func TestConversationToData(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	conv.SetTopic("Test topic")
@@ -261,7 +261,7 @@ func TestConversationIDCaseInsensitive(t *testing.T) {
 
 	c := New()
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	conv := NewConversation("#TestChannel", conn)
 	if conv.ID() != "#testchannel" {

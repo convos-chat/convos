@@ -10,6 +10,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 )
 
 // LoginUser implements api.StrictServerInterface.
@@ -133,7 +134,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 
 	// Auto-create connection from default_connection setting
 	if defaultConn := h.Core.Settings().DefaultConnection(); defaultConn != "" {
-		conn := core.NewIRCConnection(defaultConn, user)
+		conn := irc.NewConnection(defaultConn, user)
 		user.AddConnection(conn)
 
 		// Auto-create conversation from URL path

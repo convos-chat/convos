@@ -90,7 +90,7 @@ func TestMemoryBackendConnectionOperations(t *testing.T) {
 	c := New(WithBackend(b))
 	user := NewUser(testEmail, c)
 
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName("Libera")
 	conn.SetOnConnectCommands([]string{"/join #test"})
 
@@ -154,7 +154,7 @@ func TestMemoryBackendMessageOperations(t *testing.T) {
 	b := NewMemoryBackend()
 	c := New(WithBackend(b))
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conv := NewConversation(testChannel, conn)
 
 	// Save messages
@@ -234,7 +234,7 @@ func TestMemoryBackendDeleteUserCleansConnections(t *testing.T) {
 	b := NewMemoryBackend()
 	c := New(WithBackend(b))
 	user := NewUser(testEmail, c)
-	conn := NewIRCConnection("irc://irc.libera.chat:6697", user)
+	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	if err := b.SaveUser(user); err != nil {
 		t.Fatalf("SaveUser() error: %v", err)
@@ -272,8 +272,8 @@ func TestMemoryBackendMultipleUsers(t *testing.T) {
 	user1 := NewUser("user1@example.com", c)
 	user2 := NewUser("user2@example.com", c)
 
-	conn1 := NewIRCConnection("irc://irc.libera.chat:6697", user1)
-	conn2 := NewIRCConnection("irc://irc.oftc.net:6697", user2)
+	conn1 := newTestConnection("irc://irc.libera.chat:6697", user1)
+	conn2 := newTestConnection("irc://irc.oftc.net:6697", user2)
 
 	if err := b.SaveUser(user1); err != nil {
 		t.Fatalf("SaveUser(user1) error: %v", err)

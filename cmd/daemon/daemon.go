@@ -14,10 +14,30 @@ import (
 
 	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/convos-chat/convos/pkg/server"
 	"github.com/convos-chat/convos/pkg/storage"
 	"github.com/urfave/cli/v3"
 )
+
+var ErrUnknownScheme = errors.New("unknown connection scheme")
+
+// connectionProvider implements core.ConnectionProvider
+type connectionProvider struct{}
+
+func (p *connectionProvider) NewConnection(rawURL string, user *core.User) (core.Connection, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+
+	switch u.Scheme {
+	case "irc", "ircs":
+		return irc.NewConnection(rawURL, user), nil
+	default:
+		return nil, fmt.Errorf(" %s is not known: %w", u.Scheme, ErrUnknownScheme)
+	}
+}
 
 func Command() *cli.Command {
 	return &cli.Command{
@@ -58,7 +78,12 @@ func Command() *cli.Command {
 
 			// Initialize Core
 			backend := storage.NewFileBackend(cfg.Home)
-			c := core.New(core.WithHome(cfg.Home), core.WithBackend(backend))
+			c := core.New(
+				core.WithHome(cfg.Home),
+				core.WithBackend(backend),
+				core.WithConnectionProvider(&connectionProvider{}),
+			)
+
 			if err := c.Start(); err != nil {
 				return fmt.Errorf("failed to start core: %w", err)
 			}
