@@ -446,6 +446,42 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("handleNotice_Wildcard", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		// NOTICE * :*** Looking up your hostname...
+		msg := ircmsg.MakeMessage(nil, "server", "NOTICE", "*", "*** Looking up your hostname...")
+		conn.handleMessage(msg, "notice")
+
+		// Should NOT create a conversation named "*"
+		if conn.GetConversation("*") != nil {
+			t.Error("Should not create conversation '*'")
+		}
+
+		// Should be routed to server conversation (empty ID)
+		serverConv := conn.GetConversation("")
+		if serverConv == nil {
+			t.Fatal("Should create server conversation (empty ID)")
+		}
+
+		// Check event
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("Unexpected event type: %T", ev)
+			}
+			if m["conversation_id"] != "" {
+				t.Errorf("Expected conversation_id='', got %q", m["conversation_id"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("Expected message event")
+		}
+	})
 }
 
 // TestIRCConnectionIntegration tests the IRC connection against a real server

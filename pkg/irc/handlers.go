@@ -37,7 +37,9 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 
 	// Determine conversation target
 	convID := target
-	if target == c.Nick() {
+	if target == "*" {
+		convID = ""
+	} else if target == c.Nick() {
 		// Private message - use sender's nick as conversation ID
 		convID = nick
 	}
@@ -45,7 +47,11 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	// Get or create conversation
 	conv := c.GetConversation(convID)
 	if conv == nil {
-		conv = core.NewConversation(convID, c)
+		if convID == "" {
+			conv = core.NewConversationWithID("", c.Name(), c)
+		} else {
+			conv = core.NewConversation(convID, c)
+		}
 		c.AddConversation(conv)
 	}
 
@@ -575,29 +581,6 @@ func (c *Connection) handleEndOfNames(msg ircmsg.Message) {
 	})
 }
 
-// parseNickMode extracts the mode prefix and nick from an IRC NAMES entry.
-// Mode prefixes: ~ = q (founder), & = a (admin), @ = o (operator),
-// % = h (half-op), + = v (voice).
-func parseNickMode(raw string) (string, string) {
-	if len(raw) == 0 {
-		return "", ""
-	}
-	switch raw[0] {
-	case '~':
-		return "q", raw[1:]
-	case '&':
-		return "a", raw[1:]
-	case '@':
-		return "o", raw[1:]
-	case '%':
-		return "h", raw[1:]
-	case '+':
-		return "v", raw[1:]
-	default:
-		return "", raw
-	}
-}
-
 // handleWhoisReply collects WHOIS response numerics into the buffer.
 func (c *Connection) handleWhoisReply(code string, msg ircmsg.Message) {
 	if len(msg.Params) < 2 {
@@ -809,4 +792,27 @@ func (c *Connection) handleISupport(msg ircmsg.Message) {
 		}
 	}
 	c.emitInfo()
+}
+
+// parseNickMode extracts the mode prefix and nick from an IRC NAMES entry.
+// Mode prefixes: ~ = q (founder), & = a (admin), @ = o (operator),
+// % = h (half-op), + = v (voice).
+func parseNickMode(raw string) (string, string) {
+	if len(raw) == 0 {
+		return "", ""
+	}
+	switch raw[0] {
+	case '~':
+		return "q", raw[1:]
+	case '&':
+		return "a", raw[1:]
+	case '@':
+		return "o", raw[1:]
+	case '%':
+		return "h", raw[1:]
+	case '+':
+		return "v", raw[1:]
+	default:
+		return "", raw
+	}
 }
