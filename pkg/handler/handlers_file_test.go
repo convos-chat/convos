@@ -54,7 +54,7 @@ func TestFileHandlers(t *testing.T) {
 		content := []byte("hello world")
 		f, _ := c.Backend().SaveFile(user, "test.txt", content)
 
-		resp, _ := h.GetFile(ctx, api.GetFileRequestObject{Fid: f.ID})
+		resp, _ := h.GetFile(ctx, api.GetFileRequestObject{Uid: user.ID(), Fid: f.ID})
 		if r, ok := resp.(api.GetFile200AsteriskResponse); ok {
 			if r.ContentType != "text/plain; charset=utf-8" {
 				t.Errorf("Expected text/plain, got %q", r.ContentType)
