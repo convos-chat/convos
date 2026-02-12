@@ -83,15 +83,32 @@ func TestRegisterUser_Validation(t *testing.T) {
 				t.Fatalf("Unexpected error: %v", err)
 			}
 
-			if r, ok := resp.(api.RegisterUserdefaultJSONResponse); ok {
-				if r.StatusCode != tt.expectedStatus {
-					t.Errorf("Expected status %d, got %d", tt.expectedStatus, r.StatusCode)
+			var errors *[]struct {
+				Message string  `json:"message"`
+				Path    *string `json:"path,omitempty"`
+			}
+			switch r := resp.(type) {
+			case api.RegisterUser400JSONResponse:
+				if tt.expectedStatus != 400 {
+					t.Errorf("Expected status %d, got 400", tt.expectedStatus)
 				}
-				if r.Body.Errors != nil && (*r.Body.Errors)[0].Message != tt.expectedError {
-					t.Errorf("Expected error %q, got %q", tt.expectedError, (*r.Body.Errors)[0].Message)
+				errors = r.Errors
+			case api.RegisterUser401JSONResponse:
+				if tt.expectedStatus != 401 {
+					t.Errorf("Expected status %d, got 401", tt.expectedStatus)
 				}
-			} else {
-				t.Errorf("Unexpected response type: %T", resp)
+				errors = r.Errors
+			case api.RegisterUser500JSONResponse:
+				if tt.expectedStatus != 500 {
+					t.Errorf("Expected status %d, got 500", tt.expectedStatus)
+				}
+				errors = r.Errors
+			default:
+				t.Errorf("Unexpected response type %T", resp)
+			}
+
+			if errors != nil && (*errors)[0].Message != tt.expectedError {
+				t.Errorf("Expected error %q, got %q", tt.expectedError, (*errors)[0].Message)
 			}
 		})
 	}

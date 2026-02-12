@@ -39,6 +39,11 @@ import (
 //go:embed public templates
 var embeddedFiles embed.FS
 
+const (
+	httpScheme  = "http"
+	httpsScheme = "https"
+)
+
 var (
 	appTemplate           = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
 	swTemplate            = template.Must(template.New("sw").ParseFS(embeddedFiles, "templates/sw.js")).Lookup("sw.js")
@@ -80,15 +85,15 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 			s.Core.Settings().SetBaseURL(u)
 			// Update secure cookies based on detected scheme
 			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
-				cookieStore.Options.Secure = u.Scheme == "https"
+				cookieStore.Options.Secure = u.Scheme == httpsScheme
 			}
 		}
 		// Also detect base from X-Forwarded
-		scheme := "https"
-		if proto := r.Header.Get("X-Forwarded-Proto"); proto == "https" {
+		scheme := httpsScheme
+		if proto := r.Header.Get("X-Forwarded-Proto"); proto == httpsScheme {
 			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
 				cookieStore.Options.Secure = true
-				scheme = "https"
+				scheme = httpsScheme
 			}
 		}
 		if host := r.Header.Get("X-Forwarded-Host"); host != "" {
@@ -97,7 +102,6 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 				Scheme: scheme,
 			})
 		}
-		slog.Debug("Base URL updated from reverse proxy headers", "baseURL", s.Core.Settings().BaseURL())
 
 		next.ServeHTTP(w, r)
 	})

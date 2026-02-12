@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -12,6 +11,8 @@ import (
 	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/gorilla/sessions"
 )
+
+const testServer = "irc-libera"
 
 func TestConnectionHandlers(t *testing.T) {
 	t.Parallel()
@@ -49,12 +50,8 @@ func TestConnectionHandlers(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		if r, ok := resp.(api.CreateConnectiondefaultJSONResponse); ok {
-			if r.StatusCode != http.StatusUnauthorized {
-				t.Errorf("Expected 401, got %d", r.StatusCode)
-			}
-		} else {
-			t.Errorf("Unexpected response type: %T", resp)
+		if _, ok := resp.(api.CreateConnection401JSONResponse); !ok {
+			t.Errorf("Expected api.CreateConnection401JSONResponse, got %T", resp)
 		}
 	})
 
@@ -76,7 +73,7 @@ func TestConnectionHandlers(t *testing.T) {
 			if r.Url != "irc://irc.libera.chat?nick=test" {
 				t.Errorf("Expected URL with default nick, got %q", r.Url)
 			}
-			if r.ConnectionId != "irc-libera" {
+			if r.ConnectionId != testServer {
 				t.Errorf("Expected connection_id irc-libera, got %q", r.ConnectionId)
 			}
 		} else {
@@ -98,7 +95,7 @@ func TestConnectionHandlers(t *testing.T) {
 		if r, ok := resp.(api.ListConnections200JSONResponse); ok {
 			if len(*r.Connections) != 1 {
 				t.Errorf("Expected 1 connection, got %d", len(*r.Connections))
-			} else if (*r.Connections)[0].ConnectionId != "irc-libera" {
+			} else if (*r.Connections)[0].ConnectionId != testServer {
 				t.Errorf("Expected connection_id irc-libera, got %q", (*r.Connections)[0].ConnectionId)
 			}
 		} else {
@@ -118,7 +115,7 @@ func TestConnectionHandlers(t *testing.T) {
 		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
 		cmds := []string{"/msg NickServ identify pass"}
 		request := api.UpdateConnectionRequestObject{
-			ConnectionId: "irc-libera",
+			ConnectionId: testServer,
 			Body: &api.UpdateConnectionJSONRequestBody{
 				OnConnectCommands: &cmds,
 			},
@@ -145,7 +142,7 @@ func TestConnectionHandlers(t *testing.T) {
 
 		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
 		request := api.RemoveConnectionRequestObject{
-			ConnectionId: "irc-libera",
+			ConnectionId: testServer,
 		}
 
 		resp, _ := h.RemoveConnection(ctx, request)

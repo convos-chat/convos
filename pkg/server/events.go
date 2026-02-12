@@ -67,7 +67,6 @@ func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Subscribe to events for this user
 	sub := s.Core.Events().SubscribeUser(user.ID())
 	defer sub.Close()
 
@@ -120,6 +119,7 @@ func (s *Server) handleWSMessage(msg wsMessage, user *core.User) map[string]any 
 	if msg.Method == "" {
 		msg.Method = methodPing
 	}
+	slog.Debug("Received WS message", "method", msg.Method, "id", msg.ID, "message", msg.Message)
 
 	switch msg.Method {
 	case methodPing:
@@ -129,6 +129,7 @@ func (s *Server) handleWSMessage(msg wsMessage, user *core.User) map[string]any 
 	case "send":
 		return s.handleWSSend(msg, user)
 	default:
+		slog.Debug("Unknown WS method", "method", msg.Method)
 		return wsError("Invalid method.", msg)
 	}
 }

@@ -26,9 +26,8 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 
 	user := h.Core.GetUser(string(request.Body.Email))
 	if user == nil || !user.ValidatePassword(request.Body.Password) {
-		return api.LoginUserdefaultJSONResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       ErrResponse("Invalid email or password."),
+		return api.LoginUser400JSONResponse{
+			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Invalid email or password.")),
 		}, nil
 	}
 
@@ -81,9 +80,8 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 
 	email := string(request.Body.Email)
 	if email == "" || len(request.Body.Password) < 10 {
-		return api.RegisterUserdefaultJSONResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       ErrResponse("Email and password (min length 10) are required"),
+		return api.RegisterUser400JSONResponse{
+			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Email and password (min length 10) are required")),
 		}, nil
 	}
 
@@ -107,16 +105,14 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 	// Register new user
 	user, err := h.Core.User(email)
 	if err != nil {
-		return api.RegisterUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to create user: " + err.Error()),
+		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to create user: " + err.Error())),
 		}, nil
 	}
 
 	if err = user.SetPassword(request.Body.Password); err != nil {
-		return api.RegisterUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to set password: " + err.Error()),
+		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password: " + err.Error())),
 		}, nil
 	}
 
@@ -126,9 +122,8 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 	}
 
 	if err = user.Save(); err != nil {
-		return api.RegisterUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to save user: " + err.Error()),
+		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user: " + err.Error())),
 		}, nil
 	}
 
@@ -170,24 +165,21 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 // Returns (response, true) if registration should be rejected, or (nil, false) to continue.
 func (h *Handler) validateRegistration(hasToken bool, existingUser *core.User, email string, body *api.RegisterUserJSONRequestBody) (api.RegisterUserResponseObject, bool) {
 	if !hasToken && !h.Core.Settings().OpenToPublic() {
-		return api.RegisterUserdefaultJSONResponse{
-			StatusCode: http.StatusUnauthorized,
-			Body:       ErrResponse("Convos registration is not open to public."),
+		return api.RegisterUser401JSONResponse{
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Convos registration is not open to public.")),
 		}, true
 	}
 
 	if !hasToken && existingUser != nil {
-		return api.RegisterUserdefaultJSONResponse{
-			StatusCode: http.StatusUnauthorized,
-			Body:       ErrResponse("Email is taken."),
+		return api.RegisterUser401JSONResponse{
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Email is taken.")),
 		}, true
 	}
 
 	if hasToken {
 		if err := h.validateInviteRequest(email, existingUser, body); err != nil {
-			return api.RegisterUserdefaultJSONResponse{
-				StatusCode: http.StatusUnauthorized,
-				Body:       ErrResponse(err.Error()),
+			return api.RegisterUser401JSONResponse{
+				UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse(err.Error())),
 			}, true
 		}
 	}
@@ -198,15 +190,13 @@ func (h *Handler) validateRegistration(hasToken bool, existingUser *core.User, e
 // updateExistingUserViaInvite handles invite-based password update for an existing user.
 func (h *Handler) updateExistingUserViaInvite(user *core.User, password string, r *http.Request, w http.ResponseWriter) (api.RegisterUserResponseObject, error) {
 	if err := user.SetPassword(password); err != nil {
-		return api.RegisterUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to set password."),
+		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password.")),
 		}, nil
 	}
 	if err := user.Save(); err != nil {
-		return api.RegisterUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to save user."),
+		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user.")),
 		}, nil
 	}
 
@@ -333,9 +323,8 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 	targetEmail := string(request.Email)
 	target := h.Core.GetUser(targetEmail)
 	if target == nil {
-		return api.UpdateUserdefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("User not found"),
+		return api.UpdateUser404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("User not found")),
 		}, nil
 	}
 
@@ -347,9 +336,8 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 	b := request.Body
 	if b.Password != nil && *b.Password != "" {
 		if err := target.SetPassword(*b.Password); err != nil {
-			return api.UpdateUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-				StatusCode: http.StatusInternalServerError,
-				Body:       ErrResponse("Failed to set password: " + err.Error()),
+			return api.UpdateUser500JSONResponse{ //nolint:nilerr // HTTP error response
+				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password: " + err.Error())),
 			}, nil
 		}
 	}
@@ -367,9 +355,8 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 	}
 
 	if err := target.Save(); err != nil {
-		return api.UpdateUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to save user: " + err.Error()),
+		return api.UpdateUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user: " + err.Error())),
 		}, nil
 	}
 
@@ -388,9 +375,8 @@ func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestO
 
 	targetEmail := string(request.Email)
 	if err := h.Core.RemoveUser(targetEmail); err != nil {
-		return api.DeleteUserdefaultJSONResponse{ //nolint:nilerr // HTTP error response
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse("Failed to delete user: " + err.Error()),
+		return api.DeleteUser500JSONResponse{ //nolint:nilerr // HTTP error response
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to delete user: " + err.Error())),
 		}, nil
 	}
 

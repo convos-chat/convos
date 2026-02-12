@@ -47,12 +47,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     post:
       operationId: updateConnection
       summary: Update a connection.
@@ -86,12 +84,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Connection"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /connection/{connection_id}/conversation/{conversation_id}/messages:
     get:
@@ -135,12 +133,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Message"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /connection/{connection_id}/conversation/{conversation_id}/read:
     post:
@@ -157,12 +153,70 @@ paths:
             application/json:
               schema:
                 type: object
-        default:
-          description: Error.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /connections:
+    get:
+      operationId: listConnections
+      summary: Get all the connections for a user.
+      tags: [connection]
+      responses:
+        "200":
+          description: List of connections.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                type: object
+                properties:
+                  connections:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Connection"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createConnection
+      summary: Add a connection.
+      tags: [connection]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [url]
+              type: object
+              properties:
+                conversation_id:
+                  description: "Example: #convos"
+                  type: string
+                on_connect_commands:
+                  description: Commands to be run after the connection is established
+                  type: array
+                  items:
+                    type: string
+                url:
+                  description: "Example: irc://user:pass@irc.perl.org?nick=superman"
+                  type: string
+                wanted_state:
+                  description: Connection state
+                  enum: [connected, disconnected]
+                  type: string
+      responses:
+        "200":
+          description: Connection information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /connection/{connection_id}/messages:
     get:
@@ -205,12 +259,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Message"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /connection/{connection_id}/read:
     post:
@@ -226,76 +278,10 @@ paths:
             application/json:
               schema:
                 type: object
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /connections:
-    get:
-      operationId: listConnections
-      summary: Get all the connections for a user.
-      tags: [connection]
-      responses:
-        "200":
-          description: List of connections.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  connections:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Connection"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    post:
-      operationId: createConnection
-      summary: Add a connection.
-      tags: [connection]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              required: [url]
-              type: object
-              properties:
-                conversation_id:
-                  description: "Example: #convos"
-                  type: string
-                on_connect_commands:
-                  description: Commands to be run after the connection is established
-                  type: array
-                  items:
-                    type: string
-                url:
-                  description: "Example: irc://user:pass@irc.perl.org?nick=superman"
-                  type: string
-                wanted_state:
-                  description: Connection state
-                  enum: [connected, disconnected]
-                  type: string
-      responses:
-        "200":
-          description: Connection information.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Connection"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /connection-profiles:
     get:
@@ -314,6 +300,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/ConnectionProfile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     post:
       operationId: saveConnectionProfile
       summary: Update or create a profile.
@@ -331,6 +321,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConnectionProfile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /connection-profiles/{id}:
     delete:
@@ -351,6 +345,10 @@ paths:
             application/json:
               schema:
                 type: object
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /conversations:
     get:
@@ -369,6 +367,8 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Conversation"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /embed:
     get:
@@ -389,6 +389,8 @@ paths:
             application/json:
               schema:
                 type: object
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /files:
     get:
@@ -438,6 +440,8 @@ paths:
                   prev:
                     description: Can be used as "after" query param to go to the previous page
                     type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
     post:
       operationId: uploadFile
       summary: Upload file.
@@ -485,6 +489,10 @@ paths:
                         url:
                           format: uri
                           type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /files/{uid}/{fid}:
     get:
@@ -609,12 +617,8 @@ paths:
             application/json:
               schema:
                 type: object
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /push/subscribe:
     post:
@@ -646,12 +650,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /push/unsubscribe:
     post:
@@ -675,12 +679,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /push/vapid:
     get:
@@ -698,12 +702,10 @@ paths:
                 properties:
                   public_key:
                     type: string
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /search:
     get:
@@ -769,6 +771,8 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Message"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /settings:
     get:
@@ -784,12 +788,8 @@ paths:
                 $ref: "#/components/schemas/ServerSettings"
         "401":
           $ref: "#/components/responses/Unauthorized"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     post:
       operationId: updateSettings
       summary: Update settings for Convos.
@@ -807,6 +807,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /user:
     get:
@@ -833,12 +839,8 @@ paths:
                 $ref: "#/components/schemas/User"
         "401":
           $ref: "#/components/responses/Unauthorized"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /user/login:
     post:
@@ -867,12 +869,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /user/logout:
     get:
@@ -921,12 +921,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /user/{email}:
     delete:
@@ -942,12 +942,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Success"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     post:
       operationId: updateUser
       summary: Update an existing user.
@@ -980,12 +980,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        default:
-          description: Error.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /user/{email}/invite:
     post:
@@ -1108,6 +1110,12 @@ components:
         format: email
 
   responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
     Unauthorized:
       description: Unauthorized.
       content:
@@ -1116,6 +1124,18 @@ components:
             $ref: "#/components/schemas/Error"
     Forbidden:
       description: Forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalServerError:
+      description: Internal server error.
       content:
         application/json:
           schema:

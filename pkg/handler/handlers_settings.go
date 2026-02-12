@@ -50,7 +50,9 @@ func (h *Handler) UpdateSettings(ctx context.Context, request api.UpdateSettings
 	}
 
 	if err := s.Save(); err != nil {
-		return nil, err
+		return api.UpdateSettings500JSONResponse{
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+		}, nil
 	}
 
 	// Auto-create connection profile when default_connection is set

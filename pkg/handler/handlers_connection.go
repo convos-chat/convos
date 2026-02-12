@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -34,16 +33,17 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		return nil, ErrUnauthorized
 	}
 	if request.Body.Url == "" {
-		return api.CreateConnectiondefaultJSONResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       ErrResponse("URL is required"),
+		return api.CreateConnection400JSONResponse{
+			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("URL is required")),
 		}, nil
 	}
 
 	conn := irc.NewConnection(request.Body.Url, user)
 	user.AddConnection(conn)
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
-		return nil, err
+		return api.CreateConnection500JSONResponse{
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+		}, nil
 	}
 
 	// Auto-create conversation from conversation_id param or URL path
@@ -56,7 +56,9 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		conn.AddConversation(conv)
 		if err := h.Core.Backend().SaveConnection(conn); err != nil {
 			slog.Error("Failed to save connection with new conversation", "error", err)
-			return nil, err
+			return api.CreateConnection500JSONResponse{
+				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			}, nil
 		}
 	}
 
@@ -82,9 +84,8 @@ func (h *Handler) RemoveConnection(ctx context.Context, request api.RemoveConnec
 		return nil, ErrUnauthorized
 	}
 	if err := user.RemoveConnection(request.ConnectionId); err != nil {
-		return api.RemoveConnectiondefaultJSONResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrResponse(err.Error()),
+		return api.RemoveConnection500JSONResponse{
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -99,9 +100,8 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
-		return api.UpdateConnectiondefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Connection not found"),
+		return api.UpdateConnection404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
 		}, nil
 	}
 
@@ -143,7 +143,9 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 	}
 
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
-		return nil, err
+		return api.UpdateConnection500JSONResponse{
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+		}, nil
 	}
 
 	return api.UpdateConnection200JSONResponse(toAPIConnection(conn)), nil

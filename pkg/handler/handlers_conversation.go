@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"net/http"
 	"os"
 	"time"
 
@@ -38,17 +37,15 @@ func (h *Handler) ConversationMessages(ctx context.Context, request api.Conversa
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
-		return api.ConversationMessagesdefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Connection not found."),
+		return api.ConversationMessages404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found.")),
 		}, nil
 	}
 
 	conv := conn.GetConversation(request.ConversationId)
 	if conv == nil {
-		return api.ConversationMessagesdefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Conversation not found."),
+		return api.ConversationMessages404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Conversation not found.")),
 		}, nil
 	}
 
@@ -69,9 +66,8 @@ func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkCo
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
-		return api.MarkConversationAsReaddefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Connection not found"),
+		return api.MarkConversationAsRead404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
 		}, nil
 	}
 
@@ -92,9 +88,8 @@ func (h *Handler) ConnectionMessages(ctx context.Context, request api.Connection
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
-		return api.ConnectionMessagesdefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Connection not found."),
+		return api.ConnectionMessages404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found.")),
 		}, nil
 	}
 
@@ -127,9 +122,8 @@ func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConn
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
-		return api.MarkConnectionAsReaddefaultJSONResponse{
-			StatusCode: http.StatusNotFound,
-			Body:       ErrResponse("Connection not found"),
+		return api.MarkConnectionAsRead404JSONResponse{
+			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
 		}, nil
 	}
 

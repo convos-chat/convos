@@ -80,7 +80,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 
 	c.persistMessage(conv.ID(), nick, message, msgType, highlight)
 
-	if highlight || isDM {
+	if nick != c.Nick() && highlight || isDM {
 		c.persistNotification(conv.ID(), nick, message, msgType)
 	}
 }

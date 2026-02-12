@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -41,12 +40,8 @@ func TestRegisterUser_PasswordLength(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if r, ok := resp.(api.RegisterUserdefaultJSONResponse); ok {
-		if r.StatusCode != http.StatusBadRequest {
-			t.Errorf("Expected status 400 for short password, got %d", r.StatusCode)
-		}
-	} else {
-		t.Errorf("Expected RegisterUserdefaultJSONResponse (400), got %T", resp)
+	if _, ok := resp.(api.RegisterUser400JSONResponse); !ok {
+		t.Errorf("Expected api.RegisterUser400JSONResponse, got %T", resp)
 	}
 }
 
@@ -262,7 +257,7 @@ func TestListConnectionProfiles_IdAndSkipQueue(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	profileID := "irc-libera" //nolint:goconst // test value
+	profileID := testServer
 	profile := core.ConnectionProfileData{
 		ID:                 profileID,
 		URL:                "irc://irc.libera.chat",
@@ -669,7 +664,7 @@ func TestUpdateSettings_AutoCreateProfile(t *testing.T) {
 
 	found := false
 	for _, p := range profiles {
-		if p.ID == "irc-libera" {
+		if p.ID == testServer {
 			found = true
 			if !p.IsDefault {
 				t.Error("Auto-created profile should be marked as default")
@@ -710,7 +705,7 @@ func TestCreateConnection_AutoCreateProfile(t *testing.T) {
 
 	found := false
 	for _, p := range profiles {
-		if p.ID == "irc-libera" {
+		if p.ID == testServer {
 			found = true
 			if !p.SkipQueue {
 				t.Error("Auto-created profile from CreateConnection should have skip_queue=true")
@@ -789,15 +784,12 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 	}
 
 	// Perl returns 400 for login failure, not 401
-	r, ok := resp.(api.LoginUserdefaultJSONResponse)
+	r, ok := resp.(api.LoginUser400JSONResponse)
 	if !ok {
-		t.Fatalf("Expected LoginUserdefaultJSONResponse, got %T", resp)
-	}
-	if r.StatusCode != http.StatusBadRequest {
-		t.Errorf("Login failure status: got %d, want 400", r.StatusCode)
+		t.Fatalf("Expected LoginUser400JSONResponse, got %T", resp)
 	}
 
-	parsed := parseErrResponse(t, r.Body)
+	parsed := parseErrResponse(t, api.Error(r.BadRequestJSONResponse))
 	if len(parsed.Errors) == 0 {
 		t.Fatal("Expected error message")
 	}
@@ -834,15 +826,12 @@ func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 	}
 
 	// Perl returns 401 for registration closed, not 403
-	r, ok := resp.(api.RegisterUserdefaultJSONResponse)
+	r, ok := resp.(api.RegisterUser401JSONResponse)
 	if !ok {
-		t.Fatalf("Expected RegisterUserdefaultJSONResponse, got %T", resp)
-	}
-	if r.StatusCode != http.StatusUnauthorized {
-		t.Errorf("Registration closed status: got %d, want 401", r.StatusCode)
+		t.Fatalf("Expected RegisterUser401JSONResponse, got %T", resp)
 	}
 
-	parsed := parseErrResponse(t, r.Body)
+	parsed := parseErrResponse(t, api.Error(r.UnauthorizedJSONResponse))
 	if len(parsed.Errors) == 0 {
 		t.Fatal("Expected error message")
 	}
@@ -878,12 +867,12 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	r, ok := resp.(api.RegisterUserdefaultJSONResponse)
+	r, ok := resp.(api.RegisterUser401JSONResponse)
 	if !ok {
-		t.Fatalf("Expected RegisterUserdefaultJSONResponse, got %T", resp)
+		t.Fatalf("Expected RegisterUser401JSONResponse, got %T", resp)
 	}
 
-	parsed := parseErrResponse(t, r.Body)
+	parsed := parseErrResponse(t, api.Error(r.UnauthorizedJSONResponse))
 	if len(parsed.Errors) == 0 {
 		t.Fatal("Expected error message")
 	}
@@ -912,12 +901,8 @@ func TestConversationMessages_NotFound(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	r, ok := resp.(api.ConversationMessagesdefaultJSONResponse)
-	if !ok {
-		t.Fatalf("Expected ConversationMessagesdefaultJSONResponse (404), got %T", resp)
-	}
-	if r.StatusCode != http.StatusNotFound {
-		t.Errorf("Missing connection status: got %d, want 404", r.StatusCode)
+	if _, ok := resp.(api.ConversationMessages404JSONResponse); !ok {
+		t.Fatalf("Expected ConversationMessages404JSONResponse, got %T", resp)
 	}
 }
 
@@ -940,12 +925,8 @@ func TestConnectionMessages_NotFound(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	r, ok := resp.(api.ConnectionMessagesdefaultJSONResponse)
-	if !ok {
-		t.Fatalf("Expected ConnectionMessagesdefaultJSONResponse (404), got %T", resp)
-	}
-	if r.StatusCode != http.StatusNotFound {
-		t.Errorf("Missing connection status: got %d, want 404", r.StatusCode)
+	if _, ok := resp.(api.ConnectionMessages404JSONResponse); !ok {
+		t.Fatalf("Expected ConnectionMessages404JSONResponse, got %T", resp)
 	}
 }
 
@@ -1122,15 +1103,12 @@ func TestRegisterUser_InvalidToken(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	r, ok := resp.(api.RegisterUserdefaultJSONResponse)
+	r, ok := resp.(api.RegisterUser401JSONResponse)
 	if !ok {
-		t.Fatalf("Expected RegisterUserdefaultJSONResponse, got %T", resp)
-	}
-	if r.StatusCode != http.StatusUnauthorized {
-		t.Errorf("Expected status 401, got %d", r.StatusCode)
+		t.Fatalf("Expected RegisterUser401JSONResponse, got %T", resp)
 	}
 
-	parsed := parseErrResponse(t, r.Body)
+	parsed := parseErrResponse(t, api.Error(r.UnauthorizedJSONResponse))
 	if len(parsed.Errors) == 0 {
 		t.Fatal("Expected error message")
 	}
@@ -1174,12 +1152,8 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	r, ok := resp.(api.RegisterUserdefaultJSONResponse)
-	if !ok {
-		t.Fatalf("Expected RegisterUserdefaultJSONResponse, got %T", resp)
-	}
-	if r.StatusCode != http.StatusUnauthorized {
-		t.Errorf("Expected status 401, got %d", r.StatusCode)
+	if _, ok := resp.(api.RegisterUser401JSONResponse); !ok {
+		t.Fatalf("Expected RegisterUser401JSONResponse, got %T", resp)
 	}
 }
 
