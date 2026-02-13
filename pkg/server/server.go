@@ -273,6 +273,10 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	// WebSocket endpoint
 	r.Get("/events", s.eventsHandler)
 
+	// OIDC authentication endpoints
+	r.Get("/auth/oidc/login", h.OIDCLoginHandler)
+	r.Get("/auth/oidc/callback", h.OIDCCallbackHandler)
+
 	// PWA: service worker, manifest, browserconfig
 	r.Get("/sw.js", s.serveServiceWorker)
 	r.Get("/sw/info", s.serveServiceWorkerInfo)
@@ -448,6 +452,7 @@ type templateData struct {
 	OpenToPublic     string // "yes" or "no"
 	OrganizationName string
 	OrganizationURL  string
+	OIDCLoginURL     string
 	PrimaryTheme     *themeInfo // active theme from cookie, nil if none
 	StartApp         string
 	Status           int
@@ -498,6 +503,7 @@ func (s *Server) spaHandler() http.HandlerFunc {
 			OpenToPublic:     boolStr(s.Core.Settings().OpenToPublic()),
 			OrganizationName: s.Config.OrganizationName,
 			OrganizationURL:  s.Config.OrganizationURL,
+			OIDCLoginURL:     s.getOIDCLoginURL(),
 			PrimaryTheme:     primaryTheme,
 			StartApp:         "chat",
 			Status:           200,
@@ -607,6 +613,14 @@ func (s *Server) baseURL() string {
 	if u := s.Core.Settings().BaseURL(); u != nil {
 		str := u.String()
 		return strings.TrimRight(str, "/")
+	}
+	return ""
+}
+
+// getOIDCLoginURL returns the OIDC login URL if OIDC is enabled, otherwise empty string.
+func (s *Server) getOIDCLoginURL() string {
+	if s.Config.Auth.Provider == "oidc" {
+		return "/auth/oidc/login"
 	}
 	return ""
 }

@@ -109,6 +109,11 @@ async function submitForm(e) {
       <OperationStatus op="{registerOp}" success="Loading Convos..."/>
     {:else if mode === 'login'}
       <h2>{$l('Sign in')}</h2>
+      {#if settings('oidc_login_url')}
+        <div class="form-actions" style="margin-bottom: 1em">
+          <a class="btn is-primary" href="{settings('oidc_login_url')}" target="_self"><Icon name="sign-in-alt"/> <span>{$l('Sign in with OpenID Connect')}</span></a>
+        </div>
+      {/if}
       <TextField type="email" name="email" bind:value="{form.email}" placeholder="{$l('Ex: john@doe.com')}">
         <span slot="label">{$l('Email')}</span>
       </TextField>

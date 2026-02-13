@@ -11,6 +11,12 @@ Revision history for perl distribution Convos
   - The CMS system is removed. If you need a static site renderer 
     we recommend using something like Hugo or Jekyll instead.
 
+  New Features:
+
+  - Wastly simplified deployment. Convos is now a single static binary download
+  - OIDC login support for single sign on
+  - Web Push support for notifications on mobile clients
+
 8.07 2024-03-21T08:25:00+0900
  - Fix version number
 

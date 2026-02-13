@@ -1322,6 +1322,10 @@ components:
               format: uint64
         forced_connection:
           type: boolean
+        oidc_login_url:
+          type: string
+          format: uri
+          readOnly: true
         open_to_public:
           type: boolean
         organization_name:

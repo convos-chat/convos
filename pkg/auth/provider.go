@@ -14,7 +14,7 @@ type ProviderConfig struct {
 	Provider string       `envconfig:"CONVOS_AUTH_PROVIDER" default:"local"`
 	Header   HeaderConfig // Configuration for header-based authentication
 	LDAP     LDAPConfig   // Configuration for LDAP authentication
-	// Future: OIDC config will be added here
+	OIDC     OIDCConfig   // Configuration for OIDC authentication
 }
 
 // NewAuthenticator creates an authenticator based on the provider configuration.
@@ -28,6 +28,9 @@ func NewAuthenticator(c *core.Core, cfg ProviderConfig) (core.Authenticator, err
 
 	case "ldap":
 		return NewLDAPAuthenticator(c, cfg.LDAP), nil
+
+	case "oidc":
+		return NewOIDCAuthenticator(c, cfg.OIDC)
 
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnknownProvider, cfg.Provider)

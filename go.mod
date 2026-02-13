@@ -6,9 +6,11 @@ tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
+	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ergochat/irc-go v0.5.0
 	github.com/getkin/kin-openapi v0.127.0
 	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/gorilla/sessions v1.4.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -17,6 +19,7 @@ require (
 	github.com/urfave/cli/v3 v3.6.2
 	golang.org/x/crypto v0.47.0
 	golang.org/x/net v0.49.0
+	golang.org/x/oauth2 v0.35.0
 	golang.org/x/sys v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -26,7 +29,7 @@ require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
-	github.com/go-ldap/ldap/v3 v3.4.12 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect

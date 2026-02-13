@@ -13,6 +13,7 @@ type AuthRequest struct {
 type AuthResult struct {
 	User       *User
 	AutoCreate bool     // Whether to auto-create user
+	Email      string   // Email for auto-creation (used by OIDC and other external auth)
 	Roles      []string // Roles to assign on auto-creation
 }
 

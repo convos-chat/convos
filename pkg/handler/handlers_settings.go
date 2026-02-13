@@ -74,6 +74,12 @@ func (h *Handler) settingsToAPI() api.ServerSettings {
 	orgURL := s.OrganizationURL()
 	video := s.VideoService()
 
+	// Determine OIDC login URL based on authenticator type
+	oidcURL := ""
+	if h.Authenticator.Name() == "oidc" {
+		oidcURL = "/auth/oidc/login"
+	}
+
 	baseURL := s.BaseURL().String()
 
 	res := api.ServerSettings{
@@ -84,6 +90,7 @@ func (h *Handler) settingsToAPI() api.ServerSettings {
 		OpenToPublic:      &open,
 		OrganizationName:  &orgName,
 		OrganizationUrl:   &orgURL,
+		OidcLoginUrl:      &oidcURL,
 		VideoService:      &video,
 	}
 
