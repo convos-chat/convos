@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -23,6 +24,7 @@ type Config struct {
 	CertFile         string `envconfig:"CONVOS_CERT"`
 	KeyFile          string `envconfig:"CONVOS_KEY"`
 	WebhookNetworks  string `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
+	Auth             auth.ProviderConfig
 }
 
 // IsDevelopment returns true if running in development mode.

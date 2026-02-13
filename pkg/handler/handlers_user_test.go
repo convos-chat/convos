@@ -8,6 +8,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/gorilla/sessions"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -57,7 +58,7 @@ func TestRegisterUser_Validation(t *testing.T) {
 			backend := core.NewMemoryBackend()
 			c := core.New(core.WithBackend(backend))
 			c.Settings().SetOpenToPublic(tt.openToPublic)
-			h := NewHandler(c, store, nil)
+			h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 			if tt.existingUsers > 0 {
 				u, _ := c.User("existing@example.com")
@@ -68,8 +69,8 @@ func TestRegisterUser_Validation(t *testing.T) {
 
 			req := httptest.NewRequest("POST", "/api/user/register", nil)
 			w := httptest.NewRecorder()
-			ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-			ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+			ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+			ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 			request := api.RegisterUserRequestObject{
 				Body: &api.RegisterUserJSONRequestBody{
@@ -119,12 +120,12 @@ func TestRegisterUser_FirstUserIsAdmin(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	request := api.RegisterUserRequestObject{
 		Body: &api.RegisterUserJSONRequestBody{

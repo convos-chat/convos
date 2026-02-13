@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/irc"
@@ -84,12 +85,19 @@ func Command() *cli.Command {
 				core.WithConnectionProvider(&connectionProvider{}),
 			)
 
-			if err := c.Start(); err != nil {
-				return fmt.Errorf("failed to start core: %w", err)
+			if startErr := c.Start(); startErr != nil {
+				return fmt.Errorf("failed to start core: %w", startErr)
 			}
 
+			// Create authenticator based on configuration
+			authenticator, err := auth.NewAuthenticator(c, cfg.Auth)
+			if err != nil {
+				return fmt.Errorf("failed to create authenticator: %w", err)
+			}
+			slog.Info("Using authentication provider", "provider", authenticator.Name())
+
 			// Initialize Server
-			srv := server.New(c, cfg)
+			srv := server.New(c, cfg, authenticator)
 
 			httpServer := &http.Server{
 				Addr:              addr,

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/password"
 )
 
 // User represents a Convos user.
@@ -96,7 +96,7 @@ func (u *User) Password() string {
 
 // SetPassword hashes and sets the user's password.
 func (u *User) SetPassword(plain string) error {
-	hash, err := auth.GenerateHash(plain)
+	hash, err := password.GenerateHash(plain)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (u *User) ValidatePassword(plain string) bool {
 	if u.password == "" || plain == "" {
 		return false
 	}
-	valid, _ := auth.ComparePassword(plain, u.password)
+	valid, _ := password.ComparePassword(plain, u.password)
 	return valid
 }
 

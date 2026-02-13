@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -24,11 +25,31 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 		return nil, err
 	}
 
-	user := h.Core.GetUser(string(request.Body.Email))
-	if user == nil || !user.ValidatePassword(request.Body.Password) {
+	// Use authenticator instead of direct password validation
+	authReq := core.AuthRequest{
+		Email:    string(request.Body.Email),
+		Password: request.Body.Password,
+		Context:  ctx,
+	}
+
+	result, err := h.Authenticator.Authenticate(authReq)
+	if err != nil {
 		return api.LoginUser400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Invalid email or password.")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse(err.Error())),
 		}, nil
+	}
+
+	user := result.User
+
+	// Handle auto-registration (used by header and LDAP auth)
+	if result.AutoCreate {
+		user, err = h.createAutoRegisteredUser(authReq.Email, authReq.Password, result.Roles)
+		if err != nil {
+			return api.LoginUser500JSONResponse{
+				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(
+					ErrResponse(err.Error())),
+			}, nil
+		}
 	}
 
 	session, err := h.Store.Get(r, "convos")
@@ -385,6 +406,32 @@ func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestO
 }
 
 // Helpers
+
+// createAutoRegisteredUser creates and configures a new user for auto-registration scenarios.
+func (h *Handler) createAutoRegisteredUser(email, password string, roles []string) (*core.User, error) {
+	user, err := h.Core.User(email)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	// Set password if provided (LDAP users get auto-registered with password)
+	if password != "" {
+		if err = user.SetPassword(password); err != nil {
+			return nil, fmt.Errorf("failed to set password: %w", err)
+		}
+	}
+
+	// Assign roles
+	for _, role := range roles {
+		user.GiveRole(role)
+	}
+
+	if err = user.Save(); err != nil {
+		return nil, fmt.Errorf("failed to save user: %w", err)
+	}
+
+	return user, nil
+}
 
 func toAPIUserSummary(u *core.User) api.User {
 	registered := u.Registered()

@@ -6,6 +6,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestProfileHandlers(t *testing.T) {
@@ -14,7 +15,7 @@ func TestProfileHandlers(t *testing.T) {
 	setup := func() (*core.Core, *Handler, *core.User) {
 		backend := core.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
-		h := NewHandler(c, nil, nil)
+		h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 		admin, _ := c.User("admin@example.com")
 		admin.GiveRole("admin")
@@ -43,7 +44,7 @@ func TestProfileHandlers(t *testing.T) {
 	t.Run("SaveConnectionProfile_Admin", func(t *testing.T) {
 		t.Parallel()
 		c, h, admin := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 		url := "irc://irc.oftc.net"
 		isDefault := true
 		request := api.SaveConnectionProfileRequestObject{
@@ -71,7 +72,7 @@ func TestProfileHandlers(t *testing.T) {
 	t.Run("RemoveConnectionProfile_Admin", func(t *testing.T) {
 		t.Parallel()
 		c, h, admin := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 		// ID foroftc is irc-oftc
 		request := api.RemoveConnectionProfileRequestObject{
 			Id: "irc-oftc",

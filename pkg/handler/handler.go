@@ -27,28 +27,27 @@ var (
 	ErrInvalidInviteToken     = errors.New("invalid token. You have to ask your Convos admin for a new link")
 )
 
-type ctxKey string
-
-const (
-	CtxKeyRequest        ctxKey = "http.Request"
-	CtxKeyResponseWriter ctxKey = "http.ResponseWriter"
-	CtxKeyUser           ctxKey = "core.User"
-)
-
 type Handler struct {
-	Core        *core.Core
-	EmbedClient *embed.Client
-	I18n        *i18n.Catalog
-	Store       sessions.Store
-	WebhookNets []*net.IPNet
+	Core          *core.Core
+	Authenticator core.Authenticator
+	EmbedClient   *embed.Client
+	I18n          *i18n.Catalog
+	Store         sessions.Store
+	WebhookNets   []*net.IPNet
 }
 
-func NewHandler(c *core.Core, store sessions.Store, webhookNets []*net.IPNet) *Handler {
-	return &Handler{Core: c, EmbedClient: embed.NewClient(), Store: store, WebhookNets: webhookNets}
+func NewHandler(c *core.Core, authenticator core.Authenticator, store sessions.Store, webhookNets []*net.IPNet) *Handler {
+	return &Handler{
+		Core:          c,
+		Authenticator: authenticator,
+		EmbedClient:   embed.NewClient(),
+		Store:         store,
+		WebhookNets:   webhookNets,
+	}
 }
 
 func (h *Handler) getRequest(ctx context.Context) (*http.Request, error) {
-	r, ok := ctx.Value(CtxKeyRequest).(*http.Request)
+	r, ok := ctx.Value(core.CtxKeyRequest).(*http.Request)
 	if !ok {
 		return nil, ErrRequestNotFound
 	}
@@ -56,7 +55,7 @@ func (h *Handler) getRequest(ctx context.Context) (*http.Request, error) {
 }
 
 func (h *Handler) getResponseWriter(ctx context.Context) (http.ResponseWriter, error) {
-	w, ok := ctx.Value(CtxKeyResponseWriter).(http.ResponseWriter)
+	w, ok := ctx.Value(core.CtxKeyResponseWriter).(http.ResponseWriter)
 	if !ok {
 		return nil, ErrResponseWriterNotFound
 	}
@@ -70,7 +69,7 @@ func (h *Handler) makeAbsoluteURL(path string) string {
 }
 
 func (h *Handler) GetUserFromCtx(ctx context.Context) *core.User {
-	user, _ := ctx.Value(CtxKeyUser).(*core.User)
+	user, _ := ctx.Value(core.CtxKeyUser).(*core.User)
 	return user
 }
 

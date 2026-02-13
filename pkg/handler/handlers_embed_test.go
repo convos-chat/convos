@@ -8,13 +8,14 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestEmbedHandler(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
@@ -29,8 +30,8 @@ func TestEmbedHandler(t *testing.T) {
 		t.Parallel()
 		req := httptest.NewRequest("GET", "/api/embed?url="+ts.URL, nil)
 		w := httptest.NewRecorder()
-		ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-		ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+		ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 		request := api.EmbedRequestObject{
 			Params: api.EmbedParams{

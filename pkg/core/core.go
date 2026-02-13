@@ -11,6 +11,14 @@ import (
 	"github.com/SherClockHolmes/webpush-go"
 )
 
+type CtxKey string
+
+const (
+	CtxKeyRequest        CtxKey = "http.Request"
+	CtxKeyResponseWriter CtxKey = "http.ResponseWriter"
+	CtxKeyUser           CtxKey = "core.User"
+)
+
 // ConnectionProvider creates a Connection from a raw URL and user.
 type ConnectionProvider interface {
 	NewConnection(rawURL string, user *User) (Connection, error)

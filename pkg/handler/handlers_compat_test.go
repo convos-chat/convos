@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/api"
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/gorilla/sessions"
@@ -20,12 +21,12 @@ func TestRegisterUser_PasswordLength(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	// Test 9 character password (should fail if minLength: 10 is enforced)
 	request := api.RegisterUserRequestObject{
@@ -50,7 +51,7 @@ func TestGetUser_QueryParameters(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -62,8 +63,8 @@ func TestGetUser_QueryParameters(t *testing.T) {
 
 	// 1. connections=false, conversations=false
 	req := httptest.NewRequest("GET", "/api/user?connections=false&conversations=false", nil)
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyUser, u)
 
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{
 		Params: api.GetUserParams{
@@ -92,7 +93,7 @@ func TestGetUser_Fields(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	c.Settings().SetDefaultConnection("irc://irc.libera.chat")
 	c.Settings().SetForcedConnection(true)
@@ -102,8 +103,8 @@ func TestGetUser_Fields(t *testing.T) {
 	_ = u.Save()
 
 	req := httptest.NewRequest("GET", "/api/user", nil)
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyUser, u)
 
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{})
 	if err != nil {
@@ -130,13 +131,13 @@ func TestGetSettings_AuthAndDiskUsage(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
 	// Authenticated should return disk_usage
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	resp, err := h.GetSettings(ctx, api.GetSettingsRequestObject{})
 	if err != nil {
@@ -159,14 +160,14 @@ func TestGetUser_RolesAndRemoteAddress(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	u.GiveRole("admin")
 	_ = u.Save()
 	u.SetRemoteAddress("127.0.0.1")
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{})
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -194,7 +195,7 @@ func TestGetUser_ConversationFields(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -207,7 +208,7 @@ func TestGetUser_ConversationFields(t *testing.T) {
 	conv.SetFrozen("Not connected.")
 	conv.SetNotifications(3)
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{
 		Params: api.GetUserParams{
 			Connections:   ptr(true),
@@ -252,7 +253,7 @@ func TestListConnectionProfiles_IdAndSkipQueue(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -268,7 +269,7 @@ func TestListConnectionProfiles_IdAndSkipQueue(t *testing.T) {
 	}
 	_ = backend.SaveConnectionProfile(profile)
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.ListConnectionProfiles(ctx, api.ListConnectionProfilesRequestObject{})
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -296,7 +297,7 @@ func TestConversationMessages_EndField(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -306,7 +307,7 @@ func TestConversationMessages_EndField(t *testing.T) {
 	conv := core.NewConversation("#test", conn)
 	conn.AddConversation(conv)
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.ConversationMessages(ctx, api.ConversationMessagesRequestObject{
 		ConnectionId:   conn.ID(),
 		ConversationId: conv.ID(),
@@ -332,12 +333,12 @@ func TestNotificationMessages_EndField(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.NotificationMessages(ctx, api.NotificationMessagesRequestObject{})
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -360,12 +361,12 @@ func TestSearchMessages_EndField(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	match := "anything"
 	resp, err := h.SearchMessages(ctx, api.SearchMessagesRequestObject{
 		Params: api.SearchMessagesParams{Match: &match},
@@ -392,7 +393,7 @@ func TestGetSettings_BaseURL(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	baseURL, _ := url.Parse("http://localhost:3000")
 	c.Settings().SetBaseURL(baseURL)
@@ -400,7 +401,7 @@ func TestGetSettings_BaseURL(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.GetSettings(ctx, api.GetSettingsRequestObject{})
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -426,13 +427,13 @@ func TestTimestampFormat(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("ts@example.com")
 	_ = u.SetPassword("s3cret_pass")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{})
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -464,7 +465,7 @@ func TestConnectionMessages_ServerConversation(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -484,7 +485,7 @@ func TestConnectionMessages_ServerConversation(t *testing.T) {
 		Timestamp: 1700000000,
 	})
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.ConnectionMessages(ctx, api.ConnectionMessagesRequestObject{
 		ConnectionId: conn.ID(),
 	})
@@ -507,12 +508,12 @@ func TestCreateConnection_ChannelAutoJoin(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	// Create connection with URL path containing a channel
 	resp, err := h.CreateConnection(ctx, api.CreateConnectionRequestObject{
@@ -547,12 +548,12 @@ func TestCreateConnection_ConversationIdParam(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	convID := "#mychannel"
 	resp, err := h.CreateConnection(ctx, api.CreateConnectionRequestObject{
@@ -586,14 +587,14 @@ func TestRegisterUser_AutoConnect(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	c.Settings().SetDefaultConnection("irc://irc.libera.chat/%23convos")
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	resp, err := h.RegisterUser(ctx, api.RegisterUserRequestObject{
 		Body: &api.RegisterUserJSONRequestBody{
@@ -638,13 +639,13 @@ func TestUpdateSettings_AutoCreateProfile(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("admin@example.com")
 	u.GiveRole("admin")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	defaultConn := "irc://irc.libera.chat"
 	_, err := h.UpdateSettings(ctx, api.UpdateSettingsRequestObject{
@@ -681,12 +682,12 @@ func TestCreateConnection_AutoCreateProfile(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	_, err := h.CreateConnection(ctx, api.CreateConnectionRequestObject{
 		Body: &api.CreateConnectionJSONRequestBody{
@@ -762,7 +763,7 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.SetPassword("s3cret_pass")
@@ -770,8 +771,8 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/api/user/login", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	resp, err := h.LoginUser(ctx, api.LoginUserRequestObject{
 		Body: &api.LoginUserJSONRequestBody{
@@ -803,7 +804,7 @@ func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	// Create first user so registration is "closed"
 	u, _ := c.User("admin@example.com")
@@ -812,8 +813,8 @@ func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	resp, err := h.RegisterUser(ctx, api.RegisterUserRequestObject{
 		Body: &api.RegisterUserJSONRequestBody{
@@ -846,7 +847,7 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetOpenToPublic(true)
 	store := sessions.NewCookieStore([]byte("secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	u, _ := c.User("existing@example.com")
 	_ = u.SetPassword("s3cret_pass!")
@@ -854,8 +855,8 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	resp, err := h.RegisterUser(ctx, api.RegisterUserRequestObject{
 		Body: &api.RegisterUserJSONRequestBody{
@@ -885,12 +886,12 @@ func TestConversationMessages_NotFound(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	// Nonexistent connection should return 404
 	resp, err := h.ConversationMessages(ctx, api.ConversationMessagesRequestObject{
@@ -910,12 +911,12 @@ func TestConnectionMessages_NotFound(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, u)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 
 	// Nonexistent connection should return 404
 	resp, err := h.ConnectionMessages(ctx, api.ConnectionMessagesRequestObject{
@@ -937,13 +938,13 @@ func TestInviteUser_GeneratesValidToken(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	admin, _ := c.User("admin@example.com")
 	admin.GiveRole("admin")
 	_ = admin.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 	resp, err := h.InviteUser(ctx, api.InviteUserRequestObject{
 		Email: "newuser@example.com",
 	})
@@ -990,7 +991,7 @@ func TestInviteUser_ExistingUser(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	admin, _ := c.User("admin@example.com")
 	admin.GiveRole("admin")
@@ -1000,7 +1001,7 @@ func TestInviteUser_ExistingUser(t *testing.T) {
 	_ = target.SetPassword("old_password!")
 	_ = target.Save()
 
-	ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 	resp, err := h.InviteUser(ctx, api.InviteUserRequestObject{
 		Email: "existing@example.com",
 	})
@@ -1025,7 +1026,7 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	// Create existing user so registration is "closed"
 	admin, _ := c.User("admin@example.com")
@@ -1033,7 +1034,7 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 	_ = admin.Save()
 
 	// Generate invite for new user
-	ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 	inviteResp, _ := h.InviteUser(ctx, api.InviteUserRequestObject{
 		Email: "newuser@example.com",
 	})
@@ -1046,8 +1047,8 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 	// Register with the invite token
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	regCtx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	regCtx = context.WithValue(regCtx, CtxKeyResponseWriter, w)
+	regCtx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	regCtx = context.WithValue(regCtx, core.CtxKeyResponseWriter, w)
 
 	token := inviteURL.Query().Get("token")
 	exp := inviteURL.Query().Get("exp")
@@ -1079,15 +1080,15 @@ func TestRegisterUser_InvalidToken(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	admin, _ := c.User("admin@example.com")
 	_ = admin.Save()
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	badToken := "0000000000000000000000000000000000000000"
 	exp := "9999999999"
@@ -1124,7 +1125,7 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	admin, _ := c.User("admin@example.com")
 	_ = admin.Save()
@@ -1136,8 +1137,8 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	ctx = context.WithValue(ctx, CtxKeyResponseWriter, w)
+	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 
 	expStr := "1000000000"
 	resp, err := h.RegisterUser(ctx, api.RegisterUserRequestObject{
@@ -1164,7 +1165,7 @@ func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
-	h := NewHandler(c, store, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	// Create admin and target user
 	admin, _ := c.User("admin@example.com")
@@ -1176,7 +1177,7 @@ func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	_ = target.Save()
 
 	// Generate invite for existing user
-	ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+	ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 	inviteResp, _ := h.InviteUser(ctx, api.InviteUserRequestObject{
 		Email: "target@example.com",
 	})
@@ -1189,8 +1190,8 @@ func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	// Register (update) existing user with invite token
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
-	regCtx := context.WithValue(context.Background(), CtxKeyRequest, req)
-	regCtx = context.WithValue(regCtx, CtxKeyResponseWriter, w)
+	regCtx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+	regCtx = context.WithValue(regCtx, core.CtxKeyResponseWriter, w)
 
 	token := inviteURL.Query().Get("token")
 	exp := inviteURL.Query().Get("exp")

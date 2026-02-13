@@ -8,6 +8,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/irc"
 	"github.com/gorilla/sessions"
 )
@@ -21,7 +22,7 @@ func TestConnectionHandlers(t *testing.T) {
 		backend := core.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		store := sessions.NewCookieStore([]byte("secret"))
-		h := NewHandler(c, store, nil)
+		h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 		user, _ := c.User("test@example.com")
 		if err := user.Save(); err != nil {
@@ -34,7 +35,7 @@ func TestConnectionHandlers(t *testing.T) {
 		t.Parallel()
 		_, h, _ := setup()
 		req := httptest.NewRequest("POST", "/api/connections", nil)
-		ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
+		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
 		request := api.CreateConnectionRequestObject{
 			Body: &api.CreateConnectionJSONRequestBody{
@@ -59,8 +60,8 @@ func TestConnectionHandlers(t *testing.T) {
 		t.Parallel()
 		_, h, user := setup()
 		req := httptest.NewRequest("POST", "/api/connections", nil)
-		ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
-		ctx = context.WithValue(ctx, CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
+		ctx = context.WithValue(ctx, core.CtxKeyUser, user)
 
 		request := api.CreateConnectionRequestObject{
 			Body: &api.CreateConnectionJSONRequestBody{
@@ -90,7 +91,7 @@ func TestConnectionHandlers(t *testing.T) {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		resp, _ := h.ListConnections(ctx, api.ListConnectionsRequestObject{})
 		if r, ok := resp.(api.ListConnections200JSONResponse); ok {
 			if len(*r.Connections) != 1 {
@@ -112,7 +113,7 @@ func TestConnectionHandlers(t *testing.T) {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		cmds := []string{"/msg NickServ identify pass"}
 		request := api.UpdateConnectionRequestObject{
 			ConnectionId: testServer,
@@ -140,7 +141,7 @@ func TestConnectionHandlers(t *testing.T) {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		request := api.RemoveConnectionRequestObject{
 			ConnectionId: testServer,
 		}

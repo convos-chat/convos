@@ -6,13 +6,14 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestSearchMessages(t *testing.T) {
 	t.Parallel()
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	h := NewHandler(c, nil, nil)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 	user, _ := c.User("test@example.com")
 	if err := user.Save(); err != nil {
@@ -21,7 +22,7 @@ func TestSearchMessages(t *testing.T) {
 
 	t.Run("Search_Empty", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		match := "foo"
 		resp, _ := h.SearchMessages(ctx, api.SearchMessagesRequestObject{
 			Params: api.SearchMessagesParams{

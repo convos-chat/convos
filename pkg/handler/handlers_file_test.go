@@ -7,6 +7,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestFileHandlers(t *testing.T) {
@@ -15,7 +16,7 @@ func TestFileHandlers(t *testing.T) {
 	setup := func() (*core.Core, *Handler, *core.User) {
 		backend := core.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
-		h := NewHandler(c, nil, nil)
+		h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 		user, _ := c.User("test@example.com")
 		_ = user.Save()
@@ -25,7 +26,7 @@ func TestFileHandlers(t *testing.T) {
 	t.Run("GetFiles_Empty", func(t *testing.T) {
 		t.Parallel()
 		_, h, user := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		resp, _ := h.GetFiles(ctx, api.GetFilesRequestObject{})
 		if r, ok := resp.(api.GetFiles200JSONResponse); ok {
 			if len(*r.Files) != 0 {
@@ -50,7 +51,7 @@ func TestFileHandlers(t *testing.T) {
 	t.Run("GetFile_Success", func(t *testing.T) {
 		t.Parallel()
 		c, h, user := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		content := []byte("hello world")
 		f, _ := c.Backend().SaveFile(user, "test.txt", content)
 
@@ -71,7 +72,7 @@ func TestFileHandlers(t *testing.T) {
 	t.Run("DeleteFile", func(t *testing.T) {
 		t.Parallel()
 		c, h, user := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 
 		// Create a file to delete specifically for this test
 		f, err := c.Backend().SaveFile(user, "delete_me.txt", []byte("delete me"))

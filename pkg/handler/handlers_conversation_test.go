@@ -6,6 +6,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/irc"
 )
 
@@ -15,7 +16,7 @@ func TestConversationHandlers(t *testing.T) {
 	setup := func() (*Handler, *core.User, *core.Conversation) {
 		backend := core.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
-		h := NewHandler(c, nil, nil)
+		h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 		user, _ := c.User("test@example.com")
 		if err := user.Save(); err != nil {
@@ -38,7 +39,7 @@ func TestConversationHandlers(t *testing.T) {
 	t.Run("ListConversations", func(t *testing.T) {
 		t.Parallel()
 		h, user, _ := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		resp, _ := h.ListConversations(ctx, api.ListConversationsRequestObject{})
 		r, ok := resp.(api.ListConversations200JSONResponse)
 		if !ok {
@@ -64,7 +65,7 @@ func TestConversationHandlers(t *testing.T) {
 	t.Run("MarkConversationAsRead", func(t *testing.T) {
 		t.Parallel()
 		h, user, conv := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		request := api.MarkConversationAsReadRequestObject{
 			ConnectionId:   "irc-libera",
 			ConversationId: "#convos",
@@ -79,7 +80,7 @@ func TestConversationHandlers(t *testing.T) {
 	t.Run("ConversationMessages_Empty", func(t *testing.T) {
 		t.Parallel()
 		h, user, _ := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		request := api.ConversationMessagesRequestObject{
 			ConnectionId:   "irc-libera",
 			ConversationId: "#convos",

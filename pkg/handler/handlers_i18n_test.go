@@ -12,7 +12,7 @@ import (
 
 func TestGetDictionary(t *testing.T) {
 	t.Parallel()
-	h := NewHandler(nil, nil, nil)
+	h := NewHandler(nil, nil, nil, nil)
 
 	// Setup test catalog
 	fsys := fstest.MapFS{

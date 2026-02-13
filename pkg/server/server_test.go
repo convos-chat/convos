@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/config"
+	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/core"
 )
 
@@ -18,7 +19,7 @@ func TestSPAHandler(t *testing.T) {
 	t.Parallel()
 	c := core.New(core.WithBackend(core.NewMemoryBackend()))
 	cfg := &config.Config{SessionSecret: "secret"}
-	s := New(c, cfg)
+	s := New(c, cfg, auth.NewLocalAuthenticator(c))
 
 	t.Run("ServeIndex", func(t *testing.T) {
 		t.Parallel()
@@ -85,7 +86,7 @@ func setupServer() (*Server, *core.Core) {
 		SessionSecret: "test-secret",
 		SecureCookies: &falseVal,
 	}
-	s := New(c, cfg)
+	s := New(c, cfg, auth.NewLocalAuthenticator(c))
 	return s, c
 }
 

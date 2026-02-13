@@ -53,8 +53,8 @@ var (
 
 func ContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), handler.CtxKeyRequest, r)
-		ctx = context.WithValue(ctx, handler.CtxKeyResponseWriter, w)
+		ctx := context.WithValue(r.Context(), core.CtxKeyRequest, r)
+		ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -63,7 +63,7 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := s.Handler.GetUserFromSession(r)
 		if user != nil {
-			ctx := context.WithValue(r.Context(), handler.CtxKeyUser, user)
+			ctx := context.WithValue(r.Context(), core.CtxKeyUser, user)
 			r = r.WithContext(ctx)
 		}
 		next.ServeHTTP(w, r)
@@ -171,7 +171,7 @@ type Server struct {
 	lastAccess map[string]time.Time
 }
 
-func New(c *core.Core, cfg *config.Config) *Server {
+func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Server {
 	// Set log level based on mode
 	if cfg.IsDevelopment() {
 		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
@@ -222,7 +222,7 @@ func New(c *core.Core, cfg *config.Config) *Server {
 	}
 
 	webhookNets := handler.ParseWebhookNetworks(cfg.WebhookNetworks)
-	h := handler.NewHandler(c, store, webhookNets)
+	h := handler.NewHandler(c, authenticator, store, webhookNets)
 
 	i18nCatalog, err := i18n.NewCatalog()
 	if err != nil {

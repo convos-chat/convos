@@ -7,6 +7,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestSettingsHandlers(t *testing.T) {
@@ -15,7 +16,7 @@ func TestSettingsHandlers(t *testing.T) {
 	setup := func() (*core.Core, *Handler, *core.User, *core.User) {
 		backend := core.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
-		h := NewHandler(c, nil, nil)
+		h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
 		admin, _ := c.User("admin@example.com")
 		admin.GiveRole("admin")
@@ -33,7 +34,7 @@ func TestSettingsHandlers(t *testing.T) {
 	t.Run("GetSettings", func(t *testing.T) {
 		t.Parallel()
 		c, h, _, user := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		c.Settings().SetOrganizationName("Convos")
 		resp, _ := h.GetSettings(ctx, api.GetSettingsRequestObject{})
 		if r, ok := resp.(api.GetSettings200JSONResponse); ok {
@@ -48,7 +49,7 @@ func TestSettingsHandlers(t *testing.T) {
 	t.Run("UpdateSettings_Admin", func(t *testing.T) {
 		t.Parallel()
 		c, h, admin, _ := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, admin)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, admin)
 		newName := "My Org"
 		request := api.UpdateSettingsRequestObject{
 			Body: &api.UpdateSettingsJSONRequestBody{
@@ -73,7 +74,7 @@ func TestSettingsHandlers(t *testing.T) {
 	t.Run("UpdateSettings_NonAdmin", func(t *testing.T) {
 		t.Parallel()
 		_, h, _, user := setup()
-		ctx := context.WithValue(context.Background(), CtxKeyUser, user)
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		failName := "Hack"
 		request := api.UpdateSettingsRequestObject{
 			Body: &api.UpdateSettingsJSONRequestBody{

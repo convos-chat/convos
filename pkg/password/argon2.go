@@ -1,5 +1,5 @@
-// Package auth configures argon2 to be compatitle with Perl Convos.
-package auth
+// Package password configures argon2 to be compatible with Perl Convos.
+package password
 
 import (
 	"crypto/rand"

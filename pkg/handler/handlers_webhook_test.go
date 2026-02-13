@@ -7,6 +7,7 @@ import (
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/auth"
 )
 
 func TestWebhookIPValidation(t *testing.T) {
@@ -14,13 +15,13 @@ func TestWebhookIPValidation(t *testing.T) {
 	backend := core.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	nets := ParseWebhookNetworks("127.0.0.0/24")
-	h := NewHandler(c, nil, nets)
+	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nets)
 
 	t.Run("AllowedIP", func(t *testing.T) {
 		t.Parallel()
 		req := httptest.NewRequest("POST", "/api/webhook/github", nil)
 		req.RemoteAddr = "127.0.0.1:1234"
-		ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
+		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
 		body := api.WebhookJSONRequestBody{"foo": "bar"}
 		request := api.WebhookRequestObject{
@@ -46,7 +47,7 @@ func TestWebhookIPValidation(t *testing.T) {
 		t.Parallel()
 		req := httptest.NewRequest("POST", "/api/webhook/github", nil)
 		req.RemoteAddr = "192.168.1.1:1234"
-		ctx := context.WithValue(context.Background(), CtxKeyRequest, req)
+		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
 		body := api.WebhookJSONRequestBody{"foo": "bar"}
 		request := api.WebhookRequestObject{
