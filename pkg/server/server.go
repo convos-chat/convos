@@ -200,6 +200,8 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	store.Options.HttpOnly = true
 	if cfg.SecureCookies != nil {
 		store.Options.Secure = *cfg.SecureCookies
+	} else if u := c.Settings().BaseURL(); u != nil && u.Scheme == "https" {
+		store.Options.Secure = true
 	}
 	store.Options.SameSite = http.SameSiteLaxMode
 	store.Options.Path = "/"

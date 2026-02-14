@@ -1,14 +1,20 @@
+// Package daemon implements the "daemon" command which starts the Convos server.
 package daemon
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -45,10 +51,10 @@ func Command() *cli.Command {
 		Name:  "daemon",
 		Usage: "Start the Convos daemon",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
+			&cli.StringSliceFlag{
 				Name:    "listen",
 				Aliases: []string{"l"},
-				Usage:   "Address and port to listen on",
+				Usage:   "List of addresses and ports to listen on",
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -57,25 +63,21 @@ func Command() *cli.Command {
 				return fmt.Errorf("failed to load config: %w", err)
 			}
 
-			if listen := cmd.String("listen"); listen != "" {
-				cfg.Listen = listen
+			listenFlags := cmd.StringSlice("listen")
+			if len(listenFlags) == 0 {
+				listenFlags = []string{cfg.Listen}
+			} else {
+				// Update cfg.Listen to the first listen flag so BaseURL defaults correctly
+				cfg.Listen = listenFlags[0]
 			}
 
 			if os.Geteuid() == 0 {
 				slog.Warn("ATTENTION! Convos should not be run as root. It is recommended to run as a normal user.")
 			}
 
-			slog.Info("Starting Convos daemon", "listen", cfg.Listen)
-
-			// Parse the listen URL to extract host:port
-			listenURL, err := url.Parse(cfg.Listen)
-			if err != nil {
-				return fmt.Errorf("invalid listen URL: %w", err)
-			}
-			addr := listenURL.Host
-			if addr == "" {
-				addr = "localhost:8080"
-			}
+			// Auto-discover PEM files in home directory, matching Perl behavior:
+			// files ending in -key.pem → CONVOS_TLS_KEY, other .pem → CONVOS_TLS_CERT
+			discoverPEMFiles(cfg.Home)
 
 			// Initialize Core
 			backend := storage.NewFileBackend(cfg.Home)
@@ -99,47 +101,138 @@ func Command() *cli.Command {
 			// Initialize Server
 			srv := server.New(c, cfg, authenticator)
 
-			httpServer := &http.Server{
-				Addr:              addr,
-				Handler:           srv,
-				ReadHeaderTimeout: 10 * time.Second,
+			var servers []*http.Server
+			var wg sync.WaitGroup
+
+			for _, listenStr := range listenFlags {
+				listener, httpServer, err := createListener(ctx, cfg, srv, listenStr)
+				if err != nil {
+					return err
+				}
+
+				servers = append(servers, httpServer)
+				wg.Add(1)
+
+				go func(l net.Listener, s *http.Server, addr string) {
+					defer wg.Done()
+					slog.Info("Server started", "listen", addr)
+					if serveErr := s.Serve(l); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+						slog.Error("Server failed", "listen", addr, "error", serveErr)
+					}
+				}(listener, httpServer, listenStr)
 			}
-
-			// Graceful shutdown
-			go func() {
-				var err error
-				if cfg.IsHTTPS() {
-					slog.Info("Starting server with TLS", "cert", cfg.CertFile, "key", cfg.KeyFile)
-					err = httpServer.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile)
-				} else {
-					err = httpServer.ListenAndServe()
-				}
-
-				if err != nil && !errors.Is(err, http.ErrServerClosed) {
-					slog.Error("Server failed", "error", err)
-					os.Exit(1)
-				}
-			}()
-
-			slog.Info("Server started", "listen", cfg.Listen)
 
 			// Wait for interrupt signal
 			sigChan := make(chan os.Signal, 1)
 			signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 			<-sigChan
 
-			slog.Info("Shutting down server...")
+			slog.Info("Shutting down servers...")
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			if err := httpServer.Shutdown(shutdownCtx); err != nil {
-
-				slog.Error("Server shutdown failed", "error", err)
-				return err
+			for _, s := range servers {
+				if err := s.Shutdown(shutdownCtx); err != nil {
+					slog.Error("Server shutdown failed", "error", err)
+				}
 			}
 
-			slog.Info("Server stopped gracefully")
+			wg.Wait()
+			slog.Info("Servers stopped gracefully")
 			return nil
 		},
+	}
+}
+
+// createListener parses a listen address string and returns a ready net.Listener and http.Server.
+func createListener(ctx context.Context, cfg *config.Config, handler http.Handler, listenStr string) (net.Listener, *http.Server, error) {
+	listenCfg, err := parseListen(listenStr)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to parse listen address %q: %w", listenStr, err)
+	}
+
+	// Remove stale unix socket files before listening
+	if listenCfg.Network == networkUnix {
+		if err = os.RemoveAll(listenCfg.Address); err != nil {
+			return nil, nil, fmt.Errorf("failed to remove socket file %q: %w", listenCfg.Address, err)
+		}
+	}
+
+	lc := net.ListenConfig{}
+	listener, err := lc.Listen(ctx, listenCfg.Network, listenCfg.Address)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to listen on %s %s: %w", listenCfg.Network, listenCfg.Address, err)
+	}
+
+	if listenCfg.IsHTTPS {
+		listener, err = wrapTLS(listener, listenCfg, cfg.Home)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	httpServer := &http.Server{
+		Handler:           handler,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+
+	return listener, httpServer, nil
+}
+
+// wrapTLS wraps a listener with TLS, resolving certificate paths from the listen config,
+// environment variables (CONVOS_TLS_CERT/CONVOS_TLS_KEY), or auto-generating a self-signed cert.
+func wrapTLS(listener net.Listener, listenCfg ListenerConfig, homeDir string) (net.Listener, error) {
+	certFile := listenCfg.CertFile
+	keyFile := listenCfg.KeyFile
+
+	if certFile == "" || keyFile == "" {
+		certFile = os.Getenv("CONVOS_TLS_CERT")
+		keyFile = os.Getenv("CONVOS_TLS_KEY")
+	}
+
+	if certFile == "" || keyFile == "" {
+		if err := os.MkdirAll(homeDir, 0o700); err != nil {
+			return nil, fmt.Errorf("failed to create cert directory: %w", err)
+		}
+		certFile = filepath.Join(homeDir, "server.crt")
+		keyFile = filepath.Join(homeDir, "server.key")
+		if err := ensureCert(certFile, keyFile); err != nil {
+			return nil, fmt.Errorf("failed to ensure certificate: %w", err)
+		}
+		slog.Info("Using generated certificate", "cert", certFile, "key", keyFile)
+	}
+
+	tlsCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load TLS key pair: %w", err)
+	}
+
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{tlsCert},
+		MinVersion:   tls.VersionTLS12,
+	}
+	return tls.NewListener(listener, tlsConfig), nil
+}
+
+// discoverPEMFiles scans a directory for PEM files and sets CONVOS_TLS_CERT/CONVOS_TLS_KEY
+// environment variables if not already set. Matches the Perl behavior in script/convos.
+func discoverPEMFiles(dir string) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		fullPath := filepath.Join(dir, name)
+
+		if strings.HasSuffix(name, "-key.pem") && os.Getenv("CONVOS_TLS_KEY") == "" {
+			os.Setenv("CONVOS_TLS_KEY", fullPath)
+		} else if strings.HasSuffix(name, ".pem") && os.Getenv("CONVOS_TLS_CERT") == "" {
+			os.Setenv("CONVOS_TLS_CERT", fullPath)
+		}
 	}
 }

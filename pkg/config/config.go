@@ -21,8 +21,6 @@ type Config struct {
 	OrganizationName string `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
 	OrganizationURL  string `envconfig:"CONVOS_ORGANIZATION_URL" default:"https://convos.chat"`
 	Contact          string `envconfig:"CONVOS_CONTACT" default:"mailto:root@localhost"`
-	CertFile         string `envconfig:"CONVOS_CERT"`
-	KeyFile          string `envconfig:"CONVOS_KEY"`
 	WebhookNetworks  string `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
 	Auth             auth.ProviderConfig
 }
@@ -51,15 +49,5 @@ func Load() (*Config, error) {
 		c.Home = filepath.Join(homeDir, ".convos")
 	}
 
-	if c.SecureCookies == nil {
-		secure := c.IsHTTPS()
-		c.SecureCookies = &secure
-	}
-
 	return &c, nil
-}
-
-// IsHTTPS returns true if both CertFile and KeyFile are set.
-func (c *Config) IsHTTPS() bool {
-	return c.CertFile != "" && c.KeyFile != ""
 }
