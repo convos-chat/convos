@@ -93,6 +93,7 @@ func NewConnection(rawURL string, user *core.User) *Connection {
 func (c *Connection) Connect() error {
 	c.mu.Lock()
 
+	slog.Info("Attempting to connect", "url", c.URL().String())
 	state := c.State()
 	if state == core.StateConnected || state == core.StateConnecting {
 		c.mu.Unlock()
@@ -195,7 +196,7 @@ func (c *Connection) Connect() error {
 			c.SetInfo("authenticated", saslAcked)
 		}
 
-		c.emitState("connected", fmt.Sprintf("Connected to %s.", connURL.Host))
+		c.emitState(string(core.StateConnected), fmt.Sprintf("Connected to %s.", connURL.Host))
 		c.emitInfo()
 
 		// Execute on-connect commands
@@ -219,7 +220,7 @@ func (c *Connection) Connect() error {
 	c.client.AddDisconnectCallback(func(msg ircmsg.Message) {
 		c.SetState(core.StateDisconnected)
 		wantConnect := c.WantedState() == core.StateConnected
-		c.emitState("disconnected", fmt.Sprintf("Disconnected from %s.", c.URL().Host))
+		c.emitState(string(core.StateDisconnected), fmt.Sprintf("Disconnected from %s.", c.URL().Host))
 
 		// Freeze all conversations
 		for _, conv := range c.Conversations() {
@@ -310,7 +311,6 @@ func (c *Connection) Connect() error {
 	}
 
 	c.client.AddCallback(ircevent.RPL_CHANNELMODEIS, func(msg ircmsg.Message) {
-
 		c.handleChannelModeIs(msg)
 	})
 
@@ -375,7 +375,7 @@ func (c *Connection) Connect() error {
 	// Connect to server (without holding the lock)
 	if err := client.Connect(); err != nil {
 		c.SetState(core.StateDisconnected)
-		c.emitState("disconnected", fmt.Sprintf("Could not connect to %s: %s", host, err))
+		c.emitState(string(core.StateDisconnected), fmt.Sprintf("Could not connect to %s: %s", host, err))
 		return err
 	}
 

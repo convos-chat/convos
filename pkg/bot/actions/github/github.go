@@ -1,3 +1,4 @@
+// Package github implements a bot action that listens for GitHub webhook events
 package github
 
 import (
@@ -6,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/convos-chat/convos/pkg/bot"
+	"github.com/convos-chat/convos/pkg/core"
 )
 
 // Action implements the GitHub bot action.
@@ -46,7 +48,6 @@ func (a *Action) HandleWebhook(provider string, payload map[string]any) bool {
 }
 
 func (a *Action) broadcastMessage(message string) {
-
 	botUser := a.manager.BotUser()
 	if botUser == nil {
 		return
@@ -54,7 +55,7 @@ func (a *Action) broadcastMessage(message string) {
 
 	sent := false
 	for _, conn := range botUser.Connections() {
-		if string(conn.State()) != "connected" {
+		if conn.State() != core.StateConnected {
 			continue
 		}
 		for _, conv := range conn.Conversations() {

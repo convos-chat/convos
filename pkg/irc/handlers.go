@@ -321,7 +321,7 @@ func (c *Connection) handleNickInUse(msg ircmsg.Message) {
 	c.emitEvent(map[string]any{
 		"event":   "state",
 		"type":    "connection",
-		"state":   "connected",
+		"state":   core.StateConnected,
 		"message": fmt.Sprintf("Nick %s is in use, trying %s.", attempted, newNick),
 	})
 

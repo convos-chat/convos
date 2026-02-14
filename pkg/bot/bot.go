@@ -1,3 +1,4 @@
+// Package bot implements the bot manager and related functionality for Convos.
 package bot
 
 import (
@@ -6,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -50,7 +52,9 @@ func (m *Manager) Start() {
 
 	m.configFile = filepath.Join(m.core.Home(), email, "bot.yaml")
 	m.registerUser()
+	m.loadConfig()
 	m.startEventListeners()
+	slog.Info("Bot email configured, starting bot manager", "email", email, "cfg", m.Config)
 
 	go m.configLoop()
 }
@@ -127,6 +131,9 @@ func (m *Manager) ensureConnections() {
 		if connCfg.URL == "" {
 			continue
 		}
+		if connCfg.WantedState == "" {
+			connCfg.WantedState = string(core.StateConnected)
+		}
 
 		conn := m.ensureConnection(connCfg)
 		if conn == nil {
@@ -165,12 +172,8 @@ func (m *Manager) ensureConnection(connCfg ConnectionConfig) core.Connection {
 
 func (m *Manager) ensureConnectionState(conn core.Connection, wantedState string) {
 	wanted := core.StateConnected
-	if wantedState == "disconnected" {
+	if wantedState == string(core.StateDisconnected) {
 		wanted = core.StateDisconnected
-	}
-
-	if conn.WantedState() == wanted {
-		return
 	}
 
 	conn.SetWantedState(wanted)
@@ -283,7 +286,7 @@ func (m *Manager) checkConnections() {
 	}
 
 	for _, conn := range m.botUser.Connections() {
-		if string(conn.State()) != "connected" {
+		if conn.State() != core.StateConnected {
 			continue
 		}
 
@@ -401,13 +404,7 @@ func (m *Manager) findRepoRules(actionID string, payload map[string]any) ([]Repo
 }
 
 func (m *Manager) processRoutingRule(rule RepoRule, event, msg string) {
-	match := false
-	for _, e := range rule.Events {
-		if e == event {
-			match = true
-			break
-		}
-	}
+	match := slices.Contains(rule.Events, event)
 	if !match {
 		return
 	}
@@ -420,7 +417,7 @@ func (m *Manager) processRoutingRule(rule RepoRule, event, msg string) {
 	connID, convID := parts[0], parts[1]
 
 	conn := m.botUser.GetConnection(connID)
-	if conn == nil || string(conn.State()) != "connected" {
+	if conn == nil || conn.State() != core.StateConnected {
 		slog.Warn("Bot not connected to target", "connection", connID)
 		return
 	}
