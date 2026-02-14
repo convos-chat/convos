@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/api"
+	"github.com/convos-chat/convos/pkg/bot/actions/gitea"
+	"github.com/convos-chat/convos/pkg/bot/actions/github"
 	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/handler"
@@ -223,6 +225,10 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 
 	webhookNets := handler.ParseWebhookNetworks(cfg.WebhookNetworks)
 	h := handler.NewHandler(c, authenticator, store, webhookNets)
+
+	h.Bot.RegisterAction(github.NewAction())
+	h.Bot.RegisterAction(gitea.NewAction())
+	h.Bot.Start()
 
 	i18nCatalog, err := i18n.NewCatalog()
 	if err != nil {

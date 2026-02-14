@@ -13,6 +13,7 @@ import (
 	"net/url"
 
 	"github.com/convos-chat/convos/pkg/api"
+	"github.com/convos-chat/convos/pkg/bot"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/embed"
 	"github.com/convos-chat/convos/pkg/i18n"
@@ -34,6 +35,7 @@ type Handler struct {
 	I18n          *i18n.Catalog
 	Store         sessions.Store
 	WebhookNets   []*net.IPNet
+	Bot           *bot.Manager
 }
 
 func NewHandler(c *core.Core, authenticator core.Authenticator, store sessions.Store, webhookNets []*net.IPNet) *Handler {
@@ -43,6 +45,7 @@ func NewHandler(c *core.Core, authenticator core.Authenticator, store sessions.S
 		EmbedClient:   embed.NewClient(),
 		Store:         store,
 		WebhookNets:   webhookNets,
+		Bot:           bot.NewManager(c),
 	}
 }
 

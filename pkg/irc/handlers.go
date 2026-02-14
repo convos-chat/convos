@@ -824,6 +824,17 @@ func (c *Connection) handleErrorReply(msg ircmsg.Message) {
 	c.persistMessage(convID, msg.Source, message, "error", false)
 }
 
+// handleUserModeIs handles RPL_UMODEIS (221).
+func (c *Connection) handleUserModeIs(msg ircmsg.Message) {
+	if len(msg.Params) < 2 {
+		return
+	}
+
+	modeStr := msg.Params[1]
+	c.SetInfo("mode", modeStr)
+	c.emitInfo()
+}
+
 // handleWelcome handles RPL_WELCOME (001).
 func (c *Connection) handleWelcome(msg ircmsg.Message) {
 	c.SetInfo("server", msg.Source)

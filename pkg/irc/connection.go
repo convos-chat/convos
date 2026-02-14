@@ -293,6 +293,11 @@ func (c *Connection) Connect() error {
 		c.handleTopicWhoTime(msg)
 	})
 
+	// Add handler for user mode (RPL_UMODEIS / 221)
+	c.client.AddCallback(ircevent.RPL_UMODEIS, func(msg ircmsg.Message) {
+		c.handleUserModeIs(msg)
+	})
+
 	for _, code := range []string{
 		ircevent.RPL_YOURHOST, ircevent.RPL_CREATED, ircevent.RPL_MYINFO,
 		ircevent.RPL_MOTD, ircevent.RPL_MOTDSTART, ircevent.RPL_ENDOFMOTD,
@@ -305,6 +310,7 @@ func (c *Connection) Connect() error {
 	}
 
 	c.client.AddCallback(ircevent.RPL_CHANNELMODEIS, func(msg ircmsg.Message) {
+
 		c.handleChannelModeIs(msg)
 	})
 
