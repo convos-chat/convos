@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+.dockerignore
+node_modules
+local
+*.md
+*.log
+t/
+test/
+snap/
+Taskfile.yml
+Dockerfile

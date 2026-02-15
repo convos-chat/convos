@@ -1,34 +1,41 @@
-# docker pull ghcr.io/convos-chat/convos:alpha
-#
-# See https://convos.chat/doc/config.html for details about the environment variables
-#
-# BUILD: docker build --no-cache --rm -t convos/convos .
-# RUN:   docker run -it --rm -p 8080:3000 -v /var/convos/data:/data convos/convos
-FROM ghcr.io/convos-chat/convos-base:main
-LABEL maintainer="jhthorsen@cpan.org"
+FROM node:24-slim AS frontend
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm run build
 
-RUN mkdir /app
-COPY Changes Makefile.PL /app/
-COPY assets /app/assets
-COPY lib /app/lib
-COPY public /app/public
-COPY script /app/script
-COPY templates /app/templates
+FROM golang:1.26 AS backend
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+# Copy built assets from frontend stage to the correct location for embedding
+COPY --from=frontend /app/pkg/server/public/assets ./pkg/server/public/assets
+RUN CGO_ENABLED=0 GOOS=linux go build -o convos convos.go
 
-ENV CONVOS_DEPENDENCIES all
-RUN apk add --no-cache curl openssl perl perl-io-socket-ssl perl-net-ssleay wget && \
-  apk add --no-cache --virtual builddeps build-base perl-dev && \
-  /app/script/convos install --all && \
-  apk del builddeps && \
-  rm -rf /root/.cpanm /var/cache/apk/*
+RUN useradd -u 10001 convos
 
-# Do not change these variables unless you know what you're doing
-ENV CONVOS_HOME /data
-ENV CONVOS_NO_ROOT_WARNING 1
-ENV MOJO_MODE production
+FROM scratch
+LABEL maintainer="contact@convos.chat"
 
+
+WORKDIR /app
+COPY --from=backend /app/convos .
+COPY --from=backend /etc/passwd /etc/passwd
+
+
+# Set up environment variables
+ENV CONVOS_HOME=/data
+ENV CONVOS_LISTEN=http://0.0.0.0:3000
 VOLUME ["/data"]
+
 EXPOSE 3000
 
+USER convos
+
+ENTRYPOINT ["/app/convos"]
 CMD ["daemon"]
-ENTRYPOINT ["/app/script/convos"]
