@@ -14,7 +14,10 @@ import (
 	"github.com/convos-chat/convos/pkg/core"
 )
 
-var ErrUploadFail = errors.New("upload error")
+var (
+	ErrUploadFail    = errors.New("upload error")
+	ErrUploadTooLarge = errors.New("file exceeds the maximum upload size")
+)
 
 // GetFiles implements api.StrictServerInterface.
 func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObject) (api.GetFilesResponseObject, error) {
@@ -83,9 +86,17 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 			continue
 		}
 
-		content, err := io.ReadAll(part)
+		maxSize := h.MaxUploadSize
+		if maxSize <= 0 {
+			maxSize = 40_000_000
+		}
+		limited := io.LimitReader(part, maxSize+1)
+		content, err := io.ReadAll(limited)
 		if err != nil {
 			return nil, err
+		}
+		if int64(len(content)) > maxSize {
+			return nil, fmt.Errorf("%w: %d bytes exceeds limit of %d", ErrUploadTooLarge, len(content), maxSize)
 		}
 
 		f, err := h.Core.Backend().SaveFile(user, part.FileName(), content)

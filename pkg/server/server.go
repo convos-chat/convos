@@ -227,6 +227,7 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 
 	webhookNets := handler.ParseWebhookNetworks(cfg.WebhookNetworks)
 	h := handler.NewHandler(c, authenticator, store, webhookNets)
+	h.MaxUploadSize = cfg.MaxUploadSize
 
 	h.Bot.RegisterAction(github.NewAction())
 	h.Bot.RegisterAction(gitea.NewAction())

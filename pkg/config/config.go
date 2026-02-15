@@ -21,6 +21,7 @@ type Config struct {
 	OrganizationName string `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
 	OrganizationURL  string `envconfig:"CONVOS_ORGANIZATION_URL" default:"https://convos.chat"`
 	Contact          string `envconfig:"CONVOS_CONTACT" default:"mailto:root@localhost"`
+	MaxUploadSize    int64  `envconfig:"CONVOS_MAX_UPLOAD_SIZE" default:"40000000"`
 	WebhookNetworks  string `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
 	Auth             auth.ProviderConfig
 }

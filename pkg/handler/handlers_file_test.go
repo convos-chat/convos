@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"io"
+	"mime/multipart"
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/api"
-	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/core"
 )
 
 func TestFileHandlers(t *testing.T) {
@@ -63,6 +66,59 @@ func TestFileHandlers(t *testing.T) {
 			got, _ := io.ReadAll(r.Body)
 			if string(got) != string(content) {
 				t.Errorf("Expected %q, got %q", string(content), string(got))
+			}
+		} else {
+			t.Errorf("Unexpected response type: %T", resp)
+		}
+	})
+
+	t.Run("UploadFile_ExceedsMaxSize", func(t *testing.T) {
+		t.Parallel()
+		_, h, user := setup()
+		h.MaxUploadSize = 100 // 100 bytes
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
+
+		var buf bytes.Buffer
+		w := multipart.NewWriter(&buf)
+		part, _ := w.CreateFormFile("file", "big.txt")
+		if _, err := part.Write(bytes.Repeat([]byte("x"), 200)); err != nil {
+			t.Fatalf("Failed to write to multipart part: %v", err)
+		}
+
+		w.Close()
+
+		reader := multipart.NewReader(&buf, w.Boundary())
+		_, err := h.UploadFile(ctx, api.UploadFileRequestObject{Body: reader})
+		if err == nil {
+			t.Fatal("Expected error for oversized upload")
+		}
+		if !errors.Is(err, ErrUploadTooLarge) {
+			t.Errorf("Expected ErrUploadTooLarge, got: %v", err)
+		}
+	})
+
+	t.Run("UploadFile_WithinMaxSize", func(t *testing.T) {
+		t.Parallel()
+		_, h, user := setup()
+		h.MaxUploadSize = 1000
+		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
+
+		var buf bytes.Buffer
+		w := multipart.NewWriter(&buf)
+		part, _ := w.CreateFormFile("file", "small.txt")
+		if _, err := part.Write([]byte("hello")); err != nil {
+			t.Fatalf("Failed to write to multipart part: %v", err)
+		}
+		w.Close()
+
+		reader := multipart.NewReader(&buf, w.Boundary())
+		resp, err := h.UploadFile(ctx, api.UploadFileRequestObject{Body: reader})
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		if r, ok := resp.(api.UploadFile200JSONResponse); ok {
+			if len(*r.Files) != 1 {
+				t.Errorf("Expected 1 file, got %d", len(*r.Files))
 			}
 		} else {
 			t.Errorf("Unexpected response type: %T", resp)

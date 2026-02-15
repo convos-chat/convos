@@ -36,6 +36,7 @@ type Handler struct {
 	Store         sessions.Store
 	WebhookNets   []*net.IPNet
 	Bot           *bot.Manager
+	MaxUploadSize int64
 }
 
 func NewHandler(c *core.Core, authenticator core.Authenticator, store sessions.Store, webhookNets []*net.IPNet) *Handler {
