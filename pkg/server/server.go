@@ -41,10 +41,7 @@ import (
 //go:embed public templates
 var embeddedFiles embed.FS
 
-const (
-	httpScheme  = "http"
-	httpsScheme = "https"
-)
+const httpsScheme = "https"
 
 var (
 	appTemplate           = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
@@ -340,6 +337,13 @@ func (s *Server) initPublicFS() {
 	}
 	slog.Debug("Using embedded filesystem for assets")
 	s.publicFS = sub
+
+	// 3. Overlay $CONVOS_HOME/content/public/ if it exists
+	contentDir := filepath.Join(s.Config.Home, "content", "public")
+	if info, err := os.Stat(contentDir); err == nil && info.IsDir() {
+		slog.Info("Overlaying custom assets", "path", contentDir)
+		s.publicFS = &overlayFS{upper: os.DirFS(contentDir), lower: s.publicFS}
+	}
 }
 
 // discoverAssets finds the hashed JS and CSS filenames.
