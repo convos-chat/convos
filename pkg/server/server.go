@@ -533,8 +533,8 @@ func (s *Server) spaHandler() http.HandlerFunc {
 
 // findPrimaryTheme reads the convos_js cookie to determine the user's active theme.
 func (s *Server) findPrimaryTheme(r *http.Request, themes []themeInfo) *themeInfo {
-	themeName := "convos"
-	colorScheme := "light"
+	themeName := s.Config.DefaultTheme
+	colorScheme := s.Config.DefaultScheme
 
 	// Read convos_js cookie (base64-encoded JSON)
 	themeName, colorScheme = parseThemeCookie(r, themeName, colorScheme)
