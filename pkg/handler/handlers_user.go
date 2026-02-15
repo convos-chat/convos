@@ -290,7 +290,7 @@ func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestO
 	}
 
 	email := string(request.Email)
-	exp := time.Now().Unix() + 24*3600
+	exp := time.Now().Add(h.InviteExpiry).Unix()
 
 	// Use target user's password hash, or local_secret for new users
 	target := h.Core.GetUser(email)

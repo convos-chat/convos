@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/kelseyhightower/envconfig"
@@ -12,19 +13,20 @@ import (
 
 // Config holds the application configuration.
 type Config struct {
-	Home             string `envconfig:"CONVOS_HOME"`
-	Listen           string `envconfig:"CONVOS_LISTEN" default:"http://localhost:8080"`
-	Mode             string `envconfig:"CONVOS_MODE" default:"production"`
-	ReverseProxy     string `envconfig:"CONVOS_REVERSE_PROXY"`
-	SecureCookies    *bool  `envconfig:"CONVOS_SECURE_COOKIES"`
-	SessionSecret    string `envconfig:"CONVOS_SESSION_SECRET"`
-	OrganizationName string `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
-	OrganizationURL  string `envconfig:"CONVOS_ORGANIZATION_URL" default:"https://convos.chat"`
-	Contact          string `envconfig:"CONVOS_CONTACT" default:"mailto:root@localhost"`
-	DefaultTheme     string `envconfig:"CONVOS_DEFAULT_THEME" default:"convos"`
-	DefaultScheme    string `envconfig:"CONVOS_DEFAULT_SCHEME" default:"light"`
-	MaxUploadSize    int64  `envconfig:"CONVOS_MAX_UPLOAD_SIZE" default:"40000000"`
-	WebhookNetworks  string `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
+	Home             string        `envconfig:"CONVOS_HOME"`
+	Listen           string        `envconfig:"CONVOS_LISTEN" default:"http://localhost:8080"`
+	Mode             string        `envconfig:"CONVOS_MODE" default:"production"`
+	ReverseProxy     string        `envconfig:"CONVOS_REVERSE_PROXY"`
+	SecureCookies    *bool         `envconfig:"CONVOS_SECURE_COOKIES"`
+	SessionSecret    string        `envconfig:"CONVOS_SESSION_SECRET"`
+	OrganizationName string        `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
+	OrganizationURL  string        `envconfig:"CONVOS_ORGANIZATION_URL" default:"https://convos.chat"`
+	Contact          string        `envconfig:"CONVOS_CONTACT" default:"mailto:root@localhost"`
+	DefaultTheme     string        `envconfig:"CONVOS_DEFAULT_THEME" default:"convos"`
+	DefaultScheme    string        `envconfig:"CONVOS_DEFAULT_SCHEME" default:"light"`
+	MaxUploadSize    int64         `envconfig:"CONVOS_MAX_UPLOAD_SIZE" default:"40000000"`
+	WebhookNetworks  string        `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
+	InviteExpiry     time.Duration `envconfig:"CONVOS_INVITE_EXPIRY" default:"24h"`
 	Auth             auth.ProviderConfig
 }
 

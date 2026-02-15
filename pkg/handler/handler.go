@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/bot"
@@ -37,6 +38,7 @@ type Handler struct {
 	WebhookNets   []*net.IPNet
 	Bot           *bot.Manager
 	MaxUploadSize int64
+	InviteExpiry  time.Duration
 }
 
 func NewHandler(c *core.Core, authenticator core.Authenticator, store sessions.Store, webhookNets []*net.IPNet) *Handler {
