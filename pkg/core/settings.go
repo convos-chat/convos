@@ -189,7 +189,6 @@ func (s *Settings) VAPIDKeys() (string, string, error) {
 	s.vapidPrivateKey = privateKey
 	s.vapidPublicKey = publicKey
 
-	// Save immediately so we don't lose them
 	if err := s.core.Backend().SaveSettings(s.toDataLocked()); err != nil {
 		return "", "", err
 	}

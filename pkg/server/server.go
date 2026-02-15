@@ -72,6 +72,14 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if s.Config.ReverseProxy == "" {
+			detectedBase, err := url.Parse(s.Core.Settings().BaseURL().Scheme + "://" + r.Host)
+			if err == nil && s.Core.Settings().BaseURL() != detectedBase {
+				slog.Debug("Detected base URL from request (no configured reverse proxy)", "detected", detectedBase, "orig", s.Core.Settings().BaseURL())
+				s.Core.Settings().SetBaseURL(detectedBase)
+				if err = s.Core.Settings().Save(); err != nil {
+					slog.Warn("Failed to persist detected base URL", "error", err)
+				}
+			}
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -206,11 +214,10 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 
 	// Setup middleware stack
 	if cfg.ReverseProxy != "" {
-		slog.Debug("Reverse Proxy support enabled")
 		r.Use(middleware.RealIP)
-		r.Use(s.ReverseProxyMiddleware)
 	}
 	r.Use(
+		s.ReverseProxyMiddleware,
 		stripJSONSuffix,
 		ContextMiddleware,
 		middleware.Recoverer,
@@ -426,7 +433,7 @@ func (s *Server) parseThemeCSS(path string) (string, string) {
 	header := string(buf[:n])
 
 	var name, colorScheme string
-	for _, line := range strings.Split(header, "\n") {
+	for line := range strings.SplitSeq(header, "\n") {
 		line = strings.TrimSpace(line)
 		if name == "" {
 			if idx := strings.Index(strings.ToLower(line), "name:"); idx >= 0 {
