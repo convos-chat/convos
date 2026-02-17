@@ -83,6 +83,9 @@ type Connection interface {
 	// SetOnConnectCommands sets commands to run on connect.
 	SetOnConnectCommands(cmds []string)
 
+	// Profile returns the connection profile.
+	Profile() *ConnectionProfile
+
 	// ToData converts to serializable format.
 	ToData(persist bool) ConnectionData
 }
@@ -111,6 +114,7 @@ type BaseConnection struct {
 	onConnectCommands []string
 	conversations     map[string]*Conversation
 	info              map[string]any
+	profile           *ConnectionProfile
 }
 
 // NewBaseConnection creates a new base connection.
@@ -126,6 +130,11 @@ func NewBaseConnection(rawURL string, user *User) *BaseConnection {
 		u.RawQuery = q.Encode()
 	}
 
+	var profile *ConnectionProfile
+	if user != nil && user.Core() != nil && u != nil {
+		profile = user.Core().ConnectionProfile(u)
+	}
+
 	return &BaseConnection{
 		url:               u,
 		user:              user,
@@ -134,6 +143,7 @@ func NewBaseConnection(rawURL string, user *User) *BaseConnection {
 		onConnectCommands: []string{},
 		conversations:     make(map[string]*Conversation),
 		info:              make(map[string]any),
+		profile:           profile,
 	}
 }
 
@@ -233,6 +243,13 @@ func (c *BaseConnection) SetOnConnectCommands(cmds []string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.onConnectCommands = cmds
+}
+
+// Profile returns the connection profile.
+func (c *BaseConnection) Profile() *ConnectionProfile {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.profile
 }
 
 // Conversations returns all conversations.

@@ -63,7 +63,12 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 	}
 
 	// Auto-create connection profile
-	h.ensureConnectionProfile(request.Body.Url, false)
+	if profile := conn.Profile(); profile != nil {
+		profile.SetSkipQueue(true)
+		if err := profile.Save(); err != nil {
+			slog.Error("Failed to save connection profile", "error", err)
+		}
+	}
 
 	// Auto-connect if wanted state is connected
 	if conn.WantedState() == core.StateConnected {
@@ -168,33 +173,4 @@ func channelFromURL(rawURL string) string {
 		return p
 	}
 	return decoded
-}
-
-// ensureConnectionProfile creates a connection profile if one doesn't exist for the given URL.
-func (h *Handler) ensureConnectionProfile(rawURL string, isDefault bool) {
-	id := profileID(rawURL)
-
-	profiles, err := h.Core.Backend().LoadConnectionProfiles()
-	if err != nil {
-		slog.Error("Failed to load connection profiles", "error", err)
-		return
-	}
-	for _, p := range profiles {
-		if p.ID == id {
-			return
-		}
-	}
-
-	profile := core.ConnectionProfileData{
-		ID:                 id,
-		URL:                rawURL,
-		IsDefault:          isDefault,
-		SkipQueue:          !isDefault,
-		MaxBulkMessageSize: 3,
-		MaxMessageLength:   512,
-		ServiceAccounts:    []string{"chanserv", "nickserv"},
-	}
-	if err = h.Core.Backend().SaveConnectionProfile(profile); err != nil {
-		slog.Error("Failed to save connection profile", "error", err)
-	}
 }

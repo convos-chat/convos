@@ -274,12 +274,12 @@ func (c *Core) NewConnection(rawURL string, user *User) Connection {
 
 // Start initializes the core by loading users and their connections.
 func (c *Core) Start() error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
+	c.mu.RLock()
 	if c.ready {
+		c.mu.RUnlock()
 		return nil
 	}
+	c.mu.RUnlock()
 
 	// Load settings from backend
 	settingsData, err := c.backend.LoadSettings()
@@ -294,20 +294,27 @@ func (c *Core) Start() error {
 	if err != nil {
 		c.log.Error("Failed to load connection profiles", "error", err)
 	} else {
+		// Populate profiles without holding the lock for the whole operation,
+		// but we need them in c.profiles for user.loadConnections() to work.
+		c.mu.Lock()
 		for _, profileData := range profiles {
 			p := NewConnectionProfile(profileData.URL, c)
 			p.FromData(profileData)
 			c.profiles[p.ID()] = p
 		}
+		c.mu.Unlock()
 	}
 
 	// Load users from backend
-	users, err := c.backend.LoadUsers()
+	usersData, err := c.backend.LoadUsers()
 	if err != nil {
 		return err
 	}
 
-	for _, userData := range users {
+	// Prepare users and connections without holding c.mu to avoid deadlocks
+	// when NewConnection calls c.ConnectionProfile (which locks c.mu).
+	var loadedUsers []*User
+	for _, userData := range usersData {
 		user := NewUser(userData.Email, c)
 		user.password = userData.Password
 		user.roles = userData.Roles
@@ -317,12 +324,19 @@ func (c *Core) Start() error {
 		if user.subscriptions == nil {
 			user.subscriptions = make(map[string]webpush.Subscription)
 		}
-		c.users[user.ID()] = user
 
 		// Load connections for user
 		if err := user.loadConnections(); err != nil {
 			c.log.Error("Failed to load connections", "user", user.Email(), "error", err)
 		}
+		loadedUsers = append(loadedUsers, user)
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for _, user := range loadedUsers {
+		c.users[user.ID()] = user
 	}
 
 	// Ensure first user has admin role (back compat)

@@ -148,6 +148,21 @@ func (c *Connection) Connect() error {
 		DialContext:   dialContext,
 	}
 
+	// WEBIRC support via profile
+	if profile := c.Profile(); profile != nil {
+		if webircPass := profile.WebircPassword(); webircPass != "" {
+			remoteAddr := c.User().RemoteAddress()
+			hostname := remoteAddr
+			// Try to resolve hostname, but don't block too long or fail hard
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			if names, err := net.DefaultResolver.LookupAddr(ctx, remoteAddr); err == nil && len(names) > 0 {
+				hostname = strings.TrimSuffix(names[0], ".")
+			}
+			c.client.WebIRC = []string{webircPass, "convos", hostname, remoteAddr}
+		}
+	}
+
 	if saslMech == "PLAIN" || saslMech == "EXTERNAL" {
 		saslLogin := urlUser
 		if saslLogin == "" {
@@ -428,8 +443,18 @@ func (c *Connection) Send(target, message string) error {
 		return ErrNoTarget
 	}
 
-	if err := c.client.Privmsg(target, message); err != nil {
-		return err
+	var messages []string
+	if profile := c.Profile(); profile != nil {
+		messages = profile.SplitMessage(message)
+	} else {
+		// Fallback if no profile (shouldn't happen in normal operation)
+		messages = []string{message}
+	}
+
+	for _, msg := range messages {
+		if err := c.client.Privmsg(target, msg); err != nil {
+			return err
+		}
 	}
 
 	c.emitSentMessage(target, message, "private")

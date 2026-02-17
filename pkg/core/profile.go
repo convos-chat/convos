@@ -91,6 +91,34 @@ func (p *ConnectionProfile) ID() string {
 	return p.id
 }
 
+// SetIsDefault sets whether this is the default profile.
+func (p *ConnectionProfile) SetIsDefault(v bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.isDefault = v
+}
+
+// IsDefault returns whether this is the default profile.
+func (p *ConnectionProfile) IsDefault() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.isDefault
+}
+
+// SetSkipQueue sets whether to skip the connection queue.
+func (p *ConnectionProfile) SetSkipQueue(v bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.skipQueue = v
+}
+
+// SkipQueue returns whether to skip the connection queue.
+func (p *ConnectionProfile) SkipQueue() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.skipQueue
+}
+
 // MaxBulkMessageSize returns the max number of lines before a message is considered too long.
 func (p *ConnectionProfile) MaxBulkMessageSize() int {
 	p.mu.RLock()

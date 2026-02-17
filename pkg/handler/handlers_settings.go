@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"log/slog"
+	"net/url"
 
 	"github.com/convos-chat/convos/pkg/api"
 )
@@ -57,10 +59,27 @@ func (h *Handler) UpdateSettings(ctx context.Context, request api.UpdateSettings
 
 	// Auto-create connection profile when default_connection is set
 	if b.DefaultConnection != nil && *b.DefaultConnection != "" {
-		h.ensureConnectionProfile(*b.DefaultConnection, true)
+		h.createDefaultProfile(*b.DefaultConnection)
 	}
 
 	return api.UpdateSettings200JSONResponse(h.settingsToAPI()), nil
+}
+
+func (h *Handler) createDefaultProfile(rawURL string) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return
+	}
+	profile := h.Core.ConnectionProfile(u)
+	if profile == nil {
+		return
+	}
+
+	profile.SetIsDefault(true)
+	profile.SetSkipQueue(false)
+	if err := profile.Save(); err != nil {
+		slog.Error("Failed to save default connection profile", "error", err)
+	}
 }
 
 func (h *Handler) settingsToAPI() api.ServerSettings {
