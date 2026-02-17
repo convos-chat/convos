@@ -4,8 +4,10 @@ package core
 
 import (
 	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/SherClockHolmes/webpush-go"
@@ -32,10 +34,12 @@ type Core struct {
 	backend  Backend
 	settings *Settings
 	users    map[string]*User
+	profiles map[string]*ConnectionProfile
 	events   *EventEmitter
 	provider ConnectionProvider
 	ready    bool
 	log      *slog.Logger
+	getenv   func(string) string
 }
 
 // Option configures a Core instance.
@@ -72,9 +76,11 @@ func WithLogger(log *slog.Logger) Option {
 // New creates a new Core instance with the given options.
 func New(opts ...Option) *Core {
 	c := &Core{
-		users:  make(map[string]*User),
-		events: NewEventEmitter(),
-		log:    slog.Default(),
+		users:    make(map[string]*User),
+		profiles: make(map[string]*ConnectionProfile),
+		events:   NewEventEmitter(),
+		log:      slog.Default(),
+		getenv:   os.Getenv,
 	}
 
 	for _, opt := range opts {
@@ -161,6 +167,59 @@ func (c *Core) Users() []*User {
 	return users
 }
 
+// ConnectionProfile returns a connection profile for the given URL.
+func (c *Core) ConnectionProfile(u *url.URL) *ConnectionProfile {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	id := strings.ToLower(u.Scheme + "-" + prettyConnectionName(u.Host))
+	if p, ok := c.profiles[id]; ok {
+		return p
+	}
+
+	p := NewConnectionProfile(u.String(), c)
+	c.applyDefaultSettings(p, id)
+
+	c.profiles[id] = p
+	return p
+}
+
+// applyDefaultSettings applies settings from the default connection profile if applicable.
+// c.mu must be held.
+func (c *Core) applyDefaultSettings(p *ConnectionProfile, id string) {
+	defaultConn := c.settings.DefaultConnection()
+	if defaultConn == "" {
+		return
+	}
+
+	defaultURL, err := url.Parse(defaultConn)
+	if err != nil {
+		return
+	}
+
+	defaultID := strings.ToLower(defaultURL.Scheme + "-" + prettyConnectionName(defaultURL.Host))
+	if id == defaultID {
+		return
+	}
+
+	if defaultProfile, ok := c.profiles[defaultID]; ok {
+		p.ApplyDefaults(defaultProfile)
+		p.LoadEnv() // Re-apply env vars to override defaults
+	}
+}
+
+// ConnectionProfiles returns all stored connection profiles.
+func (c *Core) ConnectionProfiles() []*ConnectionProfile {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	profiles := make([]*ConnectionProfile, 0, len(c.profiles))
+	for _, p := range c.profiles {
+		profiles = append(profiles, p)
+	}
+	return profiles
+}
+
 // RemoveUser removes a user from the core.
 func (c *Core) RemoveUser(email string) error {
 	c.mu.Lock()
@@ -228,6 +287,18 @@ func (c *Core) Start() error {
 		c.log.Error("Failed to load settings", "error", err)
 	} else {
 		c.settings.FromData(settingsData)
+	}
+
+	// Load connection profiles from backend
+	profiles, err := c.backend.LoadConnectionProfiles()
+	if err != nil {
+		c.log.Error("Failed to load connection profiles", "error", err)
+	} else {
+		for _, profileData := range profiles {
+			p := NewConnectionProfile(profileData.URL, c)
+			p.FromData(profileData)
+			c.profiles[p.ID()] = p
+		}
 	}
 
 	// Load users from backend
