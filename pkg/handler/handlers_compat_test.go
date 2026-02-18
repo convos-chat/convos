@@ -12,13 +12,14 @@ import (
 	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/irc"
+	"github.com/convos-chat/convos/pkg/test"
 	"github.com/gorilla/sessions"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 func TestRegisterUser_PasswordLength(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -48,7 +49,7 @@ func TestRegisterUser_PasswordLength(t *testing.T) {
 
 func TestGetUser_QueryParameters(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -90,7 +91,7 @@ func TestGetUser_QueryParameters(t *testing.T) {
 
 func TestGetUser_Fields(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -128,7 +129,7 @@ func TestGetUser_Fields(t *testing.T) {
 
 func TestGetSettings_AuthAndDiskUsage(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -157,7 +158,7 @@ func TestGetSettings_AuthAndDiskUsage(t *testing.T) {
 
 func TestGetUser_RolesAndRemoteAddress(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -192,7 +193,7 @@ func TestGetUser_RolesAndRemoteAddress(t *testing.T) {
 
 func TestGetUser_ConversationFields(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -251,7 +252,7 @@ func TestGetUser_ConversationFields(t *testing.T) {
 
 func TestListConnectionProfiles_IdAndSkipQueue(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -295,7 +296,7 @@ func TestListConnectionProfiles_IdAndSkipQueue(t *testing.T) {
 
 func TestConversationMessages_EndField(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -331,7 +332,7 @@ func TestConversationMessages_EndField(t *testing.T) {
 
 func TestNotificationMessages_EndField(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -359,7 +360,7 @@ func TestNotificationMessages_EndField(t *testing.T) {
 
 func TestSearchMessages_EndField(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -390,7 +391,7 @@ func TestSearchMessages_EndField(t *testing.T) {
 
 func TestGetSettings_BaseURL(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -424,7 +425,7 @@ func TestGetSettings_BaseURL(t *testing.T) {
 
 func TestTimestampFormat(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -463,7 +464,7 @@ func TestTimestampFormat(t *testing.T) {
 
 func TestConnectionMessages_ServerConversation(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -505,7 +506,7 @@ func TestConnectionMessages_ServerConversation(t *testing.T) {
 
 func TestCreateConnection_ChannelAutoJoin(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -545,7 +546,7 @@ func TestCreateConnection_ChannelAutoJoin(t *testing.T) {
 
 func TestCreateConnection_ConversationIdParam(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -584,7 +585,7 @@ func TestCreateConnection_ConversationIdParam(t *testing.T) {
 
 func TestRegisterUser_AutoConnect(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -636,7 +637,7 @@ func TestRegisterUser_AutoConnect(t *testing.T) {
 
 func TestUpdateSettings_AutoCreateProfile(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -679,7 +680,7 @@ func TestUpdateSettings_AutoCreateProfile(t *testing.T) {
 
 func TestCreateConnection_AutoCreateProfile(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -760,7 +761,7 @@ func TestErrorResponse_PathField(t *testing.T) {
 
 func TestLoginUser_FailureStatusCode(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -801,7 +802,7 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 
 func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -843,7 +844,7 @@ func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 
 func TestRegisterUser_ConflictMessage(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetOpenToPublic(true)
 	store := sessions.NewCookieStore([]byte("secret"))
@@ -884,7 +885,7 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 
 func TestConversationMessages_NotFound(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -909,7 +910,7 @@ func TestConversationMessages_NotFound(t *testing.T) {
 
 func TestConnectionMessages_NotFound(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 
@@ -933,7 +934,7 @@ func TestConnectionMessages_NotFound(t *testing.T) {
 
 func TestInviteUser_GeneratesValidToken(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
@@ -986,7 +987,7 @@ func TestInviteUser_GeneratesValidToken(t *testing.T) {
 
 func TestInviteUser_ExistingUser(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
@@ -1021,7 +1022,7 @@ func TestInviteUser_ExistingUser(t *testing.T) {
 
 func TestRegisterUser_WithInviteToken(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
@@ -1075,7 +1076,7 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 
 func TestRegisterUser_InvalidToken(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
@@ -1120,7 +1121,7 @@ func TestRegisterUser_InvalidToken(t *testing.T) {
 
 func TestRegisterUser_ExpiredToken(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")
@@ -1160,7 +1161,7 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 
 func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
 	c.Settings().SetLocalSecret("test-local-secret")

@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/api"
-	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/irc"
+	"github.com/convos-chat/convos/pkg/test"
 	"github.com/gorilla/sessions"
 )
 
@@ -19,7 +20,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Parallel()
 
 	setup := func() (*core.Core, *Handler, *core.User) {
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		store := sessions.NewCookieStore([]byte("secret"))
 		h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)

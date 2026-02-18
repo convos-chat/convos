@@ -8,11 +8,12 @@ import (
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/auth"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestWebhookIPValidation(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	nets := ParseWebhookNetworks("127.0.0.0/24")
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nets)

@@ -158,7 +158,7 @@ func (c *BaseConnection) ID() string {
 
 	// Generate ID from URL: scheme-hostname
 	if c.url != nil {
-		c.id = strings.ToLower(c.url.Scheme + "-" + prettyConnectionName(c.url.Host))
+		c.id = strings.ToLower(c.url.Scheme + "-" + PrettyConnectionName(c.url.Host))
 	}
 	return c.id
 }
@@ -172,7 +172,7 @@ func (c *BaseConnection) Name() string {
 		return c.name
 	}
 	if c.url != nil {
-		return prettyConnectionName(c.url.Host)
+		return PrettyConnectionName(c.url.Host)
 	}
 	return ""
 }
@@ -366,8 +366,8 @@ func (c *BaseConnection) ToData(persist bool) ConnectionData {
 	return data
 }
 
-// prettyConnectionName extracts a clean name from a hostname.
-func prettyConnectionName(host string) string {
+// PrettyConnectionName extracts a clean name from a hostname.
+func PrettyConnectionName(host string) string {
 	// Remove port if present
 	if idx := strings.LastIndex(host, ":"); idx > 0 {
 		host = host[:idx]

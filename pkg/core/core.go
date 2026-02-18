@@ -29,17 +29,19 @@ type ConnectionProvider interface {
 // Core is the main entry point for Convos business logic.
 // It manages users, connection profiles, and the storage backend.
 type Core struct {
-	mu       sync.RWMutex
-	home     string
-	backend  Backend
-	settings *Settings
-	users    map[string]*User
-	profiles map[string]*ConnectionProfile
-	events   *EventEmitter
-	provider ConnectionProvider
-	ready    bool
-	log      *slog.Logger
-	getenv   func(string) string
+	mu                        sync.RWMutex
+	home                      string
+	backend                   Backend
+	settings                  *Settings
+	users                     map[string]*User
+	profiles                  map[string]*ConnectionProfile
+	events                    *EventEmitter
+	provider                  ConnectionProvider
+	ready                     bool
+	log                       *slog.Logger
+	DefaultMaxBulkMessageSize int
+	DefaultMaxMessageLength   int
+	DefaultServiceAccounts    []string
 }
 
 // Option configures a Core instance.
@@ -56,6 +58,14 @@ func WithHome(home string) Option {
 func WithBackend(backend Backend) Option {
 	return func(c *Core) {
 		c.backend = backend
+	}
+}
+
+func WithProfileDefaults(maxBulkSize, maxMessageLength int, serviceAccounts []string) Option {
+	return func(c *Core) {
+		c.DefaultMaxMessageLength = maxMessageLength
+		c.DefaultMaxBulkMessageSize = maxBulkSize
+		c.DefaultServiceAccounts = serviceAccounts
 	}
 }
 
@@ -80,7 +90,6 @@ func New(opts ...Option) *Core {
 		profiles: make(map[string]*ConnectionProfile),
 		events:   NewEventEmitter(),
 		log:      slog.Default(),
-		getenv:   os.Getenv,
 	}
 
 	for _, opt := range opts {
@@ -97,7 +106,7 @@ func New(opts ...Option) *Core {
 
 	// Default backend
 	if c.backend == nil {
-		c.backend = NewMemoryBackend()
+		panic("No backend configured. Please provide a storage backend using WithBackend option.")
 	}
 
 	c.settings = &Settings{core: c}
@@ -172,7 +181,7 @@ func (c *Core) ConnectionProfile(u *url.URL) *ConnectionProfile {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	id := strings.ToLower(u.Scheme + "-" + prettyConnectionName(u.Host))
+	id := strings.ToLower(u.Scheme + "-" + PrettyConnectionName(u.Host))
 	if p, ok := c.profiles[id]; ok {
 		return p
 	}
@@ -197,14 +206,13 @@ func (c *Core) applyDefaultSettings(p *ConnectionProfile, id string) {
 		return
 	}
 
-	defaultID := strings.ToLower(defaultURL.Scheme + "-" + prettyConnectionName(defaultURL.Host))
+	defaultID := strings.ToLower(defaultURL.Scheme + "-" + PrettyConnectionName(defaultURL.Host))
 	if id == defaultID {
 		return
 	}
 
 	if defaultProfile, ok := c.profiles[defaultID]; ok {
 		p.ApplyDefaults(defaultProfile)
-		p.LoadEnv() // Re-apply env vars to override defaults
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
@@ -31,7 +32,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Parallel()
 
 	setup := func() (*core.Core, *core.User, *Connection) {
-		c := core.New()
+		c := core.New(core.WithBackend(test.NewMemoryBackend()))
 		user := core.NewUser("test@example.com", c)
 		conn := NewConnection("irc://irc.libera.chat", user)
 		return c, user, conn
@@ -497,7 +498,7 @@ func TestIRCConnectionIntegration(t *testing.T) {
 	t.Log("Testing IRC connection against:", serverURL)
 
 	// Create core and user
-	c := core.New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	user := core.NewUser("testuser@convos.chat", c)
 
 	// Create connection

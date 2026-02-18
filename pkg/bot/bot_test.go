@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 // mockAction is a minimal Action implementation for testing.
@@ -19,6 +20,7 @@ func (a *mockAction) ID() string { return a.id }
 func (a *mockAction) Register(m *Manager) {
 	a.registered = true
 }
+
 func (a *mockAction) HandleWebhook(provider string, payload map[string]any) bool {
 	a.handleProvider = provider
 	a.handlePayload = payload
@@ -303,7 +305,7 @@ func TestFindRepoRules(t *testing.T) {
 // webhook dispatch logic without needing full infrastructure.
 func newManagerWithBotUser(t *testing.T) *Manager {
 	t.Helper()
-	c := core.New(core.WithHome(t.TempDir()))
+	c := core.New(core.WithHome(t.TempDir()), core.WithBackend(test.NewMemoryBackend()))
 	m := NewManager(c)
 	m.botUser = core.NewUser("bot@convos.chat", c)
 	return m

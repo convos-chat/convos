@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 const testEmail = "test@example.com"
 
 func TestLocalAuthenticator(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(core.NewMemoryBackend()))
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	auth := NewLocalAuthenticator(c)
 
 	// Create test user

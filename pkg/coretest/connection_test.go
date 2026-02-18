@@ -1,31 +1,34 @@
-package core
+package coretest
 
 import (
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 // testConnection is a minimal Connection implementation for core tests.
 type testConnection struct {
-	*BaseConnection
+	*core.BaseConnection
 }
 
-func newTestConnection(rawURL string, user *User) *testConnection {
+func newTestConnection(rawURL string, user *core.User) *testConnection {
 	return &testConnection{
-		BaseConnection: NewBaseConnection(rawURL, user),
+		BaseConnection: core.NewBaseConnection(rawURL, user),
 	}
 }
 
-func (c *testConnection) Connect() error    { return nil }
-func (c *testConnection) Disconnect() error { return nil }
+func (c *testConnection) Connect() error         { return nil }
+func (c *testConnection) Disconnect() error      { return nil }
 func (c *testConnection) Send(_, _ string) error { return nil }
 
-var _ Connection = (*testConnection)(nil)
+var _ core.Connection = (*testConnection)(nil)
 
 func TestNewConnection(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	if conn.User() != user {
@@ -44,8 +47,8 @@ func TestNewConnection(t *testing.T) {
 func TestConnectionID(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	tests := []struct {
 		url      string
@@ -68,8 +71,8 @@ func TestConnectionID(t *testing.T) {
 func TestConnectionName(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
@@ -88,31 +91,31 @@ func TestConnectionName(t *testing.T) {
 func TestConnectionState(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initial state
-	if conn.State() != StateDisconnected {
-		t.Errorf("State() = %q, want %q", conn.State(), StateDisconnected)
+	if conn.State() != core.StateDisconnected {
+		t.Errorf("State() = %q, want %q", conn.State(), core.StateDisconnected)
 	}
 
 	// Wanted state default
-	if conn.WantedState() != StateConnected {
-		t.Errorf("WantedState() = %q, want %q", conn.WantedState(), StateConnected)
+	if conn.WantedState() != core.StateConnected {
+		t.Errorf("WantedState() = %q, want %q", conn.WantedState(), core.StateConnected)
 	}
 
 	// Set wanted state
-	conn.SetWantedState(StateDisconnected)
-	if conn.WantedState() != StateDisconnected {
-		t.Errorf("WantedState() = %q, want %q", conn.WantedState(), StateDisconnected)
+	conn.SetWantedState(core.StateDisconnected)
+	if conn.WantedState() != core.StateDisconnected {
+		t.Errorf("WantedState() = %q, want %q", conn.WantedState(), core.StateDisconnected)
 	}
 }
 
 func TestConnectionNick(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	tests := []struct {
 		email    string
@@ -126,7 +129,7 @@ func TestConnectionNick(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		user := NewUser(tt.email, c)
+		user := core.NewUser(tt.email, c)
 		conn := newTestConnection(tt.url, user)
 		if conn.Nick() != tt.expected {
 			t.Errorf("Nick() for email=%q, url=%q = %q, want %q",
@@ -138,8 +141,8 @@ func TestConnectionNick(t *testing.T) {
 func TestConnectionOnConnectCommands(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initially empty
@@ -160,8 +163,8 @@ func TestConnectionOnConnectCommands(t *testing.T) {
 func TestConnectionConversations(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	// Initially empty
@@ -170,7 +173,7 @@ func TestConnectionConversations(t *testing.T) {
 	}
 
 	// Add conversation
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 	conn.AddConversation(conv)
 
 	convs := conn.Conversations()
@@ -200,14 +203,14 @@ func TestConnectionConversations(t *testing.T) {
 func TestConnectionToData(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName("Libera")
 	conn.SetOnConnectCommands([]string{"/join #test"})
 
 	// Add a conversation
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 	conv.SetTopic("Test channel")
 	conn.AddConversation(conv)
 
@@ -219,8 +222,8 @@ func TestConnectionToData(t *testing.T) {
 	if data.Name != "Libera" {
 		t.Errorf("Name = %q, want %q", data.Name, "Libera")
 	}
-	if data.State != StateDisconnected {
-		t.Errorf("State = %q, want %q", data.State, StateDisconnected)
+	if data.State != core.StateDisconnected {
+		t.Errorf("State = %q, want %q", data.State, core.StateDisconnected)
 	}
 	if len(data.Conversations) != 0 {
 		t.Error("Conversations should be empty when persist=false")
@@ -253,9 +256,9 @@ func TestPrettyConnectionName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := prettyConnectionName(tt.host)
+		got := core.PrettyConnectionName(tt.host)
 		if got != tt.expected {
-			t.Errorf("prettyConnectionName(%q) = %q, want %q", tt.host, got, tt.expected)
+			t.Errorf("PrettyConnectionName(%q) = %q, want %q", tt.host, got, tt.expected)
 		}
 	}
 }

@@ -10,14 +10,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/config"
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestSPAHandler(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(core.NewMemoryBackend()))
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	cfg := &config.Config{SessionSecret: "secret"}
 	s := New(c, cfg, auth.NewLocalAuthenticator(c))
 
@@ -79,7 +80,7 @@ func TestRequireAuthMiddleware(t *testing.T) {
 }
 
 func setupServer() (*Server, *core.Core) {
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	falseVal := false
 	cfg := &config.Config{

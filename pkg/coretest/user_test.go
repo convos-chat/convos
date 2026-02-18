@@ -1,15 +1,18 @@
-package core
+package coretest
 
 import (
 	"testing"
 	"time"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestNewUser(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	if user.Email() != testEmail {
 		t.Errorf("Email() = %q, want %q", user.Email(), testEmail)
@@ -35,8 +38,8 @@ func TestNewUser(t *testing.T) {
 func TestUserPassword(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	// Initially no password
 	if user.Password() != "" {
@@ -79,8 +82,8 @@ func TestUserPassword(t *testing.T) {
 func TestUserRoles(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	// Initially no roles
 	if len(user.Roles()) != 0 {
@@ -136,8 +139,8 @@ func TestUserRoles(t *testing.T) {
 func TestUserHighlightKeywords(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	// Initially empty
 	if len(user.HighlightKeywords()) != 0 {
@@ -156,8 +159,8 @@ func TestUserHighlightKeywords(t *testing.T) {
 func TestUserConnections(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	// Initially no connections
 	if len(user.Connections()) != 0 {
@@ -198,8 +201,8 @@ func TestUserConnections(t *testing.T) {
 func TestUserUnread(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 
 	if user.Unread() != 0 {
 		t.Errorf("Unread() = %d, want 0", user.Unread())
@@ -214,8 +217,8 @@ func TestUserUnread(t *testing.T) {
 func TestUserToData(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	if err := user.SetPassword("secret"); err != nil {
 		t.Fatalf("SetPassword() error: %v", err)
 	}
@@ -256,9 +259,9 @@ func TestUserToData(t *testing.T) {
 func TestUserRegisteredTime(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	before := time.Now().UTC().Truncate(time.Second)
-	user := NewUser(testEmail, c)
+	user := core.NewUser(testEmail, c)
 	after := time.Now().UTC().Truncate(time.Second)
 
 	reg := user.Registered()

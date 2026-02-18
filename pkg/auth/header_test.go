@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestHeaderAuthenticator(t *testing.T) {
@@ -13,7 +14,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("ExistingUser", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
@@ -53,7 +54,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("NewUser_FirstUser", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
@@ -84,7 +85,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("NewUser_NotFirstUser", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
@@ -121,7 +122,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("AdminRequired_WrongUser", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{
 			HeaderName: "X-Authenticated-User",
@@ -149,7 +150,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("AdminRequired_CorrectUser", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{
 			HeaderName: "X-Authenticated-User",
@@ -180,7 +181,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("MissingHeader", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
@@ -204,7 +205,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("CustomHeaderName", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Remote-User"})
 
@@ -229,7 +230,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 
 	t.Run("AuthenticatorName", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 

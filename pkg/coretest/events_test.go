@@ -1,9 +1,11 @@
-package core
+package coretest
 
 import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/convos-chat/convos/pkg/core"
 )
 
 const (
@@ -14,7 +16,7 @@ const (
 func TestNewEventEmitter(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	if e == nil {
 		t.Fatal("NewEventEmitter() returned nil")
 	}
@@ -26,7 +28,7 @@ func TestNewEventEmitter(t *testing.T) {
 func TestEventEmitterSubscribe(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 
 	sub := e.Subscribe()
 	if sub == nil {
@@ -50,7 +52,7 @@ func TestEventEmitterSubscribe(t *testing.T) {
 func TestEventEmitterEmitUser(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	sub := e.Subscribe()
 	defer sub.Close()
 
@@ -86,7 +88,7 @@ func TestEventEmitterEmitUser(t *testing.T) {
 func TestEventEmitterSubscribeUser(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	sub := e.SubscribeUser(testUID)
 	defer sub.Close()
 
@@ -121,7 +123,7 @@ func TestEventEmitterSubscribeUser(t *testing.T) {
 func TestEventEmitterBroadcastSubscriber(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 
 	// Subscribe with empty userID (broadcast subscriber, receives all events)
 	sub := e.Subscribe()
@@ -150,7 +152,7 @@ func TestEventEmitterBroadcastSubscriber(t *testing.T) {
 func TestEventEmitterMultipleSubscribers(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	sub1 := e.Subscribe()
 	sub2 := e.Subscribe()
 	defer sub1.Close()
@@ -163,7 +165,7 @@ func TestEventEmitterMultipleSubscribers(t *testing.T) {
 	e.EmitUser(testUID, map[string]any{"event": testEventMsg})
 
 	// Both should receive
-	for i, sub := range []*Subscription{sub1, sub2} {
+	for i, sub := range []*core.Subscription{sub1, sub2} {
 		select {
 		case received := <-sub.Events():
 			m, ok := received.(map[string]any)
@@ -182,7 +184,7 @@ func TestEventEmitterMultipleSubscribers(t *testing.T) {
 func TestEventEmitterConcurrency(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	const numSubscribers = 10
 	const numEvents = 100
 
@@ -190,7 +192,7 @@ func TestEventEmitterConcurrency(t *testing.T) {
 	received := make([]int, numSubscribers)
 
 	// Create subscribers
-	subs := make([]*Subscription, numSubscribers)
+	subs := make([]*core.Subscription, numSubscribers)
 	for i := range numSubscribers {
 		subs[i] = e.Subscribe()
 		idx := i
@@ -231,7 +233,7 @@ func TestEventEmitterConcurrency(t *testing.T) {
 func TestSubscriptionCloseTwice(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	sub := e.Subscribe()
 
 	// Should not panic
@@ -242,7 +244,7 @@ func TestSubscriptionCloseTwice(t *testing.T) {
 func TestEventEmitterSetBufferSize(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	e.SetBufferSize(5)
 
 	sub := e.Subscribe()
@@ -273,7 +275,7 @@ func TestEventEmitterSetBufferSize(t *testing.T) {
 func TestEventEmitterTimestamp(t *testing.T) {
 	t.Parallel()
 
-	e := NewEventEmitter()
+	e := core.NewEventEmitter()
 	sub := e.Subscribe()
 	defer sub.Close()
 

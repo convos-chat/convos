@@ -28,6 +28,13 @@ type Config struct {
 	WebhookNetworks  string        `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
 	InviteExpiry     time.Duration `envconfig:"CONVOS_INVITE_EXPIRY" default:"24h"`
 	Auth             auth.ProviderConfig
+	ProfileDefaults  ProfileDefaults
+}
+
+type ProfileDefaults struct {
+	MaxBulkSize      int    `envconfig:"CONVOS_MAX_BULK_SIZE" default:"3"`
+	MaxMessageLength int    `envconfig:"CONVOS_MAX_MESSAGE_LENGTH" default:"512"`
+	ServiceAccounts  string `envconfig:"CONVOS_SERVICE_ACCOUNTS" default:"chanserv,nickserv"`
 }
 
 // IsDevelopment returns true if running in development mode.

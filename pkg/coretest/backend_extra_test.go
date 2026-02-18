@@ -1,22 +1,25 @@
-package core
+package coretest
 
 import (
 	"bytes"
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestMemoryBackend_Search(t *testing.T) {
 	t.Parallel()
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser("test@example.com", c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser("test@example.com", c)
 	conn := newTestConnection("irc://irc.libera.chat", user)
-	conv := NewConversation("#test", conn)
+	conv := core.NewConversation("#test", conn)
 	user.AddConnection(conn)
 	conn.AddConversation(conv)
 
 	// Save some messages
-	msgs := []Message{
+	msgs := []core.Message{
 		{From: "alice", Message: "Hello there", Type: "privmsg"},
 		{From: "bob", Message: "Hi alice", Type: "privmsg"},
 		{From: "alice", Message: "How is it going?", Type: "privmsg"},
@@ -33,7 +36,7 @@ func TestMemoryBackend_Search(t *testing.T) {
 
 	t.Run("Match_Found", func(t *testing.T) {
 		t.Parallel()
-		res, err := b.SearchMessages(user, MessageQuery{Match: "hello", Limit: 10})
+		res, err := b.SearchMessages(user, core.MessageQuery{Match: "hello", Limit: 10})
 		if err != nil {
 			t.Fatalf("Search failed: %v", err)
 		}
@@ -47,7 +50,7 @@ func TestMemoryBackend_Search(t *testing.T) {
 
 	t.Run("Match_CaseInsensitive", func(t *testing.T) {
 		t.Parallel()
-		res, _ := b.SearchMessages(user, MessageQuery{Match: "ALICE", Limit: 10})
+		res, _ := b.SearchMessages(user, core.MessageQuery{Match: "ALICE", Limit: 10})
 		if len(res.Messages) != 1 {
 			t.Errorf("Expected 1 match, got %d", len(res.Messages))
 		}
@@ -55,7 +58,7 @@ func TestMemoryBackend_Search(t *testing.T) {
 
 	t.Run("No_Match", func(t *testing.T) {
 		t.Parallel()
-		res, _ := b.SearchMessages(user, MessageQuery{Match: "nomatch", Limit: 10})
+		res, _ := b.SearchMessages(user, core.MessageQuery{Match: "nomatch", Limit: 10})
 		if len(res.Messages) != 0 {
 			t.Errorf("Expected 0 matches, got %d", len(res.Messages))
 		}
@@ -65,10 +68,10 @@ func TestMemoryBackend_Search(t *testing.T) {
 func TestMemoryBackend_Files(t *testing.T) {
 	t.Parallel()
 
-	setup := func() (*MemoryBackend, *User) {
-		b := NewMemoryBackend()
-		c := New(WithBackend(b))
-		user := NewUser("test@example.com", c)
+	setup := func() (*test.MemoryBackend, *core.User) {
+		b := test.NewMemoryBackend()
+		c := core.New(core.WithBackend(b))
+		user := core.NewUser("test@example.com", c)
 		return b, user
 	}
 

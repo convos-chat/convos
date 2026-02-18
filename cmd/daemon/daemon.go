@@ -85,6 +85,7 @@ func Command() *cli.Command {
 				core.WithHome(cfg.Home),
 				core.WithBackend(backend),
 				core.WithConnectionProvider(&connectionProvider{}),
+				core.WithProfileDefaults(cfg.ProfileDefaults.MaxBulkSize, cfg.ProfileDefaults.MaxMessageLength, strings.Split(cfg.ProfileDefaults.ServiceAccounts, ",")),
 			)
 
 			if startErr := c.Start(); startErr != nil {

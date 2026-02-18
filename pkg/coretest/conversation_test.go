@@ -1,17 +1,20 @@
-package core
+package coretest
 
 import (
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestNewConversation(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	if conv.Connection() != conn {
 		t.Error("Connection() should return the parent connection")
@@ -29,8 +32,8 @@ func TestNewConversation(t *testing.T) {
 func TestConversationIsPrivate(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	tests := []struct {
@@ -46,7 +49,7 @@ func TestConversationIsPrivate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		conv := NewConversation(tt.name, conn)
+		conv := core.NewConversation(tt.name, conn)
 		if conv.IsPrivate() != tt.isPrivate {
 			t.Errorf("IsPrivate() for %q = %v, want %v", tt.name, conv.IsPrivate(), tt.isPrivate)
 		}
@@ -56,10 +59,10 @@ func TestConversationIsPrivate(t *testing.T) {
 func TestConversationTopic(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Initially empty
 	if conv.Topic() != "" {
@@ -76,10 +79,10 @@ func TestConversationTopic(t *testing.T) {
 func TestConversationPassword(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation("#secret", conn)
+	conv := core.NewConversation("#secret", conn)
 
 	// Initially empty
 	if conv.Password() != "" {
@@ -96,10 +99,10 @@ func TestConversationPassword(t *testing.T) {
 func TestConversationFrozen(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Initially not frozen
 	if conv.Frozen() != "" {
@@ -122,10 +125,10 @@ func TestConversationFrozen(t *testing.T) {
 func TestConversationNotifications(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Initially zero
 	if conv.Notifications() != 0 {
@@ -149,10 +152,10 @@ func TestConversationNotifications(t *testing.T) {
 func TestConversationUnread(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Initially zero
 	if conv.Unread() != 0 {
@@ -177,10 +180,10 @@ func TestConversationUnread(t *testing.T) {
 func TestConversationInfo(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Initially empty
 	info := conv.Info()
@@ -210,10 +213,10 @@ func TestConversationInfo(t *testing.T) {
 func TestConversationToData(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	conv.SetTopic("Test topic")
 	conv.SetPassword("secret")
@@ -259,11 +262,11 @@ func TestConversationToData(t *testing.T) {
 func TestConversationIDCaseInsensitive(t *testing.T) {
 	t.Parallel()
 
-	c := New()
-	user := NewUser(testEmail, c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
-	conv := NewConversation("#TestChannel", conn)
+	conv := core.NewConversation("#TestChannel", conn)
 	if conv.ID() != "#testchannel" {
 		t.Errorf("ID() = %q, want lowercase %q", conv.ID(), "#testchannel")
 	}

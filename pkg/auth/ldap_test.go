@@ -5,38 +5,39 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestLDAPAuthenticator_BuildDN(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name      string
-		pattern   string
-		email     string
+		name       string
+		pattern    string
+		email      string
 		expectedDN string
 	}{
 		{
-			name:      "Standard pattern",
-			pattern:   "uid=%uid,dc=%domain,dc=%tld",
-			email:     "john@example.com",
+			name:       "Standard pattern",
+			pattern:    "uid=%uid,dc=%domain,dc=%tld",
+			email:      "john@example.com",
 			expectedDN: "uid=john,dc=example,dc=com",
 		},
 		{
-			name:      "Email in DN",
-			pattern:   "mail=%email,ou=users,dc=company,dc=com",
-			email:     "alice@example.org",
+			name:       "Email in DN",
+			pattern:    "mail=%email,ou=users,dc=company,dc=com",
+			email:      "alice@example.org",
 			expectedDN: "mail=alice@example.org,ou=users,dc=company,dc=com",
 		},
 		{
-			name:      "Multiple substitutions",
-			pattern:   "cn=%uid,ou=%domain,o=%tld",
-			email:     "bob@subdomain.example.net",
+			name:       "Multiple substitutions",
+			pattern:    "cn=%uid,ou=%domain,o=%tld",
+			email:      "bob@subdomain.example.net",
 			expectedDN: "cn=bob,ou=subdomain,o=net",
 		},
 		{
-			name:      "No domain",
-			pattern:   "uid=%uid,dc=%domain",
-			email:     "user",
+			name:       "No domain",
+			pattern:    "uid=%uid,dc=%domain",
+			email:      "user",
 			expectedDN: "uid=user,dc=",
 		},
 	}
@@ -45,7 +46,7 @@ func TestLDAPAuthenticator_BuildDN(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			backend := core.NewMemoryBackend()
+			backend := test.NewMemoryBackend()
 			c := core.New(core.WithBackend(backend))
 			auth := NewLDAPAuthenticator(c, LDAPConfig{
 				DNPattern: tt.pattern,
@@ -65,7 +66,7 @@ func TestLDAPAuthenticator_Fallback(t *testing.T) {
 
 	t.Run("FallbackEnabled_ValidLocalPassword", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 
 		// Create user with local password
@@ -106,7 +107,7 @@ func TestLDAPAuthenticator_Fallback(t *testing.T) {
 
 	t.Run("FallbackDisabled", func(t *testing.T) {
 		t.Parallel()
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 
 		// Create user with local password
@@ -145,7 +146,7 @@ func TestLDAPAuthenticator_Fallback(t *testing.T) {
 
 func TestLDAPAuthenticator_Name(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	auth := NewLDAPAuthenticator(c, LDAPConfig{})
 
@@ -156,7 +157,7 @@ func TestLDAPAuthenticator_Name(t *testing.T) {
 
 func TestLDAPAuthenticator_DefaultConfig(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 
 	cfg := LDAPConfig{

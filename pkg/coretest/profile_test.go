@@ -1,14 +1,20 @@
-package core
+package coretest
 
 import (
 	"net/url"
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestNewConnectionProfile(t *testing.T) {
 	t.Parallel()
-	c := New()
-	p := NewConnectionProfile("irc://irc.libera.chat", c)
+	c := core.New(
+		core.WithBackend(test.NewMemoryBackend()),
+		core.WithProfileDefaults(3, 512, []string{"chanserv", "nickserv"}),
+	)
+	p := core.NewConnectionProfile("irc://irc.libera.chat", c)
 
 	if p.ID() != "irc-libera" {
 		t.Errorf("ID() = %q, want %q", p.ID(), "irc-libera")
@@ -29,40 +35,12 @@ func TestNewConnectionProfile(t *testing.T) {
 	}
 }
 
-func TestConnectionProfileEnvOverrides(t *testing.T) {
-	t.Parallel()
-
-	c := New()
-	// Mock environment
-	env := map[string]string{
-		"CONVOS_MAX_BULK_MESSAGE_SIZE": "5",
-		"CONVOS_MAX_MESSAGE_LENGTH":    "1024",
-		"CONVOS_SERVICE_ACCOUNTS":      "serv1,serv2,serv3",
-	}
-	c.getenv = func(key string) string {
-		return env[key]
-	}
-
-	p := NewConnectionProfile("irc://irc.libera.chat", c)
-
-	if p.MaxBulkMessageSize() != 5 {
-		t.Errorf("MaxBulkMessageSize() = %d, want 5", p.MaxBulkMessageSize())
-	}
-
-	if p.MaxMessageLength() != 1024 {
-		t.Errorf("MaxMessageLength() = %d, want 1024", p.MaxMessageLength())
-	}
-
-	gotSA := p.ServiceAccounts()
-	if len(gotSA) != 3 || gotSA[0] != "serv1" || gotSA[2] != "serv3" {
-		t.Errorf("ServiceAccounts() = %v, want [serv1 serv2 serv3]", gotSA)
-	}
-}
-
 func TestConnectionProfileFindServiceAccount(t *testing.T) {
 	t.Parallel()
-	c := New()
-	p := NewConnectionProfile("irc://irc.libera.chat", c)
+	c := core.New(core.WithBackend(test.NewMemoryBackend()),
+		core.WithProfileDefaults(3, 512, []string{"chanserv", "nickserv"}),
+	)
+	p := core.NewConnectionProfile("irc://irc.libera.chat", c)
 
 	if p.FindServiceAccount("NickServ") != "NickServ" {
 		t.Error("FindServiceAccount should find NickServ (case-insensitive match)")
@@ -79,7 +57,7 @@ func TestConnectionProfileFindServiceAccount(t *testing.T) {
 
 func TestCoreConnectionProfileCaching(t *testing.T) {
 	t.Parallel()
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	u1, _ := parseURL("irc://irc.libera.chat")
 	u2, _ := parseURL("irc://irc.libera.chat:6697")
 
@@ -97,21 +75,19 @@ func TestCoreConnectionProfileCaching(t *testing.T) {
 
 func TestConnectionProfilePersistence(t *testing.T) {
 	t.Parallel()
-	backend := NewMemoryBackend()
-	c := New(WithBackend(backend))
+	backend := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(backend))
 
 	u, _ := parseURL("irc://irc.libera.chat")
 	p := c.ConnectionProfile(u)
-	p.mu.Lock()
-	p.maxMessageLength = 256
-	p.mu.Unlock()
+	p.SetMaxMessageLength(256)
 
 	if err := p.Save(); err != nil {
 		t.Fatalf("Save() error: %v", err)
 	}
 
 	// Create a new core with the same backend
-	c2 := New(WithBackend(backend))
+	c2 := core.New(core.WithBackend(backend))
 	if err := c2.Start(); err != nil {
 		t.Fatalf("Start() error: %v", err)
 	}
@@ -124,7 +100,7 @@ func TestConnectionProfilePersistence(t *testing.T) {
 
 func TestConnectionProfileLink(t *testing.T) {
 	t.Parallel()
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 	user, _ := c.User(testEmail)
 	conn := newTestConnection("irc://irc.libera.chat", user)
 
@@ -140,12 +116,10 @@ func TestConnectionProfileLink(t *testing.T) {
 
 func TestConnectionProfileSplitMessage(t *testing.T) {
 	t.Parallel()
-	c := New()
-	p := NewConnectionProfile("irc://localhost", c)
-	p.mu.Lock()
-	p.maxMessageLength = 10
-	p.maxBulkMessageSize = 10 // Large enough for these tests
-	p.mu.Unlock()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	p := core.NewConnectionProfile("irc://localhost", c)
+	p.SetMaxMessageLength(10)
+	p.SetMaxBulkMessageSize(10)
 
 	tests := []struct {
 		input    string
@@ -172,12 +146,10 @@ func TestConnectionProfileSplitMessage(t *testing.T) {
 
 func TestConnectionProfileTooLongMessages(t *testing.T) {
 	t.Parallel()
-	c := New()
-	p := NewConnectionProfile("irc://localhost", c)
-	p.mu.Lock()
-	p.maxMessageLength = 10
-	p.maxBulkMessageSize = 3
-	p.mu.Unlock()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	p := core.NewConnectionProfile("irc://localhost", c)
+	p.SetMaxMessageLength(10)
+	p.SetMaxBulkMessageSize(3)
 
 	if !p.TooLongMessages([]string{"1", "2", "3"}) {
 		t.Error("3 messages should be 'too long' since maxBulkMessageSize is 3 (limit is >= size)")

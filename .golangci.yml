@@ -30,6 +30,9 @@ linters:
       disable:
         - fieldalignment
       enable-all: true
+    gosec:
+      excludes:
+        - G117 # Allow exporting sensitive data.
   exclusions:
     generated: lax
     presets:
@@ -41,8 +44,8 @@ linters:
       - linters:
           - govet
         path: (.+)_test\.go
-    # Ignoring HTTP Write errors is common as there is nothing to be done if
-    # Write fails.
+        # Ignoring HTTP Write errors is common as there is nothing to be done if
+        # Write fails.
       - path: (.+)\.go$
         text: Error return value of .(w.Write). is not checked
     paths:

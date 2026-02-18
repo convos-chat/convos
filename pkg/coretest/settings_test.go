@@ -1,16 +1,19 @@
-package core
+package coretest
 
 import (
 	"net/url"
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	setup := func() (*MemoryBackend, *Settings) {
-		backend := NewMemoryBackend()
-		c := New(WithBackend(backend))
+	setup := func() (*test.MemoryBackend, *core.Settings) {
+		backend := test.NewMemoryBackend()
+		c := core.New(core.WithBackend(backend))
 		s := c.Settings()
 		return backend, s
 	}
@@ -98,7 +101,7 @@ func TestSettings(t *testing.T) {
 			t.Errorf("ToData() name = %q, want %q", data.OrganizationName, orgName)
 		}
 
-		s2 := &Settings{}
+		s2 := &core.Settings{}
 		s2.FromData(data)
 		if s2.OrganizationName() != orgName {
 			t.Errorf("FromData() name = %q, want %q", s2.OrganizationName(), orgName)

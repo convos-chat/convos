@@ -13,6 +13,7 @@
   ];
   languages.go = {
     enable = true;
+    package = pkgs.go_1_26;
   };
   processes = {
     dev.exec = "task dev";

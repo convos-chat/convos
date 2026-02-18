@@ -7,8 +7,9 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/api"
-	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 	"github.com/gorilla/sessions"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -55,7 +56,7 @@ func TestRegisterUser_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			// Setup fresh core state for each subtest
-			backend := core.NewMemoryBackend()
+			backend := test.NewMemoryBackend()
 			c := core.New(core.WithBackend(backend))
 			c.Settings().SetOpenToPublic(tt.openToPublic)
 			h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
@@ -117,7 +118,7 @@ func TestRegisterUser_Validation(t *testing.T) {
 
 func TestRegisterUser_FirstUserIsAdmin(t *testing.T) {
 	t.Parallel()
-	backend := core.NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)

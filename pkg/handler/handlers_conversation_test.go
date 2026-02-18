@@ -5,16 +5,17 @@ import (
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/api"
-	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/auth"
+	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/irc"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestConversationHandlers(t *testing.T) {
 	t.Parallel()
 
 	setup := func() (*Handler, *core.User, *core.Conversation) {
-		backend := core.NewMemoryBackend()
+		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
 		h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
 

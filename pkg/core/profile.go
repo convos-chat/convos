@@ -2,7 +2,6 @@ package core
 
 import (
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -26,40 +25,32 @@ type ConnectionProfile struct {
 func NewConnectionProfile(rawURL string, core *Core) *ConnectionProfile {
 	u, _ := url.Parse(rawURL)
 	p := &ConnectionProfile{
-		core:               core,
-		url:                u,
-		maxBulkMessageSize: 3,
-		maxMessageLength:   512,
-		serviceAccounts:    []string{"chanserv", "nickserv"},
+		core:           core,
+		url:            u,
+		webircPassword: "",
 	}
-
-	// Load defaults from environment
-	p.LoadEnv()
 
 	if u != nil && u.Host == "localhost" {
 		p.skipQueue = true
 	}
+	p.loadDefaults()
 
 	return p
 }
 
 // LoadEnv loads configuration from environment variables.
-func (p *ConnectionProfile) LoadEnv() {
+func (p *ConnectionProfile) loadDefaults() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if val := p.core.getenv("CONVOS_MAX_BULK_MESSAGE_SIZE"); val != "" {
-		if i, err := strconv.Atoi(val); err == nil {
-			p.maxBulkMessageSize = i
-		}
+	if p.core.DefaultMaxBulkMessageSize > 0 {
+		p.maxBulkMessageSize = p.core.DefaultMaxBulkMessageSize
 	}
-	if val := p.core.getenv("CONVOS_MAX_MESSAGE_LENGTH"); val != "" {
-		if i, err := strconv.Atoi(val); err == nil {
-			p.maxMessageLength = i
-		}
+	if p.core.DefaultMaxMessageLength > 0 {
+		p.maxMessageLength = p.core.DefaultMaxMessageLength
 	}
-	if val := p.core.getenv("CONVOS_SERVICE_ACCOUNTS"); val != "" {
-		p.serviceAccounts = strings.Split(val, ",")
+	if len(p.core.DefaultServiceAccounts) != 0 {
+		p.serviceAccounts = p.core.DefaultServiceAccounts
 	}
 }
 
@@ -86,7 +77,7 @@ func (p *ConnectionProfile) ID() string {
 	}
 
 	if p.url != nil {
-		p.id = strings.ToLower(p.url.Scheme + "-" + prettyConnectionName(p.url.Host))
+		p.id = strings.ToLower(p.url.Scheme + "-" + PrettyConnectionName(p.url.Host))
 	}
 	return p.id
 }
@@ -126,11 +117,25 @@ func (p *ConnectionProfile) MaxBulkMessageSize() int {
 	return p.maxBulkMessageSize
 }
 
+// SetMaxBulkMessageSize sets the max number of lines before a message is considered too long.
+func (p *ConnectionProfile) SetMaxBulkMessageSize(v int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.maxBulkMessageSize = v
+}
+
 // MaxMessageLength returns the max number of characters in a single message.
 func (p *ConnectionProfile) MaxMessageLength() int {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	return p.maxMessageLength
+}
+
+// SetMaxMessageLength sets the max number of characters in a single message.
+func (p *ConnectionProfile) SetMaxMessageLength(v int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.maxMessageLength = v
 }
 
 // ServiceAccounts returns the list of service accounts for this connection.
@@ -147,12 +152,6 @@ func (p *ConnectionProfile) WebircPassword() string {
 
 	if p.webircPassword != "" {
 		return p.webircPassword
-	}
-
-	// Try environment variable: CONVOS_WEBIRC_PASSWORD_<HOST_PART>
-	if p.url != nil {
-		hostPart := strings.ToUpper(prettyConnectionName(p.url.Host))
-		return p.core.getenv("CONVOS_WEBIRC_PASSWORD_" + hostPart)
 	}
 
 	return ""

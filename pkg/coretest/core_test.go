@@ -1,7 +1,10 @@
-package core
+package coretest
 
 import (
 	"testing"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 const (
@@ -13,7 +16,7 @@ const (
 func TestNewCore(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	if c.Home() == "" {
 		t.Error("Home() should return a default path")
@@ -35,10 +38,10 @@ func TestNewCore(t *testing.T) {
 func TestCoreWithOptions(t *testing.T) {
 	t.Parallel()
 
-	backend := NewMemoryBackend()
-	c := New(
-		WithHome("/tmp/convos-test"),
-		WithBackend(backend),
+	backend := test.NewMemoryBackend()
+	c := core.New(
+		core.WithHome("/tmp/convos-test"),
+		core.WithBackend(backend),
 	)
 
 	if c.Home() != "/tmp/convos-test" {
@@ -53,7 +56,7 @@ func TestCoreWithOptions(t *testing.T) {
 func TestCoreUserManagement(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	// Create a user
 	user, err := c.User(testEmail)
@@ -97,7 +100,7 @@ func TestCoreUserManagement(t *testing.T) {
 func TestCoreEmailNormalization(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	user1, _ := c.User("Test@Example.COM")
 	user2, _ := c.User(testEmail)
@@ -115,7 +118,7 @@ func TestCoreEmailNormalization(t *testing.T) {
 func TestCoreStart(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	if err := c.Start(); err != nil {
 		t.Fatalf("Start() error: %v", err)
@@ -134,17 +137,15 @@ func TestCoreStart(t *testing.T) {
 func TestCoreStartWithExistingUsers(t *testing.T) {
 	t.Parallel()
 
-	backend := NewMemoryBackend()
+	backend := test.NewMemoryBackend()
 
+	c := core.New(core.WithBackend(backend))
 	// Pre-populate backend with a user
-	backend.users["admin@example.com"] = UserData{
-		Email:    "admin@example.com",
-		Password: "$2a$10$abcdefghijklmnopqrstuv", // fake bcrypt hash
-		Roles:    []string{},
-		UID:      1,
+	u := core.NewUser("admin@example.com", c)
+	err := backend.SaveUser(u)
+	if err != nil {
+		t.Fatalf("Failed to save user to backend: %v", err)
 	}
-
-	c := New(WithBackend(backend))
 
 	if err := c.Start(); err != nil {
 		t.Fatalf("Start() error: %v", err)
@@ -165,7 +166,7 @@ func TestCoreStartWithExistingUsers(t *testing.T) {
 func TestCoreRemoveUser(t *testing.T) {
 	t.Parallel()
 
-	c := New()
+	c := core.New(core.WithBackend(test.NewMemoryBackend()))
 
 	user, _ := c.User("delete@example.com")
 	if user == nil {

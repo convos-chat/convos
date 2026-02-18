@@ -1,14 +1,17 @@
-package core
+package coretest
 
 import (
 	"testing"
 	"time"
+
+	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/test"
 )
 
 func TestNewMemoryBackend(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
+	b := test.NewMemoryBackend()
 	if b == nil {
 		t.Fatal("NewMemoryBackend() returned nil")
 	}
@@ -17,9 +20,9 @@ func TestNewMemoryBackend(t *testing.T) {
 func TestMemoryBackendUserOperations(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser(testEmail, c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser(testEmail, c)
 	if err := user.SetPassword("secret"); err != nil {
 		t.Fatalf("SetPassword() error: %v", err)
 	}
@@ -86,9 +89,9 @@ func TestMemoryBackendUserOperations(t *testing.T) {
 func TestMemoryBackendConnectionOperations(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser(testEmail, c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser(testEmail, c)
 
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName("Libera")
@@ -151,14 +154,14 @@ func TestMemoryBackendConnectionOperations(t *testing.T) {
 func TestMemoryBackendMessageOperations(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser(testEmail, c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
-	conv := NewConversation(testChannel, conn)
+	conv := core.NewConversation(testChannel, conn)
 
 	// Save messages
-	msgs := []Message{
+	msgs := []core.Message{
 		{From: "alice", Message: "Hello", Type: "privmsg", Timestamp: time.Now().Unix()},
 		{From: "bob", Message: "Hi there", Type: "privmsg", Timestamp: time.Now().Unix()},
 		{From: "alice", Message: "How are you?", Type: "privmsg", Timestamp: time.Now().Unix()},
@@ -171,7 +174,7 @@ func TestMemoryBackendMessageOperations(t *testing.T) {
 	}
 
 	// Load messages
-	result, err := b.LoadMessages(conv, MessageQuery{Limit: 10})
+	result, err := b.LoadMessages(conv, core.MessageQuery{Limit: 10})
 	if err != nil {
 		t.Fatalf("LoadMessages() error: %v", err)
 	}
@@ -185,7 +188,7 @@ func TestMemoryBackendMessageOperations(t *testing.T) {
 	}
 
 	// Load with limit
-	result, err = b.LoadMessages(conv, MessageQuery{Limit: 2})
+	result, err = b.LoadMessages(conv, core.MessageQuery{Limit: 2})
 	if err != nil {
 		t.Fatalf("LoadMessages() with limit error: %v", err)
 	}
@@ -198,7 +201,7 @@ func TestMemoryBackendMessageOperations(t *testing.T) {
 		t.Fatalf("DeleteMessages() error: %v", err)
 	}
 
-	result, err = b.LoadMessages(conv, MessageQuery{Limit: 10})
+	result, err = b.LoadMessages(conv, core.MessageQuery{Limit: 10})
 	if err != nil {
 		t.Fatalf("LoadMessages() error after delete: %v", err)
 	}
@@ -210,11 +213,11 @@ func TestMemoryBackendMessageOperations(t *testing.T) {
 func TestMemoryBackendNotifications(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser(testEmail, c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser(testEmail, c)
 
-	result, err := b.LoadNotifications(user, MessageQuery{Limit: 10})
+	result, err := b.LoadNotifications(user, core.MessageQuery{Limit: 10})
 	if err != nil {
 		t.Fatalf("LoadNotifications() error: %v", err)
 	}
@@ -231,9 +234,9 @@ func TestMemoryBackendNotifications(t *testing.T) {
 func TestMemoryBackendDeleteUserCleansConnections(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
-	user := NewUser(testEmail, c)
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
+	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
 	if err := b.SaveUser(user); err != nil {
@@ -266,11 +269,11 @@ func TestMemoryBackendDeleteUserCleansConnections(t *testing.T) {
 func TestMemoryBackendMultipleUsers(t *testing.T) {
 	t.Parallel()
 
-	b := NewMemoryBackend()
-	c := New(WithBackend(b))
+	b := test.NewMemoryBackend()
+	c := core.New(core.WithBackend(b))
 
-	user1 := NewUser("user1@example.com", c)
-	user2 := NewUser("user2@example.com", c)
+	user1 := core.NewUser("user1@example.com", c)
+	user2 := core.NewUser("user2@example.com", c)
 
 	conn1 := newTestConnection("irc://irc.libera.chat:6697", user1)
 	conn2 := newTestConnection("irc://irc.oftc.net:6697", user2)
