@@ -450,17 +450,7 @@ func toAPIUserSummary(u *core.User) api.User {
 }
 
 func toAPIUser(u *core.User, includeConns, includeConvs bool) api.User {
-	registered := u.Registered()
-	keywords := u.HighlightKeywords()
-	uid := strconv.Itoa(u.UID())
-
-	res := api.User{
-		Email:             u.Email(),
-		Unread:            u.Unread(),
-		Registered:        &registered,
-		HighlightKeywords: &keywords,
-		Uid:               &uid,
-	}
+	res := toAPIUserSummary(u)
 
 	s := u.Core().Settings()
 	defaultConn := s.DefaultConnection()

@@ -15,9 +15,25 @@ import (
 )
 
 var (
-	ErrUploadFail    = errors.New("upload error")
+	ErrUploadFail     = errors.New("upload error")
 	ErrUploadTooLarge = errors.New("file exceeds the maximum upload size")
 )
+
+type fileListEntry = struct {
+	Id    string    `json:"id"`
+	Name  string    `json:"name"`
+	Saved time.Time `json:"saved"`
+	Size  int       `json:"size"`
+}
+
+type uploadedFileEntry = struct {
+	Ext      string    `json:"ext"`
+	Filename string    `json:"filename"`
+	Id       string    `json:"id"`
+	Saved    time.Time `json:"saved"`
+	Uid      string    `json:"uid"`
+	Url      string    `json:"url"`
+}
 
 // GetFiles implements api.StrictServerInterface.
 func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObject) (api.GetFilesResponseObject, error) {
@@ -30,19 +46,9 @@ func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObjec
 		return nil, err
 	}
 
-	res := make([]struct {
-		Id    string    `json:"id"`
-		Name  string    `json:"name"`
-		Saved time.Time `json:"saved"`
-		Size  int       `json:"size"`
-	}, len(files))
+	res := make([]fileListEntry, len(files))
 	for i, f := range files {
-		res[i] = struct {
-			Id    string    `json:"id"`
-			Name  string    `json:"name"`
-			Saved time.Time `json:"saved"`
-			Size  int       `json:"size"`
-		}{
+		res[i] = fileListEntry{
 			Id:    f.ID,
 			Name:  f.Name,
 			Saved: time.Unix(f.TS, 0).UTC(),
@@ -64,14 +70,7 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 		return nil, fmt.Errorf("request body is nil: %w", ErrUploadFail)
 	}
 
-	var savedFiles []struct {
-		Ext      string    `json:"ext"`
-		Filename string    `json:"filename"`
-		Id       string    `json:"id"`
-		Saved    time.Time `json:"saved"`
-		Uid      string    `json:"uid"`
-		Url      string    `json:"url"`
-	}
+	var savedFiles []uploadedFileEntry
 
 	for {
 		part, err := request.Body.NextPart()
@@ -104,14 +103,7 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 			return nil, err
 		}
 
-		savedFiles = append(savedFiles, struct {
-			Ext      string    `json:"ext"`
-			Filename string    `json:"filename"`
-			Id       string    `json:"id"`
-			Saved    time.Time `json:"saved"`
-			Uid      string    `json:"uid"`
-			Url      string    `json:"url"`
-		}{
+		savedFiles = append(savedFiles, uploadedFileEntry{
 			Ext:      filepath.Ext(f.Name),
 			Filename: f.Name,
 			Id:       f.ID,

@@ -8,6 +8,16 @@ import (
 	"github.com/convos-chat/convos/pkg/api"
 )
 
+type diskUsage = struct {
+	BlockSize   *int64  `json:"block_size,omitempty"`
+	BlocksFree  *uint64 `json:"blocks_free,omitempty"`
+	BlocksTotal *uint64 `json:"blocks_total,omitempty"`
+	BlocksUsed  *uint64 `json:"blocks_used,omitempty"`
+	InodesFree  *uint64 `json:"inodes_free,omitempty"`
+	InodesTotal *uint64 `json:"inodes_total,omitempty"`
+	InodesUsed  *uint64 `json:"inodes_used,omitempty"`
+}
+
 // GetSettings implements api.StrictServerInterface.
 func (h *Handler) GetSettings(ctx context.Context, request api.GetSettingsRequestObject) (api.GetSettingsResponseObject, error) {
 	if _, err := h.requireUser(ctx); err != nil {
@@ -120,15 +130,7 @@ func (h *Handler) settingsToAPI() api.ServerSettings {
 	return res
 }
 
-func (h *Handler) getDiskUsage(path string) *struct {
-	BlockSize   *int64  `json:"block_size,omitempty"`
-	BlocksFree  *uint64 `json:"blocks_free,omitempty"`
-	BlocksTotal *uint64 `json:"blocks_total,omitempty"`
-	BlocksUsed  *uint64 `json:"blocks_used,omitempty"`
-	InodesFree  *uint64 `json:"inodes_free,omitempty"`
-	InodesTotal *uint64 `json:"inodes_total,omitempty"`
-	InodesUsed  *uint64 `json:"inodes_used,omitempty"`
-} {
+func (h *Handler) getDiskUsage(path string) *diskUsage {
 	blockSize, blocksFree, blocksTotal, inodesFree, inodesTotal, err := getDiskUsage(path)
 	if err != nil {
 		return nil
@@ -136,15 +138,7 @@ func (h *Handler) getDiskUsage(path string) *struct {
 	blocksUsed := blocksTotal - blocksFree
 	inodesUsed := inodesTotal - inodesFree
 
-	return &struct {
-		BlockSize   *int64  `json:"block_size,omitempty"`
-		BlocksFree  *uint64 `json:"blocks_free,omitempty"`
-		BlocksTotal *uint64 `json:"blocks_total,omitempty"`
-		BlocksUsed  *uint64 `json:"blocks_used,omitempty"`
-		InodesFree  *uint64 `json:"inodes_free,omitempty"`
-		InodesTotal *uint64 `json:"inodes_total,omitempty"`
-		InodesUsed  *uint64 `json:"inodes_used,omitempty"`
-	}{
+	return &diskUsage{
 		BlockSize:   &blockSize,
 		BlocksFree:  &blocksFree,
 		BlocksTotal: &blocksTotal,
