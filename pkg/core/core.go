@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
 )
@@ -39,6 +40,7 @@ type Core struct {
 	provider                  ConnectionProvider
 	ready                     bool
 	log                       *slog.Logger
+	ConnectDelay              time.Duration
 	DefaultMaxBulkMessageSize int
 	DefaultMaxMessageLength   int
 	DefaultServiceAccounts    []string
@@ -73,6 +75,13 @@ func WithProfileDefaults(maxBulkSize, maxMessageLength int, serviceAccounts []st
 func WithConnectionProvider(provider ConnectionProvider) Option {
 	return func(c *Core) {
 		c.provider = provider
+	}
+}
+
+// WithConnectDelay sets the stagger delay between auto-connect attempts per host at startup.
+func WithConnectDelay(d time.Duration) Option {
+	return func(c *Core) {
+		c.ConnectDelay = d
 	}
 }
 
@@ -368,15 +377,22 @@ func (c *Core) Start() error {
 	c.ready = true
 	c.log.Info("Core started", "users", len(c.users))
 
-	// Auto-connect connections that want to be connected
+	// Auto-connect connections that want to be connected, staggered per host.
+	hostIdx := make(map[string]int)
 	for _, user := range c.users {
 		for _, conn := range user.Connections() {
 			if conn.WantedState() == StateConnected {
-				go func(cn Connection) {
+				host := conn.URL().Host
+				delay := time.Duration(hostIdx[host]) * c.ConnectDelay
+				hostIdx[host]++
+				go func(cn Connection, d time.Duration) {
+					if d > 0 {
+						time.Sleep(d)
+					}
 					if err := cn.Connect(); err != nil {
 						c.log.Error("Failed to auto-connect", "connection", cn.ID(), "error", err)
 					}
-				}(conn)
+				}(conn, delay)
 			}
 		}
 	}

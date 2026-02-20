@@ -25,6 +25,7 @@ type Config struct {
 	DefaultTheme     string        `envconfig:"CONVOS_DEFAULT_THEME" default:"convos"`
 	DefaultScheme    string        `envconfig:"CONVOS_DEFAULT_SCHEME" default:"light"`
 	MaxUploadSize    int64         `envconfig:"CONVOS_MAX_UPLOAD_SIZE" default:"40000000"`
+	ConnectDelay     time.Duration `envconfig:"CONVOS_CONNECT_DELAY" default:"100ms"`
 	WebhookNetworks  string        `envconfig:"CONVOS_WEBHOOK_NETWORKS" default:"140.82.112.0/20,192.30.252.0/22,185.199.108.0/22"`
 	InviteExpiry     time.Duration `envconfig:"CONVOS_INVITE_EXPIRY" default:"24h"`
 	Auth             auth.ProviderConfig
