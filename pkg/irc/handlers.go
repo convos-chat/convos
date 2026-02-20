@@ -9,30 +9,30 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/core"
+	"github.com/convos-chat/convos/pkg/version"
 	"github.com/ergochat/irc-go/ircevent"
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
+func parseServerTime(msg ircmsg.Message) time.Time {
+	if present, value := msg.GetTag("time"); present {
+		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+			return t
+		}
+	}
+	return time.Now()
+}
+
 // serverTimeOrNow extracts the server-time tag from an IRC message.
 // Returns the parsed time as Unix seconds, or time.Now().Unix() as fallback.
 func serverTimeOrNow(msg ircmsg.Message) int64 {
-	if present, value := msg.GetTag("time"); present {
-		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-			return t.Unix()
-		}
-	}
-	return time.Now().Unix()
+	return parseServerTime(msg).Unix()
 }
 
 // serverTimeOrNowRFC3339 extracts the server-time tag from an IRC message.
 // Returns the time formatted as RFC3339, or the current time as fallback.
 func serverTimeOrNowRFC3339(msg ircmsg.Message) string {
-	if present, value := msg.GetTag("time"); present {
-		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-			return t.UTC().Format(time.RFC3339)
-		}
-	}
-	return time.Now().UTC().Format(time.RFC3339)
+	return parseServerTime(msg).Format(time.RFC3339)
 }
 
 // handleMessage handles incoming PRIVMSG and NOTICE messages.
@@ -115,7 +115,7 @@ func (c *Connection) handleCTCP(nick, ctcp string) {
 		// Echo back the same payload
 		reply = ctcp
 	case "VERSION":
-		reply = "VERSION Convos (https://convos.chat)"
+		reply = fmt.Sprintf("VERSION Convos %s (https://convos.chat)", version.Version)
 	case "TIME":
 		reply = "TIME " + time.Now().UTC().Format(time.RFC1123)
 	default:
