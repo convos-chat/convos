@@ -186,6 +186,11 @@ func (c *Connection) handleCommand(target, raw string) error {
 		}
 		c.emitSentMessage(target, args, "private")
 		return nil
+	case "ISON":
+		if args == "" {
+			return ErrUsageIson
+		}
+		return c.client.Send("ISON", args)
 	case "WHOIS":
 		nick := args
 		if nick == "" {

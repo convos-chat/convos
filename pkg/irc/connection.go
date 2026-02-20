@@ -37,6 +37,7 @@ var (
 	ErrUsageInviteChannel  = errors.New("usage: /invite nick #channel")
 	ErrUsageOper           = errors.New("usage: /oper user password")
 	ErrUsageClear          = errors.New("WARNING: /clear history <name> will delete all messages in the backend")
+	ErrUsageIson           = errors.New("usage: /ison nick")
 	ErrUnknownConversation = errors.New("unknown conversation")
 )
 
@@ -220,7 +221,8 @@ func (c *Connection) Connect() error {
 			c.executeCommand(cmd)
 		}
 
-		// Rejoin saved channels
+		// Rejoin saved channels and collect frozen private conversation nicks for ISON
+		var isonNicks []string
 		for _, conv := range c.Conversations() {
 			name := conv.Name()
 			if strings.HasPrefix(name, "#") || strings.HasPrefix(name, "&") {
@@ -228,6 +230,15 @@ func (c *Connection) Connect() error {
 				if err != nil {
 					slog.Error("Failed to rejoin channel on connect", "channel", name, "error", err)
 				}
+			} else if conv.Frozen() != "" {
+				isonNicks = append(isonNicks, name)
+			}
+		}
+
+		// Send ISON to check if private conversation nicks are online
+		if len(isonNicks) > 0 {
+			if err := c.client.Send("ISON", strings.Join(isonNicks, " ")); err != nil {
+				slog.Error("Failed to send ISON on connect", "error", err)
 			}
 		}
 	})
@@ -353,6 +364,10 @@ func (c *Connection) Connect() error {
 	}
 	c.client.AddCallback(ircevent.RPL_ENDOFWHOIS, func(msg ircmsg.Message) {
 		c.handleEndOfWhois(msg)
+	})
+
+	c.client.AddCallback(ircevent.RPL_ISON, func(msg ircmsg.Message) {
+		c.handleIsonReply(msg)
 	})
 
 	// LIST response accumulation

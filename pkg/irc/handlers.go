@@ -735,6 +735,39 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	c.emitEvent(whois)
 }
 
+// handleIsonReply handles RPL_ISON (303).
+// Format: :server 303 nick :nick1 nick2 ...
+// Unfreezes private conversations for nicks that are online.
+func (c *Connection) handleIsonReply(msg ircmsg.Message) {
+	if len(msg.Params) < 2 {
+		return
+	}
+
+	onlineNicks := strings.Fields(msg.Params[1])
+	online := make(map[string]bool, len(onlineNicks))
+	for _, nick := range onlineNicks {
+		online[strings.ToLower(nick)] = true
+	}
+
+	for _, conv := range c.Conversations() {
+		if !conv.IsPrivate() || conv.Frozen() == "" {
+			continue
+		}
+		if !online[conv.ID()] {
+			continue
+		}
+		conv.SetFrozen("")
+		c.emitEvent(map[string]any{
+			"event":           "state",
+			"type":            "frozen",
+			"conversation_id": conv.ID(),
+			"frozen":          conv.Frozen(),
+		})
+	}
+
+	c.saveState()
+}
+
 // handleListReply handles RPL_LIST (322) — accumulates channel entries.
 // Format: :server 322 nick #channel n_users :topic
 func (c *Connection) handleListReply(msg ircmsg.Message) {

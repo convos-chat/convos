@@ -4,6 +4,7 @@
   # https://devenv.sh/packages/
   packages = with pkgs; [
     convos
+    golangci-lint
     air
     gopls
     pnpm
