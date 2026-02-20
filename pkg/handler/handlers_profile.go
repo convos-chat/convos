@@ -58,12 +58,8 @@ func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListCo
 
 // SaveConnectionProfile implements api.StrictServerInterface.
 func (h *Handler) SaveConnectionProfile(ctx context.Context, request api.SaveConnectionProfileRequestObject) (api.SaveConnectionProfileResponseObject, error) {
-	user, err := h.requireUser(ctx)
-	if err != nil {
+	if _, err := h.requireAdmin(ctx); err != nil {
 		return nil, err
-	}
-	if !user.HasRole("admin") {
-		return nil, ErrForbidden
 	}
 
 	p := fromAPIConnectionProfile(request.Body)
@@ -85,12 +81,8 @@ func (h *Handler) SaveConnectionProfile(ctx context.Context, request api.SaveCon
 
 // RemoveConnectionProfile implements api.StrictServerInterface.
 func (h *Handler) RemoveConnectionProfile(ctx context.Context, request api.RemoveConnectionProfileRequestObject) (api.RemoveConnectionProfileResponseObject, error) {
-	user, err := h.requireUser(ctx)
-	if err != nil {
+	if _, err := h.requireAdmin(ctx); err != nil {
 		return nil, err
-	}
-	if !user.HasRole("admin") {
-		return nil, ErrForbidden
 	}
 
 	if err := h.Core.Backend().DeleteConnectionProfile(request.Id); err != nil {

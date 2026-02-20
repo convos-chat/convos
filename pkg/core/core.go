@@ -185,6 +185,15 @@ func (c *Core) Users() []*User {
 	return users
 }
 
+// RolesForNewUser returns ["admin"] if no users exist yet, otherwise an empty slice.
+// Used by auto-registration flows to give the first registered user admin privileges.
+func (c *Core) RolesForNewUser() []string {
+	if len(c.Users()) == 0 {
+		return []string{"admin"}
+	}
+	return []string{}
+}
+
 // ConnectionProfile returns a connection profile for the given URL.
 func (c *Core) ConnectionProfile(u *url.URL) *ConnectionProfile {
 	c.mu.Lock()

@@ -52,12 +52,7 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 		}
 	}
 
-	session, err := h.Store.Get(r, "convos")
-	if err != nil {
-		slog.Warn("Failed to get session: " + err.Error())
-	}
-	session.Values["email"] = user.Email()
-	if err = session.Save(r, w); err != nil {
+	if err = h.saveUserSession(r, w, user); err != nil {
 		return nil, err
 	}
 
@@ -170,12 +165,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 		}()
 	}
 
-	session, err := h.Store.Get(r, "convos")
-	if err != nil {
-		slog.Warn("Failed to get session ", "err", err)
-	}
-	session.Values["email"] = user.Email()
-	if err = session.Save(r, w); err != nil {
+	if err = h.saveUserSession(r, w, user); err != nil {
 		return nil, err
 	}
 
@@ -221,12 +211,7 @@ func (h *Handler) updateExistingUserViaInvite(user *core.User, password string, 
 		}, nil
 	}
 
-	session, err := h.Store.Get(r, "convos")
-	if err != nil {
-		slog.Warn("Failed to get session", "err", err)
-	}
-	session.Values["email"] = user.Email()
-	if err := session.Save(r, w); err != nil {
+	if err := h.saveUserSession(r, w, user); err != nil {
 		return nil, err
 	}
 	return api.RegisterUser200JSONResponse(toAPIUser(user, true, true)), nil
@@ -281,12 +266,8 @@ func (h *Handler) GetUser(ctx context.Context, request api.GetUserRequestObject)
 
 // InviteUser implements api.StrictServerInterface.
 func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestObject) (api.InviteUserResponseObject, error) {
-	user, err := h.requireUser(ctx)
-	if err != nil {
+	if _, err := h.requireAdmin(ctx); err != nil {
 		return nil, err
-	}
-	if !user.HasRole("admin") {
-		return nil, ErrForbidden
 	}
 
 	email := string(request.Email)
@@ -386,12 +367,8 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 
 // DeleteUser implements api.StrictServerInterface.
 func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestObject) (api.DeleteUserResponseObject, error) {
-	caller, err := h.requireUser(ctx)
-	if err != nil {
+	if _, err := h.requireAdmin(ctx); err != nil {
 		return nil, err
-	}
-	if !caller.HasRole("admin") {
-		return nil, ErrForbidden
 	}
 
 	targetEmail := string(request.Email)

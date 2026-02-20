@@ -82,10 +82,7 @@ func (a *LDAPAuthenticator) Authenticate(req core.AuthRequest) (*core.AuthResult
 	}
 
 	// Auto-create user
-	roles := []string{}
-	if len(a.core.Users()) == 0 {
-		roles = append(roles, "admin")
-	}
+	roles := a.core.RolesForNewUser()
 
 	return &core.AuthResult{
 		AutoCreate: true,

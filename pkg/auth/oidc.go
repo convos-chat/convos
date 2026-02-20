@@ -284,10 +284,7 @@ func (a *OIDCAuthenticator) HandleCallback(ctx context.Context, code, state stri
 	}
 
 	// Auto-create user
-	roles := []string{}
-	if len(a.core.Users()) == 0 {
-		roles = append(roles, "admin")
-	}
+	roles := a.core.RolesForNewUser()
 
 	return &core.AuthResult{AutoCreate: true, Email: email, Roles: roles}, nil
 }

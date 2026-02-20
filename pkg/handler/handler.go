@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -85,6 +86,26 @@ func (h *Handler) requireUser(ctx context.Context) (*core.User, error) {
 		return nil, ErrUnauthorized
 	}
 	return user, nil
+}
+
+func (h *Handler) requireAdmin(ctx context.Context) (*core.User, error) {
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !user.HasRole("admin") {
+		return nil, ErrForbidden
+	}
+	return user, nil
+}
+
+func (h *Handler) saveUserSession(r *http.Request, w http.ResponseWriter, user *core.User) error {
+	session, err := h.Store.Get(r, "convos")
+	if err != nil {
+		slog.Warn("Failed to get session", "err", err)
+	}
+	session.Values["email"] = user.Email()
+	return session.Save(r, w)
 }
 
 func (h *Handler) GetUserFromSession(r *http.Request) *core.User {
