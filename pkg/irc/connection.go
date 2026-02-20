@@ -464,6 +464,12 @@ func (c *Connection) Send(target, message string) error {
 		return ErrNoTarget
 	}
 
+	// Allow "NickServ: identify password" style shorthand: strip the service
+	// account prefix and redirect to that target.
+	if profile := c.Profile(); profile != nil {
+		target, message = applyServiceAccountPrefix(profile.ServiceAccounts(), target, message)
+	}
+
 	var messages []string
 	if profile := c.Profile(); profile != nil {
 		messages = profile.SplitMessage(message)
@@ -663,6 +669,48 @@ func (c *Connection) isHighlight(message string) bool {
 	}
 
 	return false
+}
+
+// getOrCreateConv returns the conversation for convID, creating it if needed.
+// When isServiceAccount is true the look-up falls back to the server-log
+// conversation (empty ID) instead of creating a new one.
+func (c *Connection) getOrCreateConv(convID string, isServiceAccount bool) *core.Conversation {
+	if conv := c.GetConversation(convID); conv != nil {
+		return conv
+	}
+	if isServiceAccount {
+		if conv := c.GetConversation(""); conv != nil {
+			return conv
+		}
+		conv := core.NewConversationWithID("", c.Name(), c)
+		c.AddConversation(conv)
+		return conv
+	}
+	var conv *core.Conversation
+	if convID == "" {
+		conv = core.NewConversationWithID("", c.Name(), c)
+	} else {
+		conv = core.NewConversation(convID, c)
+	}
+	c.AddConversation(conv)
+	return conv
+}
+
+// applyServiceAccountPrefix checks whether message starts with "sa: " for any
+// configured service account name (case-insensitive). If it does, the prefix
+// is stripped and target is replaced with the matching service account name.
+func applyServiceAccountPrefix(serviceAccounts []string, target, message string) (string, string) {
+	lower := strings.ToLower(message)
+	for _, sa := range serviceAccounts {
+		prefix := strings.ToLower(sa) + ":"
+		if strings.HasPrefix(lower, prefix) && len(message) > len(prefix) {
+			rest := message[len(prefix):]
+			if rest[0] == ' ' || rest[0] == '\t' {
+				return sa, strings.TrimLeft(rest, " \t")
+			}
+		}
+	}
+	return target, message
 }
 
 // Ensure Connection implements core.Connection interface.

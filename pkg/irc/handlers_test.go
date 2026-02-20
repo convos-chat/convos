@@ -7,6 +7,34 @@ import (
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
+func TestApplyServiceAccountPrefix(t *testing.T) {
+	t.Parallel()
+
+	sas := []string{"nickserv", "chanserv"}
+
+	tests := []struct {
+		target      string
+		message     string
+		wantTarget  string
+		wantMessage string
+	}{
+		{"#chan", "nickserv: identify pass", "nickserv", "identify pass"},
+		{"#chan", "NickServ: identify pass", "nickserv", "identify pass"},
+		{"#chan", "CHANSERV: op #chan", "chanserv", "op #chan"},
+		{"#chan", "nickserv:nospace", "#chan", "nickserv:nospace"}, // no whitespace after colon
+		{"#chan", "hello world", "#chan", "hello world"},
+		{"#chan", "nickserv:", "#chan", "nickserv:"}, // nothing after colon
+	}
+
+	for _, tt := range tests {
+		gotTarget, gotMsg := applyServiceAccountPrefix(sas, tt.target, tt.message)
+		if gotTarget != tt.wantTarget || gotMsg != tt.wantMessage {
+			t.Errorf("applyServiceAccountPrefix(%q, %q) = (%q, %q), want (%q, %q)",
+				tt.target, tt.message, gotTarget, gotMsg, tt.wantTarget, tt.wantMessage)
+		}
+	}
+}
+
 func TestServerTimeOrNow(t *testing.T) {
 	t.Parallel()
 

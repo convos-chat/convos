@@ -68,16 +68,11 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 		convID = nick
 	}
 
-	// Get or create conversation
-	conv := c.GetConversation(convID)
-	if conv == nil {
-		if convID == "" {
-			conv = core.NewConversationWithID("", c.Name(), c)
-		} else {
-			conv = core.NewConversation(convID, c)
-		}
-		c.AddConversation(conv)
-	}
+	// Service accounts (e.g. NickServ, ChanServ) are routed to an existing
+	// conversation if one is open, otherwise they fall back to the server log.
+	profile := c.Profile()
+	isServiceAccount := profile != nil && profile.FindServiceAccount(nick, target) != ""
+	conv := c.getOrCreateConv(convID, isServiceAccount)
 
 	if conv.Frozen() != "" {
 		conv.SetFrozen("")
@@ -89,7 +84,6 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 		})
 	}
 
-	// Check for highlight
 	isDM := target == c.Nick()
 	highlight := c.isHighlight(message)
 
@@ -442,6 +436,9 @@ func (c *Connection) handleMode(msg ircmsg.Message) {
 	}
 
 	from := msg.Nick()
+	if from == "" {
+		from = msg.Source
+	}
 	convID := strings.ToLower(target)
 	modeArgs := msg.Params[2:]
 

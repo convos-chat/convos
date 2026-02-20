@@ -447,6 +447,76 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 	})
 
+	t.Run("handleMessage_ServiceAccount_no_existing_conv", func(t *testing.T) {
+		t.Parallel()
+		// Core configured with NickServ as a service account.
+		c := core.New(core.WithBackend(test.NewMemoryBackend()), core.WithProfileDefaults(0, 0, []string{"nickserv"}))
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		conn.SetNick("testnick")
+
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		// NickServ sends a NOTICE directly to our nick; no existing conversation.
+		msg := ircmsg.MakeMessage(nil, "NickServ!services@services", "NOTICE", "testnick", "You are now identified.")
+		conn.handleMessage(msg, "notice")
+
+		// Must NOT create a "nickserv" conversation.
+		if conn.GetConversation("NickServ") != nil || conn.GetConversation("nickserv") != nil {
+			t.Error("handleMessage must not auto-create a conversation for a service account")
+		}
+
+		// Message should be routed to server log (empty conv ID).
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("unexpected event type: %T", ev)
+			}
+			if m["conversation_id"] != "" {
+				t.Errorf("expected conversation_id='', got %q", m["conversation_id"])
+			}
+			if m["from"] != "NickServ" {
+				t.Errorf("expected from='NickServ', got %q", m["from"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("expected message event")
+		}
+	})
+
+	t.Run("handleMessage_ServiceAccount_existing_conv", func(t *testing.T) {
+		t.Parallel()
+		c := core.New(core.WithBackend(test.NewMemoryBackend()), core.WithProfileDefaults(0, 0, []string{"nickserv"}))
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		conn.SetNick("testnick")
+
+		// Pre-open a NickServ conversation.
+		nsConv := core.NewConversation("nickserv", conn)
+		conn.AddConversation(nsConv)
+
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, "NickServ!services@services", "NOTICE", "testnick", "Password accepted.")
+		conn.handleMessage(msg, "notice")
+
+		// Message should be routed to the existing NickServ conversation.
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("unexpected event type: %T", ev)
+			}
+			if m["conversation_id"] != "nickserv" {
+				t.Errorf("expected conversation_id='nickserv', got %q", m["conversation_id"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("expected message event")
+		}
+	})
+
 	t.Run("handleNotice_Wildcard", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
