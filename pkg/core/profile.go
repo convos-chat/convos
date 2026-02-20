@@ -220,7 +220,12 @@ func (p *ConnectionProfile) Save() error {
 }
 
 // SplitMessage splits a long message into multiple lines or parts based on MaxMessageLength.
+// When MaxMessageLength is 0 the message is returned as-is.
 func (p *ConnectionProfile) SplitMessage(message string) []string {
+	if p.MaxMessageLength() <= 0 {
+		return []string{message}
+	}
+
 	var messages []string
 	lines := strings.Split(message, "\n")
 
