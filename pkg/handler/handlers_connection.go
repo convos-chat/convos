@@ -14,9 +14,9 @@ import (
 
 // ListConnections implements api.StrictServerInterface.
 func (h *Handler) ListConnections(ctx context.Context, request api.ListConnectionsRequestObject) (api.ListConnectionsResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conns := user.Connections()
 	res := make([]api.Connection, len(conns))
@@ -29,9 +29,9 @@ func (h *Handler) ListConnections(ctx context.Context, request api.ListConnectio
 
 // CreateConnection implements api.StrictServerInterface.
 func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnectionRequestObject) (api.CreateConnectionResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if request.Body.Url == "" {
 		return api.CreateConnection400JSONResponse{
@@ -85,9 +85,9 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 
 // RemoveConnection implements api.StrictServerInterface.
 func (h *Handler) RemoveConnection(ctx context.Context, request api.RemoveConnectionRequestObject) (api.RemoveConnectionResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if err := user.RemoveConnection(request.ConnectionId); err != nil {
 		return api.RemoveConnection500JSONResponse{
@@ -100,9 +100,9 @@ func (h *Handler) RemoveConnection(ctx context.Context, request api.RemoveConnec
 
 // UpdateConnection implements api.StrictServerInterface.
 func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnectionRequestObject) (api.UpdateConnectionResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {

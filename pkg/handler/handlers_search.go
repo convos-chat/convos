@@ -8,9 +8,9 @@ import (
 
 // SearchMessages implements api.StrictServerInterface.
 func (h *Handler) SearchMessages(ctx context.Context, request api.SearchMessagesRequestObject) (api.SearchMessagesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	query := paramsToMessageQuery(request.Params.After, nil, request.Params.Before, request.Params.Limit, request.Params.Match)
 	result, err := h.Core.Backend().SearchMessages(user, query)

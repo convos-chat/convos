@@ -18,7 +18,7 @@ import (
 
 func TestSPAHandler(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	cfg := &config.Config{SessionSecret: "secret"}
 	s := New(c, cfg, auth.NewLocalAuthenticator(c))
 

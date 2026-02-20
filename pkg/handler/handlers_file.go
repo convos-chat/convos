@@ -21,9 +21,9 @@ var (
 
 // GetFiles implements api.StrictServerInterface.
 func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObject) (api.GetFilesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	files, err := h.Core.Backend().LoadFiles(user)
 	if err != nil {
@@ -55,9 +55,9 @@ func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObjec
 
 // UploadFile implements api.StrictServerInterface.
 func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestObject) (api.UploadFileResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	// The oapi-codegen gives us a multipart.Reader in request.Body
 	if request.Body == nil {
@@ -126,9 +126,9 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 
 // DeleteFiles implements api.StrictServerInterface.
 func (h *Handler) DeleteFiles(ctx context.Context, request api.DeleteFilesRequestObject) (api.DeleteFilesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if err := h.Core.Backend().DeleteFile(user, request.Fid); err != nil {
 		return nil, err

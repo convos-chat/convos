@@ -267,9 +267,9 @@ func (h *Handler) validateInviteRequest(email string, existingUser *core.User, b
 
 // GetUser implements api.StrictServerInterface.
 func (h *Handler) GetUser(ctx context.Context, request api.GetUserRequestObject) (api.GetUserResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	params := request.Params
@@ -281,9 +281,9 @@ func (h *Handler) GetUser(ctx context.Context, request api.GetUserRequestObject)
 
 // InviteUser implements api.StrictServerInterface.
 func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestObject) (api.InviteUserResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !user.HasRole("admin") {
 		return nil, ErrForbidden
@@ -317,9 +317,9 @@ func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestO
 
 // GetUsers implements api.StrictServerInterface.
 func (h *Handler) GetUsers(ctx context.Context, request api.GetUsersRequestObject) (api.GetUsersResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !user.HasRole("admin") {
 		return api.GetUsers200JSONResponse{Users: &[]api.User{}}, nil
@@ -336,9 +336,9 @@ func (h *Handler) GetUsers(ctx context.Context, request api.GetUsersRequestObjec
 
 // UpdateUser implements api.StrictServerInterface.
 func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestObject) (api.UpdateUserResponseObject, error) {
-	caller := h.GetUserFromCtx(ctx)
-	if caller == nil {
-		return nil, ErrUnauthorized
+	caller, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	targetEmail := string(request.Email)
@@ -386,9 +386,9 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 
 // DeleteUser implements api.StrictServerInterface.
 func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestObject) (api.DeleteUserResponseObject, error) {
-	caller := h.GetUserFromCtx(ctx)
-	if caller == nil {
-		return nil, ErrUnauthorized
+	caller, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !caller.HasRole("admin") {
 		return nil, ErrForbidden

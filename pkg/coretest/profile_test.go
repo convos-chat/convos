@@ -57,7 +57,7 @@ func TestConnectionProfileFindServiceAccount(t *testing.T) {
 
 func TestCoreConnectionProfileCaching(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	u1, _ := parseURL("irc://irc.libera.chat")
 	u2, _ := parseURL("irc://irc.libera.chat:6697")
 
@@ -100,7 +100,7 @@ func TestConnectionProfilePersistence(t *testing.T) {
 
 func TestConnectionProfileLink(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user, _ := c.User(testEmail)
 	conn := newTestConnection("irc://irc.libera.chat", user)
 
@@ -116,7 +116,7 @@ func TestConnectionProfileLink(t *testing.T) {
 
 func TestConnectionProfileSplitMessage(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	p := core.NewConnectionProfile("irc://localhost", c)
 	p.SetMaxMessageLength(10)
 	p.SetMaxBulkMessageSize(10)
@@ -146,7 +146,7 @@ func TestConnectionProfileSplitMessage(t *testing.T) {
 
 func TestConnectionProfileTooLongMessages(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	p := core.NewConnectionProfile("irc://localhost", c)
 	p.SetMaxMessageLength(10)
 	p.SetMaxBulkMessageSize(3)

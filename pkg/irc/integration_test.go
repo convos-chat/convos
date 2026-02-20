@@ -90,7 +90,7 @@ func connectTestIRC(t *testing.T, serverURL, nick string) (*Connection, *core.Su
 	q.Set("nick", nick)
 	u.RawQuery = q.Encode()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(nick+"@convos.test", c)
 	conn := NewConnection(u.String(), user)
 	sub := c.Events().SubscribeUser(user.ID())

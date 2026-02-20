@@ -12,9 +12,9 @@ import (
 
 // ListConversations implements api.StrictServerInterface.
 func (h *Handler) ListConversations(ctx context.Context, request api.ListConversationsRequestObject) (api.ListConversationsResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	var convs []api.Conversation
 	for _, conn := range user.Connections() {
@@ -31,9 +31,9 @@ func (h *Handler) ListConversations(ctx context.Context, request api.ListConvers
 
 // ConversationMessages implements api.StrictServerInterface.
 func (h *Handler) ConversationMessages(ctx context.Context, request api.ConversationMessagesRequestObject) (api.ConversationMessagesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
@@ -60,9 +60,9 @@ func (h *Handler) ConversationMessages(ctx context.Context, request api.Conversa
 
 // MarkConversationAsRead implements api.StrictServerInterface.
 func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkConversationAsReadRequestObject) (api.MarkConversationAsReadResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
@@ -82,9 +82,9 @@ func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkCo
 
 // ConnectionMessages implements api.StrictServerInterface.
 func (h *Handler) ConnectionMessages(ctx context.Context, request api.ConnectionMessagesRequestObject) (api.ConnectionMessagesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
@@ -116,9 +116,9 @@ func (h *Handler) ConnectionMessages(ctx context.Context, request api.Connection
 
 // MarkConnectionAsRead implements api.StrictServerInterface.
 func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConnectionAsReadRequestObject) (api.MarkConnectionAsReadResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
@@ -138,9 +138,9 @@ func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConn
 
 // NotificationMessages implements api.StrictServerInterface.
 func (h *Handler) NotificationMessages(ctx context.Context, request api.NotificationMessagesRequestObject) (api.NotificationMessagesResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	result, err := h.Core.Backend().LoadNotifications(user, core.MessageQuery{Limit: 40})
 	if err != nil {
@@ -163,13 +163,13 @@ func (h *Handler) NotificationMessages(ctx context.Context, request api.Notifica
 
 // MarkNotificationsAsRead implements api.StrictServerInterface.
 func (h *Handler) MarkNotificationsAsRead(ctx context.Context, request api.MarkNotificationsAsReadRequestObject) (api.MarkNotificationsAsReadResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	// Clear the notifications file by truncating it
 	notifFile := h.Core.Home() + "/" + user.ID() + "/notifications.log"
-	_, err := os.Stat(notifFile)
+	_, err = os.Stat(notifFile)
 	if errors.Is(err, os.ErrNotExist) {
 		return api.MarkNotificationsAsRead200JSONResponse{}, nil
 	}

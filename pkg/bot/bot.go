@@ -359,6 +359,75 @@ func (m *Manager) BotUser() *core.User {
 	return m.botUser
 }
 
+// BroadcastMessage sends a message to all connected channels of the bot user.
+// actionName is used in log messages (e.g. "GitHub", "Gitea").
+func (m *Manager) BroadcastMessage(actionName, message string) {
+	botUser := m.BotUser()
+	if botUser == nil {
+		return
+	}
+
+	sent := false
+	for _, conn := range botUser.Connections() {
+		if conn.State() != core.StateConnected {
+			continue
+		}
+		for _, conv := range conn.Conversations() {
+			if strings.HasPrefix(conv.ID(), "#") {
+				if err := conn.Send(conv.ID(), message); err != nil {
+					slog.Warn(actionName+" bot: Failed to send message", "connection", conn.ID(), "conversation", conv.ID(), "error", err)
+				} else {
+					sent = true
+				}
+			}
+		}
+	}
+
+	if !sent {
+		slog.Warn(actionName + " bot: No connected channels found for bot user. Please ensure the bot is connected and has joined channels.")
+	}
+}
+
+// PayloadGetter returns a helper that navigates nested keys in a webhook payload map,
+// returning the string form of the value or "" if any key is missing or the path is invalid.
+func PayloadGetter(payload map[string]any) func(...string) string {
+	return func(keys ...string) string {
+		val := payload
+		for i, k := range keys {
+			v, ok := val[k]
+			if !ok {
+				return ""
+			}
+			if i == len(keys)-1 {
+				return fmt.Sprintf("%v", v)
+			}
+			if m, ok := v.(map[string]any); ok {
+				val = m
+			} else {
+				return ""
+			}
+		}
+		return ""
+	}
+}
+
+// FormatPushMessage formats a git push event into a human-readable IRC message.
+// get is a helper that navigates nested map keys, as provided by each webhook formatter.
+func FormatPushMessage(repo, sender string, commits []any, get func(...string) string) string {
+	ref := get("ref")
+	branch := strings.TrimPrefix(ref, "refs/heads/")
+	msg := fmt.Sprintf("[%s] %s pushed %d commit(s) to %s", repo, sender, len(commits), branch)
+	if len(commits) > 0 {
+		if first, ok := commits[0].(map[string]any); ok {
+			if cm, ok := first["message"].(string); ok {
+				cm = strings.SplitN(cm, "\n", 2)[0]
+				msg += fmt.Sprintf(": %s", cm)
+			}
+		}
+	}
+	return msg
+}
+
 // RouteMessage routes a formatted message based on the bot configuration.
 // Returns true if the message was handled (even if silently ignored by filter).
 // Returns false if no configuration was found for the action (caller should decide fallback).

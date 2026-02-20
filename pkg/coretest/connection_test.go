@@ -29,7 +29,7 @@ var _ core.Connection = (*testConnection)(nil)
 func TestNewConnection(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
@@ -49,7 +49,7 @@ func TestNewConnection(t *testing.T) {
 func TestConnectionID(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	tests := []struct {
@@ -73,7 +73,7 @@ func TestConnectionID(t *testing.T) {
 func TestConnectionName(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
@@ -93,7 +93,7 @@ func TestConnectionName(t *testing.T) {
 func TestConnectionState(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
@@ -117,7 +117,7 @@ func TestConnectionState(t *testing.T) {
 func TestConnectionNick(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	tests := []struct {
 		email    string
@@ -143,7 +143,7 @@ func TestConnectionNick(t *testing.T) {
 func TestConnectionOnConnectCommands(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
@@ -165,7 +165,7 @@ func TestConnectionOnConnectCommands(t *testing.T) {
 func TestConnectionConversations(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 
@@ -205,7 +205,7 @@ func TestConnectionConversations(t *testing.T) {
 func TestConnectionToData(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	conn := newTestConnection("irc://irc.libera.chat:6697", user)
 	conn.SetName("Libera")

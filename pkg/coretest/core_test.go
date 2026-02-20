@@ -16,7 +16,7 @@ const (
 func TestNewCore(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	if c.Home() == "" {
 		t.Error("Home() should return a default path")
@@ -56,7 +56,7 @@ func TestCoreWithOptions(t *testing.T) {
 func TestCoreUserManagement(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	// Create a user
 	user, err := c.User(testEmail)
@@ -100,7 +100,7 @@ func TestCoreUserManagement(t *testing.T) {
 func TestCoreEmailNormalization(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	user1, _ := c.User("Test@Example.COM")
 	user2, _ := c.User(testEmail)
@@ -118,7 +118,7 @@ func TestCoreEmailNormalization(t *testing.T) {
 func TestCoreStart(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	if err := c.Start(); err != nil {
 		t.Fatalf("Start() error: %v", err)
@@ -166,7 +166,7 @@ func TestCoreStartWithExistingUsers(t *testing.T) {
 func TestCoreRemoveUser(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	user, _ := c.User("delete@example.com")
 	if user == nil {

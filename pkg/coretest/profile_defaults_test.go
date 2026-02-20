@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/test"
 )
 
@@ -12,7 +11,7 @@ const defaultIRCURL = "irc://irc.libera.chat"
 
 func TestConnectionProfileInheritance(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 
 	// Setup default connection
 	defaultURL, _ := url.Parse(defaultIRCURL)

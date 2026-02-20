@@ -3,11 +3,8 @@ package github
 
 import (
 	"fmt"
-	"log/slog"
-	"strings"
 
 	"github.com/convos-chat/convos/pkg/bot"
-	"github.com/convos-chat/convos/pkg/core"
 )
 
 // Action implements the GitHub bot action.
@@ -43,63 +40,19 @@ func (a *Action) HandleWebhook(provider string, payload map[string]any) bool {
 		return true
 	}
 
-	a.broadcastMessage(msg)
+	a.manager.BroadcastMessage("GitHub", msg)
 	return true
-}
-
-func (a *Action) broadcastMessage(message string) {
-	botUser := a.manager.BotUser()
-	if botUser == nil {
-		return
-	}
-
-	sent := false
-	for _, conn := range botUser.Connections() {
-		if conn.State() != core.StateConnected {
-			continue
-		}
-		for _, conv := range conn.Conversations() {
-			if strings.HasPrefix(conv.ID(), "#") {
-				if err := conn.Send(conv.ID(), message); err != nil {
-					slog.Warn("GitHub bot: Failed to send message", "connection", conn.ID(), "conversation", conv.ID(), "error", err)
-				} else {
-					sent = true
-				}
-			}
-		}
-	}
-
-	if !sent {
-		slog.Warn("GitHub bot: No connected channels found for bot user. Please ensure the bot is connected and has joined channels.")
-	}
 }
 
 // formatGitHubMessage formats a GitHub webhook event into an IRC message.
 func formatGitHubMessage(payload map[string]any) (string, string) {
-	get := func(keys ...string) string {
-		val := payload
-		for i, k := range keys {
-			v, ok := val[k]
-			if !ok {
-				return ""
-			}
-			if i == len(keys)-1 {
-				return fmt.Sprintf("%v", v)
-			}
-			if m, ok := v.(map[string]any); ok {
-				val = m
-			} else {
-				return ""
-			}
-		}
-		return ""
-	}
+	get := bot.PayloadGetter(payload)
 
 	repo := get("repository", "full_name")
 	sender := get("sender", "login")
 
 	if commits, ok := payload["commits"].([]any); ok {
-		return formatPushMessage(repo, sender, commits, get), "push"
+		return bot.FormatPushMessage(repo, sender, commits, get), "push"
 	}
 
 	if _, ok := payload["pull_request"]; ok {
@@ -144,17 +97,3 @@ func formatGitHubMessage(payload map[string]any) (string, string) {
 	return "", "unknown"
 }
 
-func formatPushMessage(repo, sender string, commits []any, get func(...string) string) string {
-	ref := get("ref")
-	branch := strings.TrimPrefix(ref, "refs/heads/")
-	msg := fmt.Sprintf("[%s] %s pushed %d commit(s) to %s", repo, sender, len(commits), branch)
-	if len(commits) > 0 {
-		if first, ok := commits[0].(map[string]any); ok {
-			if cm, ok := first["message"].(string); ok {
-				cm = strings.SplitN(cm, "\n", 2)[0]
-				msg += fmt.Sprintf(": %s", cm)
-			}
-		}
-	}
-	return msg
-}

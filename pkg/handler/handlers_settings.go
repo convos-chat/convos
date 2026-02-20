@@ -10,17 +10,17 @@ import (
 
 // GetSettings implements api.StrictServerInterface.
 func (h *Handler) GetSettings(ctx context.Context, request api.GetSettingsRequestObject) (api.GetSettingsResponseObject, error) {
-	if h.GetUserFromCtx(ctx) == nil {
-		return nil, ErrUnauthorized
+	if _, err := h.requireUser(ctx); err != nil {
+		return nil, err
 	}
 	return api.GetSettings200JSONResponse(h.settingsToAPI()), nil
 }
 
 // UpdateSettings implements api.StrictServerInterface.
 func (h *Handler) UpdateSettings(ctx context.Context, request api.UpdateSettingsRequestObject) (api.UpdateSettingsResponseObject, error) {
-	user := h.GetUserFromCtx(ctx)
-	if user == nil {
-		return nil, ErrUnauthorized
+	user, err := h.requireUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !user.HasRole("admin") {
 		return nil, ErrForbidden

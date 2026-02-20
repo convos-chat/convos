@@ -12,7 +12,7 @@ const testEmail = "test@example.com"
 
 func TestLocalAuthenticator(t *testing.T) {
 	t.Parallel()
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	auth := NewLocalAuthenticator(c)
 
 	// Create test user

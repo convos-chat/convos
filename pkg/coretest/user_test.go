@@ -11,7 +11,7 @@ import (
 func TestNewUser(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	if user.Email() != testEmail {
@@ -38,7 +38,7 @@ func TestNewUser(t *testing.T) {
 func TestUserPassword(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	// Initially no password
@@ -82,7 +82,7 @@ func TestUserPassword(t *testing.T) {
 func TestUserRoles(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	// Initially no roles
@@ -139,7 +139,7 @@ func TestUserRoles(t *testing.T) {
 func TestUserHighlightKeywords(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	// Initially empty
@@ -159,7 +159,7 @@ func TestUserHighlightKeywords(t *testing.T) {
 func TestUserConnections(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	// Initially no connections
@@ -201,7 +201,7 @@ func TestUserConnections(t *testing.T) {
 func TestUserUnread(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 
 	if user.Unread() != 0 {
@@ -217,7 +217,7 @@ func TestUserUnread(t *testing.T) {
 func TestUserToData(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	user := core.NewUser(testEmail, c)
 	if err := user.SetPassword("secret"); err != nil {
 		t.Fatalf("SetPassword() error: %v", err)
@@ -259,7 +259,7 @@ func TestUserToData(t *testing.T) {
 func TestUserRegisteredTime(t *testing.T) {
 	t.Parallel()
 
-	c := core.New(core.WithBackend(test.NewMemoryBackend()))
+	c := test.NewTestCore()
 	before := time.Now().UTC().Truncate(time.Second)
 	user := core.NewUser(testEmail, c)
 	after := time.Now().UTC().Truncate(time.Second)

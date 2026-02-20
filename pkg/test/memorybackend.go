@@ -21,6 +21,11 @@ type MemoryBackend struct {
 	fileContent map[string][]byte
 }
 
+// NewTestCore creates a new Core instance backed by an in-memory backend for testing.
+func NewTestCore() *core.Core {
+	return core.New(core.WithBackend(NewMemoryBackend()))
+}
+
 // NewMemoryBackend creates a new in-memory backend.
 func NewMemoryBackend() *MemoryBackend {
 	return &MemoryBackend{

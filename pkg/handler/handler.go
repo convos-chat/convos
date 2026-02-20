@@ -79,6 +79,14 @@ func (h *Handler) GetUserFromCtx(ctx context.Context) *core.User {
 	return user
 }
 
+func (h *Handler) requireUser(ctx context.Context) (*core.User, error) {
+	user := h.GetUserFromCtx(ctx)
+	if user == nil {
+		return nil, ErrUnauthorized
+	}
+	return user, nil
+}
+
 func (h *Handler) GetUserFromSession(r *http.Request) *core.User {
 	session, _ := h.Store.Get(r, "convos")
 	email, ok := session.Values["email"].(string)
