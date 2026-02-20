@@ -876,15 +876,19 @@ func (c *Connection) handleWelcome(msg ircmsg.Message) {
 }
 
 // handleISupport handles RPL_ISUPPORT (005).
-func (c *Connection) handleISupport(msg ircmsg.Message) {
-	// FIXME: Simple implementation: just store them in info for now
-	for i := 1; i < len(msg.Params)-1; i++ {
-		parts := strings.SplitN(msg.Params[i], "=", 2)
-		key := strings.ToLower(parts[0])
-		if len(parts) == 2 {
-			c.SetInfo(key, parts[1])
+func (c *Connection) handleISupport(_ ircmsg.Message) {
+	c.mu.RLock()
+	client := c.client
+	c.mu.RUnlock()
+	if client == nil {
+		return
+	}
+
+	for key, value := range client.ISupport() {
+		if value != "" {
+			c.SetInfo(strings.ToLower(key), value)
 		} else {
-			c.SetInfo(key, true)
+			c.SetInfo(strings.ToLower(key), true)
 		}
 	}
 	c.emitInfo()

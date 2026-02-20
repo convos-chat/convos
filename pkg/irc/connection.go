@@ -625,6 +625,7 @@ func (c *Connection) emitState(state, message string) {
 	})
 }
 
+
 // emitInfo emits the connection info (nick, server details).
 func (c *Connection) emitInfo() {
 	c.mu.RLock()
