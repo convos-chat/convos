@@ -164,6 +164,8 @@ func (c *Connection) Connect() error {
 		}
 	}
 
+	c.client.RequestCaps = []string{"message-tags", "server-time"}
+
 	if saslMech == "PLAIN" || saslMech == "EXTERNAL" {
 		saslLogin := urlUser
 		if saslLogin == "" {
@@ -174,7 +176,7 @@ func (c *Connection) Connect() error {
 		c.client.SASLLogin = saslLogin
 		c.client.SASLPassword = urlPass
 		c.client.SASLOptional = true
-		c.client.RequestCaps = []string{"sasl"}
+		c.client.RequestCaps = append(c.client.RequestCaps, "sasl")
 	} else if urlPass != "" {
 		c.client.Password = urlPass
 	}
@@ -584,11 +586,11 @@ func (c *Connection) emitSentMessage(target, message, msgType string) {
 		"type":            msgType,
 	})
 
-	c.persistMessage(convID, from, message, msgType, false)
+	c.persistMessage(convID, from, message, msgType, false, time.Now().Unix())
 }
 
 // persistMessage saves a message to the backend storage.
-func (c *Connection) persistMessage(convID, from, message, msgType string, highlight bool) {
+func (c *Connection) persistMessage(convID, from, message, msgType string, highlight bool, ts int64) {
 	conv := c.GetConversation(convID)
 	if conv == nil {
 		slog.Warn("Conversation not found for message", "conversation_id", convID)
@@ -600,7 +602,7 @@ func (c *Connection) persistMessage(convID, from, message, msgType string, highl
 		Message:   message,
 		Type:      msgType,
 		Highlight: highlight,
-		Timestamp: time.Now().Unix(),
+		Timestamp: ts,
 	}
 
 	err := c.User().Core().Backend().SaveMessage(conv, msg)

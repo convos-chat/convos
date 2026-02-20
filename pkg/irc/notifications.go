@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/convos-chat/convos/pkg/core"
@@ -15,14 +14,14 @@ import (
 
 // persistNotification saves a highlighted message to the user's notification log
 // and sends a Web Push notification if enabled.
-func (c *Connection) persistNotification(convID, from, message, msgType string) {
+func (c *Connection) persistNotification(convID, from, message, msgType string, ts int64) {
 	msg := core.Notification{
 		ConnectionID:   c.ID(),
 		ConversationID: convID,
 		From:           from,
 		Message:        message,
 		Type:           msgType,
-		Timestamp:      time.Now().Unix(),
+		Timestamp:      ts,
 	}
 	err := c.User().Core().Backend().SaveNotification(c.User(), msg)
 	if err != nil {

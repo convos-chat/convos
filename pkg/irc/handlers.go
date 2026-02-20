@@ -13,6 +13,28 @@ import (
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
+// serverTimeOrNow extracts the server-time tag from an IRC message.
+// Returns the parsed time as Unix seconds, or time.Now().Unix() as fallback.
+func serverTimeOrNow(msg ircmsg.Message) int64 {
+	if present, value := msg.GetTag("time"); present {
+		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+			return t.Unix()
+		}
+	}
+	return time.Now().Unix()
+}
+
+// serverTimeOrNowRFC3339 extracts the server-time tag from an IRC message.
+// Returns the time formatted as RFC3339, or the current time as fallback.
+func serverTimeOrNowRFC3339(msg ircmsg.Message) string {
+	if present, value := msg.GetTag("time"); present {
+		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
+			return t.UTC().Format(time.RFC3339)
+		}
+	}
+	return time.Now().UTC().Format(time.RFC3339)
+}
+
 // handleMessage handles incoming PRIVMSG and NOTICE messages.
 func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	if len(msg.Params) < 2 {
@@ -22,6 +44,8 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	target := msg.Params[0]
 	message := msg.Params[1]
 	nick := msg.Nick()
+	ts := serverTimeOrNow(msg)
+	tsRFC3339 := serverTimeOrNowRFC3339(msg)
 
 	// Handle CTCP requests
 	if msgType == "private" && strings.HasPrefix(message, "\x01") && strings.HasSuffix(message, "\x01") {
@@ -76,12 +100,13 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 		"highlight":       highlight,
 		"message":         message,
 		"type":            msgType,
+		"ts":              tsRFC3339,
 	})
 
-	c.persistMessage(conv.ID(), nick, message, msgType, highlight)
+	c.persistMessage(conv.ID(), nick, message, msgType, highlight, ts)
 
 	if nick != c.Nick() && highlight || isDM {
-		c.persistNotification(conv.ID(), nick, message, msgType)
+		c.persistNotification(conv.ID(), nick, message, msgType, ts)
 	}
 }
 
@@ -823,9 +848,10 @@ func (c *Connection) handleNotice(msg ircmsg.Message) {
 		"from":            msg.Source,
 		"message":         message,
 		"type":            "notice",
+		"ts":              serverTimeOrNowRFC3339(msg),
 	})
 
-	c.persistMessage(convID, msg.Source, message, "notice", false)
+	c.persistMessage(convID, msg.Source, message, "notice", false, serverTimeOrNow(msg))
 }
 
 // handleErrorReply handles IRC error numerics (4xx) and surfaces them to the
@@ -852,9 +878,10 @@ func (c *Connection) handleErrorReply(msg ircmsg.Message) {
 		"from":            msg.Source,
 		"message":         message,
 		"type":            "error",
+		"ts":              serverTimeOrNowRFC3339(msg),
 	})
 
-	c.persistMessage(convID, msg.Source, message, "error", false)
+	c.persistMessage(convID, msg.Source, message, "error", false, serverTimeOrNow(msg))
 }
 
 // handleUserModeIs handles RPL_UMODEIS (221).
