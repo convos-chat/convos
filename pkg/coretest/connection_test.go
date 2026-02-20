@@ -1,6 +1,7 @@
 package coretest
 
 import (
+	"log/slog"
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
@@ -18,9 +19,10 @@ func newTestConnection(rawURL string, user *core.User) *testConnection {
 	}
 }
 
-func (c *testConnection) Connect() error         { return nil }
-func (c *testConnection) Disconnect() error      { return nil }
-func (c *testConnection) Send(_, _ string) error { return nil }
+func (c *testConnection) Connect() error            { return nil }
+func (c *testConnection) Disconnect() error         { return nil }
+func (c *testConnection) Send(_, _ string) error    { return nil }
+func (c *testConnection) LogServerError(msg string) { slog.Info("[Server log]", "msg", msg) }
 
 var _ core.Connection = (*testConnection)(nil)
 

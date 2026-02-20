@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"strings"
@@ -135,7 +136,7 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 		case core.StateConnected:
 			go func() {
 				if err := conn.Connect(); err != nil {
-					slog.Error("Failed to connect connection", "error", err)
+					conn.LogServerError(fmt.Sprintf("Failed to connect to %s: %s", conn.URL().Host, err))
 				}
 			}()
 		case core.StateDisconnected:

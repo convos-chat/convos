@@ -230,7 +230,7 @@ func (c *Connection) Connect() error {
 			if strings.HasPrefix(name, "#") || strings.HasPrefix(name, "&") {
 				err := c.client.Join(name)
 				if err != nil {
-					slog.Error("Failed to rejoin channel on connect", "channel", name, "error", err)
+					c.LogServerError(fmt.Sprintf("Failed to rejoin channel %s: %s", name, err))
 				}
 			} else if conv.Frozen() != "" {
 				isonNicks = append(isonNicks, name)
@@ -240,7 +240,7 @@ func (c *Connection) Connect() error {
 		// Send ISON to check if private conversation nicks are online
 		if len(isonNicks) > 0 {
 			if err := c.client.Send("ISON", strings.Join(isonNicks, " ")); err != nil {
-				slog.Error("Failed to send ISON on connect", "error", err)
+				c.LogServerError(fmt.Sprintf("Failed to check online status: %s", err))
 			}
 		}
 	})
@@ -248,7 +248,9 @@ func (c *Connection) Connect() error {
 	c.client.AddDisconnectCallback(func(msg ircmsg.Message) {
 		c.SetState(core.StateDisconnected)
 		wantConnect := c.WantedState() == core.StateConnected
-		c.emitState(string(core.StateDisconnected), fmt.Sprintf("Disconnected from %s.", c.URL().Host))
+		disconnectMsg := fmt.Sprintf("Disconnected from %s.", c.URL().Host)
+		c.emitState(string(core.StateDisconnected), disconnectMsg)
+		c.LogServerError(disconnectMsg)
 
 		// Freeze all conversations
 		for _, conv := range c.Conversations() {
@@ -407,7 +409,9 @@ func (c *Connection) Connect() error {
 	// Connect to server (without holding the lock)
 	if err := client.Connect(); err != nil {
 		c.SetState(core.StateDisconnected)
-		c.emitState(string(core.StateDisconnected), fmt.Sprintf("Could not connect to %s: %s", host, err))
+		errMsg := fmt.Sprintf("Could not connect to %s: %s", host, err)
+		c.emitState(string(core.StateDisconnected), errMsg)
+		c.LogServerError(errMsg)
 		return err
 	}
 
@@ -626,7 +630,6 @@ func (c *Connection) emitState(state, message string) {
 		"message": message,
 	})
 }
-
 
 // emitInfo emits the connection info (nick, server details).
 func (c *Connection) emitInfo() {

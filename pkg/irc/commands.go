@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"fmt"
 	"log/slog"
 	"regexp"
 	"sort"
@@ -25,7 +26,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		c.SetWantedState(core.StateConnected)
 		go func() {
 			if err := c.Connect(); err != nil {
-				slog.Error("Failed to connect", "error", err)
+				c.LogServerError(fmt.Sprintf("Failed to connect to %s: %s", c.URL().Host, err))
 			}
 		}()
 		return nil
@@ -33,17 +34,17 @@ func (c *Connection) handleCommand(target, raw string) error {
 		c.SetWantedState(core.StateDisconnected)
 		go func() {
 			if err := c.Disconnect(); err != nil {
-				slog.Error("Failed to disconnect", "error", err)
+				c.LogServerError(fmt.Sprintf("Failed to disconnect from %s: %s", c.URL().Host, err))
 			}
 		}()
 		return nil
 	case "RECONNECT":
 		go func() {
 			if err := c.Disconnect(); err != nil {
-				slog.Error("Failed to disconnect", "error", err)
+				c.LogServerError(fmt.Sprintf("Failed to disconnect from %s: %s", c.URL().Host, err))
 			}
 			if err := c.Connect(); err != nil {
-				slog.Error("Failed to reconnect", "error", err)
+				c.LogServerError(fmt.Sprintf("Failed to reconnect to %s: %s", c.URL().Host, err))
 			}
 		}()
 		return nil

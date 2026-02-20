@@ -351,7 +351,7 @@ func (c *Connection) handleNickInUse(msg ircmsg.Message) {
 	})
 
 	if err := c.client.Send("NICK", newNick); err != nil {
-		slog.Error("Failed to change nick after nickname in use", "attempted", newNick, "error", err)
+		c.LogServerError(fmt.Sprintf("Failed to change nick to %s: %s", newNick, err))
 	}
 }
 
@@ -919,6 +919,27 @@ func (c *Connection) handleISupport(_ ircmsg.Message) {
 		}
 	}
 	c.emitInfo()
+}
+
+// LogServerError logs an error message to the server log (visible in UI).
+func (c *Connection) LogServerError(message string) {
+	convID := ""
+	conv := c.GetConversation(convID)
+	if conv == nil {
+		conv = core.NewConversationWithID("", c.Name(), c)
+		c.AddConversation(conv)
+	}
+
+	ts := time.Now().Unix()
+	c.emitEvent(map[string]any{
+		"event":           "message",
+		"conversation_id": convID,
+		"from":            c.URL().Host,
+		"message":         message,
+		"type":            "error",
+		"ts":              time.Unix(ts, 0).Format(time.RFC3339),
+	})
+	c.persistMessage(convID, c.URL().Host, message, "error", false, ts)
 }
 
 // parseNickMode extracts the mode prefix and nick from an IRC NAMES entry.

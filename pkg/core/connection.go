@@ -88,6 +88,8 @@ type Connection interface {
 
 	// ToData converts to serializable format.
 	ToData(persist bool) ConnectionData
+
+	LogServerError(message string)
 }
 
 // ConnectionData represents serialized connection data.
