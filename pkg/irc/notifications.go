@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/convos-chat/convos/pkg/core"
 )
+
+var pushHTTPClient = &http.Client{Timeout: 15 * time.Second}
 
 // persistNotification saves a highlighted message to the user's notification log
 // and sends a Web Push notification if enabled.
@@ -78,6 +81,7 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 				TTL:             3600, // 1 hour
 				Urgency:         "high",
 				Topic:           "convos",
+				HTTPClient:      pushHTTPClient,
 			})
 			if err != nil {
 				slog.Error("Failed to send push notification", "error", err)
