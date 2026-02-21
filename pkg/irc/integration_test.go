@@ -297,7 +297,7 @@ func TestIRCIntegration(t *testing.T) {
 		newNickB := "cvtBx" + sfx
 
 		connA, subA := connectTestIRC(t, serverURL, nickA)
-		connB, _ := connectTestIRC(t, serverURL, nickB)
+		connB, subB := connectTestIRC(t, serverURL, nickB)
 
 		joinChannel(t, connA, subA, channel)
 
@@ -323,6 +323,14 @@ func TestIRCIntegration(t *testing.T) {
 		if newNick := fmt.Sprintf("%v", ev["new_nick"]); !strings.EqualFold(newNick, newNickB) {
 			t.Errorf("nick_change new_nick = %q, want %q", newNick, newNickB)
 		}
+
+		// Wait for B to process its own NICK message before reading connB.Nick().
+		// A's event and B's callback run in separate goroutines; without this
+		// wait there is a race between the assertion and B updating c.nick.
+		waitForEvent(t, subB, func(m map[string]any) bool {
+			return m["event"] == evState && m["type"] == typeNickChange &&
+				strings.EqualFold(fmt.Sprintf("%v", m["old_nick"]), nickB)
+		})
 
 		// B's own Nick() must reflect the change.
 		if got := connB.Nick(); !strings.EqualFold(got, newNickB) {
@@ -574,7 +582,112 @@ func TestIRCIntegration(t *testing.T) {
 	})
 
 	// ──────────────────────────────────────────────────────────────
-	// 12. Disconnect – state becomes disconnected; conversations are frozen
+	// 12. IRCv3 caps – multi-prefix, userhost-in-names, extended-join
+	//     are all acknowledged by ergo after CAP negotiation.
+	// ──────────────────────────────────────────────────────────────
+	t.Run("ircv3_caps_negotiated", func(t *testing.T) {
+		t.Parallel()
+		conn, _ := connectTestIRC(t, serverURL, "cvt"+randSuffix())
+
+		caps, _ := conn.Info()["capabilities"].([]string)
+		capSet := make(map[string]bool, len(caps))
+		for _, c := range caps {
+			capSet[c] = true
+		}
+		for _, want := range []string{"multi-prefix", "userhost-in-names", "extended-join"} {
+			if !capSet[want] {
+				t.Errorf("cap %q not in acknowledged caps: %v", want, caps)
+			}
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 13. userhost-in-names – NAMES participants carry a host field
+	// ──────────────────────────────────────────────────────────────
+	t.Run("ircv3_userhost_in_names", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		conn, sub := connectTestIRC(t, serverURL, "cvt"+sfx)
+		joinChannel(t, conn, sub, "#cvtest"+sfx)
+
+		conv := conn.GetConversation("#cvtest" + sfx)
+		if conv == nil {
+			t.Fatal("conversation missing after join")
+		}
+		for nick, p := range conv.Participants() {
+			if host, _ := p["host"].(string); host == "" {
+				t.Errorf("participant %q missing host field (userhost-in-names): %v", nick, p)
+			}
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 14. multi-prefix – channel creator's op mode appears in NAMES data
+	// ──────────────────────────────────────────────────────────────
+	t.Run("ircv3_multi_prefix", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		conn, sub := connectTestIRC(t, serverURL, "cvt"+sfx)
+		joinChannel(t, conn, sub, "#cvtest"+sfx)
+
+		conv := conn.GetConversation("#cvtest" + sfx)
+		if conv == nil {
+			t.Fatal("conversation missing after join")
+		}
+		// ergo grants op to the first joiner; parseNickMode must translate "@" → "o".
+		actualNick := conn.Nick()
+		p, ok := conv.Participants()[strings.ToLower(actualNick)]
+		if !ok {
+			t.Fatalf("self nick %q not in participants: %v", actualNick, conv.Participants())
+		}
+		if mode, _ := p["mode"].(string); !strings.Contains(mode, "o") {
+			t.Errorf("participant mode = %q, want it to contain 'o' (channel op)", mode)
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 15. extended-join – joining user's realname is stored in participant data
+	// ──────────────────────────────────────────────────────────────
+	t.Run("ircv3_extended_join", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		channel := "#cvtest" + sfx
+		nickA := "cvtA" + sfx
+		nickB := "cvtB" + sfx
+
+		connA, subA := connectTestIRC(t, serverURL, nickA)
+		connB, _ := connectTestIRC(t, serverURL, nickB)
+
+		joinChannel(t, connA, subA, channel)
+		if err := connB.Send(channel, "/join "+channel); err != nil {
+			t.Fatalf("B /join: %v", err)
+		}
+		waitForEvent(t, subA, func(m map[string]any) bool {
+			return m["event"] == evState && m["type"] == typeJoin &&
+				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		})
+
+		convA := connA.GetConversation(strings.ToLower(channel))
+		if convA == nil {
+			t.Fatal("A: channel conversation missing")
+		}
+		var bEntry map[string]any
+		for n, p := range convA.Participants() {
+			if strings.EqualFold(n, nickB) {
+				bEntry = p
+				break
+			}
+		}
+		if bEntry == nil {
+			t.Fatalf("B's nick %q not in A's participants: %v", nickB, convA.Participants())
+		}
+		if _, ok := bEntry["realname"]; !ok {
+			t.Errorf("B's participant entry missing 'realname' (extended-join not working): %v", bEntry)
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 16. Disconnect – state becomes disconnected; conversations are frozen
 	// ──────────────────────────────────────────────────────────────
 	t.Run("disconnect", func(t *testing.T) {
 		t.Parallel()

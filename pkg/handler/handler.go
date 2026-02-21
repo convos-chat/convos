@@ -88,15 +88,15 @@ func (h *Handler) requireUser(ctx context.Context) (*core.User, error) {
 	return user, nil
 }
 
-func (h *Handler) requireAdmin(ctx context.Context) (*core.User, error) {
+func (h *Handler) requireAdmin(ctx context.Context) error {
 	user, err := h.requireUser(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !user.HasRole("admin") {
-		return nil, ErrForbidden
+		return ErrForbidden
 	}
-	return user, nil
+	return nil
 }
 
 func (h *Handler) saveUserSession(r *http.Request, w http.ResponseWriter, user *core.User) error {

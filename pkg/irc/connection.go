@@ -108,9 +108,16 @@ func (c *Connection) Connect() error {
 
 	c.SetState(core.StateConnecting)
 
-	// Stop any pending reconnect loop
+	// Stop any pending reconnect loop. Use select to avoid closing an already
+	// closed channel (Disconnect leaves a pre-closed channel to short-circuit
+	// any reconnect loop that fires after it).
 	if c.stopReconnect != nil {
-		close(c.stopReconnect)
+		select {
+		case <-c.stopReconnect:
+			// already closed; nothing to do
+		default:
+			close(c.stopReconnect)
+		}
 	}
 	c.stopReconnect = make(chan struct{})
 
@@ -164,7 +171,7 @@ func (c *Connection) Connect() error {
 		}
 	}
 
-	c.client.RequestCaps = []string{"message-tags", "server-time"}
+	c.client.RequestCaps = []string{"message-tags", "server-time", "multi-prefix", "userhost-in-names", "extended-join"}
 
 	if saslMech == "PLAIN" || saslMech == "EXTERNAL" {
 		saslLogin := urlUser
@@ -423,11 +430,20 @@ func (c *Connection) Disconnect() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// Stop any pending reconnect loop
+	// Stop any pending reconnect loop and leave a pre-closed channel so that
+	// any reconnectLoop spawned by the subsequent disconnect callback also
+	// exits immediately (receiving from a nil channel blocks forever).
 	if c.stopReconnect != nil {
-		close(c.stopReconnect)
-		c.stopReconnect = nil
+		select {
+		case <-c.stopReconnect:
+			// already closed; nothing to do
+		default:
+			close(c.stopReconnect)
+		}
 	}
+	stopped := make(chan struct{})
+	close(stopped)
+	c.stopReconnect = stopped
 
 	state := c.State()
 	if state == core.StateDisconnected || state == core.StateDisconnecting {

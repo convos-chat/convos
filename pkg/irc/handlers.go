@@ -136,6 +136,17 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 	channel := msg.Params[0]
 	nick := msg.Nick()
 
+	// extended-join: params[1] = account ("*" if not logged in), params[2] = realname
+	participant := map[string]any{"nick": nick, "mode": ""}
+	if len(msg.Params) >= 3 {
+		if account := msg.Params[1]; account != "*" {
+			participant["account"] = account
+		}
+		if realname := msg.Params[2]; realname != "" {
+			participant["realname"] = realname
+		}
+	}
+
 	if nick == c.Nick() {
 		// We joined - create/get conversation and emit frozen event
 		conv := c.GetConversation(channel)
@@ -145,10 +156,7 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 		}
 
 		conv.SetFrozen("")
-		conv.AddParticipant(nick, map[string]any{
-			"nick": nick,
-			"mode": "",
-		})
+		conv.AddParticipant(nick, participant)
 
 		c.emitEvent(map[string]any{
 			"event":           "state",
@@ -167,17 +175,18 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 			conv = core.NewConversation(channel, c)
 			c.AddConversation(conv)
 		}
-		conv.AddParticipant(nick, map[string]any{
-			"nick": nick,
-			"mode": "",
-		})
+		conv.AddParticipant(nick, participant)
 
-		c.emitEvent(map[string]any{
+		joinEvent := map[string]any{
 			"event":           "state",
 			"type":            "join",
 			"conversation_id": strings.ToLower(channel),
 			"nick":            nick,
-		})
+		}
+		if account, ok := participant["account"]; ok {
+			joinEvent["account"] = account
+		}
+		c.emitEvent(joinEvent)
 	}
 }
 
@@ -567,10 +576,16 @@ func (c *Connection) handleNamesReply(msg ircmsg.Message) {
 	}
 
 	for _, raw := range nicks {
-		mode, nick := parseNickMode(raw)
+		mode, nick, user, host := parseNamesEntry(raw)
 		participant := map[string]any{
 			"nick": nick,
 			"mode": mode,
+		}
+		if user != "" {
+			participant["user"] = user
+		}
+		if host != "" {
+			participant["host"] = host
 		}
 		c.namesBuffer[channel] = append(c.namesBuffer[channel], participant)
 		conv.AddParticipant(nick, participant)
@@ -939,25 +954,37 @@ func (c *Connection) LogServerError(message string) {
 	c.persistMessage(convID, c.URL().Host, message, "error", false, ts)
 }
 
-// parseNickMode extracts the mode prefix and nick from an IRC NAMES entry.
+// parseNickMode extracts all mode prefixes and the nick from an IRC NAMES entry.
+// Supports multi-prefix (multiple consecutive prefixes, e.g. "@+nick" → "ov", "nick").
 // Mode prefixes: ~ = q (founder), & = a (admin), @ = o (operator),
 // % = h (half-op), + = v (voice).
 func parseNickMode(raw string) (string, string) {
-	if len(raw) == 0 {
-		return "", ""
+	var modes strings.Builder
+	for i := range len(raw) {
+		switch raw[i] {
+		case '~':
+			modes.WriteByte('q')
+		case '&':
+			modes.WriteByte('a')
+		case '@':
+			modes.WriteByte('o')
+		case '%':
+			modes.WriteByte('h')
+		case '+':
+			modes.WriteByte('v')
+		default:
+			return modes.String(), raw[i:]
+		}
 	}
-	switch raw[0] {
-	case '~':
-		return "q", raw[1:]
-	case '&':
-		return "a", raw[1:]
-	case '@':
-		return "o", raw[1:]
-	case '%':
-		return "h", raw[1:]
-	case '+':
-		return "v", raw[1:]
-	default:
-		return "", raw
-	}
+	return modes.String(), ""
+}
+
+// parseNamesEntry parses a single token from a NAMES reply, handling:
+//   - multi-prefix: multiple mode chars before the nick (e.g. "@+nick" → modes="ov")
+//   - userhost-in-names: user@host appended to nick (e.g. "nick!user@host")
+func parseNamesEntry(raw string) (string, string, string, string) {
+	mode, rest := parseNickMode(raw)
+	nick, userhost, _ := strings.Cut(rest, "!")
+	user, host, _ := strings.Cut(userhost, "@")
+	return mode, nick, user, host
 }

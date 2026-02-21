@@ -266,7 +266,7 @@ func (h *Handler) GetUser(ctx context.Context, request api.GetUserRequestObject)
 
 // InviteUser implements api.StrictServerInterface.
 func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestObject) (api.InviteUserResponseObject, error) {
-	if _, err := h.requireAdmin(ctx); err != nil {
+	if err := h.requireAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -367,7 +367,7 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 
 // DeleteUser implements api.StrictServerInterface.
 func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestObject) (api.DeleteUserResponseObject, error) {
-	if _, err := h.requireAdmin(ctx); err != nil {
+	if err := h.requireAdmin(ctx); err != nil {
 		return nil, err
 	}
 

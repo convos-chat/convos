@@ -7,6 +7,65 @@ import (
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
+func TestParseNickMode(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input    string
+		wantMode string
+		wantNick string
+	}{
+		{"nick", "", "nick"},
+		{"@nick", "o", "nick"},
+		{"+nick", "v", "nick"},
+		{"@+nick", "ov", "nick"},        // multi-prefix: op + voice
+		{"~&@%+nick", "qaohv", "nick"}, // all prefixes
+		{"", "", ""},
+	}
+
+	for _, tt := range tests {
+		mode, nick := parseNickMode(tt.input)
+		if mode != tt.wantMode || nick != tt.wantNick {
+			t.Errorf("parseNickMode(%q) = (%q, %q), want (%q, %q)",
+				tt.input, mode, nick, tt.wantMode, tt.wantNick)
+		}
+	}
+}
+
+func TestParseNamesEntry(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input    string
+		wantMode string
+		wantNick string
+		wantUser string
+		wantHost string
+	}{
+		// plain nick
+		{"nick", "", "nick", "", ""},
+		// single prefix
+		{"@nick", "o", "nick", "", ""},
+		// multi-prefix (multi-prefix cap)
+		{"@+nick", "ov", "nick", "", ""},
+		// userhost-in-names
+		{"nick!user@host.example", "", "nick", "user", "host.example"},
+		// both caps together
+		{"@+nick!user@host.example", "ov", "nick", "user", "host.example"},
+		// empty
+		{"", "", "", "", ""},
+	}
+
+	for _, tt := range tests {
+		mode, nick, user, host := parseNamesEntry(tt.input)
+		if mode != tt.wantMode || nick != tt.wantNick || user != tt.wantUser || host != tt.wantHost {
+			t.Errorf("parseNamesEntry(%q) = (%q, %q, %q, %q), want (%q, %q, %q, %q)",
+				tt.input, mode, nick, user, host,
+				tt.wantMode, tt.wantNick, tt.wantUser, tt.wantHost)
+		}
+	}
+}
+
 func TestApplyServiceAccountPrefix(t *testing.T) {
 	t.Parallel()
 

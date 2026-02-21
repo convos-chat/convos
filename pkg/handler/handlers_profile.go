@@ -58,7 +58,7 @@ func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListCo
 
 // SaveConnectionProfile implements api.StrictServerInterface.
 func (h *Handler) SaveConnectionProfile(ctx context.Context, request api.SaveConnectionProfileRequestObject) (api.SaveConnectionProfileResponseObject, error) {
-	if _, err := h.requireAdmin(ctx); err != nil {
+	if err := h.requireAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func (h *Handler) SaveConnectionProfile(ctx context.Context, request api.SaveCon
 
 // RemoveConnectionProfile implements api.StrictServerInterface.
 func (h *Handler) RemoveConnectionProfile(ctx context.Context, request api.RemoveConnectionProfileRequestObject) (api.RemoveConnectionProfileResponseObject, error) {
-	if _, err := h.requireAdmin(ctx); err != nil {
+	if err := h.requireAdmin(ctx); err != nil {
 		return nil, err
 	}
 
