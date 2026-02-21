@@ -104,6 +104,71 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	}
 }
 
+// handleTagMsg handles TAGMSG messages (typing indicators, reactions).
+func (c *Connection) handleTagMsg(msg ircmsg.Message) {
+	if len(msg.Params) < 1 {
+		return
+	}
+
+	target := msg.Params[0]
+	nick := msg.Nick()
+
+	// Determine conversation target
+	convID := target
+	if target == "*" {
+		convID = ""
+	} else if target == c.Nick() {
+		// Private message - use sender's nick as conversation ID
+		convID = nick
+	}
+
+	// Service accounts (e.g. NickServ, ChanServ) are routed to an existing
+	// conversation if one is open, otherwise they fall back to the server log.
+	profile := c.Profile()
+	isServiceAccount := profile != nil && profile.FindServiceAccount(nick, target) != ""
+	conv := c.getOrCreateConv(convID, isServiceAccount)
+
+	// +typing tag: emit state event
+	if present, value := msg.GetTag("+typing"); present {
+		c.emitEvent(map[string]any{
+			"event":           "state",
+			"type":            "typing",
+			"nick":            nick,
+			"conversation_id": conv.ID(),
+			"typing":          value,
+		})
+	}
+
+	// +draft/react or react tag: emit reaction event
+	reactEmoji := ""
+	if present, value := msg.GetTag("+draft/react"); present {
+		reactEmoji = value
+	} else if present, value := msg.GetTag("react"); present {
+		reactEmoji = value
+	}
+
+	if reactEmoji != "" {
+		targetMsgID := ""
+		if present, value := msg.GetTag("+draft/reply"); present {
+			targetMsgID = value
+		} else if present, value := msg.GetTag("reply"); present {
+			targetMsgID = value
+		}
+
+		if targetMsgID != "" {
+			c.emitEvent(map[string]any{
+				"event":           "message",
+				"type":            "reaction",
+				"conversation_id": conv.ID(),
+				"nick":            nick,
+				"message":         reactEmoji,
+				"reply_to":        targetMsgID,
+				"ts":              serverTimeOrNowRFC3339(msg),
+			})
+		}
+	}
+}
+
 // handleCTCP responds to CTCP queries (PING, VERSION, TIME).
 func (c *Connection) handleCTCP(nick, ctcp string) {
 	parts := strings.SplitN(ctcp, " ", 2)

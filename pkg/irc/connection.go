@@ -283,6 +283,10 @@ func (c *Connection) Connect() error {
 		c.handleMessage(msg, "notice")
 	})
 
+	c.client.AddCallback("TAGMSG", func(msg ircmsg.Message) {
+		c.handleTagMsg(msg)
+	})
+
 	c.client.AddCallback("JOIN", func(msg ircmsg.Message) {
 		c.handleJoin(msg)
 	})

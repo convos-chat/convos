@@ -71,7 +71,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != "message" || m["type"] != "notice" {
+			if m["event"] != evMessage || m["type"] != "notice" {
 				t.Errorf("Expected notice message event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -212,7 +212,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != "message" || m["from"] != aliceNick {
+			if m["event"] != evMessage || m["from"] != aliceNick {
 				t.Errorf("Expected message from alice, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -552,5 +552,67 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			t.Error("Expected message event")
 		}
 	})
-}
 
+	t.Run("handleTagMsg", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		// Setup conversation
+		conv := core.NewConversation("#convos", conn)
+		conn.AddConversation(conv)
+		conv.AddParticipant("alice", map[string]any{"nick": "alice"})
+
+		// 1. Typing notification
+		// TAGMSG #convos +typing=active
+		typingMsg := ircmsg.MakeMessage(map[string]string{"+typing": "active"}, "alice!user@host", "TAGMSG", "#convos")
+		conn.handleTagMsg(typingMsg)
+
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("Unexpected event type: %T", ev)
+			}
+			if m["event"] != evState || m["type"] != "typing" {
+				t.Errorf("Expected state/typing event, got %+v", m)
+			}
+			if m["typing"] != "active" {
+				t.Errorf("Expected typing='active', got %v", m["typing"])
+			}
+			if m["nick"] != "alice" {
+				t.Errorf("Expected nick='alice', got %v", m["nick"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("Expected typing event")
+		}
+
+		// 2. Reaction
+		// TAGMSG #convos +draft/reply=msg123 +draft/react=👍
+		reactMsg := ircmsg.MakeMessage(map[string]string{
+			"+draft/reply": "msg123",
+			"+draft/react": "👍",
+		}, "alice!user@host", "TAGMSG", "#convos")
+		conn.handleTagMsg(reactMsg)
+
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("Unexpected event type: %T", ev)
+			}
+			if m["event"] != evMessage || m["type"] != "reaction" {
+				t.Errorf("Expected message/reaction event, got %+v", m)
+			}
+			if m["message"] != "👍" {
+				t.Errorf("Expected message='👍', got %v", m["message"])
+			}
+			if m["reply_to"] != "msg123" {
+				t.Errorf("Expected reply_to='msg123', got %v", m["reply_to"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("Expected reaction event")
+		}
+	})
+}

@@ -713,4 +713,69 @@ func TestIRCIntegration(t *testing.T) {
 			t.Error("Channel conversation should be frozen after disconnect")
 		}
 	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 17. TAGMSG - Typing indicators and reactions
+	// ──────────────────────────────────────────────────────────────
+	t.Run("ircv3_tagmsg", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		channel := "#cvtest" + sfx
+		nickA := "cvtA" + sfx
+		nickB := "cvtB" + sfx
+
+		connA, subA := connectTestIRC(t, serverURL, nickA)
+		connB, subB := connectTestIRC(t, serverURL, nickB)
+
+		joinChannel(t, connA, subA, channel)
+		if err := connB.Send(channel, "/join "+channel); err != nil {
+			t.Fatalf("B /join: %v", err)
+		}
+		// Wait for A to see B join
+		waitForEvent(t, subA, func(m map[string]any) bool {
+			return m["event"] == evState && m["type"] == typeJoin &&
+				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		})
+
+		// 1. Typing notification
+		// A sends typing notification to channel
+		// Note: We use the underlying client to send TAGMSG as it's not a user command
+		if err := connA.client.SendWithTags(map[string]string{"+typing": "active"}, "TAGMSG", channel); err != nil {
+			t.Fatalf("A SendWithTags: %v", err)
+		}
+
+		// B should receive the typing event
+		ev := waitForEvent(t, subB, func(m map[string]any) bool {
+			return m["event"] == evState &&
+				m["type"] == "typing" &&
+				m["conversation_id"] == strings.ToLower(channel) &&
+				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickA)
+		})
+		if typing := fmt.Sprintf("%v", ev["typing"]); typing != "active" {
+			t.Errorf("typing status = %q, want active", typing)
+		}
+
+		// 2. Reaction
+		// A sends a reaction to a hypothetical message
+		if err := connA.client.SendWithTags(map[string]string{
+			"+draft/reply": "msg123",
+			"+draft/react": "👍",
+		}, "TAGMSG", channel); err != nil {
+			t.Fatalf("A SendWithTags: %v", err)
+		}
+
+		// B should receive the reaction event
+		ev = waitForEvent(t, subB, func(m map[string]any) bool {
+			return m["event"] == evMessage &&
+				m["type"] == "reaction" &&
+				m["conversation_id"] == strings.ToLower(channel) &&
+				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickA)
+		})
+		if msg := fmt.Sprintf("%v", ev["message"]); msg != "👍" {
+			t.Errorf("reaction emoji = %q, want 👍", msg)
+		}
+		if replyTo := fmt.Sprintf("%v", ev["reply_to"]); replyTo != "msg123" {
+			t.Errorf("reaction reply_to = %q, want msg123", replyTo)
+		}
+	})
 }
