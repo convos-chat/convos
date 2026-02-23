@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -9,6 +10,24 @@ import (
 	"time"
 
 	"github.com/convos-chat/convos/pkg/core"
+)
+
+var (
+	ErrUsageJoin          = errors.New("usage: /join #channel")
+	ErrUsagePart          = errors.New("usage: /part #channel")
+	ErrUsageMsg           = errors.New("usage: /msg target message")
+	ErrUsageNick          = errors.New("usage: /nick newnick")
+	ErrUsageKick          = errors.New("usage: /kick nick [reason]")
+	ErrUsageMe            = errors.New("usage: /me action")
+	ErrUsageSay           = errors.New("usage: /say message")
+	ErrUsageWhois         = errors.New("usage: /whois nick")
+	ErrUsageQuery         = errors.New("usage: /query <nick> [message]")
+	ErrUsageNames         = errors.New("usage: /names #channel")
+	ErrUsageInvite        = errors.New("usage: /invite nick [#channel]")
+	ErrUsageInviteChannel = errors.New("usage: /invite nick #channel")
+	ErrUsageOper          = errors.New("usage: /oper user password")
+	ErrUsageClear         = errors.New("WARNING: /clear history <name> will delete all messages in the backend")
+	ErrUsageIson          = errors.New("usage: /ison nick")
 )
 
 // handleCommand parses and executes an IRC command from user input.

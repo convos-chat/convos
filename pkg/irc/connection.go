@@ -23,21 +23,6 @@ var (
 	ErrNotConnected        = errors.New("not connected")
 	ErrDoesNotWantConnect  = errors.New("does not want to be connected")
 	ErrNoTarget            = errors.New("cannot send message without a target")
-	ErrUsageJoin           = errors.New("usage: /join #channel")
-	ErrUsagePart           = errors.New("usage: /part #channel")
-	ErrUsageMsg            = errors.New("usage: /msg target message")
-	ErrUsageNick           = errors.New("usage: /nick newnick")
-	ErrUsageKick           = errors.New("usage: /kick nick [reason]")
-	ErrUsageMe             = errors.New("usage: /me action")
-	ErrUsageSay            = errors.New("usage: /say message")
-	ErrUsageWhois          = errors.New("usage: /whois nick")
-	ErrUsageQuery          = errors.New("usage: /query <nick> [message]")
-	ErrUsageNames          = errors.New("usage: /names #channel")
-	ErrUsageInvite         = errors.New("usage: /invite nick [#channel]")
-	ErrUsageInviteChannel  = errors.New("usage: /invite nick #channel")
-	ErrUsageOper           = errors.New("usage: /oper user password")
-	ErrUsageClear          = errors.New("WARNING: /clear history <name> will delete all messages in the backend")
-	ErrUsageIson           = errors.New("usage: /ison nick")
 	ErrUnknownConversation = errors.New("unknown conversation")
 )
 
@@ -464,6 +449,40 @@ func (c *Connection) Disconnect() error {
 	return nil
 }
 
+// LogServerError logs an error message to the server log (visible in UI).
+func (c *Connection) LogServerError(message string) {
+	convID := ""
+	conv := c.GetConversation(convID)
+	if conv == nil {
+		conv = core.NewConversationWithID("", c.Name(), c)
+		c.AddConversation(conv)
+	}
+
+	ts := time.Now().Unix()
+	c.emitEvent(map[string]any{
+		"event":           "message",
+		"conversation_id": convID,
+		"from":            c.URL().Host,
+		"message":         message,
+		"type":            "error",
+		"ts":              time.Unix(ts, 0).Format(time.RFC3339),
+	})
+	c.persistMessage(convID, c.URL().Host, message, "error", false, ts)
+}
+
+// Nick returns the current IRC nickname.
+func (c *Connection) Nick() string {
+	c.mu.RLock()
+	if c.nick != "" {
+		c.mu.RUnlock()
+		return c.nick
+	}
+	c.mu.RUnlock()
+
+	// Fall back to base implementation
+	return c.BaseConnection.Nick()
+}
+
 // Send sends a message or command to a target (channel or user).
 // Messages starting with "/" are interpreted as IRC commands.
 func (c *Connection) Send(target, message string) error {
@@ -506,19 +525,6 @@ func (c *Connection) Send(target, message string) error {
 
 	c.emitSentMessage(target, message, "private")
 	return nil
-}
-
-// Nick returns the current IRC nickname.
-func (c *Connection) Nick() string {
-	c.mu.RLock()
-	if c.nick != "" {
-		c.mu.RUnlock()
-		return c.nick
-	}
-	c.mu.RUnlock()
-
-	// Fall back to base implementation
-	return c.BaseConnection.Nick()
 }
 
 // SetNick sets the current nickname.
@@ -714,6 +720,25 @@ func (c *Connection) getOrCreateConv(convID string, isServiceAccount bool) *core
 	}
 	c.AddConversation(conv)
 	return conv
+}
+
+// EnsureConversation finds or creates a conversation for a given target and sender.
+// It handles private message redirection (target == self), wildcard target (server log),
+// and service account redirection.
+func (c *Connection) EnsureConversation(target, sender string) *core.Conversation {
+	convID := target
+	if target == "*" {
+		convID = ""
+	} else if target == c.Nick() {
+		// Private message - use sender's nick as conversation ID
+		convID = sender
+	}
+
+	// Service accounts (e.g. NickServ, ChanServ) are routed to an existing
+	// conversation if one is open, otherwise they fall back to the server log.
+	profile := c.Profile()
+	isServiceAccount := profile != nil && profile.FindServiceAccount(sender, target) != ""
+	return c.getOrCreateConv(convID, isServiceAccount)
 }
 
 // applyServiceAccountPrefix checks whether message starts with "sa: " for any

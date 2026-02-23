@@ -14,27 +14,6 @@ import (
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
-func parseServerTime(msg ircmsg.Message) time.Time {
-	if present, value := msg.GetTag("time"); present {
-		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-			return t
-		}
-	}
-	return time.Now()
-}
-
-// serverTimeOrNow extracts the server-time tag from an IRC message.
-// Returns the parsed time as Unix seconds, or time.Now().Unix() as fallback.
-func serverTimeOrNow(msg ircmsg.Message) int64 {
-	return parseServerTime(msg).Unix()
-}
-
-// serverTimeOrNowRFC3339 extracts the server-time tag from an IRC message.
-// Returns the time formatted as RFC3339, or the current time as fallback.
-func serverTimeOrNowRFC3339(msg ircmsg.Message) string {
-	return parseServerTime(msg).Format(time.RFC3339)
-}
-
 // handleMessage handles incoming PRIVMSG and NOTICE messages.
 func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	if len(msg.Params) < 2 {
@@ -59,20 +38,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 		}
 	}
 
-	// Determine conversation target
-	convID := target
-	if target == "*" {
-		convID = ""
-	} else if target == c.Nick() {
-		// Private message - use sender's nick as conversation ID
-		convID = nick
-	}
-
-	// Service accounts (e.g. NickServ, ChanServ) are routed to an existing
-	// conversation if one is open, otherwise they fall back to the server log.
-	profile := c.Profile()
-	isServiceAccount := profile != nil && profile.FindServiceAccount(nick, target) != ""
-	conv := c.getOrCreateConv(convID, isServiceAccount)
+	conv := c.EnsureConversation(target, nick)
 
 	if conv.Frozen() != "" {
 		conv.SetFrozen("")
@@ -113,20 +79,7 @@ func (c *Connection) handleTagMsg(msg ircmsg.Message) {
 	target := msg.Params[0]
 	nick := msg.Nick()
 
-	// Determine conversation target
-	convID := target
-	if target == "*" {
-		convID = ""
-	} else if target == c.Nick() {
-		// Private message - use sender's nick as conversation ID
-		convID = nick
-	}
-
-	// Service accounts (e.g. NickServ, ChanServ) are routed to an existing
-	// conversation if one is open, otherwise they fall back to the server log.
-	profile := c.Profile()
-	isServiceAccount := profile != nil && profile.FindServiceAccount(nick, target) != ""
-	conv := c.getOrCreateConv(convID, isServiceAccount)
+	conv := c.EnsureConversation(target, nick)
 
 	// +typing tag: emit state event
 	if present, value := msg.GetTag("+typing"); present {
@@ -998,58 +951,3 @@ func (c *Connection) handleISupport(_ ircmsg.Message) {
 	c.emitInfo()
 }
 
-// LogServerError logs an error message to the server log (visible in UI).
-func (c *Connection) LogServerError(message string) {
-	convID := ""
-	conv := c.GetConversation(convID)
-	if conv == nil {
-		conv = core.NewConversationWithID("", c.Name(), c)
-		c.AddConversation(conv)
-	}
-
-	ts := time.Now().Unix()
-	c.emitEvent(map[string]any{
-		"event":           "message",
-		"conversation_id": convID,
-		"from":            c.URL().Host,
-		"message":         message,
-		"type":            "error",
-		"ts":              time.Unix(ts, 0).Format(time.RFC3339),
-	})
-	c.persistMessage(convID, c.URL().Host, message, "error", false, ts)
-}
-
-// parseNickMode extracts all mode prefixes and the nick from an IRC NAMES entry.
-// Supports multi-prefix (multiple consecutive prefixes, e.g. "@+nick" → "ov", "nick").
-// Mode prefixes: ~ = q (founder), & = a (admin), @ = o (operator),
-// % = h (half-op), + = v (voice).
-func parseNickMode(raw string) (string, string) {
-	var modes strings.Builder
-	for i := range len(raw) {
-		switch raw[i] {
-		case '~':
-			modes.WriteByte('q')
-		case '&':
-			modes.WriteByte('a')
-		case '@':
-			modes.WriteByte('o')
-		case '%':
-			modes.WriteByte('h')
-		case '+':
-			modes.WriteByte('v')
-		default:
-			return modes.String(), raw[i:]
-		}
-	}
-	return modes.String(), ""
-}
-
-// parseNamesEntry parses a single token from a NAMES reply, handling:
-//   - multi-prefix: multiple mode chars before the nick (e.g. "@+nick" → modes="ov")
-//   - userhost-in-names: user@host appended to nick (e.g. "nick!user@host")
-func parseNamesEntry(raw string) (string, string, string, string) {
-	mode, rest := parseNickMode(raw)
-	nick, userhost, _ := strings.Cut(rest, "!")
-	user, host, _ := strings.Cut(userhost, "@")
-	return mode, nick, user, host
-}
