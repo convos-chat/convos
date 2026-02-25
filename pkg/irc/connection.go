@@ -467,7 +467,7 @@ func (c *Connection) LogServerError(message string) {
 		"type":            "error",
 		"ts":              time.Unix(ts, 0).Format(time.RFC3339),
 	})
-	c.persistMessage(convID, c.URL().Host, message, "error", false, ts)
+	c.persistMessage(convID, c.URL().Host, message, "error", false, ts, "", "", "")
 }
 
 // Nick returns the current IRC nickname.
@@ -622,11 +622,11 @@ func (c *Connection) emitSentMessage(target, message, msgType string) {
 		"type":            msgType,
 	})
 
-	c.persistMessage(convID, from, message, msgType, false, time.Now().Unix())
+	c.persistMessage(convID, from, message, msgType, false, time.Now().Unix(), "", "", "")
 }
 
 // persistMessage saves a message to the backend storage.
-func (c *Connection) persistMessage(convID, from, message, msgType string, highlight bool, ts int64) {
+func (c *Connection) persistMessage(convID, from, message, msgType string, highlight bool, ts int64, msgID, account, replyTo string) {
 	conv := c.GetConversation(convID)
 	if conv == nil {
 		slog.Warn("Conversation not found for message", "conversation_id", convID)
@@ -639,6 +639,9 @@ func (c *Connection) persistMessage(convID, from, message, msgType string, highl
 		Type:      msgType,
 		Highlight: highlight,
 		Timestamp: ts,
+		MsgID:     msgID,
+		Account:   account,
+		ReplyTo:   replyTo,
 	}
 
 	err := c.User().Core().Backend().SaveMessage(conv, msg)

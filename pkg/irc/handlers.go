@@ -53,7 +53,17 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 	isDM := target == c.Nick()
 	highlight := c.isHighlight(message)
 
-	c.emitEvent(map[string]any{
+	// Extract IRCv3 message tags.
+	_, msgID := msg.GetTag("msgid")
+	_, account := msg.GetTag("account")
+	replyTo := ""
+	if _, v := msg.GetTag("+draft/reply"); v != "" {
+		replyTo = v
+	} else if _, v := msg.GetTag("reply"); v != "" {
+		replyTo = v
+	}
+
+	event := map[string]any{
 		"event":           "message",
 		"conversation_id": conv.ID(),
 		"from":            nick,
@@ -61,9 +71,19 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType string) {
 		"message":         message,
 		"type":            msgType,
 		"ts":              tsRFC3339,
-	})
+	}
+	if msgID != "" {
+		event["msgid"] = msgID
+	}
+	if account != "" {
+		event["account"] = account
+	}
+	if replyTo != "" {
+		event["reply_to"] = replyTo
+	}
+	c.emitEvent(event)
 
-	c.persistMessage(conv.ID(), nick, message, msgType, highlight, ts)
+	c.persistMessage(conv.ID(), nick, message, msgType, highlight, ts, msgID, account, replyTo)
 
 	if nick != c.Nick() && highlight || isDM {
 		c.persistNotification(conv.ID(), nick, message, msgType, ts)
@@ -881,7 +901,7 @@ func (c *Connection) handleNotice(msg ircmsg.Message) {
 		"ts":              serverTimeOrNowRFC3339(msg),
 	})
 
-	c.persistMessage(convID, msg.Source, message, "notice", false, serverTimeOrNow(msg))
+	c.persistMessage(convID, msg.Source, message, "notice", false, serverTimeOrNow(msg), "", "", "")
 }
 
 // handleErrorReply handles IRC error numerics (4xx) and surfaces them to the
@@ -911,7 +931,7 @@ func (c *Connection) handleErrorReply(msg ircmsg.Message) {
 		"ts":              serverTimeOrNowRFC3339(msg),
 	})
 
-	c.persistMessage(convID, msg.Source, message, "error", false, serverTimeOrNow(msg))
+	c.persistMessage(convID, msg.Source, message, "error", false, serverTimeOrNow(msg), "", "", "")
 }
 
 // handleUserModeIs handles RPL_UMODEIS (221).

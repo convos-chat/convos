@@ -220,6 +220,103 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 	})
 
+	t.Run("handleMessage_ircv3_tags", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		conn.SetNick("testnick")
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		// PRIVMSG with msgid, account, and +draft/reply tags
+		msg := ircmsg.MakeMessage(
+			map[string]string{
+				"msgid":        "abc-123",
+				"account":      "alice_account",
+				"+draft/reply": "parent-msg-456",
+			},
+			"alice!user@host", "PRIVMSG", "#convos", "Hello with tags!",
+		)
+		conn.AddConversation(core.NewConversation("#convos", conn))
+		conn.handleMessage(msg, "private")
+
+		// Check emitted event
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("unexpected event type: %T", ev)
+			}
+			if m["event"] != evMessage {
+				t.Fatalf("expected message event, got %+v", m)
+			}
+			if m["msgid"] != "abc-123" {
+				t.Errorf("expected msgid=abc-123, got %v", m["msgid"])
+			}
+			if m["account"] != "alice_account" {
+				t.Errorf("expected account=alice_account, got %v", m["account"])
+			}
+			if m["reply_to"] != "parent-msg-456" {
+				t.Errorf("expected reply_to=parent-msg-456, got %v", m["reply_to"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("expected message event")
+		}
+
+		// Check persisted message has MsgID, Account, ReplyTo
+		conv := conn.GetConversation("#convos")
+		if conv == nil {
+			t.Fatal("conversation #convos not found")
+		}
+		result, err := c.Backend().LoadMessages(conv, core.MessageQuery{Limit: 10})
+		if err != nil {
+			t.Fatalf("LoadMessages: %v", err)
+		}
+		if len(result.Messages) == 0 {
+			t.Fatal("expected at least one persisted message")
+		}
+		saved := result.Messages[len(result.Messages)-1]
+		if saved.MsgID != "abc-123" {
+			t.Errorf("persisted MsgID: want abc-123, got %q", saved.MsgID)
+		}
+		if saved.Account != "alice_account" {
+			t.Errorf("persisted Account: want alice_account, got %q", saved.Account)
+		}
+		if saved.ReplyTo != "parent-msg-456" {
+			t.Errorf("persisted ReplyTo: want parent-msg-456, got %q", saved.ReplyTo)
+		}
+	})
+
+	t.Run("handleMessage_no_tags", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		conn.SetNick("testnick")
+		sub := c.Events().SubscribeUser(user.ID())
+		defer sub.Close()
+
+		conn.AddConversation(core.NewConversation("#convos", conn))
+		msg := ircmsg.MakeMessage(nil, "bob!user@host", "PRIVMSG", "#convos", "plain message")
+		conn.handleMessage(msg, "private")
+
+		select {
+		case ev := <-sub.Events():
+			m, ok := ev.(map[string]any)
+			if !ok {
+				t.Fatalf("unexpected event type: %T", ev)
+			}
+			if _, has := m["msgid"]; has {
+				t.Errorf("expected no msgid field, got %v", m["msgid"])
+			}
+			if _, has := m["account"]; has {
+				t.Errorf("expected no account field, got %v", m["account"])
+			}
+			if _, has := m["reply_to"]; has {
+				t.Errorf("expected no reply_to field, got %v", m["reply_to"])
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("expected message event")
+		}
+	})
+
 	t.Run("handlePart", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()

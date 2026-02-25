@@ -119,4 +119,7 @@ type Message struct {
 	Highlight bool   `json:"highlight"`
 	Type      string `json:"type"` // action, error, notice, privmsg
 	Timestamp int64  `json:"ts"`
+	MsgID    string `json:"msgid,omitempty"`   // IRCv3 server-assigned message ID
+	Account  string `json:"account,omitempty"` // IRCv3 sender NickServ account
+	ReplyTo  string `json:"reply_to,omitempty"` // IRCv3 reply tag (msgid of parent)
 }
