@@ -218,7 +218,6 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	}
 	r.Use(
 		s.ReverseProxyMiddleware,
-		stripJSONSuffix,
 		ContextMiddleware,
 		middleware.Recoverer,
 		ProviderMiddleware,
@@ -716,36 +715,31 @@ func generateSecret(nBytes int) string {
 	return hex.EncodeToString(b)
 }
 
-// stripJSONSuffix is middleware that strips .json suffix from /api/ URL paths.
-func stripJSONSuffix(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/") && strings.HasSuffix(r.URL.Path, ".json") {
-			r.URL.Path = strings.TrimSuffix(r.URL.Path, ".json")
-		}
-		if strings.HasPrefix(r.URL.RawPath, "/api/") && strings.HasSuffix(r.URL.RawPath, ".json") {
-			r.URL.RawPath = strings.TrimSuffix(r.URL.RawPath, ".json")
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-// serveOpenAPISpec serves the Swagger 2.0 spec as JSON at /api.
+// serveOpenAPISpec serves the OpenAPI 3.0 spec as JSON at /api.
 func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
-	data, err := fs.ReadFile(s.publicFS, "convos-api.yaml")
+	data, err := fs.ReadFile(s.publicFS, "convos-api3.yaml")
 	if err != nil {
 		http.Error(w, "OpenAPI spec not found", http.StatusNotFound)
 		return
 	}
 
-	// Parse YAML and serve as JSON with the correct host
+	// Parse YAML and serve as JSON with the correct server URL
 	var spec map[string]any
 	if err := yaml.Unmarshal(data, &spec); err != nil {
 		http.Error(w, "Failed to parse spec", http.StatusInternalServerError)
 		return
 	}
 
-	// Set host to match the actual server
-	spec["host"] = r.Host
+	// Inject the absolute server URL so the frontend can construct requests
+	scheme := "http"
+	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+		scheme = "https"
+	}
+	if servers, ok := spec["servers"].([]any); ok && len(servers) > 0 {
+		if server, ok := servers[0].(map[string]any); ok {
+			server["url"] = scheme + "://" + r.Host + "/api"
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(spec)

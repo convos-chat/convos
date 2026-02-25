@@ -12,7 +12,6 @@ import {is} from '../js/util';
 
 class Api {
   constructor() {
-    this.protocol = location.protocol || 'http';
     this._url = '/api';
   }
 
@@ -63,8 +62,9 @@ class Api {
         if (!operationId) return;
 
         op.method = method.toUpperCase();
-        op.url = this.protocol + '//' + spec.host + spec.basePath + path + '.json';
+        op.url = spec.servers[0].url + path;
         op.parameters = (op.parameters || []).map(p => this._resolveRef(p));
+        op.requestBody = op.requestBody ? this._resolveRef(op.requestBody) : null;
 
         this._ops[operationId] = op;
       });

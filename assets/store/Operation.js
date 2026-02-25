@@ -127,12 +127,10 @@ export default class Operation extends Reactive {
   }
 
   _extractValue(params, p) {
-    return !p.schema ? params[p.name] : Object.keys(p.schema.properties).reduce((map, k) => { map[k] = params[k]; return map }, {});
+    return params[p.name];
   }
 
   _hasProperty(params, p) {
-    if (p.in === 'body') return true;
-    if (p.in === 'formData') return params.formData.has(p.name);
     return Object.hasOwn(params, p.name);
   }
 
@@ -155,20 +153,25 @@ export default class Operation extends Reactive {
       else if (p.in === 'query') {
         url.searchParams.set(p.name, this._extractValue(params, p));
       }
-      else if (p.in === 'formData') {
-        delete req.headers['Content-Type'];
-        req.body = params.formData;
-      }
-      else if (p.in === 'body') {
-        req.body = this._extractValue(params, p);
-      }
       else if (p.in === 'header') {
-        req.header[p.name] = this._extractValue(params, p.name);
+        req.headers[p.name] = this._extractValue(params, p.name);
       }
       else {
         throw '[Api] Parameter in:' + p.in + ' is not supported.';
       }
     });
+
+    if (opSpec.requestBody) {
+      const content = opSpec.requestBody.content;
+      if (content['multipart/form-data']) {
+        delete req.headers['Content-Type'];
+        req.body = params.formData;
+      }
+      else if (content['application/json']) {
+        const props = content['application/json'].schema?.properties || {};
+        req.body = Object.keys(props).reduce((body, k) => { body[k] = params[k]; return body; }, {});
+      }
+    }
 
     if (errors.length) throw errors;
     return req;
