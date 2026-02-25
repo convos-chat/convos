@@ -483,6 +483,12 @@ func (c *Connection) Nick() string {
 	return c.BaseConnection.Nick()
 }
 
+// List returns the current channel list cache state immediately, triggering a
+// fresh IRC LIST fetch when the cache is empty or "refresh" is requested.
+func (c *Connection) List(args string) (map[string]any, error) {
+	return c.handleListCommand(args)
+}
+
 // Send sends a message or command to a target (channel or user).
 // Messages starting with "/" are interpreted as IRC commands.
 func (c *Connection) Send(target, message string) error {

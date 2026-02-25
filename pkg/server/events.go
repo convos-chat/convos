@@ -202,6 +202,24 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		return wsError("Connection not found.", msg)
 	}
 
+	// /list is handled synchronously: return the current cache state immediately
+	// (triggering a fresh IRC LIST fetch when needed) so the frontend's polling
+	// loop fires correctly — matching Perl's _send_list_p behaviour.
+	if args, ok := parseListArgs(msg.Message); ok {
+		result, err := conn.List(args)
+		if err != nil {
+			return wsError(err.Error(), msg)
+		}
+		result["event"] = "sent"
+		result["connection_id"] = msg.ConnectionID
+		result["conversation_id"] = msg.ConversationID
+		result["message"] = msg.Message
+		if msg.ID != nil {
+			result["id"] = msg.ID
+		}
+		return result
+	}
+
 	if err := conn.Send(msg.ConversationID, msg.Message); err != nil {
 		return wsError(err.Error(), msg)
 	}
@@ -223,6 +241,19 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		resp["id"] = msg.ID
 	}
 	return resp
+}
+
+// parseListArgs checks whether message is a /list command (case-insensitive)
+// and returns the arguments after "/list". Returns ok=false for anything else.
+func parseListArgs(message string) (args string, ok bool) {
+	if len(message) < 5 || !strings.EqualFold(message[:5], "/list") {
+		return "", false
+	}
+	rest := message[5:]
+	if rest != "" && rest[0] != ' ' {
+		return "", false // e.g. /listing — not a /list command
+	}
+	return strings.TrimSpace(rest), true
 }
 
 // wsError builds an error response for a WebSocket message.

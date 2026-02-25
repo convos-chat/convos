@@ -56,6 +56,10 @@ type Connection interface {
 	// Send sends a message to a target.
 	Send(target, message string) error
 
+	// List returns the current channel list cache state immediately, triggering
+	// a fresh IRC LIST fetch if the cache is empty or refresh is requested.
+	List(args string) (map[string]any, error)
+
 	// Nick returns the current nickname.
 	Nick() string
 

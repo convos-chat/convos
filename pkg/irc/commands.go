@@ -250,7 +250,8 @@ func (c *Connection) handleCommand(target, raw string) error {
 		}
 		return c.client.SendRaw("OPER " + args)
 	case "LIST":
-		return c.handleListCommand(args)
+		_, err := c.handleListCommand(args)
+		return err
 	case "QUIT":
 		msg := "Bye!"
 		if args != "" {
@@ -307,21 +308,33 @@ func (c *Connection) executeCommand(cmd string) {
 // handleListCommand implements the /list command with caching and search.
 // Usage: /list [refresh] [/pattern/[flags]]
 //
+// Always returns the current cache state immediately (matching Perl's _send_list_p
+// behaviour). When the cache is empty or "refresh" is requested, it also triggers
+// a fresh IRC LIST fetch so results trickle in asynchronously.
+//
 // With no args: returns cached results (or fetches if no cache).
 // "refresh": clears cache and re-fetches from server.
 // /pattern/: searches cached channels by name and topic (case-insensitive).
 // /pattern/n: search by name only. /pattern/t: search by topic only.
-func (c *Connection) handleListCommand(args string) error {
+func (c *Connection) handleListCommand(args string) (map[string]any, error) {
 	c.mu.Lock()
 
-	// Refresh if requested or no cache exists
+	// Refresh if requested or no cache exists — fire off the IRC LIST but
+	// still fall through and return the (empty) cache immediately.
 	if strings.Contains(args, "refresh") || c.listBuf.ts.IsZero() {
 		c.listBuf = listCache{
 			conversations: make(map[string]listEntry),
 			ts:            time.Now(),
 		}
 		c.mu.Unlock()
-		return c.client.Send("LIST")
+		if err := c.client.Send("LIST"); err != nil {
+			return nil, err
+		}
+		return map[string]any{
+			"conversations":   []map[string]any{},
+			"n_conversations": 0,
+			"done":            false,
+		}, nil
 	}
 
 	// Snapshot the cache under lock
@@ -340,7 +353,6 @@ func (c *Connection) handleListCommand(args string) error {
 		found = found[:200]
 	}
 
-	// Convert to []any for JSON serialization
 	convList := make([]map[string]any, len(found))
 	for i, e := range found {
 		convList[i] = map[string]any{
@@ -351,15 +363,11 @@ func (c *Connection) handleListCommand(args string) error {
 		}
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           "sent",
-		"command":         []string{"list"},
-		"args":            args,
+	return map[string]any{
 		"conversations":   convList,
 		"n_conversations": total,
 		"done":            done,
-	})
-	return nil
+	}, nil
 }
 
 // listFilterRE matches /pattern/[modifiers] in /list arguments.

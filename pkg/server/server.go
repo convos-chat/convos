@@ -205,7 +205,7 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	store.Options.HttpOnly = true
 	if cfg.SecureCookies != nil {
 		store.Options.Secure = *cfg.SecureCookies
-	} else if u := c.Settings().BaseURL(); u != nil && u.Scheme == "https" {
+	} else if u := c.Settings().BaseURL(); u != nil && u.Scheme == httpsScheme {
 		store.Options.Secure = true
 	}
 	store.Options.SameSite = http.SameSiteStrictMode
@@ -731,9 +731,9 @@ func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inject the absolute server URL so the frontend can construct requests
-	scheme := "http"
-	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
-		scheme = "https"
+	scheme := httpsScheme
+	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == httpsScheme {
+		scheme = httpsScheme
 	}
 	if servers, ok := spec["servers"].([]any); ok && len(servers) > 0 {
 		if server, ok := servers[0].(map[string]any); ok {
