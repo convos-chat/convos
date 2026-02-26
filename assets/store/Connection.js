@@ -178,6 +178,8 @@ export default class Connection extends Conversation {
 
   wsEventSentNames() { } // Ignore this event
 
+  wsEventParticipants() { } // Ignore this event - handled by Conversation
+
   _addDefaultParticipants(conversation) {
     const participants = [{nick: this.nick, me: true}];
     if (conversation.is('private')) participants.push({nick: conversation.name});

@@ -60,6 +60,10 @@ type Connection interface {
 	// a fresh IRC LIST fetch if the cache is empty or refresh is requested.
 	List(args string) (map[string]any, error)
 
+	// Names sends a NAMES command for the channel and returns the current
+	// participant list, triggering a fresh IRC NAMES fetch.
+	Names(channel string) (map[string]any, error)
+
 	// Nick returns the current nickname.
 	Nick() string
 

@@ -649,10 +649,9 @@ func (c *Connection) handleEndOfNames(msg ircmsg.Message) {
 	}
 
 	c.emitEvent(map[string]any{
-		"event":           "sent",
+		"event":           "state",
+		"type":            "participants",
 		"conversation_id": channel,
-		"message":         "/names",
-		"command":         []string{"names"},
 		"participants":    participants,
 	})
 }

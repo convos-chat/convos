@@ -489,6 +489,43 @@ func (c *Connection) List(args string) (map[string]any, error) {
 	return c.handleListCommand(args)
 }
 
+// Names sends a NAMES command for the channel and returns the current participant list.
+func (c *Connection) Names(channel string) (map[string]any, error) {
+	if channel == "" {
+		return nil, ErrUsageNames
+	}
+
+	// Normalize channel name
+	channel = strings.ToLower(channel)
+
+	// Get conversation to retrieve current participants
+	conv := c.GetConversation(channel)
+	participants := []map[string]any{}
+	if conv != nil {
+		participantsMap := conv.Participants()
+		for _, p := range participantsMap {
+			participants = append(participants, p)
+		}
+	}
+
+	// Send NAMES command to refresh the list
+	c.mu.RLock()
+	if c.State() == core.StateConnected && c.client != nil {
+		client := c.client
+		c.mu.RUnlock()
+		if err := client.Send("NAMES", channel); err != nil {
+			return nil, err
+		}
+	} else {
+		c.mu.RUnlock()
+	}
+
+	return map[string]any{
+		"command":      []string{"names"},
+		"participants": participants,
+	}, nil
+}
+
 // Send sends a message or command to a target (channel or user).
 // Messages starting with "/" are interpreted as IRC commands.
 func (c *Connection) Send(target, message string) error {

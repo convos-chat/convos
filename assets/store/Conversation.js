@@ -172,6 +172,11 @@ export default class Conversation extends Reactive {
     }
   }
 
+  wsEventParticipants(params) {
+    this.participants.add(params.participants);
+    this.update({participants: true});
+  }
+
   wsEventSentClear(params) {
     if (params.errors) return;
     this.messages.clear();

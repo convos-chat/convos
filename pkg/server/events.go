@@ -12,7 +12,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const methodPing = "ping"
+const (
+	methodPing = "ping"
+	eventSent  = "sent"
+)
 
 // newUpgrader creates a WebSocket upgrader that validates the Origin header
 // matches the request's Host. This prevents cross-site WebSocket hijacking.
@@ -210,10 +213,29 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		if err != nil {
 			return wsError(err.Error(), msg)
 		}
-		result["event"] = "sent"
+		result["event"] = eventSent
 		result["connection_id"] = msg.ConnectionID
 		result["conversation_id"] = msg.ConversationID
 		result["message"] = msg.Message
+		result["ts"] = time.Now().Format(time.RFC3339)
+		if msg.ID != nil {
+			result["id"] = msg.ID
+		}
+		return result
+	}
+
+	// /names is handled synchronously: return the current participant list immediately
+	// and trigger a fresh IRC NAMES fetch — matching Perl's _send_names_p behaviour.
+	if channel, ok := parseNamesArgs(msg.Message); ok {
+		result, err := conn.Names(channel)
+		if err != nil {
+			return wsError(err.Error(), msg)
+		}
+		result["event"] = eventSent
+		result["connection_id"] = msg.ConnectionID
+		result["conversation_id"] = msg.ConversationID
+		result["message"] = msg.Message
+		result["ts"] = time.Now().Format(time.RFC3339)
 		if msg.ID != nil {
 			result["id"] = msg.ID
 		}
@@ -232,7 +254,7 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 	}
 
 	resp := map[string]any{
-		"event":           "sent",
+		"event":           eventSent,
 		"connection_id":   msg.ConnectionID,
 		"conversation_id": msg.ConversationID,
 		"message":         msg.Message,
@@ -245,13 +267,26 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 
 // parseListArgs checks whether message is a /list command (case-insensitive)
 // and returns the arguments after "/list". Returns ok=false for anything else.
-func parseListArgs(message string) (args string, ok bool) {
+func parseListArgs(message string) (string, bool) {
 	if len(message) < 5 || !strings.EqualFold(message[:5], "/list") {
 		return "", false
 	}
 	rest := message[5:]
 	if rest != "" && rest[0] != ' ' {
 		return "", false // e.g. /listing — not a /list command
+	}
+	return strings.TrimSpace(rest), true
+}
+
+// parseNamesArgs checks whether message is a /names command (case-insensitive)
+// and returns the channel name. Returns ok=false for anything else.
+func parseNamesArgs(message string) (string, bool) {
+	if len(message) < 6 || !strings.EqualFold(message[:6], "/names") {
+		return "", false
+	}
+	rest := message[6:]
+	if rest != "" && rest[0] != ' ' {
+		return "", false // e.g. /namespace — not a /names command
 	}
 	return strings.TrimSpace(rest), true
 }
