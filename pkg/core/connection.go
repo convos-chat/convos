@@ -16,6 +16,7 @@ const (
 	StateConnecting    ConnectionState = "connecting"
 	StateConnected     ConnectionState = "connected"
 	StateDisconnecting ConnectionState = "disconnecting"
+	StateQueued        ConnectionState = "queued"
 )
 
 // Connection represents a connection to a chat server.

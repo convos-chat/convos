@@ -71,7 +71,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage || m["type"] != "notice" {
+			if m["event"] != evMessage || m["type"] != core.MessageTypeNotice {
 				t.Errorf("Expected notice message event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -106,7 +106,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "join" || m["nick"] != "other" {
+			if m["type"] != core.StateEventJoin || m["nick"] != "other" {
 				t.Errorf("Expected join event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -137,7 +137,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "frozen" || m["topic"] != "New Topic" {
+			if m["type"] != core.StateEventFrozen || m["topic"] != "New Topic" {
 				t.Errorf("Expected frozen event with topic, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -199,7 +199,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Private message to user
 		msg := ircmsg.MakeMessage(nil, aliceNick+"!user@host", "PRIVMSG", "newnick", "Hello!")
-		conn.handleMessage(msg, "private")
+		conn.handleMessage(msg, core.MessageTypePrivate)
 
 		conv := conn.GetConversation(aliceNick)
 		if conv == nil {
@@ -237,7 +237,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			"alice!user@host", "PRIVMSG", "#convos", "Hello with tags!",
 		)
 		conn.AddConversation(core.NewConversation("#convos", conn))
-		conn.handleMessage(msg, "private")
+		conn.handleMessage(msg, core.MessageTypePrivate)
 
 		// Check emitted event
 		select {
@@ -295,7 +295,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		conn.AddConversation(core.NewConversation("#convos", conn))
 		msg := ircmsg.MakeMessage(nil, "bob!user@host", "PRIVMSG", "#convos", "plain message")
-		conn.handleMessage(msg, "private")
+		conn.handleMessage(msg, core.MessageTypePrivate)
 
 		select {
 		case ev := <-sub.Events():
@@ -341,7 +341,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "part" || m["nick"] != "other_" {
+			if m["type"] != core.StateEventPart || m["nick"] != "other_" {
 				t.Errorf("Expected part event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -373,7 +373,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "part" || m["nick"] != "victim" || m["kicker"] != "op" {
+			if m["type"] != core.StateEventPart || m["nick"] != "victim" || m["kicker"] != "op" {
 				t.Errorf("Expected part (kick) event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -405,7 +405,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "quit" || m["nick"] != "alice" {
+			if m["type"] != core.StateEventQuit || m["nick"] != "alice" {
 				t.Errorf("Expected quit event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -557,7 +557,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// NickServ sends a NOTICE directly to our nick; no existing conversation.
 		msg := ircmsg.MakeMessage(nil, "NickServ!services@services", "NOTICE", "testnick", "You are now identified.")
-		conn.handleMessage(msg, "notice")
+		conn.handleMessage(msg, core.MessageTypeNotice)
 
 		// Must NOT create a "nickserv" conversation.
 		if conn.GetConversation("NickServ") != nil || conn.GetConversation("nickserv") != nil {
@@ -597,7 +597,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		defer sub.Close()
 
 		msg := ircmsg.MakeMessage(nil, "NickServ!services@services", "NOTICE", "testnick", "Password accepted.")
-		conn.handleMessage(msg, "notice")
+		conn.handleMessage(msg, core.MessageTypeNotice)
 
 		// Message should be routed to the existing NickServ conversation.
 		select {
@@ -622,7 +622,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// NOTICE * :*** Looking up your hostname...
 		msg := ircmsg.MakeMessage(nil, "server", "NOTICE", "*", "*** Looking up your hostname...")
-		conn.handleMessage(msg, "notice")
+		conn.handleMessage(msg, core.MessageTypeNotice)
 
 		// Should NOT create a conversation named "*"
 		if conn.GetConversation("*") != nil {
@@ -672,7 +672,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evState || m["type"] != "typing" {
+			if m["event"] != evState || m["type"] != core.StateEventTyping {
 				t.Errorf("Expected state/typing event, got %+v", m)
 			}
 			if m["typing"] != "active" {
@@ -699,7 +699,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage || m["type"] != "reaction" {
+			if m["event"] != evMessage || m["type"] != core.MessageTypeReaction {
 				t.Errorf("Expected message/reaction event, got %+v", m)
 			}
 			if m["message"] != "👍" {

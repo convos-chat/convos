@@ -107,7 +107,7 @@ func (c *Connection) Connect() error {
 	c.stopReconnect = make(chan struct{})
 
 	url := c.URL()
-	c.emitState("connecting", fmt.Sprintf("Connecting to %s.", url.Host))
+	c.emitState(core.StateConnecting, fmt.Sprintf("Connecting to %s.", url.Host))
 
 	// Get nickname and other config while holding the lock
 	nick := c.BaseConnection.Nick()
@@ -206,7 +206,7 @@ func (c *Connection) Connect() error {
 			c.SetInfo("authenticated", saslAcked)
 		}
 
-		c.emitState(string(core.StateConnected), fmt.Sprintf("Connected to %s.", connURL.Host))
+		c.emitState(core.StateConnected, fmt.Sprintf("Connected to %s.", connURL.Host))
 		c.emitInfo()
 
 		// Execute on-connect commands
@@ -241,7 +241,7 @@ func (c *Connection) Connect() error {
 		c.SetState(core.StateDisconnected)
 		wantConnect := c.WantedState() == core.StateConnected
 		disconnectMsg := fmt.Sprintf("Disconnected from %s.", c.URL().Host)
-		c.emitState(string(core.StateDisconnected), disconnectMsg)
+		c.emitState(core.StateDisconnected, disconnectMsg)
 		c.LogServerError(disconnectMsg)
 
 		// Freeze all conversations
@@ -261,11 +261,11 @@ func (c *Connection) Connect() error {
 	})
 
 	c.client.AddCallback("PRIVMSG", func(msg ircmsg.Message) {
-		c.handleMessage(msg, "private")
+		c.handleMessage(msg, core.MessageTypePrivate)
 	})
 
 	c.client.AddCallback("NOTICE", func(msg ircmsg.Message) {
-		c.handleMessage(msg, "notice")
+		c.handleMessage(msg, core.MessageTypeNotice)
 	})
 
 	c.client.AddCallback("TAGMSG", func(msg ircmsg.Message) {
@@ -406,7 +406,7 @@ func (c *Connection) Connect() error {
 	if err := client.Connect(); err != nil {
 		c.SetState(core.StateDisconnected)
 		errMsg := fmt.Sprintf("Could not connect to %s: %s", host, err)
-		c.emitState(string(core.StateDisconnected), errMsg)
+		c.emitState(core.StateDisconnected, errMsg)
 		c.LogServerError(errMsg)
 		return err
 	}
@@ -566,7 +566,7 @@ func (c *Connection) Send(target, message string) error {
 		}
 	}
 
-	c.emitSentMessage(target, message, "private")
+	c.emitSentMessage(target, message, core.MessageTypePrivate)
 	return nil
 }
 
@@ -597,7 +597,7 @@ func (c *Connection) reconnectLoop() {
 	stop := c.stopReconnect
 	c.mu.Unlock()
 
-	c.emitState("queued", fmt.Sprintf("Reconnecting in %s.", delay.Truncate(time.Second)))
+	c.emitState(core.StateQueued, fmt.Sprintf("Reconnecting in %s.", delay.Truncate(time.Second)))
 
 	select {
 	case <-time.After(delay):
@@ -652,7 +652,7 @@ func (c *Connection) saveState() {
 
 // emitSentMessage emits a message event for a message the user sent,
 // so the frontend can display it. IRC servers don't echo your own messages back.
-func (c *Connection) emitSentMessage(target, message, msgType string) {
+func (c *Connection) emitSentMessage(target, message string, msgType core.MessageType) {
 	convID := strings.ToLower(target)
 	from := c.Nick()
 
@@ -669,7 +669,7 @@ func (c *Connection) emitSentMessage(target, message, msgType string) {
 }
 
 // persistMessage saves a message to the backend storage.
-func (c *Connection) persistMessage(convID, from, message, msgType string, highlight bool, ts int64, msgID, account, replyTo string) {
+func (c *Connection) persistMessage(convID, from, message string, msgType core.MessageType, highlight bool, ts int64, msgID, account, replyTo string) {
 	conv := c.GetConversation(convID)
 	if conv == nil {
 		slog.Warn("Conversation not found for message", "conversation_id", convID)
@@ -700,10 +700,10 @@ func (c *Connection) emitEvent(event map[string]any) {
 }
 
 // emitState emits a connection state change event.
-func (c *Connection) emitState(state, message string) {
+func (c *Connection) emitState(state core.ConnectionState, message string) {
 	c.emitEvent(map[string]any{
-		"event":   "state",
-		"type":    "connection",
+		"event":   core.EventTypeState,
+		"type":    core.StateEventConnection,
 		"state":   state,
 		"message": message,
 	})

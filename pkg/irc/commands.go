@@ -149,7 +149,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if err := c.client.Privmsg(msgParts[0], msgParts[1]); err != nil {
 			return err
 		}
-		c.emitSentMessage(msgParts[0], msgParts[1], "private")
+		c.emitSentMessage(msgParts[0], msgParts[1], core.MessageTypePrivate)
 		return nil
 	case "NICK":
 		if args == "" {
@@ -195,7 +195,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if err := c.client.Privmsg(target, "\x01ACTION "+args+"\x01"); err != nil {
 			return err
 		}
-		c.emitSentMessage(target, args, "action")
+		c.emitSentMessage(target, args, core.MessageTypeAction)
 		return nil
 	case "SAY":
 		if target == "" || args == "" {
@@ -204,7 +204,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if err := c.client.Privmsg(target, args); err != nil {
 			return err
 		}
-		c.emitSentMessage(target, args, "private")
+		c.emitSentMessage(target, args, core.MessageTypePrivate)
 		return nil
 	case "ISON":
 		if args == "" {

@@ -241,11 +241,11 @@ func TestFileBackendMessageOperations(t *testing.T) {
 	}
 
 	// Check message types are preserved
-	found := make(map[string]bool)
+	found := make(map[core.MessageType]bool)
 	for _, msg := range result.Messages {
 		found[msg.Type] = true
 	}
-	if !found["private"] || !found["action"] {
+	if !found[core.MessageTypePrivate] || !found[core.MessageTypeAction] {
 		t.Errorf("Message types not preserved: %v", result.Messages)
 	}
 
@@ -403,15 +403,15 @@ func TestFileBackendPerlLogCompat(t *testing.T) {
 
 	// Verify parsed message types and fields
 	tests := []struct {
-		wantType string
+		wantType core.MessageType
 		wantFrom string
 		wantMsg  string
 	}{
-		{"notice", "irc-localhost", "Connecting to localhost."},
-		{"notice", "irc-localhost", "Connected to localhost."},
-		{"private", "example.com", "Welcome to the testnetwork IRC Network perluser"},
-		{"action", "perluser", "waves"},
-		{"notice", "", "perluser has quit"},
+		{core.MessageTypeNotice, "irc-localhost", "Connecting to localhost."},
+		{core.MessageTypeNotice, "irc-localhost", "Connected to localhost."},
+		{core.MessageTypePrivate, "example.com", "Welcome to the testnetwork IRC Network perluser"},
+		{core.MessageTypeAction, "perluser", "waves"},
+		{core.MessageTypeNotice, "", "perluser has quit"},
 	}
 
 	for i, tt := range tests {
@@ -435,15 +435,15 @@ func TestFileBackendMessageFormats(t *testing.T) {
 
 	tests := []struct {
 		input    string
-		wantType string
+		wantType core.MessageType
 		wantFrom string
 		wantMsg  string
 	}{
-		{"<alice> Hello world", "private", "alice", "Hello world"},
-		{"-bob- This is a notice", "notice", "bob", "This is a notice"},
-		{"* charlie waves", "action", "charlie", "waves"},
-		{"-!- User has quit", "notice", "", "User has quit"},
-		{"Some other text", "notice", "", "Some other text"},
+		{"<alice> Hello world", core.MessageTypePrivate, "alice", "Hello world"},
+		{"-bob- This is a notice", core.MessageTypeNotice, "bob", "This is a notice"},
+		{"* charlie waves", core.MessageTypeAction, "charlie", "waves"},
+		{"-!- User has quit", core.MessageTypeNotice, "", "User has quit"},
+		{"Some other text", core.MessageTypeNotice, "", "Some other text"},
 	}
 
 	for _, tt := range tests {

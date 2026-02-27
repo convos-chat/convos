@@ -221,12 +221,13 @@ func paramsToMessageQuery(after *time.Time, around *time.Time, before *time.Time
 }
 
 func coreMessageToAPI(m core.Message) api.Message {
+	typeStr := string(m.Type)
 	return api.Message{
 		From:      m.From,
 		Highlight: &m.Highlight,
 		Message:   m.Message,
 		Ts:        time.Unix(m.Timestamp, 0).UTC(),
-		Type:      &m.Type,
+		Type:      &typeStr,
 	}
 }
 

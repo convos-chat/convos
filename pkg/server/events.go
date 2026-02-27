@@ -14,7 +14,7 @@ import (
 
 const (
 	methodPing = "ping"
-	eventSent  = "sent"
+	eventSent  = core.EventTypeSent
 )
 
 // newUpgrader creates a WebSocket upgrader that validates the Origin header
@@ -141,7 +141,7 @@ func (s *Server) handleWSMessage(msg wsMessage, user *core.User) map[string]any 
 func (s *Server) handleWSPing(msg wsMessage) map[string]any {
 	ts := float64(time.Now().UnixMicro()) / 1e6
 	resp := map[string]any{
-		"event": "pong",
+		"event": core.EventTypePong,
 		"ts":    ts,
 	}
 	if msg.ID != nil {
@@ -185,7 +185,7 @@ func (s *Server) handleWSLoad(msg wsMessage, user *core.User) map[string]any {
 	userData["video_service"] = settings.VideoService()
 
 	resp := map[string]any{
-		"event": "load",
+		"event": core.EventTypeLoad,
 		"user":  userData,
 	}
 	if msg.ID != nil {

@@ -25,17 +25,17 @@ const ircEventTimeout = 15 * time.Second
 
 // IRC event type constants used in predicate closures.
 const (
-	evState   = "state"
-	evMessage = "message"
-	evSent    = "sent"
+	evState   = core.EventTypeState
+	evMessage = core.EventTypeMessage
+	evSent    = core.EventTypeSent
 
-	typeConnection = "connection"
-	typeFrozen     = "frozen"
-	typeJoin       = "join"
-	typePart       = "part"
-	typeQuit       = "quit"
-	typeNickChange = "nick_change"
-	typePrivate    = "private"
+	typeConnection = core.StateEventConnection
+	typeFrozen     = core.StateEventFrozen
+	typeJoin       = core.StateEventJoin
+	typePart       = core.StateEventPart
+	typeQuit       = core.StateEventQuit
+	typeNickChange = core.StateEventNickChange
+	typePrivate    = core.MessageTypePrivate
 )
 
 // waitForEvent reads from sub, discarding events that don't match pred, until

@@ -67,12 +67,12 @@ type ConnectionProfileData struct {
 
 // Notification represents a highlight notification.
 type Notification struct {
-	ConnectionID   string `json:"connection_id"`
-	ConversationID string `json:"conversation_id"`
-	From           string `json:"from"`
-	Message        string `json:"message"`
-	Type           string `json:"type"`
-	Timestamp      int64  `json:"ts"`
+	ConnectionID   string      `json:"connection_id"`
+	ConversationID string      `json:"conversation_id"`
+	From           string      `json:"from"`
+	Message        string      `json:"message"`
+	Type           MessageType `json:"type"`
+	Timestamp      int64       `json:"ts"`
 }
 
 // NotificationResult contains the result of a notification query.
@@ -114,12 +114,12 @@ type MessageResult struct {
 
 // Message represents a chat message.
 type Message struct {
-	From      string `json:"from"`
-	Message   string `json:"message"`
-	Highlight bool   `json:"highlight"`
-	Type      string `json:"type"` // action, error, notice, privmsg
-	Timestamp int64  `json:"ts"`
-	MsgID    string `json:"msgid,omitempty"`   // IRCv3 server-assigned message ID
-	Account  string `json:"account,omitempty"` // IRCv3 sender NickServ account
-	ReplyTo  string `json:"reply_to,omitempty"` // IRCv3 reply tag (msgid of parent)
+	From      string      `json:"from"`
+	Message   string      `json:"message"`
+	Highlight bool        `json:"highlight"`
+	Type      MessageType `json:"type"` // MessageTypePrivate, MessageTypeAction, MessageTypeNotice, MessageTypeError, MessageTypeReaction
+	Timestamp int64       `json:"ts"`
+	MsgID     string      `json:"msgid,omitempty"`   // IRCv3 server-assigned message ID
+	Account   string      `json:"account,omitempty"` // IRCv3 sender NickServ account
+	ReplyTo   string      `json:"reply_to,omitempty"` // IRCv3 reply tag (msgid of parent)
 }

@@ -17,7 +17,7 @@ var pushHTTPClient = &http.Client{Timeout: 15 * time.Second}
 
 // persistNotification saves a highlighted message to the user's notification log
 // and sends a Web Push notification if enabled.
-func (c *Connection) persistNotification(convID, from, message, msgType string, ts int64) {
+func (c *Connection) persistNotification(convID, from, message string, msgType core.MessageType, ts int64) {
 	msg := core.Notification{
 		ConnectionID:   c.ID(),
 		ConversationID: convID,

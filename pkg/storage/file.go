@@ -20,12 +20,7 @@ import (
 	"github.com/convos-chat/convos/pkg/core"
 )
 
-// Message type constants (matching Perl Convos conventions).
-const (
-	msgTypePrivmsg = "private"
-	msgTypeNotice  = "notice"
-	msgTypeAction  = "action"
-)
+// Message types are defined in core.MessageType
 
 // FileBackend implements core.Backend using file-based storage.
 // This is compatible with the Perl Convos::Core::Backend::File implementation.
@@ -495,7 +490,7 @@ func (b *FileBackend) parseMessageLine(line string) core.Message {
 		if idx := strings.Index(line, "> "); idx > 0 {
 			msg.From = line[1:idx]
 			msg.Message = line[idx+2:]
-			msg.Type = msgTypePrivmsg
+			msg.Type = core.MessageTypePrivate
 			return msg
 		}
 	}
@@ -503,7 +498,7 @@ func (b *FileBackend) parseMessageLine(line string) core.Message {
 	// -!- message - server message (check before -nick- notice)
 	if strings.HasPrefix(line, "-!- ") {
 		msg.Message = line[4:]
-		msg.Type = msgTypeNotice
+		msg.Type = core.MessageTypeNotice
 		msg.From = ""
 		return msg
 	}
@@ -513,7 +508,7 @@ func (b *FileBackend) parseMessageLine(line string) core.Message {
 		if idx := strings.Index(line[1:], "- "); idx > 0 {
 			msg.From = line[1 : idx+1]
 			msg.Message = line[idx+3:]
-			msg.Type = msgTypeNotice
+			msg.Type = core.MessageTypeNotice
 			return msg
 		}
 	}
@@ -524,12 +519,12 @@ func (b *FileBackend) parseMessageLine(line string) core.Message {
 		if len(parts) == 2 {
 			msg.From = parts[0]
 			msg.Message = parts[1]
-			msg.Type = msgTypeAction
+			msg.Type = core.MessageTypeAction
 			return msg
 		}
 	}
 
-	msg.Type = msgTypeNotice
+	msg.Type = core.MessageTypeNotice
 	return msg
 }
 
@@ -565,14 +560,14 @@ func (b *FileBackend) SaveMessage(conv *core.Conversation, msg core.Message) err
 // formatMessageLine formats a message for log storage.
 func (b *FileBackend) formatMessageLine(msg core.Message) string {
 	switch msg.Type {
-	case msgTypePrivmsg:
+	case core.MessageTypePrivate:
 		return fmt.Sprintf("<%s> %s", msg.From, msg.Message)
-	case msgTypeNotice:
+	case core.MessageTypeNotice:
 		if msg.From != "" {
 			return fmt.Sprintf("-%s- %s", msg.From, msg.Message)
 		}
 		return fmt.Sprintf("-!- %s", msg.Message)
-	case msgTypeAction:
+	case core.MessageTypeAction:
 		return fmt.Sprintf("* %s %s", msg.From, msg.Message)
 	default:
 		return msg.Message
