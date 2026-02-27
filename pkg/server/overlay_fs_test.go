@@ -10,15 +10,15 @@ func TestOverlayFS(t *testing.T) {
 	t.Parallel()
 
 	lower := fstest.MapFS{
-		"themes/builtin.css":  {Data: []byte("/* builtin */")},
-		"themes/shared.css":   {Data: []byte("/* lower shared */")},
-		"images/logo.png":     {Data: []byte("lower-logo")},
-		"favicon.ico":         {Data: []byte("lower-favicon")},
+		"themes/builtin.css": {Data: []byte("/* builtin */")},
+		"themes/shared.css":  {Data: []byte("/* lower shared */")},
+		"images/logo.png":    {Data: []byte("lower-logo")},
+		"favicon.ico":        {Data: []byte("lower-favicon")},
 	}
 
 	upper := fstest.MapFS{
-		"themes/custom.css":  {Data: []byte("/* custom theme */")},
-		"themes/shared.css":  {Data: []byte("/* upper shared */")},
+		"themes/custom.css": {Data: []byte("/* custom theme */")},
+		"themes/shared.css": {Data: []byte("/* upper shared */")},
 	}
 
 	ofs := &overlayFS{upper: upper, lower: lower}

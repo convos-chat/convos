@@ -1,3 +1,4 @@
+// Package auth implements pluggable authentication
 package auth
 
 import (
@@ -8,8 +9,7 @@ import (
 
 const authTypeLocal = "local"
 
-//nolint:staticcheck // ST1005: User-facing error message, capitalized for UX
-var ErrInvalidCredentials = errors.New("Invalid email or password.")
+var ErrInvalidCredentials = errors.New("invalid email or password")
 
 // LocalAuthenticator implements password-based authentication using Argon2id.
 type LocalAuthenticator struct {

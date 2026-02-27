@@ -9,14 +9,14 @@ import (
 type Subscription struct {
 	id       uint64
 	userID   string
-	events   chan any
+	events   chan Event
 	emitter  *EventEmitter
 	closed   bool
 	closedMu sync.Mutex
 }
 
 // Events returns the channel for receiving events.
-func (s *Subscription) Events() <-chan any {
+func (s *Subscription) Events() <-chan Event {
 	return s.events
 }
 
@@ -71,7 +71,7 @@ func (e *EventEmitter) SubscribeUser(userID string) *Subscription {
 	sub := &Subscription{
 		id:      e.nextID,
 		userID:  userID,
-		events:  make(chan any, e.bufferSize),
+		events:  make(chan Event, e.bufferSize),
 		emitter: e,
 	}
 	e.subscriptions[sub.id] = sub
@@ -85,11 +85,11 @@ func (e *EventEmitter) unsubscribe(id uint64) {
 	delete(e.subscriptions, id)
 }
 
-// EmitUser sends a flat event map to all subscribers for the given user.
-// The event map is sent directly to the WebSocket as JSON.
-func (e *EventEmitter) EmitUser(userID string, event map[string]any) {
-	if _, ok := event["ts"]; !ok {
-		event["ts"] = time.Now().UTC().Format(time.RFC3339)
+// EmitUser sends an event to all subscribers for the given user.
+// The event is sent to the WebSocket as JSON.
+func (e *EventEmitter) EmitUser(userID string, event Event) {
+	if event.GetTS() == "" {
+		event.SetTS(time.Now().UTC().Format(time.RFC3339))
 	}
 
 	e.mu.RLock()
@@ -119,4 +119,3 @@ func (e *EventEmitter) SubscriberCount() int {
 	defer e.mu.RUnlock()
 	return len(e.subscriptions)
 }
-

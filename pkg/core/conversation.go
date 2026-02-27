@@ -33,7 +33,7 @@ type Conversation struct {
 	unread        int
 	modes         map[string]bool
 	info          map[string]any
-	participants  map[string]map[string]any
+	participants  map[string]Participant
 }
 
 // ConversationData represents serialized conversation data.
@@ -47,7 +47,7 @@ type ConversationData struct {
 	Notifications  int                       `json:"notifications"`
 	Unread         int                       `json:"unread"`
 	Info           map[string]any            `json:"info"`
-	Participants   map[string]map[string]any `json:"participants,omitempty"`
+	Participants   map[string]Participant    `json:"participants,omitempty"`
 }
 
 // NewConversation creates a new conversation.
@@ -62,7 +62,7 @@ func NewConversationWithID(id, name string, conn Connection) *Conversation {
 		name:         name,
 		id:           id,
 		info:         make(map[string]any),
-		participants: make(map[string]map[string]any),
+		participants: make(map[string]Participant),
 	}
 }
 
@@ -234,27 +234,20 @@ func (c *Conversation) SetInfo(key string, value any) {
 }
 
 // Participants returns the list of participants.
-func (c *Conversation) Participants() map[string]map[string]any {
+func (c *Conversation) Participants() map[string]Participant {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	res := make(map[string]map[string]any)
+	res := make(map[string]Participant, len(c.participants))
 	maps.Copy(res, c.participants)
 	return res
 }
 
-// SetParticipants sets the participants list.
-func (c *Conversation) SetParticipants(p map[string]map[string]any) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.participants = p
-}
-
 // AddParticipant adds or updates a participant.
-func (c *Conversation) AddParticipant(nick string, info map[string]any) {
+func (c *Conversation) AddParticipant(p Participant) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.participants[nick] = info
+	c.participants[p.Nick] = p
 }
 
 // RemoveParticipant removes a participant.

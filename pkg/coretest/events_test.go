@@ -8,10 +8,7 @@ import (
 	"github.com/convos-chat/convos/pkg/core"
 )
 
-const (
-	testUID      = "testUserID"
-	testEventMsg = "message"
-)
+const testUID = "testUserID"
 
 func TestNewEventEmitter(t *testing.T) {
 	t.Parallel()
@@ -56,29 +53,24 @@ func TestEventEmitterEmitUser(t *testing.T) {
 	sub := e.Subscribe()
 	defer sub.Close()
 
-	event := map[string]any{
-		"event":         "message",
-		"connection_id": "irc-libera",
-		"from":          "alice",
-		"message":       "Hello!",
-	}
-
-	e.EmitUser(testUID, event)
+	e.EmitUser(testUID, &core.MessageEvent{
+		BaseEvent: core.BaseEvent{ConnectionID: "irc-libera"},
+		From:      "alice",
+		Message:   "Hello!",
+		Type:      core.MessageTypePrivate,
+	})
 
 	select {
 	case received := <-sub.Events():
-		m, ok := received.(map[string]any)
+		ev, ok := received.(*core.MessageEvent)
 		if !ok {
-			t.Fatalf("Expected map[string]any, got %T", received)
+			t.Fatalf("Expected *core.MessageEvent, got %T", received)
 		}
-		if m["event"] != testEventMsg {
-			t.Errorf("event = %q, want %q", m["event"], testEventMsg)
+		if ev.From != "alice" {
+			t.Errorf("From = %v, want alice", ev.From)
 		}
-		if m["from"] != "alice" {
-			t.Errorf("from = %q, want %q", m["from"], "alice")
-		}
-		if m["ts"] == nil {
-			t.Error("ts should be set automatically")
+		if ev.TS == "" {
+			t.Error("TS should be set automatically")
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timeout waiting for event")
@@ -93,19 +85,21 @@ func TestEventEmitterSubscribeUser(t *testing.T) {
 	defer sub.Close()
 
 	// Emit event for user2 (should be filtered out)
-	e.EmitUser("user2", map[string]any{"event": testEventMsg})
+	e.EmitUser("user2", &core.MessageEvent{
+		BaseEvent: core.BaseEvent{ConnectionID: "conn"},
+		From:      "user",
+		Message:   "msg",
+		Type:      core.MessageTypePrivate,
+	})
 
 	// Emit event for testUID (should be received)
-	e.EmitUser(testUID, map[string]any{"event": testEventMsg})
+	e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "msg", Type: core.MessageTypePrivate})
 
 	select {
 	case received := <-sub.Events():
-		m, ok := received.(map[string]any)
+		_, ok := received.(*core.MessageEvent)
 		if !ok {
-			t.Fatalf("Expected map[string]any, got %T", received)
-		}
-		if m["event"] != testEventMsg {
-			t.Errorf("event = %q, want %q", m["event"], testEventMsg)
+			t.Fatalf("Expected *core.MessageEvent, got %T", received)
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timeout waiting for event")
@@ -129,19 +123,19 @@ func TestEventEmitterBroadcastSubscriber(t *testing.T) {
 	sub := e.Subscribe()
 	defer sub.Close()
 
-	e.EmitUser("user1", map[string]any{"event": "state", "user": "user1"})
-	e.EmitUser("user2", map[string]any{"event": "state", "user": "user2"})
+	e.EmitUser("user1", &core.StateConnectionEvent{BaseEvent: core.BaseEvent{ConnectionID: "user1"}, State: core.StateConnected, Message: "Connected"})
+	e.EmitUser("user2", &core.StateConnectionEvent{BaseEvent: core.BaseEvent{ConnectionID: "user2"}, State: core.StateConnected, Message: "Connected"})
 
 	// Should receive both events
 	for i, expected := range []string{"user1", "user2"} {
 		select {
 		case received := <-sub.Events():
-			m, ok := received.(map[string]any)
+			ev, ok := received.(*core.StateConnectionEvent)
 			if !ok {
-				t.Fatalf("Event %d: expected map, got %T", i, received)
+				t.Fatalf("Event %d: expected *core.StateConnectionEvent, got %T", i, received)
 			}
-			if m["user"] != expected {
-				t.Errorf("Event %d: user = %q, want %q", i, m["user"], expected)
+			if ev.ConnectionID != expected {
+				t.Errorf("Event %d: ConnectionID = %q, want %q", i, ev.ConnectionID, expected)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Fatalf("Timeout waiting for event %d", i)
@@ -162,18 +156,15 @@ func TestEventEmitterMultipleSubscribers(t *testing.T) {
 		t.Errorf("SubscriberCount() = %d, want 2", e.SubscriberCount())
 	}
 
-	e.EmitUser(testUID, map[string]any{"event": testEventMsg})
+	e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "msg", Type: core.MessageTypePrivate})
 
 	// Both should receive
 	for i, sub := range []*core.Subscription{sub1, sub2} {
 		select {
 		case received := <-sub.Events():
-			m, ok := received.(map[string]any)
+			_, ok := received.(*core.MessageEvent)
 			if !ok {
-				t.Fatalf("Subscriber %d: expected map, got %T", i, received)
-			}
-			if m["event"] != testEventMsg {
-				t.Errorf("Subscriber %d: event = %q, want %q", i, m["event"], testEventMsg)
+				t.Fatalf("Subscriber %d: expected *core.MessageEvent, got %T", i, received)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Fatalf("Subscriber %d: Timeout waiting for event", i)
@@ -196,19 +187,17 @@ func TestEventEmitterConcurrency(t *testing.T) {
 	for i := range numSubscribers {
 		subs[i] = e.Subscribe()
 		idx := i
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for range subs[idx].Events() {
 				received[idx]++
 			}
-		}()
+		})
 	}
 
 	// Emit events concurrently
 	for i := range numEvents {
 		go func(_ int) {
-			e.EmitUser(testUID, map[string]any{"event": testEventMsg})
+			e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "msg", Type: core.MessageTypePrivate})
 		}(i)
 	}
 
@@ -251,12 +240,12 @@ func TestEventEmitterSetBufferSize(t *testing.T) {
 	defer sub.Close()
 
 	// Fill up the buffer
-	for i := range 5 {
-		e.EmitUser(testUID, map[string]any{"event": testEventMsg, "i": i})
+	for range 5 {
+		e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "msg", Type: core.MessageTypePrivate})
 	}
 
 	// This should be dropped (buffer full, non-blocking)
-	e.EmitUser(testUID, map[string]any{"event": testEventMsg, "i": 5})
+	e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "dropped", Type: core.MessageTypePrivate})
 
 	count := 0
 	for {
@@ -279,34 +268,35 @@ func TestEventEmitterTimestamp(t *testing.T) {
 	sub := e.Subscribe()
 	defer sub.Close()
 
-	// Event without ts should get one added
-	e.EmitUser(testUID, map[string]any{"event": "state"})
+	// Event should have timestamp set by constructor
+	e.EmitUser(testUID, &core.StateConnectionEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, State: core.StateConnected, Message: "Connected"})
 
 	select {
 	case received := <-sub.Events():
-		m, ok := received.(map[string]any)
+		ev, ok := received.(*core.StateConnectionEvent)
 		if !ok {
-			t.Fatalf("expected map[string]any, got %T", received)
+			t.Fatalf("expected *core.StateConnectionEvent, got %T", received)
 		}
-		ts, ok := m["ts"].(string)
-		if !ok || ts == "" {
-			t.Error("ts should be set automatically as string")
+		if ev.TS == "" {
+			t.Error("TS should be set automatically")
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timeout waiting for event")
 	}
 
-	// Event with ts should keep it
-	e.EmitUser(testUID, map[string]any{"event": "state", "ts": "custom-ts"})
+	// Event can have custom timestamp
+	customEvent := &core.StateConnectionEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, State: core.StateConnected, Message: "Connected"}
+	customEvent.TS = "custom-ts"
+	e.EmitUser(testUID, customEvent)
 
 	select {
 	case received := <-sub.Events():
-		m, ok := received.(map[string]any)
+		ev, ok := received.(*core.StateConnectionEvent)
 		if !ok {
-			t.Fatalf("expected map[string]any, got %T", received)
+			t.Fatalf("expected *core.StateConnectionEvent, got %T", received)
 		}
-		if m["ts"] != "custom-ts" {
-			t.Errorf("ts = %q, want %q", m["ts"], "custom-ts")
+		if ev.TS != "custom-ts" {
+			t.Errorf("TS = %q, want %q", ev.TS, "custom-ts")
 		}
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("Timeout waiting for event")

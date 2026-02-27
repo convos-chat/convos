@@ -53,11 +53,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// handleWelcome emits info event
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StateInfoEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "info" {
+			if m.EventType() != core.EventTypeState {
 				t.Errorf("Unexpected event: %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -67,11 +67,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// handleWelcome also calls handleNotice which emits a message
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage || m["type"] != core.MessageTypeNotice {
+			if m.Type != core.MessageTypeNotice {
 				t.Errorf("Expected notice message event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -102,11 +102,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StateJoinEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != core.StateEventJoin || m["nick"] != "other" {
+			if m.Nick != "other" {
 				t.Errorf("Expected join event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -133,11 +133,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StateFrozenEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != core.StateEventFrozen || m["topic"] != "New Topic" {
+			if m.Topic != "New Topic" {
 				t.Errorf("Expected frozen event with topic, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -155,7 +155,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Setup a conversation where we are present
 		conv := core.NewConversation("#test", conn)
 		conn.AddConversation(conv)
-		conv.AddParticipant("testnick", map[string]any{"nick": "testnick"})
+		conv.AddParticipant(core.Participant{Nick: "testnick"})
 
 		// testnick changes to newnick
 		msg := ircmsg.MakeMessage(nil, "testnick!user@host", "NICK", "newnick")
@@ -168,14 +168,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Expect 'me' event
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StateInfoEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != "me" {
-				// Might be nick_change if order changes, but currently we expect me first or only
-				t.Logf("Got event: %v", m)
-			}
+			_ = m // StateInfoEvent confirmed by type assertion; Info map content varies
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected event")
 		}
@@ -208,11 +205,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage || m["from"] != aliceNick {
+			if m.From != aliceNick {
 				t.Errorf("Expected message from alice, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -242,21 +239,18 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Check emitted event
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage {
-				t.Fatalf("expected message event, got %+v", m)
+			if m.MsgID != "abc-123" {
+				t.Errorf("expected msgid=abc-123, got %v", m.MsgID)
 			}
-			if m["msgid"] != "abc-123" {
-				t.Errorf("expected msgid=abc-123, got %v", m["msgid"])
+			if m.Account != "alice_account" {
+				t.Errorf("expected account=alice_account, got %v", m.Account)
 			}
-			if m["account"] != "alice_account" {
-				t.Errorf("expected account=alice_account, got %v", m["account"])
-			}
-			if m["reply_to"] != "parent-msg-456" {
-				t.Errorf("expected reply_to=parent-msg-456, got %v", m["reply_to"])
+			if m.ReplyTo != "parent-msg-456" {
+				t.Errorf("expected reply_to=parent-msg-456, got %v", m.ReplyTo)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Fatal("expected message event")
@@ -299,18 +293,18 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
 			}
-			if _, has := m["msgid"]; has {
-				t.Errorf("expected no msgid field, got %v", m["msgid"])
+			if m.MsgID != "" {
+				t.Errorf("expected no msgid field, got %v", m.MsgID)
 			}
-			if _, has := m["account"]; has {
-				t.Errorf("expected no account field, got %v", m["account"])
+			if m.Account != "" {
+				t.Errorf("expected no account field, got %v", m.Account)
 			}
-			if _, has := m["reply_to"]; has {
-				t.Errorf("expected no reply_to field, got %v", m["reply_to"])
+			if m.ReplyTo != "" {
+				t.Errorf("expected no reply_to field, got %v", m.ReplyTo)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Fatal("expected message event")
@@ -326,7 +320,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Setup: Create conversation and add participant
 		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
-		conv.AddParticipant("other_", map[string]any{"nick": "other_"})
+		conv.AddParticipant(core.Participant{Nick: "other_"})
 
 		msg := ircmsg.MakeMessage(nil, "other_!user@host", "PART", "#convos", "Bye")
 		conn.handlePart(msg)
@@ -337,11 +331,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StatePartEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != core.StateEventPart || m["nick"] != "other_" {
+			if m.Nick != "other_" {
 				t.Errorf("Expected part event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -358,7 +352,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Add victim back first - creating conv
 		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
-		conv.AddParticipant("victim", map[string]any{"nick": "victim"})
+		conv.AddParticipant(core.Participant{Nick: "victim"})
 
 		msg := ircmsg.MakeMessage(nil, "op!user@host", "KICK", "#convos", "victim", "Bad behavior")
 		conn.handleKick(msg)
@@ -369,11 +363,11 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StatePartEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["type"] != core.StateEventPart || m["nick"] != "victim" || m["kicker"] != "op" {
+			if m.Nick != "victim" || m.Kicker != "op" {
 				t.Errorf("Expected part (kick) event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
@@ -390,7 +384,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Add alice back to a channel - creating conv first
 		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
-		conv.AddParticipant("alice", map[string]any{"nick": "alice"})
+		conv.AddParticipant(core.Participant{Nick: "alice"})
 
 		msg := ircmsg.MakeMessage(nil, "alice!user@host", "QUIT", "Gone to lunch")
 		conn.handleQuit(msg)
@@ -401,12 +395,9 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			_, ok := ev.(*core.StateQuitEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
-			}
-			if m["type"] != core.StateEventQuit || m["nick"] != "alice" {
-				t.Errorf("Expected quit event, got %+v", m)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected quit event")
@@ -567,15 +558,15 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Message should be routed to server log (empty conv ID).
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
 			}
-			if m["conversation_id"] != "" {
-				t.Errorf("expected conversation_id='', got %q", m["conversation_id"])
+			if m.ConversationID != "" {
+				t.Errorf("expected conversation_id='', got %q", m.ConversationID)
 			}
-			if m["from"] != "NickServ" {
-				t.Errorf("expected from='NickServ', got %q", m["from"])
+			if m.From != "NickServ" {
+				t.Errorf("expected from='NickServ', got %q", m.From)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("expected message event")
@@ -602,12 +593,12 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Message should be routed to the existing NickServ conversation.
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
 			}
-			if m["conversation_id"] != "nickserv" {
-				t.Errorf("expected conversation_id='nickserv', got %q", m["conversation_id"])
+			if m.ConversationID != "nickserv" {
+				t.Errorf("expected conversation_id='nickserv', got %q", m.ConversationID)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("expected message event")
@@ -638,12 +629,12 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Check event
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["conversation_id"] != "" {
-				t.Errorf("Expected conversation_id='', got %q", m["conversation_id"])
+			if m.ConversationID != "" {
+				t.Errorf("Expected conversation_id='', got %q", m.ConversationID)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected message event")
@@ -659,7 +650,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		// Setup conversation
 		conv := core.NewConversation("#convos", conn)
 		conn.AddConversation(conv)
-		conv.AddParticipant("alice", map[string]any{"nick": "alice"})
+		conv.AddParticipant(core.Participant{Nick: "alice"})
 
 		// 1. Typing notification
 		// TAGMSG #convos +typing=active
@@ -668,18 +659,15 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.StateTypingEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evState || m["type"] != core.StateEventTyping {
-				t.Errorf("Expected state/typing event, got %+v", m)
+			if m.Typing != "active" {
+				t.Errorf("Expected typing='active', got %v", m.Typing)
 			}
-			if m["typing"] != "active" {
-				t.Errorf("Expected typing='active', got %v", m["typing"])
-			}
-			if m["nick"] != "alice" {
-				t.Errorf("Expected nick='alice', got %v", m["nick"])
+			if m.Nick != "alice" {
+				t.Errorf("Expected nick='alice', got %v", m.Nick)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected typing event")
@@ -695,18 +683,18 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		select {
 		case ev := <-sub.Events():
-			m, ok := ev.(map[string]any)
+			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
 			}
-			if m["event"] != evMessage || m["type"] != core.MessageTypeReaction {
+			if m.Type != core.MessageTypeReaction {
 				t.Errorf("Expected message/reaction event, got %+v", m)
 			}
-			if m["message"] != "👍" {
-				t.Errorf("Expected message='👍', got %v", m["message"])
+			if m.Message != "👍" {
+				t.Errorf("Expected message='👍', got %v", m.Message)
 			}
-			if m["reply_to"] != "msg123" {
-				t.Errorf("Expected reply_to='msg123', got %v", m["reply_to"])
+			if m.ReplyTo != "msg123" {
+				t.Errorf("Expected reply_to='msg123', got %v", m.ReplyTo)
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected reaction event")

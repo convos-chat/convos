@@ -42,12 +42,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType core.MessageType)
 
 	if conv.Frozen() != "" {
 		conv.SetFrozen("")
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          "",
-		})
+		c.emitEvent(&core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: ""})
 	}
 
 	isDM := target == c.Nick()
@@ -63,24 +58,17 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType core.MessageType)
 		replyTo = v
 	}
 
-	event := map[string]any{
-		"event":           core.EventTypeMessage,
-		"conversation_id": conv.ID(),
-		"from":            nick,
-		"highlight":       highlight,
-		"message":         message,
-		"type":            msgType,
-		"ts":              tsRFC3339,
+	event := &core.MessageEvent{
+				ConversationID: conv.ID(),
+		From:           nick,
+		Message:        message,
+		Type:           msgType,
+		Highlight:      highlight,
+		MsgID:          msgID,
+		Account:        account,
+		ReplyTo:        replyTo,
 	}
-	if msgID != "" {
-		event["msgid"] = msgID
-	}
-	if account != "" {
-		event["account"] = account
-	}
-	if replyTo != "" {
-		event["reply_to"] = replyTo
-	}
+	event.TS = tsRFC3339 // Use server time instead of auto-generated timestamp
 	c.emitEvent(event)
 
 	c.persistMessage(conv.ID(), nick, message, msgType, highlight, ts, msgID, account, replyTo)
@@ -103,13 +91,7 @@ func (c *Connection) handleTagMsg(msg ircmsg.Message) {
 
 	// +typing tag: emit state event
 	if present, value := msg.GetTag("+typing"); present {
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventTyping,
-			"nick":            nick,
-			"conversation_id": conv.ID(),
-			"typing":          value,
-		})
+		c.emitEvent(&core.StateTypingEvent{Nick: nick, ConversationID: conv.ID(), Typing: value})
 	}
 
 	// +draft/react or react tag: emit reaction event
@@ -129,15 +111,10 @@ func (c *Connection) handleTagMsg(msg ircmsg.Message) {
 		}
 
 		if targetMsgID != "" {
-			c.emitEvent(map[string]any{
-				"event":           core.EventTypeMessage,
-				"type":            core.MessageTypeReaction,
-				"conversation_id": conv.ID(),
-				"nick":            nick,
-				"message":         reactEmoji,
-				"reply_to":        targetMsgID,
-				"ts":              serverTimeOrNowRFC3339(msg),
-			})
+			event := &core.MessageEvent{ConversationID: conv.ID(), From: nick, Message: reactEmoji, Type: core.MessageTypeReaction, Highlight: false}
+			event.TS = serverTimeOrNowRFC3339(msg)
+			event.ReplyTo = targetMsgID
+			c.emitEvent(event)
 		}
 	}
 }
@@ -175,13 +152,13 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 	nick := msg.Nick()
 
 	// extended-join: params[1] = account ("*" if not logged in), params[2] = realname
-	participant := map[string]any{"nick": nick, "mode": ""}
+	p := core.Participant{Nick: nick, Mode: ""}
 	if len(msg.Params) >= 3 {
 		if account := msg.Params[1]; account != "*" {
-			participant["account"] = account
+			p.Account = account
 		}
 		if realname := msg.Params[2]; realname != "" {
-			participant["realname"] = realname
+			p.Realname = realname
 		}
 	}
 
@@ -194,17 +171,10 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 		}
 
 		conv.SetFrozen("")
-		conv.AddParticipant(nick, participant)
+		conv.AddParticipant(p)
 
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          conv.Frozen(),
-			"name":            conv.Name(),
-			"topic":           conv.Topic(),
-			"unread":          conv.Unread(),
-		})
+		event := &core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: conv.Frozen(), Name: conv.Name(), Topic: conv.Topic(), Unread: conv.Unread()}
+		c.emitEvent(event)
 		c.saveState()
 	} else {
 		// Someone else joined
@@ -213,18 +183,9 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 			conv = core.NewConversation(channel, c)
 			c.AddConversation(conv)
 		}
-		conv.AddParticipant(nick, participant)
+		conv.AddParticipant(p)
 
-		joinEvent := map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventJoin,
-			"conversation_id": strings.ToLower(channel),
-			"nick":            nick,
-		}
-		if account, ok := participant["account"]; ok {
-			joinEvent["account"] = account
-		}
-		c.emitEvent(joinEvent)
+		c.emitEvent(&core.StateJoinEvent{ConversationID: strings.ToLower(channel), Nick: nick, Account: p.Account})
 	}
 }
 
@@ -250,13 +211,7 @@ func (c *Connection) handlePart(msg ircmsg.Message) {
 		}
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventPart,
-		"conversation_id": strings.ToLower(channel),
-		"nick":            nick,
-		"message":         reason,
-	})
+	c.emitEvent(&core.StatePartEvent{ConversationID: strings.ToLower(channel), Nick: nick, Message: reason})
 }
 
 // handleQuit handles QUIT messages.
@@ -271,12 +226,7 @@ func (c *Connection) handleQuit(msg ircmsg.Message) {
 		conv.RemoveParticipant(nick)
 	}
 
-	c.emitEvent(map[string]any{
-		"event":   "state",
-		"type":    core.StateEventQuit,
-		"nick":    nick,
-		"message": message,
-	})
+	c.emitEvent(&core.StateQuitEvent{Nick: nick, Message: message})
 }
 
 // handleKick handles KICK messages.
@@ -309,14 +259,7 @@ func (c *Connection) handleKick(msg ircmsg.Message) {
 		}
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventPart,
-		"conversation_id": strings.ToLower(channel),
-		"nick":            target,
-		"message":         kickMsg,
-		"kicker":          kicker,
-	})
+	c.emitEvent(&core.StatePartEvent{ConversationID: strings.ToLower(channel), Nick: target, Message: kickMsg, Kicker: kicker})
 }
 
 // handleInvite handles INVITE messages.
@@ -328,14 +271,9 @@ func (c *Connection) handleInvite(msg ircmsg.Message) {
 
 	inviter := msg.Nick()
 	channel := msg.Params[1]
+	message := fmt.Sprintf("%s invited you to %s.", inviter, channel)
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventInvite,
-		"conversation_id": strings.ToLower(channel),
-		"nick":            inviter,
-		"message":         fmt.Sprintf("%s invited you to %s.", inviter, channel),
-	})
+	c.emitEvent(&core.StateInviteEvent{ConversationID: strings.ToLower(channel), Nick: inviter, Message: message})
 }
 
 // handleNick handles NICK change messages.
@@ -357,19 +295,14 @@ func (c *Connection) handleNick(msg ircmsg.Message) {
 
 	for _, conv := range c.Conversations() {
 		participants := conv.Participants()
-		if info, ok := participants[oldNick]; ok {
-			info["nick"] = newNick
-			conv.AddParticipant(newNick, info)
+		if p, ok := participants[oldNick]; ok {
+			p.Nick = newNick
+			conv.AddParticipant(p)
 			conv.RemoveParticipant(oldNick)
 		}
 	}
 
-	c.emitEvent(map[string]any{
-		"event":    "state",
-		"type":     core.StateEventNickChange,
-		"old_nick": oldNick,
-		"new_nick": newNick,
-	})
+	c.emitEvent(&core.StateNickChangeEvent{OldNick: oldNick, NewNick: newNick})
 }
 
 // handleNickInUse handles ERR_NICKNAMEINUSE (433) by appending "_" and retrying.
@@ -384,12 +317,7 @@ func (c *Connection) handleNickInUse(msg ircmsg.Message) {
 	}
 
 	newNick := attempted + "_"
-	c.emitEvent(map[string]any{
-		"event":   "state",
-		"type":    "connection",
-		"state":   core.StateConnected,
-		"message": fmt.Sprintf("Nick %s is in use, trying %s.", attempted, newNick),
-	})
+	c.emitEvent(&core.StateConnectionEvent{State: core.StateConnected, Message: fmt.Sprintf("Nick %s is in use, trying %s.", attempted, newNick)})
 
 	if err := c.client.Send("NICK", newNick); err != nil {
 		c.LogServerError(fmt.Sprintf("Failed to change nick to %s: %s", newNick, err))
@@ -410,12 +338,9 @@ func (c *Connection) handleTopic(msg ircmsg.Message) {
 		conv.SetTopic(topic)
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventFrozen,
-		"conversation_id": strings.ToLower(channel),
-		"topic":           topic,
-	})
+	event := &core.StateFrozenEvent{ConversationID: strings.ToLower(channel), Frozen: ""}
+	event.Topic = topic
+	c.emitEvent(event)
 }
 
 // handleTopicReply handles RPL_TOPIC (332) - topic on channel join.
@@ -433,15 +358,8 @@ func (c *Connection) handleTopicReply(msg ircmsg.Message) {
 		if conv.Frozen() != "" {
 			conv.SetFrozen("")
 		}
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          conv.Frozen(),
-			"name":            conv.Name(),
-			"topic":           topic,
-			"unread":          conv.Unread(),
-		})
+		event := &core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: conv.Frozen(), Name: conv.Name(), Topic: topic, Unread: conv.Unread()}
+		c.emitEvent(event)
 	}
 }
 
@@ -454,12 +372,9 @@ func (c *Connection) handleTopicWhoTime(msg ircmsg.Message) {
 	channel := strings.ToLower(msg.Params[1])
 	who := msg.Params[2]
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventFrozen,
-		"conversation_id": channel,
-		"topic_by":        who,
-	})
+	event := &core.StateFrozenEvent{ConversationID: channel, Frozen: ""}
+	event.Info = map[string]any{"topic_by": who}
+	c.emitEvent(event)
 }
 
 // handleMode handles MODE messages.
@@ -473,12 +388,11 @@ func (c *Connection) handleMode(msg ircmsg.Message) {
 
 	// User mode change (not a channel)
 	if !core.ChannelRE.MatchString(target) {
-		c.emitEvent(map[string]any{
-			"event": "state",
-			"type":  "info",
-			"nick":  c.Nick(),
-			"mode":  modeStr,
-		})
+		// Special "info" state event for user mode changes
+		c.emitEvent(&core.StateInfoEvent{Info: map[string]any{
+			"nick": c.Nick(),
+			"mode": modeStr,
+		}})
 		return
 	}
 
@@ -511,14 +425,13 @@ func (c *Connection) handleMode(msg ircmsg.Message) {
 			if !add {
 				prefix = "-"
 			}
-			c.emitEvent(map[string]any{
-				"event":           core.EventTypeState,
-				"type":            core.StateEventMode,
-				"conversation_id": convID,
-				"from":            from,
-				"nick":            targetNick,
-				"mode":            prefix + string(ch),
-			})
+			event := &core.StateModeEvent{
+				ConversationID: convID,
+				From:           from,
+				Mode:           prefix + string(ch),
+				Nick:           targetNick,
+			}
+			c.emitEvent(event)
 			continue
 		}
 
@@ -545,14 +458,8 @@ func (c *Connection) handleMode(msg ircmsg.Message) {
 		if conv := c.GetConversation(convID); conv != nil {
 			conv.UpdateModes(chanModeStr)
 		}
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventMode,
-			"conversation_id": convID,
-			"from":            from,
-			"mode":            chanModeStr,
-			"mode_changed":    true,
-		})
+		event := &core.StateModeEvent{ConversationID: convID, From: from, Mode: chanModeStr, Nick: "", ModeChanged: true, Args: ""}
+		c.emitEvent(event)
 	}
 }
 
@@ -575,13 +482,8 @@ func (c *Connection) handleChannelModeIs(msg ircmsg.Message) {
 		conv.UpdateModes(mode)
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventMode,
-		"conversation_id": convID,
-		"mode":            mode,
-		"args":            args,
-	})
+	event := &core.StateModeEvent{ConversationID: convID, From: "", Mode: mode, Nick: "", ModeChanged: false, Args: args}
+	c.emitEvent(event)
 }
 
 // handleNamesReply handles RPL_NAMREPLY (353) - accumulates channel members.
@@ -605,28 +507,14 @@ func (c *Connection) handleNamesReply(msg ircmsg.Message) {
 
 	if conv.Frozen() != "" {
 		conv.SetFrozen("")
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          "",
-		})
+		c.emitEvent(&core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: ""})
 	}
 
 	for _, raw := range nicks {
 		mode, nick, user, host := parseNamesEntry(raw)
-		participant := map[string]any{
-			"nick": nick,
-			"mode": mode,
-		}
-		if user != "" {
-			participant["user"] = user
-		}
-		if host != "" {
-			participant["host"] = host
-		}
-		c.namesBuffer[channel] = append(c.namesBuffer[channel], participant)
-		conv.AddParticipant(nick, participant)
+		p := core.Participant{Nick: nick, Mode: mode, User: user, Host: host}
+		c.namesBuffer[channel] = append(c.namesBuffer[channel], p)
+		conv.AddParticipant(p)
 	}
 }
 
@@ -644,16 +532,7 @@ func (c *Connection) handleEndOfNames(msg ircmsg.Message) {
 	delete(c.namesBuffer, channel)
 	c.mu.Unlock()
 
-	if participants == nil {
-		participants = []map[string]any{}
-	}
-
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeState,
-		"type":            core.StateEventParticipants,
-		"conversation_id": channel,
-		"participants":    participants,
-	})
+	c.emitEvent(&core.StateParticipantsEvent{ConversationID: channel, Participants: participants})
 }
 
 // handleWhoisReply collects WHOIS response numerics into the buffer.
@@ -791,22 +670,15 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 		}
 
 		// Emit state update so frontend updates conversation.info
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          conv.Frozen(),
-			"info":            conv.Info(),
-		})
+		event := &core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: conv.Frozen(), Info: conv.Info()}
+		c.emitEvent(event)
 	}
 
-	whois["event"] = "sent"
-	whois["message"] = "/whois"
-	whois["command"] = []string{"whois"}
+	convID := ""
 	if conv != nil {
-		whois["conversation_id"] = conv.ID()
+		convID = conv.ID()
 	}
-	c.emitEvent(whois)
+	c.emitEvent(&core.SentEvent{ConversationID: convID, Message: "/whois", Command: []string{"whois"}, Data: whois})
 }
 
 // handleIsonReply handles RPL_ISON (303).
@@ -831,12 +703,7 @@ func (c *Connection) handleIsonReply(msg ircmsg.Message) {
 			continue
 		}
 		conv.SetFrozen("")
-		c.emitEvent(map[string]any{
-			"event":           core.EventTypeState,
-			"type":            core.StateEventFrozen,
-			"conversation_id": conv.ID(),
-			"frozen":          conv.Frozen(),
-		})
+		c.emitEvent(&core.StateFrozenEvent{ConversationID: conv.ID(), Frozen: conv.Frozen()})
 	}
 
 	c.saveState()
@@ -891,14 +758,9 @@ func (c *Connection) handleNotice(msg ircmsg.Message) {
 		c.AddConversation(conv)
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeMessage,
-		"conversation_id": convID,
-		"from":            msg.Source,
-		"message":         message,
-		"type":            core.MessageTypeNotice,
-		"ts":              serverTimeOrNowRFC3339(msg),
-	})
+	event := &core.MessageEvent{ConversationID: convID, From: msg.Source, Message: message, Type: core.MessageTypeNotice, Highlight: false}
+	event.TS = serverTimeOrNowRFC3339(msg)
+	c.emitEvent(event)
 
 	c.persistMessage(convID, msg.Source, message, core.MessageTypeNotice, false, serverTimeOrNow(msg), "", "", "")
 }
@@ -921,14 +783,9 @@ func (c *Connection) handleErrorReply(msg ircmsg.Message) {
 		}
 	}
 
-	c.emitEvent(map[string]any{
-		"event":           core.EventTypeMessage,
-		"conversation_id": convID,
-		"from":            msg.Source,
-		"message":         message,
-		"type":            core.MessageTypeError,
-		"ts":              serverTimeOrNowRFC3339(msg),
-	})
+	event := &core.MessageEvent{ConversationID: convID, From: msg.Source, Message: message, Type: core.MessageTypeError, Highlight: false}
+	event.TS = serverTimeOrNowRFC3339(msg)
+	c.emitEvent(event)
 
 	c.persistMessage(convID, msg.Source, message, core.MessageTypeError, false, serverTimeOrNow(msg), "", "", "")
 }
@@ -969,4 +826,3 @@ func (c *Connection) handleISupport(_ ircmsg.Message) {
 	}
 	c.emitInfo()
 }
-

@@ -69,8 +69,8 @@ func TestGetUser_QueryParameters(t *testing.T) {
 
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{
 		Params: api.GetUserParams{
-			Connections:   ptr(false),
-			Conversations: ptr(false),
+			Connections:   new(false),
+			Conversations: new(false),
 		},
 	})
 	if err != nil {
@@ -212,8 +212,8 @@ func TestGetUser_ConversationFields(t *testing.T) {
 	ctx := context.WithValue(context.Background(), core.CtxKeyUser, u)
 	resp, err := h.GetUser(ctx, api.GetUserRequestObject{
 		Params: api.GetUserParams{
-			Connections:   ptr(true),
-			Conversations: ptr(true),
+			Connections:   new(true),
+			Conversations: new(true),
 		},
 	})
 	if err != nil {
@@ -795,8 +795,8 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 	if len(parsed.Errors) == 0 {
 		t.Fatal("Expected error message")
 	}
-	if parsed.Errors[0].Message != "Invalid email or password." {
-		t.Errorf("Login error message: got %q, want %q", parsed.Errors[0].Message, "Invalid email or password.")
+	if parsed.Errors[0].Message != "invalid email or password" {
+		t.Errorf("Login error message: got %q, want %q", parsed.Errors[0].Message, "invalid email or password")
 	}
 }
 

@@ -18,7 +18,7 @@ func TestParseNickMode(t *testing.T) {
 		{"nick", "", "nick"},
 		{"@nick", "o", "nick"},
 		{"+nick", "v", "nick"},
-		{"@+nick", "ov", "nick"},        // multi-prefix: op + voice
+		{"@+nick", "ov", "nick"},       // multi-prefix: op + voice
 		{"~&@%+nick", "qaohv", "nick"}, // all prefixes
 		{"", "", ""},
 	}

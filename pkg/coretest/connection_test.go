@@ -19,9 +19,9 @@ func newTestConnection(rawURL string, user *core.User) *testConnection {
 	}
 }
 
-func (c *testConnection) Connect() error            { return nil }
-func (c *testConnection) Disconnect() error         { return nil }
-func (c *testConnection) Send(_, _ string) error    { return nil }
+func (c *testConnection) Connect() error         { return nil }
+func (c *testConnection) Disconnect() error      { return nil }
+func (c *testConnection) Send(_, _ string) error { return nil }
 func (c *testConnection) List(_ string) (map[string]any, error) {
 	return map[string]any{"conversations": []map[string]any{}, "n_conversations": 0, "done": false}, nil
 }

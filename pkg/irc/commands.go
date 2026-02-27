@@ -81,11 +81,9 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if conv != nil && (conv.IsPrivate() || conv.Frozen() != "") || c.State() != core.StateConnected {
 			c.RemoveConversation(ch)
 			c.saveState()
-			c.emitEvent(map[string]any{
-				"event":           "state",
-				"type":            "part",
-				"conversation_id": strings.ToLower(ch),
-				"nick":            c.Nick(),
+			c.emitEvent(&core.StatePartEvent{
+				ConversationID: strings.ToLower(ch),
+				Nick:           c.Nick(),
 			})
 			return nil
 		}
@@ -103,10 +101,9 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if err := c.User().Core().Backend().DeleteMessages(conv); err != nil {
 			return err
 		}
-		c.emitEvent(map[string]any{
-			"event":           "sent",
-			"command":         []string{"clear"},
-			"conversation_id": conv.ID(),
+		c.emitEvent(&core.SentEvent{
+			ConversationID: conv.ID(),
+			Command:        []string{"clear"},
 		})
 		return nil
 	case "QUERY":

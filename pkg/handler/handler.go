@@ -118,9 +118,6 @@ func (h *Handler) GetUserFromSession(r *http.Request) *core.User {
 	return h.Core.GetUser(email)
 }
 
-func ptr[T any](v T) *T {
-	return &v
-}
 
 // inviteToken computes HMAC-SHA1 of "email:{email}:exp:{exp}:password:{password}"
 // keyed with the given secret. Matches Perl's _add_invite_token_to_params.
@@ -156,7 +153,7 @@ func ErrResponse(message string) api.Error {
 			Message string  `json:"message"`
 			Path    *string `json:"path,omitempty"`
 		}{
-			{Message: message, Path: ptr("/")},
+			{Message: message, Path: new("/")},
 		},
 	}
 }

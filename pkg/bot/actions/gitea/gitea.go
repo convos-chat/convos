@@ -85,4 +85,3 @@ func formatGiteaMessage(payload map[string]any) (string, string) {
 
 	return "", "unknown"
 }
-

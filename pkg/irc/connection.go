@@ -54,7 +54,7 @@ type Connection struct {
 	client *ircevent.Connection
 
 	// Buffers for accumulating multi-message IRC replies
-	namesBuffer map[string][]map[string]any // channel -> participants
+	namesBuffer map[string][]core.Participant // channel -> participants
 	whoisBuffer map[string]map[string]any   // nick -> whois data
 	listBuf     listCache                   // cached LIST results
 
@@ -70,7 +70,7 @@ type Connection struct {
 func NewConnection(rawURL string, user *core.User) *Connection {
 	return &Connection{
 		BaseConnection: core.NewBaseConnection(rawURL, user),
-		namesBuffer:    make(map[string][]map[string]any),
+		namesBuffer:    make(map[string][]core.Participant),
 		whoisBuffer:    make(map[string]map[string]any),
 	}
 }
@@ -247,11 +247,9 @@ func (c *Connection) Connect() error {
 		// Freeze all conversations
 		for _, conv := range c.Conversations() {
 			conv.SetFrozen("Disconnected.")
-			c.emitEvent(map[string]any{
-				"event":           "state",
-				"type":            "frozen",
-				"conversation_id": conv.ID(),
-				"frozen":          conv.Frozen(),
+			c.emitEvent(&core.StateFrozenEvent{
+								ConversationID: conv.ID(),
+				Frozen:         conv.Frozen(),
 			})
 		}
 
@@ -459,14 +457,14 @@ func (c *Connection) LogServerError(message string) {
 	}
 
 	ts := time.Now().Unix()
-	c.emitEvent(map[string]any{
-		"event":           "message",
-		"conversation_id": convID,
-		"from":            c.URL().Host,
-		"message":         message,
-		"type":            "error",
-		"ts":              time.Unix(ts, 0).Format(time.RFC3339),
-	})
+	event := &core.MessageEvent{
+		ConversationID: convID,
+		From:           c.URL().Host,
+		Message:        message,
+		Type:           core.MessageTypeError,
+	}
+	event.TS = time.Unix(ts, 0).Format(time.RFC3339)
+	c.emitEvent(event)
 	c.persistMessage(convID, c.URL().Host, message, "error", false, ts, "", "", "")
 }
 
@@ -500,10 +498,9 @@ func (c *Connection) Names(channel string) (map[string]any, error) {
 
 	// Get conversation to retrieve current participants
 	conv := c.GetConversation(channel)
-	participants := []map[string]any{}
+	var participants []core.Participant
 	if conv != nil {
-		participantsMap := conv.Participants()
-		for _, p := range participantsMap {
+		for _, p := range conv.Participants() {
 			participants = append(participants, p)
 		}
 	}
@@ -625,15 +622,14 @@ func (c *Connection) openConversation(nick string) error {
 		conv = core.NewConversation(convID, c)
 		c.AddConversation(conv)
 	}
-	c.emitEvent(map[string]any{
-		"event":           "state",
-		"type":            "frozen",
-		"conversation_id": conv.ID(),
-		"frozen":          conv.Frozen(),
-		"name":            conv.Name(),
-		"topic":           conv.Topic(),
-		"unread":          conv.Unread(),
-	})
+	event := &core.StateFrozenEvent{
+		ConversationID: conv.ID(),
+		Frozen:         conv.Frozen(),
+		Name:           conv.Name(),
+		Topic:          conv.Topic(),
+		Unread:         conv.Unread(),
+	}
+	c.emitEvent(event)
 	c.saveState()
 	return nil
 }
@@ -641,12 +637,12 @@ func (c *Connection) openConversation(nick string) error {
 // saveState persists the connection (including conversations) to the backend.
 func (c *Connection) saveState() {
 	if err := c.User().Core().Backend().SaveConnection(c); err != nil {
-		c.User().Core().Events().EmitUser(c.User().ID(), map[string]any{
-			"event":         "state",
-			"type":          "connection",
-			"connection_id": c.ID(),
-			"message":       "Failed to save connection state: " + err.Error(),
-		})
+		event := &core.MessageEvent{
+			From:    c.Name(),
+			Message: "Failed to save connection state: " + err.Error(),
+			Type:    core.MessageTypeError,
+		}
+		c.User().Core().Events().EmitUser(c.User().ID(), event)
 	}
 }
 
@@ -656,13 +652,11 @@ func (c *Connection) emitSentMessage(target, message string, msgType core.Messag
 	convID := strings.ToLower(target)
 	from := c.Nick()
 
-	c.emitEvent(map[string]any{
-		"event":           "message",
-		"conversation_id": convID,
-		"from":            from,
-		"highlight":       false,
-		"message":         message,
-		"type":            msgType,
+	c.emitEvent(&core.MessageEvent{
+		ConversationID: convID,
+		From:           from,
+		Message:        message,
+		Type:           msgType,
 	})
 
 	c.persistMessage(convID, from, message, msgType, false, time.Now().Unix(), "", "", "")
@@ -694,18 +688,18 @@ func (c *Connection) persistMessage(convID, from, message string, msgType core.M
 }
 
 // emitEvent emits an event to the user's event subscribers.
-func (c *Connection) emitEvent(event map[string]any) {
-	event["connection_id"] = c.ID()
+func (c *Connection) emitEvent(event core.Event) {
+	if event.GetConnectionID() == "" {
+		event.SetConnectionID(c.ID())
+	}
 	c.User().Core().Events().EmitUser(c.User().ID(), event)
 }
 
 // emitState emits a connection state change event.
 func (c *Connection) emitState(state core.ConnectionState, message string) {
-	c.emitEvent(map[string]any{
-		"event":   core.EventTypeState,
-		"type":    core.StateEventConnection,
-		"state":   state,
-		"message": message,
+	c.emitEvent(&core.StateConnectionEvent{
+		State:   state,
+		Message: message,
 	})
 }
 
@@ -716,13 +710,11 @@ func (c *Connection) emitInfo() {
 	c.mu.RUnlock()
 
 	baseInfo := c.Info()
-	info := map[string]any{
-		"event": "state",
-		"type":  "info",
-		"nick":  nick,
-	}
+	info := map[string]any{"nick": nick}
 	maps.Copy(info, baseInfo)
-	c.emitEvent(info)
+	c.emitEvent(&core.StateInfoEvent{
+		Info: info,
+	})
 }
 
 // isHighlight checks if a message should be highlighted for this user.

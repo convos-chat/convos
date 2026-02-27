@@ -95,7 +95,7 @@ func (h *Handler) RemoveConnection(ctx context.Context, request api.RemoveConnec
 		}, nil
 	}
 
-	return api.RemoveConnection200JSONResponse{Message: ptr("Connection removed")}, nil
+	return api.RemoveConnection200JSONResponse{Message: new("Connection removed")}, nil
 }
 
 // UpdateConnection implements api.StrictServerInterface.

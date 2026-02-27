@@ -63,7 +63,7 @@ func (h *Handler) SubscribeToPush(ctx context.Context, request api.SubscribeToPu
 	}
 
 	return api.SubscribeToPush200JSONResponse{
-		Message: ptr("Subscribed"),
+		Message: new("Subscribed"),
 	}, nil
 }
 
@@ -91,6 +91,6 @@ func (h *Handler) UnsubscribeFromPush(ctx context.Context, request api.Unsubscri
 	}
 
 	return api.UnsubscribeFromPush200JSONResponse{
-		Message: ptr("Unsubscribed"),
+		Message: new("Unsubscribed"),
 	}, nil
 }

@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand/v2"
 	"net/url"
@@ -40,6 +41,7 @@ const (
 
 // waitForEvent reads from sub, discarding events that don't match pred, until
 // one matches or ircEventTimeout elapses. On timeout the test is failed immediately.
+// Events are marshaled to map[string]any so predicates can inspect arbitrary fields.
 func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any) bool) map[string]any {
 	t.Helper()
 	deadline := time.After(ircEventTimeout)
@@ -50,8 +52,12 @@ func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any
 				t.Fatal("subscription channel closed unexpectedly")
 				return nil
 			}
-			m, ok := ev.(map[string]any)
-			if !ok {
+			data, err := json.Marshal(ev)
+			if err != nil {
+				continue
+			}
+			var m map[string]any
+			if err := json.Unmarshal(data, &m); err != nil {
 				continue
 			}
 			if pred(m) {
@@ -575,7 +581,7 @@ func TestIRCIntegration(t *testing.T) {
 				m["conversation_id"] == strings.ToLower(channel)
 		})
 
-		participants, _ := ev["participants"].([]map[string]any)
+		participants, _ := ev["participants"].([]any)
 		if len(participants) < 2 {
 			t.Errorf("NAMES reply has %d participant(s), want ≥2", len(participants))
 		}
@@ -615,7 +621,7 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatal("conversation missing after join")
 		}
 		for nick, p := range conv.Participants() {
-			if host, _ := p["host"].(string); host == "" {
+			if p.Host == "" {
 				t.Errorf("participant %q missing host field (userhost-in-names): %v", nick, p)
 			}
 		}
@@ -640,8 +646,8 @@ func TestIRCIntegration(t *testing.T) {
 		if !ok {
 			t.Fatalf("self nick %q not in participants: %v", actualNick, conv.Participants())
 		}
-		if mode, _ := p["mode"].(string); !strings.Contains(mode, "o") {
-			t.Errorf("participant mode = %q, want it to contain 'o' (channel op)", mode)
+		if !strings.Contains(p.Mode, "o") {
+			t.Errorf("participant mode = %q, want it to contain 'o' (channel op)", p.Mode)
 		}
 	})
 
@@ -671,17 +677,18 @@ func TestIRCIntegration(t *testing.T) {
 		if convA == nil {
 			t.Fatal("A: channel conversation missing")
 		}
-		var bEntry map[string]any
+		var bEntry *core.Participant
 		for n, p := range convA.Participants() {
 			if strings.EqualFold(n, nickB) {
-				bEntry = p
+				p := p
+				bEntry = &p
 				break
 			}
 		}
 		if bEntry == nil {
 			t.Fatalf("B's nick %q not in A's participants: %v", nickB, convA.Participants())
 		}
-		if _, ok := bEntry["realname"]; !ok {
+		if bEntry.Realname == "" {
 			t.Errorf("B's participant entry missing 'realname' (extended-join not working): %v", bEntry)
 		}
 	})

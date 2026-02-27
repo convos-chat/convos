@@ -65,8 +65,8 @@ func TestLocalAuthenticator(t *testing.T) {
 		if result != nil {
 			t.Error("Expected nil result on authentication failure")
 		}
-		if err.Error() != "Invalid email or password." {
-			t.Errorf("Expected error message 'Invalid email or password.', got: %v", err)
+		if err.Error() != "invalid email or password" {
+			t.Errorf("Expected error message 'invalid email or password', got: %v", err)
 		}
 	})
 
