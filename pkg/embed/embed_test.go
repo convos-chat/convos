@@ -6,7 +6,16 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
+
+// newTestClient returns a Client that connects to any address, including
+// loopback. Only for use in tests.
+func newTestClient() *Client {
+	c := NewClient()
+	c.HTTPClient = &http.Client{Timeout: 5 * time.Second}
+	return c
+}
 
 func TestProviderName(t *testing.T) {
 	t.Parallel()
@@ -37,7 +46,7 @@ func TestFetch_Photo(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient()
+	client := newTestClient()
 	link, err := client.Fetch(context.Background(), ts.URL+"/test.png", "")
 	if err != nil {
 		t.Fatalf("Fetch failed: %v", err)
@@ -71,7 +80,7 @@ func TestFetch_Rich(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient()
+	client := newTestClient()
 	link, err := client.Fetch(context.Background(), ts.URL, "")
 	if err != nil {
 		t.Fatalf("Fetch failed: %v", err)
@@ -104,7 +113,7 @@ func TestFetch_Caching(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient()
+	client := newTestClient()
 	_, _ = client.Fetch(context.Background(), ts.URL, "")
 	_, _ = client.Fetch(context.Background(), ts.URL, "")
 
@@ -120,7 +129,7 @@ func TestFetch_Error(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient()
+	client := newTestClient()
 	_, err := client.Fetch(context.Background(), ts.URL, "")
 	if err == nil {
 		t.Fatal("Expected error for 404 status, got nil")

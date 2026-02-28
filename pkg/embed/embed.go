@@ -112,9 +112,11 @@ type Client struct {
 }
 
 // NewClient creates an embed Client with sensible defaults.
+// The underlying HTTP client blocks requests to private/reserved IP ranges
+// to prevent SSRF.
 func NewClient() *Client {
 	return &Client{
-		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+		HTTPClient: newSafeHTTPClient(5 * time.Second),
 		MaxEntries: 100,
 		TTL:        10 * time.Minute,
 		cache:      make(map[string]cacheEntry),
@@ -133,6 +135,9 @@ func (c *Client) Fetch(ctx context.Context, rawURL, userAgent string) (*Link, er
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return nil, fmt.Errorf("%w: %q", ErrUnsupportedScheme, parsed.Scheme)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)

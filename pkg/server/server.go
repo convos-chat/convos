@@ -72,46 +72,41 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if s.Config.ReverseProxy == "" {
-			detectedBase, err := url.Parse(s.Core.Settings().BaseURL().Scheme + "://" + r.Host)
-			if err == nil && s.Core.Settings().BaseURL() != detectedBase {
-				slog.Debug("Detected base URL from request (no configured reverse proxy)", "detected", detectedBase, "orig", s.Core.Settings().BaseURL())
-				s.Core.Settings().SetBaseURL(detectedBase)
-				if err = s.Core.Settings().Save(); err != nil {
-					slog.Warn("Failed to persist detected base URL", "error", err)
-				}
-			}
 			next.ServeHTTP(w, r)
 			return
 		}
+
+		// X-Request-Base (Convos-specific) carries the full base URL including
+		// any sub-path, so it takes priority over the individual X-Forwarded-*
+		// headers. The proxy is responsible for stripping this header from
+		// untrusted client requests.
 		if base := r.Header.Get("X-Request-Base"); base != "" {
-			u, err := url.Parse(base)
-			if err != nil {
-				next.ServeHTTP(w, r)
-				return
+			if u, err := url.Parse(base); err == nil {
+				s.updateBaseURL(u)
 			}
-			s.Core.Settings().SetBaseURL(u)
-			// Update secure cookies based on detected scheme
-			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
-				cookieStore.Options.Secure = u.Scheme == httpsScheme
-			}
-		}
-		// Also detect base from X-Forwarded
-		scheme := httpsScheme
-		if proto := r.Header.Get("X-Forwarded-Proto"); proto == httpsScheme {
-			if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
-				cookieStore.Options.Secure = true
+		} else if host := r.Header.Get("X-Forwarded-Host"); host != "" {
+			// Fall back to standard forwarded headers when X-Request-Base is
+			// absent. Default to http; only upgrade to https when the proto
+			// header explicitly says so.
+			scheme := "http"
+			if r.Header.Get("X-Forwarded-Proto") == httpsScheme {
 				scheme = httpsScheme
 			}
-		}
-		if host := r.Header.Get("X-Forwarded-Host"); host != "" {
-			s.Core.Settings().SetBaseURL(&url.URL{
-				Host:   host,
-				Scheme: scheme,
-			})
+			s.updateBaseURL(&url.URL{Scheme: scheme, Host: host})
 		}
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// updateBaseURL sets the in-memory base URL and updates the secure-cookie flag
+// to match. It does not persist the change to disk; proxy-derived base URLs
+// are intentionally ephemeral.
+func (s *Server) updateBaseURL(u *url.URL) {
+	s.Core.Settings().SetBaseURL(u)
+	if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
+		cookieStore.Options.Secure = u.Scheme == httpsScheme
+	}
 }
 
 func (s *Server) RateLimitMiddleware(next http.Handler) http.Handler {

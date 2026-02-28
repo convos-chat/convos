@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/auth"
@@ -17,6 +18,9 @@ func TestEmbedHandler(t *testing.T) {
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), nil, nil)
+	// Replace the safe HTTP client with a plain one so the test server on
+	// loopback (127.0.0.1) is not blocked by SSRF protection.
+	h.EmbedClient.HTTPClient = &http.Client{Timeout: 5 * time.Second}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
