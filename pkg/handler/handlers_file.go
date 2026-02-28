@@ -8,11 +8,36 @@ import (
 	"io"
 	"mime"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
 )
+
+// unsafeUploadMIMEPrefixes lists MIME type prefixes that can execute scripts
+// in a browser when served inline. Files with these types are rejected at
+// upload time.
+var unsafeUploadMIMEPrefixes = []string{
+	"text/html",
+	"image/svg",
+	"text/xml",
+	"application/xml",
+	"application/xhtml",
+	"application/javascript",
+	"text/javascript",
+}
+
+func isUnsafeMIME(ct string) bool {
+	mimeType, _, _ := mime.ParseMediaType(ct)
+	mimeType = strings.ToLower(mimeType)
+	for _, prefix := range unsafeUploadMIMEPrefixes {
+		if strings.HasPrefix(mimeType, prefix) {
+			return true
+		}
+	}
+	return false
+}
 
 var (
 	ErrUploadFail     = errors.New("upload error")
@@ -98,7 +123,17 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 			return nil, fmt.Errorf("%w: %d bytes exceeds limit of %d", ErrUploadTooLarge, len(content), maxSize)
 		}
 
-		f, err := h.Core.Backend().SaveFile(user, part.FileName(), content)
+		filename := part.FileName()
+		ext := filepath.Ext(filename)
+		ct := mime.TypeByExtension(ext)
+		if ct == "" {
+			ct = "application/octet-stream"
+		}
+		if isUnsafeMIME(ct) {
+			return nil, fmt.Errorf("file type %q is not allowed: %w", ct, ErrUploadFail)
+		}
+
+		f, err := h.Core.Backend().SaveFile(user, filename, content)
 		if err != nil {
 			return nil, err
 		}
