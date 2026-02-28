@@ -85,13 +85,6 @@ func WithConnectDelay(d time.Duration) Option {
 	}
 }
 
-// WithLogger sets the logger.
-func WithLogger(log *slog.Logger) Option {
-	return func(c *Core) {
-		c.log = log
-	}
-}
-
 // New creates a new Core instance with the given options.
 func New(opts ...Option) *Core {
 	c := &Core{
