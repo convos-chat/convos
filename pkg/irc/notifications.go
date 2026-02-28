@@ -3,6 +3,7 @@ package irc
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -62,13 +63,18 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 		return
 	}
 
-	// We can't customize email yet, so use a dummy one if contact is not set.
-	// In real world, this should be admin's email.
-	subscriber := user.Core().Settings().Contact()
-	if subscriber == "" {
-		subscriber = "mailto:admin@example.com"
-	} else if !strings.HasPrefix(subscriber, "mailto:") && !strings.HasPrefix(subscriber, "http") {
-		subscriber = "mailto:" + subscriber
+	// RFC 8292 VAPID requires the "sub" JWT claim to be either an HTTPS URL or
+	// a mailto: URI. Apple enforces HTTPS. Prefer the server's base URL when it
+	// is HTTPS; fall back to the contact email (the webpush library prepends
+	// "mailto:" automatically, so strip any existing prefix first).
+	var subscriber string
+	if base := user.Core().Settings().BaseURL(); base != nil && base.Scheme == "https" {
+		subscriber = base.String()
+	} else {
+		subscriber = strings.TrimPrefix(user.Core().Settings().Contact(), "mailto:")
+		if subscriber == "" {
+			subscriber = "admin@example.com"
+		}
 	}
 
 	for _, sub := range subs {
@@ -89,12 +95,16 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 			}
 			defer resp.Body.Close()
 
-			if resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden {
-				// Subscription is no longer valid, remove it
-				user.RemoveSubscription(s.Endpoint)
-				_ = user.Save()
-			} else if resp.StatusCode >= 300 {
-				slog.Warn("Push notification delivery failed", "status", resp.StatusCode, "endpoint", s.Endpoint)
+			if resp.StatusCode >= 300 {
+				body, _ := io.ReadAll(resp.Body)
+				if resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden {
+					// Subscription is no longer valid, remove it
+					slog.Warn("Push subscription invalid, removing", "status", resp.StatusCode, "body", string(body), "endpoint", s.Endpoint)
+					user.RemoveSubscription(s.Endpoint)
+					_ = user.Save()
+				} else {
+					slog.Warn("Push notification delivery failed", "status", resp.StatusCode, "body", string(body), "endpoint", s.Endpoint)
+				}
 			}
 		}(sub)
 	}
