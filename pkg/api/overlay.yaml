@@ -1,0 +1,29 @@
+overlay: 1.0.0
+info:
+  title: Convos Go Type Overlays
+  version: 1.0.0
+actions:
+  - target: "$.components.schemas.Connection.properties.state"
+    update:
+      x-go-type: core.ConnectionState
+      x-go-type-import:
+        path: github.com/convos-chat/convos/pkg/core
+        name: core
+  - target: "$.components.schemas.Connection.properties.wanted_state"
+    update:
+      x-go-type: core.ConnectionState
+      x-go-type-import:
+        path: github.com/convos-chat/convos/pkg/core
+        name: core
+  - target: "$.components.schemas.Connection.properties.info"
+    update:
+      x-go-type: core.InfoMap
+      x-go-type-import:
+        path: github.com/convos-chat/convos/pkg/core
+        name: core
+  - target: "$.components.schemas.Conversation.properties.info"
+    update:
+      x-go-type: core.InfoMap
+      x-go-type-import:
+        path: github.com/convos-chat/convos/pkg/core
+        name: core

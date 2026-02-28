@@ -746,7 +746,7 @@ func parseErrResponse(t *testing.T, body api.Error) errBody {
 
 func TestErrorResponse_PathField(t *testing.T) {
 	t.Parallel()
-	resp := ErrResponse("test error")
+	resp := api.ErrResponse("test error")
 
 	parsed := parseErrResponse(t, resp)
 	if len(parsed.Errors) == 0 {

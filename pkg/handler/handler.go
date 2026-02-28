@@ -14,7 +14,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/bot"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/embed"
@@ -147,13 +146,3 @@ func (h *Handler) validateInviteToken(email, token string, exp int64, password s
 	return false
 }
 
-func ErrResponse(message string) api.Error {
-	return api.Error{
-		Errors: &[]struct {
-			Message string  `json:"message"`
-			Path    *string `json:"path,omitempty"`
-		}{
-			{Message: message, Path: new("/")},
-		},
-	}
-}

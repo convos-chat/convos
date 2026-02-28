@@ -55,7 +55,7 @@ type Connection struct {
 
 	// Buffers for accumulating multi-message IRC replies
 	namesBuffer map[string][]core.Participant // channel -> participants
-	whoisBuffer map[string]map[string]any   // nick -> whois data
+	whoisBuffer map[string]*core.WhoisData    // nick -> whois data
 	listBuf     listCache                   // cached LIST results
 
 	// Reconnect state
@@ -71,7 +71,7 @@ func NewConnection(rawURL string, user *core.User) *Connection {
 	return &Connection{
 		BaseConnection: core.NewBaseConnection(rawURL, user),
 		namesBuffer:    make(map[string][]core.Participant),
-		whoisBuffer:    make(map[string]map[string]any),
+		whoisBuffer:    make(map[string]*core.WhoisData),
 	}
 }
 

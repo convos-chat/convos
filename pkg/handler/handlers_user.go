@@ -35,7 +35,7 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 	result, err := h.Authenticator.Authenticate(authReq)
 	if err != nil {
 		return api.LoginUser400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse(err.Error())),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -47,7 +47,7 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 		if err != nil {
 			return api.LoginUser500JSONResponse{
 				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(
-					ErrResponse(err.Error())),
+					api.ErrResponse(err.Error())),
 			}, nil
 		}
 	}
@@ -56,7 +56,7 @@ func (h *Handler) LoginUser(ctx context.Context, request api.LoginUserRequestObj
 		return nil, err
 	}
 
-	return api.LoginUser200JSONResponse(toAPIUser(user, true, true)), nil
+	return api.LoginUser200JSONResponse(api.ToUser(user, true, true)), nil
 }
 
 // LogoutUser implements api.StrictServerInterface.
@@ -97,7 +97,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 	email := string(request.Body.Email)
 	if email == "" || len(request.Body.Password) < 10 {
 		return api.RegisterUser400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Email and password (min length 10) are required")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse("Email and password (min length 10) are required")),
 		}, nil
 	}
 
@@ -122,13 +122,13 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 	user, err := h.Core.User(email)
 	if err != nil {
 		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to create user: " + err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to create user: " + err.Error())),
 		}, nil
 	}
 
 	if err = user.SetPassword(request.Body.Password); err != nil {
 		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password: " + err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to set password: " + err.Error())),
 		}, nil
 	}
 
@@ -139,7 +139,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 
 	if err = user.Save(); err != nil {
 		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user: " + err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to save user: " + err.Error())),
 		}, nil
 	}
 
@@ -169,7 +169,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 		return nil, err
 	}
 
-	return api.RegisterUser200JSONResponse(toAPIUser(user, true, true)), nil
+	return api.RegisterUser200JSONResponse(api.ToUser(user, true, true)), nil
 }
 
 // validateRegistration checks whether a non-first-user registration is allowed.
@@ -177,20 +177,20 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 func (h *Handler) validateRegistration(hasToken bool, existingUser *core.User, email string, body *api.RegisterUserJSONRequestBody) (api.RegisterUserResponseObject, bool) {
 	if !hasToken && !h.Core.Settings().OpenToPublic() {
 		return api.RegisterUser401JSONResponse{
-			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Convos registration is not open to public.")),
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse("Convos registration is not open to public.")),
 		}, true
 	}
 
 	if !hasToken && existingUser != nil {
 		return api.RegisterUser401JSONResponse{
-			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Email is taken.")),
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse("Email is taken.")),
 		}, true
 	}
 
 	if hasToken {
 		if err := h.validateInviteRequest(email, existingUser, body); err != nil {
 			return api.RegisterUser401JSONResponse{
-				UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse(err.Error())),
+				UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse(err.Error())),
 			}, true
 		}
 	}
@@ -202,19 +202,19 @@ func (h *Handler) validateRegistration(hasToken bool, existingUser *core.User, e
 func (h *Handler) updateExistingUserViaInvite(user *core.User, password string, r *http.Request, w http.ResponseWriter) (api.RegisterUserResponseObject, error) {
 	if err := user.SetPassword(password); err != nil {
 		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password.")),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to set password.")),
 		}, nil
 	}
 	if err := user.Save(); err != nil {
 		return api.RegisterUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user.")),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to save user.")),
 		}, nil
 	}
 
 	if err := h.saveUserSession(r, w, user); err != nil {
 		return nil, err
 	}
-	return api.RegisterUser200JSONResponse(toAPIUser(user, true, true)), nil
+	return api.RegisterUser200JSONResponse(api.ToUser(user, true, true)), nil
 }
 
 // validateInviteRequest checks the invite token and expiration from a registration request.
@@ -261,7 +261,7 @@ func (h *Handler) GetUser(ctx context.Context, request api.GetUserRequestObject)
 	includeConns := params.Connections == nil || *params.Connections
 	includeConvs := params.Conversations == nil || *params.Conversations
 
-	return api.GetUser200JSONResponse(toAPIUser(user, includeConns, includeConvs)), nil
+	return api.GetUser200JSONResponse(api.ToUser(user, includeConns, includeConvs)), nil
 }
 
 // InviteUser implements api.StrictServerInterface.
@@ -309,7 +309,7 @@ func (h *Handler) GetUsers(ctx context.Context, request api.GetUsersRequestObjec
 	coreUsers := h.Core.Users()
 	users := make([]api.User, len(coreUsers))
 	for i, u := range coreUsers {
-		users[i] = toAPIUserSummary(u)
+		users[i] = api.ToUserSummary(u)
 	}
 
 	return api.GetUsers200JSONResponse{Users: &users}, nil
@@ -326,7 +326,7 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 	target := h.Core.GetUser(targetEmail)
 	if target == nil {
 		return api.UpdateUser404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("User not found")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("User not found")),
 		}, nil
 	}
 
@@ -339,7 +339,7 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 	if b.Password != nil && *b.Password != "" {
 		if err := target.SetPassword(*b.Password); err != nil {
 			return api.UpdateUser500JSONResponse{ //nolint:nilerr // HTTP error response
-				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to set password: " + err.Error())),
+				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to set password: " + err.Error())),
 			}, nil
 		}
 	}
@@ -358,11 +358,11 @@ func (h *Handler) UpdateUser(ctx context.Context, request api.UpdateUserRequestO
 
 	if err := target.Save(); err != nil {
 		return api.UpdateUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to save user: " + err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to save user: " + err.Error())),
 		}, nil
 	}
 
-	return api.UpdateUser200JSONResponse(toAPIUser(target, true, true)), nil
+	return api.UpdateUser200JSONResponse(api.ToUser(target, true, true)), nil
 }
 
 // DeleteUser implements api.StrictServerInterface.
@@ -374,7 +374,7 @@ func (h *Handler) DeleteUser(ctx context.Context, request api.DeleteUserRequestO
 	targetEmail := string(request.Email)
 	if err := h.Core.RemoveUser(targetEmail); err != nil {
 		return api.DeleteUser500JSONResponse{ //nolint:nilerr // HTTP error response
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse("Failed to delete user: " + err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse("Failed to delete user: " + err.Error())),
 		}, nil
 	}
 
@@ -408,89 +408,4 @@ func (h *Handler) createAutoRegisteredUser(email, password string, roles []strin
 	}
 
 	return user, nil
-}
-
-func toAPIUserSummary(u *core.User) api.User {
-	registered := u.Registered()
-	keywords := u.HighlightKeywords()
-	uid := strconv.Itoa(u.UID())
-	roles := u.Roles()
-
-	return api.User{
-		Email:             u.Email(),
-		Unread:            u.Unread(),
-		Registered:        &registered,
-		HighlightKeywords: &keywords,
-		Uid:               &uid,
-		Roles:             &roles,
-	}
-}
-
-func toAPIUser(u *core.User, includeConns, includeConvs bool) api.User {
-	res := toAPIUserSummary(u)
-
-	s := u.Core().Settings()
-	defaultConn := s.DefaultConnection()
-	forcedConn := s.ForcedConnection()
-	videoService := s.VideoService()
-
-	res.DefaultConnection = &defaultConn
-	res.ForcedConnection = &forcedConn
-	res.VideoService = &videoService
-
-	roles := u.Roles()
-	res.Roles = &roles
-	remoteAddr := u.RemoteAddress()
-	res.RemoteAddress = &remoteAddr
-
-	if includeConns {
-		coreConns := u.Connections()
-		conns := make([]api.Connection, 0, len(coreConns))
-		convs := make([]api.Conversation, 0, len(coreConns)*4)
-		for _, conn := range coreConns {
-			conns = append(conns, toAPIConnection(conn))
-			if includeConvs {
-				for _, conv := range conn.Conversations() {
-					convs = append(convs, toAPIConversation(conv))
-				}
-			}
-		}
-		res.Connections = &conns
-		if includeConvs {
-			res.Conversations = &convs
-		}
-	}
-
-	return res
-}
-
-func toAPIConnection(c core.Connection) api.Connection {
-	name := c.Name()
-	state := api.ConnectionState(c.State())
-	wantedState := api.ConnectionWantedState(c.WantedState())
-	cmds := c.OnConnectCommands()
-	urlStr := ""
-	if u := c.URL(); u != nil {
-		// Strip password from URL for API response
-		clean := *u
-		clean.User = nil
-		urlStr = clean.String()
-	}
-
-	res := api.Connection{
-		ConnectionId:      c.ID(),
-		Name:              &name,
-		Url:               urlStr,
-		State:             &state,
-		WantedState:       &wantedState,
-		OnConnectCommands: &cmds,
-	}
-
-	info := c.Info()
-	if _, ok := info["nick"]; !ok {
-		info["nick"] = c.Nick()
-	}
-	res.Info = &info
-
-	return res
 }

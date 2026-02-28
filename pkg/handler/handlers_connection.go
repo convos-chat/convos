@@ -21,7 +21,7 @@ func (h *Handler) ListConnections(ctx context.Context, request api.ListConnectio
 	conns := user.Connections()
 	res := make([]api.Connection, len(conns))
 	for i, c := range conns {
-		res[i] = toAPIConnection(c)
+		res[i] = api.ToConnection(c)
 	}
 
 	return api.ListConnections200JSONResponse{Connections: &res}, nil
@@ -35,7 +35,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 	}
 	if request.Body.Url == "" {
 		return api.CreateConnection400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("URL is required")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse("URL is required")),
 		}, nil
 	}
 
@@ -43,7 +43,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 	user.AddConnection(conn)
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
 		return api.CreateConnection500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		if err := h.Core.Backend().SaveConnection(conn); err != nil {
 			slog.Error("Failed to save connection with new conversation", "error", err)
 			return api.CreateConnection500JSONResponse{
-				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 			}, nil
 		}
 	}
@@ -80,7 +80,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 		}()
 	}
 
-	return api.CreateConnection200JSONResponse(toAPIConnection(conn)), nil
+	return api.CreateConnection200JSONResponse(api.ToConnection(conn)), nil
 }
 
 // RemoveConnection implements api.StrictServerInterface.
@@ -91,7 +91,7 @@ func (h *Handler) RemoveConnection(ctx context.Context, request api.RemoveConnec
 	}
 	if err := user.RemoveConnection(request.ConnectionId); err != nil {
 		return api.RemoveConnection500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -107,7 +107,7 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
 		return api.UpdateConnection404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Connection not found")),
 		}, nil
 	}
 
@@ -150,11 +150,11 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 
 	if err := h.Core.Backend().SaveConnection(conn); err != nil {
 		return api.UpdateConnection500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
-	return api.UpdateConnection200JSONResponse(toAPIConnection(conn)), nil
+	return api.UpdateConnection200JSONResponse(api.ToConnection(conn)), nil
 }
 
 // channelFromURL extracts a channel name from a URL path.

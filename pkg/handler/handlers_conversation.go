@@ -20,7 +20,7 @@ func (h *Handler) ListConversations(ctx context.Context, request api.ListConvers
 	var convs []api.Conversation
 	for _, conn := range user.Connections() {
 		for _, conv := range conn.Conversations() {
-			convs = append(convs, toAPIConversation(conv))
+			convs = append(convs, api.ToConversation(conv))
 		}
 	}
 	if convs == nil {
@@ -39,14 +39,14 @@ func (h *Handler) ConversationMessages(ctx context.Context, request api.Conversa
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
 		return api.ConversationMessages404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found.")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Connection not found.")),
 		}, nil
 	}
 
 	conv := conn.GetConversation(request.ConversationId)
 	if conv == nil {
 		return api.ConversationMessages404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Conversation not found.")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Conversation not found.")),
 		}, nil
 	}
 
@@ -68,7 +68,7 @@ func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkCo
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
 		return api.MarkConversationAsRead404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Connection not found")),
 		}, nil
 	}
 
@@ -93,7 +93,7 @@ func (h *Handler) ConnectionMessages(ctx context.Context, request api.Connection
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
 		return api.ConnectionMessages404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found.")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Connection not found.")),
 		}, nil
 	}
 
@@ -127,7 +127,7 @@ func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConn
 	conn := user.GetConnection(request.ConnectionId)
 	if conn == nil {
 		return api.MarkConnectionAsRead404JSONResponse{
-			NotFoundJSONResponse: api.NotFoundJSONResponse(ErrResponse("Connection not found")),
+			NotFoundJSONResponse: api.NotFoundJSONResponse(api.ErrResponse("Connection not found")),
 		}, nil
 	}
 
@@ -189,23 +189,6 @@ func (h *Handler) MarkNotificationsAsRead(ctx context.Context, request api.MarkN
 }
 
 // Helpers
-
-func toAPIConversation(c *core.Conversation) api.Conversation {
-	topic := c.Topic()
-	frozen := c.Frozen()
-	notifications := c.Notifications()
-	info := c.Info()
-	return api.Conversation{
-		ConnectionId:   c.Connection().ID(),
-		ConversationId: c.ID(),
-		Frozen:         &frozen,
-		Info:           &info,
-		Name:           c.Name(),
-		Notifications:  &notifications,
-		Topic:          &topic,
-		Unread:         c.Unread(),
-	}
-}
 
 func paramsToMessageQuery(after *time.Time, around *time.Time, before *time.Time, limit *int, match *string) core.MessageQuery {
 	q := core.MessageQuery{}

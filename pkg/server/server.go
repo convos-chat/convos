@@ -151,7 +151,7 @@ func (s *Server) RequireAuthMiddleware(next http.Handler) http.Handler {
 		if user == nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(w).Encode(handler.ErrResponse("Need to log in first."))
+			_ = json.NewEncoder(w).Encode(api.ErrResponse("Need to log in first."))
 			return
 		}
 
@@ -248,20 +248,20 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 				if err != nil && errors.Is(err, handler.ErrUnauthorized) {
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusUnauthorized)
-					_ = json.NewEncoder(w).Encode(handler.ErrResponse("Need to log in first."))
+					_ = json.NewEncoder(w).Encode(api.ErrResponse("Need to log in first."))
 					return nil, nil
 				}
 				if err != nil && errors.Is(err, handler.ErrForbidden) {
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusForbidden)
-					_ = json.NewEncoder(w).Encode(handler.ErrResponse("Forbidden"))
+					_ = json.NewEncoder(w).Encode(api.ErrResponse("Forbidden"))
 					return nil, nil
 				}
 				if err != nil {
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
 					if cfg.IsDevelopment() {
-						_ = json.NewEncoder(w).Encode(handler.ErrResponse("Internal Server Error: " + err.Error()))
+						_ = json.NewEncoder(w).Encode(api.ErrResponse("Internal Server Error: " + err.Error()))
 					} else {
 						w.Write([]byte(`{"error":"Internal Server Error"}`))
 					}

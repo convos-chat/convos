@@ -555,17 +555,9 @@ func (c *Connection) handleWhoisReply(code string, msg ircmsg.Message) {
 	defer c.mu.Unlock()
 
 	if c.whoisBuffer[nick] == nil {
-		c.whoisBuffer[nick] = map[string]any{
-			"nick":        msg.Params[1], // preserve original case
-			"away":        "",
-			"channels":    map[string]any{},
-			"fingerprint": "",
-			"host":        "",
-			"idle_for":    0,
-			"name":        "",
-			"server":      "",
-			"server_info": "",
-			"user":        "",
+		c.whoisBuffer[nick] = &core.WhoisData{
+			Nick:     msg.Params[1], // preserve original case
+			Channels: make(map[string]any),
 		}
 	}
 	w := c.whoisBuffer[nick]
@@ -573,52 +565,47 @@ func (c *Connection) handleWhoisReply(code string, msg ircmsg.Message) {
 	switch code {
 	case ircevent.RPL_WHOISUSER: // <nick> <user> <host> * :<realname>
 		if len(msg.Params) >= 4 {
-			w["user"] = msg.Params[2]
-			w["host"] = msg.Params[3]
+			w.User = msg.Params[2]
+			w.Host = msg.Params[3]
 		}
 		if len(msg.Params) >= 6 {
-			w["name"] = msg.Params[5]
+			w.Name = msg.Params[5]
 		}
 	case ircevent.RPL_WHOISSERVER: // <nick> <server> :<server info>
 		if len(msg.Params) >= 3 {
-			w["server"] = msg.Params[2]
+			w.Server = msg.Params[2]
 		}
 		if len(msg.Params) >= 4 {
-			w["server_info"] = msg.Params[3]
+			w.ServerInfo = msg.Params[3]
 		}
 	case ircevent.RPL_WHOISIDLE: // <nick> <idle_seconds> <signon> :seconds idle
 		if len(msg.Params) >= 3 {
 			var secs int
 			if _, err := fmt.Sscanf(msg.Params[2], "%d", &secs); err == nil {
-				w["idle_for"] = secs
+				w.IdleFor = secs
 			}
 		}
 	case ircevent.RPL_WHOISCHANNELS: // <nick> :<channels>
 		if len(msg.Params) >= 3 {
-			channels, ok := w["channels"].(map[string]any)
-			if !ok {
-				channels = make(map[string]any)
-				w["channels"] = channels
-			}
 			for ch := range strings.FieldsSeq(msg.Params[2]) {
 				mode, chName := parseNickMode(ch) // reuse - same prefix format
-				channels[chName] = map[string]any{"mode": mode}
+				w.Channels[chName] = map[string]any{"mode": mode}
 			}
 		}
 	case ircevent.RPL_WHOISCERTFP:
 		if len(msg.Params) >= 3 {
-			w["fingerprint"] = msg.Params[2]
+			w.Fingerprint = msg.Params[2]
 		}
 	case ircevent.RPL_AWAY: // <nick> :<away message>
 		if len(msg.Params) >= 3 {
-			w["away"] = msg.Params[2]
+			w.Away = msg.Params[2]
 		}
 	case ircevent.RPL_WHOISACCOUNT: // <nick> <account> :is logged in as
 		if len(msg.Params) >= 3 {
-			w["account"] = msg.Params[2]
+			w.Account = msg.Params[2]
 		}
 	case ircevent.RPL_WHOISSECURE:
-		w["secure"] = true
+		w.Secure = true
 	}
 }
 
@@ -631,38 +618,15 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	nick := strings.ToLower(msg.Params[1])
 
 	c.mu.Lock()
-	whois := c.whoisBuffer[nick]
+	whoisData := c.whoisBuffer[nick]
 	delete(c.whoisBuffer, nick)
 	c.mu.Unlock()
 
-	if whois == nil {
+	var whois map[string]any
+	if whoisData == nil {
 		whois = map[string]any{"nick": msg.Params[1]}
-	}
-
-	// Ensure required fields have defaults
-	if whois["away"] == nil {
-		whois["away"] = ""
-	}
-	if whois["fingerprint"] == nil {
-		whois["fingerprint"] = ""
-	}
-	if whois["host"] == nil {
-		whois["host"] = ""
-	}
-	if whois["name"] == nil {
-		whois["name"] = ""
-	}
-	if whois["server"] == nil {
-		whois["server"] = ""
-	}
-	if whois["server_info"] == nil {
-		whois["server_info"] = ""
-	}
-	if whois["user"] == nil {
-		whois["user"] = ""
-	}
-	if whois["idle_for"] == nil {
-		whois["idle_for"] = 0
+	} else {
+		whois = whoisData.ToMap()
 	}
 
 	// Update conversation info if this is a private conversation

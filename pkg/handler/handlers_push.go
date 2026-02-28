@@ -12,7 +12,7 @@ func (h *Handler) GetVapidKey(ctx context.Context, request api.GetVapidKeyReques
 	pub, _, err := h.Core.Settings().VAPIDKeys()
 	if err != nil {
 		return api.GetVapidKey500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -26,14 +26,14 @@ func (h *Handler) SubscribeToPush(ctx context.Context, request api.SubscribeToPu
 	user := h.GetUserFromCtx(ctx)
 	if user == nil {
 		return api.SubscribeToPush401JSONResponse{
-			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Unauthorized")),
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse("Unauthorized")),
 		}, nil
 	}
 
 	body := request.Body
 	if body == nil {
 		return api.SubscribeToPush400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Missing body")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse("Missing body")),
 		}, nil
 	}
 
@@ -43,7 +43,7 @@ func (h *Handler) SubscribeToPush(ctx context.Context, request api.SubscribeToPu
 
 	if endpoint == "" || auth == "" || p256dh == "" {
 		return api.SubscribeToPush400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Invalid subscription data")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse("Invalid subscription data")),
 		}, nil
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) SubscribeToPush(ctx context.Context, request api.SubscribeToPu
 	user.AddSubscription(sub)
 	if err := user.Save(); err != nil {
 		return api.SubscribeToPush500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
@@ -72,21 +72,21 @@ func (h *Handler) UnsubscribeFromPush(ctx context.Context, request api.Unsubscri
 	user := h.GetUserFromCtx(ctx)
 	if user == nil {
 		return api.UnsubscribeFromPush401JSONResponse{
-			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(ErrResponse("Unauthorized")),
+			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse("Unauthorized")),
 		}, nil
 	}
 
 	body := request.Body
 	if body == nil || body.Endpoint == "" {
 		return api.UnsubscribeFromPush400JSONResponse{
-			BadRequestJSONResponse: api.BadRequestJSONResponse(ErrResponse("Missing endpoint")),
+			BadRequestJSONResponse: api.BadRequestJSONResponse(api.ErrResponse("Missing endpoint")),
 		}, nil
 	}
 
 	user.RemoveSubscription(body.Endpoint)
 	if err := user.Save(); err != nil {
 		return api.UnsubscribeFromPush500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 

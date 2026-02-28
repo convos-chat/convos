@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/convos-chat/convos/pkg/api"
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/gorilla/websocket"
 )
@@ -46,6 +46,42 @@ type wsMessage struct {
 	ConversationID string         `json:"conversation_id,omitempty"`
 	Message        string         `json:"message,omitempty"`
 	Params         map[string]any `json:"params,omitempty"`
+}
+
+// wsResponse is the base for all outgoing WebSocket responses.
+type wsResponse struct {
+	Event core.EventType `json:"event"`
+	ID    any            `json:"id,omitempty"`
+}
+
+// wsPongResponse is the response to a ping message.
+type wsPongResponse struct {
+	wsResponse
+	TS float64 `json:"ts"`
+}
+
+// wsLoadResponse is the response to a load message.
+type wsLoadResponse struct {
+	wsResponse
+	User api.User `json:"user"`
+}
+
+// wsSentResponse is the response to a send message.
+type wsSentResponse struct {
+	wsResponse
+	ConnectionID   string `json:"connection_id,omitempty"`
+	ConversationID string `json:"conversation_id,omitempty"`
+	Message        string `json:"message,omitempty"`
+	TS             string `json:"ts,omitempty"`
+}
+
+// wsErrorResponse represents an error sent over WebSocket.
+type wsErrorResponse struct {
+	wsResponse
+	Errors         []map[string]string `json:"errors"`
+	ConnectionID   string              `json:"connection_id,omitempty"`
+	ConversationID string              `json:"conversation_id,omitempty"`
+	Message        string              `json:"message,omitempty"`
 }
 
 func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +154,7 @@ func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleWSMessage dispatches an incoming WebSocket message to the appropriate handler.
-func (s *Server) handleWSMessage(msg wsMessage, user *core.User) map[string]any {
+func (s *Server) handleWSMessage(msg wsMessage, user *core.User) any {
 	if msg.Method == "" {
 		msg.Method = methodPing
 	}
@@ -138,64 +174,30 @@ func (s *Server) handleWSMessage(msg wsMessage, user *core.User) map[string]any 
 }
 
 // handleWSPing responds to a ping with a pong.
-func (s *Server) handleWSPing(msg wsMessage) map[string]any {
+func (s *Server) handleWSPing(msg wsMessage) any {
 	ts := float64(time.Now().UnixMicro()) / 1e6
-	resp := map[string]any{
-		"event": core.EventTypePong,
-		"ts":    ts,
+	return wsPongResponse{
+		wsResponse: wsResponse{
+			Event: core.EventTypePong,
+			ID:    msg.ID,
+		},
+		TS: ts,
 	}
-	if msg.ID != nil {
-		resp["id"] = msg.ID
-	}
-	return resp
 }
 
 // handleWSLoad returns user data with connections, conversations, and settings.
-func (s *Server) handleWSLoad(msg wsMessage, user *core.User) map[string]any {
-	settings := s.Core.Settings()
-
-	// Build user object matching Perl's TO_JSON + get_p
-	userData := map[string]any{
-		"email":              user.Email(),
-		"highlight_keywords": user.HighlightKeywords(),
-		"registered":         user.Registered().Format(time.RFC3339),
-		"roles":              user.Roles(),
-		"uid":                strconv.Itoa(user.UID()),
-		"unread":             user.Unread(),
+func (s *Server) handleWSLoad(msg wsMessage, user *core.User) any {
+	return wsLoadResponse{
+		wsResponse: wsResponse{
+			Event: core.EventTypeLoad,
+			ID:    msg.ID,
+		},
+		User: api.ToUser(user, true, true),
 	}
-
-	// Build connections and conversations arrays
-	conns := user.Connections()
-	connList := make([]map[string]any, 0, len(conns))
-	convList := make([]map[string]any, 0, len(conns)*4)
-
-	for _, c := range conns {
-		connList = append(connList, wsConnectionData(c))
-		for _, conv := range c.Conversations() {
-			convList = append(convList, wsConversationData(conv))
-		}
-	}
-
-	userData["connections"] = connList
-	userData["conversations"] = convList
-
-	// Add settings (matching Perl's _event_load)
-	userData["default_connection"] = settings.DefaultConnection()
-	userData["forced_connection"] = settings.ForcedConnection()
-	userData["video_service"] = settings.VideoService()
-
-	resp := map[string]any{
-		"event": core.EventTypeLoad,
-		"user":  userData,
-	}
-	if msg.ID != nil {
-		resp["id"] = msg.ID
-	}
-	return resp
 }
 
 // handleWSSend forwards a message to an IRC connection.
-func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
+func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 	if msg.ConnectionID == "" || msg.Message == "" {
 		return wsError("Invalid input.", msg)
 	}
@@ -213,6 +215,8 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		if err != nil {
 			return wsError(err.Error(), msg)
 		}
+
+		// Inject common fields into the result map for list/names results
 		result["event"] = eventSent
 		result["connection_id"] = msg.ConnectionID
 		result["conversation_id"] = msg.ConversationID
@@ -231,6 +235,8 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		if err != nil {
 			return wsError(err.Error(), msg)
 		}
+
+		// Inject common fields into the result map
 		result["event"] = eventSent
 		result["connection_id"] = msg.ConnectionID
 		result["conversation_id"] = msg.ConversationID
@@ -253,16 +259,15 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) map[string]any {
 		return nil
 	}
 
-	resp := map[string]any{
-		"event":           eventSent,
-		"connection_id":   msg.ConnectionID,
-		"conversation_id": msg.ConversationID,
-		"message":         msg.Message,
+	return wsSentResponse{
+		wsResponse: wsResponse{
+			Event: eventSent,
+			ID:    msg.ID,
+		},
+		ConnectionID:   msg.ConnectionID,
+		ConversationID: msg.ConversationID,
+		Message:        msg.Message,
 	}
-	if msg.ID != nil {
-		resp["id"] = msg.ID
-	}
-	return resp
 }
 
 // parseListArgs checks whether message is a /list command (case-insensitive)
@@ -292,7 +297,7 @@ func parseNamesArgs(message string) (string, bool) {
 }
 
 // wsError builds an error response for a WebSocket message.
-func wsError(message string, msg wsMessage) map[string]any {
+func wsError(message string, msg wsMessage) any {
 	eventName := "unknown"
 	switch msg.Method {
 	case methodPing:
@@ -305,55 +310,14 @@ func wsError(message string, msg wsMessage) map[string]any {
 		}
 	}
 
-	resp := map[string]any{
-		"event":  eventName,
-		"errors": []map[string]string{{"message": message}},
+	return wsErrorResponse{
+		wsResponse: wsResponse{
+			Event: core.EventType(eventName),
+			ID:    msg.ID,
+		},
+		Errors:         []map[string]string{{"message": message}},
+		ConnectionID:   msg.ConnectionID,
+		ConversationID: msg.ConversationID,
+		Message:        msg.Message,
 	}
-	if msg.ID != nil {
-		resp["id"] = msg.ID
-	}
-	if msg.ConnectionID != "" {
-		resp["connection_id"] = msg.ConnectionID
-	}
-	if msg.Message != "" {
-		resp["message"] = msg.Message
-	}
-	return resp
-}
-
-// wsConnectionData builds a connection map for WebSocket responses.
-func wsConnectionData(c core.Connection) map[string]any {
-	urlStr := ""
-	if u := c.URL(); u != nil {
-		clean := *u
-		clean.User = nil
-		urlStr = clean.String()
-	}
-
-	return map[string]any{
-		"connection_id":       c.ID(),
-		"name":                c.Name(),
-		"url":                 urlStr,
-		"state":               string(c.State()),
-		"wanted_state":        string(c.WantedState()),
-		"on_connect_commands": c.OnConnectCommands(),
-	}
-}
-
-// wsConversationData builds a conversation map for WebSocket responses.
-func wsConversationData(conv *core.Conversation) map[string]any {
-	data := map[string]any{
-		"connection_id":   conv.Connection().ID(),
-		"conversation_id": conv.ID(),
-		"frozen":          conv.Frozen(),
-		"name":            conv.Name(),
-		"notifications":   conv.Notifications(),
-		"topic":           conv.Topic(),
-		"unread":          conv.Unread(),
-		"participants":    conv.Participants(),
-	}
-	if modes := conv.Modes(); modes != nil {
-		data["modes"] = modes
-	}
-	return data
 }

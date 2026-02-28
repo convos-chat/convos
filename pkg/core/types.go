@@ -3,7 +3,11 @@ package core
 import (
 	"encoding/json"
 	"maps"
+	"time"
 )
+
+// InfoMap represents a generic map for extra information.
+type InfoMap map[string]any
 
 // MessageType represents the type of a chat message.
 type MessageType string
@@ -258,6 +262,49 @@ type Participant struct {
 	Host     string `json:"host,omitempty"`
 }
 
+// WhoisData represents the collected data from an IRC WHOIS query.
+type WhoisData struct {
+	Nick        string         `json:"nick"`
+	User        string         `json:"user"`
+	Host        string         `json:"host"`
+	Name        string         `json:"name"`
+	Server      string         `json:"server"`
+	ServerInfo  string         `json:"server_info"`
+	IdleFor     int            `json:"idle_for"`
+	Away        string         `json:"away"`
+	Account     string         `json:"account,omitempty"`
+	Fingerprint string         `json:"fingerprint,omitempty"`
+	Secure      bool           `json:"secure,omitempty"`
+	Channels    map[string]any `json:"channels,omitempty"`
+}
+
+// ToMap converts WhoisData to a map[string]any for event emission and storage.
+func (w WhoisData) ToMap() map[string]any {
+	m := map[string]any{
+		"nick":        w.Nick,
+		"user":        w.User,
+		"host":        w.Host,
+		"name":        w.Name,
+		"server":      w.Server,
+		"server_info": w.ServerInfo,
+		"idle_for":    w.IdleFor,
+		"away":        w.Away,
+	}
+	if w.Account != "" {
+		m["account"] = w.Account
+	}
+	if w.Fingerprint != "" {
+		m["fingerprint"] = w.Fingerprint
+	}
+	if w.Secure {
+		m["secure"] = w.Secure
+	}
+	if w.Channels != nil {
+		m["channels"] = w.Channels
+	}
+	return m
+}
+
 // StateParticipantsEvent represents a participant list update.
 type StateParticipantsEvent struct {
 	BaseEvent
@@ -348,6 +395,24 @@ func (e StateInfoEvent) MarshalJSON() ([]byte, error) {
 	extras := map[string]any{"event": EventTypeState, "type": StateEventInfo}
 	maps.Copy(extras, e.Info)
 	return marshalWithExtras(s(e), extras)
+}
+
+// FileEntry represents a single file from the backend.
+type FileEntry struct {
+	ID    string    `json:"id"`
+	Name  string    `json:"name"`
+	Saved time.Time `json:"saved"`
+	Size  int       `json:"size"`
+}
+
+// UploadedFile represents an uploaded file metadata.
+type UploadedFile struct {
+	Ext      string    `json:"ext"`
+	Filename string    `json:"filename"`
+	ID       string    `json:"id"`
+	Saved    time.Time `json:"saved"`
+	UID      string    `json:"uid"`
+	URL      string    `json:"url"`
 }
 
 // SentEvent represents a sent command response event.

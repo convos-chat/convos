@@ -1,6 +1,9 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
 output: server.gen.go
 package: api
+output-options:
+  overlay:
+    path: overlay.yaml
 generate:
   # other servers are available!
   strict-server: true

@@ -44,22 +44,6 @@ var (
 	ErrUploadTooLarge = errors.New("file exceeds the maximum upload size")
 )
 
-type fileListEntry = struct {
-	Id    string    `json:"id"`
-	Name  string    `json:"name"`
-	Saved time.Time `json:"saved"`
-	Size  int       `json:"size"`
-}
-
-type uploadedFileEntry = struct {
-	Ext      string    `json:"ext"`
-	Filename string    `json:"filename"`
-	Id       string    `json:"id"`
-	Saved    time.Time `json:"saved"`
-	Uid      string    `json:"uid"`
-	Url      string    `json:"url"`
-}
-
 // GetFiles implements api.StrictServerInterface.
 func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObject) (api.GetFilesResponseObject, error) {
 	user, err := h.requireUser(ctx)
@@ -69,6 +53,13 @@ func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObjec
 	files, err := h.Core.Backend().LoadFiles(user)
 	if err != nil {
 		return nil, err
+	}
+
+	type fileListEntry = struct {
+		Id    string    `json:"id"`
+		Name  string    `json:"name"`
+		Saved time.Time `json:"saved"`
+		Size  int       `json:"size"`
 	}
 
 	res := make([]fileListEntry, len(files))
@@ -93,6 +84,15 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 	// The oapi-codegen gives us a multipart.Reader in request.Body
 	if request.Body == nil {
 		return nil, fmt.Errorf("request body is nil: %w", ErrUploadFail)
+	}
+
+	type uploadedFileEntry = struct {
+		Ext      string    `json:"ext"`
+		Filename string    `json:"filename"`
+		Id       string    `json:"id"`
+		Saved    time.Time `json:"saved"`
+		Uid      string    `json:"uid"`
+		Url      string    `json:"url"`
 	}
 
 	var savedFiles []uploadedFileEntry

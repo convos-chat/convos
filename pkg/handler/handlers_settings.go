@@ -63,7 +63,7 @@ func (h *Handler) UpdateSettings(ctx context.Context, request api.UpdateSettings
 
 	if err := s.Save(); err != nil {
 		return api.UpdateSettings500JSONResponse{
-			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(ErrResponse(err.Error())),
+			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
 	}
 
