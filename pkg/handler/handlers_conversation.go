@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"time"
 
@@ -75,6 +76,9 @@ func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkCo
 	if conv != nil {
 		conv.SetUnread(0)
 		conv.SetNotifications(0)
+		if err := h.Core.Backend().SaveConnection(conn); err != nil {
+			slog.Error("Failed to persist read state", "error", err)
+		}
 	}
 
 	return api.MarkConversationAsRead200JSONResponse{}, nil
@@ -131,6 +135,9 @@ func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConn
 	conv := conn.GetConversation("")
 	if conv != nil {
 		conv.SetUnread(0)
+		if err := h.Core.Backend().SaveConnection(conn); err != nil {
+			slog.Error("Failed to persist read state", "error", err)
+		}
 	}
 
 	return api.MarkConnectionAsRead200JSONResponse{}, nil

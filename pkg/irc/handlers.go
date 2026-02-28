@@ -76,6 +76,14 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType core.MessageType)
 	if nick != c.Nick() && highlight || isDM {
 		c.persistNotification(conv.ID(), nick, message, msgType, ts)
 	}
+
+	if nick != c.Nick() && (msgType == core.MessageTypePrivate || msgType == core.MessageTypeAction) {
+		conv.IncUnread()
+		if highlight || isDM {
+			conv.IncNotifications()
+		}
+		c.saveState()
+	}
 }
 
 // handleTagMsg handles TAGMSG messages (typing indicators, reactions).
