@@ -61,9 +61,13 @@ type Connection interface {
 	// a fresh IRC LIST fetch if the cache is empty or refresh is requested.
 	List(args string) (map[string]any, error)
 
-	// Names sends a NAMES command for the channel and returns the current
-	// participant list, triggering a fresh IRC NAMES fetch.
-	Names(channel string) (map[string]any, error)
+	// Mode registers a pending mode query and sends MODE to IRC. The response
+	// arrives asynchronously as a SentEvent carrying requestID.
+	Mode(channel string, requestID any) error
+
+	// Names registers a pending names query and sends NAMES to IRC. The response
+	// arrives asynchronously as a SentEvent carrying requestID.
+	Names(channel string, requestID any) error
 
 	// Nick returns the current nickname.
 	Nick() string

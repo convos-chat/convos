@@ -216,7 +216,7 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 			return wsError(err.Error(), msg)
 		}
 
-		// Inject common fields into the result map for list/names results
+		// Inject common fields into the result map
 		result["event"] = eventSent
 		result["connection_id"] = msg.ConnectionID
 		result["conversation_id"] = msg.ConversationID
@@ -228,24 +228,24 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 		return result
 	}
 
-	// /names is handled synchronously: return the current participant list immediately
-	// and trigger a fresh IRC NAMES fetch — matching Perl's _send_names_p behaviour.
+	// /names registers a pending query and sends NAMES to IRC. The response
+	// arrives asynchronously as a SentEvent carrying requestID — matching
+	// Perl's _send_names_p write-and-wait behaviour.
 	if channel, ok := parseNamesArgs(msg.Message); ok {
-		result, err := conn.Names(channel)
-		if err != nil {
+		if err := conn.Names(channel, msg.ID); err != nil {
 			return wsError(err.Error(), msg)
 		}
+		return nil // response arrives asynchronously via SentEvent
+	}
 
-		// Inject common fields into the result map
-		result["event"] = eventSent
-		result["connection_id"] = msg.ConnectionID
-		result["conversation_id"] = msg.ConversationID
-		result["message"] = msg.Message
-		result["ts"] = time.Now().Format(time.RFC3339)
-		if msg.ID != nil {
-			result["id"] = msg.ID
+	// /mode (no args) is a channel mode query. Register the request ID so that
+	// when RPL_CHANNELMODEIS (324) arrives the handler can emit a SentEvent
+	// carrying this ID — matching Perl's _send_mode_p behaviour without blocking.
+	if channel, ok := parseModeQueryArgs(msg.Message, msg.ConversationID); ok {
+		if err := conn.Mode(channel, msg.ID); err != nil {
+			return wsError(err.Error(), msg)
 		}
-		return result
+		return nil // response arrives asynchronously via SentEvent
 	}
 
 	if err := conn.Send(msg.ConversationID, msg.Message); err != nil {
@@ -294,6 +294,19 @@ func parseNamesArgs(message string) (string, bool) {
 		return "", false // e.g. /namespace — not a /names command
 	}
 	return strings.TrimSpace(rest), true
+}
+
+// parseModeQueryArgs checks whether message is a bare "/mode" command with no
+// arguments (a channel mode query). Returns the target channel from conversationID
+// and ok=true. Mode set commands ("/mode +o nick") or other variants return ok=false.
+func parseModeQueryArgs(message string, conversationID string) (string, bool) {
+	if !strings.EqualFold(strings.TrimSpace(message), "/mode") {
+		return "", false
+	}
+	if conversationID == "" {
+		return "", false
+	}
+	return conversationID, true
 }
 
 // wsError builds an error response for a WebSocket message.

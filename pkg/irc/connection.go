@@ -23,6 +23,7 @@ var (
 	ErrNotConnected        = errors.New("not connected")
 	ErrDoesNotWantConnect  = errors.New("does not want to be connected")
 	ErrNoTarget            = errors.New("cannot send message without a target")
+	ErrChannelRequired     = errors.New("channel is required")
 	ErrUnknownConversation = errors.New("unknown conversation")
 )
 
@@ -56,7 +57,17 @@ type Connection struct {
 	// Buffers for accumulating multi-message IRC replies
 	namesBuffer map[string][]core.Participant // channel -> participants
 	whoisBuffer map[string]*core.WhoisData    // nick -> whois data
-	listBuf     listCache                   // cached LIST results
+	listBuf     listCache                     // cached LIST results
+
+	// Pending mode queries: channel -> original WebSocket request ID.
+	// When RPL_CHANNELMODEIS (324) arrives, the handler emits a SentEvent
+	// carrying this ID so the frontend callback fires via normal ID-matching.
+	modeWaiters map[string]any
+
+	// Pending names queries: channel -> original WebSocket request ID.
+	// When RPL_ENDOFNAMES (366) arrives, the handler emits a SentEvent
+	// carrying this ID so the frontend callback fires via normal ID-matching.
+	namesWaiters map[string]any
 
 	// Reconnect state
 	reconnectDelay time.Duration
@@ -70,8 +81,10 @@ type Connection struct {
 func NewConnection(rawURL string, user *core.User) *Connection {
 	return &Connection{
 		BaseConnection: core.NewBaseConnection(rawURL, user),
-		namesBuffer:    make(map[string][]core.Participant),
-		whoisBuffer:    make(map[string]*core.WhoisData),
+		namesBuffer:  make(map[string][]core.Participant),
+		whoisBuffer:  make(map[string]*core.WhoisData),
+		modeWaiters:  make(map[string]any),
+		namesWaiters: make(map[string]any),
 	}
 }
 
@@ -248,7 +261,7 @@ func (c *Connection) Connect() error {
 		for _, conv := range c.Conversations() {
 			conv.SetFrozen("Disconnected.")
 			c.emitEvent(&core.StateFrozenEvent{
-								ConversationID: conv.ID(),
+				ConversationID: conv.ID(),
 				Frozen:         conv.Frozen(),
 			})
 		}
@@ -487,40 +500,84 @@ func (c *Connection) List(args string) (map[string]any, error) {
 	return c.handleListCommand(args)
 }
 
-// Names sends a NAMES command for the channel and returns the current participant list.
-func (c *Connection) Names(channel string) (map[string]any, error) {
+// Mode registers a pending mode query for the channel and sends MODE to IRC.
+// When RPL_CHANNELMODEIS (324) arrives, handleChannelModeIs emits a SentEvent
+// carrying requestID so the frontend callback fires via normal ID-matching.
+func (c *Connection) Mode(channel string, requestID any) error {
 	if channel == "" {
-		return nil, ErrUsageNames
+		return ErrChannelRequired
 	}
 
-	// Normalize channel name
 	channel = strings.ToLower(channel)
 
-	// Get conversation to retrieve current participants
-	conv := c.GetConversation(channel)
-	var participants []core.Participant
-	if conv != nil {
-		for _, p := range conv.Participants() {
-			participants = append(participants, p)
-		}
-	}
+	// Register before sending to avoid a race with a fast IRC response.
+	c.mu.Lock()
+	c.modeWaiters[channel] = requestID
+	c.mu.Unlock()
 
-	// Send NAMES command to refresh the list
 	c.mu.RLock()
-	if c.State() == core.StateConnected && c.client != nil {
-		client := c.client
-		c.mu.RUnlock()
-		if err := client.Send("NAMES", channel); err != nil {
-			return nil, err
-		}
-	} else {
-		c.mu.RUnlock()
+	connected := c.State() == core.StateConnected && c.client != nil
+	var client *ircevent.Connection
+	if connected {
+		client = c.client
+	}
+	c.mu.RUnlock()
+
+	if !connected {
+		c.mu.Lock()
+		delete(c.modeWaiters, channel)
+		c.mu.Unlock()
+		return ErrNotConnected
 	}
 
-	return map[string]any{
-		"command":      []string{"names"},
-		"participants": participants,
-	}, nil
+	if err := client.Send("MODE", channel); err != nil {
+		c.mu.Lock()
+		delete(c.modeWaiters, channel)
+		c.mu.Unlock()
+		return err
+	}
+
+	return nil
+}
+
+// Names registers a pending names query for the channel and sends NAMES to IRC.
+// When RPL_ENDOFNAMES (366) arrives, handleEndOfNames emits a SentEvent
+// carrying requestID so the frontend callback fires via normal ID-matching.
+func (c *Connection) Names(channel string, requestID any) error {
+	if channel == "" {
+		return ErrChannelRequired
+	}
+
+	channel = strings.ToLower(channel)
+
+	// Register before sending to avoid a race with a fast IRC response.
+	c.mu.Lock()
+	c.namesWaiters[channel] = requestID
+	c.mu.Unlock()
+
+	c.mu.RLock()
+	connected := c.State() == core.StateConnected && c.client != nil
+	var client *ircevent.Connection
+	if connected {
+		client = c.client
+	}
+	c.mu.RUnlock()
+
+	if !connected {
+		c.mu.Lock()
+		delete(c.namesWaiters, channel)
+		c.mu.Unlock()
+		return ErrNotConnected
+	}
+
+	if err := client.Send("NAMES", channel); err != nil {
+		c.mu.Lock()
+		delete(c.namesWaiters, channel)
+		c.mu.Unlock()
+		return err
+	}
+
+	return nil
 }
 
 // Send sends a message or command to a target (channel or user).

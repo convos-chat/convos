@@ -490,6 +490,35 @@ func (c *Connection) handleChannelModeIs(msg ircmsg.Message) {
 		conv.UpdateModes(mode)
 	}
 
+	// If a mode query is pending, emit a SentEvent carrying the original request ID
+	// so the frontend callback fires via Socket.js's ID-matching. This avoids showing
+	// a "got mode" chat message for auto-refresh queries.
+	c.mu.Lock()
+	requestID, waiting := c.modeWaiters[convID]
+	if waiting {
+		delete(c.modeWaiters, convID)
+	}
+	c.mu.Unlock()
+
+	if waiting {
+		var modes map[string]bool
+		if conv := c.GetConversation(convID); conv != nil {
+			modes = conv.Modes()
+		}
+		c.emitEvent(&core.SentEvent{
+			ConversationID: convID,
+			Message:        "/mode",
+			Command:        []string{"mode"},
+			Data: map[string]any{
+				"id":    requestID,
+				"mode":  mode,
+				"modes": modes,
+			},
+		})
+		return
+	}
+
+	// No pending query — emit as a state event (e.g. unsolicited on some servers).
 	event := &core.StateModeEvent{ConversationID: convID, From: "", Mode: mode, Nick: "", ModeChanged: false, Args: args}
 	c.emitEvent(event)
 }
@@ -538,8 +567,29 @@ func (c *Connection) handleEndOfNames(msg ircmsg.Message) {
 	c.mu.Lock()
 	participants := c.namesBuffer[channel]
 	delete(c.namesBuffer, channel)
+	requestID, waiting := c.namesWaiters[channel]
+	if waiting {
+		delete(c.namesWaiters, channel)
+	}
 	c.mu.Unlock()
 
+	// If a names query is pending, emit a SentEvent carrying the original request ID
+	// so the frontend callback fires via Socket.js's ID-matching. This avoids showing
+	// a "got names" chat message for auto-refresh queries.
+	if waiting {
+		c.emitEvent(&core.SentEvent{
+			ConversationID: channel,
+			Message:        "/names " + channel,
+			Command:        []string{"names"},
+			Data: map[string]any{
+				"id":           requestID,
+				"participants": participants,
+			},
+		})
+		return
+	}
+
+	// No pending query — emit as a state event (e.g. on join or manual /names command).
 	c.emitEvent(&core.StateParticipantsEvent{ConversationID: channel, Participants: participants})
 }
 

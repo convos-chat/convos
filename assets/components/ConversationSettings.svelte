@@ -83,6 +83,7 @@ function updateState() {
   else if (!isPrivate && !conversation.frozen) {
     conversation.send('/mode', (msg) => {
       msg.bubbles = false;
+      if (msg.modes) conversation.update({modes: msg.modes});
       checkboxes = {...checkboxes, ...conversation.modes};
       topic = conversation.topic;
     });

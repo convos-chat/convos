@@ -25,9 +25,8 @@ func (c *testConnection) Send(_, _ string) error { return nil }
 func (c *testConnection) List(_ string) (map[string]any, error) {
 	return map[string]any{"conversations": []map[string]any{}, "n_conversations": 0, "done": false}, nil
 }
-func (c *testConnection) Names(_ string) (map[string]any, error) {
-	return map[string]any{"command": []string{"names"}, "participants": []map[string]any{}}, nil
-}
+func (c *testConnection) Mode(_ string, _ any) error { return nil }
+func (c *testConnection) Names(_ string, _ any) error { return nil }
 func (c *testConnection) LogServerError(msg string) { slog.Info("[Server log]", "msg", msg) }
 
 var _ core.Connection = (*testConnection)(nil)
