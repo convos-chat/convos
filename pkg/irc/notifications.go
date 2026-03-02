@@ -82,6 +82,7 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 			slog.Debug("Sending push notification", "endpoint", s.Endpoint, "payload", string(payload))
 			resp, err := webpush.SendNotification(payload, &s, &webpush.Options{
 				Subscriber:      subscriber,
+				RecordSize:      2048, // Android Firefox fails with larger payloads, so limit to 2KB
 				VAPIDPublicKey:  pub,
 				VAPIDPrivateKey: priv,
 				TTL:             3600, // 1 hour
