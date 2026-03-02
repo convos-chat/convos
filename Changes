@@ -19,6 +19,8 @@ Revision history for perl distribution Convos
   - Wastly simplified deployment. Convos is now a single static binary download
   - OIDC login support for single sign on
   - Web Push support for notifications on mobile clients
+  - Improved channel mode handling
+  - Tokyo Night color scheme
   - More IRCv3 features supported. Primarily building foundation for ui rework
     in 10.0
 

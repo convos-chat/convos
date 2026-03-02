@@ -1,0 +1,94 @@
+/*
+ * name: Tokyo-Night
+ * color-scheme: dark
+ */
+
+:root {
+  --body-bg: #1a1b26;
+  --cms-bg: linear-gradient(170deg, #1a1b26, #24283b);
+  --text-color: #c0caf5;
+  --link-color: #7aa2f7;
+  --quote-color: #7dcfff;
+  --error-color: #f7768e;
+  --success-color: #9ece6a;
+  --highlight-color-bg: #24283b;
+  --highlight-color: #e0af68;
+  --hr-border: 1px solid #414868;
+  --button-bg: #7aa2f7;
+  --code-bg: #24283b;
+  --button-color: #1a1b26;
+  --button-border: 1px solid #7aa2f7;
+  --button-focus-outline: 2px solid #565f89;
+  --button-disabled-bg: #414868;
+  --button-disabled-color: #a9b1d6;
+  --button-disabled-border: #414868;
+  --button-danger-bg: #f7768e;
+  --button-danger-color: #1a1b26;
+  --input-bg: #24283b;
+  --input-border: 1px solid #414868;
+  --input-color: #c0caf5;
+  --input-focus-outline: 2px solid #7aa2f7;
+  --input-disabled-bg: #1a1b26;
+  --input-disabled-color: #565f89;
+  --input-placeholder-color: #565f89;
+  --chat-input-bg: #24283b;
+  --autocomplete-bg: #24283b;
+  --autocomplete-border: 2px solid #7aa2f7;
+  --autocomplete-focus-bg: #414868;
+  --ts-color: #e0af68;
+  --sidebar-left-bg: #16161e;
+  --sidebar-left-frozen-color: #bb9af7;
+  --sidebar-left-text: #73daca;
+  --sidebar-left-outline: #9ece6a auto 3px;
+  --sidebar-left-border-bottom: #414868;
+  --sidebar-left-search-placeholder-color: #bb9af7;
+  --sidebar-left-search-focus-bg: #24283b;
+  --sidebar-right-bg: var(--body-bg);
+  --sidebar-right-text: var(--text-color);
+  --tooltip-background: #c0caf5;
+  --tooltip-color: #1a1b26;
+
+  /* Tokyo Night syntax highlighting */
+  --syntax-hl-base: #c0caf5;
+  --syntax-hl-base-bg: #1a1b26;
+  --syntax-hl-addition-bg: rgba(158, 206, 106, 0.2);
+  --syntax-hl-deletion-bg: rgba(247, 118, 142, 0.2);
+  --syntax-hl-attr: #e0af68;
+  --syntax-hl-attribute: #bb9af7;
+  --syntax-hl-built-in: #2ac3de;
+  --syntax-hl-bullet: #ff9e64;
+  --syntax-hl-comment: #565f89;
+  --syntax-hl-doctag: #7dcfff;
+  --syntax-hl-class: #c0caf5;
+  --syntax-hl-code: #c0caf5;
+  --syntax-hl-code-bg: #1a1b26;
+  --syntax-hl-formula: #bb9af7;
+  --syntax-hl-function: #7aa2f7;
+  --syntax-hl-keyword: #f7768e;
+  --syntax-hl-literal: #ff9e64;
+  --syntax-hl-meta: #7dcfff;
+  --syntax-hl-meta-keyword: #bb9af7;
+  --syntax-hl-meta-string: #9ece6a;
+  --syntax-hl-name: #7aa2f7;
+  --syntax-hl-number: #ff9e64;
+  --syntax-hl-params: #e0af68;
+  --syntax-hl-quote: #e0af68;
+  --syntax-hl-regexp: #b4f9f8;
+  --syntax-hl-section: #7dcfff;
+  --syntax-hl-selector-attr: #bb9af7;
+  --syntax-hl-selector-class: #9ece6a;
+  --syntax-hl-selector-id: #7aa2f7;
+  --syntax-hl-selector-pseudo: #2ac3de;
+  --syntax-hl-selector-tag: #f7768e;
+  --syntax-hl-string: #9ece6a;
+  --syntax-hl-subst: #c0caf5;
+  --syntax-hl-symbol: #73daca;
+  --syntax-hl-template-variable: #ff9e64;
+  --syntax-hl-title: #7dcfff;
+  --syntax-hl-type: #2ac3de;
+  --syntax-hl-variable: #c0caf5;
+}
+
+body.for-cms {
+  --footer-bg: #24283b;
+}
