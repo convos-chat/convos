@@ -8,42 +8,31 @@ on:
 jobs:
   nodejs:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{matrix.node-version}}
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: latest
+    - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: ${{matrix.node-version}}
-    - run: npm install
-    - run: npm run lint
-    - run: npm run check
-    - run: npm run test
-  perl:
+        node-version: 22
+        cache: pnpm
+    - run: pnpm install
+    - run: pnpm run lint
+    - run: pnpm run check
+    - run: pnpm run test
+  go:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        perl-version:
-        - '5.20'
-        - '5.34'
-    container:
-      image: perl:${{matrix.perl-version}}
     steps:
-    - uses: actions/checkout@v3
-    - name: perl -V
-      run: perl -V
-    - name: Install dependencies
-      run: |
-        cpanm -n EV~"!= 4.28"
-        cpanm -n https://github.com/jhthorsen/linkembedder/archive/main.tar.gz
-        cpanm -n DBD::SQLite Hailo Math::Calc::Parser
-        cpanm -n Test::Pod Test::Pod::Coverage
-        cpanm -n --installdeps .
-    - name: Run perl tests
-      run: prove -l
-      env:
-        HARNESS_OPTIONS: j4
-        TEST_BOT: 1
-        TEST_POD: 1
+    - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+    - name: Download dependencies
+      run: go mod download
+    - name: Lint
+      uses: golangci/golangci-lint-action@v6
+    - name: Test
+      run: go test -cover ./...

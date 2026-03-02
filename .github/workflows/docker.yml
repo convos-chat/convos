@@ -17,7 +17,7 @@ jobs:
             VERSION=$(echo $GITHUB_REF | cut -d/ -f3);
             TAG_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:$VERSION";
           fi
-          echo '::set-output name=tag::'$TAG_NAME
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
       - name: Check Out Repo
         uses: actions/checkout@v4
       - name: Login to registry
