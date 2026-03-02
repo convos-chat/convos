@@ -63,7 +63,6 @@ func TestRequireAuthMiddleware(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		tt := tt
 		remoteAddr := fmt.Sprintf("192.0.2.%d:1234", i+1)
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()

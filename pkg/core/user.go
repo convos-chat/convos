@@ -2,6 +2,7 @@ package core
 
 import (
 	"log/slog"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -304,9 +305,7 @@ func (u *User) ToData(includePassword bool) UserData {
 		Unread:            u.unread,
 		Subscriptions:     make(map[string]webpush.Subscription, len(u.subscriptions)),
 	}
-	for k, v := range u.subscriptions {
-		data.Subscriptions[k] = v
-	}
+	maps.Copy(data.Subscriptions, u.subscriptions)
 
 	if includePassword {
 		data.Password = u.password

@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io"
 	"io/fs"
+	"maps"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -75,7 +76,6 @@ func NewCatalogFromFS(fsys fs.FS) (*Catalog, error) {
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,6 @@ func (c *Catalog) AvailableLanguages() map[string]LangMeta {
 
 	// Return a copy to be safe
 	result := make(map[string]LangMeta, len(c.meta))
-	for k, v := range c.meta {
-		result[k] = v
-	}
+	maps.Copy(result, c.meta)
 	return result
 }

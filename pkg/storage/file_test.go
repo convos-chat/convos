@@ -289,11 +289,11 @@ func TestFileBackendLoadMessagesReturnsNewest(t *testing.T) {
 	}
 	logFile := filepath.Join(logDir, now.Format("01")+".log")
 
-	var lines []string
+	lines := make([]string, 100)
 	baseTime := now.Add(-100 * time.Minute)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		ts := baseTime.Add(time.Duration(i) * time.Minute)
-		lines = append(lines, fmt.Sprintf("%s 0 -!- Server message %d", ts.Format("2006-01-02T15:04:05"), i))
+		lines[i] = fmt.Sprintf("%s 0 -!- Server message %d", ts.Format("2006-01-02T15:04:05"), i)
 	}
 	if err := os.WriteFile(logFile, []byte(strings.Join(lines, "\n")+"\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile() error: %v", err)

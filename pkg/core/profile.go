@@ -227,9 +227,8 @@ func (p *ConnectionProfile) SplitMessage(message string) []string {
 	}
 
 	var messages []string
-	lines := strings.Split(message, "\n")
 
-	for _, line := range lines {
+	for line := range strings.SplitSeq(message, "\n") {
 		line = strings.TrimRight(line, "\r")
 
 		if len(line) < p.MaxMessageLength() {

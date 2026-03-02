@@ -11,6 +11,7 @@ linters:
     - gocritic
     - gosec
     - makezero
+    - modernize
     - nakedret
     - nestif
     - nilerr
