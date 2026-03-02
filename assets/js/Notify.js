@@ -35,7 +35,7 @@ export default class Notify extends Reactive {
 
   requestDesktopAccess() {
     if (!this.Notification.requestPermission) return this.update({desktopAccess: this.Notification.permission});
-    this.Notification.requestPermission((permission) => this.update({desktopAccess: permission}));
+    this.Notification.requestPermission().then(permission => this.update({desktopAccess: permission}));
     return this;
   }
 
@@ -46,10 +46,15 @@ export default class Notify extends Reactive {
     if (this.desktopAccess !== 'granted') return this.showInApp(message, params);
     if (this.pushEnabled && !this.appHasFocus) return this._showInConsole(message, params);
 
-    const notification = new Notification(params.title, {...params, body: message});
-    notification.onclick = (e) => this._onClick(e, notification, params);
-    setTimeout(() => notification.close(), this.notificationCloseDelay);
-    return notification;
+    try {
+      const notification = new Notification(params.title, {...params, body: message});
+      notification.onclick = (e) => this._onClick(e, notification, params);
+      setTimeout(() => notification.close(), this.notificationCloseDelay);
+      return notification;
+    } catch {
+      // Standalone PWA mode (Chrome Android, iOS) forbids new Notification()
+      return this.showInApp(message, params);
+    }
   }
 
   showInApp(message, params = {}) {
