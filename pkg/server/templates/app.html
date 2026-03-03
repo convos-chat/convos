@@ -129,6 +129,9 @@
         }
       </style></noscript
     >
+    <audio muted class="non-interactive" id="audio_notification">
+      <source src="/sounds/notification.ogg" type="audio/ogg" />
+    </audio>
     {{if .AssetCSS}}
     <link rel="stylesheet" href="/assets/{{.AssetCSS}}" />
     {{end}} {{if .PrimaryTheme}}
