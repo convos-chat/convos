@@ -726,7 +726,7 @@ func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inject the absolute server URL so the frontend can construct requests
-	scheme := httpsScheme
+	scheme := "http"
 	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == httpsScheme {
 		scheme = httpsScheme
 	}
