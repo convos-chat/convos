@@ -20,8 +20,9 @@ func main() {
 
 func run(args []string) {
 	convos := &cli.Command{
-		Name:    "convos",
-		Version: convosVersion.Version,
+		Name:                  "convos",
+		Version:               convosVersion.Version,
+		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			daemon.Command(),
 			get.Command(),

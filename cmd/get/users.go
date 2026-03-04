@@ -29,8 +29,8 @@ func usersCommand() *cli.Command {
 				core.WithBackend(backend),
 			)
 
-			if err := c.Start(); err != nil {
-				return fmt.Errorf("failed to start core: %w", err)
+			if err := c.Initialize(); err != nil {
+				return fmt.Errorf("failed to initalize core: %w", err)
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)

@@ -291,15 +291,7 @@ func (c *Core) NewConnection(rawURL string, user *User) Connection {
 	return conn
 }
 
-// Start initializes the core by loading users and their connections.
-func (c *Core) Start() error {
-	c.mu.RLock()
-	if c.ready {
-		c.mu.RUnlock()
-		return nil
-	}
-	c.mu.RUnlock()
-
+func (c *Core) Initialize() error {
 	// Load settings from backend
 	settingsData, err := c.backend.LoadSettings()
 	if err != nil {
@@ -377,7 +369,17 @@ func (c *Core) Start() error {
 	}
 
 	c.ready = true
-	c.log.Info("Core started", "users", len(c.users))
+	return nil
+}
+
+// Start initializes the core if not ready and auto-connects
+func (c *Core) Start() error {
+	if !c.Ready() {
+		if err := c.Initialize(); err != nil {
+			return err
+		}
+	}
+	c.log.Info("Core starting", "users", len(c.users))
 
 	// Auto-connect connections that want to be connected, staggered per host.
 	hostIdx := make(map[string]int)

@@ -50,8 +50,8 @@ func passwordCommand() *cli.Command {
 				core.WithBackend(backend),
 			)
 
-			if err := c.Start(); err != nil {
-				return fmt.Errorf("failed to start core: %w", err)
+			if err := c.Initialize(); err != nil {
+				return fmt.Errorf("failed to Initialize core: %w", err)
 			}
 
 			user := c.GetUser(email)
