@@ -1,4 +1,4 @@
-package coretest
+package core_test
 
 import (
 	"net/url"
