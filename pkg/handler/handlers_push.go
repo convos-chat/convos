@@ -90,7 +90,5 @@ func (h *Handler) UnsubscribeFromPush(ctx context.Context, request api.Unsubscri
 		}, nil
 	}
 
-	return api.UnsubscribeFromPush200JSONResponse{
-		Message: new("Unsubscribed"),
-	}, nil
+	return api.UnsubscribeFromPush200JSONResponse{}, nil
 }

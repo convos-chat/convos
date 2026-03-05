@@ -71,23 +71,25 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// X-Request-Base (Convos-specific) carries the full base URL including
 		if s.Config.ReverseProxy == "" {
+			if s.Config.RequestBaseURL != "" {
+				if u, err := url.Parse(s.Config.RequestBaseURL); err == nil {
+					s.updateBaseURL(u)
+				}
+			}
 			next.ServeHTTP(w, r)
 			return
 		}
-
-		// X-Request-Base (Convos-specific) carries the full base URL including
 		// any sub-path, so it takes priority over the individual X-Forwarded-*
 		// headers. The proxy is responsible for stripping this header from
 		// untrusted client requests.
 		if base := r.Header.Get("X-Request-Base"); base != "" {
+			slog.Info("Received X-Request-Base header from proxy", "base", base)
 			if u, err := url.Parse(base); err == nil {
 				s.updateBaseURL(u)
 			}
 		} else if host := r.Header.Get("X-Forwarded-Host"); host != "" {
-			// Fall back to standard forwarded headers when X-Request-Base is
-			// absent. Default to http; only upgrade to https when the proto
-			// header explicitly says so.
 			scheme := "http"
 			if r.Header.Get("X-Forwarded-Proto") == httpsScheme {
 				scheme = httpsScheme
@@ -211,8 +213,7 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	if cfg.ReverseProxy != "" {
 		r.Use(middleware.RealIP)
 	}
-	r.Use(
-		s.ReverseProxyMiddleware,
+	r.Use(s.ReverseProxyMiddleware,
 		ContextMiddleware,
 		middleware.Recoverer,
 		ProviderMiddleware,
@@ -782,7 +783,8 @@ func (s *Server) serveManifest(w http.ResponseWriter, r *http.Request) {
 // serveBrowserconfig serves the Microsoft browser configuration XML.
 func (s *Server) serveBrowserconfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml")
-	if err := browserconfigTemplate.Execute(w, nil); err != nil {
+	data := map[string]string{"BaseURL": s.baseURL()}
+	if err := browserconfigTemplate.Execute(w, data); err != nil {
 		slog.Error("Failed to render browserconfig template", "error", err)
 	}
 }

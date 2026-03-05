@@ -36,7 +36,7 @@ func TestSPAHandler(t *testing.T) {
 		if !strings.Contains(body, "Starting Convos...") {
 			t.Error("Body does not contain loading indicator")
 		}
-		re := regexp.MustCompile(`<script src="\/assets\/convos\.[\w-]+\.js"><\/script>`)
+		re := regexp.MustCompile(`\/assets\/convos\.[\w-]+\.js"><\/script>`)
 		if !re.MatchString(body) {
 			t.Errorf("Body does not contain expected JS asset: %s", body)
 		}

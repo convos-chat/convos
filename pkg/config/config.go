@@ -19,6 +19,7 @@ type Config struct {
 	ReverseProxy     string        `envconfig:"CONVOS_REVERSE_PROXY"`
 	SecureCookies    *bool         `envconfig:"CONVOS_SECURE_COOKIES"`
 	SessionSecret    string        `envconfig:"CONVOS_SESSION_SECRET"`
+	RequestBaseURL   string        `envconfig:"CONVOS_REQUEST_BASE_URL"`
 	OrganizationName string        `envconfig:"CONVOS_ORGANIZATION_NAME" default:"Convos"`
 	OrganizationURL  string        `envconfig:"CONVOS_ORGANIZATION_URL" default:"https://convos.chat"`
 	Contact          string        `envconfig:"CONVOS_CONTACT" default:"mailto:root@localhost"`
