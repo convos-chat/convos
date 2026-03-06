@@ -3,36 +3,36 @@ on:
   pull_request:
   push:
     branches:
-    - '**'
-    - '!stable'
+      - '**'
+      - '!stable'
 jobs:
   nodejs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@v4
-      with:
-        version: latest
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: pnpm
-    - run: pnpm install
-    - run: pnpm run lint
-    - run: pnpm run check
-    - run: pnpm run test
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm run lint
+      - run: pnpm run check
+      - run: pnpm run test
   go:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: go.mod
-    - name: Download dependencies
-      run: go mod download
-    - name: Lint
-      uses: golangci/golangci-lint-action@v6
-    - name: Test
-      run: go test -cover ./...
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Download dependencies
+        run: go mod download
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+      - name: Test
+        run: go test -cover ./...
