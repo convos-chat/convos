@@ -6,11 +6,7 @@
     convos
     golangci-lint
     air
-    gopls
     pnpm
-    rlwrap
-    sqlite-interactive
-    sqlx-cli
   ];
   languages.go = {
     enable = true;

@@ -1,3 +1,4 @@
+// Package recoveraccount provides the command to recover data or reset passwords.
 package recoveraccount
 
 import (

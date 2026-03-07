@@ -43,7 +43,6 @@ func passwordCommand() *cli.Command {
 				return err
 			}
 
-			// Initialize core with file backend
 			backend := storage.NewFileBackend(cfg.Home)
 			c := core.New(
 				core.WithHome(cfg.Home),

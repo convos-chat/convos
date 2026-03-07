@@ -41,7 +41,6 @@ func ensureCert(certPath, keyPath string) error {
 		BasicConstraintsValid: true,
 	}
 
-	// Add localhost and loopback IP addresses to SANs
 	template.DNSNames = append(template.DNSNames, "localhost")
 	template.IPAddresses = append(template.IPAddresses, net.ParseIP("127.0.0.1"), net.ParseIP("::1"))
 
@@ -50,7 +49,6 @@ func ensureCert(certPath, keyPath string) error {
 		return fmt.Errorf("failed to create certificate: %w", err)
 	}
 
-	// Write certificate
 	certOut, err := os.Create(certPath)
 	if err != nil {
 		return fmt.Errorf("failed to open %s for writing: %w", certPath, err)
@@ -62,7 +60,6 @@ func ensureCert(certPath, keyPath string) error {
 		return fmt.Errorf("error closing %s: %w", certPath, err)
 	}
 
-	// Write key
 	keyOut, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
 		return fmt.Errorf("failed to open %s for writing: %w", keyPath, err)

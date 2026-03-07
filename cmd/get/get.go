@@ -1,3 +1,4 @@
+// Package get implements the "get" command for the Convos CLI tool.
 package get
 
 import (

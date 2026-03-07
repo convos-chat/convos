@@ -1,3 +1,4 @@
+// Package version implements the "version" command, which shows version information about the Convos binary.
 package version
 
 import (

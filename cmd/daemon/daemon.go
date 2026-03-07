@@ -57,93 +57,91 @@ func Command() *cli.Command {
 				Usage:   "List of addresses and ports to listen on",
 			},
 		},
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			cfg, err := config.Load()
-			if err != nil {
-				return fmt.Errorf("failed to load config: %w", err)
-			}
-
-			listenFlags := cmd.StringSlice("listen")
-			if len(listenFlags) == 0 {
-				listenFlags = []string{cfg.Listen}
-			} else {
-				// Update cfg.Listen to the first listen flag so BaseURL defaults correctly
-				cfg.Listen = listenFlags[0]
-			}
-
-			if os.Geteuid() == 0 {
-				slog.Warn("ATTENTION! Convos should not be run as root. It is recommended to run as a normal user.")
-			}
-
-			// Auto-discover PEM files in home directory, matching Perl behavior:
-			// files ending in -key.pem → CONVOS_TLS_KEY, other .pem → CONVOS_TLS_CERT
-			discoverPEMFiles(cfg.Home)
-
-			// Initialize Core
-			backend := storage.NewFileBackend(cfg.Home)
-			c := core.New(
-				core.WithHome(cfg.Home),
-				core.WithBackend(backend),
-				core.WithConnectionProvider(&connectionProvider{}),
-				core.WithProfileDefaults(cfg.ProfileDefaults.MaxBulkSize, cfg.ProfileDefaults.MaxMessageLength, strings.Split(cfg.ProfileDefaults.ServiceAccounts, ",")),
-				core.WithConnectDelay(cfg.ConnectDelay),
-			)
-
-			if startErr := c.Start(); startErr != nil {
-				return fmt.Errorf("failed to start core: %w", startErr)
-			}
-
-			// Create authenticator based on configuration
-			authenticator, err := auth.NewAuthenticator(c, cfg.Auth)
-			if err != nil {
-				return fmt.Errorf("failed to create authenticator: %w", err)
-			}
-			slog.Info("Using authentication provider", "provider", authenticator.Name())
-
-			// Initialize Server
-			srv := server.New(c, cfg, authenticator)
-
-			var servers []*http.Server
-			var wg sync.WaitGroup
-
-			for _, listenStr := range listenFlags {
-				listener, httpServer, err := createListener(ctx, cfg, srv, listenStr)
-				if err != nil {
-					return err
-				}
-
-				servers = append(servers, httpServer)
-				wg.Add(1)
-
-				go func(l net.Listener, s *http.Server, addr string) {
-					defer wg.Done()
-					slog.Info("Server started", "listen", addr)
-					if serveErr := s.Serve(l); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
-						slog.Error("Server failed", "listen", addr, "error", serveErr)
-					}
-				}(listener, httpServer, listenStr)
-			}
-
-			// Wait for interrupt signal
-			sigChan := make(chan os.Signal, 1)
-			signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-			<-sigChan
-
-			slog.Info("Shutting down servers...")
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-
-			for _, s := range servers {
-				if err := s.Shutdown(shutdownCtx); err != nil {
-					slog.Error("Server shutdown failed", "error", err)
-				}
-			}
-
-			wg.Wait()
-			slog.Info("Servers stopped gracefully")
-			return nil
-		},
+		Action: startDaemon,
 	}
+}
+
+func startDaemon(ctx context.Context, cmd *cli.Command) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	listenFlags := cmd.StringSlice("listen")
+	if len(listenFlags) == 0 {
+		listenFlags = []string{cfg.Listen}
+	} else {
+		cfg.Listen = listenFlags[0]
+	}
+
+	if os.Geteuid() == 0 {
+		slog.Warn("ATTENTION! Convos should not be run as root. It is recommended to run as a normal user.")
+	}
+
+	// Auto-discover PEM files in home directory
+	// files ending in -key.pem → CONVOS_TLS_KEY, other .pem → CONVOS_TLS_CERT
+	discoverPEMFiles(cfg.Home)
+
+	// Initialize Core
+	backend := storage.NewFileBackend(cfg.Home)
+	c := core.New(
+		core.WithHome(cfg.Home),
+		core.WithBackend(backend),
+		core.WithConnectionProvider(&connectionProvider{}),
+		core.WithProfileDefaults(cfg.ProfileDefaults.MaxBulkSize, cfg.ProfileDefaults.MaxMessageLength, strings.Split(cfg.ProfileDefaults.ServiceAccounts, ",")),
+		core.WithConnectDelay(cfg.ConnectDelay),
+	)
+
+	if startErr := c.Start(); startErr != nil {
+		return fmt.Errorf("failed to start core: %w", startErr)
+	}
+
+	authenticator, err := auth.NewAuthenticator(c, cfg.Auth)
+	if err != nil {
+		return fmt.Errorf("failed to create authenticator: %w", err)
+	}
+	slog.Info("Using authentication provider", "provider", authenticator.Name())
+
+	srv := server.New(c, cfg, authenticator)
+
+	var servers []*http.Server
+	var wg sync.WaitGroup
+
+	for _, listenStr := range listenFlags {
+		listener, httpServer, err := createListener(ctx, cfg, srv, listenStr)
+		if err != nil {
+			return err
+		}
+
+		servers = append(servers, httpServer)
+		wg.Add(1)
+
+		go func(l net.Listener, s *http.Server, addr string) {
+			defer wg.Done()
+			slog.Info("Server started", "listen", addr)
+			if serveErr := s.Serve(l); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+				slog.Error("Server failed", "listen", addr, "error", serveErr)
+			}
+		}(listener, httpServer, listenStr)
+	}
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	slog.Info("Shutting down servers...")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	for _, s := range servers {
+		if err := s.Shutdown(shutdownCtx); err != nil {
+			slog.Error("Server shutdown failed", "error", err)
+		}
+	}
+
+	wg.Wait()
+	slog.Info("Servers stopped gracefully")
+	return nil
 }
 
 // createListener parses a listen address string and returns a ready net.Listener and http.Server.
@@ -217,7 +215,7 @@ func wrapTLS(listener net.Listener, listenCfg ListenerConfig, homeDir string) (n
 }
 
 // discoverPEMFiles scans a directory for PEM files and sets CONVOS_TLS_CERT/CONVOS_TLS_KEY
-// environment variables if not already set. Matches the Perl behavior in script/convos.
+// environment variables if not already set.
 func discoverPEMFiles(dir string) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
