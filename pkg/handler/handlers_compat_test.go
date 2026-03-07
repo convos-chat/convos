@@ -96,9 +96,9 @@ func TestGetUser_Fields(t *testing.T) {
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
-	c.Settings().SetDefaultConnection("irc://irc.libera.chat")
-	c.Settings().SetForcedConnection(true)
-	c.Settings().SetVideoService("https://meet.jit.si/")
+	c.Settings.SetDefaultConnection("irc://irc.libera.chat")
+	c.Settings.SetForcedConnection(true)
+	c.Settings.SetVideoService("https://meet.jit.si/")
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -397,7 +397,7 @@ func TestGetSettings_BaseURL(t *testing.T) {
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 	baseURL, _ := url.Parse("http://localhost:3000")
-	c.Settings().SetBaseURL(baseURL)
+	c.Settings.SetBaseURL(baseURL)
 
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
@@ -590,7 +590,7 @@ func TestRegisterUser_AutoConnect(t *testing.T) {
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
-	c.Settings().SetDefaultConnection("irc://irc.libera.chat/%23convos")
+	c.Settings.SetDefaultConnection("irc://irc.libera.chat/%23convos")
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
@@ -846,7 +846,7 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetOpenToPublic(true)
+	c.Settings.SetOpenToPublic(true)
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -936,8 +936,8 @@ func TestInviteUser_GeneratesValidToken(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -989,8 +989,8 @@ func TestInviteUser_ExistingUser(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -1024,8 +1024,8 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -1078,8 +1078,8 @@ func TestRegisterUser_InvalidToken(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -1123,8 +1123,8 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
@@ -1133,7 +1133,7 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 
 	// Generate a token with an expiration in the past
 	expiredExp := int64(1000000000) // well in the past
-	password := c.Settings().LocalSecret()
+	password := c.Settings.LocalSecret()
 	token := inviteToken("newuser@example.com", expiredExp, password, "test-session-secret")
 
 	req := httptest.NewRequest("POST", "/api/user/register", nil)
@@ -1163,8 +1163,8 @@ func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
 	c := core.New(core.WithBackend(backend))
-	c.Settings().SetSessionSecrets([]string{"test-session-secret"})
-	c.Settings().SetLocalSecret("test-local-secret")
+	c.Settings.SetSessionSecrets([]string{"test-session-secret"})
+	c.Settings.SetLocalSecret("test-local-secret")
 	store := sessions.NewCookieStore([]byte("test-session-secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 

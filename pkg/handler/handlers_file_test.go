@@ -57,7 +57,7 @@ func TestFileHandlers(t *testing.T) {
 		c, h, user := setup()
 		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 		content := []byte("hello world")
-		f, _ := c.Backend().SaveFile(user, "test.txt", content)
+		f, _ := c.Backend.SaveFile(user, "test.txt", content)
 
 		resp, _ := h.GetFile(ctx, api.GetFileRequestObject{Uid: user.ID(), Fid: f.ID})
 		if r, ok := resp.(api.GetFile200AsteriskResponse); ok {
@@ -132,7 +132,7 @@ func TestFileHandlers(t *testing.T) {
 		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
 
 		// Create a file to delete specifically for this test
-		f, err := c.Backend().SaveFile(user, "delete_me.txt", []byte("delete me"))
+		f, err := c.Backend.SaveFile(user, "delete_me.txt", []byte("delete me"))
 		if err != nil {
 			t.Fatalf("Failed to create file for deletion: %v", err)
 		}
@@ -144,7 +144,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		// Verify file is gone - LoadFiles might return other files, so we check GetFile
-		_, _, err = c.Backend().GetFile(user, fid)
+		_, _, err = c.Backend.GetFile(user, fid)
 		if err == nil {
 			t.Error("GetFile should fail for deleted file")
 		}

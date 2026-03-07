@@ -9,15 +9,10 @@ import (
 type Subscription struct {
 	id       uint64
 	userID   string
-	events   chan Event
+	Events   chan Event
 	emitter  *EventEmitter
 	closed   bool
 	closedMu sync.Mutex
-}
-
-// Events returns the channel for receiving events.
-func (s *Subscription) Events() <-chan Event {
-	return s.events
 }
 
 // Close unsubscribes and closes the event channel.
@@ -31,7 +26,7 @@ func (s *Subscription) Close() {
 	s.closedMu.Unlock()
 
 	s.emitter.unsubscribe(s.id)
-	close(s.events)
+	close(s.Events)
 }
 
 // EventEmitter provides pub/sub functionality for events.
@@ -71,7 +66,7 @@ func (e *EventEmitter) SubscribeUser(userID string) *Subscription {
 	sub := &Subscription{
 		id:      e.nextID,
 		userID:  userID,
-		events:  make(chan Event, e.bufferSize),
+		Events:  make(chan Event, e.bufferSize),
 		emitter: e,
 	}
 	e.subscriptions[sub.id] = sub
@@ -104,7 +99,7 @@ func (e *EventEmitter) EmitUser(userID string, event Event) {
 
 		if sub.userID == "" || sub.userID == userID {
 			select {
-			case sub.events <- event:
+			case sub.Events <- event:
 			default:
 				// Buffer full, skip event (non-blocking)
 			}

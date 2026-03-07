@@ -193,7 +193,7 @@ func (a *OIDCAuthenticator) getOAuth2Config() *oauth2.Config {
 	}
 
 	redirectPath, _ := url.Parse("auth/oidc/callback")
-	baseURL := a.core.Settings().BaseURL()
+	baseURL := a.core.Settings.BaseURL()
 	cfg.RedirectURL = baseURL.ResolveReference(redirectPath).String()
 
 	return &cfg

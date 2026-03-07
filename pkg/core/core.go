@@ -31,12 +31,12 @@ type ConnectionProvider interface {
 // It manages users, connection profiles, and the storage backend.
 type Core struct {
 	mu                        sync.RWMutex
-	home                      string
-	backend                   Backend
-	settings                  *Settings
+	Home                      string
+	Backend                   Backend
+	Settings                  *Settings
 	users                     map[string]*User
 	profiles                  map[string]*ConnectionProfile
-	events                    *EventEmitter
+	EventEmitter              *EventEmitter
 	provider                  ConnectionProvider
 	ready                     bool
 	log                       *slog.Logger
@@ -52,14 +52,14 @@ type Option func(*Core)
 // WithHome sets the home directory for data storage.
 func WithHome(home string) Option {
 	return func(c *Core) {
-		c.home = home
+		c.Home = home
 	}
 }
 
 // WithBackend sets the storage backend.
 func WithBackend(backend Backend) Option {
 	return func(c *Core) {
-		c.backend = backend
+		c.Backend = backend
 	}
 }
 
@@ -88,10 +88,10 @@ func WithConnectDelay(d time.Duration) Option {
 // New creates a new Core instance with the given options.
 func New(opts ...Option) *Core {
 	c := &Core{
-		users:    make(map[string]*User),
-		profiles: make(map[string]*ConnectionProfile),
-		events:   NewEventEmitter(),
-		log:      slog.Default(),
+		users:        make(map[string]*User),
+		profiles:     make(map[string]*ConnectionProfile),
+		EventEmitter: NewEventEmitter(),
+		log:          slog.Default(),
 	}
 
 	for _, opt := range opts {
@@ -99,41 +99,20 @@ func New(opts ...Option) *Core {
 	}
 
 	// Default home from environment
-	if c.home == "" {
-		c.home = os.Getenv("CONVOS_HOME")
-		if c.home == "" {
-			c.home = filepath.Join(os.Getenv("HOME"), ".convos")
+	if c.Home == "" {
+		c.Home = os.Getenv("CONVOS_HOME")
+		if c.Home == "" {
+			c.Home = filepath.Join(os.Getenv("HOME"), ".convos")
 		}
 	}
 
-	// Default backend
-	if c.backend == nil {
+	if c.Backend == nil {
 		panic("No backend configured. Please provide a storage backend using WithBackend option.")
 	}
 
-	c.settings = &Settings{core: c}
+	c.Settings = &Settings{core: c}
 
 	return c
-}
-
-// Home returns the home directory path.
-func (c *Core) Home() string {
-	return c.home
-}
-
-// Backend returns the storage backend.
-func (c *Core) Backend() Backend {
-	return c.backend
-}
-
-// Settings returns the core settings.
-func (c *Core) Settings() *Settings {
-	return c.settings
-}
-
-// Events returns the event emitter.
-func (c *Core) Events() *EventEmitter {
-	return c.events
 }
 
 // Ready returns whether the core has finished loading initial data.
@@ -207,7 +186,7 @@ func (c *Core) ConnectionProfile(u *url.URL) *ConnectionProfile {
 // applyDefaultSettings applies settings from the default connection profile if applicable.
 // c.mu must be held.
 func (c *Core) applyDefaultSettings(p *ConnectionProfile, id string) {
-	defaultConn := c.settings.DefaultConnection()
+	defaultConn := c.Settings.DefaultConnection()
 	if defaultConn == "" {
 		return
 	}
@@ -256,25 +235,18 @@ func (c *Core) RemoveUser(email string) error {
 	}
 
 	delete(c.users, email)
-	return c.backend.DeleteUser(user)
+	return c.Backend.DeleteUser(user)
 }
 
 // nextUID returns the next available user ID. Must be called with mu held.
 func (c *Core) nextUID() int {
-	uid := len(c.users) + 1
-	for {
-		taken := false
-		for _, u := range c.users {
-			if u.uid == uid {
-				taken = true
-				break
-			}
+	uid := 1
+	for _, u := range c.users {
+		if u.uid >= uid {
+			uid = u.uid + 1
 		}
-		if !taken {
-			return uid
-		}
-		uid++
 	}
+	return uid
 }
 
 // NewConnection creates a connection using the registered provider.
@@ -292,16 +264,14 @@ func (c *Core) NewConnection(rawURL string, user *User) Connection {
 }
 
 func (c *Core) Initialize() error {
-	// Load settings from backend
-	settingsData, err := c.backend.LoadSettings()
+	settingsData, err := c.Backend.LoadSettings()
 	if err != nil {
 		c.log.Error("Failed to load settings", "error", err)
 	} else {
-		c.settings.FromData(settingsData)
+		c.Settings.FromData(settingsData)
 	}
 
-	// Load connection profiles from backend
-	profiles, err := c.backend.LoadConnectionProfiles()
+	profiles, err := c.Backend.LoadConnectionProfiles()
 	if err != nil {
 		c.log.Error("Failed to load connection profiles", "error", err)
 	} else {
@@ -316,8 +286,7 @@ func (c *Core) Initialize() error {
 		c.mu.Unlock()
 	}
 
-	// Load users from backend
-	usersData, err := c.backend.LoadUsers()
+	usersData, err := c.Backend.LoadUsers()
 	if err != nil {
 		return err
 	}
@@ -336,7 +305,6 @@ func (c *Core) Initialize() error {
 			user.subscriptions = make(map[string]webpush.Subscription)
 		}
 
-		// Load connections for user
 		if err := user.loadConnections(); err != nil {
 			c.log.Error("Failed to load connections", "user", user.Email(), "error", err)
 		}
@@ -348,24 +316,6 @@ func (c *Core) Initialize() error {
 
 	for _, user := range loadedUsers {
 		c.users[user.ID()] = user
-	}
-
-	// Ensure first user has admin role (back compat)
-	if len(c.users) > 0 {
-		var firstUser *User
-		hasAdmin := false
-		for _, u := range c.users {
-			if firstUser == nil {
-				firstUser = u
-			}
-			if u.HasRole("admin") {
-				hasAdmin = true
-				break
-			}
-		}
-		if !hasAdmin && firstUser != nil {
-			firstUser.GiveRole("admin")
-		}
 	}
 
 	c.ready = true

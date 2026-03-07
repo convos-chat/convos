@@ -51,7 +51,7 @@ func (h *Handler) ConversationMessages(ctx context.Context, request api.Conversa
 	}
 
 	query := paramsToMessageQuery(request.Params.After, request.Params.Around, request.Params.Before, request.Params.Limit, request.Params.Match)
-	result, err := h.Core.Backend().LoadMessages(conv, query)
+	result, err := h.Core.Backend.LoadMessages(conv, query)
 	if err != nil {
 		return buildMessagesResponse(core.MessageResult{End: true}, query), nil //nolint:nilerr // return empty on backend error
 	}
@@ -76,7 +76,7 @@ func (h *Handler) MarkConversationAsRead(ctx context.Context, request api.MarkCo
 	if conv != nil {
 		conv.SetUnread(0)
 		conv.SetNotifications(0)
-		if err := h.Core.Backend().SaveConnection(conn); err != nil {
+		if err := h.Core.Backend.SaveConnection(conn); err != nil {
 			slog.Error("Failed to persist read state", "error", err)
 		}
 	}
@@ -107,7 +107,7 @@ func (h *Handler) ConnectionMessages(ctx context.Context, request api.Connection
 	}
 
 	query := paramsToMessageQuery(request.Params.After, request.Params.Around, request.Params.Before, request.Params.Limit, request.Params.Match)
-	result, err := h.Core.Backend().LoadMessages(conv, query)
+	result, err := h.Core.Backend.LoadMessages(conv, query)
 	if err != nil {
 		return api.ConnectionMessages200JSONResponse{ //nolint:nilerr // return empty on backend error
 			Messages: &[]api.Message{},
@@ -135,7 +135,7 @@ func (h *Handler) MarkConnectionAsRead(ctx context.Context, request api.MarkConn
 	conv := conn.GetConversation("")
 	if conv != nil {
 		conv.SetUnread(0)
-		if err := h.Core.Backend().SaveConnection(conn); err != nil {
+		if err := h.Core.Backend.SaveConnection(conn); err != nil {
 			slog.Error("Failed to persist read state", "error", err)
 		}
 	}
@@ -149,7 +149,7 @@ func (h *Handler) NotificationMessages(ctx context.Context, request api.Notifica
 	if err != nil {
 		return nil, err
 	}
-	result, err := h.Core.Backend().LoadNotifications(user, core.MessageQuery{Limit: 40})
+	result, err := h.Core.Backend.LoadNotifications(user, core.MessageQuery{Limit: 40})
 	if err != nil {
 		return api.NotificationMessages200JSONResponse{Messages: &[]api.Notification{}}, nil //nolint:nilerr // return empty on backend error
 	}
@@ -175,7 +175,7 @@ func (h *Handler) MarkNotificationsAsRead(ctx context.Context, request api.MarkN
 		return nil, err
 	}
 	// Clear the notifications file by truncating it
-	notifFile := h.Core.Home() + "/" + user.ID() + "/notifications.log"
+	notifFile := h.Core.Home + "/" + user.ID() + "/notifications.log"
 	_, err = os.Stat(notifFile)
 	if errors.Is(err, os.ErrNotExist) {
 		return api.MarkNotificationsAsRead200JSONResponse{}, nil

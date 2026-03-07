@@ -98,7 +98,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if conv == nil {
 			return ErrUnknownConversation
 		}
-		if err := c.User().Core().Backend().DeleteMessages(conv); err != nil {
+		if err := c.User().Core().Backend.DeleteMessages(conv); err != nil {
 			return err
 		}
 		c.emitEvent(&core.SentEvent{

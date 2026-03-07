@@ -13,7 +13,7 @@ func (h *Handler) SearchMessages(ctx context.Context, request api.SearchMessages
 		return nil, err
 	}
 	query := paramsToMessageQuery(request.Params.After, nil, request.Params.Before, request.Params.Limit, request.Params.Match)
-	result, err := h.Core.Backend().SearchMessages(user, query)
+	result, err := h.Core.Backend.SearchMessages(user, query)
 	if err != nil {
 		return nil, err
 	}

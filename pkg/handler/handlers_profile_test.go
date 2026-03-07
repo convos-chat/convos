@@ -65,8 +65,8 @@ func TestProfileHandlers(t *testing.T) {
 		}
 
 		// Verify settings update
-		if c.Settings().DefaultConnection() != url {
-			t.Errorf("Default connection setting not updated, got %q", c.Settings().DefaultConnection())
+		if c.Settings.DefaultConnection() != url {
+			t.Errorf("Default connection setting not updated, got %q", c.Settings.DefaultConnection())
 		}
 	})
 
@@ -85,7 +85,7 @@ func TestProfileHandlers(t *testing.T) {
 		}
 
 		// Verify deletion
-		profiles, _ := c.Backend().LoadConnectionProfiles()
+		profiles, _ := c.Backend.LoadConnectionProfiles()
 		if len(profiles) != 0 {
 			t.Error("Profile should have been deleted")
 		}

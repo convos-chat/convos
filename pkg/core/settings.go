@@ -189,7 +189,7 @@ func (s *Settings) VAPIDKeys() (string, string, error) {
 	s.vapidPrivateKey = privateKey
 	s.vapidPublicKey = publicKey
 
-	if err := s.core.Backend().SaveSettings(s.toDataLocked()); err != nil {
+	if err := s.core.Backend.SaveSettings(s.toDataLocked()); err != nil {
 		return "", "", err
 	}
 
@@ -245,5 +245,5 @@ func (s *Settings) FromData(data SettingsData) {
 
 // Save persists the settings to the backend.
 func (s *Settings) Save() error {
-	return s.core.Backend().SaveSettings(s.ToData())
+	return s.core.Backend.SaveSettings(s.ToData())
 }

@@ -36,7 +36,7 @@ func TestSettingsHandlers(t *testing.T) {
 		t.Parallel()
 		c, h, _, user := setup()
 		ctx := context.WithValue(context.Background(), core.CtxKeyUser, user)
-		c.Settings().SetOrganizationName("Convos")
+		c.Settings.SetOrganizationName("Convos")
 		resp, _ := h.GetSettings(ctx, api.GetSettingsRequestObject{})
 		if r, ok := resp.(api.GetSettings200JSONResponse); ok {
 			if *r.OrganizationName != "Convos" {
@@ -67,8 +67,8 @@ func TestSettingsHandlers(t *testing.T) {
 			t.Errorf("Unexpected response type: %T", resp)
 		}
 
-		if c.Settings().OrganizationName() != newName {
-			t.Errorf("Core settings not updated, got %q", c.Settings().OrganizationName())
+		if c.Settings.OrganizationName() != newName {
+			t.Errorf("Core settings not updated, got %q", c.Settings.OrganizationName())
 		}
 	})
 

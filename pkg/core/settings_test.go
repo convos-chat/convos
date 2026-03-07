@@ -14,7 +14,7 @@ func TestSettings(t *testing.T) {
 	setup := func() (*test.MemoryBackend, *core.Settings) {
 		backend := test.NewMemoryBackend()
 		c := core.New(core.WithBackend(backend))
-		s := c.Settings()
+		s := c.Settings
 		return backend, s
 	}
 

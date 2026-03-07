@@ -58,7 +58,7 @@ func TestRegisterUser_Validation(t *testing.T) {
 			// Setup fresh core state for each subtest
 			backend := test.NewMemoryBackend()
 			c := core.New(core.WithBackend(backend))
-			c.Settings().SetOpenToPublic(tt.openToPublic)
+			c.Settings.SetOpenToPublic(tt.openToPublic)
 			h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
 			if tt.existingUsers > 0 {

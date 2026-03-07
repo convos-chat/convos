@@ -47,7 +47,7 @@ func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any
 	deadline := time.After(ircEventTimeout)
 	for {
 		select {
-		case ev, ok := <-sub.Events():
+		case ev, ok := <-sub.Events:
 			if !ok {
 				t.Fatal("subscription channel closed unexpectedly")
 				return nil
@@ -99,7 +99,7 @@ func connectTestIRC(t *testing.T, serverURL, nick string) (*Connection, *core.Su
 	c := test.NewTestCore()
 	user := core.NewUser(nick+"@convos.test", c)
 	conn := NewConnection(u.String(), user)
-	sub := c.Events().SubscribeUser(user.ID())
+	sub := c.EventEmitter.SubscribeUser(user.ID())
 
 	// Register cleanup before Connect so it always runs even if Connect fails.
 	t.Cleanup(func() {
@@ -248,7 +248,7 @@ func TestIRCIntegration(t *testing.T) {
 		if convA == nil {
 			t.Fatal("A: channel conversation missing from connection")
 		}
-		result, err := connA.User().Core().Backend().LoadMessages(convA, core.MessageQuery{Limit: 50})
+		result, err := connA.User().Core().Backend.LoadMessages(convA, core.MessageQuery{Limit: 50})
 		if err != nil {
 			t.Fatalf("LoadMessages: %v", err)
 		}

@@ -18,15 +18,15 @@ func TestNewCore(t *testing.T) {
 
 	c := test.NewTestCore()
 
-	if c.Home() == "" {
+	if c.Home == "" {
 		t.Error("Home() should return a default path")
 	}
 
-	if c.Backend() == nil {
+	if c.Backend == nil {
 		t.Error("Backend() should return a default backend")
 	}
 
-	if c.Settings() == nil {
+	if c.Settings == nil {
 		t.Error("Settings() should return settings")
 	}
 
@@ -44,11 +44,11 @@ func TestCoreWithOptions(t *testing.T) {
 		core.WithBackend(backend),
 	)
 
-	if c.Home() != "/tmp/convos-test" {
-		t.Errorf("Home() = %q, want %q", c.Home(), "/tmp/convos-test")
+	if c.Home != "/tmp/convos-test" {
+		t.Errorf("Home() = %q, want %q", c.Home, "/tmp/convos-test")
 	}
 
-	if c.Backend() != backend {
+	if c.Backend != backend {
 		t.Error("Backend() should return the provided backend")
 	}
 }
@@ -155,11 +155,6 @@ func TestCoreStartWithExistingUsers(t *testing.T) {
 	user := c.GetUser("admin@example.com")
 	if user == nil {
 		t.Fatal("User should be loaded from backend")
-	}
-
-	// First user without admin should get admin role
-	if !user.HasRole(roleAdmin) {
-		t.Error("First user should be given admin role")
 	}
 }
 

@@ -144,7 +144,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 	}
 
 	// Auto-create connection from default_connection setting
-	if defaultConn := h.Core.Settings().DefaultConnection(); defaultConn != "" {
+	if defaultConn := h.Core.Settings.DefaultConnection(); defaultConn != "" {
 		conn := irc.NewConnection(defaultConn, user)
 		user.AddConnection(conn)
 
@@ -153,7 +153,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 			conv := core.NewConversation(ch, conn)
 			conn.AddConversation(conv)
 		}
-		if err = h.Core.Backend().SaveConnection(conn); err != nil {
+		if err = h.Core.Backend.SaveConnection(conn); err != nil {
 			slog.Error("Failed to save conversation", "err", err)
 		}
 
@@ -175,7 +175,7 @@ func (h *Handler) RegisterUser(ctx context.Context, request api.RegisterUserRequ
 // validateRegistration checks whether a non-first-user registration is allowed.
 // Returns (response, true) if registration should be rejected, or (nil, false) to continue.
 func (h *Handler) validateRegistration(hasToken bool, existingUser *core.User, email string, body *api.RegisterUserJSONRequestBody) (api.RegisterUserResponseObject, bool) {
-	if !hasToken && !h.Core.Settings().OpenToPublic() {
+	if !hasToken && !h.Core.Settings.OpenToPublic() {
 		return api.RegisterUser401JSONResponse{
 			UnauthorizedJSONResponse: api.UnauthorizedJSONResponse(api.ErrResponse("Convos registration is not open to public.")),
 		}, true
@@ -238,7 +238,7 @@ func (h *Handler) validateInviteRequest(email string, existingUser *core.User, b
 	}
 
 	// Determine password for HMAC: existing user's hash or local_secret
-	password := h.Core.Settings().LocalSecret()
+	password := h.Core.Settings.LocalSecret()
 	if existingUser != nil {
 		password = existingUser.Password()
 	}
@@ -275,7 +275,7 @@ func (h *Handler) InviteUser(ctx context.Context, request api.InviteUserRequestO
 
 	// Use target user's password hash, or local_secret for new users
 	target := h.Core.GetUser(email)
-	password := h.Core.Settings().LocalSecret()
+	password := h.Core.Settings.LocalSecret()
 	if target != nil {
 		password = target.Password()
 	}

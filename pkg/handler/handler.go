@@ -69,7 +69,7 @@ func (h *Handler) getResponseWriter(ctx context.Context) (http.ResponseWriter, e
 }
 
 func (h *Handler) makeAbsoluteURL(path string) string {
-	baseURL := h.Core.Settings().BaseURL()
+	baseURL := h.Core.Settings.BaseURL()
 	rel, _ := url.Parse(path)
 	return baseURL.ResolveReference(rel).String()
 }
@@ -117,7 +117,6 @@ func (h *Handler) GetUserFromSession(r *http.Request) *core.User {
 	return h.Core.GetUser(email)
 }
 
-
 // inviteToken computes HMAC-SHA1 of "email:{email}:exp:{exp}:password:{password}"
 // keyed with the given secret. Matches Perl's _add_invite_token_to_params.
 func inviteToken(email string, exp int64, password, secret string) string {
@@ -129,7 +128,7 @@ func inviteToken(email string, exp int64, password, secret string) string {
 
 // generateInviteToken creates a token using the primary session secret.
 func (h *Handler) generateInviteToken(email string, exp int64, password string) string {
-	secrets := h.Core.Settings().SessionSecrets()
+	secrets := h.Core.Settings.SessionSecrets()
 	if len(secrets) == 0 {
 		return ""
 	}
@@ -138,11 +137,10 @@ func (h *Handler) generateInviteToken(email string, exp int64, password string) 
 
 // validateInviteToken checks a token against all session secrets (supports key rotation).
 func (h *Handler) validateInviteToken(email, token string, exp int64, password string) bool {
-	for _, secret := range h.Core.Settings().SessionSecrets() {
+	for _, secret := range h.Core.Settings.SessionSecrets() {
 		if inviteToken(email, exp, password, secret) == token {
 			return true
 		}
 	}
 	return false
 }
-

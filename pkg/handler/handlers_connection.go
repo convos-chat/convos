@@ -41,7 +41,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 
 	conn := irc.NewConnection(request.Body.Url, user)
 	user.AddConnection(conn)
-	if err := h.Core.Backend().SaveConnection(conn); err != nil {
+	if err := h.Core.Backend.SaveConnection(conn); err != nil {
 		return api.CreateConnection500JSONResponse{
 			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil
@@ -55,7 +55,7 @@ func (h *Handler) CreateConnection(ctx context.Context, request api.CreateConnec
 	if channelName != "" {
 		conv := core.NewConversation(channelName, conn)
 		conn.AddConversation(conv)
-		if err := h.Core.Backend().SaveConnection(conn); err != nil {
+		if err := h.Core.Backend.SaveConnection(conn); err != nil {
 			slog.Error("Failed to save connection with new conversation", "error", err)
 			return api.CreateConnection500JSONResponse{
 				InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
@@ -148,7 +148,7 @@ func (h *Handler) UpdateConnection(ctx context.Context, request api.UpdateConnec
 		}
 	}
 
-	if err := h.Core.Backend().SaveConnection(conn); err != nil {
+	if err := h.Core.Backend.SaveConnection(conn); err != nil {
 		return api.UpdateConnection500JSONResponse{
 			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),
 		}, nil

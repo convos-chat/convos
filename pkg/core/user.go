@@ -282,12 +282,12 @@ func (u *User) RemoveConnection(id string) error {
 	if err := conn.Disconnect(); err != nil {
 		slog.Warn("Failed to disconnect connection", "id", id, "err", err)
 	}
-	return u.core.Backend().DeleteConnection(conn)
+	return u.core.Backend.DeleteConnection(conn)
 }
 
 // Save persists the user to storage.
 func (u *User) Save() error {
-	return u.core.Backend().SaveUser(u)
+	return u.core.Backend.SaveUser(u)
 }
 
 // ToData converts the user to a serializable format.
@@ -315,7 +315,7 @@ func (u *User) ToData(includePassword bool) UserData {
 
 // loadConnections loads connections from the backend.
 func (u *User) loadConnections() error {
-	conns, err := u.core.Backend().LoadConnections(u)
+	conns, err := u.core.Backend.LoadConnections(u)
 	if err != nil {
 		return err
 	}

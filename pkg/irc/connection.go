@@ -81,10 +81,10 @@ type Connection struct {
 func NewConnection(rawURL string, user *core.User) *Connection {
 	return &Connection{
 		BaseConnection: core.NewBaseConnection(rawURL, user),
-		namesBuffer:  make(map[string][]core.Participant),
-		whoisBuffer:  make(map[string]*core.WhoisData),
-		modeWaiters:  make(map[string]any),
-		namesWaiters: make(map[string]any),
+		namesBuffer:    make(map[string][]core.Participant),
+		whoisBuffer:    make(map[string]*core.WhoisData),
+		modeWaiters:    make(map[string]any),
+		namesWaiters:   make(map[string]any),
 	}
 }
 
@@ -693,13 +693,13 @@ func (c *Connection) openConversation(nick string) error {
 
 // saveState persists the connection (including conversations) to the backend.
 func (c *Connection) saveState() {
-	if err := c.User().Core().Backend().SaveConnection(c); err != nil {
+	if err := c.User().Core().Backend.SaveConnection(c); err != nil {
 		event := &core.MessageEvent{
 			From:    c.Name(),
 			Message: "Failed to save connection state: " + err.Error(),
 			Type:    core.MessageTypeError,
 		}
-		c.User().Core().Events().EmitUser(c.User().ID(), event)
+		c.User().Core().EventEmitter.EmitUser(c.User().ID(), event)
 	}
 }
 
@@ -738,7 +738,7 @@ func (c *Connection) persistMessage(convID, from, message string, msgType core.M
 		ReplyTo:   replyTo,
 	}
 
-	err := c.User().Core().Backend().SaveMessage(conv, msg)
+	err := c.User().Core().Backend.SaveMessage(conv, msg)
 	if err != nil {
 		slog.Error("Failed to save message", "conversation_id", convID, "error", err)
 	}
@@ -749,7 +749,7 @@ func (c *Connection) emitEvent(event core.Event) {
 	if event.GetConnectionID() == "" {
 		event.SetConnectionID(c.ID())
 	}
-	c.User().Core().Events().EmitUser(c.User().ID(), event)
+	c.User().Core().EventEmitter.EmitUser(c.User().ID(), event)
 }
 
 // emitState emits a connection state change event.

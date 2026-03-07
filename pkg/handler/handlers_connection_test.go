@@ -88,7 +88,7 @@ func TestConnectionHandlers(t *testing.T) {
 		c, h, user := setup()
 		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
-		if err := c.Backend().SaveConnection(conn); err != nil {
+		if err := c.Backend.SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 
@@ -110,7 +110,7 @@ func TestConnectionHandlers(t *testing.T) {
 		c, h, user := setup()
 		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
-		if err := c.Backend().SaveConnection(conn); err != nil {
+		if err := c.Backend.SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 
@@ -138,7 +138,7 @@ func TestConnectionHandlers(t *testing.T) {
 		c, h, user := setup()
 		conn := irc.NewConnection("irc://irc.libera.chat", user)
 		user.AddConnection(conn)
-		if err := c.Backend().SaveConnection(conn); err != nil {
+		if err := c.Backend.SaveConnection(conn); err != nil {
 			t.Fatalf("Failed to save connection: %v", err)
 		}
 

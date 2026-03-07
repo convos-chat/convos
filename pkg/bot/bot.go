@@ -50,7 +50,7 @@ func (m *Manager) Start() {
 		return
 	}
 
-	m.configFile = filepath.Join(m.core.Home(), email, "bot.yaml")
+	m.configFile = filepath.Join(m.core.Home, email, "bot.yaml")
 	m.registerUser()
 	m.loadConfig()
 	m.startEventListeners()

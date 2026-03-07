@@ -36,7 +36,7 @@ func (h *Handler) UpdateSettings(ctx context.Context, request api.UpdateSettings
 		return nil, ErrForbidden
 	}
 
-	s := h.Core.Settings()
+	s := h.Core.Settings
 	b := request.Body
 
 	if b.Contact != nil {
@@ -93,7 +93,7 @@ func (h *Handler) createDefaultProfile(rawURL string) {
 }
 
 func (h *Handler) settingsToAPI() api.ServerSettings {
-	s := h.Core.Settings()
+	s := h.Core.Settings
 
 	contact := s.Contact()
 	defaultConn := s.DefaultConnection()
@@ -123,7 +123,7 @@ func (h *Handler) settingsToAPI() api.ServerSettings {
 		VideoService:      &video,
 	}
 
-	if usage := h.getDiskUsage(h.Core.Home()); usage != nil {
+	if usage := h.getDiskUsage(h.Core.Home); usage != nil {
 		res.DiskUsage = usage
 	}
 

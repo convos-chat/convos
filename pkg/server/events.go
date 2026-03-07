@@ -25,9 +25,6 @@ func newUpgrader() websocket.Upgrader {
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			if origin == "" {
-				return true // non-browser clients may omit Origin
-			}
 			u, err := url.Parse(origin)
 			if err != nil {
 				return false
@@ -92,7 +89,7 @@ func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Authenticate after upgrade (matching Perl behavior).
+	// Authenticate after upgrade
 	// If unauthenticated, send an error event and close with 1008 (Policy Violation)
 	// so the client knows not to reconnect.
 	user := s.Handler.GetUserFromSession(r)
@@ -106,7 +103,7 @@ func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sub := s.Core.Events().SubscribeUser(user.ID())
+	sub := s.Core.EventEmitter.SubscribeUser(user.ID())
 	defer sub.Close()
 
 	// Channel for incoming messages from the reader goroutine
@@ -136,15 +133,18 @@ func (s *Server) eventsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-		case event, ok := <-sub.Events():
+		case event, ok := <-sub.Events:
 			if !ok {
+				slog.Debug("Event channel closed, ending WS handler")
 				return
 			}
 			if err := conn.WriteJSON(event); err != nil {
+				slog.Debug("Failed to write event to WebSocket, closing connection", "error", err)
 				return
 			}
 		case <-ticker.C:
 			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				slog.Debug("Failed to send ping, closing WebSocket connection", "error", err)
 				return
 			}
 		case <-done:
@@ -196,7 +196,7 @@ func (s *Server) handleWSLoad(msg wsMessage, user *core.User) any {
 	}
 }
 
-// handleWSSend forwards a message to an IRC connection.
+// handleWSSend forwards a message to an connection.
 func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 	if msg.ConnectionID == "" || msg.Message == "" {
 		return wsError("Invalid input.", msg)
@@ -209,7 +209,7 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 
 	// /list is handled synchronously: return the current cache state immediately
 	// (triggering a fresh IRC LIST fetch when needed) so the frontend's polling
-	// loop fires correctly — matching Perl's _send_list_p behaviour.
+	// loop fires correctly
 	if args, ok := parseListArgs(msg.Message); ok {
 		result, err := conn.List(args)
 		if err != nil {
@@ -229,8 +229,7 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 	}
 
 	// /names registers a pending query and sends NAMES to IRC. The response
-	// arrives asynchronously as a SentEvent carrying requestID — matching
-	// Perl's _send_names_p write-and-wait behaviour.
+	// arrives asynchronously as a SentEvent carrying requestID
 	if channel, ok := parseNamesArgs(msg.Message); ok {
 		if err := conn.Names(channel, msg.ID); err != nil {
 			return wsError(err.Error(), msg)
@@ -240,7 +239,7 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 
 	// /mode (no args) is a channel mode query. Register the request ID so that
 	// when RPL_CHANNELMODEIS (324) arrives the handler can emit a SentEvent
-	// carrying this ID — matching Perl's _send_mode_p behaviour without blocking.
+	// carrying this ID
 	if channel, ok := parseModeQueryArgs(msg.Message, msg.ConversationID); ok {
 		if err := conn.Mode(channel, msg.ID); err != nil {
 			return wsError(err.Error(), msg)

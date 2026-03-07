@@ -49,28 +49,23 @@ func (a *HeaderAuthenticator) Authenticate(req core.AuthRequest) (*core.AuthResu
 		return nil, ErrNoHTTPRequest
 	}
 
-	// Read email from header
 	email := r.Header.Get(a.headerName)
 	if email == "" {
 		return nil, fmt.Errorf("%w: %s", ErrHeaderMissing, a.headerName)
 	}
 
-	// Check if user already exists
 	if user := a.core.GetUser(email); user != nil {
 		return &core.AuthResult{User: user}, nil
 	}
 
 	// Auto-registration: enforce admin-first policy if configured
 	nUsers := len(a.core.Users())
-	if nUsers == 0 && a.adminEmail != "" && email != a.adminEmail {
-		return nil, fmt.Errorf("%w: %s", ErrAdminRequired, a.adminEmail)
-	}
-
-	// Determine roles for new user
-	roles := []string{}
 	if nUsers == 0 {
-		roles = append(roles, "admin")
+		if a.adminEmail != "" && email != a.adminEmail {
+			return nil, fmt.Errorf("%w: %s", ErrAdminRequired, a.adminEmail)
+		}
 	}
+	roles := a.core.RolesForNewUser()
 
 	return &core.AuthResult{
 		AutoCreate: true,

@@ -15,7 +15,7 @@ func TestConnectionProfileInheritance(t *testing.T) {
 
 	// Setup default connection
 	defaultURL, _ := url.Parse(defaultIRCURL)
-	c.Settings().SetDefaultConnection(defaultIRCURL)
+	c.Settings.SetDefaultConnection(defaultIRCURL)
 
 	// Get default profile and modify it
 	defaultProfile := c.ConnectionProfile(defaultURL)

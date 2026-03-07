@@ -15,7 +15,7 @@ func TestNewEventEmitter(t *testing.T) {
 
 	e := core.NewEventEmitter()
 	if e == nil {
-		t.Fatal("NewEventEmitter() returned nil")
+		t.Fatal("NewEventEmitter( returned nil")
 	}
 	if e.SubscriberCount() != 0 {
 		t.Errorf("SubscriberCount() = %d, want 0", e.SubscriberCount())
@@ -61,7 +61,7 @@ func TestEventEmitterEmitUser(t *testing.T) {
 	})
 
 	select {
-	case received := <-sub.Events():
+	case received := <-sub.Events:
 		ev, ok := received.(*core.MessageEvent)
 		if !ok {
 			t.Fatalf("Expected *core.MessageEvent, got %T", received)
@@ -96,7 +96,7 @@ func TestEventEmitterSubscribeUser(t *testing.T) {
 	e.EmitUser(testUID, &core.MessageEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, From: "user", Message: "msg", Type: core.MessageTypePrivate})
 
 	select {
-	case received := <-sub.Events():
+	case received := <-sub.Events:
 		_, ok := received.(*core.MessageEvent)
 		if !ok {
 			t.Fatalf("Expected *core.MessageEvent, got %T", received)
@@ -107,7 +107,7 @@ func TestEventEmitterSubscribeUser(t *testing.T) {
 
 	// Verify no more events (user2's event should have been filtered)
 	select {
-	case ev := <-sub.Events():
+	case ev := <-sub.Events:
 		t.Errorf("Unexpected event: %+v", ev)
 	case <-time.After(50 * time.Millisecond):
 		// Expected
@@ -129,7 +129,7 @@ func TestEventEmitterBroadcastSubscriber(t *testing.T) {
 	// Should receive both events
 	for i, expected := range []string{"user1", "user2"} {
 		select {
-		case received := <-sub.Events():
+		case received := <-sub.Events:
 			ev, ok := received.(*core.StateConnectionEvent)
 			if !ok {
 				t.Fatalf("Event %d: expected *core.StateConnectionEvent, got %T", i, received)
@@ -161,7 +161,7 @@ func TestEventEmitterMultipleSubscribers(t *testing.T) {
 	// Both should receive
 	for i, sub := range []*core.Subscription{sub1, sub2} {
 		select {
-		case received := <-sub.Events():
+		case received := <-sub.Events:
 			_, ok := received.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Subscriber %d: expected *core.MessageEvent, got %T", i, received)
@@ -188,7 +188,7 @@ func TestEventEmitterConcurrency(t *testing.T) {
 		subs[i] = e.Subscribe()
 		idx := i
 		wg.Go(func() {
-			for range subs[idx].Events() {
+			for range subs[idx].Events {
 				received[idx]++
 			}
 		})
@@ -250,7 +250,7 @@ func TestEventEmitterSetBufferSize(t *testing.T) {
 	count := 0
 	for {
 		select {
-		case <-sub.Events():
+		case <-sub.Events:
 			count++
 		case <-time.After(50 * time.Millisecond):
 			if count != 5 {
@@ -272,7 +272,7 @@ func TestEventEmitterTimestamp(t *testing.T) {
 	e.EmitUser(testUID, &core.StateConnectionEvent{BaseEvent: core.BaseEvent{ConnectionID: "conn"}, State: core.StateConnected, Message: "Connected"})
 
 	select {
-	case received := <-sub.Events():
+	case received := <-sub.Events:
 		ev, ok := received.(*core.StateConnectionEvent)
 		if !ok {
 			t.Fatalf("expected *core.StateConnectionEvent, got %T", received)
@@ -290,7 +290,7 @@ func TestEventEmitterTimestamp(t *testing.T) {
 	e.EmitUser(testUID, customEvent)
 
 	select {
-	case received := <-sub.Events():
+	case received := <-sub.Events:
 		ev, ok := received.(*core.StateConnectionEvent)
 		if !ok {
 			t.Fatalf("expected *core.StateConnectionEvent, got %T", received)

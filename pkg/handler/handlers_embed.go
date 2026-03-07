@@ -45,7 +45,7 @@ func (h *Handler) Embed(ctx context.Context, request api.EmbedRequestObject) (ap
 // embedLocalFile checks if the URL points to a file on this server and returns
 // embed metadata directly from the backend, avoiding a self-referential HTTP request.
 func (h *Handler) embedLocalFile(rawURL string) *embed.Link {
-	baseURL := h.Core.Settings().BaseURL()
+	baseURL := h.Core.Settings.BaseURL()
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
@@ -74,7 +74,7 @@ func (h *Handler) embedLocalFile(rawURL string) *embed.Link {
 		return nil
 	}
 
-	_, filename, err := h.Core.Backend().GetFile(user, fid)
+	_, filename, err := h.Core.Backend.GetFile(user, fid)
 	if err != nil {
 		return nil
 	}

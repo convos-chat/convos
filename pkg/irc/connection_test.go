@@ -40,7 +40,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleWelcome", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		msg := ircmsg.MakeMessage(nil, "server.net", "001", "testnick", "Welcome to the Network")
@@ -52,7 +52,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// handleWelcome emits info event
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StateInfoEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -66,7 +66,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// handleWelcome also calls handleNotice which emits a message
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -82,7 +82,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleJoin", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Mock current nick since client is nil
@@ -101,7 +101,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StateJoinEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -117,7 +117,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleTopic", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Create conversation first
@@ -132,7 +132,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StateFrozenEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -149,7 +149,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
 		conn.SetNick("testnick") // Force current nick to match
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Setup a conversation where we are present
@@ -167,7 +167,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Expect 'me' event
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StateInfoEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -191,7 +191,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		c, user, conn := setup()
 		conn.SetNick("newnick") // Force current nick to match target
 		const aliceNick = "alice"
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Private message to user
@@ -204,7 +204,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -221,7 +221,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
 		conn.SetNick("testnick")
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// PRIVMSG with msgid, account, and +draft/reply tags
@@ -238,7 +238,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Check emitted event
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
@@ -261,7 +261,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		if conv == nil {
 			t.Fatal("conversation #convos not found")
 		}
-		result, err := c.Backend().LoadMessages(conv, core.MessageQuery{Limit: 10})
+		result, err := c.Backend.LoadMessages(conv, core.MessageQuery{Limit: 10})
 		if err != nil {
 			t.Fatalf("LoadMessages: %v", err)
 		}
@@ -284,7 +284,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
 		conn.SetNick("testnick")
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		conn.AddConversation(core.NewConversation("#convos", conn))
@@ -292,7 +292,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		conn.handleMessage(msg, core.MessageTypePrivate)
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
@@ -314,7 +314,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handlePart", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Setup: Create conversation and add participant
@@ -330,7 +330,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StatePartEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -346,7 +346,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleKick", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Add victim back first - creating conv
@@ -362,7 +362,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StatePartEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -378,7 +378,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleQuit", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Add alice back to a channel - creating conv first
@@ -394,7 +394,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		}
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			_, ok := ev.(*core.StateQuitEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -543,7 +543,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		conn := NewConnection("irc://irc.libera.chat", user)
 		conn.SetNick("testnick")
 
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// NickServ sends a NOTICE directly to our nick; no existing conversation.
@@ -557,7 +557,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Message should be routed to server log (empty conv ID).
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
@@ -584,7 +584,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		nsConv := core.NewConversation("nickserv", conn)
 		conn.AddConversation(nsConv)
 
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		msg := ircmsg.MakeMessage(nil, "NickServ!services@services", "NOTICE", "testnick", "Password accepted.")
@@ -592,7 +592,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Message should be routed to the existing NickServ conversation.
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("unexpected event type: %T", ev)
@@ -608,7 +608,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleNotice_Wildcard", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// NOTICE * :*** Looking up your hostname...
@@ -628,7 +628,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 
 		// Check event
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -644,7 +644,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 	t.Run("handleTagMsg", func(t *testing.T) {
 		t.Parallel()
 		c, user, conn := setup()
-		sub := c.Events().SubscribeUser(user.ID())
+		sub := c.EventEmitter.SubscribeUser(user.ID())
 		defer sub.Close()
 
 		// Setup conversation
@@ -658,7 +658,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		conn.handleTagMsg(typingMsg)
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.StateTypingEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)
@@ -682,7 +682,7 @@ func TestIRCConnection_Handlers(t *testing.T) {
 		conn.handleTagMsg(reactMsg)
 
 		select {
-		case ev := <-sub.Events():
+		case ev := <-sub.Events:
 			m, ok := ev.(*core.MessageEvent)
 			if !ok {
 				t.Fatalf("Unexpected event type: %T", ev)

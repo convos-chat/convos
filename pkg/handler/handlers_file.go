@@ -50,7 +50,7 @@ func (h *Handler) GetFiles(ctx context.Context, request api.GetFilesRequestObjec
 	if err != nil {
 		return nil, err
 	}
-	files, err := h.Core.Backend().LoadFiles(user)
+	files, err := h.Core.Backend.LoadFiles(user)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (h *Handler) UploadFile(ctx context.Context, request api.UploadFileRequestO
 			return nil, fmt.Errorf("file type %q is not allowed: %w", ct, ErrUploadFail)
 		}
 
-		f, err := h.Core.Backend().SaveFile(user, filename, content)
+		f, err := h.Core.Backend.SaveFile(user, filename, content)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +157,7 @@ func (h *Handler) DeleteFiles(ctx context.Context, request api.DeleteFilesReques
 	if err != nil {
 		return nil, err
 	}
-	if err := h.Core.Backend().DeleteFile(user, request.Fid); err != nil {
+	if err := h.Core.Backend.DeleteFile(user, request.Fid); err != nil {
 		return nil, err
 	}
 
@@ -170,7 +170,7 @@ func (h *Handler) GetFile(ctx context.Context, request api.GetFileRequestObject)
 	if user == nil {
 		return api.GetFile404JSONResponse{}, nil
 	}
-	content, filename, err := h.Core.Backend().GetFile(user, request.Fid)
+	content, filename, err := h.Core.Backend.GetFile(user, request.Fid)
 	if err != nil {
 		if errors.Is(err, core.ErrFileNotFound) {
 			return api.GetFile404JSONResponse{}, nil

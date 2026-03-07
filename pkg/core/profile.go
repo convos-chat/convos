@@ -216,7 +216,7 @@ func (p *ConnectionProfile) FromData(data ConnectionProfileData) {
 
 // Save persists the profile to the backend.
 func (p *ConnectionProfile) Save() error {
-	return p.core.Backend().SaveConnectionProfile(p.ToData())
+	return p.core.Backend.SaveConnectionProfile(p.ToData())
 }
 
 // SplitMessage splits a long message into multiple lines or parts based on MaxMessageLength.

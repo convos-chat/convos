@@ -9,7 +9,7 @@ import (
 
 // GetVapidKey handles GET /push/vapid
 func (h *Handler) GetVapidKey(ctx context.Context, request api.GetVapidKeyRequestObject) (api.GetVapidKeyResponseObject, error) {
-	pub, _, err := h.Core.Settings().VAPIDKeys()
+	pub, _, err := h.Core.Settings.VAPIDKeys()
 	if err != nil {
 		return api.GetVapidKey500JSONResponse{
 			InternalServerErrorJSONResponse: api.InternalServerErrorJSONResponse(api.ErrResponse(err.Error())),

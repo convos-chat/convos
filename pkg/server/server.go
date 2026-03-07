@@ -105,7 +105,7 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 // to match. It does not persist the change to disk; proxy-derived base URLs
 // are intentionally ephemeral.
 func (s *Server) updateBaseURL(u *url.URL) {
-	s.Core.Settings().SetBaseURL(u)
+	s.Core.Settings.SetBaseURL(u)
 	if cookieStore, ok := s.Store.(*sessions.CookieStore); ok {
 		cookieStore.Options.Secure = u.Scheme == httpsScheme
 	}
@@ -202,7 +202,7 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 	store.Options.HttpOnly = true
 	if cfg.SecureCookies != nil {
 		store.Options.Secure = *cfg.SecureCookies
-	} else if u := c.Settings().BaseURL(); u != nil && u.Scheme == httpsScheme {
+	} else if u := c.Settings.BaseURL(); u != nil && u.Scheme == httpsScheme {
 		store.Options.Secure = true
 	}
 	store.Options.SameSite = http.SameSiteStrictMode
@@ -516,7 +516,7 @@ func (s *Server) spaHandler() http.HandlerFunc {
 			Contact:          base64.StdEncoding.EncodeToString([]byte(s.Config.Contact)),
 			ExistingUser:     boolStr(existingUser),
 			FirstUser:        boolStr(!hasUsers),
-			OpenToPublic:     boolStr(s.Core.Settings().OpenToPublic()),
+			OpenToPublic:     boolStr(s.Core.Settings.OpenToPublic()),
 			OrganizationName: s.Config.OrganizationName,
 			OrganizationURL:  s.Config.OrganizationURL,
 			OIDCLoginURL:     s.getOIDCLoginURL(),
@@ -626,7 +626,7 @@ func (s *Server) logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // baseURL returns the base URL for the application (no trailing slash).
 func (s *Server) baseURL() string {
-	if u := s.Core.Settings().BaseURL(); u != nil {
+	if u := s.Core.Settings.BaseURL(); u != nil {
 		str := u.String()
 		return strings.TrimRight(str, "/")
 	}
@@ -643,7 +643,7 @@ func (s *Server) getOIDCLoginURL() string {
 
 // initSettingsFromConfig seeds core settings from config env vars.
 func (s *Server) initSettingsFromConfig() {
-	settings := s.Core.Settings()
+	settings := s.Core.Settings
 	if s.Config.Contact != "" {
 		settings.SetContact(s.Config.Contact)
 	}
@@ -679,15 +679,15 @@ func (s *Server) resolveSessionSecret() string {
 	if s.Config.SessionSecret != "" {
 		slog.Info("Using session secret from CONVOS_SESSION_SECRET")
 		// Ensure it's in settings so handlers can access it for invite token signing
-		existing := s.Core.Settings().SessionSecrets()
+		existing := s.Core.Settings.SessionSecrets()
 		if len(existing) == 0 || existing[0] != s.Config.SessionSecret {
-			s.Core.Settings().SetSessionSecrets(append([]string{s.Config.SessionSecret}, existing...))
+			s.Core.Settings.SetSessionSecrets(append([]string{s.Config.SessionSecret}, existing...))
 		}
 		return s.Config.SessionSecret
 	}
 
 	// 2. Check persisted session secrets from settings
-	if secrets := s.Core.Settings().SessionSecrets(); len(secrets) > 0 && secrets[0] != "" {
+	if secrets := s.Core.Settings.SessionSecrets(); len(secrets) > 0 && secrets[0] != "" {
 		slog.Info("Using session secret from persisted settings")
 		return secrets[0]
 	}
@@ -695,8 +695,8 @@ func (s *Server) resolveSessionSecret() string {
 	// 3. Generate a new cryptographically secure secret and persist it
 	secret := generateSecret(40)
 	slog.Info("Generated new session secret (persisting to settings)")
-	s.Core.Settings().SetSessionSecrets([]string{secret})
-	if err := s.Core.Settings().Save(); err != nil {
+	s.Core.Settings.SetSessionSecrets([]string{secret})
+	if err := s.Core.Settings.Save(); err != nil {
 		slog.Error("Failed to persist generated session secret", "error", err)
 	}
 	return secret
@@ -747,7 +747,7 @@ func (s *Server) serveServiceWorker(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 
 	basePath := "/"
-	if u := s.Core.Settings().BaseURL(); u != nil && u.Path != "" {
+	if u := s.Core.Settings.BaseURL(); u != nil && u.Path != "" {
 		basePath = u.Path
 		if !strings.HasSuffix(basePath, "/") {
 			basePath += "/"

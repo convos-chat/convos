@@ -12,14 +12,14 @@ import (
 
 // ListConnectionProfiles implements api.StrictServerInterface.
 func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListConnectionProfilesRequestObject) (api.ListConnectionProfilesResponseObject, error) {
-	profiles, err := h.Core.Backend().LoadConnectionProfiles()
+	profiles, err := h.Core.Backend.LoadConnectionProfiles()
 	if err != nil {
 		return nil, err
 	}
 
 	// If no profiles exist, return a default one
 	if len(profiles) == 0 {
-		defaultURL := h.Core.Settings().DefaultConnection()
+		defaultURL := h.Core.Settings.DefaultConnection()
 		if defaultURL == "" {
 			defaultURL = "irc://irc.libera.chat:6697"
 		}
@@ -32,7 +32,7 @@ func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListCo
 		})
 	}
 
-	settings := h.Core.Settings()
+	settings := h.Core.Settings
 	defaultConn := settings.DefaultConnection()
 	forced := settings.ForcedConnection()
 
@@ -49,7 +49,7 @@ func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListCo
 		t := true
 		res[0].IsDefault = &t
 	}
-	if err := h.Core.Settings().Save(); err != nil {
+	if err := h.Core.Settings.Save(); err != nil {
 		return nil, err
 	}
 
@@ -63,15 +63,15 @@ func (h *Handler) SaveConnectionProfile(ctx context.Context, request api.SaveCon
 	}
 
 	p := fromAPIConnectionProfile(request.Body)
-	if err := h.Core.Backend().SaveConnectionProfile(p); err != nil {
+	if err := h.Core.Backend.SaveConnectionProfile(p); err != nil {
 		return nil, err
 	}
 
 	// When marked as default, update and persist settings
 	if p.IsDefault {
-		h.Core.Settings().SetDefaultConnection(p.URL)
-		h.Core.Settings().SetForcedConnection(p.IsForced)
-		if err := h.Core.Settings().Save(); err != nil {
+		h.Core.Settings.SetDefaultConnection(p.URL)
+		h.Core.Settings.SetForcedConnection(p.IsForced)
+		if err := h.Core.Settings.Save(); err != nil {
 			return nil, err
 		}
 	}
@@ -85,7 +85,7 @@ func (h *Handler) RemoveConnectionProfile(ctx context.Context, request api.Remov
 		return nil, err
 	}
 
-	if err := h.Core.Backend().DeleteConnectionProfile(request.Id); err != nil {
+	if err := h.Core.Backend.DeleteConnectionProfile(request.Id); err != nil {
 		return nil, err
 	}
 

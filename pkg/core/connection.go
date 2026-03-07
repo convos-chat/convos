@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"maps"
 	"net"
 	"net/url"
@@ -10,6 +11,8 @@ import (
 
 // ConnectionState represents the state of a connection.
 type ConnectionState string
+
+var ErrNoReplyExpected = errors.New("no reply expected for this command")
 
 const (
 	StateDisconnected  ConnectionState = "disconnected"

@@ -52,20 +52,16 @@ func NewLDAPAuthenticator(c *core.Core, cfg LDAPConfig) *LDAPAuthenticator {
 // If the bind succeeds, the user is authenticated. If the user doesn't exist locally,
 // they will be auto-created. On LDAP failure, falls back to local authentication if enabled.
 func (a *LDAPAuthenticator) Authenticate(req core.AuthRequest) (*core.AuthResult, error) {
-	// Build DN from email using pattern
 	dn := a.buildDN(req.Email)
 
-	// Dial LDAP server
 	conn, err := ldap.DialURL(a.url)
 	if err != nil {
 		return a.tryFallback(req, fmt.Errorf("LDAP connection failed: %w", err))
 	}
 	defer conn.Close()
 
-	// Set timeout
 	conn.SetTimeout(a.timeout)
 
-	// Attempt bind with credentials
 	err = conn.Bind(dn, req.Password)
 	if err != nil {
 		// LDAP authentication failed - try fallback
@@ -76,12 +72,10 @@ func (a *LDAPAuthenticator) Authenticate(req core.AuthRequest) (*core.AuthResult
 		return a.tryFallback(req, fmt.Errorf("LDAP bind failed: %w", err))
 	}
 
-	// LDAP authentication successful - check if user exists locally
 	if user := a.core.GetUser(req.Email); user != nil {
 		return &core.AuthResult{User: user}, nil
 	}
 
-	// Auto-create user
 	roles := a.core.RolesForNewUser()
 
 	return &core.AuthResult{
