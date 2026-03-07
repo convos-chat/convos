@@ -117,7 +117,6 @@ function setConversationFromUser(user) {
   if (unsubscribe.conversation) unsubscribe.conversation();
   if (unsubscribe.unread) unsubscribe.unread();
 
-  popoverMessage = null;
   conversation = user.activeConversation;
   messages = conversation.messages;
   participants = conversation.participants;

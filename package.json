@@ -12,7 +12,7 @@
     "check": "svelte-check",
     "coverage": "vitest run --coverage",
     "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose",
-    "lint": "eslint",
+    "lint": "eslint assets/",
     "test": "vitest"
   },
   "browserslist": [

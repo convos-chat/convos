@@ -1,5 +1,5 @@
-import escapeRegExp from 'lodash/escapeRegExp';
-import {route} from '../store/Route';
+import escapeRegExp from "lodash/escapeRegExp";
+import { route } from "../store/Route";
 
 export default class Emojis {
   constructor() {
@@ -7,7 +7,7 @@ export default class Emojis {
     this.re = this._buildRe();
     this.byShortName = {};
     this.grouped = {};
-    this.status = 'pending';
+    this.status = "pending";
   }
 
   /**
@@ -16,11 +16,13 @@ export default class Emojis {
    * @return {Promise} The promise will be fulfilled when the databse is fetched and parsed.
    */
   async load() {
-    if (['loading', 'success'].indexOf(this.status) !== -1) return this;
-    this.status = 'loading';
-    const res = await fetch(route.urlFor('/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json'));
+    if (["loading", "success"].indexOf(this.status) !== -1) return this;
+    this.status = "loading";
+    const res = await fetch(
+      route.urlFor("/emojis/0bf11a9aff0d6da7b46f1490f86a71eb.json"),
+    );
     this._load((await res.json()).emojis);
-    this.status = 'success';
+    this.status = "success";
     return this;
   }
 
@@ -36,7 +38,7 @@ export default class Emojis {
     return str.replace(this.re, (_all, pre, match) => {
       const shortname = this.aliases[match] || match;
       const emoji = this.byShortName[shortname];
-      return pre + (emoji && emoji.emoji || match);
+      return pre + ((emoji && emoji.emoji) || match);
     });
   }
 
@@ -51,31 +53,34 @@ export default class Emojis {
     const group = this.grouped[q] || this.grouped[q.substring(0, 2)] || {};
     return Object.keys(group)
       .sort((a, b) => group[a] - group[b])
-      .map(shortname => this.byShortName[shortname])
-      .filter(emoji => (emoji.shortname + emoji.name).toLowerCase().indexOf(q) !== -1);
+      .map((shortname) => this.byShortName[shortname])
+      .filter(
+        (emoji) =>
+          (emoji.shortname + emoji.name).toLowerCase().indexOf(q) !== -1,
+      );
   }
 
   _buildAliases() {
     return {
-      '&lt;3': ':heart:', // Because "<3" str is often escaped by I18N.md()
-      '(Y)':   ':thumbsup:',
-      ':(':    ':disappointed:',
-      ':)':    ':slight_smile:',
-      ':-*':   ':kissing:',
-      ':/':    ':confused:',
-      ':D':    ':smiley:',
-      ':O':    ':open_mouth:',
-      ':P':    ':stuck_out_tongue:',
-      ';)':    ':wink:',
-      ';D':    ':grin:',
+      "&lt;3": ":heart:", // Because "<3" str is often escaped by I18N.md()
+      "(Y)": ":thumbsup:",
+      ":(": ":disappointed:",
+      ":)": ":slight_smile:",
+      ":-*": ":kissing:",
+      ":/": ":confused:",
+      ":D": ":smiley:",
+      ":O": ":open_mouth:",
+      ":P": ":stuck_out_tongue:",
+      ";)": ":wink:",
+      ";D": ":grin:",
     };
   }
 
   _buildRe() {
     // The regexp will match one of :short_code:, :(, :), :/, :D, :P, ;), ;D, <3, ...
     // followed by a space, comma, dot or end of string
-    const re = Object.keys(this.aliases).sort().map(escapeRegExp).join('|');
-    return new RegExp('(^|\\s)(:\\w+:|' + re + ')(?=\&|\\s|\\,|\\.|$)', 'gi');
+    const re = Object.keys(this.aliases).sort().map(escapeRegExp).join("|");
+    return new RegExp("(^|\\s)(:\\w+:|" + re + ")(?=&|\\s|\\,|\\.|$)", "gi");
   }
 
   // This is used in unit tests
@@ -97,7 +102,10 @@ export default class Emojis {
 
   _toGrouped(emoji) {
     const grouped = this.grouped;
-    const groups = [emoji.shortname, emoji.name].join('-').replace(/\W+/, ' ').match(/\W(\w{2})/g);
+    const groups = [emoji.shortname, emoji.name]
+      .join("-")
+      .replace(/\W+/, " ")
+      .match(/\W(\w{2})/g);
 
     (groups || []).forEach((g, i) => {
       g = g.substring(1).toLowerCase();

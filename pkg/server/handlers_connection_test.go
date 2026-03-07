@@ -16,7 +16,7 @@ func TestConnectionLifecycle(t *testing.T) {
 	cookie := loginUser(t, s, c, email, password)
 
 	// 1. List Connections - Should be empty
-	req := httptest.NewRequest("GET", "/api/connections", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/connections", nil)
 	req.AddCookie(cookie)
 	w := httptest.NewRecorder()
 	s.ServeHTTP(w, req)
@@ -40,7 +40,7 @@ func TestConnectionLifecycle(t *testing.T) {
 	// 2. Create Connection
 	body := map[string]string{"url": "irc://irc.libera.chat"}
 	jsonBody, _ := json.Marshal(body)
-	req = httptest.NewRequest("POST", "/api/connections", bytes.NewReader(jsonBody))
+	req = httptest.NewRequestWithContext(t.Context(), "POST", "/api/connections", bytes.NewReader(jsonBody))
 	req.AddCookie(cookie)
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()
@@ -64,7 +64,7 @@ func TestConnectionLifecycle(t *testing.T) {
 	}
 
 	// 3. List Connections - Should have 1
-	req = httptest.NewRequest("GET", "/api/connections", nil)
+	req = httptest.NewRequestWithContext(t.Context(), "GET", "/api/connections", nil)
 	req.AddCookie(cookie)
 	w = httptest.NewRecorder()
 	s.ServeHTTP(w, req)
@@ -81,7 +81,7 @@ func TestConnectionLifecycle(t *testing.T) {
 	}
 
 	// 4. Remove Connection
-	req = httptest.NewRequest("DELETE", "/api/connection/"+connID, nil)
+	req = httptest.NewRequestWithContext(t.Context(), "DELETE", "/api/connection/"+connID, nil)
 	req.AddCookie(cookie)
 	w = httptest.NewRecorder()
 	s.ServeHTTP(w, req)
@@ -91,7 +91,7 @@ func TestConnectionLifecycle(t *testing.T) {
 	}
 
 	// 5. List Connections - Should be empty again
-	req = httptest.NewRequest("GET", "/api/connections", nil)
+	req = httptest.NewRequestWithContext(t.Context(), "GET", "/api/connections", nil)
 	req.AddCookie(cookie)
 	w = httptest.NewRecorder()
 	s.ServeHTTP(w, req)
@@ -116,7 +116,7 @@ func TestCreateConnectionInvalid(t *testing.T) {
 	// Empty URL
 	body := map[string]string{"url": ""}
 	jsonBody, _ := json.Marshal(body)
-	req := httptest.NewRequest("POST", "/api/connections", bytes.NewReader(jsonBody))
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/connections", bytes.NewReader(jsonBody))
 	req.AddCookie(cookie)
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

@@ -12,17 +12,17 @@ global.Notification = function(title, params) {
 
 global.Notification.permission = 'denied';
 
-test('requestDesktopAccess', () => {
+test('requestDesktopAccess', async () => {
   const notify = new Notify();
   notify.requestDesktopAccess();
   expect(notify.desktopAccess).toBe('denied');
 
-  notify.Notification.requestPermission = (cb) => cb('granted');
-  notify.requestDesktopAccess();
+  notify.Notification.requestPermission = () => Promise.resolve('granted');
+  await notify.requestDesktopAccess();
   expect(notify.desktopAccess).toBe('granted');
 });
 
-test('cannot show', () => {
+test('cannot show', async () => {
   const notify = new Notify();
   let notification;
 
@@ -33,8 +33,8 @@ test('cannot show', () => {
   notification = notify.show('b');
   expect(notification.target).toBe('app');
 
-  notify.Notification.requestPermission = (cb) => cb('granted');
-  notify.requestDesktopAccess();
+  notify.Notification.requestPermission = () => Promise.resolve('granted');
+  await notify.requestDesktopAccess();
   notification = notify.show('b');
   expect(notification.target).toBe('desktop');
 });

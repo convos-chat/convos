@@ -24,7 +24,7 @@ func TestSPAHandler(t *testing.T) {
 
 	t.Run("ServeIndex", func(t *testing.T) {
 		t.Parallel()
-		req := httptest.NewRequest("GET", "/", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "GET", "/", nil)
 		w := httptest.NewRecorder()
 		s.ServeHTTP(w, req)
 
@@ -66,7 +66,7 @@ func TestRequireAuthMiddleware(t *testing.T) {
 		remoteAddr := fmt.Sprintf("192.0.2.%d:1234", i+1)
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			req := httptest.NewRequest(tt.method, tt.path, nil)
+			req := httptest.NewRequestWithContext(t.Context(), tt.method, tt.path, nil)
 			req.RemoteAddr = remoteAddr
 			w := httptest.NewRecorder()
 			s.ServeHTTP(w, req)
@@ -104,7 +104,7 @@ func loginUser(t *testing.T, s *Server, c *core.Core, email, password string) *h
 		"password": password,
 	}
 	jsonBody, _ := json.Marshal(body)
-	req := httptest.NewRequest("POST", "/api/user/login", bytes.NewReader(jsonBody))
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", bytes.NewReader(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 

@@ -35,8 +35,7 @@ export default class Notify extends Reactive {
 
   requestDesktopAccess() {
     if (!this.Notification.requestPermission) return this.update({desktopAccess: this.Notification.permission});
-    this.Notification.requestPermission().then(permission => this.update({desktopAccess: permission}));
-    return this;
+    return this.Notification.requestPermission().then(permission => this.update({desktopAccess: permission}));
   }
 
   show(message, params = {}) {

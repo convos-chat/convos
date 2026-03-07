@@ -35,7 +35,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Run("CreateConnection_Unauthorized", func(t *testing.T) {
 		t.Parallel()
 		_, h, _ := setup()
-		req := httptest.NewRequest("POST", "/api/connections", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/connections", nil)
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
 		request := api.CreateConnectionRequestObject{
@@ -60,7 +60,7 @@ func TestConnectionHandlers(t *testing.T) {
 	t.Run("CreateConnection_Success", func(t *testing.T) {
 		t.Parallel()
 		_, h, user := setup()
-		req := httptest.NewRequest("POST", "/api/connections", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/connections", nil)
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 		ctx = context.WithValue(ctx, core.CtxKeyUser, user)
 

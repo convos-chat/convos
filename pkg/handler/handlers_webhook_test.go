@@ -20,7 +20,7 @@ func TestWebhookIPValidation(t *testing.T) {
 
 	t.Run("AllowedIP", func(t *testing.T) {
 		t.Parallel()
-		req := httptest.NewRequest("POST", "/api/webhook/github", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/webhook/github", nil)
 		req.RemoteAddr = "127.0.0.1:1234"
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -46,7 +46,7 @@ func TestWebhookIPValidation(t *testing.T) {
 
 	t.Run("RejectedIP", func(t *testing.T) {
 		t.Parallel()
-		req := httptest.NewRequest("POST", "/api/webhook/github", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/webhook/github", nil)
 		req.RemoteAddr = "192.168.1.1:1234"
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 

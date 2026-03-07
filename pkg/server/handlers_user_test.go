@@ -21,7 +21,7 @@ func TestRegisterUser(t *testing.T) {
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	req := httptest.NewRequest("POST", "/api/user/register", bytes.NewReader(jsonBody))
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", bytes.NewReader(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 
@@ -61,7 +61,7 @@ func TestLoginUser(t *testing.T) {
 	}
 	jsonBody, _ := json.Marshal(body)
 
-	req := httptest.NewRequest("POST", "/api/user/login", bytes.NewReader(jsonBody))
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", bytes.NewReader(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 

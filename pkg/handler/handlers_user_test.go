@@ -68,7 +68,7 @@ func TestRegisterUser_Validation(t *testing.T) {
 				}
 			}
 
-			req := httptest.NewRequest("POST", "/api/user/register", nil)
+			req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 			w := httptest.NewRecorder()
 			ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 			ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -123,7 +123,7 @@ func TestRegisterUser_FirstUserIsAdmin(t *testing.T) {
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)

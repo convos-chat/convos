@@ -34,6 +34,8 @@ linters:
     gosec:
       excludes:
         - G117 # Allow exporting sensitive data.
+        - G704 # unreliable taint analyis
+        - G706 # unreliable taint analyis
   exclusions:
     generated: lax
     presets:

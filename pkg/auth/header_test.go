@@ -28,7 +28,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		}
 
 		// Create request with header
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Authenticated-User", "test@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -59,7 +59,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
 		// Create request with header
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Authenticated-User", "admin@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -99,7 +99,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		}
 
 		// Create request with header for second user
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Authenticated-User", "second@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -130,7 +130,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		})
 
 		// Try to register as non-admin when admin is required
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Authenticated-User", "user@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -158,7 +158,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		})
 
 		// Register as admin when admin is required
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Authenticated-User", "admin@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
@@ -186,7 +186,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Authenticated-User"})
 
 		// Create request without header
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 
 		authReq := core.AuthRequest{
@@ -210,7 +210,7 @@ func TestHeaderAuthenticator(t *testing.T) {
 		auth := NewHeaderAuthenticator(c, HeaderConfig{HeaderName: "X-Remote-User"})
 
 		// Create request with custom header
-		req := httptest.NewRequest("POST", "/api/user/login", nil)
+		req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 		req.Header.Set("X-Remote-User", "test@example.com")
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 

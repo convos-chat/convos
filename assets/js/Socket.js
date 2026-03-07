@@ -23,9 +23,11 @@ export const getSocket = (id) => {
 
 getSocket.singletons = {};
 
+const WS_OPEN = WebSocket.OPEN;
+
 const readyStateHuman = [];
 readyStateHuman[WebSocket.CONNECTING] = 'connecting';
-readyStateHuman[WebSocket.OPEN] = 'open';
+readyStateHuman[WS_OPEN] = 'open';
 readyStateHuman[WebSocket.CLOSING] = 'closing';
 readyStateHuman[WebSocket.CLOSED] = 'closed';
 
@@ -200,7 +202,7 @@ export default class Socket extends Reactive {
     const queue = this.queue;
     if (queue.length) this.update({waiting: true});
     while (queue.length) {
-      if (this.ws.readyState !== WebSocket.OPEN) return;
+      if (this.ws.readyState !== WS_OPEN) return;
       const msg = queue.shift();
       log.trace('<<<', msg);
       this.ws.send(this.deflateMessage(msg));
@@ -212,7 +214,7 @@ export default class Socket extends Reactive {
 
   _keepAliveStart() {
     this._keepAliveStop();
-    this.keepaliveTid = setInterval(() => this.ws.readyState === WebSocket.OPEN && this.ws.send('{}'), this.keepaliveInterval);
+    this.keepaliveTid = setInterval(() => this.ws.readyState === WS_OPEN && this.ws.send('{}'), this.keepaliveInterval);
   }
 
   _keepAliveStop() {

@@ -33,7 +33,7 @@ func TestEmbedHandler(t *testing.T) {
 
 	t.Run("Embed_Success", func(t *testing.T) {
 		t.Parallel()
-		req := httptest.NewRequest("GET", "/api/embed?url="+ts.URL, nil)
+		req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/embed?url="+ts.URL, nil)
 		w := httptest.NewRecorder()
 		ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 		ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)

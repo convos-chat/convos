@@ -587,7 +587,7 @@ func (b *FileBackend) DeleteMessages(conv *core.Conversation) error {
 			return err
 		}
 		if !d.IsDir() && strings.HasSuffix(d.Name(), ".log") {
-			if err = os.Remove(path); err != nil {
+			if err = os.Remove(path); err != nil { //nolint:gosec // Not user provided input
 				slog.Warn("Failed to delete log file", "path", path, "error", err)
 			}
 		}

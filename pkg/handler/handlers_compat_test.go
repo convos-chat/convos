@@ -24,7 +24,7 @@ func TestRegisterUser_PasswordLength(t *testing.T) {
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -63,7 +63,7 @@ func TestGetUser_QueryParameters(t *testing.T) {
 	u.AddConnection(conn)
 
 	// 1. connections=false, conversations=false
-	req := httptest.NewRequest("GET", "/api/user?connections=false&conversations=false", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/user?connections=false&conversations=false", nil)
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyUser, u)
 
@@ -103,7 +103,7 @@ func TestGetUser_Fields(t *testing.T) {
 	u, _ := c.User("test@example.com")
 	_ = u.Save()
 
-	req := httptest.NewRequest("GET", "/api/user", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/user", nil)
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyUser, u)
 
@@ -592,7 +592,7 @@ func TestRegisterUser_AutoConnect(t *testing.T) {
 
 	c.Settings.SetDefaultConnection("irc://irc.libera.chat/%23convos")
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -770,7 +770,7 @@ func TestLoginUser_FailureStatusCode(t *testing.T) {
 	_ = u.SetPassword("s3cret_pass")
 	_ = u.Save()
 
-	req := httptest.NewRequest("POST", "/api/user/login", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/login", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -812,7 +812,7 @@ func TestRegisterUser_ClosedStatusCode(t *testing.T) {
 	_ = u.SetPassword("s3cret_pass!")
 	_ = u.Save()
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -854,7 +854,7 @@ func TestRegisterUser_ConflictMessage(t *testing.T) {
 	_ = u.SetPassword("s3cret_pass!")
 	_ = u.Save()
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -1046,7 +1046,7 @@ func TestRegisterUser_WithInviteToken(t *testing.T) {
 	inviteURL, _ := url.Parse(invite.Url)
 
 	// Register with the invite token
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	regCtx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	regCtx = context.WithValue(regCtx, core.CtxKeyResponseWriter, w)
@@ -1086,7 +1086,7 @@ func TestRegisterUser_InvalidToken(t *testing.T) {
 	admin, _ := c.User("admin@example.com")
 	_ = admin.Save()
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -1136,7 +1136,7 @@ func TestRegisterUser_ExpiredToken(t *testing.T) {
 	password := c.Settings.LocalSecret()
 	token := inviteToken("newuser@example.com", expiredExp, password, "test-session-secret")
 
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	ctx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	ctx = context.WithValue(ctx, core.CtxKeyResponseWriter, w)
@@ -1189,7 +1189,7 @@ func TestRegisterUser_InviteExistingUser(t *testing.T) {
 	inviteURL, _ := url.Parse(invite.Url)
 
 	// Register (update) existing user with invite token
-	req := httptest.NewRequest("POST", "/api/user/register", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "POST", "/api/user/register", nil)
 	w := httptest.NewRecorder()
 	regCtx := context.WithValue(context.Background(), core.CtxKeyRequest, req)
 	regCtx = context.WithValue(regCtx, core.CtxKeyResponseWriter, w)
