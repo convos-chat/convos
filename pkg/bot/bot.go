@@ -223,7 +223,7 @@ func (m *Manager) joinConversation(conn core.Connection, conv *core.Conversation
 	if password != "" {
 		cmd += " " + password
 	}
-	if err := conn.Send("", cmd); err != nil {
+	if err := conn.Send("", cmd, nil); err != nil {
 		slog.Warn("Failed to send join command", "connection", conn.ID(), "channel", name, "error", err)
 	}
 }
@@ -233,7 +233,7 @@ func (m *Manager) partConversation(conn core.Connection, conv *core.Conversation
 		return
 	}
 
-	if err := conn.Send("", fmt.Sprintf("/part %s", name)); err != nil {
+	if err := conn.Send("", fmt.Sprintf("/part %s", name), nil); err != nil {
 		slog.Warn("Failed to send part command", "connection", conn.ID(), "channel", name, "error", err)
 	}
 }
@@ -318,7 +318,7 @@ func (m *Manager) checkAndApplyBotMode(conn core.Connection) bool {
 		return true
 	}
 
-	if err := conn.Send("", fmt.Sprintf("/mode %s +%s", conn.Nick(), modeChar)); err != nil {
+	if err := conn.Send("", fmt.Sprintf("/mode %s +%s", conn.Nick(), modeChar), nil); err != nil {
 		slog.Warn("Failed to send bot mode command", "connection", conn.ID(), "error", err)
 	} else {
 		conn.SetInfo("bot_mode_set", true)
@@ -374,7 +374,7 @@ func (m *Manager) BroadcastMessage(actionName, message string) {
 		}
 		for _, conv := range conn.Conversations() {
 			if strings.HasPrefix(conv.ID(), "#") {
-				if err := conn.Send(conv.ID(), message); err != nil {
+				if err := conn.Send(conv.ID(), message, nil); err != nil {
 					slog.Warn(actionName+" bot: Failed to send message", "connection", conn.ID(), "conversation", conv.ID(), "error", err)
 				} else {
 					sent = true
@@ -491,7 +491,7 @@ func (m *Manager) processRoutingRule(rule RepoRule, event, msg string) {
 		return
 	}
 
-	if err := conn.Send(convID, msg); err != nil {
+	if err := conn.Send(convID, msg, nil); err != nil {
 		slog.Warn("Failed to send routed message", "target", rule.To, "error", err)
 	}
 }

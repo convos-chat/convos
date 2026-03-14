@@ -285,6 +285,11 @@ func (u *User) RemoveConnection(id string) error {
 	return u.core.Backend.DeleteConnection(conn)
 }
 
+// EmitEvent emits an event to all subscribers for this user.
+func (u *User) EmitEvent(event Event) {
+	u.core.EventEmitter.EmitUser(u.ID(), event)
+}
+
 // Save persists the user to storage.
 func (u *User) Save() error {
 	return u.core.Backend.SaveUser(u)

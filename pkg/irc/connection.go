@@ -494,99 +494,16 @@ func (c *Connection) Nick() string {
 	return c.BaseConnection.Nick()
 }
 
-// List returns the current channel list cache state immediately, triggering a
-// fresh IRC LIST fetch when the cache is empty or "refresh" is requested.
-func (c *Connection) List(args string) (map[string]any, error) {
-	return c.handleListCommand(args)
-}
-
-// Mode registers a pending mode query for the channel and sends MODE to IRC.
-// When RPL_CHANNELMODEIS (324) arrives, handleChannelModeIs emits a SentEvent
-// carrying requestID so the frontend callback fires via normal ID-matching.
-func (c *Connection) Mode(channel string, requestID any) error {
-	if channel == "" {
-		return ErrChannelRequired
-	}
-
-	channel = strings.ToLower(channel)
-
-	// Register before sending to avoid a race with a fast IRC response.
-	c.mu.Lock()
-	c.modeWaiters[channel] = requestID
-	c.mu.Unlock()
-
-	c.mu.RLock()
-	connected := c.State() == core.StateConnected && c.client != nil
-	var client *ircevent.Connection
-	if connected {
-		client = c.client
-	}
-	c.mu.RUnlock()
-
-	if !connected {
-		c.mu.Lock()
-		delete(c.modeWaiters, channel)
-		c.mu.Unlock()
-		return ErrNotConnected
-	}
-
-	if err := client.Send("MODE", channel); err != nil {
-		c.mu.Lock()
-		delete(c.modeWaiters, channel)
-		c.mu.Unlock()
-		return err
-	}
-
-	return nil
-}
-
-// Names registers a pending names query for the channel and sends NAMES to IRC.
-// When RPL_ENDOFNAMES (366) arrives, handleEndOfNames emits a SentEvent
-// carrying requestID so the frontend callback fires via normal ID-matching.
-func (c *Connection) Names(channel string, requestID any) error {
-	if channel == "" {
-		return ErrChannelRequired
-	}
-
-	channel = strings.ToLower(channel)
-
-	// Register before sending to avoid a race with a fast IRC response.
-	c.mu.Lock()
-	c.namesWaiters[channel] = requestID
-	c.mu.Unlock()
-
-	c.mu.RLock()
-	connected := c.State() == core.StateConnected && c.client != nil
-	var client *ircevent.Connection
-	if connected {
-		client = c.client
-	}
-	c.mu.RUnlock()
-
-	if !connected {
-		c.mu.Lock()
-		delete(c.namesWaiters, channel)
-		c.mu.Unlock()
-		return ErrNotConnected
-	}
-
-	if err := client.Send("NAMES", channel); err != nil {
-		c.mu.Lock()
-		delete(c.namesWaiters, channel)
-		c.mu.Unlock()
-		return err
-	}
-
-	return nil
-}
-
 // Send sends a message or command to a target (channel or user).
 // Messages starting with "/" are interpreted as IRC commands.
-func (c *Connection) Send(target, message string) error {
+// requestID is an optional WebSocket request ID threaded to async IRC handlers
+// (e.g. /names, /mode, /list) so responses can be matched back to the request.
+// Pass nil when not applicable.
+func (c *Connection) Send(target, message string, requestID any) error {
 	// Handle IRC commands (messages starting with /) — some commands like
 	// /connect and /reconnect must work even when disconnected.
 	if strings.HasPrefix(message, "/") {
-		return c.handleCommand(target, message[1:])
+		return c.handleCommand(target, message[1:], requestID)
 	}
 
 	c.mu.RLock()
@@ -694,12 +611,11 @@ func (c *Connection) openConversation(nick string) error {
 // saveState persists the connection (including conversations) to the backend.
 func (c *Connection) saveState() {
 	if err := c.User().Core().Backend.SaveConnection(c); err != nil {
-		event := &core.MessageEvent{
+		c.emitEvent(&core.MessageEvent{
 			From:    c.Name(),
 			Message: "Failed to save connection state: " + err.Error(),
 			Type:    core.MessageTypeError,
-		}
-		c.User().Core().EventEmitter.EmitUser(c.User().ID(), event)
+		})
 	}
 }
 
@@ -749,7 +665,7 @@ func (c *Connection) emitEvent(event core.Event) {
 	if event.GetConnectionID() == "" {
 		event.SetConnectionID(c.ID())
 	}
-	c.User().Core().EventEmitter.EmitUser(c.User().ID(), event)
+	c.User().EmitEvent(event)
 }
 
 // emitState emits a connection state change event.

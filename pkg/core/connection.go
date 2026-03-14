@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"maps"
 	"net"
 	"net/url"
@@ -11,8 +10,6 @@ import (
 
 // ConnectionState represents the state of a connection.
 type ConnectionState string
-
-var ErrNoReplyExpected = errors.New("no reply expected for this command")
 
 const (
 	StateDisconnected  ConnectionState = "disconnected"
@@ -57,20 +54,10 @@ type Connection interface {
 	// Disconnect closes the connection.
 	Disconnect() error
 
-	// Send sends a message to a target.
-	Send(target, message string) error
-
-	// List returns the current channel list cache state immediately, triggering
-	// a fresh IRC LIST fetch if the cache is empty or refresh is requested.
-	List(args string) (map[string]any, error)
-
-	// Mode registers a pending mode query and sends MODE to IRC. The response
-	// arrives asynchronously as a SentEvent carrying requestID.
-	Mode(channel string, requestID any) error
-
-	// Names registers a pending names query and sends NAMES to IRC. The response
-	// arrives asynchronously as a SentEvent carrying requestID.
-	Names(channel string, requestID any) error
+	// Send sends a message to a target. requestID is an optional WebSocket
+	// request ID that is threaded to async IRC handlers so responses can be
+	// matched back to the originating request. Pass nil when not needed.
+	Send(target, message string, requestID any) error
 
 	// Nick returns the current nickname.
 	Nick() string

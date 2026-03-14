@@ -207,53 +207,12 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 		return wsError("Connection not found.", msg)
 	}
 
-	// /list is handled synchronously: return the current cache state immediately
-	// (triggering a fresh IRC LIST fetch when needed) so the frontend's polling
-	// loop fires correctly
-	if args, ok := parseListArgs(msg.Message); ok {
-		result, err := conn.List(args)
-		if err != nil {
-			return wsError(err.Error(), msg)
-		}
-
-		// Inject common fields into the result map
-		result["event"] = eventSent
-		result["connection_id"] = msg.ConnectionID
-		result["conversation_id"] = msg.ConversationID
-		result["message"] = msg.Message
-		result["ts"] = time.Now().Format(time.RFC3339)
-		if msg.ID != nil {
-			result["id"] = msg.ID
-		}
-		return result
-	}
-
-	// /names registers a pending query and sends NAMES to IRC. The response
-	// arrives asynchronously as a SentEvent carrying requestID
-	if channel, ok := parseNamesArgs(msg.Message); ok {
-		if err := conn.Names(channel, msg.ID); err != nil {
-			return wsError(err.Error(), msg)
-		}
-		return nil // response arrives asynchronously via SentEvent
-	}
-
-	// /mode (no args) is a channel mode query. Register the request ID so that
-	// when RPL_CHANNELMODEIS (324) arrives the handler can emit a SentEvent
-	// carrying this ID
-	if channel, ok := parseModeQueryArgs(msg.Message, msg.ConversationID); ok {
-		if err := conn.Mode(channel, msg.ID); err != nil {
-			return wsError(err.Error(), msg)
-		}
-		return nil // response arrives asynchronously via SentEvent
-	}
-
-	if err := conn.Send(msg.ConversationID, msg.Message); err != nil {
+	if err := conn.Send(msg.ConversationID, msg.Message, msg.ID); err != nil {
 		return wsError(err.Error(), msg)
 	}
 
-	// Commands starting with / produce async responses via the EventEmitter
-	// (e.g. /whois, /names). Don't send an immediate "sent" response for those
-	// because it would lack the required "command" field and break the frontend.
+	// Commands starting with / produce async responses via the EventEmitter.
+	// Don't send an immediate "sent" response for those.
 	if strings.HasPrefix(msg.Message, "/") {
 		return nil
 	}
@@ -267,45 +226,6 @@ func (s *Server) handleWSSend(msg wsMessage, user *core.User) any {
 		ConversationID: msg.ConversationID,
 		Message:        msg.Message,
 	}
-}
-
-// parseListArgs checks whether message is a /list command (case-insensitive)
-// and returns the arguments after "/list". Returns ok=false for anything else.
-func parseListArgs(message string) (string, bool) {
-	if len(message) < 5 || !strings.EqualFold(message[:5], "/list") {
-		return "", false
-	}
-	rest := message[5:]
-	if rest != "" && rest[0] != ' ' {
-		return "", false // e.g. /listing — not a /list command
-	}
-	return strings.TrimSpace(rest), true
-}
-
-// parseNamesArgs checks whether message is a /names command (case-insensitive)
-// and returns the channel name. Returns ok=false for anything else.
-func parseNamesArgs(message string) (string, bool) {
-	if len(message) < 6 || !strings.EqualFold(message[:6], "/names") {
-		return "", false
-	}
-	rest := message[6:]
-	if rest != "" && rest[0] != ' ' {
-		return "", false // e.g. /namespace — not a /names command
-	}
-	return strings.TrimSpace(rest), true
-}
-
-// parseModeQueryArgs checks whether message is a bare "/mode" command with no
-// arguments (a channel mode query). Returns the target channel from conversationID
-// and ok=true. Mode set commands ("/mode +o nick") or other variants return ok=false.
-func parseModeQueryArgs(message string, conversationID string) (string, bool) {
-	if !strings.EqualFold(strings.TrimSpace(message), "/mode") {
-		return "", false
-	}
-	if conversationID == "" {
-		return "", false
-	}
-	return conversationID, true
 }
 
 // wsError builds an error response for a WebSocket message.

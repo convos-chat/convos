@@ -31,7 +31,7 @@ var (
 )
 
 // handleCommand parses and executes an IRC command from user input.
-func (c *Connection) handleCommand(target, raw string) error {
+func (c *Connection) handleCommand(target, raw string, requestID any) error {
 	parts := strings.SplitN(raw, " ", 2)
 	command := strings.ToUpper(parts[0])
 	args := ""
@@ -115,7 +115,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 			return err
 		}
 		if len(qparts) > 1 {
-			return c.Send(qparts[0], strings.Join(qparts[1:], " "))
+			return c.Send(qparts[0], strings.Join(qparts[1:], " "), nil)
 		}
 		return nil
 	}
@@ -180,9 +180,20 @@ func (c *Connection) handleCommand(target, raw string) error {
 			}
 			return c.client.SendRaw("MODE " + args)
 		}
-		// /mode with no args → query mode of current target
+		// /mode with no args → query mode of current target.
+		// Register the waiter before sending to avoid a race with a fast response.
 		if target != "" {
-			return c.client.Send("MODE", target)
+			ch := strings.ToLower(target)
+			c.mu.Lock()
+			c.modeWaiters[ch] = requestID
+			c.mu.Unlock()
+			if err := c.client.Send("MODE", target); err != nil {
+				c.mu.Lock()
+				delete(c.modeWaiters, ch)
+				c.mu.Unlock()
+				return err
+			}
+			return nil
 		}
 		return nil
 	case "ME":
@@ -222,7 +233,18 @@ func (c *Connection) handleCommand(target, raw string) error {
 		if ch == "" {
 			return ErrUsageNames
 		}
-		return c.client.Send("NAMES", ch)
+		ch = strings.ToLower(ch)
+		// Register before sending to avoid a race with a fast IRC response.
+		c.mu.Lock()
+		c.namesWaiters[ch] = requestID
+		c.mu.Unlock()
+		if err := c.client.Send("NAMES", ch); err != nil {
+			c.mu.Lock()
+			delete(c.namesWaiters, ch)
+			c.mu.Unlock()
+			return err
+		}
+		return nil
 	case "INVITE":
 		inviteParts := strings.Fields(args)
 		if len(inviteParts) == 0 || inviteParts[0] == "" {
@@ -247,8 +269,7 @@ func (c *Connection) handleCommand(target, raw string) error {
 		}
 		return c.client.SendRaw("OPER " + args)
 	case "LIST":
-		_, err := c.handleListCommand(args)
-		return err
+		return c.handleListCommand(target, args, requestID)
 	case "QUIT":
 		msg := "Bye!"
 		if args != "" {
@@ -305,19 +326,20 @@ func (c *Connection) executeCommand(cmd string) {
 // handleListCommand implements the /list command with caching and search.
 // Usage: /list [refresh] [/pattern/[flags]]
 //
-// Always returns the current cache state immediately (matching Perl's _send_list_p
-// behaviour). When the cache is empty or "refresh" is requested, it also triggers
-// a fresh IRC LIST fetch so results trickle in asynchronously.
+// Always emits a SentEvent with the current cache state immediately (matching
+// Perl's _send_list_p behaviour). When the cache is empty or "refresh" is
+// requested, it also triggers a fresh IRC LIST fetch so results trickle in
+// asynchronously via handleListReply / handleListEnd events.
 //
-// With no args: returns cached results (or fetches if no cache).
+// With no args: emits cached results (or fetches if no cache).
 // "refresh": clears cache and re-fetches from server.
 // /pattern/: searches cached channels by name and topic (case-insensitive).
 // /pattern/n: search by name only. /pattern/t: search by topic only.
-func (c *Connection) handleListCommand(args string) (map[string]any, error) {
+func (c *Connection) handleListCommand(target, args string, requestID any) error {
 	c.mu.Lock()
 
 	// Refresh if requested or no cache exists — fire off the IRC LIST but
-	// still fall through and return the (empty) cache immediately.
+	// still fall through and emit the (empty) cache immediately.
 	if strings.Contains(args, "refresh") || c.listBuf.ts.IsZero() {
 		c.listBuf = listCache{
 			conversations: make(map[string]listEntry),
@@ -325,13 +347,23 @@ func (c *Connection) handleListCommand(args string) (map[string]any, error) {
 		}
 		c.mu.Unlock()
 		if err := c.client.Send("LIST"); err != nil {
-			return nil, err
+			return err
 		}
-		return map[string]any{
+		data := map[string]any{
 			"conversations":   []map[string]any{},
 			"n_conversations": 0,
 			"done":            false,
-		}, nil
+		}
+		if requestID != nil {
+			data["id"] = requestID
+		}
+		c.emitEvent(&core.SentEvent{
+			ConversationID: target,
+			Message:        "/list",
+			Command:        []string{"list"},
+			Data:           data,
+		})
+		return nil
 	}
 
 	// Snapshot the cache under lock
@@ -360,11 +392,21 @@ func (c *Connection) handleListCommand(args string) (map[string]any, error) {
 		}
 	}
 
-	return map[string]any{
+	data := map[string]any{
 		"conversations":   convList,
 		"n_conversations": total,
 		"done":            done,
-	}, nil
+	}
+	if requestID != nil {
+		data["id"] = requestID
+	}
+	c.emitEvent(&core.SentEvent{
+		ConversationID: target,
+		Message:        "/list",
+		Command:        []string{"list"},
+		Data:           data,
+	})
+	return nil
 }
 
 // listFilterRE matches /pattern/[modifiers] in /list arguments.

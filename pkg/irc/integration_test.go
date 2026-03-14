@@ -118,7 +118,7 @@ func connectTestIRC(t *testing.T, serverURL, nick string) (*Connection, *core.Su
 // joinChannel sends /join and waits for the frozen (join-confirmed) event on sub.
 func joinChannel(t *testing.T, conn *Connection, sub *core.Subscription, channel string) {
 	t.Helper()
-	if err := conn.Send(channel, "/join "+channel); err != nil {
+	if err := conn.Send(channel, "/join "+channel, nil); err != nil {
 		t.Fatalf("joinChannel %q: %v", channel, err)
 	}
 	waitForEvent(t, sub, func(m map[string]any) bool {
@@ -230,7 +230,7 @@ func TestIRCIntegration(t *testing.T) {
 
 		// B sends a message to the channel; A must receive it.
 		wantMsg := "hello from B id=" + sfx
-		if err := connB.Send(channel, wantMsg); err != nil {
+		if err := connB.Send(channel, wantMsg, nil); err != nil {
 			t.Fatalf("B.Send: %v", err)
 		}
 
@@ -277,7 +277,7 @@ func TestIRCIntegration(t *testing.T) {
 		_, subB := connectTestIRC(t, serverURL, nickB)
 
 		wantMsg := "private hello id=" + sfx
-		if err := connA.Send(nickB, wantMsg); err != nil {
+		if err := connA.Send(nickB, wantMsg, nil); err != nil {
 			t.Fatalf("A.Send PM: %v", err)
 		}
 
@@ -308,7 +308,7 @@ func TestIRCIntegration(t *testing.T) {
 		joinChannel(t, connA, subA, channel)
 
 		// B joins so they share a channel with A (required for NICK propagation).
-		if err := connB.Send(channel, "/join "+channel); err != nil {
+		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
 		waitForEvent(t, subA, func(m map[string]any) bool {
@@ -317,7 +317,7 @@ func TestIRCIntegration(t *testing.T) {
 		})
 
 		// B changes nick.
-		if err := connB.Send("", "/nick "+newNickB); err != nil {
+		if err := connB.Send("", "/nick "+newNickB, nil); err != nil {
 			t.Fatalf("B /nick: %v", err)
 		}
 
@@ -379,7 +379,7 @@ func TestIRCIntegration(t *testing.T) {
 		connB, _ := connectTestIRC(t, serverURL, nickB)
 
 		joinChannel(t, connA, subA, channel)
-		if err := connB.Send(channel, "/join "+channel); err != nil {
+		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
 		waitForEvent(t, subA, func(m map[string]any) bool {
@@ -434,7 +434,7 @@ func TestIRCIntegration(t *testing.T) {
 		})
 
 		// A kicks B.
-		if err := connA.Send(channel, "/kick "+nickB+" integration test"); err != nil {
+		if err := connA.Send(channel, "/kick "+nickB+" integration test", nil); err != nil {
 			t.Fatalf("A /kick: %v", err)
 		}
 
@@ -476,7 +476,7 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("Conversation %q missing after JOIN", channel)
 		}
 
-		if err := conn.Send(channel, "/part "+channel); err != nil {
+		if err := conn.Send(channel, "/part "+channel, nil); err != nil {
 			t.Fatalf("/part: %v", err)
 		}
 
@@ -504,7 +504,7 @@ func TestIRCIntegration(t *testing.T) {
 		joinChannel(t, conn, sub, channel)
 
 		wantTopic := "integration test topic " + sfx
-		if err := conn.Send(channel, "/topic "+wantTopic); err != nil {
+		if err := conn.Send(channel, "/topic "+wantTopic, nil); err != nil {
 			t.Fatalf("/topic: %v", err)
 		}
 
@@ -536,7 +536,7 @@ func TestIRCIntegration(t *testing.T) {
 
 		// Use the actual nick the server assigned (may differ if nick was taken).
 		actualNick := conn.Nick()
-		if err := conn.Send("", "/whois "+actualNick); err != nil {
+		if err := conn.Send("", "/whois "+actualNick, nil); err != nil {
 			t.Fatalf("/whois: %v", err)
 		}
 
@@ -562,7 +562,7 @@ func TestIRCIntegration(t *testing.T) {
 		connB, _ := connectTestIRC(t, serverURL, nickB)
 
 		joinChannel(t, connA, subA, channel)
-		if err := connB.Send(channel, "/join "+channel); err != nil {
+		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
 		// Wait for A to confirm B has joined before requesting NAMES.
@@ -572,7 +572,7 @@ func TestIRCIntegration(t *testing.T) {
 		})
 
 		// Send /names with the channel as the target so it resolves to the right channel.
-		if err := connA.Send(channel, "/names"); err != nil {
+		if err := connA.Send(channel, "/names", nil); err != nil {
 			t.Fatalf("/names: %v", err)
 		}
 
@@ -665,7 +665,7 @@ func TestIRCIntegration(t *testing.T) {
 		connB, _ := connectTestIRC(t, serverURL, nickB)
 
 		joinChannel(t, connA, subA, channel)
-		if err := connB.Send(channel, "/join "+channel); err != nil {
+		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
 		waitForEvent(t, subA, func(m map[string]any) bool {
@@ -735,7 +735,7 @@ func TestIRCIntegration(t *testing.T) {
 		connB, subB := connectTestIRC(t, serverURL, nickB)
 
 		joinChannel(t, connA, subA, channel)
-		if err := connB.Send(channel, "/join "+channel); err != nil {
+		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
 		// Wait for A to see B join
