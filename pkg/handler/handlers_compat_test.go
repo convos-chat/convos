@@ -130,7 +130,7 @@ func TestGetUser_Fields(t *testing.T) {
 func TestGetSettings_AuthAndDiskUsage(t *testing.T) {
 	t.Parallel()
 	backend := test.NewMemoryBackend()
-	c := core.New(core.WithBackend(backend))
+	c := core.New(core.WithBackend(backend), core.WithHome(t.TempDir()))
 	store := sessions.NewCookieStore([]byte("secret"))
 	h := NewHandler(c, auth.NewLocalAuthenticator(c), store, nil)
 

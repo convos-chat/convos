@@ -88,7 +88,7 @@ func TestFileBackend_Profiles(t *testing.T) {
 	})
 }
 
-func TestFileBackend_Files(t *testing.T) {
+func TestFileBackend_Files(t *testing.T) { //nolint:tparallel // subtests share state and must run sequentially
 	t.Parallel()
 	tmpDir := t.TempDir()
 	b := NewFileBackend(tmpDir)
@@ -98,8 +98,7 @@ func TestFileBackend_Files(t *testing.T) {
 	content := []byte("hello world")
 	name := "test.txt"
 
-	t.Run("SaveAndLoad", func(t *testing.T) {
-		t.Parallel()
+	t.Run("SaveAndLoad", func(t *testing.T) { //nolint:paralleltest // subtests share state and must run sequentially
 		f, err := b.SaveFile(user, name, content)
 		if err != nil {
 			t.Fatalf("SaveFile() error: %v", err)
@@ -150,8 +149,7 @@ func TestFileBackend_Files(t *testing.T) {
 		}
 	})
 
-	t.Run("Delete", func(t *testing.T) {
-		t.Parallel()
+	t.Run("Delete", func(t *testing.T) { //nolint:paralleltest // subtests share state and must run sequentially
 		files, _ := b.LoadFiles(user)
 		fid := files[0].ID
 		if err := b.DeleteFile(user, fid); err != nil {
