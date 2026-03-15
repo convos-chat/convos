@@ -22,7 +22,7 @@ func TestNewUser(t *testing.T) {
 		t.Errorf("ID() = %q, want %q", user.ID(), testEmail)
 	}
 
-	if user.Core() != c {
+	if user.Core != c {
 		t.Error("Core() should return the parent core")
 	}
 

@@ -248,7 +248,7 @@ func TestIRCIntegration(t *testing.T) {
 		if convA == nil {
 			t.Fatal("A: channel conversation missing from connection")
 		}
-		result, err := connA.User().Core().Backend.LoadMessages(convA, core.MessageQuery{Limit: 50})
+		result, err := connA.User().Core.Backend.LoadMessages(convA, core.MessageQuery{Limit: 50})
 		if err != nil {
 			t.Fatalf("LoadMessages: %v", err)
 		}

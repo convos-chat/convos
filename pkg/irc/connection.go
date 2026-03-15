@@ -610,7 +610,7 @@ func (c *Connection) openConversation(nick string) error {
 
 // saveState persists the connection (including conversations) to the backend.
 func (c *Connection) saveState() {
-	if err := c.User().Core().Backend.SaveConnection(c); err != nil {
+	if err := c.User().Core.Backend.SaveConnection(c); err != nil {
 		c.emitEvent(&core.MessageEvent{
 			From:    c.Name(),
 			Message: "Failed to save connection state: " + err.Error(),
@@ -654,7 +654,7 @@ func (c *Connection) persistMessage(convID, from, message string, msgType core.M
 		ReplyTo:   replyTo,
 	}
 
-	err := c.User().Core().Backend.SaveMessage(conv, msg)
+	err := c.User().Core.Backend.SaveMessage(conv, msg)
 	if err != nil {
 		slog.Error("Failed to save message", "conversation_id", convID, "error", err)
 	}

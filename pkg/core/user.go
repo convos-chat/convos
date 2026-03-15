@@ -15,7 +15,7 @@ import (
 // User represents a Convos user.
 type User struct {
 	mu                sync.RWMutex
-	core              *Core
+	Core              *Core
 	email             string
 	password          string
 	roles             []string
@@ -44,7 +44,7 @@ type UserData struct {
 // NewUser creates a new User instance.
 func NewUser(email string, core *Core) *User {
 	return &User{
-		core:              core,
+		Core:              core,
 		email:             normalizeEmail(email),
 		roles:             []string{},
 		registered:        time.Now().UTC().Truncate(time.Second),
@@ -53,11 +53,6 @@ func NewUser(email string, core *Core) *User {
 		connections:       make(map[string]Connection),
 		subscriptions:     make(map[string]webpush.Subscription),
 	}
-}
-
-// Core returns the parent Core instance.
-func (u *User) Core() *Core {
-	return u.core
 }
 
 // Email returns the user's email address.
@@ -282,17 +277,17 @@ func (u *User) RemoveConnection(id string) error {
 	if err := conn.Disconnect(); err != nil {
 		slog.Warn("Failed to disconnect connection", "id", id, "err", err)
 	}
-	return u.core.Backend.DeleteConnection(conn)
+	return u.Core.Backend.DeleteConnection(conn)
 }
 
 // EmitEvent emits an event to all subscribers for this user.
 func (u *User) EmitEvent(event Event) {
-	u.core.EventEmitter.EmitUser(u.ID(), event)
+	u.Core.EventEmitter.EmitUser(u.ID(), event)
 }
 
 // Save persists the user to storage.
 func (u *User) Save() error {
-	return u.core.Backend.SaveUser(u)
+	return u.Core.Backend.SaveUser(u)
 }
 
 // ToData converts the user to a serializable format.
@@ -320,7 +315,7 @@ func (u *User) ToData(includePassword bool) UserData {
 
 // loadConnections loads connections from the backend.
 func (u *User) loadConnections() error {
-	conns, err := u.core.Backend.LoadConnections(u)
+	conns, err := u.Core.Backend.LoadConnections(u)
 	if err != nil {
 		return err
 	}
@@ -329,7 +324,7 @@ func (u *User) loadConnections() error {
 	// when NewConnection calls back into User methods (e.g. Email)
 	createdConns := make([]Connection, 0)
 	for _, connData := range conns {
-		conn := u.core.NewConnection(connData.URL, u)
+		conn := u.Core.NewConnection(connData.URL, u)
 		if conn == nil {
 			slog.Warn("No provider registered for connection URL", "url", connData.URL)
 			continue

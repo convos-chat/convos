@@ -136,8 +136,8 @@ func NewBaseConnection(rawURL string, user *User) *BaseConnection {
 	}
 
 	var profile *ConnectionProfile
-	if user != nil && user.Core() != nil && u != nil {
-		profile = user.Core().ConnectionProfile(u)
+	if user != nil && user.Core != nil && u != nil {
+		profile = user.Core.ConnectionProfile(u)
 	}
 
 	return &BaseConnection{

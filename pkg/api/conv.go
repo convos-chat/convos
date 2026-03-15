@@ -27,7 +27,7 @@ func ToUserSummary(u *core.User) User {
 func ToUser(u *core.User, includeConns, includeConvs bool) User {
 	res := ToUserSummary(u)
 
-	s := u.Core().Settings
+	s := u.Core.Settings
 	defaultConn := s.DefaultConnection()
 	forcedConn := s.ForcedConnection()
 	videoService := s.VideoService()

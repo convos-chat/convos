@@ -27,7 +27,7 @@ func (c *Connection) persistNotification(convID, from, message string, msgType c
 		Type:           msgType,
 		Timestamp:      ts,
 	}
-	err := c.User().Core().Backend.SaveNotification(c.User(), msg)
+	err := c.User().Core.Backend.SaveNotification(c.User(), msg)
 	if err != nil {
 		slog.Error("Failed to save notification", "error", err)
 	}
@@ -43,7 +43,7 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 		return
 	}
 
-	pub, priv, err := user.Core().Settings.VAPIDKeys()
+	pub, priv, err := user.Core.Settings.VAPIDKeys()
 	if err != nil {
 		slog.Error("Failed to get VAPID keys for push", "error", err)
 		return
@@ -68,10 +68,10 @@ func (c *Connection) sendWebPush(notification core.Notification) {
 	// is HTTPS; fall back to the contact email (the webpush library prepends
 	// "mailto:" automatically, so strip any existing prefix first).
 	var subscriber string
-	if base := user.Core().Settings.BaseURL(); base != nil && base.Scheme == "https" {
+	if base := user.Core.Settings.BaseURL(); base != nil && base.Scheme == "https" {
 		subscriber = base.String()
 	} else {
-		subscriber = strings.TrimPrefix(user.Core().Settings.Contact(), "mailto:")
+		subscriber = strings.TrimPrefix(user.Core.Settings.Contact(), "mailto:")
 		if subscriber == "" {
 			subscriber = "admin@example.com"
 		}
