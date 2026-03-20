@@ -7,7 +7,7 @@ tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
 	github.com/coreos/go-oidc/v3 v3.17.0
-	github.com/ergochat/irc-go v0.5.0
+	github.com/ergochat/irc-go v0.6.0
 	github.com/getkin/kin-openapi v0.127.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-ldap/ldap/v3 v3.4.12
