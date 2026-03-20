@@ -8,13 +8,14 @@ import (
 )
 
 // parseServerTime extracts the server-time tag from an IRC message.
+// Always returns UTC so callers produce "Z"-suffixed RFC3339 strings.
 func parseServerTime(msg ircmsg.Message) time.Time {
 	if present, value := msg.GetTag("time"); present {
 		if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-			return t
+			return t.UTC()
 		}
 	}
-	return time.Now()
+	return time.Now().UTC()
 }
 
 // serverTimeOrNow extracts the server-time tag from an IRC message.
