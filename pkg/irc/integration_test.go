@@ -1,7 +1,6 @@
 package irc
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand/v2"
 	"net/url"
@@ -24,25 +23,9 @@ const ircIntegrationEnv = "CONVOS_TEST_IRC_SERVER"
 // ircEventTimeout is how long to wait for a single expected IRC event.
 const ircEventTimeout = 15 * time.Second
 
-// IRC event type constants used in predicate closures.
-const (
-	evState   = core.EventTypeState
-	evMessage = core.EventTypeMessage
-	evSent    = core.EventTypeSent
-
-	typeConnection = core.StateEventConnection
-	typeFrozen     = core.StateEventFrozen
-	typeJoin       = core.StateEventJoin
-	typePart       = core.StateEventPart
-	typeQuit       = core.StateEventQuit
-	typeNickChange = core.StateEventNickChange
-	typePrivate    = core.MessageTypePrivate
-)
-
 // waitForEvent reads from sub, discarding events that don't match pred, until
 // one matches or ircEventTimeout elapses. On timeout the test is failed immediately.
-// Events are marshaled to map[string]any so predicates can inspect arbitrary fields.
-func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any) bool) map[string]any {
+func waitForEvent(t *testing.T, sub *core.Subscription, pred func(core.Event) bool) core.Event {
 	t.Helper()
 	deadline := time.After(ircEventTimeout)
 	for {
@@ -52,16 +35,8 @@ func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any
 				t.Fatal("subscription channel closed unexpectedly")
 				return nil
 			}
-			data, err := json.Marshal(ev)
-			if err != nil {
-				continue
-			}
-			var m map[string]any
-			if err := json.Unmarshal(data, &m); err != nil {
-				continue
-			}
-			if pred(m) {
-				return m
+			if pred(ev) {
+				return ev
 			}
 		case <-deadline:
 			t.Fatal("timed out waiting for expected IRC event")
@@ -73,10 +48,9 @@ func waitForEvent(t *testing.T, sub *core.Subscription, pred func(map[string]any
 // waitConnected blocks until a "connected" state event arrives on sub.
 func waitConnected(t *testing.T, sub *core.Subscription) {
 	t.Helper()
-	waitForEvent(t, sub, func(m map[string]any) bool {
-		return m["event"] == evState &&
-			m["type"] == typeConnection &&
-			m["state"] == string(core.StateConnected)
+	waitForEvent(t, sub, func(ev core.Event) bool {
+		e, ok := ev.(*core.StateConnectionEvent)
+		return ok && e.State == core.StateConnected
 	})
 }
 
@@ -121,10 +95,9 @@ func joinChannel(t *testing.T, conn *Connection, sub *core.Subscription, channel
 	if err := conn.Send(channel, "/join "+channel, nil); err != nil {
 		t.Fatalf("joinChannel %q: %v", channel, err)
 	}
-	waitForEvent(t, sub, func(m map[string]any) bool {
-		return m["event"] == evState &&
-			m["type"] == typeFrozen &&
-			m["conversation_id"] == strings.ToLower(channel)
+	waitForEvent(t, sub, func(ev core.Event) bool {
+		e, ok := ev.(*core.StateFrozenEvent)
+		return ok && e.ConversationID == strings.ToLower(channel)
 	})
 }
 
@@ -223,9 +196,9 @@ func TestIRCIntegration(t *testing.T) {
 		joinChannel(t, connB, subB, channel)
 
 		// Wait until A can observe B's JOIN so we know both are in the channel.
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// B sends a message to the channel; A must receive it.
@@ -234,12 +207,11 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("B.Send: %v", err)
 		}
 
-		ev := waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evMessage &&
-				m["conversation_id"] == strings.ToLower(channel) &&
-				m["message"] == wantMsg
+		ret := waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.MessageEvent)
+			return ok && e.ConversationID == strings.ToLower(channel) && e.Message == wantMsg
 		})
-		if from := fmt.Sprintf("%v", ev["from"]); !strings.EqualFold(from, nickB) {
+		if from := ret.(*core.MessageEvent).From; !strings.EqualFold(from, nickB) {
 			t.Errorf("message from = %q, want %q", from, nickB)
 		}
 
@@ -281,12 +253,11 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("A.Send PM: %v", err)
 		}
 
-		ev := waitForEvent(t, subB, func(m map[string]any) bool {
-			return m["event"] == evMessage &&
-				m["type"] == typePrivate &&
-				m["message"] == wantMsg
+		ret := waitForEvent(t, subB, func(ev core.Event) bool {
+			e, ok := ev.(*core.MessageEvent)
+			return ok && e.Type == core.MessageTypePrivate && e.Message == wantMsg
 		})
-		if from := fmt.Sprintf("%v", ev["from"]); !strings.EqualFold(from, nickA) {
+		if from := ret.(*core.MessageEvent).From; !strings.EqualFold(from, nickA) {
 			t.Errorf("PM from = %q, want %q", from, nickA)
 		}
 	})
@@ -311,9 +282,9 @@ func TestIRCIntegration(t *testing.T) {
 		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// B changes nick.
@@ -322,20 +293,20 @@ func TestIRCIntegration(t *testing.T) {
 		}
 
 		// A must receive a nick_change event for B.
-		ev := waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeNickChange &&
-				strings.EqualFold(fmt.Sprintf("%v", m["old_nick"]), nickB)
+		ret := waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateNickChangeEvent)
+			return ok && strings.EqualFold(e.OldNick, nickB)
 		})
-		if newNick := fmt.Sprintf("%v", ev["new_nick"]); !strings.EqualFold(newNick, newNickB) {
+		if newNick := ret.(*core.StateNickChangeEvent).NewNick; !strings.EqualFold(newNick, newNickB) {
 			t.Errorf("nick_change new_nick = %q, want %q", newNick, newNickB)
 		}
 
 		// Wait for B to process its own NICK message before reading connB.Nick().
 		// A's event and B's callback run in separate goroutines; without this
 		// wait there is a race between the assertion and B updating c.nick.
-		waitForEvent(t, subB, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeNickChange &&
-				strings.EqualFold(fmt.Sprintf("%v", m["old_nick"]), nickB)
+		waitForEvent(t, subB, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateNickChangeEvent)
+			return ok && strings.EqualFold(e.OldNick, nickB)
 		})
 
 		// B's own Nick() must reflect the change.
@@ -382,9 +353,9 @@ func TestIRCIntegration(t *testing.T) {
 		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// B disconnects (sends QUIT to server).
@@ -393,9 +364,9 @@ func TestIRCIntegration(t *testing.T) {
 		}
 
 		// A must receive a quit event for B.
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeQuit &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateQuitEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// B must no longer appear in A's participant list.
@@ -428,9 +399,9 @@ func TestIRCIntegration(t *testing.T) {
 		joinChannel(t, connA, subA, channel)
 
 		joinChannel(t, connB, subB, channel)
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// A kicks B.
@@ -439,19 +410,18 @@ func TestIRCIntegration(t *testing.T) {
 		}
 
 		// A must receive a part event with kicker set.
-		ev := waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typePart &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB) &&
-				m["kicker"] != nil
+		ret := waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StatePartEvent)
+			return ok && strings.EqualFold(e.Nick, nickB) && e.Kicker != ""
 		})
-		if kicker := fmt.Sprintf("%v", ev["kicker"]); !strings.EqualFold(kicker, nickA) {
+		if kicker := ret.(*core.StatePartEvent).Kicker; !strings.EqualFold(kicker, nickA) {
 			t.Errorf("kick event kicker = %q, want %q", kicker, nickA)
 		}
 
 		// B must also receive a part event (for itself being kicked).
-		waitForEvent(t, subB, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typePart &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subB, func(ev core.Event) bool {
+			e, ok := ev.(*core.StatePartEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// B's conversation must be removed after being kicked.
@@ -480,10 +450,10 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("/part: %v", err)
 		}
 
-		waitForEvent(t, sub, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typePart &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nick) &&
-				m["conversation_id"] == strings.ToLower(channel)
+		waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.StatePartEvent)
+			return ok && strings.EqualFold(e.Nick, nick) &&
+				e.ConversationID == strings.ToLower(channel)
 		})
 
 		if conn.GetConversation(strings.ToLower(channel)) != nil {
@@ -508,11 +478,9 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("/topic: %v", err)
 		}
 
-		waitForEvent(t, sub, func(m map[string]any) bool {
-			return m["event"] == evState &&
-				m["type"] == typeFrozen &&
-				m["conversation_id"] == strings.ToLower(channel) &&
-				m["topic"] == wantTopic
+		waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateFrozenEvent)
+			return ok && e.ConversationID == strings.ToLower(channel) && e.Topic == wantTopic
 		})
 
 		conv := conn.GetConversation(strings.ToLower(channel))
@@ -540,11 +508,13 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("/whois: %v", err)
 		}
 
-		ev := waitForEvent(t, sub, func(m map[string]any) bool {
-			return m["event"] == evSent && m["message"] == "/whois"
+		ret := waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.SentEvent)
+			return ok && e.Message == "/whois"
 		})
-		if ev["nick"] == nil {
-			t.Errorf("whois reply missing 'nick' field; got: %v", ev)
+		sentEv := ret.(*core.SentEvent)
+		if sentEv.Data["nick"] == nil {
+			t.Errorf("whois reply missing 'nick' field; got: %v", sentEv.Data)
 		}
 	})
 
@@ -566,9 +536,9 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("B /join: %v", err)
 		}
 		// Wait for A to confirm B has joined before requesting NAMES.
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// Send /names with the channel as the target so it resolves to the right channel.
@@ -576,12 +546,11 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("/names: %v", err)
 		}
 
-		ev := waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evSent &&
-				m["conversation_id"] == strings.ToLower(channel)
+		ret := waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.SentEvent)
+			return ok && e.ConversationID == strings.ToLower(channel)
 		})
-
-		participants, _ := ev["participants"].([]any)
+		participants, _ := ret.(*core.SentEvent).Data["participants"].([]core.Participant)
 		if len(participants) < 2 {
 			t.Errorf("NAMES reply has %d participant(s), want ≥2", len(participants))
 		}
@@ -668,9 +637,9 @@ func TestIRCIntegration(t *testing.T) {
 		if err := connB.Send(channel, "/join "+channel, nil); err != nil {
 			t.Fatalf("B /join: %v", err)
 		}
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		convA := connA.GetConversation(strings.ToLower(channel))
@@ -722,7 +691,96 @@ func TestIRCIntegration(t *testing.T) {
 	})
 
 	// ──────────────────────────────────────────────────────────────
-	// 17. TAGMSG - Typing indicators and reactions
+	// 17. Nick collision – when the requested nick is taken the server
+	//     assigns exactly <nick>_ (one trailing underscore, no digit).
+	//     A second collision must produce <nick>__ and so on.
+	// ──────────────────────────────────────────────────────────────
+	t.Run("nick_collision_suffix", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		nick := "cvt" + sfx
+
+		// A takes the nick first.
+		connA, _ := connectTestIRC(t, serverURL, nick)
+		if connA.Nick() != nick {
+			t.Fatalf("A: Nick() = %q, want %q", connA.Nick(), nick)
+		}
+
+		// B requests the same nick; server should assign nick+"_".
+		// The post-connect auto-fix sends an async NICK command; wait for it.
+		connB, subB := connectTestIRC(t, serverURL, nick)
+		wantB := nick + "_"
+		if !strings.EqualFold(connB.Nick(), wantB) {
+			// Rename not yet confirmed; wait for the nick_change event.
+			waitForEvent(t, subB, func(ev core.Event) bool {
+				e, ok := ev.(*core.StateNickChangeEvent)
+				return ok && strings.EqualFold(e.NewNick, wantB)
+			})
+		}
+		if got := connB.Nick(); !strings.EqualFold(got, wantB) {
+			t.Errorf("B: Nick() = %q after collision, want %q (no digit suffix)", got, wantB)
+		}
+
+		// C requests the same nick again; should get nick+"__".
+		connC, subC := connectTestIRC(t, serverURL, nick)
+		wantC := nick + "__"
+		if !strings.EqualFold(connC.Nick(), wantC) {
+			waitForEvent(t, subC, func(ev core.Event) bool {
+				e, ok := ev.(*core.StateNickChangeEvent)
+				return ok && strings.EqualFold(e.NewNick, wantC)
+			})
+		}
+		if got := connC.Nick(); !strings.EqualFold(got, wantC) {
+			t.Errorf("C: Nick() = %q after second collision, want %q", got, wantC)
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 18. Self nick change – /nick updates conn.Nick(); attempting to
+	//     change to an already-taken nick leaves the nick unchanged.
+	// ──────────────────────────────────────────────────────────────
+	t.Run("self_nick_change", func(t *testing.T) {
+		t.Parallel()
+		sfx := randSuffix()
+		nick := "cvt" + sfx
+		newNick := "cvtN" + sfx
+
+		conn, sub := connectTestIRC(t, serverURL, nick)
+		if got := conn.Nick(); got != nick {
+			t.Fatalf("initial Nick() = %q, want %q", got, nick)
+		}
+
+		if err := conn.Send("", "/nick "+newNick, nil); err != nil {
+			t.Fatalf("/nick: %v", err)
+		}
+
+		// Wait for the NICK event confirming the change.
+		waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateNickChangeEvent)
+			return ok && strings.EqualFold(e.OldNick, nick)
+		})
+
+		if got := conn.Nick(); !strings.EqualFold(got, newNick) {
+			t.Errorf("Nick() = %q after /nick, want %q", got, newNick)
+		}
+
+		// Trying to change to an already-taken nick must leave the nick
+		// unchanged (post-registration 433 should not trigger an auto-retry).
+		anotherNick := "cvtO" + sfx
+		conn2, _ := connectTestIRC(t, serverURL, anotherNick)
+		if err := conn2.Send("", "/nick "+newNick, nil); err != nil {
+			t.Fatalf("conn2 /nick to taken nick: %v", err)
+		}
+		// Give the server time to send 433 back and for any (incorrect)
+		// automatic retry logic to fire.
+		time.Sleep(300 * time.Millisecond)
+		if got := conn2.Nick(); !strings.EqualFold(got, anotherNick) {
+			t.Errorf("conn2.Nick() = %q after rejected /nick, want %q (should stay unchanged)", got, anotherNick)
+		}
+	})
+
+	// ──────────────────────────────────────────────────────────────
+	// 19. TAGMSG - Typing indicators and reactions
 	// ──────────────────────────────────────────────────────────────
 	t.Run("ircv3_tagmsg", func(t *testing.T) {
 		t.Parallel()
@@ -739,9 +797,9 @@ func TestIRCIntegration(t *testing.T) {
 			t.Fatalf("B /join: %v", err)
 		}
 		// Wait for A to see B join
-		waitForEvent(t, subA, func(m map[string]any) bool {
-			return m["event"] == evState && m["type"] == typeJoin &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickB)
+		waitForEvent(t, subA, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateJoinEvent)
+			return ok && strings.EqualFold(e.Nick, nickB)
 		})
 
 		// 1. Typing notification
@@ -752,13 +810,12 @@ func TestIRCIntegration(t *testing.T) {
 		}
 
 		// B should receive the typing event
-		ev := waitForEvent(t, subB, func(m map[string]any) bool {
-			return m["event"] == evState &&
-				m["type"] == "typing" &&
-				m["conversation_id"] == strings.ToLower(channel) &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickA)
+		ret := waitForEvent(t, subB, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateTypingEvent)
+			return ok && e.ConversationID == strings.ToLower(channel) &&
+				strings.EqualFold(e.Nick, nickA)
 		})
-		if typing := fmt.Sprintf("%v", ev["typing"]); typing != "active" {
+		if typing := ret.(*core.StateTypingEvent).Typing; typing != "active" {
 			t.Errorf("typing status = %q, want active", typing)
 		}
 
@@ -772,16 +829,16 @@ func TestIRCIntegration(t *testing.T) {
 		}
 
 		// B should receive the reaction event
-		ev = waitForEvent(t, subB, func(m map[string]any) bool {
-			return m["event"] == evMessage &&
-				m["type"] == "reaction" &&
-				m["conversation_id"] == strings.ToLower(channel) &&
-				strings.EqualFold(fmt.Sprintf("%v", m["nick"]), nickA)
+		ret = waitForEvent(t, subB, func(ev core.Event) bool {
+			e, ok := ev.(*core.MessageEvent)
+			return ok && e.Type == core.MessageTypeReaction &&
+				e.ConversationID == strings.ToLower(channel) &&
+				strings.EqualFold(e.From, nickA)
 		})
-		if msg := fmt.Sprintf("%v", ev["message"]); msg != "👍" {
+		if msg := ret.(*core.MessageEvent).Message; msg != "👍" {
 			t.Errorf("reaction emoji = %q, want 👍", msg)
 		}
-		if replyTo := fmt.Sprintf("%v", ev["reply_to"]); replyTo != "msg123" {
+		if replyTo := ret.(*core.MessageEvent).ReplyTo; replyTo != "msg123" {
 			t.Errorf("reaction reply_to = %q, want msg123", replyTo)
 		}
 	})

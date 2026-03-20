@@ -69,6 +69,11 @@ type Connection struct {
 	// carrying this ID so the frontend callback fires via normal ID-matching.
 	namesWaiters map[string]any
 
+	// nickFixBase is set when we need to auto-rename after a collision.
+	// It holds the base nick we are trying to restore ("nick", then "nick_",
+	// etc.) and is cleared on any successful own-nick change.
+	nickFixBase string
+
 	// Reconnect state
 	reconnectDelay time.Duration
 	stopReconnect  chan struct{}
@@ -196,11 +201,35 @@ func (c *Connection) Connect() error {
 	// Set up callbacks before releasing lock and connecting.
 
 	c.client.AddConnectCallback(func(msg ircmsg.Message) {
+		currentNick := c.client.CurrentNick()
+		desiredNick := c.BaseConnection.Nick()
+
 		c.mu.Lock()
 		c.SetState(core.StateConnected)
-		c.nick = c.client.CurrentNick()
+		c.nick = currentNick
 		c.reconnectDelay = 0
 		c.mu.Unlock()
+
+		c.client.ClearCallback(ircevent.ERR_NICKNAMEINUSE)
+		c.client.AddCallback(ircevent.ERR_NICKNAMEINUSE, func(m ircmsg.Message) {
+			c.handleNickInUse(m)
+		})
+
+		// If the server assigned a different nick (collision resolved by the
+		// library with its counter suffix), start the auto-fix rename sequence.
+		if !strings.EqualFold(currentNick, desiredNick) {
+			correctNick := desiredNick + "_"
+			c.mu.Lock()
+			c.nickFixBase = desiredNick
+			c.mu.Unlock()
+			c.emitEvent(&core.StateConnectionEvent{
+				State:   core.StateConnected,
+				Message: fmt.Sprintf("Nick %s is in use, trying %s.", desiredNick, correctNick),
+			})
+			if err := c.client.Send("NICK", correctNick); err != nil {
+				c.LogServerError(fmt.Sprintf("Failed to send NICK: %s", err))
+			}
+		}
 
 		// Store acknowledged capabilities and SASL status
 		caps := c.client.AcknowledgedCaps()
@@ -357,10 +386,6 @@ func (c *Connection) Connect() error {
 
 	c.client.AddCallback(ircevent.RPL_ENDOFNAMES, func(msg ircmsg.Message) {
 		c.handleEndOfNames(msg)
-	})
-
-	c.client.AddCallback(ircevent.ERR_NICKNAMEINUSE, func(msg ircmsg.Message) {
-		c.handleNickInUse(msg)
 	})
 
 	// WHOIS response numerics

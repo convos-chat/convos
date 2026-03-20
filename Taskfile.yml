@@ -37,3 +37,10 @@ tasks:
     desc: Run the tests
     cmds:
       - go test -cover ./...
+
+  test:integration:
+    desc: Run IRC integration tests against a live server (requires CONVOS_TEST_IRC_SERVER)
+    env:
+      CONVOS_TEST_IRC_SERVER: irc://localhost:6667?tls=0
+    cmds:
+      - go test -v -run TestIRCIntegration -timeout 120s ./pkg/irc/

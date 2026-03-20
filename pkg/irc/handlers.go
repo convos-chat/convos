@@ -294,9 +294,10 @@ func (c *Connection) handleNick(msg ircmsg.Message) {
 	newNick := msg.Params[0]
 
 	if oldNick == c.Nick() {
-		// Our nick changed
+		// Our nick changed – clear any pending auto-fix sequence.
 		c.mu.Lock()
 		c.nick = newNick
+		c.nickFixBase = ""
 		c.mu.Unlock()
 		c.emitInfo()
 	}
@@ -313,7 +314,15 @@ func (c *Connection) handleNick(msg ircmsg.Message) {
 	c.emitEvent(&core.StateNickChangeEvent{OldNick: oldNick, NewNick: newNick})
 }
 
-// handleNickInUse handles ERR_NICKNAMEINUSE (433) by appending "_" and retrying.
+// handleNickInUse handles ERR_NICKNAMEINUSE (433).
+//
+// Three cases are distinguished:
+//  1. Pre-registration (c.nick == ""): the library's default handler was
+//     cleared in the connect callback, so this is our reconnect path.
+//     Retry by appending "_" to the attempted nick.
+//  2. Auto-fix in progress (nickFixBase != "" and the 433 is for our fix
+//     attempt): extend the fix by appending another "_".
+//  3. Post-registration, user-initiated /nick: just surface the error.
 func (c *Connection) handleNickInUse(msg ircmsg.Message) {
 	// msg.Params: [<current_nick>, <attempted_nick>, "Nickname is already in use"]
 	attempted := ""
@@ -324,9 +333,35 @@ func (c *Connection) handleNickInUse(msg ircmsg.Message) {
 		attempted = c.Nick()
 	}
 
-	newNick := attempted + "_"
-	c.emitEvent(&core.StateConnectionEvent{State: core.StateConnected, Message: fmt.Sprintf("Nick %s is in use, trying %s.", attempted, newNick)})
+	c.mu.Lock()
+	isPreRegistration := c.nick == ""
+	fixBase := c.nickFixBase
+	c.mu.Unlock()
 
+	var newNick string
+	switch {
+	case isPreRegistration:
+		// Reconnect path: library's counter handler was cleared; retry with "_".
+		newNick = attempted + "_"
+	case fixBase != "" && strings.EqualFold(attempted, fixBase+"_"):
+		// Auto-fix: our rename attempt was also taken; try one more underscore.
+		newNick = attempted + "_"
+		c.mu.Lock()
+		c.nickFixBase = attempted
+		c.mu.Unlock()
+	default:
+		// Post-registration user-initiated /nick — surface error, do not retry.
+		c.emitEvent(&core.StateConnectionEvent{
+			State:   core.StateConnected,
+			Message: fmt.Sprintf("Nick %s is already in use.", attempted),
+		})
+		return
+	}
+
+	c.emitEvent(&core.StateConnectionEvent{
+		State:   core.StateConnected,
+		Message: fmt.Sprintf("Nick %s is in use, trying %s.", attempted, newNick),
+	})
 	if err := c.client.Send("NICK", newNick); err != nil {
 		c.LogServerError(fmt.Sprintf("Failed to change nick to %s: %s", newNick, err))
 	}
