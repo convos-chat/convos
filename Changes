@@ -23,6 +23,7 @@ Revision history for perl distribution Convos
   - Tokyo Night color scheme
   - More IRCv3 features supported. Primarily building foundation for ui rework
     in 10.0
+  - /ignore / /unignore commands - filtering on our side.
 
 8.07 2024-03-21T08:25:00+0900
  - Fix version number
