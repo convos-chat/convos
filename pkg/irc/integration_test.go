@@ -605,10 +605,18 @@ func TestIRCIntegration(t *testing.T) {
 	t.Run("ircv3_userhost_in_names", func(t *testing.T) {
 		t.Parallel()
 		sfx := randSuffix()
+		channel := "#cvtest" + sfx
 		conn, sub := connectTestIRC(t, serverURL, "cvt"+sfx)
-		joinChannel(t, conn, sub, "#cvtest"+sfx)
+		joinChannel(t, conn, sub, channel)
+		// Wait for the NAMES reply (366) so that participants carry user/host data.
+		// handleJoin (JOIN echo) fires first and emits StateFrozenEvent; the NAMES
+		// reply arrives afterward and emits StateParticipantsEvent.
+		waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateParticipantsEvent)
+			return ok && e.ConversationID == strings.ToLower(channel)
+		})
 
-		conv := conn.GetConversation("#cvtest" + sfx)
+		conv := conn.GetConversation(channel)
 		if conv == nil {
 			t.Fatal("conversation missing after join")
 		}
@@ -625,10 +633,16 @@ func TestIRCIntegration(t *testing.T) {
 	t.Run("ircv3_multi_prefix", func(t *testing.T) {
 		t.Parallel()
 		sfx := randSuffix()
+		channel := "#cvtest" + sfx
 		conn, sub := connectTestIRC(t, serverURL, "cvt"+sfx)
-		joinChannel(t, conn, sub, "#cvtest"+sfx)
+		joinChannel(t, conn, sub, channel)
+		// Wait for the NAMES reply (366) so that the op mode prefix is populated.
+		waitForEvent(t, sub, func(ev core.Event) bool {
+			e, ok := ev.(*core.StateParticipantsEvent)
+			return ok && e.ConversationID == strings.ToLower(channel)
+		})
 
-		conv := conn.GetConversation("#cvtest" + sfx)
+		conv := conn.GetConversation(channel)
 		if conv == nil {
 			t.Fatal("conversation missing after join")
 		}

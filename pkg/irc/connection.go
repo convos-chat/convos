@@ -699,6 +699,11 @@ func (c *Connection) emitSentMessage(target, message string, msgType core.Messag
 	convID := strings.ToLower(target)
 	from := c.Nick()
 
+	// Ensure the conversation exists on the sender's side so the message can be
+	// persisted. For outgoing PMs the conversation may not exist yet (first message
+	// to a nick), mirroring what EnsureConversation does for incoming messages.
+	c.getOrCreateConv(convID, false)
+
 	c.emitEvent(&core.MessageEvent{
 		ConversationID: convID,
 		From:           from,

@@ -43,4 +43,4 @@ tasks:
     env:
       CONVOS_TEST_IRC_SERVER: irc://localhost:6667?tls=0
     cmds:
-      - go test -v -run TestIRCIntegration -timeout 120s ./pkg/irc/
+      - go test -count 1 -v -run TestIRCIntegration -timeout 120s ./pkg/irc/
