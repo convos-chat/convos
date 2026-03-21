@@ -1065,3 +1065,48 @@ func TestHandleIgnoreCommand(t *testing.T) {
 		}
 	})
 }
+
+func TestDefaultNickFromEmail(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		email    string
+		expected string
+	}{
+		{"john.doe@example.com", "john_doe"},
+		{"alice@example.com", "alice"},
+		{"test-user@example.com", "test_user"},
+		{"no-at-sign", "guest"},
+		{"@example.com", "guest"},
+	}
+
+	for _, tt := range tests {
+		if got := defaultNickFromEmail(tt.email); got != tt.expected {
+			t.Errorf("defaultNickFromEmail(%q) = %q, want %q", tt.email, got, tt.expected)
+		}
+	}
+}
+
+func TestNewConnectionNickInjection(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+
+	t.Run("injects nick from email when absent", func(t *testing.T) {
+		t.Parallel()
+		user := core.NewUser("john.doe@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		if got := conn.NickFromURL(); got != "john_doe" {
+			t.Errorf("NickFromURL() = %q, want %q", got, "john_doe")
+		}
+	})
+
+	t.Run("preserves existing nick in URL", func(t *testing.T) {
+		t.Parallel()
+		user := core.NewUser("john.doe@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat?nick=mynick", user)
+		if got := conn.NickFromURL(); got != "mynick" {
+			t.Errorf("NickFromURL() = %q, want %q", got, "mynick")
+		}
+	})
+}

@@ -126,15 +126,6 @@ type BaseConnection struct {
 func NewBaseConnection(rawURL string, user *User) *BaseConnection {
 	u, _ := url.Parse(rawURL)
 
-	// Ensure the URL always has a nick parameter so the frontend can identify
-	// the user's own messages. Derive from email if not explicitly set.
-	if u != nil && u.Query().Get("nick") == "" && user != nil {
-		nick := defaultNickFromEmail(user.Email())
-		q := u.Query()
-		q.Set("nick", nick)
-		u.RawQuery = q.Encode()
-	}
-
 	var profile *ConnectionProfile
 	if user != nil && user.Core != nil && u != nil {
 		profile = user.Core.ConnectionProfile(u)
@@ -307,37 +298,18 @@ func (c *BaseConnection) SetInfo(key string, value any) {
 	c.info[key] = value
 }
 
-// Nick returns the current nickname (base implementation).
-func (c *BaseConnection) Nick() string {
+
+// NickFromURL returns the value of the ?nick= query parameter from the
+// connection URL, or "guest" if absent or empty. No email or protocol
+// specific logic; callers that need a richer fallback (e.g. IRC) should
+// override Nick() and call NickFromURL() as one step in their chain.
+func (c *BaseConnection) NickFromURL() string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-
-	// Try to get nick from URL query
 	if c.url != nil {
 		if nick := c.url.Query().Get("nick"); nick != "" {
 			return nick
 		}
-	}
-
-	// Default to part before @ in email
-	if c.user != nil {
-		return defaultNickFromEmail(c.user.Email())
-	}
-
-	return "guest"
-}
-
-// defaultNickFromEmail derives a nick from an email address by taking the local
-// part and replacing non-word characters with underscores.
-func defaultNickFromEmail(email string) string {
-	if idx := strings.Index(email, "@"); idx > 0 {
-		nick := email[:idx]
-		return strings.Map(func(r rune) rune {
-			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' {
-				return r
-			}
-			return '_'
-		}, nick)
 	}
 	return "guest"
 }

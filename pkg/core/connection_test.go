@@ -23,6 +23,7 @@ func (c *testConnection) Connect() error                 { return nil }
 func (c *testConnection) Disconnect() error              { return nil }
 func (c *testConnection) Send(_, _ string, _ any) error { return nil }
 func (c *testConnection) LogServerError(msg string)      { slog.Info("[Server log]", "msg", msg) }
+func (c *testConnection) Nick() string                   { return c.NickFromURL() }
 
 var _ core.Connection = (*testConnection)(nil)
 
@@ -114,28 +115,25 @@ func TestConnectionState(t *testing.T) {
 	}
 }
 
-func TestConnectionNick(t *testing.T) {
+func TestBaseConnectionNickFromURL(t *testing.T) {
 	t.Parallel()
 
 	c := test.NewTestCore()
+	user := core.NewUser("john.doe@example.com", c)
 
 	tests := []struct {
-		email    string
 		url      string
 		expected string
 	}{
-		{"john.doe@example.com", "irc://irc.libera.chat", "john_doe"},
-		{"alice@example.com", "irc://irc.libera.chat", "alice"},
-		{"test-user@example.com", "irc://irc.libera.chat", "test_user"},
-		{"user@example.com", "irc://irc.libera.chat?nick=custom", "custom"},
+		{"irc://irc.libera.chat?nick=custom", "custom"},
+		{"irc://irc.libera.chat?nick=", "guest"},
+		{"irc://irc.libera.chat", "guest"},
 	}
 
 	for _, tt := range tests {
-		user := core.NewUser(tt.email, c)
 		conn := newTestConnection(tt.url, user)
-		if conn.Nick() != tt.expected {
-			t.Errorf("Nick() for email=%q, url=%q = %q, want %q",
-				tt.email, tt.url, conn.Nick(), tt.expected)
+		if got := conn.NickFromURL(); got != tt.expected {
+			t.Errorf("NickFromURL() for url=%q = %q, want %q", tt.url, got, tt.expected)
 		}
 	}
 }

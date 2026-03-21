@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"maps"
 	"net"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -27,8 +28,26 @@ var (
 	ErrUnknownConversation = errors.New("unknown conversation")
 )
 
+// defaultNickFromEmail derives an IRC nick from an email address by taking
+// the local part and replacing non-word characters with underscores.
+func defaultNickFromEmail(email string) string {
+	if idx := strings.Index(email, "@"); idx > 0 {
+		nick := email[:idx]
+		return strings.Map(func(r rune) rune {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' {
+				return r
+			}
+			return '_'
+		}, nick)
+	}
+	return guestNick
+}
+
 // userModeChars are IRC mode characters that target a specific user (nick) in a channel.
 const userModeChars = "ovhaq"
+
+// guestNick is the fallback nick when no nick can be determined.
+const guestNick = "guest"
 
 // listCache stores cached LIST results for channel discovery.
 type listCache struct {
@@ -90,6 +109,15 @@ type Connection struct {
 
 // NewConnection creates a new IRC connection.
 func NewConnection(rawURL string, user *core.User) *Connection {
+	// Inject ?nick= from email before BaseConnection parses the URL.
+	// This must happen before core.NewBaseConnection is called.
+	if u, err := url.Parse(rawURL); err == nil && u.Query().Get("nick") == "" && user != nil {
+		nick := defaultNickFromEmail(user.Email())
+		q := u.Query()
+		q.Set("nick", nick)
+		u.RawQuery = q.Encode()
+		rawURL = u.String()
+	}
 	return &Connection{
 		BaseConnection: core.NewBaseConnection(rawURL, user),
 		namesBuffer:    make(map[string][]core.Participant),
@@ -134,8 +162,11 @@ func (c *Connection) Connect() error {
 	url := c.URL()
 	c.emitState(core.StateConnecting, fmt.Sprintf("Connecting to %s.", url.Host))
 
-	// Get nickname and other config while holding the lock
-	nick := c.BaseConnection.Nick()
+	// Get nickname and other config while holding the lock.
+	// Use NickFromURL() directly (not Nick()) to avoid a self-deadlock:
+	// Connect() holds c.mu.Lock(), and Nick() would try to c.mu.RLock().
+	// NickFromURL() uses BaseConnection.mu (a separate mutex) and is safe here.
+	nick := c.NickFromURL()
 	host := url.Host
 	userEmail := c.User().Email()
 	useTLS := url.Scheme == "ircs"
@@ -209,7 +240,7 @@ func (c *Connection) Connect() error {
 
 	c.client.AddConnectCallback(func(msg ircmsg.Message) {
 		currentNick := c.client.CurrentNick()
-		desiredNick := c.BaseConnection.Nick()
+		desiredNick := c.Nick()
 
 		c.mu.Lock()
 		c.SetState(core.StateConnected)
@@ -522,8 +553,16 @@ func (c *Connection) Nick() string {
 	}
 	c.mu.RUnlock()
 
-	// Fall back to base implementation
-	return c.BaseConnection.Nick()
+	// NickFromURL is always populated for IRC connections because NewConnection
+	// injects ?nick= from the user's email. The email fallback below is
+	// defensive and covers edge cases (e.g. manually constructed connections).
+	if nick := c.NickFromURL(); nick != guestNick {
+		return nick
+	}
+	if c.User() != nil {
+		return defaultNickFromEmail(c.User().Email())
+	}
+	return guestNick
 }
 
 // Send sends a message or command to a target (channel or user).
