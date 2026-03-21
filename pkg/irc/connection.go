@@ -81,12 +81,12 @@ type Connection struct {
 	// Pending mode queries: channel -> original WebSocket request ID.
 	// When RPL_CHANNELMODEIS (324) arrives, the handler emits a SentEvent
 	// carrying this ID so the frontend callback fires via normal ID-matching.
-	modeWaiters map[string]any
+	modeWaiters waiterMap[any]
 
 	// Pending names queries: channel -> original WebSocket request ID.
 	// When RPL_ENDOFNAMES (366) arrives, the handler emits a SentEvent
 	// carrying this ID so the frontend callback fires via normal ID-matching.
-	namesWaiters map[string]any
+	namesWaiters waiterMap[any]
 
 	// Pending /ignore WHOIS lookups: lowercase nick → original nick casing.
 	// When RPL_ENDOFWHOIS (318) arrives for a waiter, the handler builds the
@@ -97,7 +97,7 @@ type Connection struct {
 	// Pending /whois lookups triggered from a conversation: lowercase nick → conversation ID.
 	// When RPL_ENDOFWHOIS (318) arrives, the response is routed to that conversation
 	// instead of falling back to the server log.
-	whoisWaiters map[string]string
+	whoisWaiters waiterMap[string]
 
 	// nickFixBase is set when we need to auto-rename after a collision.
 	// It holds the base nick we are trying to restore ("nick", then "nick_",
@@ -127,10 +127,7 @@ func NewConnection(rawURL string, user *core.User) *Connection {
 		BaseConnection: core.NewBaseConnection(rawURL, user),
 		namesBuffer:    make(map[string][]core.Participant),
 		whoisBuffer:    make(map[string]*core.WhoisData),
-		modeWaiters:    make(map[string]any),
-		namesWaiters:   make(map[string]any),
 		ignoreWaiters:  make(map[string]string),
-		whoisWaiters:   make(map[string]string),
 	}
 }
 

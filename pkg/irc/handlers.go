@@ -564,12 +564,7 @@ func (c *Connection) handleChannelModeIs(msg ircmsg.Message) {
 	// If a mode query is pending, emit a SentEvent carrying the original request ID
 	// so the frontend callback fires via Socket.js's ID-matching. This avoids showing
 	// a "got mode" chat message for auto-refresh queries.
-	c.mu.Lock()
-	requestID, waiting := c.modeWaiters[convID]
-	if waiting {
-		delete(c.modeWaiters, convID)
-	}
-	c.mu.Unlock()
+	requestID, waiting := c.modeWaiters.take(convID)
 
 	if waiting {
 		var modes map[string]bool
@@ -638,11 +633,8 @@ func (c *Connection) handleEndOfNames(msg ircmsg.Message) {
 	c.mu.Lock()
 	participants := c.namesBuffer[channel]
 	delete(c.namesBuffer, channel)
-	requestID, waiting := c.namesWaiters[channel]
-	if waiting {
-		delete(c.namesWaiters, channel)
-	}
 	c.mu.Unlock()
+	requestID, waiting := c.namesWaiters.take(channel)
 
 	// If a names query is pending, emit a SentEvent carrying the original request ID
 	// so the frontend callback fires via Socket.js's ID-matching. This avoids showing
@@ -745,11 +737,8 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	if hasIgnoreWaiter {
 		delete(c.ignoreWaiters, nick)
 	}
-	waiterConvID, hasWhoisWaiter := c.whoisWaiters[nick]
-	if hasWhoisWaiter {
-		delete(c.whoisWaiters, nick)
-	}
 	c.mu.Unlock()
+	waiterConvID, hasWhoisWaiter := c.whoisWaiters.take(nick)
 
 	var whois map[string]any
 	if whoisData == nil {

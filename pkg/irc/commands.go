@@ -247,13 +247,9 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 		// Register the waiter before sending to avoid a race with a fast response.
 		if target != "" {
 			ch := strings.ToLower(target)
-			c.mu.Lock()
-			c.modeWaiters[ch] = requestID
-			c.mu.Unlock()
+			c.modeWaiters.set(ch, requestID)
 			if err := c.client.Send("MODE", target); err != nil {
-				c.mu.Lock()
-				delete(c.modeWaiters, ch)
-				c.mu.Unlock()
+				c.modeWaiters.take(ch)
 				return err
 			}
 			return nil
@@ -288,9 +284,7 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 			return ErrUsageWhois
 		}
 		if target != "" {
-			c.mu.Lock()
-			c.whoisWaiters[strings.ToLower(nick)] = target
-			c.mu.Unlock()
+			c.whoisWaiters.set(strings.ToLower(nick), target)
 		}
 		return c.client.Send("WHOIS", nick)
 	case "NAMES":
@@ -303,13 +297,9 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 		}
 		ch = strings.ToLower(ch)
 		// Register before sending to avoid a race with a fast IRC response.
-		c.mu.Lock()
-		c.namesWaiters[ch] = requestID
-		c.mu.Unlock()
+		c.namesWaiters.set(ch, requestID)
 		if err := c.client.Send("NAMES", ch); err != nil {
-			c.mu.Lock()
-			delete(c.namesWaiters, ch)
-			c.mu.Unlock()
+			c.namesWaiters.take(ch)
 			return err
 		}
 		return nil
