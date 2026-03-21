@@ -38,6 +38,12 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType core.MessageType)
 		}
 	}
 
+	if nuh, err := msg.NUH(); err == nil && nuh.User != "" && nuh.Host != "" {
+		if c.User().IsIgnored(nuh.Name, nuh.User, nuh.Host) {
+			return
+		}
+	}
+
 	conv := c.EnsureConversation(target, nick)
 
 	if conv.Frozen() != "" {
@@ -156,6 +162,12 @@ func (c *Connection) handleJoin(msg ircmsg.Message) {
 		return
 	}
 
+	if nuh, err := msg.NUH(); err == nil && nuh.User != "" && nuh.Host != "" {
+		if c.User().IsIgnored(nuh.Name, nuh.User, nuh.Host) {
+			return
+		}
+	}
+
 	channel := msg.Params[0]
 	nick := msg.Nick()
 
@@ -203,6 +215,12 @@ func (c *Connection) handlePart(msg ircmsg.Message) {
 		return
 	}
 
+	if nuh, err := msg.NUH(); err == nil && nuh.User != "" && nuh.Host != "" {
+		if c.User().IsIgnored(nuh.Name, nuh.User, nuh.Host) {
+			return
+		}
+	}
+
 	channel := msg.Params[0]
 	nick := msg.Nick()
 	reason := ""
@@ -230,8 +248,17 @@ func (c *Connection) handleQuit(msg ircmsg.Message) {
 		message = strings.Join(msg.Params, " ")
 	}
 
+	// Always remove from participant lists to keep rosters accurate,
+	// even for ignored users who have disconnected from the server.
 	for _, conv := range c.Conversations() {
 		conv.RemoveParticipant(nick)
+	}
+
+	// Suppress the quit notification for ignored senders.
+	if nuh, err := msg.NUH(); err == nil && nuh.User != "" && nuh.Host != "" {
+		if c.User().IsIgnored(nuh.Name, nuh.User, nuh.Host) {
+			return
+		}
 	}
 
 	c.emitEvent(&core.StateQuitEvent{Nick: nick, Message: message})
@@ -292,14 +319,23 @@ func (c *Connection) handleNick(msg ircmsg.Message) {
 
 	oldNick := msg.Nick()
 	newNick := msg.Params[0]
+	// Capture current nick before any mutation so the ignore guard below
+	// can reliably distinguish our own nick change from others'.
+	myOldNick := c.Nick()
 
-	if oldNick == c.Nick() {
+	if oldNick == myOldNick {
 		// Our nick changed – clear any pending auto-fix sequence.
 		c.mu.Lock()
 		c.nick = newNick
 		c.nickFixBase = ""
 		c.mu.Unlock()
 		c.emitInfo()
+	} else {
+		if nuh, err := msg.NUH(); err == nil && nuh.User != "" && nuh.Host != "" {
+			if c.User().IsIgnored(nuh.Name, nuh.User, nuh.Host) {
+				return
+			}
+		}
 	}
 
 	for _, conv := range c.Conversations() {
@@ -705,6 +741,10 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	c.mu.Lock()
 	whoisData := c.whoisBuffer[nick]
 	delete(c.whoisBuffer, nick)
+	originalNick, hasIgnoreWaiter := c.ignoreWaiters[nick]
+	if hasIgnoreWaiter {
+		delete(c.ignoreWaiters, nick)
+	}
 	c.mu.Unlock()
 
 	var whois map[string]any
@@ -712,6 +752,22 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 		whois = map[string]any{"nick": msg.Params[1]}
 	} else {
 		whois = whoisData.ToMap()
+	}
+
+	// Check if this WHOIS was triggered by /ignore
+
+	if hasIgnoreWaiter && whoisData != nil && whoisData.User != "" && whoisData.Host != "" {
+		mask := "*!" + whoisData.User + "@" + whoisData.Host
+		c.User().AddIgnoreMask(originalNick, mask)
+		if err := c.User().Save(); err != nil {
+			slog.Error("Failed to save user after adding ignore mask", "error", err)
+		}
+		c.emitEvent(&core.SentEvent{
+			ConversationID: "",
+			Message:        "/ignore",
+			Command:        []string{"ignore"},
+			Data:           map[string]any{"nick": originalNick, "mask": mask},
+		})
 	}
 
 	// Update conversation info if this is a private conversation

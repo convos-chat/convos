@@ -304,6 +304,10 @@ func (c *Core) Initialize() error {
 		if user.subscriptions == nil {
 			user.subscriptions = make(map[string]webpush.Subscription)
 		}
+		user.ignoreMasks = userData.IgnoreMasks
+		if user.ignoreMasks == nil {
+			user.ignoreMasks = make(map[string]string)
+		}
 
 		if err := user.loadConnections(); err != nil {
 			c.log.Error("Failed to load connections", "user", user.Email(), "error", err)

@@ -256,6 +256,79 @@ func TestUserToData(t *testing.T) {
 	}
 }
 
+func TestUserIgnoreMasks(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+	user := core.NewUser("test@example.com", c)
+
+	// Initially empty
+	if len(user.IgnoreMasks()) != 0 {
+		t.Error("IgnoreMasks() should be empty initially")
+	}
+
+	// Add mask
+	user.AddIgnoreMask("BadNick", "*!baduser@evil.host")
+	masks := user.IgnoreMasks()
+	if masks["BadNick"] != "*!baduser@evil.host" {
+		t.Errorf("IgnoreMasks() = %v, want BadNick → *!baduser@evil.host", masks)
+	}
+
+	// Remove mask
+	user.RemoveIgnoreMask("BadNick")
+	if len(user.IgnoreMasks()) != 0 {
+		t.Error("IgnoreMasks() should be empty after RemoveIgnoreMask")
+	}
+
+	// Remove non-existent is a no-op
+	user.RemoveIgnoreMask("nobody")
+}
+
+func TestUserIsIgnored(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+	user := core.NewUser("test@example.com", c)
+	user.AddIgnoreMask("Spammer", "*!spam@evil.example")
+
+	tests := []struct {
+		nick, ident, host string
+		want              bool
+	}{
+		// Exact ident+host match, different nicks
+		{"Spammer", "spam", "evil.example", true},
+		{"SpammerRenamed", "spam", "evil.example", true},
+		// Different ident or host
+		{"Spammer", "other", "evil.example", false},
+		{"Spammer", "spam", "good.example", false},
+		// Case-insensitive
+		{"spammer", "SPAM", "EVIL.EXAMPLE", true},
+		// Empty ident/host (server message) — never matches
+		{"irc.server.net", "", "", false},
+	}
+
+	for _, tt := range tests {
+		got := user.IsIgnored(tt.nick, tt.ident, tt.host)
+		if got != tt.want {
+			t.Errorf("IsIgnored(%q, %q, %q) = %v, want %v",
+				tt.nick, tt.ident, tt.host, got, tt.want)
+		}
+	}
+}
+
+func TestUserToDataIgnoreMasks(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+	user := core.NewUser("test@example.com", c)
+	user.AddIgnoreMask("BadNick", "*!bad@host.example")
+
+	data := user.ToData(false)
+	if data.IgnoreMasks["BadNick"] != "*!bad@host.example" {
+		t.Errorf("ToData().IgnoreMasks = %v, want BadNick entry", data.IgnoreMasks)
+	}
+}
+
 func TestUserRegisteredTime(t *testing.T) {
 	t.Parallel()
 

@@ -28,6 +28,11 @@ var (
 	ErrUsageOper          = errors.New("usage: /oper user password")
 	ErrUsageClear         = errors.New("WARNING: /clear history <name> will delete all messages in the backend")
 	ErrUsageIson          = errors.New("usage: /ison nick")
+	// ErrUsageUnignore is returned when /unignore is called without a nick.
+	// There is no paired ErrUsageIgnore because bare /ignore (no args) is valid: it lists masks.
+	ErrUsageUnignore    = errors.New("usage: /unignore <nick>")
+	ErrCannotIgnoreSelf = errors.New("cannot ignore yourself")
+	ErrNotIgnored       = errors.New("nick is not in ignore list")
 )
 
 // handleCommand parses and executes an IRC command from user input.
@@ -117,6 +122,64 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 		if len(qparts) > 1 {
 			return c.Send(qparts[0], strings.Join(qparts[1:], " "), nil)
 		}
+		return nil
+	case "IGNORE":
+		nick := strings.TrimSpace(args)
+		if nick == "" {
+			// List ignores
+			masks := c.User().IgnoreMasks()
+			c.emitEvent(&core.SentEvent{
+				ConversationID: target,
+				Message:        "/ignore",
+				Command:        []string{"ignore"},
+				Data:           map[string]any{"masks": masks},
+			})
+			return nil
+		}
+		// Guard: cannot ignore self
+		if strings.EqualFold(nick, c.Nick()) {
+			return ErrCannotIgnoreSelf
+		}
+		// Need active connection for WHOIS
+		c.mu.RLock()
+		connected := c.State() == core.StateConnected && c.client != nil
+		c.mu.RUnlock()
+		if !connected {
+			return ErrNotConnected
+		}
+		// Store waiter and trigger WHOIS
+		c.mu.Lock()
+		c.ignoreWaiters[strings.ToLower(nick)] = nick
+		c.mu.Unlock()
+		return c.client.Send("WHOIS", nick)
+	case "UNIGNORE":
+		nick := strings.TrimSpace(args)
+		if nick == "" {
+			return ErrUsageUnignore
+		}
+		// Case-insensitive lookup: IRC nicks are case-insensitive, so "/unignore
+		// badnick" should match a key stored as "BadNick".
+		masks := c.User().IgnoreMasks()
+		var storedKey string
+		for k := range masks {
+			if strings.EqualFold(k, nick) {
+				storedKey = k
+				break
+			}
+		}
+		if storedKey == "" {
+			return ErrNotIgnored
+		}
+		c.User().RemoveIgnoreMask(storedKey)
+		if err := c.User().Save(); err != nil {
+			return err
+		}
+		c.emitEvent(&core.SentEvent{
+			ConversationID: target,
+			Message:        "/unignore",
+			Command:        []string{"unignore"},
+			Data:           map[string]any{"nick": nick},
+		})
 		return nil
 	}
 

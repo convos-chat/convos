@@ -15,6 +15,21 @@ import (
 
 var errDialDisabled = errors.New("dial disabled in test")
 
+func TestNewConnectionIgnoreWaitersInitialised(t *testing.T) {
+	t.Parallel()
+	c := test.NewTestCore()
+	user := core.NewUser("test@example.com", c)
+	conn := NewConnection("irc://irc.libera.chat", user)
+	if len(conn.ignoreWaiters) != 0 {
+		t.Errorf("ignoreWaiters should be empty on construction, got %d entries", len(conn.ignoreWaiters))
+	}
+	// Verify the map is writable (not nil).
+	conn.ignoreWaiters["testnick"] = "TestNick"
+	if conn.ignoreWaiters["testnick"] != "TestNick" {
+		t.Error("ignoreWaiters should be writable after construction")
+	}
+}
+
 var failDialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 	return nil, errDialDisabled
 }
@@ -698,6 +713,355 @@ func TestIRCConnection_Handlers(t *testing.T) {
 			}
 		case <-time.After(100 * time.Millisecond):
 			t.Error("Expected reaction event")
+		}
+	})
+}
+
+func TestHandleEndOfWhoisIgnoreWaiter(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+	user := core.NewUser("test@example.com", c)
+	conn := NewConnection("irc://irc.libera.chat", user)
+	sub := c.EventEmitter.SubscribeUser(user.ID())
+	defer sub.Close()
+
+	// Simulate a WHOIS reply populating the buffer
+	conn.mu.Lock()
+	conn.whoisBuffer["badnick"] = &core.WhoisData{
+		Nick:     "BadNick",
+		User:     "baduser",
+		Host:     "evil.host",
+		Channels: make(map[string]any),
+	}
+	conn.ignoreWaiters["badnick"] = "BadNick"
+	conn.mu.Unlock()
+
+	// Simulate RPL_ENDOFWHOIS
+	msg := ircmsg.MakeMessage(nil, "server.net", "318", "me", "BadNick", "End of WHOIS list")
+	conn.handleEndOfWhois(msg)
+
+	// Expect both an ignore-confirmation SentEvent and a normal whois SentEvent.
+	var gotIgnoreEvent, gotWhoisEvent bool
+	deadline := time.After(200 * time.Millisecond)
+	for !gotIgnoreEvent || !gotWhoisEvent {
+		select {
+		case ev := <-sub.Events:
+			if sent, ok := ev.(*core.SentEvent); ok && len(sent.Command) > 0 {
+				switch sent.Command[0] {
+				case "ignore":
+					gotIgnoreEvent = true
+				case "whois":
+					gotWhoisEvent = true
+				}
+			}
+		case <-deadline:
+			t.Fatalf("timed out waiting for events: gotIgnore=%v gotWhois=%v", gotIgnoreEvent, gotWhoisEvent)
+		}
+	}
+
+	// Mask should be stored on user
+	masks := user.IgnoreMasks()
+	if masks["BadNick"] != "*!baduser@evil.host" {
+		t.Errorf("IgnoreMasks() = %v, want BadNick → *!baduser@evil.host", masks)
+	}
+
+	// Waiter should be cleared
+	conn.mu.RLock()
+	_, still := conn.ignoreWaiters["badnick"]
+	conn.mu.RUnlock()
+	if still {
+		t.Error("ignoreWaiters should be cleared after WHOIS completes")
+	}
+}
+
+func TestIgnoreFiltering(t *testing.T) {
+	t.Parallel()
+
+	const spammerNick = "Spammer"
+	const spammerNUH = "Spammer!spam@evil.host"
+
+	setup := func() (*Connection, *core.Subscription) {
+		c := test.NewTestCore()
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		conn.nick = "me"
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		user.AddIgnoreMask(spammerNick, "*!spam@evil.host")
+		return conn, sub
+	}
+
+	drain := func(sub *core.Subscription) []core.Event {
+		var evs []core.Event
+		for {
+			select {
+			case ev := <-sub.Events:
+				evs = append(evs, ev)
+			case <-time.After(50 * time.Millisecond):
+				return evs
+			}
+		}
+	}
+
+	t.Run("handleMessage drops ignored PRIVMSG", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		conn.AddConversation(core.NewConversation("#test", conn))
+		msg := ircmsg.MakeMessage(nil, spammerNUH, "PRIVMSG", "#test", "hello")
+		conn.handleMessage(msg, core.MessageTypePrivate)
+
+		evs := drain(sub)
+		for _, ev := range evs {
+			if me, ok := ev.(*core.MessageEvent); ok && me.From == spammerNick {
+				t.Errorf("ignored sender's message was emitted: %+v", me)
+			}
+		}
+	})
+
+	t.Run("handleMessage passes non-ignored PRIVMSG", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		conn.AddConversation(core.NewConversation("#test", conn))
+		msg := ircmsg.MakeMessage(nil, "GoodUser!good@good.host", "PRIVMSG", "#test", "hello")
+		conn.handleMessage(msg, core.MessageTypePrivate)
+
+		evs := drain(sub)
+		var found bool
+		for _, ev := range evs {
+			if me, ok := ev.(*core.MessageEvent); ok && me.From == "GoodUser" {
+				found = true
+			}
+		}
+		if !found {
+			t.Error("non-ignored sender's message was not emitted")
+		}
+	})
+
+	t.Run("handleJoin drops ignored join", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		conn.AddConversation(core.NewConversation("#test", conn))
+		msg := ircmsg.MakeMessage(nil, spammerNUH, "JOIN", "#test")
+		conn.handleJoin(msg)
+
+		evs := drain(sub)
+		for _, ev := range evs {
+			if je, ok := ev.(*core.StateJoinEvent); ok && je.Nick == spammerNick {
+				t.Errorf("ignored sender's join was emitted: %+v", je)
+			}
+		}
+	})
+
+	t.Run("handleQuit drops ignored quit but removes participant", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		// Add spammer as a participant so we can verify they are removed.
+		conv := core.NewConversation("#test", conn)
+		conv.AddParticipant(core.Participant{Nick: spammerNick})
+		conn.AddConversation(conv)
+
+		msg := ircmsg.MakeMessage(nil, spammerNUH, "QUIT", "Bye")
+		conn.handleQuit(msg)
+
+		// Event should be suppressed.
+		evs := drain(sub)
+		for _, ev := range evs {
+			if qe, ok := ev.(*core.StateQuitEvent); ok && qe.Nick == spammerNick {
+				t.Errorf("ignored sender's quit was emitted: %+v", qe)
+			}
+		}
+
+		// Participant must be removed from the roster.
+		if _, ok := conv.Participants()[spammerNick]; ok {
+			t.Error("ignored quitter should be removed from participant list")
+		}
+	})
+
+	t.Run("handlePart drops ignored part", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		conn.AddConversation(core.NewConversation("#test", conn))
+		msg := ircmsg.MakeMessage(nil, spammerNUH, "PART", "#test", "bye")
+		conn.handlePart(msg)
+
+		evs := drain(sub)
+		for _, ev := range evs {
+			if pe, ok := ev.(*core.StatePartEvent); ok && pe.Nick == spammerNick {
+				t.Errorf("ignored sender's part was emitted: %+v", pe)
+			}
+		}
+	})
+
+	t.Run("handleNick drops ignored nick change", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, spammerNUH, "NICK", "SpammerRenamed")
+		conn.handleNick(msg)
+
+		evs := drain(sub)
+		for _, ev := range evs {
+			if ne, ok := ev.(*core.StateNickChangeEvent); ok && ne.OldNick == spammerNick {
+				t.Errorf("ignored sender's nick change was emitted: %+v", ne)
+			}
+		}
+	})
+
+	t.Run("handleNick does not suppress own nick change", func(t *testing.T) {
+		t.Parallel()
+		conn, sub := setup()
+		defer sub.Close()
+		conn.nick = "me"
+
+		// Own nick change: sender is "me!myident@myhost" → "me2"
+		msg := ircmsg.MakeMessage(nil, "me!myident@myhost", "NICK", "me2")
+		conn.handleNick(msg)
+
+		evs := drain(sub)
+		var gotNickChange bool
+		for _, ev := range evs {
+			if ne, ok := ev.(*core.StateNickChangeEvent); ok && ne.OldNick == "me" {
+				gotNickChange = true
+			}
+		}
+		if !gotNickChange {
+			t.Error("own nick change event was suppressed")
+		}
+	})
+}
+
+func TestHandleIgnoreCommand(t *testing.T) {
+	t.Parallel()
+
+	setup := func() (*core.Core, *core.User, *Connection) {
+		c := test.NewTestCore()
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		return c, user, conn
+	}
+
+	t.Run("list empty", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		err := conn.handleCommand("", "IGNORE", nil)
+		if err != nil {
+			t.Fatalf("handleCommand(IGNORE) error: %v", err)
+		}
+
+		select {
+		case ev := <-sub.Events:
+			sent, ok := ev.(*core.SentEvent)
+			if !ok {
+				t.Fatalf("expected SentEvent, got %T", ev)
+			}
+			if len(sent.Command) == 0 || sent.Command[0] != "ignore" {
+				t.Errorf("expected command=[ignore], got %v", sent.Command)
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("expected SentEvent for /ignore list")
+		}
+	})
+
+	t.Run("self-ignore returns error", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.nick = "myNick"
+
+		err := conn.handleCommand("", "IGNORE myNick", nil)
+		if !errors.Is(err, ErrCannotIgnoreSelf) {
+			t.Errorf("expected ErrCannotIgnoreSelf, got %v", err)
+		}
+	})
+
+	t.Run("ignore nick when disconnected returns ErrNotConnected", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+		conn.nick = "me"
+
+		err := conn.handleCommand("", "IGNORE SomeNick", nil)
+		if !errors.Is(err, ErrNotConnected) {
+			t.Errorf("expected ErrNotConnected, got %v", err)
+		}
+	})
+
+	t.Run("unignore blank returns error", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+
+		err := conn.handleCommand("", "UNIGNORE", nil)
+		if !errors.Is(err, ErrUsageUnignore) {
+			t.Errorf("expected ErrUsageUnignore, got %v", err)
+		}
+	})
+
+	t.Run("unignore unknown nick returns error", func(t *testing.T) {
+		t.Parallel()
+		_, _, conn := setup()
+
+		err := conn.handleCommand("", "UNIGNORE UnknownNick", nil)
+		if err == nil {
+			t.Error("expected error for unknown nick, got nil")
+		}
+	})
+
+	t.Run("unignore is case-insensitive", func(t *testing.T) {
+		t.Parallel()
+		_, user, conn := setup()
+
+		user.AddIgnoreMask("BadNick", "*!bad@host")
+
+		// "/unignore badnick" should match the key stored as "BadNick".
+		err := conn.handleCommand("", "UNIGNORE badnick", nil)
+		if err != nil {
+			t.Fatalf("UNIGNORE with mismatched case error: %v", err)
+		}
+		if len(user.IgnoreMasks()) != 0 {
+			t.Error("expected ignore mask to be removed by case-insensitive unignore")
+		}
+	})
+
+	t.Run("unignore removes mask and emits event", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		user.AddIgnoreMask("BadNick", "*!bad@host")
+
+		err := conn.handleCommand("", "UNIGNORE BadNick", nil)
+		if err != nil {
+			t.Fatalf("UNIGNORE error: %v", err)
+		}
+
+		if len(user.IgnoreMasks()) != 0 {
+			t.Error("expected ignore mask to be removed")
+		}
+
+		select {
+		case ev := <-sub.Events:
+			sent, ok := ev.(*core.SentEvent)
+			if !ok {
+				t.Fatalf("expected SentEvent, got %T", ev)
+			}
+			if len(sent.Command) == 0 || sent.Command[0] != "unignore" {
+				t.Errorf("expected command=[unignore], got %v", sent.Command)
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Error("expected SentEvent for /unignore")
 		}
 	})
 }

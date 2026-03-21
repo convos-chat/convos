@@ -211,8 +211,12 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.MessageEvent)
 			return ok && e.ConversationID == strings.ToLower(channel) && e.Message == wantMsg
 		})
-		if from := ret.(*core.MessageEvent).From; !strings.EqualFold(from, nickB) {
-			t.Errorf("message from = %q, want %q", from, nickB)
+		me, ok := ret.(*core.MessageEvent)
+		if !ok {
+			t.Fatalf("expected *core.MessageEvent, got %T", ret)
+		}
+		if !strings.EqualFold(me.From, nickB) {
+			t.Errorf("message from = %q, want %q", me.From, nickB)
 		}
 
 		// Message must also be persisted to the backend.
@@ -257,8 +261,12 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.MessageEvent)
 			return ok && e.Type == core.MessageTypePrivate && e.Message == wantMsg
 		})
-		if from := ret.(*core.MessageEvent).From; !strings.EqualFold(from, nickA) {
-			t.Errorf("PM from = %q, want %q", from, nickA)
+		me, ok := ret.(*core.MessageEvent)
+		if !ok {
+			t.Fatalf("expected *core.MessageEvent, got %T", ret)
+		}
+		if !strings.EqualFold(me.From, nickA) {
+			t.Errorf("PM from = %q, want %q", me.From, nickA)
 		}
 	})
 
@@ -297,8 +305,12 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.StateNickChangeEvent)
 			return ok && strings.EqualFold(e.OldNick, nickB)
 		})
-		if newNick := ret.(*core.StateNickChangeEvent).NewNick; !strings.EqualFold(newNick, newNickB) {
-			t.Errorf("nick_change new_nick = %q, want %q", newNick, newNickB)
+		ne, ok := ret.(*core.StateNickChangeEvent)
+		if !ok {
+			t.Fatalf("expected *core.StateNickChangeEvent, got %T", ret)
+		}
+		if !strings.EqualFold(ne.NewNick, newNickB) {
+			t.Errorf("nick_change new_nick = %q, want %q", ne.NewNick, newNickB)
 		}
 
 		// Wait for B to process its own NICK message before reading connB.Nick().
@@ -414,8 +426,12 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.StatePartEvent)
 			return ok && strings.EqualFold(e.Nick, nickB) && e.Kicker != ""
 		})
-		if kicker := ret.(*core.StatePartEvent).Kicker; !strings.EqualFold(kicker, nickA) {
-			t.Errorf("kick event kicker = %q, want %q", kicker, nickA)
+		pe, ok := ret.(*core.StatePartEvent)
+		if !ok {
+			t.Fatalf("expected *core.StatePartEvent, got %T", ret)
+		}
+		if !strings.EqualFold(pe.Kicker, nickA) {
+			t.Errorf("kick event kicker = %q, want %q", pe.Kicker, nickA)
 		}
 
 		// B must also receive a part event (for itself being kicked).
@@ -512,7 +528,10 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.SentEvent)
 			return ok && e.Message == "/whois"
 		})
-		sentEv := ret.(*core.SentEvent)
+		sentEv, ok := ret.(*core.SentEvent)
+		if !ok {
+			t.Fatalf("expected *core.SentEvent, got %T", ret)
+		}
 		if sentEv.Data["nick"] == nil {
 			t.Errorf("whois reply missing 'nick' field; got: %v", sentEv.Data)
 		}
@@ -550,7 +569,11 @@ func TestIRCIntegration(t *testing.T) {
 			e, ok := ev.(*core.SentEvent)
 			return ok && e.ConversationID == strings.ToLower(channel)
 		})
-		participants, _ := ret.(*core.SentEvent).Data["participants"].([]core.Participant)
+		sentEv2, ok := ret.(*core.SentEvent)
+		if !ok {
+			t.Fatalf("expected *core.SentEvent, got %T", ret)
+		}
+		participants, _ := sentEv2.Data["participants"].([]core.Participant)
 		if len(participants) < 2 {
 			t.Errorf("NAMES reply has %d participant(s), want ≥2", len(participants))
 		}
@@ -815,8 +838,12 @@ func TestIRCIntegration(t *testing.T) {
 			return ok && e.ConversationID == strings.ToLower(channel) &&
 				strings.EqualFold(e.Nick, nickA)
 		})
-		if typing := ret.(*core.StateTypingEvent).Typing; typing != "active" {
-			t.Errorf("typing status = %q, want active", typing)
+		te, ok := ret.(*core.StateTypingEvent)
+		if !ok {
+			t.Fatalf("expected *core.StateTypingEvent, got %T", ret)
+		}
+		if te.Typing != "active" {
+			t.Errorf("typing status = %q, want active", te.Typing)
 		}
 
 		// 2. Reaction
@@ -835,11 +862,15 @@ func TestIRCIntegration(t *testing.T) {
 				e.ConversationID == strings.ToLower(channel) &&
 				strings.EqualFold(e.From, nickA)
 		})
-		if msg := ret.(*core.MessageEvent).Message; msg != "👍" {
-			t.Errorf("reaction emoji = %q, want 👍", msg)
+		re, ok := ret.(*core.MessageEvent)
+		if !ok {
+			t.Fatalf("expected *core.MessageEvent, got %T", ret)
 		}
-		if replyTo := ret.(*core.MessageEvent).ReplyTo; replyTo != "msg123" {
-			t.Errorf("reaction reply_to = %q, want msg123", replyTo)
+		if re.Message != "👍" {
+			t.Errorf("reaction emoji = %q, want 👍", re.Message)
+		}
+		if re.ReplyTo != "msg123" {
+			t.Errorf("reaction reply_to = %q, want msg123", re.ReplyTo)
 		}
 	})
 }

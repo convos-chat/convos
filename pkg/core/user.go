@@ -23,6 +23,7 @@ type User struct {
 	registered        time.Time
 	remoteAddress     string
 	highlightKeywords []string
+	ignoreMasks       map[string]string // label (nick as typed) → "*!ident@host"; label used only for /unignore lookup, not matching
 	unread            int
 	connections       map[string]Connection
 	subscriptions     map[string]webpush.Subscription
@@ -37,6 +38,7 @@ type UserData struct {
 	Registered        time.Time                       `json:"registered"`
 	RemoteAddress     string                          `json:"remote_address"`
 	HighlightKeywords []string                        `json:"highlight_keywords"`
+	IgnoreMasks       map[string]string               `json:"ignore_masks,omitempty"`
 	Unread            int                             `json:"unread"`
 	Subscriptions     map[string]webpush.Subscription `json:"subscriptions,omitempty"`
 }
@@ -50,6 +52,7 @@ func NewUser(email string, core *Core) *User {
 		registered:        time.Now().UTC().Truncate(time.Second),
 		remoteAddress:     "127.0.0.1",
 		highlightKeywords: []string{},
+		ignoreMasks:       make(map[string]string),
 		connections:       make(map[string]Connection),
 		subscriptions:     make(map[string]webpush.Subscription),
 	}
@@ -180,6 +183,80 @@ func (u *User) SetHighlightKeywords(keywords []string) {
 	u.highlightKeywords = keywords
 }
 
+// AddIgnoreMask stores a mask for later removal. nick is a user-supplied label
+// (used only by RemoveIgnoreMask); mask must be in "*!ident@host" form. Thread-safe.
+func (u *User) AddIgnoreMask(nick, mask string) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	u.ignoreMasks[nick] = mask
+}
+
+// RemoveIgnoreMask removes the ignore entry for nick. Thread-safe.
+func (u *User) RemoveIgnoreMask(nick string) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	delete(u.ignoreMasks, nick)
+}
+
+// IgnoreMasks returns a copy of the ignore map. Thread-safe.
+func (u *User) IgnoreMasks() map[string]string {
+	u.mu.RLock()
+	defer u.mu.RUnlock()
+	cp := make(map[string]string, len(u.ignoreMasks))
+	maps.Copy(cp, u.ignoreMasks)
+	return cp
+}
+
+// IsIgnored returns true if *!ident@host matches any stored ignore mask.
+// Masks use simple glob matching (* and ?). Both sides are lowercased.
+// Returns false immediately when ident or host is empty (server-sourced message).
+func (u *User) IsIgnored(nick, ident, host string) bool {
+	if ident == "" || host == "" {
+		return false
+	}
+	candidate := strings.ToLower(nick + "!" + ident + "@" + host)
+	u.mu.RLock()
+	defer u.mu.RUnlock()
+	for _, mask := range u.ignoreMasks {
+		if matchMask(strings.ToLower(mask), candidate) {
+			return true
+		}
+	}
+	return false
+}
+
+// matchMask reports whether s matches the glob pattern (supports * and ?).
+// Note: matching is byte-oriented, not rune-oriented. ? matches a single byte.
+// This is acceptable for IRC hostmasks which are historically ASCII-only.
+func matchMask(pattern, s string) bool {
+	for len(pattern) > 0 {
+		switch pattern[0] {
+		case '*':
+			pattern = pattern[1:]
+			if len(pattern) == 0 {
+				return true
+			}
+			for i := 0; i <= len(s); i++ {
+				if matchMask(pattern, s[i:]) {
+					return true
+				}
+			}
+			return false
+		case '?':
+			if len(s) == 0 {
+				return false
+			}
+			pattern, s = pattern[1:], s[1:]
+		default:
+			if len(s) == 0 || pattern[0] != s[0] {
+				return false
+			}
+			pattern, s = pattern[1:], s[1:]
+		}
+	}
+	return len(s) == 0
+}
+
 // Unread returns the number of unread notifications.
 func (u *User) Unread() int {
 	u.mu.RLock()
@@ -306,6 +383,8 @@ func (u *User) ToData(includePassword bool) UserData {
 		Subscriptions:     make(map[string]webpush.Subscription, len(u.subscriptions)),
 	}
 	maps.Copy(data.Subscriptions, u.subscriptions)
+	data.IgnoreMasks = make(map[string]string, len(u.ignoreMasks))
+	maps.Copy(data.IgnoreMasks, u.ignoreMasks)
 
 	if includePassword {
 		data.Password = u.password
