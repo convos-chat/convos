@@ -287,6 +287,11 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 		if nick == "" {
 			return ErrUsageWhois
 		}
+		if target != "" {
+			c.mu.Lock()
+			c.whoisWaiters[strings.ToLower(nick)] = target
+			c.mu.Unlock()
+		}
 		return c.client.Send("WHOIS", nick)
 	case "NAMES":
 		ch := target

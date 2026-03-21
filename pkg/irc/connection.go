@@ -94,6 +94,11 @@ type Connection struct {
 	// removes the entry from the map.
 	ignoreWaiters map[string]string
 
+	// Pending /whois lookups triggered from a conversation: lowercase nick → conversation ID.
+	// When RPL_ENDOFWHOIS (318) arrives, the response is routed to that conversation
+	// instead of falling back to the server log.
+	whoisWaiters map[string]string
+
 	// nickFixBase is set when we need to auto-rename after a collision.
 	// It holds the base nick we are trying to restore ("nick", then "nick_",
 	// etc.) and is cleared on any successful own-nick change.
@@ -125,6 +130,7 @@ func NewConnection(rawURL string, user *core.User) *Connection {
 		modeWaiters:    make(map[string]any),
 		namesWaiters:   make(map[string]any),
 		ignoreWaiters:  make(map[string]string),
+		whoisWaiters:   make(map[string]string),
 	}
 }
 

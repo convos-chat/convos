@@ -745,6 +745,10 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	if hasIgnoreWaiter {
 		delete(c.ignoreWaiters, nick)
 	}
+	waiterConvID, hasWhoisWaiter := c.whoisWaiters[nick]
+	if hasWhoisWaiter {
+		delete(c.whoisWaiters, nick)
+	}
 	c.mu.Unlock()
 
 	var whois map[string]any
@@ -790,6 +794,8 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 	convID := ""
 	if conv != nil {
 		convID = conv.ID()
+	} else if hasWhoisWaiter {
+		convID = waiterConvID
 	}
 	c.emitEvent(&core.SentEvent{ConversationID: convID, Message: "/whois", Command: []string{"whois"}, Data: whois})
 }
