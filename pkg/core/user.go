@@ -3,6 +3,7 @@ package core
 import (
 	"log/slog"
 	"maps"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -184,7 +185,7 @@ func (u *User) SetHighlightKeywords(keywords []string) {
 }
 
 // AddIgnoreMask stores a mask for later removal. nick is a user-supplied label
-// (used only by RemoveIgnoreMask); mask must be in "*!ident@host" form. Thread-safe.
+// mask must be in "*!ident@host" form. Thread-safe.
 func (u *User) AddIgnoreMask(nick, mask string) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -218,43 +219,12 @@ func (u *User) IsIgnored(nick, ident, host string) bool {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
 	for _, mask := range u.ignoreMasks {
-		if matchMask(strings.ToLower(mask), candidate) {
+		match, err := filepath.Match(strings.ToLower(mask), candidate)
+		if match && err == nil {
 			return true
 		}
 	}
 	return false
-}
-
-// matchMask reports whether s matches the glob pattern (supports * and ?).
-// Note: matching is byte-oriented, not rune-oriented. ? matches a single byte.
-// This is acceptable for IRC hostmasks which are historically ASCII-only.
-func matchMask(pattern, s string) bool {
-	for len(pattern) > 0 {
-		switch pattern[0] {
-		case '*':
-			pattern = pattern[1:]
-			if len(pattern) == 0 {
-				return true
-			}
-			for i := 0; i <= len(s); i++ {
-				if matchMask(pattern, s[i:]) {
-					return true
-				}
-			}
-			return false
-		case '?':
-			if len(s) == 0 {
-				return false
-			}
-			pattern, s = pattern[1:], s[1:]
-		default:
-			if len(s) == 0 || pattern[0] != s[0] {
-				return false
-			}
-			pattern, s = pattern[1:], s[1:]
-		}
-	}
-	return len(s) == 0
 }
 
 // Unread returns the number of unread notifications.

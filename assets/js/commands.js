@@ -51,6 +51,8 @@ add('/ms', '/ms <msg>', 'Send a message to memoserv.');
 add('/hs', '/hs <msg>', 'Send a message to hostserv.');
 add('/bs', '/bs <msg>', 'Send a message to botserv.');
 add('/os', '/os <msg>', 'Send a message to operserv.');
+add('/ignore', '/ignore <nick>', 'Add nick to ignore list. Call without nick to list');
+add('/unignore', '/unignore <nick>', 'Add nick to ignore list');
 add('/quote', '/quote <irc-command>', 'Allow you to send any raw IRC message.');
 
 const rewrite = (from, to) => (rewriteRule[from] = to);
