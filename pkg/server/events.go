@@ -19,7 +19,7 @@ const (
 
 // newUpgrader creates a WebSocket upgrader that validates the Origin header
 // matches the request's Host. This prevents cross-site WebSocket hijacking.
-func newUpgrader() websocket.Upgrader {
+func newUpgrader(c *core.Core) websocket.Upgrader {
 	return websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -29,7 +29,9 @@ func newUpgrader() websocket.Upgrader {
 			if err != nil {
 				return false
 			}
-			return u.Host == r.Host
+			baseURL := c.Settings.BaseURL()
+			slog.Debug("Checking WebSocket origin", "origin", u.Host, "host", baseURL.Host)
+			return u.Host == baseURL.Host
 		},
 	}
 }

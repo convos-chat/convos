@@ -77,6 +77,8 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 				if u, err := url.Parse(s.Config.RequestBaseURL); err == nil {
 					s.updateBaseURL(u)
 				}
+			} else {
+				s.updateBaseURL(&url.URL{Scheme: "http", Host: r.Host})
 			}
 			next.ServeHTTP(w, r)
 			return
@@ -188,7 +190,7 @@ func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Se
 		Router:     r,
 		Core:       c,
 		Config:     cfg,
-		upgrader:   newUpgrader(),
+		upgrader:   newUpgrader(c),
 		lastAccess: make(map[string]time.Time),
 	}
 

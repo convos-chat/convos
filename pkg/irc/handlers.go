@@ -65,7 +65,7 @@ func (c *Connection) handleMessage(msg ircmsg.Message, msgType core.MessageType)
 	}
 
 	event := &core.MessageEvent{
-				ConversationID: conv.ID(),
+		ConversationID: conv.ID(),
 		From:           nick,
 		Message:        message,
 		Type:           msgType,
