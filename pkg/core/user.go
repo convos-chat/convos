@@ -60,39 +60,19 @@ func NewUser(email string, core *Core) *User {
 }
 
 // Email returns the user's email address.
-func (u *User) Email() string {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.email
-}
+func (u *User) Email() string { return rGet(&u.mu, &u.email) }
 
 // ID returns the unique identifier for this user (lowercase email).
-func (u *User) ID() string {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.email
-}
+func (u *User) ID() string { return rGet(&u.mu, &u.email) }
 
 // UID returns the numeric user ID.
-func (u *User) UID() int {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.uid
-}
+func (u *User) UID() int { return rGet(&u.mu, &u.uid) }
 
 // SetUID sets the numeric user ID.
-func (u *User) SetUID(uid int) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.uid = uid
-}
+func (u *User) SetUID(uid int) { wSet(&u.mu, &u.uid, uid) }
 
 // Password returns the hashed password.
-func (u *User) Password() string {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.password
-}
+func (u *User) Password() string { return rGet(&u.mu, &u.password) }
 
 // SetPassword hashes and sets the user's password.
 func (u *User) SetPassword(plain string) error {
@@ -150,25 +130,13 @@ func (u *User) TakeRole(role string) {
 }
 
 // Registered returns when the user was registered.
-func (u *User) Registered() time.Time {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.registered
-}
+func (u *User) Registered() time.Time { return rGet(&u.mu, &u.registered) }
 
 // RemoteAddress returns the last known remote address.
-func (u *User) RemoteAddress() string {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.remoteAddress
-}
+func (u *User) RemoteAddress() string { return rGet(&u.mu, &u.remoteAddress) }
 
 // SetRemoteAddress sets the last known remote address.
-func (u *User) SetRemoteAddress(addr string) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.remoteAddress = addr
-}
+func (u *User) SetRemoteAddress(addr string) { wSet(&u.mu, &u.remoteAddress, addr) }
 
 // HighlightKeywords returns keywords that trigger highlights.
 func (u *User) HighlightKeywords() []string {
@@ -178,11 +146,7 @@ func (u *User) HighlightKeywords() []string {
 }
 
 // SetHighlightKeywords sets keywords that trigger highlights.
-func (u *User) SetHighlightKeywords(keywords []string) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.highlightKeywords = keywords
-}
+func (u *User) SetHighlightKeywords(keywords []string) { wSet(&u.mu, &u.highlightKeywords, keywords) }
 
 // AddIgnoreMask stores a mask for later removal. nick is a user-supplied label
 // mask must be in "*!ident@host" form. Thread-safe.
@@ -228,18 +192,10 @@ func (u *User) IsIgnored(nick, ident, host string) bool {
 }
 
 // Unread returns the number of unread notifications.
-func (u *User) Unread() int {
-	u.mu.RLock()
-	defer u.mu.RUnlock()
-	return u.unread
-}
+func (u *User) Unread() int { return rGet(&u.mu, &u.unread) }
 
 // SetUnread sets the number of unread notifications.
-func (u *User) SetUnread(n int) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.unread = n
-}
+func (u *User) SetUnread(n int) { wSet(&u.mu, &u.unread, n) }
 
 // AddSubscription adds a Web Push subscription.
 func (u *User) AddSubscription(sub webpush.Subscription) {
@@ -267,18 +223,6 @@ func (u *User) Subscriptions() []webpush.Subscription {
 		subs = append(subs, sub)
 	}
 	return subs
-}
-
-// Connection returns an existing connection or creates a new one.
-func (u *User) Connection(id string) Connection {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-
-	id = strings.ToLower(id)
-	if conn, ok := u.connections[id]; ok {
-		return conn
-	}
-	return nil
 }
 
 // AddConnection adds a connection to the user.

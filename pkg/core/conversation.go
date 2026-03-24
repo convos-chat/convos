@@ -72,60 +72,28 @@ func (c *Conversation) Connection() Connection {
 }
 
 // ID returns the conversation identifier.
-func (c *Conversation) ID() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.id
-}
+func (c *Conversation) ID() string { return rGet(&c.mu, &c.id) }
 
 // Name returns the conversation name.
-func (c *Conversation) Name() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.name
-}
+func (c *Conversation) Name() string { return rGet(&c.mu, &c.name) }
 
 // Topic returns the conversation topic.
-func (c *Conversation) Topic() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.topic
-}
+func (c *Conversation) Topic() string { return rGet(&c.mu, &c.topic) }
 
 // SetTopic sets the conversation topic.
-func (c *Conversation) SetTopic(topic string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.topic = topic
-}
+func (c *Conversation) SetTopic(topic string) { wSet(&c.mu, &c.topic, topic) }
 
 // Password returns the conversation password.
-func (c *Conversation) Password() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.password
-}
+func (c *Conversation) Password() string { return rGet(&c.mu, &c.password) }
 
 // SetPassword sets the conversation password.
-func (c *Conversation) SetPassword(password string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.password = password
-}
+func (c *Conversation) SetPassword(password string) { wSet(&c.mu, &c.password, password) }
 
 // Frozen returns the frozen status message, or empty if not frozen.
-func (c *Conversation) Frozen() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.frozen
-}
+func (c *Conversation) Frozen() string { return rGet(&c.mu, &c.frozen) }
 
 // SetFrozen sets the frozen status.
-func (c *Conversation) SetFrozen(msg string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.frozen = msg
-}
+func (c *Conversation) SetFrozen(msg string) { wSet(&c.mu, &c.frozen, msg) }
 
 // IsPrivate returns true if this is a private conversation (not a channel).
 func (c *Conversation) IsPrivate() bool {
@@ -135,11 +103,7 @@ func (c *Conversation) IsPrivate() bool {
 }
 
 // Notifications returns the notification count.
-func (c *Conversation) Notifications() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.notifications
-}
+func (c *Conversation) Notifications() int { return rGet(&c.mu, &c.notifications) }
 
 // IncNotifications increments the notification count.
 func (c *Conversation) IncNotifications() {
@@ -149,18 +113,10 @@ func (c *Conversation) IncNotifications() {
 }
 
 // SetNotifications sets the notification count.
-func (c *Conversation) SetNotifications(n int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.notifications = n
-}
+func (c *Conversation) SetNotifications(n int) { wSet(&c.mu, &c.notifications, n) }
 
 // Unread returns the unread message count.
-func (c *Conversation) Unread() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.unread
-}
+func (c *Conversation) Unread() int { return rGet(&c.mu, &c.unread) }
 
 // IncUnread increments the unread count.
 func (c *Conversation) IncUnread() {
@@ -170,11 +126,7 @@ func (c *Conversation) IncUnread() {
 }
 
 // SetUnread sets the unread count.
-func (c *Conversation) SetUnread(n int) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.unread = n
-}
+func (c *Conversation) SetUnread(n int) { wSet(&c.mu, &c.unread, n) }
 
 // Modes returns the channel modes as a name→bool map.
 func (c *Conversation) Modes() map[string]bool {

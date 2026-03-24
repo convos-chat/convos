@@ -126,38 +126,31 @@ type BaseConnection struct {
 func NewBaseConnection(rawURL string, user *User) *BaseConnection {
 	u, _ := url.Parse(rawURL)
 
+	id := ""
+	if u != nil {
+		id = strings.ToLower(u.Scheme + "-" + PrettyConnectionName(u.Host))
+	}
+
 	var profile *ConnectionProfile
 	if user != nil && user.Core != nil && u != nil {
 		profile = user.Core.ConnectionProfile(u)
 	}
 
 	return &BaseConnection{
+		id:                id,
 		url:               u,
 		user:              user,
+		profile:           profile,
 		state:             StateDisconnected,
 		wantedState:       StateConnected,
 		onConnectCommands: []string{},
 		conversations:     make(map[string]*Conversation),
 		info:              make(map[string]any),
-		profile:           profile,
 	}
 }
 
-// ID returns the connection identifier.
-func (c *BaseConnection) ID() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
-	if c.id != "" {
-		return c.id
-	}
-
-	// Generate ID from URL: scheme-hostname
-	if c.url != nil {
-		c.id = strings.ToLower(c.url.Scheme + "-" + PrettyConnectionName(c.url.Host))
-	}
-	return c.id
-}
+// ID returns the connection identifier (fixed at construction time).
+func (c *BaseConnection) ID() string { return rGet(&c.mu, &c.id) }
 
 // Name returns the connection name.
 func (c *BaseConnection) Name() string {
@@ -174,25 +167,13 @@ func (c *BaseConnection) Name() string {
 }
 
 // SetName sets the connection name.
-func (c *BaseConnection) SetName(name string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.name = name
-}
+func (c *BaseConnection) SetName(name string) { wSet(&c.mu, &c.name, name) }
 
-// URL returns the connection URL.
-func (c *BaseConnection) URL() *url.URL {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.url
-}
+// URL returns the connection URL. Callers must not mutate the returned *url.URL.
+func (c *BaseConnection) URL() *url.URL { return rGet(&c.mu, &c.url) }
 
 // SetURL sets the connection URL.
-func (c *BaseConnection) SetURL(u *url.URL) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.url = u
-}
+func (c *BaseConnection) SetURL(u *url.URL) { wSet(&c.mu, &c.url, u) }
 
 // User returns the owning user.
 func (c *BaseConnection) User() *User {
@@ -200,34 +181,18 @@ func (c *BaseConnection) User() *User {
 }
 
 // State returns the current connection state.
-func (c *BaseConnection) State() ConnectionState {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.state
-}
+func (c *BaseConnection) State() ConnectionState { return rGet(&c.mu, &c.state) }
 
 // SetState sets the connection state.
-func (c *BaseConnection) SetState(state ConnectionState) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.state = state
-}
+func (c *BaseConnection) SetState(state ConnectionState) { wSet(&c.mu, &c.state, state) }
 
 // WantedState returns the desired connection state.
-func (c *BaseConnection) WantedState() ConnectionState {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.wantedState
-}
+func (c *BaseConnection) WantedState() ConnectionState { return rGet(&c.mu, &c.wantedState) }
 
 // SetWantedState sets the desired connection state.
-func (c *BaseConnection) SetWantedState(state ConnectionState) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.wantedState = state
-}
+func (c *BaseConnection) SetWantedState(state ConnectionState) { wSet(&c.mu, &c.wantedState, state) }
 
-// OnConnectCommands returns commands to run on connect.
+// OnConnectCommands returns commands to run on connect. Callers must not mutate the returned slice.
 func (c *BaseConnection) OnConnectCommands() []string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -235,18 +200,10 @@ func (c *BaseConnection) OnConnectCommands() []string {
 }
 
 // SetOnConnectCommands sets commands to run on connect.
-func (c *BaseConnection) SetOnConnectCommands(cmds []string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.onConnectCommands = cmds
-}
+func (c *BaseConnection) SetOnConnectCommands(cmds []string) { wSet(&c.mu, &c.onConnectCommands, cmds) }
 
-// Profile returns the connection profile.
-func (c *BaseConnection) Profile() *ConnectionProfile {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.profile
-}
+// Profile returns the connection profile. Callers must not mutate the returned *ConnectionProfile.
+func (c *BaseConnection) Profile() *ConnectionProfile { return rGet(&c.mu, &c.profile) }
 
 // Conversations returns all conversations.
 func (c *BaseConnection) Conversations() []*Conversation {

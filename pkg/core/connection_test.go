@@ -2,11 +2,14 @@ package core_test
 
 import (
 	"log/slog"
+	"net/url"
 	"testing"
 
 	"github.com/convos-chat/convos/pkg/core"
 	"github.com/convos-chat/convos/pkg/test"
 )
+
+const liberaID = "irc-libera"
 
 // testConnection is a minimal Connection implementation for core tests.
 type testConnection struct {
@@ -57,7 +60,7 @@ func TestConnectionID(t *testing.T) {
 		url      string
 		expected string
 	}{
-		{"irc://irc.libera.chat:6697", "irc-libera"},
+		{"irc://irc.libera.chat:6697", liberaID},
 		{"irc://chat.freenode.net:6667", "irc-freenode"},
 		{"irc://localhost:6667", "irc-localhost"},
 		{"ircs://irc.oftc.net:6697", "ircs-oftc"},
@@ -236,6 +239,23 @@ func TestConnectionToData(t *testing.T) {
 	}
 	if len(data.Conversations) != 1 {
 		t.Errorf("Conversations = %d, want 1", len(data.Conversations))
+	}
+}
+
+func TestConnectionIDStableAfterSetURL(t *testing.T) {
+	t.Parallel()
+
+	c := test.NewTestCore()
+	user := core.NewUser(testEmail, c)
+	conn := newTestConnection("irc://irc.libera.chat", user)
+
+	// Mutate the URL before ID() has ever been called
+	u, _ := url.Parse("irc://chat.freenode.net")
+	conn.SetURL(u)
+
+	// ID must reflect the construction-time URL, not the current URL
+	if got := conn.ID(); got != liberaID {
+		t.Errorf("ID() = %q after SetURL, want %q (stable ID contract)", got, liberaID)
 	}
 }
 
