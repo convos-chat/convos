@@ -16,6 +16,7 @@ type Config struct {
 	Home             string        `envconfig:"CONVOS_HOME"`
 	Listen           string        `envconfig:"CONVOS_LISTEN" default:"http://localhost:8080"`
 	Mode             string        `envconfig:"CONVOS_MODE" default:"production"`
+	LogLevel         string        `envconfig:"CONVOS_LOG_LEVEL"`
 	ReverseProxy     string        `envconfig:"CONVOS_REVERSE_PROXY"`
 	SecureCookies    *bool         `envconfig:"CONVOS_SECURE_COOKIES"`
 	SessionSecret    string        `envconfig:"CONVOS_SESSION_SECRET"`

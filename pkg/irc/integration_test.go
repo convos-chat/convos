@@ -693,8 +693,7 @@ func TestIRCIntegration(t *testing.T) {
 		}
 		if bEntry == nil {
 			t.Fatalf("B's nick %q not in A's participants: %v", nickB, convA.Participants())
-		}
-		if bEntry.Realname == "" {
+		} else if bEntry.Realname == "" {
 			t.Errorf("B's participant entry missing 'realname' (extended-join not working): %v", bEntry)
 		}
 	})

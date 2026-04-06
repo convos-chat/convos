@@ -178,11 +178,22 @@ type Server struct {
 }
 
 func New(c *core.Core, cfg *config.Config, authenticator core.Authenticator) *Server {
-	// Set log level based on mode
-	if cfg.IsDevelopment() {
-		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
-		slog.Debug("Running in development mode")
+	// Set log level based on mode/loglevel
+	var level slog.Level
+	if cfg.LogLevel != "" {
+		if cfg.LogLevel == "trace" {
+			// Fall back to debug level for "trace" since slog doesn't have a trace level
+			cfg.LogLevel = "debug"
+		}
+		if err := level.UnmarshalText([]byte(cfg.LogLevel)); err != nil {
+			slog.Warn("Invalid log level in config, defaulting to info", "error", err)
+			level = slog.LevelInfo
+		}
+	} else if cfg.IsDevelopment() {
+		level = slog.LevelDebug
 	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level})))
+	slog.Debug("Running in development mode")
 
 	r := chi.NewRouter()
 
