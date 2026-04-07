@@ -9,7 +9,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/ergochat/irc-go v0.6.0
 	github.com/getkin/kin-openapi v0.131.0
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/gorilla/sessions v1.4.0
 	github.com/gorilla/websocket v1.5.3
