@@ -235,11 +235,12 @@ func buildMessagesResponse(result core.MessageResult, query core.MessageQuery) a
 			resp.Before = &first
 		}
 
-		// "after" cursor: set if there are newer messages beyond the returned set.
-		// When loading with "around", we're typically at the latest point, so don't
-		// set "after". When loading with explicit "before" param, there are newer
-		// messages the user hasn't scrolled to yet.
-		if query.Before != "" && query.Around == "" {
+		// "after" cursor: set only when loading forward with an explicit "after"
+		// param AND more messages exist beyond the returned set (!result.End).
+		// When loading backward ("before" or "around"), we must NOT set "after" —
+		// doing so would cause the frontend to reset its historyStopAt cursor,
+		// triggering an infinite reload loop.
+		if query.After != "" && !result.End {
 			last := time.Unix(result.Messages[len(result.Messages)-1].Timestamp, 0).UTC()
 			resp.After = &last
 		}
