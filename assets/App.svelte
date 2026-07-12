@@ -113,7 +113,7 @@ function socketChanged(socket) {
 
   const message
     = navigator.onLine === false ? i18n.l('You seem to be offline.')
-    : socket.error               ? i18n.l(socket.error)
+    : socket.error               ? i18n.l('The Convos server appears to be unreachable.')
     : socket.is('connecting')    ? i18n.l('Connecting to Convos...')
     :                              i18n.l('Connection to Convos is %1.', i18n.l(socket.readyStateHuman));
 

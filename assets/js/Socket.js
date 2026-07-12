@@ -41,6 +41,7 @@ export default class Socket extends Reactive {
     this.prop('rw', 'closed', 0);
     this.prop('rw', 'error', '');
     this.prop('rw', 'keepaliveInterval', 10000);
+    this.prop('rw', 'reconnectAt', 0);
     this.prop('rw', 'url', '');
 
     this.id = 0;
@@ -264,7 +265,7 @@ export default class Socket extends Reactive {
 
   _onOpen(e) {
     log.info('open', e);
-    this.update({closed: 0, error: '', readyState: true});
+    this.update({closed: 0, error: '', readyState: true, reconnectAt: 0});
     this._dequeue();
   }
 
@@ -274,6 +275,7 @@ export default class Socket extends Reactive {
     if (delay === true) return this.open();
     if (typeof delay !== 'number') return (this.keepClosed = true);
     this.reconnectTid = setTimeout(() => this.open(), delay);
+    this.update({reconnectAt: Date.now() + delay});
   }
 
   _reconnectStop() {

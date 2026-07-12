@@ -1,7 +1,7 @@
 <script>
 import Icon from '../components/Icon.svelte';
 import {fade} from 'svelte/transition';
-import {getContext} from 'svelte';
+import {getContext, onDestroy} from 'svelte';
 import {l, lmd} from '../store/I18N';
 import {route} from '../store/Route';
 import {settings, timer} from '../js/util';
@@ -13,9 +13,25 @@ const socket = getContext('socket');
 const user = getContext('user');
 const timeout = timer(5000);
 
+let secondsLeft = 0;
+let countdownTid;
+
 $: status = calculateStatus($route, $user);
 $: startHref = route.urlFor(user.email ? '/chat' : '/login');
 $: title = messages[status];
+$: updateCountdown($socket.reconnectAt);
+
+function updateCountdown(reconnectAt) {
+  clearInterval(countdownTid);
+  secondsLeft = 0;
+  if (!reconnectAt) return;
+
+  const tick = () => { secondsLeft = Math.max(0, Math.ceil((reconnectAt - Date.now()) / 1000)) };
+  tick();
+  countdownTid = setInterval(tick, 500);
+}
+
+onDestroy(() => clearInterval(countdownTid));
 
 function calculateStatus($route, user) {
   const override = $route.path.match(/\/err\/(\w+)/);
@@ -29,7 +45,15 @@ function calculateStatus($route, user) {
     <p><Icon name="download"/> {$l('Downloaded Convos.')}</p>
     <p><Icon name="rocket"/> {$l('Started Convos.')}</p>
     {#if $socket.error}
-      <p><Icon name="exclamation-triangle"/> {$l('Loading user data failed: %1', $l($socket.error))}</p>
+      <p>
+        <Icon name="exclamation-triangle"/>
+        {navigator.onLine === false ? $l('You appear to be offline.') : $l('The Convos server appears to be unreachable.')}
+      </p>
+      {#if secondsLeft > 0}
+        <p><Icon name="spinner fa-spin"/> {$l('Retrying in %1s...', secondsLeft)}</p>
+      {:else}
+        <p><Icon name="spinner fa-spin"/> {$l('Connecting...')}</p>
+      {/if}
     {:else}
       <p><Icon name="spinner fa-spin"/> {$l('Loading user data...')}</p>
     {/if}
