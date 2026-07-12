@@ -361,12 +361,15 @@ func execTemplate(t *template.Template, data any) string {
 	return buf.String()
 }
 
+// fieldProvider is the template data key for the provider name.
+const fieldProvider = "Provider"
+
 // RenderPhoto returns HTML for a photo embed.
 func RenderPhoto(l *Link) string {
 	return execTemplate(photoTmpl, map[string]string{
-		"Provider": strings.ToLower(l.ProviderName),
-		"Src":      l.URL,
-		"Alt":      l.Title,
+		fieldProvider: strings.ToLower(l.ProviderName),
+		"Src":         l.URL,
+		"Alt":         l.Title,
 	})
 }
 
@@ -377,16 +380,16 @@ func RenderVideo(l *Link, mimeType string) string {
 		mimeType = strings.TrimSpace(mimeType[:idx])
 	}
 	return execTemplate(videoTmpl, map[string]string{
-		"Provider": strings.ToLower(l.ProviderName),
-		"Src":      l.URL,
-		"Mime":     mimeType,
+		fieldProvider: strings.ToLower(l.ProviderName),
+		"Src":         l.URL,
+		"Mime":        mimeType,
 	})
 }
 
 // RenderRichCard returns HTML for a rich card embed.
 func RenderRichCard(l *Link) string {
 	data := map[string]string{
-		"Provider":    strings.ToLower(l.ProviderName),
+		fieldProvider: strings.ToLower(l.ProviderName),
 		"URL":         l.URL,
 		"Title":       l.Title,
 		"Description": l.Description,

@@ -9,6 +9,13 @@ import (
 // InfoMap represents a generic map for extra information.
 type InfoMap map[string]any
 
+// JSON field keys used when marshalling events into a flat object.
+const (
+	fieldEvent = "event"
+	fieldType  = "type"
+	fieldNick  = "nick"
+)
+
 // MessageType represents the type of a chat message.
 type MessageType string
 
@@ -172,7 +179,7 @@ func (MessageEvent) EventType() EventType { return EventTypeMessage }
 
 func (e MessageEvent) MarshalJSON() ([]byte, error) {
 	type s MessageEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeMessage})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeMessage})
 }
 
 // StateConnectionEvent represents connection state changes.
@@ -186,7 +193,7 @@ func (StateConnectionEvent) EventType() EventType { return EventTypeState }
 
 func (e StateConnectionEvent) MarshalJSON() ([]byte, error) {
 	type s StateConnectionEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventConnection})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventConnection})
 }
 
 // StateFrozenEvent represents conversation frozen state.
@@ -204,7 +211,7 @@ func (StateFrozenEvent) EventType() EventType { return EventTypeState }
 
 func (e StateFrozenEvent) MarshalJSON() ([]byte, error) {
 	type s StateFrozenEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventFrozen})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventFrozen})
 }
 
 // StateJoinEvent represents a user joining a channel.
@@ -219,7 +226,7 @@ func (StateJoinEvent) EventType() EventType { return EventTypeState }
 
 func (e StateJoinEvent) MarshalJSON() ([]byte, error) {
 	type s StateJoinEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventJoin})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventJoin})
 }
 
 // StatePartEvent represents a user leaving a channel (PART or KICK).
@@ -235,7 +242,7 @@ func (StatePartEvent) EventType() EventType { return EventTypeState }
 
 func (e StatePartEvent) MarshalJSON() ([]byte, error) {
 	type s StatePartEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventPart})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventPart})
 }
 
 // StateQuitEvent represents a user quitting the server.
@@ -249,7 +256,7 @@ func (StateQuitEvent) EventType() EventType { return EventTypeState }
 
 func (e StateQuitEvent) MarshalJSON() ([]byte, error) {
 	type s StateQuitEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventQuit})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventQuit})
 }
 
 // Participant represents a channel participant.
@@ -281,7 +288,7 @@ type WhoisData struct {
 // ToMap converts WhoisData to a map[string]any for event emission and storage.
 func (w WhoisData) ToMap() map[string]any {
 	m := map[string]any{
-		"nick":        w.Nick,
+		fieldNick:     w.Nick,
 		"user":        w.User,
 		"host":        w.Host,
 		"name":        w.Name,
@@ -316,7 +323,7 @@ func (StateParticipantsEvent) EventType() EventType { return EventTypeState }
 
 func (e StateParticipantsEvent) MarshalJSON() ([]byte, error) {
 	type s StateParticipantsEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventParticipants})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventParticipants})
 }
 
 // StateTypingEvent represents a typing indicator.
@@ -331,7 +338,7 @@ func (StateTypingEvent) EventType() EventType { return EventTypeState }
 
 func (e StateTypingEvent) MarshalJSON() ([]byte, error) {
 	type s StateTypingEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventTyping})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventTyping})
 }
 
 // StateNickChangeEvent represents a user changing their nickname.
@@ -345,7 +352,7 @@ func (StateNickChangeEvent) EventType() EventType { return EventTypeState }
 
 func (e StateNickChangeEvent) MarshalJSON() ([]byte, error) {
 	type s StateNickChangeEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventNickChange})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventNickChange})
 }
 
 // StateModeEvent represents a channel or user mode change.
@@ -363,7 +370,7 @@ func (StateModeEvent) EventType() EventType { return EventTypeState }
 
 func (e StateModeEvent) MarshalJSON() ([]byte, error) {
 	type s StateModeEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventMode})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventMode})
 }
 
 // StateInviteEvent represents a user being invited to a channel.
@@ -378,7 +385,7 @@ func (StateInviteEvent) EventType() EventType { return EventTypeState }
 
 func (e StateInviteEvent) MarshalJSON() ([]byte, error) {
 	type s StateInviteEvent
-	return marshalWithExtras(s(e), map[string]any{"event": EventTypeState, "type": StateEventInvite})
+	return marshalWithExtras(s(e), map[string]any{fieldEvent: EventTypeState, fieldType: StateEventInvite})
 }
 
 // StateInfoEvent represents a generic info event (user modes, connection info).
@@ -392,7 +399,7 @@ func (StateInfoEvent) EventType() EventType { return EventTypeState }
 // MarshalJSON inlines the Info map into the top-level JSON object.
 func (e StateInfoEvent) MarshalJSON() ([]byte, error) {
 	type s StateInfoEvent
-	extras := map[string]any{"event": EventTypeState, "type": StateEventInfo}
+	extras := map[string]any{fieldEvent: EventTypeState, fieldType: StateEventInfo}
 	maps.Copy(extras, e.Info)
 	return marshalWithExtras(s(e), extras)
 }
@@ -429,7 +436,7 @@ func (SentEvent) EventType() EventType { return EventTypeSent }
 // MarshalJSON inlines the Data map into the top-level JSON object.
 func (e SentEvent) MarshalJSON() ([]byte, error) {
 	type s SentEvent
-	extras := map[string]any{"event": EventTypeSent}
+	extras := map[string]any{fieldEvent: EventTypeSent}
 	maps.Copy(extras, e.Data)
 	return marshalWithExtras(s(e), extras)
 }

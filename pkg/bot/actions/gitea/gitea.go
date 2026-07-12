@@ -7,6 +7,14 @@ import (
 	"github.com/convos-chat/convos/pkg/bot"
 )
 
+const (
+	providerGitea     = "gitea"
+	eventPush         = "push"
+	eventPullRequest  = "pull_request"
+	eventIssueComment = "issue_comment"
+	eventUnknown      = "unknown"
+)
+
 // Action implements the Gitea/Forgejo bot action.
 type Action struct {
 	manager *bot.Manager
@@ -19,7 +27,7 @@ func NewAction() *Action {
 
 // ID returns the action ID.
 func (a *Action) ID() string {
-	return "gitea"
+	return providerGitea
 }
 
 func (a *Action) Register(m *bot.Manager) {
@@ -28,7 +36,7 @@ func (a *Action) Register(m *bot.Manager) {
 
 func (a *Action) HandleWebhook(provider string, payload map[string]any) bool {
 	// Support both "gitea" and "codeberg" (which is forgejo/gitea based)
-	if provider != "gitea" && provider != "codeberg" && provider != "forgejo" {
+	if provider != providerGitea && provider != "codeberg" && provider != "forgejo" {
 		return false
 	}
 
@@ -57,15 +65,15 @@ func formatGiteaMessage(payload map[string]any) (string, string) {
 	}
 
 	if commits, ok := payload["commits"].([]any); ok {
-		return bot.FormatPushMessage(repo, sender, commits, get), "push"
+		return bot.FormatPushMessage(repo, sender, commits, get), eventPush
 	}
 
-	if _, ok := payload["pull_request"]; ok {
+	if _, ok := payload[eventPullRequest]; ok {
 		action := get("action")
-		num := get("pull_request", "number")
-		title := get("pull_request", "title")
-		url := get("pull_request", "html_url")
-		return fmt.Sprintf("[%s] %s %s pull request #%s: %s — %s", repo, sender, action, num, title, url), "pull_request"
+		num := get(eventPullRequest, "number")
+		title := get(eventPullRequest, "title")
+		url := get(eventPullRequest, "html_url")
+		return fmt.Sprintf("[%s] %s %s pull request #%s: %s — %s", repo, sender, action, num, title, url), eventPullRequest
 	}
 
 	if _, ok := payload["issue"]; ok {
@@ -73,7 +81,7 @@ func formatGiteaMessage(payload map[string]any) (string, string) {
 			// Issue Comment
 			num := get("issue", "number")
 			url := get("comment", "html_url")
-			return fmt.Sprintf("[%s] %s commented on issue #%s: %s", repo, sender, num, url), "issue_comment"
+			return fmt.Sprintf("[%s] %s commented on issue #%s: %s", repo, sender, num, url), eventIssueComment
 		}
 		// Issue
 		action := get("action")
@@ -83,5 +91,5 @@ func formatGiteaMessage(payload map[string]any) (string, string) {
 		return fmt.Sprintf("[%s] %s %s issue #%s: %s — %s", repo, sender, action, num, title, url), "issues"
 	}
 
-	return "", "unknown"
+	return "", eventUnknown
 }

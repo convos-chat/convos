@@ -35,6 +35,13 @@ var (
 	ErrNotIgnored       = errors.New("nick is not in ignore list")
 )
 
+// Shared string keys used in event data maps and command payloads.
+const (
+	fieldNick = "nick"
+	fieldMode = "mode"
+	cmdIgnore = "ignore"
+)
+
 // handleCommand parses and executes an IRC command from user input.
 func (c *Connection) handleCommand(target, raw string, requestID any) error {
 	parts := strings.SplitN(raw, " ", 2)
@@ -131,7 +138,7 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 			c.emitEvent(&core.SentEvent{
 				ConversationID: target,
 				Message:        "/ignore",
-				Command:        []string{"ignore"},
+				Command:        []string{cmdIgnore},
 				Data:           map[string]any{"masks": masks},
 			})
 			return nil
@@ -178,7 +185,7 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 			ConversationID: target,
 			Message:        "/unignore",
 			Command:        []string{"unignore"},
-			Data:           map[string]any{"nick": nick},
+			Data:           map[string]any{fieldNick: nick},
 		})
 		return nil
 	}

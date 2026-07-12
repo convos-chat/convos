@@ -45,6 +45,10 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          - goconst
+        # Duplicated literals in tests are fine and often clearer inline.
+        path: (.+)_test\.go
+      - linters:
           - govet
         path: (.+)_test\.go
         # Ignoring HTTP Write errors is common as there is nothing to be done if

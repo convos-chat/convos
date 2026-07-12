@@ -10,6 +10,12 @@ import (
 	"github.com/convos-chat/convos/pkg/core"
 )
 
+// serviceChanServ is the default channel service account nick.
+const (
+	serviceChanServ = "chanserv"
+	serviceNickServ = "nickserv"
+)
+
 // ListConnectionProfiles implements api.StrictServerInterface.
 func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListConnectionProfilesRequestObject) (api.ListConnectionProfilesResponseObject, error) {
 	profiles, err := h.Core.Backend.LoadConnectionProfiles()
@@ -28,7 +34,7 @@ func (h *Handler) ListConnectionProfiles(ctx context.Context, request api.ListCo
 			URL:                defaultURL,
 			MaxBulkMessageSize: 3,
 			MaxMessageLength:   512,
-			ServiceAccounts:    []string{"chanserv", "nickserv"},
+			ServiceAccounts:    []string{serviceChanServ, serviceNickServ},
 		})
 	}
 
@@ -111,7 +117,7 @@ func fromAPIConnectionProfile(p *api.ConnectionProfile) core.ConnectionProfileDa
 		URL:                p.Url,
 		MaxBulkMessageSize: 3,
 		MaxMessageLength:   512,
-		ServiceAccounts:    []string{"chanserv", "nickserv"},
+		ServiceAccounts:    []string{serviceChanServ, serviceNickServ},
 	}
 	if p.IsDefault != nil {
 		res.IsDefault = *p.IsDefault

@@ -116,10 +116,10 @@ type Connection struct {
 func NewConnection(rawURL string, user *core.User) *Connection {
 	// Inject ?nick= from email before BaseConnection parses the URL.
 	// This must happen before core.NewBaseConnection is called.
-	if u, err := url.Parse(rawURL); err == nil && u.Query().Get("nick") == "" && user != nil {
+	if u, err := url.Parse(rawURL); err == nil && u.Query().Get(fieldNick) == "" && user != nil {
 		nick := defaultNickFromEmail(user.Email())
 		q := u.Query()
-		q.Set("nick", nick)
+		q.Set(fieldNick, nick)
 		u.RawQuery = q.Encode()
 		rawURL = u.String()
 	}
@@ -762,7 +762,7 @@ func (c *Connection) emitInfo() {
 	c.mu.RUnlock()
 
 	baseInfo := c.Info()
-	info := map[string]any{"nick": nick}
+	info := map[string]any{fieldNick: nick}
 	maps.Copy(info, baseInfo)
 	c.emitEvent(&core.StateInfoEvent{
 		Info: info,

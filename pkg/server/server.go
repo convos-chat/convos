@@ -43,6 +43,13 @@ var embeddedFiles embed.FS
 
 const httpsScheme = "https"
 
+const (
+	httpScheme        = "http"
+	pathUserLogin     = "/api/user/login"
+	pathUserRegister  = "/api/user/register"
+	colorSchemeNormal = "normal"
+)
+
 var (
 	appTemplate           = template.Must(template.New("app").ParseFS(embeddedFiles, "templates/app.html")).Lookup("app.html")
 	swTemplate            = template.Must(template.New("sw").ParseFS(embeddedFiles, "templates/sw.js")).Lookup("sw.js")
@@ -78,7 +85,7 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 					s.updateBaseURL(u)
 				}
 			} else {
-				s.updateBaseURL(&url.URL{Scheme: "http", Host: r.Host})
+				s.updateBaseURL(&url.URL{Scheme: httpScheme, Host: r.Host})
 			}
 			next.ServeHTTP(w, r)
 			return
@@ -92,7 +99,7 @@ func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 				s.updateBaseURL(u)
 			}
 		} else if host := r.Header.Get("X-Forwarded-Host"); host != "" {
-			scheme := "http"
+			scheme := httpScheme
 			if r.Header.Get("X-Forwarded-Proto") == httpsScheme {
 				scheme = httpsScheme
 			}
@@ -116,7 +123,7 @@ func (s *Server) updateBaseURL(u *url.URL) {
 func (s *Server) RateLimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Only rate limit login and register
-		if r.Method == http.MethodPost && (r.URL.Path == "/api/user/login" || r.URL.Path == "/api/user/register") {
+		if r.Method == http.MethodPost && (r.URL.Path == pathUserLogin || r.URL.Path == pathUserRegister) {
 			s.mu.Lock()
 			last, ok := s.lastAccess[r.RemoteAddr]
 			if ok && time.Since(last) < 1*time.Second {
@@ -143,9 +150,9 @@ func (s *Server) RequireAuthMiddleware(next http.Handler) http.Handler {
 		// Skip for non-API routes or public API routes
 		if !strings.HasPrefix(r.URL.Path, "/api") ||
 			r.URL.Path == "/api" ||
-			r.URL.Path == "/api/user/login" ||
-			r.URL.Path == "/api/user/register" ||
-			(strings.HasPrefix(r.URL.Path, "/api/files/") && r.Method == "GET") ||
+			r.URL.Path == pathUserLogin ||
+			r.URL.Path == pathUserRegister ||
+			(strings.HasPrefix(r.URL.Path, "/api/files/") && r.Method == http.MethodGet) ||
 			strings.HasPrefix(r.URL.Path, "/api/i18n/") {
 			next.ServeHTTP(w, r)
 			return
@@ -409,12 +416,12 @@ func (s *Server) themeList() []themeInfo {
 			name = strings.TrimSuffix(filename, ".css")
 		}
 		if colorScheme == "" {
-			colorScheme = "normal"
+			colorScheme = colorSchemeNormal
 		}
 
 		id := colorScheme + "-" + name
 		title := name
-		if colorScheme != "normal" {
+		if colorScheme != colorSchemeNormal {
 			title += " (" + colorScheme + ")"
 		}
 
@@ -556,7 +563,7 @@ func (s *Server) findPrimaryTheme(r *http.Request, themes []themeInfo) *themeInf
 	themeName, colorScheme = parseThemeCookie(r, themeName, colorScheme)
 
 	// Try schemes in priority order: requested, normal, light
-	schemes := []string{colorScheme, "normal", "light"}
+	schemes := []string{colorScheme, colorSchemeNormal, "light"}
 	for _, scheme := range schemes {
 		targetID := scheme + "-" + themeName
 		for i := range themes {
@@ -740,7 +747,7 @@ func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inject the absolute server URL so the frontend can construct requests
-	scheme := "http"
+	scheme := httpScheme
 	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == httpsScheme {
 		scheme = httpsScheme
 	}

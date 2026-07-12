@@ -29,6 +29,12 @@ var (
 	ErrInvalidInviteToken     = errors.New("invalid token. You have to ask your Convos admin for a new link")
 )
 
+// fieldErrors is the JSON key used for error lists in API responses.
+const (
+	fieldErrors  = "errors"
+	fieldMessage = "message"
+)
+
 type Handler struct {
 	Core          *core.Core
 	Authenticator core.Authenticator

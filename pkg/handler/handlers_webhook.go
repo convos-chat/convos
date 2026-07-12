@@ -20,12 +20,12 @@ func (h *Handler) Webhook(ctx context.Context, request api.WebhookRequestObject)
 		remoteIP := extractIP(r.RemoteAddr)
 		if !h.isAllowedWebhookIP(remoteIP) {
 			slog.Warn("Webhook rejected: IP not in allowed networks", "ip", remoteIP)
-			return api.Webhook200JSONResponse{"errors": []map[string]string{{"message": fmt.Sprintf("Invalid source IP %s.", remoteIP)}}}, nil
+			return api.Webhook200JSONResponse{fieldErrors: []map[string]string{{fieldMessage: fmt.Sprintf("Invalid source IP %s.", remoteIP)}}}, nil
 		}
 	}
 
 	if request.Body == nil {
-		return api.Webhook200JSONResponse{"errors": []map[string]string{{"message": "Empty payload."}}}, nil
+		return api.Webhook200JSONResponse{fieldErrors: []map[string]string{{fieldMessage: "Empty payload."}}}, nil
 	}
 
 	provider := request.ProviderName

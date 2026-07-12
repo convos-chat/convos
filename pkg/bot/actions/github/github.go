@@ -7,6 +7,11 @@ import (
 	"github.com/convos-chat/convos/pkg/bot"
 )
 
+const (
+	eventPullRequest  = "pull_request"
+	eventIssueComment = "issue_comment"
+)
+
 // Action implements the GitHub bot action.
 type Action struct {
 	manager *bot.Manager
@@ -55,26 +60,26 @@ func formatGitHubMessage(payload map[string]any) (string, string) {
 		return bot.FormatPushMessage(repo, sender, commits, get), "push"
 	}
 
-	if _, ok := payload["pull_request"]; ok {
+	if _, ok := payload[eventPullRequest]; ok {
 		action := get("action")
-		num := get("pull_request", "number")
-		title := get("pull_request", "title")
-		url := get("pull_request", "html_url")
+		num := get(eventPullRequest, "number")
+		title := get(eventPullRequest, "title")
+		url := get(eventPullRequest, "html_url")
 		if sender == "dependabot[bot]" || sender == "renovate[bot]" {
-			return "", "pull_request"
+			return "", eventPullRequest
 		}
-		return fmt.Sprintf("[%s] %s %s pull request #%s: %s — %s", repo, sender, action, num, title, url), "pull_request"
+		return fmt.Sprintf("[%s] %s %s pull request #%s: %s — %s", repo, sender, action, num, title, url), eventPullRequest
 	}
 
 	if _, ok := payload["issue"]; ok {
 		if _, ok := payload["comment"]; ok {
 			action := get("action")
 			if action != "created" {
-				return "", "issue_comment"
+				return "", eventIssueComment
 			}
 			num := get("issue", "number")
 			url := get("comment", "html_url")
-			return fmt.Sprintf("[%s] %s commented on issue #%s: %s", repo, sender, num, url), "issue_comment"
+			return fmt.Sprintf("[%s] %s commented on issue #%s: %s", repo, sender, num, url), eventIssueComment
 		}
 		action := get("action")
 		num := get("issue", "number")

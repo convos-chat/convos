@@ -152,7 +152,7 @@ func (c *Connection) handleCTCP(nick, ctcp string) {
 	}
 
 	if err := c.client.Send("NOTICE", nick, "\x01"+reply+"\x01"); err != nil {
-		slog.Error("Failed to send CTCP reply", "nick", nick, "ctcp", ctcp, "error", err)
+		slog.Error("Failed to send CTCP reply", fieldNick, nick, "ctcp", ctcp, "error", err)
 	}
 }
 
@@ -469,8 +469,8 @@ func (c *Connection) handleMode(msg ircmsg.Message) {
 	if !core.ChannelRE.MatchString(target) {
 		// Special "info" state event for user mode changes
 		c.emitEvent(&core.StateInfoEvent{Info: map[string]any{
-			"nick": c.Nick(),
-			"mode": modeStr,
+			fieldNick: c.Nick(),
+			fieldMode: modeStr,
 		}})
 		return
 	}
@@ -574,10 +574,10 @@ func (c *Connection) handleChannelModeIs(msg ircmsg.Message) {
 		c.emitEvent(&core.SentEvent{
 			ConversationID: convID,
 			Message:        "/mode",
-			Command:        []string{"mode"},
+			Command:        []string{fieldMode},
 			Data: map[string]any{
 				"id":    requestID,
-				"mode":  mode,
+				fieldMode:  mode,
 				"modes": modes,
 			},
 		})
@@ -702,7 +702,7 @@ func (c *Connection) handleWhoisReply(code string, msg ircmsg.Message) {
 		if len(msg.Params) >= 3 {
 			for ch := range strings.FieldsSeq(msg.Params[2]) {
 				mode, chName := parseNickMode(ch) // reuse - same prefix format
-				w.Channels[chName] = map[string]any{"mode": mode}
+				w.Channels[chName] = map[string]any{fieldMode: mode}
 			}
 		}
 	case ircevent.RPL_WHOISCERTFP:
@@ -742,7 +742,7 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 
 	var whois map[string]any
 	if whoisData == nil {
-		whois = map[string]any{"nick": msg.Params[1]}
+		whois = map[string]any{fieldNick: msg.Params[1]}
 	} else {
 		whois = whoisData.ToMap()
 	}
@@ -758,8 +758,8 @@ func (c *Connection) handleEndOfWhois(msg ircmsg.Message) {
 		c.emitEvent(&core.SentEvent{
 			ConversationID: "",
 			Message:        "/ignore",
-			Command:        []string{"ignore"},
-			Data:           map[string]any{"nick": originalNick, "mask": mask},
+			Command:        []string{cmdIgnore},
+			Data:           map[string]any{fieldNick: originalNick, "mask": mask},
 		})
 	}
 
@@ -905,7 +905,7 @@ func (c *Connection) handleUserModeIs(msg ircmsg.Message) {
 	}
 
 	modeStr := msg.Params[1]
-	c.SetInfo("mode", modeStr)
+	c.SetInfo(fieldMode, modeStr)
 	c.emitInfo()
 }
 
