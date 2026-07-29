@@ -104,9 +104,8 @@ type Connection struct {
 	// etc.) and is cleared on any successful own-nick change.
 	nickFixBase string
 
-	// Reconnect state
-	reconnectDelay time.Duration
-	stopReconnect  chan struct{}
+	// stopReconnect signals reconnectLoop to stop retrying.
+	stopReconnect chan struct{}
 
 	// For testing
 	DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
@@ -248,7 +247,6 @@ func (c *Connection) Connect() error {
 		c.mu.Lock()
 		c.SetState(core.StateConnected)
 		c.nick = currentNick
-		c.reconnectDelay = 0
 		c.mu.Unlock()
 
 		c.client.ClearCallback(ircevent.ERR_NICKNAMEINUSE)
@@ -473,13 +471,14 @@ func (c *Connection) Connect() error {
 		})
 	}
 
-	// Capture client for local use to avoid needing lock
 	client := c.client
 	c.mu.Unlock()
 
-	go client.Loop()
-
-	// Connect to server (without holding the lock)
+	// Connect to server (without holding the lock).
+	// We do NOT call client.Loop() here: ircevent's Loop() implements its own
+	// reconnection loop that conflicts with convos' reconnectLoop(). Instead,
+	// convos drives all reconnection via reconnectLoop() which loops internally
+	// with exponential backoff until the network comes back.
 	if err := client.Connect(); err != nil {
 		c.SetState(core.StateDisconnected)
 		errMsg := fmt.Sprintf("Could not connect to %s: %s", host, err)
@@ -622,42 +621,50 @@ func (c *Connection) SetNick(nick string) {
 	c.nick = nick
 }
 
-// reconnectLoop attempts to reconnect with exponential backoff.
+// reconnectLoop retries connection with exponential backoff until success or
+// the user explicitly disconnects. Unlike the old single-shot design, this
+// loops internally so that transient network outages (hours-long, overnight)
+// are handled: once the network comes back, the next attempt succeeds.
 func (c *Connection) reconnectLoop() {
 	const (
 		minDelay = 2 * time.Second
 		maxDelay = 5 * time.Minute
 	)
 
-	c.mu.Lock()
-	if c.reconnectDelay < minDelay {
-		c.reconnectDelay = minDelay
-	} else {
-		c.reconnectDelay *= 2
-		if c.reconnectDelay > maxDelay {
-			c.reconnectDelay = maxDelay
+	delay := minDelay
+
+	for {
+		c.emitState(core.StateQueued, fmt.Sprintf("Reconnecting in %s.", delay.Truncate(time.Second)))
+
+		// Read the current stop channel under lock (Connect/Disconnect swap it
+		// under c.mu). We re-read each iteration on purpose: this loop's own
+		// Connect() call replaces the channel, so capturing once would make the
+		// loop self-cancel on its second iteration.
+		c.mu.RLock()
+		stop := c.stopReconnect
+		c.mu.RUnlock()
+
+		select {
+		case <-time.After(delay):
+		case <-stop:
+			return
 		}
-	}
-	delay := c.reconnectDelay
-	stop := c.stopReconnect
-	c.mu.Unlock()
 
-	c.emitState(core.StateQueued, fmt.Sprintf("Reconnecting in %s.", delay.Truncate(time.Second)))
+		if c.WantedState() != core.StateConnected {
+			return
+		}
 
-	select {
-	case <-time.After(delay):
-		// Continue to reconnect
-	case <-stop:
-		return
-	}
+		err := c.Connect()
+		if err == nil {
+			// Connected successfully; reconnectLoop is done.
+			return
+		}
 
-	if c.WantedState() != core.StateConnected {
-		return
-	}
-
-	if err := c.Connect(); err != nil {
-		// Connect failed immediately; the disconnect callback will fire another reconnectLoop
-		return
+		// Backoff for next attempt.
+		delay *= 2
+		if delay > maxDelay {
+			delay = maxDelay
+		}
 	}
 }
 
