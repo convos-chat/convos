@@ -23,7 +23,7 @@ export default class Messages extends Reactive {
 
     this.prop('ro', 'length', () => this.messages.length);
     this.prop('ro', 'messages', []);
-    this.prop('rw', 'expandUrlToMedia', true);
+    this.prop('rw', 'expandUrlToMedia', false);
     this.prop('persist', 'raw', false, {key: keyPrefix + ':raw'});
     this.embedCache = EMBED_CACHE;
   }
