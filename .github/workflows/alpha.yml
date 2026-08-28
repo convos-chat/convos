@@ -6,8 +6,9 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  GO_VERSION: "1.26.0"
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo
@@ -35,3 +36,45 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:alpha
           labels: ${{ steps.meta.outputs.labels }}
+  binaries:
+    strategy:
+      matrix:
+        include:
+          - goarch: amd64
+            name: x86_64
+          - goarch: arm64
+            name: arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+      - name: Build binary
+        env:
+          CGO_ENABLED: 0
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          go build -ldflags "-X github.com/convos-chat/convos/pkg/version.Version=${VERSION}" \
+            -o convos-convos-linux-${{ matrix.name }} convos.go
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: convos-linux-${{ matrix.name }}
+          path: convos-convos-linux-${{ matrix.name }}
+          if-no-files-found: error
+
