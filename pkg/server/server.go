@@ -425,10 +425,11 @@ func (s *Server) themeList() []themeInfo {
 			title += " (" + colorScheme + ")"
 		}
 
+		baseURL := s.baseURL()
 		themes = append(themes, themeInfo{
 			ID:    id,
 			Title: title,
-			URL:   "/themes/" + filename,
+			URL:   baseURL + "/themes/" + filename,
 		})
 	}
 
@@ -656,7 +657,7 @@ func (s *Server) baseURL() string {
 // getOIDCLoginURL returns the OIDC login URL if OIDC is enabled, otherwise empty string.
 func (s *Server) getOIDCLoginURL() string {
 	if s.Config.Auth.Provider == "oidc" {
-		return "/auth/oidc/login"
+		return s.baseURL() + "/auth/oidc/login"
 	}
 	return ""
 }
@@ -747,13 +748,9 @@ func (s *Server) serveOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inject the absolute server URL so the frontend can construct requests
-	scheme := httpScheme
-	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == httpsScheme {
-		scheme = httpsScheme
-	}
 	if servers, ok := spec["servers"].([]any); ok && len(servers) > 0 {
 		if server, ok := servers[0].(map[string]any); ok {
-			server["url"] = scheme + "://" + r.Host + "/api"
+			server["url"] = s.baseURL() + "/api"
 		}
 	}
 
