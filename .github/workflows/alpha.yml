@@ -72,7 +72,7 @@ jobs:
           go build -ldflags "-X github.com/convos-chat/convos/pkg/version.Version=${VERSION}" \
             -o convos-convos-linux-${{ matrix.name }} convos.go
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: convos-linux-${{ matrix.name }}
           path: convos-convos-linux-${{ matrix.name }}
