@@ -21,7 +21,7 @@
     ">1%"
   ],
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "6.6.0",
+    "@fortawesome/fontawesome-free": "6.7.2",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-svelte": "^2.34.0",
