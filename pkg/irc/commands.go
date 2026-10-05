@@ -82,7 +82,7 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 	case "PART", "LEAVE", "CLOSE":
 		ch := target
 		if args != "" {
-			ch = strings.SplitN(args, " ", 2)[0]
+			ch, _, _ = strings.Cut(args, " ")
 		}
 		if ch == "" {
 			return ErrUsagePart
@@ -203,7 +203,7 @@ func (c *Connection) handleCommand(target, raw string, requestID any) error {
 		if args == "" {
 			return ErrUsageJoin
 		}
-		ch := strings.SplitN(args, " ", 2)[0]
+		ch, _, _ := strings.Cut(args, " ")
 		if !core.ChannelRE.MatchString(ch) {
 			return c.openConversation(ch)
 		}
