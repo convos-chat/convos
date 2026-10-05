@@ -6,6 +6,114 @@ msgstr ""
 "Language-Team: English <lang-en@convos.chat>\n"
 "Plural-Forms: ;\n"
 
+#: assets/js/commands.js:39
+msgid "Add a shrug to end of message. Message is optional."
+msgstr "Add a shrug to end of message. Message is optional."
+
+#: assets/js/commands.js:59
+msgid "Add nick to ignore list"
+msgstr "Add nick to ignore list"
+
+#: assets/js/commands.js:58
+msgid "Add nick to ignore list. Call without nick to list"
+msgstr "Add nick to ignore list. Call without nick to list"
+
+#: assets/js/commands.js:43
+msgid "Add or remove an away message"
+msgstr "Add or remove an away message"
+
+#: assets/js/commands.js:60
+msgid "Allow you to send any raw IRC message."
+msgstr "Allow you to send any raw IRC message."
+
+#: assets/js/commands.js:45
+msgid "Change mode of yourself or a user"
+msgstr "Change mode of yourself or a user"
+
+#: assets/js/commands.js:42
+msgid "Change your wanted nick."
+msgstr "Change your wanted nick."
+
+#: assets/js/commands.js:41
+msgid "Close conversation."
+msgstr "Close conversation."
+
+#: assets/js/commands.js:50
+msgid "Delete all history for the given conversation."
+msgstr "Delete all history for the given conversation."
+
+#: assets/js/commands.js:51
+msgid "Gain operator status on a network."
+msgstr "Gain operator status on a network."
+
+#: assets/js/commands.js:48
+msgid "Invite a user to a channel."
+msgstr "Invite a user to a channel."
+
+#: assets/js/commands.js:40
+msgid "Join channel and open up a chat window."
+msgstr "Join channel and open up a chat window."
+
+#: assets/js/commands.js:44
+msgid "Kick a user from the current channel."
+msgstr "Kick a user from the current channel."
+
+#: assets/js/commands.js:37
+msgid "Open up a new chat window with nick."
+msgstr "Open up a new chat window with nick."
+
+#: assets/js/commands.js:49
+msgid "Restart the current connection."
+msgstr "Restart the current connection."
+
+#: assets/js/commands.js:38
+msgid "Send a direct message to nick."
+msgstr "Send a direct message to nick."
+
+#: assets/js/commands.js:56
+msgid "Send a message to botserv."
+msgstr "Send a message to botserv."
+
+#: assets/js/commands.js:52
+msgid "Send a message to chanserv."
+msgstr "Send a message to chanserv."
+
+#: assets/js/commands.js:55
+msgid "Send a message to hostserv."
+msgstr "Send a message to hostserv."
+
+#: assets/js/commands.js:54
+msgid "Send a message to memoserv."
+msgstr "Send a message to memoserv."
+
+#: assets/js/commands.js:53
+msgid "Send a message to nickserv."
+msgstr "Send a message to nickserv."
+
+#: assets/js/commands.js:57
+msgid "Send a message to operserv."
+msgstr "Send a message to operserv."
+
+#: assets/js/commands.js:34
+msgid "Send message as an action."
+msgstr "Send message as an action."
+
+#: assets/js/commands.js:46
+msgid "Show current topic, or set a new one."
+msgstr "Show current topic, or set a new one."
+
+#: assets/js/commands.js:36
+msgid "Show information about a user."
+msgstr "Show information about a user."
+
+#: assets/js/commands.js:47
+msgid "Show participants in the channel."
+msgstr "Show participants in the channel."
+
+#: assets/js/commands.js:35
+msgid "Used when you want to send a message starting with \"/\"."
+msgstr "Used when you want to send a message starting with \"/\"."
+
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
 msgstr "\"#\" will show the matching conversation names."

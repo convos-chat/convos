@@ -12,6 +12,114 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.9\n"
 
+#: assets/js/commands.js:39
+msgid "Add a shrug to end of message. Message is optional."
+msgstr "在消息末尾加一个耸肩表情。消息内容是可选的。"
+
+#: assets/js/commands.js:59
+msgid "Add nick to ignore list"
+msgstr "添加昵称到忽略列表"
+
+#: assets/js/commands.js:58
+msgid "Add nick to ignore list. Call without nick to list"
+msgstr "添加昵称到忽略列表。不带昵称调用则查看列表"
+
+#: assets/js/commands.js:43
+msgid "Add or remove an away message"
+msgstr "添加或移除一条离开消息"
+
+#: assets/js/commands.js:60
+msgid "Allow you to send any raw IRC message."
+msgstr "允许您发送任何原始 IRC 消息。"
+
+#: assets/js/commands.js:45
+msgid "Change mode of yourself or a user"
+msgstr "更改您自己或某个用户的模式"
+
+#: assets/js/commands.js:42
+msgid "Change your wanted nick."
+msgstr "改为您想要的昵称。"
+
+#: assets/js/commands.js:41
+msgid "Close conversation."
+msgstr "关闭会话。"
+
+#: assets/js/commands.js:50
+msgid "Delete all history for the given conversation."
+msgstr "删除指定会话的全部历史记录。"
+
+#: assets/js/commands.js:51
+msgid "Gain operator status on a network."
+msgstr "获得一个网络上的管理员状态。"
+
+#: assets/js/commands.js:48
+msgid "Invite a user to a channel."
+msgstr "邀请一名用户加入一个频道。"
+
+#: assets/js/commands.js:40
+msgid "Join channel and open up a chat window."
+msgstr "加入频道并打开一个聊天窗口。"
+
+#: assets/js/commands.js:44
+msgid "Kick a user from the current channel."
+msgstr "将一名用户从当前频道中踢出。"
+
+#: assets/js/commands.js:37
+msgid "Open up a new chat window with nick."
+msgstr "打开与指定昵称的新聊天窗口。"
+
+#: assets/js/commands.js:49
+msgid "Restart the current connection."
+msgstr "重新启动当前连接。"
+
+#: assets/js/commands.js:38
+msgid "Send a direct message to nick."
+msgstr "向昵称发送一封私信。"
+
+#: assets/js/commands.js:56
+msgid "Send a message to botserv."
+msgstr "向 botserv 发送消息。"
+
+#: assets/js/commands.js:52
+msgid "Send a message to chanserv."
+msgstr "向 chanserv 发送消息。"
+
+#: assets/js/commands.js:55
+msgid "Send a message to hostserv."
+msgstr "向 hostserv 发送消息。"
+
+#: assets/js/commands.js:54
+msgid "Send a message to memoserv."
+msgstr "向 memoserv 发送消息。"
+
+#: assets/js/commands.js:53
+msgid "Send a message to nickserv."
+msgstr "向 nickserv 发送消息。"
+
+#: assets/js/commands.js:57
+msgid "Send a message to operserv."
+msgstr "向 operserv 发送消息。"
+
+#: assets/js/commands.js:34
+msgid "Send message as an action."
+msgstr "发送一条动作消息。"
+
+#: assets/js/commands.js:46
+msgid "Show current topic, or set a new one."
+msgstr "显示当前话题，或设置一个新话题。"
+
+#: assets/js/commands.js:36
+msgid "Show information about a user."
+msgstr "显示一名用户的信息。"
+
+#: assets/js/commands.js:47
+msgid "Show participants in the channel."
+msgstr "显示频道中的参与者。"
+
+#: assets/js/commands.js:35
+msgid "Used when you want to send a message starting with \"/\"."
+msgstr "当你想发送以“/”开头的消息时使用。"
+
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
 msgstr "“#”将显示匹配的会话名称。"
