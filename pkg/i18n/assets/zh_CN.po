@@ -1,111 +1,56 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
 "POT-Creation-Date: 2020-07-02 11:34:58+0900\n"
-"PO-Revision-Date: 2021-12-30 08:13:00+0900\n"
-"Last-Translator: Jan Henning Thorsen <jhthorsen@cpan.org>\n"
-"Language-Team: English <lang-en@convos.chat>\n"
-"Plural-Forms: ;\n"
+"PO-Revision-Date: 2026-10-05 19:14+0800\n"
+"Last-Translator: YFdyh000 <yfdyh000@gmail.com>\n"
+"Language-Team: 简体中文 <lang-zh_CN@convos.chat>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.9\n"
 
 #: assets/page/Help.svelte:43
 msgid "\"#\" will show the matching conversation names."
-msgstr "\"#\" will show the matching conversation names."
+msgstr "“#”将显示匹配的会话名称。"
 
 #: assets/page/Help.svelte:42
 msgid "\"/\" will show the available commands."
-msgstr "\"/\" will show the available commands."
+msgstr "“/”将显示可用的命令。"
 
 #: assets/page/Help.svelte:41
 msgid "\":\" followed by a character will show matching emojis."
-msgstr "\":\" followed by a character will show matching emojis."
+msgstr "“:”后跟一个字符将显示匹配的表情符号。"
 
 #: assets/page/Help.svelte:40
 msgid "\"@\" followed by a character will show matching nicks in the current conversation."
-msgstr "\"@\" followed by a character will show matching nicks in the current conversation."
+msgstr "“@”后跟一个字符将显示当前会话中相匹配的昵称。"
 
 #: assets/page/ConversationAdd.svelte:77
 msgid "#room or nick"
-msgstr "#room or nick"
+msgstr "#房间或昵称"
 
-#: layouts/convos.html.ep:10
-#: templates/layouts/convos.html.ep:10
+#: layouts/convos.html.ep:10 templates/layouts/convos.html.ep:10
 msgid "%1 - Convos"
 msgstr "%1 - Convos"
 
-#: layouts/convos.html.ep:12
-#: templates/layouts/convos.html.ep:12
+#: layouts/convos.html.ep:12 templates/layouts/convos.html.ep:12
 msgid "%1 - Convos for %2"
-msgstr "%1 - Convos for %2"
+msgstr "%1 - %2 的 Convos"
 
-#: assets/page/Notifications.svelte:46
-#: assets/page/Search.svelte:72
+#: assets/page/Notifications.svelte:46 assets/page/Search.svelte:72
 msgid "%1 in %2"
-msgstr "%1 in %2"
+msgstr "%2 中的 %1"
 
 #: assets/page/Chat.svelte:249
 msgid "%b %e %H:%M"
-msgstr "%b %e %H:%M"
-
-# Optional localizable strings used by Time.js for date formatting.
-# Languages that do not translate them will fall back to the English values.
-#: assets/js/Time.js
-msgid "%b %e"
-msgstr "%b %e"
-
-#: assets/js/Time.js
-msgid "%b %e, %Y"
-msgstr "%b %e, %Y"
-
-#: assets/js/Time.js
-msgid "Jan"
-msgstr "Jan"
-
-#: assets/js/Time.js
-msgid "Feb"
-msgstr "Feb"
-
-#: assets/js/Time.js
-msgid "March"
-msgstr "March"
-
-#: assets/js/Time.js
-msgid "Apr"
-msgstr "Apr"
-
-#: assets/js/Time.js
-msgid "May"
-msgstr "May"
-
-#: assets/js/Time.js
-msgid "Jun"
-msgstr "Jun"
-
-#: assets/js/Time.js
-msgid "July"
-msgstr "July"
-
-#: assets/js/Time.js
-msgid "Aug"
-msgstr "Aug"
-
-#: assets/js/Time.js
-msgid "Sept"
-msgstr "Sept"
-
-#: assets/js/Time.js
-msgid "Oct"
-msgstr "Oct"
-
-#: assets/js/Time.js
-msgid "Nov"
-msgstr "Nov"
-
-#: assets/js/Time.js
-msgid "Dec"
-msgstr "Dec"
+msgstr "%b%e日 %H:%M"
 
 #: assets/page/Help.svelte:53
 msgid "*some text*, **some text**, ***some text***"
-msgstr "*some text*, **some text**, ***some text***"
+msgstr "*内容*, **内容**, ***内容***"
 
 #: assets/page/Chat.svelte:215
 msgid "/chat/"
@@ -117,1201 +62,1137 @@ msgstr "/settings/account"
 
 #: assets/page/Help.svelte:51
 msgid "> some text"
-msgstr "> some text"
+msgstr "> 内容"
 
-#: app.html.ep:15
-#: templates/app.html.ep:15
+#: app.html.ep:15 templates/app.html.ep:15
 msgid "A better chat experience"
-msgstr "A better chat experience"
+msgstr "更好的聊天体验"
 
 #: assets/page/Help.svelte:52
 msgid "A line starting with \">\" will be converted into a quote."
-msgstr "A line starting with \">\" will be converted into a quote."
+msgstr "以“>”开头的行将被转换为引用。"
 
 #: assets/page/SettingsAdminUsers.svelte:127
 msgid "A link was generated"
-msgstr "A link was generated"
+msgstr "已生成链接"
 
 #: partial/app_header.html.ep:17
 msgid "About"
-msgstr "About"
+msgstr "关于"
 
-#: assets/components/MainMenu.svelte:196
-#: assets/components/MainMenu.svelte:216
+#: assets/components/MainMenu.svelte:196 assets/components/MainMenu.svelte:216
 #: assets/page/SettingsAccount.svelte:73
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Account"
-msgstr "Account"
+msgstr "账户"
 
 #: assets/components/ConnectionForm.svelte:158
 #: assets/page/ConnectionProfileSettings.svelte:123
-#: assets/page/Connections.svelte:50
-#: assets/page/Connections.svelte:79
+#: assets/page/Connections.svelte:50 assets/page/Connections.svelte:79
 #: assets/page/ConversationAdd.svelte:81
 msgid "Add"
-msgstr "Add"
+msgstr "添加"
 
 msgid "Add connection"
-msgstr "Add connection"
+msgstr "添加连接"
 
-#: assets/components/MainMenu.svelte:208
-#: assets/page/ConversationAdd.svelte:60
+#: assets/components/MainMenu.svelte:208 assets/page/ConversationAdd.svelte:60
 msgid "Add conversation"
-msgstr "Add conversation"
+msgstr "添加会话"
 
 #: assets/page/SettingsAdmin.svelte:80
 msgid "Admin email"
-msgstr "Admin email"
+msgstr "管理员邮箱"
 
 #: assets/components/ConnectionForm.svelte:110
 #: assets/page/ConnectionProfileSettings.svelte:92
 msgid "Advanced settings"
-msgstr "Advanced settings"
+msgstr "高级设置"
 
 #: assets/page/Help.svelte:62
 msgid "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
-msgstr "Any message starting with a-z is prefixed with \"`/quote`\", when sending from a connection conversation."
+msgstr "从连接会话发送时，任何以 a-z 开头的消息都会带有“`/quote`”前缀。"
 
 #: assets/page/Help.svelte:33
 msgid "Any other combination"
-msgstr "Any other combination"
+msgstr "任何其他组合"
 
 #: assets/page/Login.svelte:82
 msgid "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
-msgstr "As you are the first user, you do not need any invitation link. Just fill in the form below, hit \"Sign up\" to start chatting."
+msgstr "您是第一位用户，所以无需任何邀请链接。填写以下表单后点击“注册”，即可开始聊天。"
 
 #: assets/components/ChatInput.svelte:203
 msgid "Attach a file"
-msgstr "Attach a file"
+msgstr "附加文件"
 
 #: assets/components/ConnectionForm.svelte:128
 msgid "Authentication settings"
-msgstr "Authentication settings"
+msgstr "身份验证设置"
 
 #: assets/page/Help.svelte:37
 msgid "Autocomplete"
-msgstr "Autocomplete"
+msgstr "自动补全"
 
 #: assets/page/Help.svelte:61
 msgid "Available commands"
-msgstr "Available commands"
+msgstr "可用命令"
 
-#: partial/error.html.ep:4
-#: partial/error.html.ep:9
+#: partial/error.html.ep:4 partial/error.html.ep:9
 msgid "Backend is starting"
-msgstr "Backend is starting"
+msgstr "后端正在启动"
 
-#: blog_list.html.ep:7
-#: partial/app_footer.html.ep:4
-#: partial/app_header.html.ep:19
-#: partial/cms_footer.html.ep:5
-#: templates/blog_list.html.ep:7
-#: templates/partial/app_footer.html.ep:4
+#: blog_list.html.ep:7 partial/app_footer.html.ep:4
+#: partial/app_header.html.ep:19 partial/cms_footer.html.ep:5
+#: templates/blog_list.html.ep:7 templates/partial/app_footer.html.ep:4
 #: templates/partial/app_header.html.ep:19
 #: templates/partial/cms_footer.html.ep:5
 msgid "Blog"
-msgstr "Blog"
+msgstr "博客"
 
 #: assets/page/Help.svelte:74
 msgid "Bug/issue tracker"
-msgstr "Bug/issue tracker"
+msgstr "Bug/问题跟踪器"
 
 #: assets/page/SettingsFiles.svelte:127
 msgid "By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time."
-msgstr "By deleting the files, you and everyone with the link *should* lose access to the file: Aggressive caching in browsers or proxies between Convos and other users might keep the file around for some time."
+msgstr "删除文件后，您和所有拥有链接的人都*应该*无法再访问该文件：浏览器或者 Convos 与其他用户之间的代理程序中的较激进缓存可能使让文件保留一段时间。"
 
 #: assets/page/SettingsAdmin.svelte:73
 msgid "Can be changed if you want to add a touch of your organization."
-msgstr "Can be changed if you want to add a touch of your organization."
+msgstr "如果您想增添组织特色，可做更改。"
 
 #: assets/page/Help.svelte:72
 msgid "Changelog for v%1"
-msgstr "Changelog for v%1"
+msgstr "v%1 的更新日志"
 
-#: assets/page/Chat.svelte:191
-#: partial/app_header.html.ep:25
-#: templates/partial/app_header.html.ep:25
-#: templates/video.html.ep:14
+#: assets/page/Chat.svelte:191 partial/app_header.html.ep:25
+#: templates/partial/app_header.html.ep:25 templates/video.html.ep:14
 msgid "Chat"
-msgstr "Chat"
+msgstr "聊天"
 
-#: assets/page/SettingsAdmin.svelte:108
-#: assets/page/SettingsAdmin.svelte:99
+#: assets/page/SettingsAdmin.svelte:108 assets/page/SettingsAdmin.svelte:99
 msgid "Check for updates"
-msgstr "Check for updates"
+msgstr "检查更新"
 
 #: assets/page/Search.svelte:45
 msgid "Clear"
-msgstr "Clear"
+msgstr "清除"
 
 msgid "Clicking on the icon next to the conversation name will take you to settings."
-msgstr "Clicking on the icon next to the conversation name will take you to settings."
+msgstr "点击会话名称旁的图标将进入设置。"
 
 #: assets/page/SettingsAccount.svelte:109
 msgid "Color scheme"
-msgstr "Color scheme"
+msgstr "配色方案"
 
 #: assets/components/ConnectionForm.svelte:172
 msgid "Confirm connection ID"
-msgstr "Confirm connection ID"
+msgstr "确认连接 ID"
 
 #: assets/page/SettingsAdminUsers.svelte:109
 msgid "Confirm email"
-msgstr "Confirm email"
+msgstr "确认邮箱"
 
 msgid "Connecting..."
-msgstr "Connecting..."
+msgstr "正在连接..."
 
 #: assets/store/Connection.js
 msgid "Disconnected."
-msgstr "Disconnected."
+msgstr "已断开连接"
 
 #: assets/store/Connection.js
 msgid "Disconnecting..."
-msgstr "Disconnecting..."
+msgstr "正在断开连接..."
 
 #: assets/store/Connection.js
 msgid "Unreachable."
-msgstr "Unreachable."
+msgstr "无法访问"
 
 #: assets/components/ConnectionSettings.svelte:25
 #: assets/page/ConversationAdd.svelte:69
 msgid "Connection"
-msgstr "Connection"
+msgstr "连接"
 
 #: assets/page/Chat.svelte:200
 msgid "Connection does not exist."
-msgstr "Connection does not exist."
+msgstr "连接不存在。"
 
 msgid "Connection messages."
-msgstr "Connection messages."
+msgstr "连接消息。"
 
 #: assets/components/ConnectionSettings.svelte:30
 msgid "Connection not found."
-msgstr "Connection not found."
+msgstr "未找到连接。"
 
 #: assets/page/Connections.svelte:54
 msgid "Connection profiles"
-msgstr "Connection profiles"
+msgstr "连接配置文件"
 
 #: assets/page/Connections.svelte:55
 msgid "Connection profiles are used to set up global values for every connection that connect to the same host."
-msgstr "Connection profiles are used to set up global values for every connection that connect to the same host."
+msgstr "连接配置文件能为连接到同一主机的每个连接设置全局值。"
 
-#: assets/components/MainMenu.svelte:212
-#: assets/page/Connections.svelte:25
+#: assets/components/MainMenu.svelte:212 assets/page/Connections.svelte:25
 #: assets/page/Connections.svelte:29
 msgid "Connections"
-msgstr "Connections"
+msgstr "连接"
 
-#: app.html.ep:29
-#: assets/page/Fallback.svelte:37
-#: assets/page/Help.svelte:81
-#: assets/page/Login.svelte:124
-#: assets/page/Login.svelte:76
-#: partial/noscript.html.ep:13
-#: templates/app.html.ep:29
-#: templates/partial/noscript.html.ep:13
-#: templates/video.html.ep:39
+#: app.html.ep:29 assets/page/Fallback.svelte:37 assets/page/Help.svelte:81
+#: assets/page/Login.svelte:124 assets/page/Login.svelte:76
+#: partial/noscript.html.ep:13 templates/app.html.ep:29
+#: templates/partial/noscript.html.ep:13 templates/video.html.ep:39
 msgid "Contact admin"
-msgstr "Contact admin"
+msgstr "联系管理员"
 
 #: assets/page/Login.svelte:111
 msgid "Contact your [Convos admin](%1) if you have forgotten your password."
-msgstr "Contact your [Convos admin](%1) if you have forgotten your password."
+msgstr "如果您忘记了密码，请联系您的 [Convos 管理员](%1)。"
 
 #: assets/components/ConversationSettings.svelte:98
 msgid "Conversation"
-msgstr "Conversation"
+msgstr "会话"
 
 #: assets/components/ConversationSettings.svelte:141
 msgid "Conversation modes"
-msgstr "Conversation modes"
+msgstr "会话模式"
 
 #: assets/components/ConnectionForm.svelte:99
 #: assets/page/ConnectionProfileSettings.svelte:75
 #: assets/page/ConversationAdd.svelte:78
 msgid "Conversation name"
-msgstr "Conversation name"
+msgstr "会话名称"
 
 msgid "Conversation with %1 is frozen. Reason: %2"
-msgstr "Conversation with %1 is frozen. Reason: %2"
+msgstr "与 %1 的会话已冻结。原因：%2"
 
 #: assets/components/MainMenu.svelte:168
 msgid "Conversations"
-msgstr "Conversations"
+msgstr "会话"
 
-#: assets/components/MainMenu.svelte:154
-#: assets/page/SettingsAccount.svelte:134
+#: assets/components/MainMenu.svelte:154 assets/page/SettingsAccount.svelte:134
 #: assets/page/SettingsAccount.svelte:135
 msgid "Convos"
 msgstr "Convos"
 
-#: app.html.ep:18
-#: templates/app.html.ep:18
+#: app.html.ep:18 templates/app.html.ep:18
 msgid "Convos is the simplest way to use IRC and it is always online."
-msgstr "Convos is the simplest way to use IRC and it is always online."
+msgstr "Convos 是使用 IRC 的最简单方式，并且始终在线。"
 
 #: assets/page/SettingsAdmin.svelte:68
 msgid "Convos settings"
-msgstr "Convos settings"
+msgstr "Convos 设置"
 
 #: assets/page/Help.svelte:47
 msgid "Convos supports some special way of formatting text:"
-msgstr "Convos supports some special way of formatting text:"
+msgstr "Convos 支持一些特殊的文本格式化方式："
 
 #: assets/page/SettingsAdmin.svelte:104
 msgid "Convos v%1 is available."
-msgstr "Convos v%1 is available."
+msgstr "Convos v%1 已可用。"
 
 #: assets/page/SettingsAdminUsers.svelte:129
 msgid "Copy and send the link to your *existing* user."
-msgstr "Copy and send the link to your *existing* user."
+msgstr "复制链接并发送给您的*现有*用户。"
 
 #: assets/page/SettingsAdminUsers.svelte:129
 msgid "Copy and send the link to your *new* user."
-msgstr "Copy and send the link to your *new* user."
+msgstr "复制链接并发送给您的*新*用户。"
 
-#: partial/error.html.ep:11
-#: templates/partial/error.html.ep:11
+#: partial/error.html.ep:11 templates/partial/error.html.ep:11
 msgid "Could not find the page you are looking for. Maybe you entered an invalid URL?"
-msgstr "Could not find the page you are looking for. Maybe you entered an invalid URL?"
+msgstr "找不到您要查找的页面。您输入了无效的网址？"
 
 msgid "Could not send message \"%1\"."
-msgstr "Could not send message \"%1\"."
+msgstr "无法发送消息“%1”。"
 
 msgid "Create"
-msgstr "Create"
+msgstr "创建"
 
 #: assets/components/ConnectionSettings.svelte:34
 msgid "Currently connected to %1."
-msgstr "Currently connected to %1."
+msgstr "当前已连接到 %1。"
 
 #: assets/components/ConnectionSettings.svelte:36
 msgid "Currently connecting to %1."
-msgstr "Currently connecting to %1."
+msgstr "当前正在连接到 %1。"
 
 #: assets/components/ConnectionSettings.svelte:32
 msgid "Currently disconnected from %1."
-msgstr "Currently disconnected from %1."
+msgstr "当前已断开与 %1 的连接。"
 
 #: assets/page/Connections.svelte:61
 msgid "Default"
-msgstr "Default"
+msgstr "默认"
 
 #: assets/page/ConnectionProfileSettings.svelte:82
 msgid "Default connection"
-msgstr "Default connection"
+msgstr "默认连接"
 
 msgid "Default connection URL"
-msgstr "Default connection URL"
+msgstr "默认连接 URL"
 
 #: assets/components/ConnectionForm.svelte:165
 #: assets/components/ConnectionForm.svelte:168
 #: assets/components/ConnectionForm.svelte:176
 #: assets/page/ConnectionProfileSettings.svelte:121
 msgid "Delete"
-msgstr "Delete"
+msgstr "删除"
 
 #: assets/page/SettingsFiles.svelte:122
 msgid "Delete selected files"
-msgstr "Delete selected files"
+msgstr "删除选定的文件"
 
 #: assets/page/SettingsAdminUsers.svelte:105
 #: assets/page/SettingsAdminUsers.svelte:113
 msgid "Delete user"
-msgstr "Delete user"
+msgstr "删除用户"
 
 #: assets/page/Help.svelte:84
 msgid "Demo error pages"
-msgstr "Demo error pages"
+msgstr "演示错误页面"
 
-#: partial/error.html.ep:16
-#: templates/partial/error.html.ep:16
+#: partial/error.html.ep:16 templates/partial/error.html.ep:16
 msgid "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
-msgstr "Did you forget to set CONVOS_REVERSE_PROXY=1 before starting Convos?"
+msgstr "您是否忘了在启动 Convos 前设置 CONVOS_REVERSE_PROXY=1？"
 
 #: assets/page/Chat.svelte:215
 msgid "Disconnected. Your connection %1 can be edited in [settings](%2)."
-msgstr "Disconnected. Your connection %1 can be edited in [settings](%2)."
+msgstr "已断开连接。您的连接 %1 可以在[设置](%2)中编辑。"
 
-#: assets/page/SettingsAdmin.svelte:113
-#: assets/page/SettingsAdmin.svelte:117
+#: assets/page/SettingsAdmin.svelte:113 assets/page/SettingsAdmin.svelte:117
 msgid "Disk usage"
-msgstr "Disk usage"
+msgstr "磁盘使用量"
 
 #: assets/page/Chat.svelte:208
 msgid "Do you want to chat with \"%1\"?"
-msgstr "Do you want to chat with \"%1\"?"
+msgstr "您想与“%1”聊天吗？"
 
 #: assets/page/Chat.svelte:201
 msgid "Do you want to create the connection \"%1\"?"
-msgstr "Do you want to create the connection \"%1\"?"
+msgstr "您想创建连接“%1”吗？"
 
 #: assets/page/Chat.svelte:219
 msgid "Do you want to join?"
-msgstr "Do you want to join?"
+msgstr "您想加入吗？"
 
-#: app.html.ep:25
-#: assets/page/Fallback.svelte:29
-#: templates/app.html.ep:25
+#: app.html.ep:25 assets/page/Fallback.svelte:29 templates/app.html.ep:25
 #: templates/video.html.ep:34
 msgid "Downloaded Convos."
-msgstr "Downloaded Convos."
+msgstr "已下载 Convos。"
 
 #: assets/page/ConnectionSettings.svelte:14
 msgid "Edit connection"
-msgstr "Edit connection"
+msgstr "编辑连接"
 
 #: assets/page/ConnectionProfileSettings.svelte:55
 msgid "Edit connection profile"
-msgstr "Edit connection profile"
+msgstr "编辑连接配置文件"
 
-#: assets/page/Login.svelte:107
-#: assets/page/Login.svelte:88
+#: assets/page/Login.svelte:107 assets/page/Login.svelte:88
 #: assets/page/SettingsAccount.svelte:79
 #: assets/page/SettingsAdminUsers.svelte:147
 #: assets/page/SettingsAdminUsers.svelte:89
 msgid "Email"
-msgstr "Email"
+msgstr "邮箱"
 
 #: assets/page/SettingsAccount.svelte:103
 msgid "Enable compact message display"
-msgstr "Enable compact message display"
+msgstr "启用紧凑的消息显示"
 
 #: assets/page/SettingsAccount.svelte:85
 msgid "Enable notifications"
-msgstr "Enable notifications"
+msgstr "启用通知"
 
 #: assets/page/ConversationAdd.svelte:64
 msgid "Enter the name of an exising conversation, or create a new conversation."
-msgstr "Enter the name of an exising conversation, or create a new conversation."
+msgstr "输入现有会话的名称，或创建新会话。"
 
 #: assets/components/ConnectionForm.svelte:98
 #: assets/page/ConnectionProfileSettings.svelte:74
 msgid "Ex: #convos"
-msgstr "Ex: #convos"
+msgstr "例如：#convos"
 
 #: assets/components/ConnectionForm.svelte:89
 msgid "Ex: Clark Kent"
-msgstr "Ex: Clark Kent"
+msgstr "例如：Clark Kent"
 
 #: assets/page/SettingsAdmin.svelte:83
 msgid "Ex: https://meet.jit.si/"
-msgstr "Ex: https://meet.jit.si/"
+msgstr "例如：https://meet.jit.si/"
 
 #: assets/components/ConnectionForm.svelte:82
 #: assets/page/ConnectionProfileSettings.svelte:64
 msgid "Ex: irc.libera.chat:6697"
-msgstr "Ex: irc.libera.chat:6697"
+msgstr "例如：irc.libera.chat:6697"
 
 #: assets/page/SettingsAdmin.svelte:79
 msgid "Ex: jhthorsen@cpan.org"
-msgstr "Ex: jhthorsen@cpan.org"
+msgstr "例如：jhthorsen@cpan.org"
 
-#: assets/page/Login.svelte:106
-#: assets/page/Login.svelte:87
+#: assets/page/Login.svelte:106 assets/page/Login.svelte:87
 msgid "Ex: john@doe.com"
-msgstr "Ex: john@doe.com"
+msgstr "例如：john@doe.com"
 
 #: assets/components/ConnectionForm.svelte:86
 msgid "Ex: superman"
-msgstr "Ex: superman"
+msgstr "例如：superman"
 
 msgid "Example: %1"
-msgstr "Example: %1"
+msgstr "示例：%1"
 
 #: assets/page/SettingsAccount.svelte:100
 msgid "Expand URL to media"
-msgstr "Expand URL to media"
+msgstr "将网址展开为媒体"
 
 #: assets/page/SettingsFiles.svelte:38
 msgid "File URL copied"
-msgstr "File URL copied"
+msgstr "已复制文件网址"
 
-#: assets/components/MainMenu.svelte:220
-#: assets/page/SettingsFiles.svelte:73
+#: assets/components/MainMenu.svelte:220 assets/page/SettingsFiles.svelte:73
 msgid "Files"
-msgstr "Files"
+msgstr "文件"
 
 #: assets/page/Help.svelte:32
 msgid "Filter channels with unread messages."
-msgstr "Filter channels with unread messages."
+msgstr "过滤有未读消息的频道。"
 
 #: assets/page/Help.svelte:34
 msgid "Filter channels, private conversations or search for a string."
-msgstr "Filter channels, private conversations or search for a string."
+msgstr "过滤频道、私聊或搜索一个字符串。"
 
 #: assets/page/Help.svelte:28
 msgid "Filter conversations with unread messages."
-msgstr "Filter conversations with unread messages."
+msgstr "过滤有未读消息的会话。"
 
 #: assets/page/Help.svelte:30
 msgid "Filter private conversations with unread messages."
-msgstr "Filter private conversations with unread messages."
+msgstr "过滤有未读消息的私聊。"
 
 #: assets/components/ConnectionForm.svelte:138
 msgid "Fingerprint"
-msgstr "Fingerprint"
+msgstr "指纹"
 
 #: assets/page/ConnectionProfileSettings.svelte:85
 msgid "Force default connection"
-msgstr "Force default connection"
+msgstr "强制默认连接"
 
 #: assets/page/Connections.svelte:62
 msgid "Forced"
-msgstr "Forced"
+msgstr "已强制"
 
 #: assets/page/SettingsAdminUsers.svelte:137
 msgid "Generate link"
-msgstr "Generate link"
+msgstr "生成链接"
 
 #: assets/page/SettingsAdmin.svelte:63
 msgid "Global settings"
-msgstr "Global settings"
+msgstr "全局设置"
 
 #: assets/page/Chat.svelte:241
 msgid "Go to \"[account settings](%1)\" to enable or disable notifications."
-msgstr "Go to \"[account settings](%1)\" to enable or disable notifications."
+msgstr "转到“[账户设置](%1)”以启用或禁用通知。"
 
 #: partial/error.html.ep:26
 msgid "Go to landing page"
-msgstr "Go to landing page"
+msgstr "转到着陆页"
 
-#: assets/page/Fallback.svelte:46
-#: assets/page/Fallback.svelte:49
+#: assets/page/Fallback.svelte:46 assets/page/Fallback.svelte:49
 msgid "Go to start page"
-msgstr "Go to start page"
+msgstr "转到起始页"
 
 #: assets/page/Help.svelte:20
 msgid "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
-msgstr "Got any questions? Come and talk to us in the \"#convos\" channel on https://libera.chat."
+msgstr "有任何问题吗？欢迎到 https://libera.chat 的“#convos”频道与我们交流。"
 
-#: assets/components/MainMenu.svelte:234
-#: assets/page/Help.svelte:15
+#: assets/components/MainMenu.svelte:234 assets/page/Help.svelte:15
 msgid "Help"
-msgstr "Help"
+msgstr "帮助"
 
 #: assets/page/Login.svelte:93
 msgid "Hint: Use a phrase from a book."
-msgstr "Hint: Use a phrase from a book."
+msgstr "提示：避免忘记您的密码。"
 
-#: assets/page/Connections.svelte:33
-#: assets/page/Connections.svelte:59
+#: assets/page/Connections.svelte:33 assets/page/Connections.svelte:59
 msgid "Host"
-msgstr "Host"
+msgstr "主机"
 
 #: assets/components/ConnectionForm.svelte:83
 #: assets/page/ConnectionProfileSettings.svelte:65
 msgid "Host and port"
-msgstr "Host and port"
+msgstr "主机和端口"
 
 #: assets/page/SettingsAccount.svelte:97
 msgid "Ignore join/part messages"
-msgstr "Ignore join/part messages"
+msgstr "忽略加入/离开消息"
 
 #: assets/page/Chat.svelte:268
 msgid "Information"
-msgstr "Information"
+msgstr "信息"
 
 #: assets/page/SettingsAdmin.svelte:121
 msgid "Inode usage"
-msgstr "Inode usage"
+msgstr "Inode 使用量"
 
-#: partial/error.html.ep:4
-#: partial/error.html.ep:9
+#: partial/error.html.ep:4 partial/error.html.ep:9
 msgid "Internal Server Error"
-msgstr "Internal Server Error"
+msgstr "内部服务器错误"
 
 #: assets/page/Login.svelte:72
 msgid "Invalid invite/recover URL"
-msgstr "Invalid invite/recover URL"
+msgstr "无效的邀请/恢复 URL"
 
 #: assets/page/SettingsAdminUsers.svelte:38
 msgid "Invite link copied"
-msgstr "Invite link copied"
+msgstr "邀请链接已复制"
 
 #: assets/page/SettingsAdminUsers.svelte:120
 msgid "Invite or recover password"
-msgstr "Invite or recover password"
+msgstr "邀请或恢复密码"
 
-#: partial/noscript.html.ep:3
-#: templates/partial/noscript.html.ep:3
+#: partial/noscript.html.ep:3 templates/partial/noscript.html.ep:3
 msgid "Javascript is disabled"
-msgstr "Javascript is disabled"
+msgstr "Javascript 已禁用"
 
-#: partial/noscript.html.ep:5
-#: templates/partial/noscript.html.ep:5
+#: partial/noscript.html.ep:5 templates/partial/noscript.html.ep:5
 msgid "Javascript is disabled so Convos cannot start."
-msgstr "Javascript is disabled so Convos cannot start."
+msgstr "Javascript 已被禁用，因此 Convos 无法启动。"
 
 #: assets/page/Chat.svelte:249
 msgid "Jump to %1"
-msgstr "Jump to %1"
+msgstr "跳转到 %1"
 
 #: assets/page/SettingsAccount.svelte:112
 msgid "Language"
-msgstr "Language"
+msgstr "语言"
 
 #: assets/components/ConversationSettings.svelte:161
 msgid "Leave"
-msgstr "Leave"
+msgstr "离开"
 
 #: assets/page/SettingsAccount.svelte:121
 msgid "Leave the password fields empty to keep the current password."
-msgstr "Leave the password fields empty to keep the current password."
+msgstr "留空密码字段则保持当前密码不变。"
 
 #: assets/components/ConnectionForm.svelte:120
 msgid "Leave this blank, unless you know what you are doing."
-msgstr "Leave this blank, unless you know what you are doing."
+msgstr "除非您知道自己在做什么，否则请留空。"
 
 #: assets/page/SettingsAccount.svelte:87
 msgid "Leave this unchecked, and hit \"Save\" to disable notifications."
-msgstr "Leave this unchecked, and hit \"Save\" to disable notifications."
+msgstr "未选中状态下点击“保存”则禁用通知。"
 
-#: partial/app_footer.html.ep:5
-#: templates/partial/app_footer.html.ep:5
+#: partial/app_footer.html.ep:5 templates/partial/app_footer.html.ep:5
 msgid "License"
-msgstr "License"
+msgstr "许可协议"
 
 #: assets/page/ConversationAdd.svelte:72
 msgid "Load"
-msgstr "Load"
+msgstr "加载"
 
 msgid "Loading user data failed: %1"
-msgstr "Loading user data failed: %1"
+msgstr "加载用户数据失败：%1"
 
 #: assets/page/Fallback.svelte:34
 msgid "Loading user data..."
-msgstr "Loading user data..."
+msgstr "正在加载用户数据..."
 
 #: templates/video.html.ep:33
 msgid "Loading video conference with \"%1\" via %2"
-msgstr "Loading video conference with \"%1\" via %2"
+msgstr "正在通过 %2 加载与“%1”的视频会议"
 
-#: app.html.ep:24
-#: assets/components/OperationStatusRow.svelte:13
-#: assets/page/Chat.svelte:149
-#: assets/page/Chat.svelte:246
-#: assets/page/Notifications.svelte:52
-#: assets/page/Search.svelte:79
+#: app.html.ep:24 assets/components/OperationStatusRow.svelte:13
+#: assets/page/Chat.svelte:149 assets/page/Chat.svelte:246
+#: assets/page/Notifications.svelte:52 assets/page/Search.svelte:79
 #: templates/app.html.ep:24
 msgid "Loading..."
-msgstr "Loading..."
+msgstr "正在加载..."
 
 #: assets/components/MainMenu.svelte:238
 msgid "Log out"
-msgstr "Log out"
+msgstr "退出登录"
 
 #: assets/page/ConnectionProfileSettings.svelte:101
 msgid "Max message length"
-msgstr "Max message length"
+msgstr "最大消息长度"
 
 #: assets/page/ConnectionProfileSettings.svelte:97
 msgid "Max number of pasted lines"
-msgstr "Max number of pasted lines"
+msgstr "最大粘贴行数"
 
 #: assets/page/Chat.svelte:190
 msgid "Mention"
-msgstr "Mention"
+msgstr "提及"
 
-#: partial/app_header.html.ep:13
-#: partial/cms_header.html.ep:11
+#: partial/app_header.html.ep:13 partial/cms_header.html.ep:11
 #: templates/partial/app_header.html.ep:13
 #: templates/partial/cms_header.html.ep:11
 msgid "Menu"
-msgstr "Menu"
+msgstr "菜单"
 
 #: assets/page/ConnectionProfileSettings.svelte:79
 msgid "Messages from these nicks will be shown in the connection conversation."
-msgstr "Messages from these nicks will be shown in the connection conversation."
+msgstr "这些昵称发来的消息将在连接会话中显示。"
 
 #: assets/page/ConnectionProfileSettings.svelte:102
 msgid "Messages longer than this will be split into multiple messages."
-msgstr "Messages longer than this will be split into multiple messages."
+msgstr "超过此长度的消息将拆分为多条消息。"
 
 #: assets/page/Help.svelte:21
 msgid "More information can also be found on https://convos.chat."
-msgstr "More information can also be found on https://convos.chat."
+msgstr "更多信息也可在 https://convos.chat 上找到。"
 
 #: assets/page/SettingsFiles.svelte:82
 msgid "Name"
-msgstr "Name"
+msgstr "名称"
 
 #: assets/page/Chat.svelte:162
 msgid "New messages"
-msgstr "New messages"
+msgstr "新消息"
 
-#: assets/page/SettingsFiles.svelte:115
-#: assets/page/SettingsFiles.svelte:117
+#: assets/page/SettingsFiles.svelte:115 assets/page/SettingsFiles.svelte:117
 msgid "Next"
-msgstr "Next"
+msgstr "下一页"
 
 #: assets/page/Connections.svelte:35
 msgid "Nick"
-msgstr "Nick"
+msgstr "昵称"
 
 #: assets/components/ConnectionForm.svelte:87
 msgid "Nickname"
-msgstr "Nickname"
+msgstr "昵称"
 
-#: assets/page/Chat.svelte:204
-#: assets/page/Chat.svelte:211
-#: assets/page/Chat.svelte:222
-#: assets/page/Connections.svelte:42
-#: assets/page/Connections.svelte:70
-#: assets/page/Connections.svelte:71
+#: assets/page/Chat.svelte:204 assets/page/Chat.svelte:211
+#: assets/page/Chat.svelte:222 assets/page/Connections.svelte:42
+#: assets/page/Connections.svelte:70 assets/page/Connections.svelte:71
 #: assets/page/Connections.svelte:72
 msgid "No"
-msgstr "No"
+msgstr "否"
 
 #: assets/components/MainMenu.svelte:172
 msgid "No conversations"
-msgstr "No conversations"
+msgstr "没有会话"
 
 #: assets/page/SettingsFiles.svelte:99
 msgid "No files."
-msgstr "No files."
+msgstr "没有文件。"
 
 #: assets/page/Notifications.svelte:32
 msgid "No notifications."
-msgstr "No notifications."
+msgstr "没有通知。"
 
 #: assets/page/Search.svelte:54
 msgid "No search results for \"%1\"."
-msgstr "No search results for \"%1\"."
+msgstr "没有“%1”的搜索结果。"
 
 #: assets/page/Chat.svelte:134
 msgid "No topic is set for %1."
-msgstr "No topic is set for %1."
+msgstr "%1 未设置话题（topic）。"
 
 #: assets/components/ConversationSettings.svelte:118
 #: assets/components/ConversationSettings.svelte:124
 msgid "No topic is set."
-msgstr "No topic is set."
+msgstr "未设置话题（topic）。"
 
-#: partial/error.html.ep:4
-#: partial/error.html.ep:9
+#: partial/error.html.ep:4 partial/error.html.ep:9
 msgid "Not Found"
-msgstr "Not Found"
+msgstr "未找到"
 
 #: assets/page/SettingsAccount.svelte:82
 msgid "Notification keywords"
-msgstr "Notification keywords"
+msgstr "通知关键词"
 
 #: assets/page/SettingsAccount.svelte:90
 msgid "Notification sound volume"
-msgstr "Notification sound volume"
+msgstr "通知音量"
 
-#: assets/components/MainMenu.svelte:199
-#: assets/page/Notifications.svelte:26
+#: assets/components/MainMenu.svelte:199 assets/page/Notifications.svelte:26
 msgid "Notifications"
-msgstr "Notifications"
+msgstr "通知"
 
 #: assets/components/ConversationSettings.svelte:131
 msgid "Notify me on new messages"
-msgstr "Notify me on new messages"
+msgstr "有新消息时通知我"
 
 #: assets/components/ConnectionForm.svelte:115
 msgid "On-connect commands"
-msgstr "On-connect commands"
+msgstr "连接时执行命令"
 
 #: assets/page/ConnectionProfileSettings.svelte:115
 msgid "Only administrators can edit this section."
-msgstr "Only administrators can edit this section."
+msgstr "只有管理员可以编辑此部分。"
 
 #: assets/components/ConversationSettings.svelte:154
 msgid "Only operators can change modes."
-msgstr "Only operators can change modes."
+msgstr "只有频道管理员可以更改模式。"
 
 msgid "Open conversation or connection settings"
-msgstr "Open conversation or connection settings"
+msgstr "打开会话或连接设置"
 
 #: assets/page/SettingsAdmin.svelte:76
 msgid "Organization URL"
-msgstr "Organization URL"
+msgstr "组织 URL"
 
 #: assets/page/SettingsAdmin.svelte:72
 msgid "Organization name"
-msgstr "Organization name"
+msgstr "组织名称"
 
 #: assets/page/Help.svelte:70
 msgid "Other resources"
-msgstr "Other resources"
+msgstr "其他资源"
 
 #: assets/components/ConversationSettings.svelte:168
 #: assets/page/Chat.svelte:257
 msgid "Participants (%1)"
-msgstr "Participants (%1)"
+msgstr "参与者 (%1)"
 
 #: assets/components/ConnectionForm.svelte:143
 #: assets/components/ConversationSettings.svelte:148
-#: assets/page/Login.svelte:110
-#: assets/page/Login.svelte:92
+#: assets/page/Login.svelte:110 assets/page/Login.svelte:92
 #: assets/page/SettingsAccount.svelte:115
 msgid "Password"
-msgstr "Password"
+msgstr "密码"
 
 #: assets/page/Login.svelte:74
 msgid "Please ask your Convos admin for a new link."
-msgstr "Please ask your Convos admin for a new link."
+msgstr "请向您的 Convos 管理员索取新链接。"
 
 #: assets/page/Login.svelte:122
 msgid "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
-msgstr "Please ask your Convos admin for an invite link to sign up, or sign in if you already have an account."
+msgstr "请向您的 Convos 管理员索取注册邀请链接；如果您已有账户，请直接登录。"
 
 #: assets/components/ConnectionForm.svelte:168
 #: assets/page/SettingsAdminUsers.svelte:105
 msgid "Please confirm by entering \"**%1**\" before hitting **%2**."
-msgstr "Please confirm by entering \"**%1**\" before hitting **%2**."
+msgstr "请先输入“**%1**”，再点击 **%2** 以确认。"
 
-#: partial/noscript.html.ep:6
-#: templates/partial/noscript.html.ep:6
+#: partial/noscript.html.ep:6 templates/partial/noscript.html.ep:6
 msgid "Please enable Javascript and try again."
-msgstr "Please enable Javascript and try again."
+msgstr "请启用 Javascript 后再试。"
 
-#: blog_entry.html.ep:12
-#: blog_entry.txt.ep:4
-#: blog_list.html.ep:16
-#: blog_list.txt.ep:9
-#: templates/blog_entry.html.ep:12
-#: templates/blog_entry.txt.ep:4
-#: templates/blog_list.html.ep:16
+#: blog_entry.html.ep:12 blog_entry.txt.ep:4 blog_list.html.ep:16
+#: blog_list.txt.ep:9 templates/blog_entry.html.ep:12
+#: templates/blog_entry.txt.ep:4 templates/blog_list.html.ep:16
 #: templates/blog_list.txt.ep:9
 msgid "Posted by %1"
-msgstr "Posted by %1"
+msgstr "由 %1 发布"
 
 #: assets/page/Help.svelte:25
 msgid "Pressing `shift+enter` will shift focus between chat input and search in sidebar."
-msgstr "Pressing `shift+enter` will shift focus between chat input and search in sidebar."
+msgstr "按 `Shift+Enter` 可在聊天输入框与侧边栏搜索之间切换焦点。"
 
-#: assets/page/SettingsFiles.svelte:110
-#: assets/page/SettingsFiles.svelte:112
+#: assets/page/SettingsFiles.svelte:110 assets/page/SettingsFiles.svelte:112
 msgid "Previous"
-msgstr "Previous"
+msgstr "上一页"
 
 msgid "Private conversation with %1."
-msgstr "Private conversation with %1."
+msgstr "与 %1 的私聊。"
 
 msgid "Private conversation."
-msgstr "Private conversation."
+msgstr "私聊。"
 
 #: assets/page/Help.svelte:73
 msgid "Project homepage"
-msgstr "Project homepage"
+msgstr "项目主页"
 
 #: assets/components/ConnectionForm.svelte:114
 msgid "Put each command on a new line."
-msgstr "Put each command on a new line."
+msgstr "每个命令单独占一行。"
 
 #: assets/page/Help.svelte:24
 msgid "Quick search"
-msgstr "Quick search"
+msgstr "快速搜索"
 
 #: file.html.ep:19
 msgid "Raw"
-msgstr "Raw"
+msgstr "原始"
 
-#: blog_list.html.ep:21
-#: partial/error.html.ep:25
+#: blog_list.html.ep:21 partial/error.html.ep:25
 msgid "Read more"
-msgstr "Read more"
+msgstr "阅读更多"
 
 msgid "Recover account"
-msgstr "Recover account"
+msgstr "恢复账户"
 
 #: assets/page/ConversationAdd.svelte:72
 msgid "Refresh"
-msgstr "Refresh"
+msgstr "刷新"
 
 #: assets/page/SettingsAdminUsers.svelte:149
 msgid "Registered"
-msgstr "Registered"
+msgstr "已注册"
 
 #: assets/page/SettingsAdmin.svelte:88
 msgid "Registration is open to public"
-msgstr "Registration is open to public"
+msgstr "允许公众注册"
 
 #: assets/page/Chat.svelte:174
 msgid "Remove"
-msgstr "Remove"
+msgstr "移除"
 
 #: assets/page/SettingsAccount.svelte:118
 msgid "Repeat password"
-msgstr "Repeat password"
+msgstr "复述密码"
 
 #: assets/page/Chat.svelte:175
 msgid "Resend"
-msgstr "Resend"
+msgstr "重新发送"
 
 #: assets/page/Fallback.svelte:41
 msgid "Retry"
-msgstr "Retry"
+msgstr "重试"
 
 #: assets/page/SettingsAdminUsers.svelte:148
 #: assets/page/SettingsAdminUsers.svelte:92
 msgid "Roles"
-msgstr "Roles"
+msgstr "角色"
 
 #: assets/page/SettingsAdminUsers.svelte:93
 msgid "Roles must be separated by comma."
-msgstr "Roles must be separated by comma."
+msgstr "角色之间必须用英文逗号分隔。"
 
 #: assets/components/ConnectionForm.svelte:134
 msgid "SASL and IRC server username."
-msgstr "SASL and IRC server username."
+msgstr "SASL 和 IRC 服务器用户名。"
 
 #: assets/components/ConnectionForm.svelte:148
 msgid "SASL authentication mechanism"
-msgstr "SASL authentication mechanism"
+msgstr "SASL 身份验证机制"
 
 #: assets/components/ConnectionForm.svelte:144
 msgid "SASL plain or IRC server password."
-msgstr "SASL plain or IRC server password."
+msgstr "SASL 明文或 IRC 服务器密码。"
 
 #: assets/components/ConversationSettings.svelte:160
 msgid "Save"
-msgstr "Save"
+msgstr "保存"
 
-#: assets/page/SettingsAccount.svelte:124
-#: assets/page/SettingsAdmin.svelte:93
+#: assets/page/SettingsAccount.svelte:124 assets/page/SettingsAdmin.svelte:93
 msgid "Save settings"
-msgstr "Save settings"
+msgstr "保存设置"
 
 #: assets/page/SettingsAdminUsers.svelte:96
 msgid "Save user"
-msgstr "Save user"
+msgstr "保存用户"
 
 #: assets/components/MainMenu.svelte:204
 msgid "Search"
-msgstr "Search"
+msgstr "搜索"
 
 #: assets/components/MainMenu.svelte:242
 msgid "Search for \"%1\""
-msgstr "Search for \"%1\""
+msgstr "搜索“%1”"
 
 msgid "Search..."
-msgstr "Search..."
+msgstr "搜索..."
 
-#: assets/page/Connections.svelte:34
-#: assets/page/Connections.svelte:60
+#: assets/page/Connections.svelte:34 assets/page/Connections.svelte:60
 msgid "Secure"
-msgstr "Secure"
+msgstr "安全"
 
 #: assets/components/ConnectionForm.svelte:104
 #: assets/page/ConnectionProfileSettings.svelte:69
 msgid "Secure connection (TLS)"
-msgstr "Secure connection (TLS)"
+msgstr "安全连接 (TLS)"
 
 #: assets/page/ConnectionProfileSettings.svelte:58
 msgid "See all connection profiles"
-msgstr "See all connection profiles"
+msgstr "查看所有连接配置文件"
 
 #: assets/page/ConnectionSettings.svelte:17
 msgid "See all connections"
-msgstr "See all connections"
+msgstr "查看所有连接"
 
 #: assets/page/SettingsAdminUsers.svelte:80
 msgid "See all users"
-msgstr "See all users"
+msgstr "查看所有用户"
 
 #: assets/page/ConversationAdd.svelte:68
 msgid "Select..."
-msgstr "Select..."
+msgstr "选择..."
 
 #: assets/page/ConnectionProfileSettings.svelte:78
 msgid "Service accounts"
-msgstr "Service accounts"
+msgstr "服务账户"
 
 msgid "Set new password"
-msgstr "Set new password"
+msgstr "设置新密码"
 
 #: assets/page/ConnectionProfileSettings.svelte:98
 msgid "Setting this value too high might get you banned from the server."
-msgstr "Setting this value too high might get you banned from the server."
+msgstr "此值设置过高可能使您被服务器封禁。"
 
 #: assets/components/MainMenu.svelte:225
 msgid "Settings"
-msgstr "Settings"
+msgstr "设置"
 
 msgid "Shift focus between chat input and search in sidebar."
-msgstr "Shift focus between chat input and search in sidebar."
+msgstr "在聊天输入框与侧边栏搜索之间切换焦点。"
 
 msgid "Shortcuts"
-msgstr "Shortcuts"
+msgstr "快捷键"
 
 msgid "Show advanced settings"
-msgstr "Show advanced settings"
+msgstr "显示高级设置"
 
 #: assets/components/ConversationSettings.svelte:136
 msgid "Show raw messages"
-msgstr "Show raw messages"
+msgstr "显示原始消息"
 
 #: assets/page/ConversationAdd.svelte:94
 msgid "Showing %1 of %2 conversations, but the list is still loading."
-msgstr "Showing %1 of %2 conversations, but the list is still loading."
+msgstr "正在显示 %2 个会话中的 %1 个，列表仍在加载中。"
 
 #: assets/page/ConversationAdd.svelte:92
 msgid "Showing %1 of %2 conversations."
-msgstr "Showing %1 of %2 conversations."
+msgstr "正在显示 %2 个会话中的 %1 个。"
 
-#: assets/page/Login.svelte:105
-#: assets/page/Login.svelte:115
-#: assets/page/Login.svelte:125
-#: assets/page/Login.svelte:77
-#: assets/page/Login.svelte:99
-#: templates/video.html.ep:21
+#: assets/page/Login.svelte:105 assets/page/Login.svelte:115
+#: assets/page/Login.svelte:125 assets/page/Login.svelte:77
+#: assets/page/Login.svelte:99 templates/video.html.ep:21
 msgid "Sign in"
-msgstr "Sign in"
+msgstr "登录"
 
-#: assets/page/Login.svelte:116
-#: assets/page/Login.svelte:121
-#: assets/page/Login.svelte:80
-#: assets/page/Login.svelte:97
+#: assets/page/Login.svelte:116 assets/page/Login.svelte:121
+#: assets/page/Login.svelte:80 assets/page/Login.svelte:97
 #: templates/video.html.ep:18
 msgid "Sign up"
-msgstr "Sign up"
+msgstr "注册"
 
 #: assets/page/SettingsFiles.svelte:83
 msgid "Size"
-msgstr "Size"
+msgstr "大小"
 
 #: assets/page/ConnectionProfileSettings.svelte:108
 msgid "Skip connection queue"
-msgstr "Skip connection queue"
+msgstr "跳过连接队列"
 
 #: assets/components/ConnectionForm.svelte:119
 msgid "Source IP"
-msgstr "Source IP"
+msgstr "源 IP"
 
 #: assets/page/Help.svelte:75
 msgid "Source code"
-msgstr "Source code"
+msgstr "源代码"
 
 #: assets/components/ChatInput.svelte:178
 #: assets/components/ChatInput.svelte:199
 msgid "Start a video conference"
-msgstr "Start a video conference"
+msgstr "开始一次视频会议"
 
 #: assets/page/Fallback.svelte:30
 msgid "Started Convos."
-msgstr "Started Convos."
+msgstr "已启动 Convos。"
 
 #: assets/page/Chat.svelte:152
 msgid "Started chatting on %1"
-msgstr "Started chatting on %1"
+msgstr "于 %1 开始聊天"
 
-#: app.html.ep:26
-#: templates/app.html.ep:26
+#: app.html.ep:26 templates/app.html.ep:26
 msgid "Starting Convos..."
-msgstr "Starting Convos..."
+msgstr "正在启动 Convos..."
 
 #: templates/video.html.ep:35
 msgid "Starting video chat..."
-msgstr "Starting video chat..."
+msgstr "正在启动视频聊天..."
 
 #: assets/App.svelte:114
 msgid "Status"
-msgstr "Status"
+msgstr "状态"
 
 #: assets/page/SettingsAccount.svelte:93
 msgid "Test"
-msgstr "Test"
+msgstr "测试"
 
 #: assets/page/SettingsAccount.svelte:141
 #: assets/page/SettingsAccount.svelte:146
 msgid "Test it by clicking on %1."
-msgstr "Test it by clicking on %1."
+msgstr "点击 %1 进行测试。"
 
 #: assets/page/Help.svelte:46
 msgid "Text formatting"
-msgstr "Text formatting"
+msgstr "文本格式化"
 
 #: assets/page/Fallback.svelte:45
 msgid "The Convos Team have been searching and searching, but the requested page could not be found."
-msgstr "The Convos Team have been searching and searching, but the requested page could not be found."
+msgstr "Convos 团队努力寻找了，但无法找到请求的页面。"
 
-#: partial/error.html.ep:13
-#: templates/partial/error.html.ep:13
+#: partial/error.html.ep:13 templates/partial/error.html.ep:13
 msgid "The backend is starting up. Please try again later."
-msgstr "The backend is starting up. Please try again later."
+msgstr "后端正在启动。请稍后再试。"
 
 #: assets/components/ConnectionForm.svelte:139
 msgid "The certificate fingerprint is used for SASL external authentication."
-msgstr "The certificate fingerprint is used for SASL external authentication."
+msgstr "证书指纹用于 SASL 外部身份验证。"
 
 #: assets/page/Help.svelte:38
 msgid "The following rules apply when typing a message:"
-msgstr "The following rules apply when typing a message:"
+msgstr "输入消息时适用以下规则："
 
 #: assets/page/Login.svelte:73
 msgid "The link has expired."
-msgstr "The link has expired."
+msgstr "链接已过期。"
 
 #: assets/page/Login.svelte:73
 msgid "The link is invalid."
-msgstr "The link is invalid."
+msgstr "链接无效。"
 
 #: assets/page/SettingsAdminUsers.svelte:130
 msgid "The link is valid until **%1**."
-msgstr "The link is valid until **%1**."
+msgstr "链接有效期至 **%1**。"
 
 msgid "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
-msgstr "The path part is the default channel to join. \"%%23convos\" means \"#convos\"."
+msgstr "路径部分是默认加入的频道。“%%23convos”表示“#convos”。"
 
 #: assets/page/SettingsAccount.svelte:106
 msgid "Theme"
-msgstr "Theme"
+msgstr "主题"
 
 #: assets/page/Chat.svelte:141
 msgid "There are %1 participants in this conversation."
-msgstr "There are %1 participants in this conversation."
+msgstr "此会话中有 %1 名参与者。"
 
 #: assets/page/SettingsAdmin.svelte:69
 msgid "These settings control what users experience when they visit [%1](%1)."
-msgstr "These settings control what users experience when they visit [%1](%1)."
+msgstr "这些设置控制用户访问 [%1](%1) 时的体验。"
 
-#: blog_list.html.ep:10
-#: templates/blog_list.html.ep:10
+#: blog_list.html.ep:10 templates/blog_list.html.ep:10
 msgid "This blog is empty."
-msgstr "This blog is empty."
+msgstr "此博客为空。"
 
 #: assets/page/SettingsAdmin.svelte:81
 msgid "This email can be used by users to get in touch with the Convos admin."
-msgstr "This email can be used by users to get in touch with the Convos admin."
+msgstr "用户可以通过此邮箱联系 Convos 管理员。"
 
 #: assets/page/Chat.svelte:130
 msgid "This is a private conversation with \"%1\"."
-msgstr "This is a private conversation with \"%1\"."
+msgstr "这是与“%1”的私聊。"
 
 msgid "This is the default connection new users will connect to."
-msgstr "This is the default connection new users will connect to."
+msgstr "这是新用户将连接的默认连接。"
 
 #: assets/page/ConnectionProfileSettings.svelte:110
 msgid "This might result in flood ban."
-msgstr "This might result in flood ban."
+msgstr "这可能会导致刷屏封禁。"
 
-#: partial/error.html.ep:19
-#: templates/partial/error.html.ep:19
+#: partial/error.html.ep:19 templates/partial/error.html.ep:19
 msgid "This should not happen."
-msgstr "This should not happen."
+msgstr "这不应该发生。"
 
 msgid "This should point to a %1 instance."
-msgstr "This should point to a %1 instance."
+msgstr "这应指向一个 %1 实例。"
 
 #: assets/page/SettingsAdmin.svelte:85
 msgid "This should point to a [%1](%2) instance."
-msgstr "This should point to a [%1](%2) instance."
+msgstr "这应指向一个 [%1](%2) 实例。"
 
 #: assets/components/ConnectionForm.svelte:167
 msgid "This will permanently remove chat logs and other connection related data."
-msgstr "This will permanently remove chat logs and other connection related data."
+msgstr "这将永久删除聊天记录及与连接相关的数据。"
 
 #: assets/page/SettingsAdminUsers.svelte:104
 msgid "This will permanently remove user settings, chat logs, uploaded files and other user related data."
-msgstr "This will permanently remove user settings, chat logs, uploaded files and other user related data."
+msgstr "这将永久删除用户设置、聊天记录、上传的文件以及其他与用户相关的数据。"
 
 #: assets/page/ConnectionProfileSettings.svelte:88
 msgid "Tick this box if you want to prevent users from creating custom connections."
-msgstr "Tick this box if you want to prevent users from creating custom connections."
+msgstr "如果您想阻止用户创建自定义连接，勾选此框。"
 
 #: assets/page/SettingsAdmin.svelte:90
 msgid "Tick this box if you want users to be able to register without an invite URL."
-msgstr "Tick this box if you want users to be able to register without an invite URL."
+msgstr "如果您希望用户无需邀请 URL 即可注册，勾选此框。"
 
 #: assets/page/SettingsAdminUsers.svelte:133
 msgid "Tip: Clicking on the link will copy it to your clipboard."
-msgstr "Tip: Clicking on the link will copy it to your clipboard."
+msgstr "提示：点击链接会将其复制到剪贴板。"
 
 #: assets/components/ConversationSettings.svelte:119
 #: assets/components/ConversationSettings.svelte:123
 msgid "Topic"
-msgstr "Topic"
+msgstr "话题"
 
 #: assets/page/Chat.svelte:134
 msgid "Topic for %1 is: %2"
-msgstr "Topic for %1 is: %2"
+msgstr "%1 的话题是：%2"
 
-#: partial/error.html.ep:26
-#: partial/noscript.html.ep:10
+#: partial/error.html.ep:26 partial/noscript.html.ep:10
 #: templates/partial/noscript.html.ep:10
 msgid "Try again"
-msgstr "Try again"
+msgstr "重试"
 
 #: assets/page/Help.svelte:58
 msgid "URLs will be converted to links, and might be embedded in the chat."
-msgstr "URLs will be converted to links, and might be embedded in the chat."
+msgstr "URL 将被转换为链接，并可能会嵌入到聊天中。"
 
 #: assets/components/ConnectionForm.svelte:156
 #: assets/page/ConnectionProfileSettings.svelte:120
 msgid "Update"
-msgstr "Update"
+msgstr "更新"
 
 #: assets/components/ConversationSettings.svelte:107
 msgid "Update information"
-msgstr "Update information"
+msgstr "更新信息"
 
 #: assets/components/ChatInput.svelte:173
 msgid "Upload a file"
-msgstr "Upload a file"
+msgstr "上传文件"
 
 #: assets/page/SettingsFiles.svelte:80
 msgid "Uploaded"
-msgstr "Uploaded"
+msgstr "已上传"
 
 #: assets/page/Chat.svelte:232
 msgid "Uploading %1..."
-msgstr "Uploading %1..."
+msgstr "正在上传 %1..."
 
 #: assets/page/SettingsAdmin.svelte:77
 msgid "Used together with \"Organization name\" to add a link to your organization on the login screen."
-msgstr "Used together with \"Organization name\" to add a link to your organization on the login screen."
+msgstr "与“组织名称”配合使用，在登录界面添加指向您的组织的链接。"
 
 #: assets/page/SettingsAdminUsers.svelte:122
 msgid "User email"
-msgstr "User email"
+msgstr "用户邮箱"
 
 #: assets/components/ConnectionForm.svelte:133
 msgid "Username"
-msgstr "Username"
+msgstr "用户名"
 
 #: assets/components/MainMenu.svelte:229
 #: assets/page/SettingsAdminUsers.svelte:143
 #: assets/page/SettingsAdminUsers.svelte:77
 msgid "Users"
-msgstr "Users"
+msgstr "用户"
 
 #: assets/page/Help.svelte:54
 msgid "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
-msgstr "Using \"*\" around some text, will convert it into *italic*, **bold** or ***italic bold***."
+msgstr "在文本周围使用“*”会将其转换为 *斜体*、**粗体**或***斜体加粗***。"
 
 #: assets/page/Help.svelte:56
 msgid "Using backticks around some text, will format it as a `code fragment`."
-msgstr "Using backticks around some text, will format it as a `code fragment`."
+msgstr "在文本周围使用反引号会将其格式化为 `代码片段`。"
 
 #: assets/page/SettingsAdminUsers.svelte:123
 msgid "Using this form, you can generate a forgotten password or invite link for a user."
-msgstr "Using this form, you can generate a forgotten password or invite link for a user."
+msgstr "您可以使用此表单为用户生成忘记密码或邀请的链接。"
 
 #: assets/components/ConnectionForm.svelte:107
 #: assets/page/ConnectionProfileSettings.svelte:72
 msgid "Verify certificate (TLS)"
-msgstr "Verify certificate (TLS)"
+msgstr "验证证书 (TLS)"
 
 #: assets/page/SettingsAdmin.svelte:84
 msgid "Video service"
-msgstr "Video service"
+msgstr "视频服务"
 
 #: assets/page/ConnectionProfileSettings.svelte:105
 msgid "WEBIRC password"
-msgstr "WEBIRC password"
+msgstr "WEBIRC 密码"
 
 #: assets/components/ConnectionForm.svelte:95
 msgid "Want to be connected"
-msgstr "Want to be connected"
+msgstr "保持连接"
 
 msgid "What is on your mind %1?"
-msgstr "What is on your mind, %1?"
+msgstr "%1，想说点什么？"
 
 #: assets/page/Chat.svelte:192
 msgid "Whois"
@@ -1319,75 +1200,74 @@ msgstr "Whois"
 
 #: assets/page/Help.svelte:50
 msgid "Will be automatically converted into emojis."
-msgstr "Will be automatically converted into emojis."
+msgstr "将自动转换为表情符号。"
 
 #: assets/page/ConnectionProfileSettings.svelte:66
 msgid "Will match connections on hostname."
-msgstr "Will match connections on hostname."
+msgstr "将按主机名匹配连接。"
 
-#: assets/page/Chat.svelte:203
-#: assets/page/Chat.svelte:210
+#: assets/page/Chat.svelte:203 assets/page/Chat.svelte:210
 #: assets/page/Chat.svelte:221
 msgid "Yes"
-msgstr "Yes"
+msgstr "是"
 
 #: assets/page/Fallback.svelte:48
 msgid "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
-msgstr "Yikes! we are so sorry for the inconvenience. Please submit an [issue](%1), if the problem does not go away."
+msgstr "哎呀！给您带来不便，非常抱歉。如果问题仍未消失，请提交 [issue](%1)。"
 
 #: assets/components/ConversationSettings.svelte:109
 msgid "You are channel operator in %1."
-msgstr "You are channel operator in %1."
+msgstr "您是 %1 的频道管理员。"
 
 #: assets/page/Chat.svelte:218
 msgid "You are invited to join %1."
-msgstr "You are invited to join %1."
+msgstr "您被邀请加入 %1。"
 
 #: assets/components/ConversationSettings.svelte:111
 msgid "You are not a channel operator in %1."
-msgstr "You are not a channel operator in %1."
+msgstr "您不是 %1 的频道管理员。"
 
 #: assets/page/Chat.svelte:207
 msgid "You are not part of this conversation."
-msgstr "You are not part of this conversation."
+msgstr "您不在此会话中。"
 
 #: assets/page/Chat.svelte:139
 msgid "You are the only participant in this conversation."
-msgstr "You are the only participant in this conversation."
+msgstr "您是此会话的唯一参与者。"
 
 #: assets/page/Search.svelte:56
 msgid "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
-msgstr "You can enter a channel name like #cool_beans to narrow down the search, or enter @some_nick to filter messages sent by a given user."
+msgstr "您可以输入频道名称（如 #cool_beans）来缩小搜索范围，或输入 @some_nick 来过滤指定用户发送的消息。"
 
 #: assets/components/ConnectionForm.svelte:84
 msgid "You cannot create custom connections."
-msgstr "You cannot create custom connections."
+msgstr "您无法创建自定义连接。"
 
 #: assets/page/SettingsAdmin.svelte:106
 msgid "You currently have Convos v%1 installed."
-msgstr "You currently have Convos v%1 installed."
+msgstr "您当前安装的是 Convos v%1。"
 
 #: assets/page/SettingsAdmin.svelte:104
 msgid "You have Convos v%1, which is the latest version."
-msgstr "You have Convos v%1, which is the latest version."
+msgstr "您拥有 Convos v%1，这是最新版本。"
 
 msgid "You have enabled notifications."
-msgstr "You have enabled notifications."
+msgstr "您已启用通知。"
 
 msgid "Your email is from the invite link."
-msgstr "Your email is from the invite link."
+msgstr "您的邮箱地址来自邀请链接。"
 
 #: assets/page/Login.svelte:89
 msgid "Your email will be used if you forget your password."
-msgstr "Your email will be used if you forget your password."
+msgstr "如果您忘记密码，我们将通过您的邮箱地址找回。"
 
 #: assets/components/ConnectionForm.svelte:90
 msgid "Your name"
-msgstr "Your name"
+msgstr "您的名字"
 
 #: assets/page/Help.svelte:55
 msgid "`some fragment`"
-msgstr "`some fragment`"
+msgstr "`一些内容`"
 
 #: assets/page/SettingsAdminUsers.svelte:91
 msgid "admin, bot, ..."
@@ -1397,10 +1277,9 @@ msgstr "admin, bot, ..."
 msgid "chanserv, nickserv, ..."
 msgstr "chanserv, nickserv, ..."
 
-#: app.html.ep:13
-#: templates/app.html.ep:13
+#: app.html.ep:13 templates/app.html.ep:13
 msgid "for %1"
-msgstr "for %1"
+msgstr "为 %1"
 
 msgid "irc.libera.chat:6697"
 msgstr "irc.libera.chat:6697"
@@ -1435,24 +1314,80 @@ msgstr "whatever, keywords"
 
 #: assets/page/SettingsAccount.svelte:136
 msgid "Protocol handlers"
-msgstr "Protocol handlers"
+msgstr "协议处理"
 
 #: assets/page/SettingsAccount.svelte:139
 msgid "Mark the protocols below that you want %1 to handle, and a popup should ask you for confirmation."
-msgstr "Mark the protocols below that you want %1 to handle, and a popup should ask you for confirmation."
+msgstr "选中您希望 %1 处理的协议，然后有弹出窗口要求您确认。"
 
 #: assets/page/SettingsAccount.svelte:148
 msgid "If you do not see any popup, then it probably means %1 already handles the protocol."
-msgstr "If you do not see any popup, then it probably means %1 already handles the protocol."
+msgstr "如果您没有看到任何弹出窗口，那可能是 %1 已经处理了该协议。"
+
+#: assets/js/Time.js
+msgid "%b %e"
+msgstr "%b%e日"
+
+#: assets/js/Time.js
+msgid "%b %e, %Y"
+msgstr "%Y年%b%e日"
+
+#: assets/js/Time.js
+msgid "Jan"
+msgstr "1月"
+
+#: assets/js/Time.js
+msgid "Feb"
+msgstr "2月"
+
+#: assets/js/Time.js
+msgid "March"
+msgstr "3月"
+
+#: assets/js/Time.js
+msgid "Apr"
+msgstr "4月"
+
+#: assets/js/Time.js
+msgid "May"
+msgstr "5月"
+
+#: assets/js/Time.js
+msgid "Jun"
+msgstr "6月"
+
+#: assets/js/Time.js
+msgid "July"
+msgstr "7月"
+
+#: assets/js/Time.js
+msgid "Aug"
+msgstr "8月"
+
+#: assets/js/Time.js
+msgid "Sept"
+msgstr "9月"
+
+#: assets/js/Time.js
+msgid "Oct"
+msgstr "10月"
+
+#: assets/js/Time.js
+msgid "Nov"
+msgstr "11月"
+
+#: assets/js/Time.js
+msgid "Dec"
+msgstr "12月"
 
 #: assets/page/Fallback.svelte
 msgid "The Convos server appears to be unreachable."
-msgstr "The Convos server appears to be unreachable."
+msgstr "Convos 服务器似乎无法访问。"
 
 #: assets/page/Fallback.svelte
 msgid "Retrying in %1s..."
-msgstr "Retrying in %1s..."
+msgstr "将在 %1 秒后重试..."
 
 #: assets/page/Fallback.svelte
 msgid "You appear to be offline."
-msgstr "You appear to be offline."
+msgstr "您似乎处于离线状态。"

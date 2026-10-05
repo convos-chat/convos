@@ -250,7 +250,7 @@ function setConversationFromUser(user) {
     <div class="message__status-line for-loading has-pos-bottom"><span><Icon name="spinner" animation="spin"/> <i>{$l('Loading...')}</i></span></div>
   {/if}
   {#if !$conversation.historyStopAt && $messages.length}
-    <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {$l('Jump to %1', now.format('%b %e %H:%M'))}</a></div>
+    <div class="message__status-line for-jump-to-now"><a href="{conversation.path}"><Icon name="external-link-alt"/> {$l('Jump to %1', now.format($l('%b %e %H:%M')))}</a></div>
   {/if}
 </InfinityScroll>
 

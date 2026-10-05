@@ -115,7 +115,7 @@ export default class I18N extends Reactive {
     rules.push({tag: tagPair(['em']), re: /\*(?=\S)/, rules, handler: '_mdTag'});
     rules.push({tag: tagPair(['span']), re: /\x03\d{1,2}(?:,\d{1,2})?/, rules, handler: '_mdIrcColorFormatting'});
     rules.push({tag: tagPair(['span']), re: /[\x02\x1d\x1e\x1f\x11]/, rules, handler: '_mdIrcTextFormatting'});
-    rules.push({tag: tagPair(['a']), re: /\[([a-zA-Z][^\]]+)\]\(([^)]+)\)/, rules: [], handler: '_mdLink'});
+    rules.push({tag: tagPair(['a']), re: /\[([^\]]+)\]\(([^)]+)\)/, rules: [], handler: '_mdLink'});
     rules.push({tag: tagPair(['a']), re: /\b(https?|mailto):\S+/, rules: [], handler: '_mdURL'});
     rules.push({tag: tagPair(['a']), re: /(\s|^)#[a-zA-Z][\w.-]+(?=\W|$)/, rules: [], handler: '_mdChannelname'});
 
