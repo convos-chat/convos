@@ -1,3 +1,5 @@
+import {i18n} from '../store/I18N';
+
 /**
  * Time extends Date with more functinality.
  *
@@ -55,11 +57,10 @@ export default class Time extends Date {
    * @returns {String} Example "Sept 15"
    */
   getHumanDate(params = {}) {
-    let str = this.format('%b %e');
     const now = new Time();
     const sameYear = this.getYear() === now.getYear();
-    if (!sameYear || params.year) str += ', ' + this.getFullYear();
-    return str;
+    if (sameYear && !params.year) return this.format(i18n.l('%b %e'));
+    return this.format(i18n.l('%b %e, %Y'));
   }
 
   setDate(param, setUTC) { return [setUTC ? super.setUTCDate(param) : super.setDate(param), this][1] }
@@ -83,7 +84,7 @@ export default class Time extends Date {
   }
 
   _getMonthAbbr() {
-    return MONTH_ABBR[this.getMonth()] || '';
+    return i18n.l(MONTH_ABBR[this.getMonth()] || '');
   }
 
   _getPaddedHours() {

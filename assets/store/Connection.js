@@ -6,6 +6,7 @@ import {awayMessage} from '../js/chatHelpers';
 import {convosApi} from '../js/Api';
 import {extractErrorMessage, is} from '../js/util';
 import {notify} from '../js/Notify';
+import {i18n} from './I18N';
 
 const sortConversations = (a, b) => {
   return (a.is('private') - b.is('private')) || a.name.localeCompare(b.name);
@@ -194,11 +195,11 @@ export default class Connection extends Conversation {
   _calculateFrozen() {
     switch (this.state) {
       case 'connected': return '';
-      case 'connecting': return 'Connecting...';
-      case 'disconnected': return 'Disconnected.';
-      case 'disconnecting': return 'Disconnecting...';
-      case 'unreachable': return 'Unreachable.';
-      default: return 'Connecting...';
+      case 'connecting': return i18n.l('Connecting...');
+      case 'disconnected': return i18n.l('Disconnected.');
+      case 'disconnecting': return i18n.l('Disconnecting...');
+      case 'unreachable': return i18n.l('Unreachable.');
+      default: return i18n.l('Connecting...');
     }
   }
 }
