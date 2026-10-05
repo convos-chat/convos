@@ -1,6 +1,4 @@
-//go:build wasm || windows
-
-// FIXME: we can probably support windows through another syscall
+//go:build wasm
 
 package handler
 
