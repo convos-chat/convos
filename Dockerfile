@@ -8,7 +8,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-FROM golang:1.26 AS backend
+FROM golang:1.27 AS backend
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
