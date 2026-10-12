@@ -56,6 +56,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("failed to process config: %w", err)
 	}
 
+	// Fallback for backwards compat
+	if c.RequestBaseURL == "" {
+		c.RequestBaseURL = os.Getenv("CONVOS_REQUEST_BASE")
+	}
+
 	if c.Home == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {

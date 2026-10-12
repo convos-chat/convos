@@ -78,36 +78,36 @@ func (s *Server) AuthMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) ReverseProxyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// X-Request-Base (Convos-specific) carries the full base URL including
-		if s.Config.ReverseProxy == "" {
-			if s.Config.RequestBaseURL != "" {
-				if u, err := url.Parse(s.Config.RequestBaseURL); err == nil {
-					s.updateBaseURL(u)
-				}
-			} else {
-				s.updateBaseURL(&url.URL{Scheme: httpScheme, Host: r.Host})
-			}
-			next.ServeHTTP(w, r)
-			return
-		}
-		// any sub-path, so it takes priority over the individual X-Forwarded-*
-		// headers. The proxy is responsible for stripping this header from
-		// untrusted client requests.
-		if base := r.Header.Get("X-Request-Base"); base != "" {
-			slog.Info("Received X-Request-Base header from proxy", "base", base)
-			if u, err := url.Parse(base); err == nil {
-				s.updateBaseURL(u)
-			}
-		} else if host := r.Header.Get("X-Forwarded-Host"); host != "" {
-			scheme := httpScheme
-			if r.Header.Get("X-Forwarded-Proto") == httpsScheme {
-				scheme = httpsScheme
-			}
-			s.updateBaseURL(&url.URL{Scheme: scheme, Host: host})
-		}
-
+		s.updateBaseURL(s.requestBaseURL(r))
 		next.ServeHTTP(w, r)
 	})
+}
+
+// requestBaseURL handles proxy config: X-Request-Base (proxy only), then
+// CONVOS_REQUEST_BASE_URL, then the request's Host with X-Forwarded-Proto.
+func (s *Server) requestBaseURL(r *http.Request) *url.URL {
+	proxy := s.Config.ReverseProxy != ""
+	// The proxy is responsible for stripping X-Request-Base from untrusted
+	// client requests.
+	if base := r.Header.Get("X-Request-Base"); proxy && base != "" {
+		if u, err := url.Parse(base); err == nil {
+			return u
+		}
+	}
+	if s.Config.RequestBaseURL != "" {
+		if u, err := url.Parse(s.Config.RequestBaseURL); err == nil {
+			return u
+		}
+	}
+	scheme := httpScheme
+	if r.TLS != nil || (proxy && r.Header.Get("X-Forwarded-Proto") == httpsScheme) {
+		scheme = httpsScheme
+	}
+	host := r.Host
+	if fh := r.Header.Get("X-Forwarded-Host"); proxy && fh != "" {
+		host = fh
+	}
+	return &url.URL{Scheme: scheme, Host: host}
 }
 
 // updateBaseURL sets the in-memory base URL and updates the secure-cookie flag

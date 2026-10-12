@@ -122,3 +122,35 @@ func loginUser(t *testing.T, s *Server, c *core.Core, email, password string) *h
 	t.Fatal("Session cookie not found in login helper")
 	return nil
 }
+
+func TestRequestBaseURL(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name        string
+		proxy       string
+		requestBase string
+		headers     map[string]string
+		want        string
+	}{
+		{"Host only", "", "", nil, "http://chat.example.com"},
+		{"Forwarded headers ignored without proxy", "", "", map[string]string{"X-Forwarded-Proto": "https", "X-Forwarded-Host": "evil.example.com", "X-Request-Base": "https://evil.example.com/"}, "http://chat.example.com"},
+		{"Env without proxy", "", "https://env.example.com/convos", nil, "https://env.example.com/convos"},
+		{"Cloudflare tunnel", "1", "", map[string]string{"X-Forwarded-Proto": "https"}, "https://chat.example.com"},
+		{"Forwarded host", "1", "", map[string]string{"X-Forwarded-Proto": "https", "X-Forwarded-Host": "proxy.example.com"}, "https://proxy.example.com"},
+		{"Env beats forwarded headers", "1", "https://env.example.com/", map[string]string{"X-Forwarded-Host": "proxy.example.com"}, "https://env.example.com/"},
+		{"X-Request-Base beats env", "1", "https://env.example.com/", map[string]string{"X-Request-Base": "https://proxy.example.com/convos"}, "https://proxy.example.com/convos"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &Server{Config: &config.Config{ReverseProxy: tt.proxy, RequestBaseURL: tt.requestBase}}
+			req := httptest.NewRequestWithContext(t.Context(), "GET", "http://chat.example.com/", nil)
+			for k, v := range tt.headers {
+				req.Header.Set(k, v)
+			}
+			if got := s.requestBaseURL(req).String(); got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
