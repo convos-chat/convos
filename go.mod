@@ -6,21 +6,21 @@ tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
-	github.com/coreos/go-oidc/v3 v3.17.0
-	github.com/ergochat/irc-go v0.6.0
+	github.com/coreos/go-oidc/v3 v3.21.0
+	github.com/ergochat/irc-go v0.7.0
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/go-chi/chi/v5 v5.2.1
-	github.com/go-ldap/ldap/v3 v3.4.12
+	github.com/go-ldap/ldap/v3 v3.4.15
 	github.com/gorilla/sessions v1.4.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/leonelquinteros/gotext v1.7.2
-	github.com/oapi-codegen/runtime v1.1.1
-	github.com/urfave/cli/v3 v3.6.2
+	github.com/leonelquinteros/gotext v1.8.0
+	github.com/oapi-codegen/runtime v1.9.0
+	github.com/urfave/cli/v3 v3.14.0
 	golang.org/x/crypto v0.47.0
 	golang.org/x/net v0.49.0
-	golang.org/x/oauth2 v0.35.0
-	golang.org/x/sys v0.41.0
+	golang.org/x/oauth2 v0.38.0
+	golang.org/x/sys v0.50.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
