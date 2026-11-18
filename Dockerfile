@@ -28,7 +28,7 @@ WORKDIR /app
 COPY --from=backend /app/convos .
 COPY --from=backend /etc/passwd /etc/passwd
 COPY --from=backend --chown=convos:convos /data /data
-
+COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 # Set up environment variables
 ENV CONVOS_HOME=/data
