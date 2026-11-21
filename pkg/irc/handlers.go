@@ -576,9 +576,9 @@ func (c *Connection) handleChannelModeIs(msg ircmsg.Message) {
 			Message:        "/mode",
 			Command:        []string{fieldMode},
 			Data: map[string]any{
-				"id":    requestID,
-				fieldMode:  mode,
-				"modes": modes,
+				"id":      requestID,
+				fieldMode: mode,
+				"modes":   modes,
 			},
 		})
 		return
@@ -896,6 +896,48 @@ func (c *Connection) handleErrorReply(msg ircmsg.Message) {
 	c.emitEvent(event)
 
 	c.persistMessage(convID, msg.Source, message, core.MessageTypeError, false, serverTimeOrNow(msg), "", "", "")
+}
+
+// isErrorCommand reports whether an IRC command denotes an error reply:
+// numerics 400-599 are reserved for errors, plus the ERR_* numerics outside
+// that range (STARTTLS and SASL failures) and the ERROR command.
+func isErrorCommand(command string) bool {
+	n, err := strconv.Atoi(command)
+	if err != nil {
+		return command == cmdError
+	}
+	return (n >= 400 && n <= 599) || n == 691 || n == 902 || (n >= 904 && n <= 907)
+}
+
+// handleFallback is a fallback for any server message without a dedicated
+// handler. I is shown in the server conversation as an error or notice.
+func (c *Connection) handleFallback(command string, msg ircmsg.Message) {
+	params := msg.Params
+	if len(params) > 0 && strings.EqualFold(params[0], c.Nick()) {
+		params = params[1:]
+	}
+	message := strings.Join(params, " ")
+	if message == "" {
+		return
+	}
+
+	msgType := core.MessageTypeNotice
+	if isErrorCommand(command) {
+		msgType = core.MessageTypeError
+	}
+
+	convID := ""
+
+	// Ensure server conversation exists
+	if conv := c.GetConversation(convID); conv == nil {
+		c.AddConversation(core.NewConversationWithID("", c.Name(), c))
+	}
+
+	event := &core.MessageEvent{ConversationID: convID, From: msg.Source, Message: message, Type: msgType, Highlight: false}
+	event.TS = serverTimeOrNowRFC3339(msg)
+	c.emitEvent(event)
+
+	c.persistMessage(convID, msg.Source, message, msgType, false, serverTimeOrNow(msg), "", "", "")
 }
 
 // handleUserModeIs handles RPL_UMODEIS (221).

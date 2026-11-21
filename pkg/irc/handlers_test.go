@@ -7,6 +7,40 @@ import (
 	"github.com/ergochat/irc-go/ircmsg"
 )
 
+func TestIsErrorCommand(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		command string
+		want    bool
+	}{
+		{"468", true},  // ERR_INVALIDUSERNAME
+		{"432", true},  // ERR_ERRONEUSNICKNAME
+		{"400", true},  // start of error range
+		{"599", true},  // end of error range
+		{"691", true},  // ERR_STARTTLS
+		{"902", true},  // ERR_NICKLOCKED
+		{"904", true},  // ERR_SASLFAIL
+		{"907", true},  // ERR_SASLALREADY
+		{"ERROR", true},
+		{"001", false}, // RPL_WELCOME
+		{"252", false}, // RPL_LUSEROP
+		{"372", false}, // RPL_MOTD
+		{"900", false}, // RPL_LOGGEDIN
+		{"903", false}, // RPL_SASLSUCCESS
+		{"WALLOPS", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.command, func(t *testing.T) {
+			t.Parallel()
+			if got := isErrorCommand(tt.command); got != tt.want {
+				t.Errorf("isErrorCommand(%q) = %v, want %v", tt.command, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseNickMode(t *testing.T) {
 	t.Parallel()
 

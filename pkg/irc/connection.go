@@ -46,6 +46,37 @@ func defaultNickFromEmail(email string) string {
 // userModeChars are IRC mode characters that target a specific user (nick) in a channel.
 const userModeChars = "ovhaq"
 
+// convosURL identifies Convos to IRC servers (QUIT/realname)
+const convosURL = "https://convos.chat"
+
+// cmdError is the IRC ERROR command.
+const cmdError = "ERROR"
+
+// isASCIIAlnum reports whether b is an ASCII letter or digit.
+func isASCIIAlnum(b byte) bool {
+	return (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9')
+}
+
+// ircUserInfo computes the username and real name for the IRC USER command
+// the username is the connection URL username, falling back to the nick
+// A leading non-alphanumeric character is
+// replaced with "x" he real name advertises Convos, optionally prefixed by the
+// "realname" query parameter. It returns the username and the real name.
+func ircUserInfo(urlUser, nick, realnameParam string) (string, string) {
+	user := urlUser
+	if user == "" {
+		user = nick
+	}
+	if user != "" && !isASCIIAlnum(user[0]) {
+		user = "x" + user[1:]
+	}
+	realname := convosURL
+	if realnameParam != "" {
+		realname = realnameParam + " via " + convosURL
+	}
+	return user, realname
+}
+
 // guestNick is the fallback nick when no nick can be determined.
 const guestNick = "guest"
 
@@ -170,7 +201,6 @@ func (c *Connection) Connect() error {
 	// NickFromURL() uses BaseConnection.mu (a separate mutex) and is safe here.
 	nick := c.NickFromURL()
 	host := url.Host
-	userEmail := c.User().Email()
 	useTLS := url.Scheme == "ircs"
 	if tlsParam := url.Query().Get("tls"); tlsParam != "" {
 		useTLS = tlsParam != "0"
@@ -187,11 +217,13 @@ func (c *Connection) Connect() error {
 
 	saslMech := strings.ToUpper(url.Query().Get("sasl"))
 
+	ircUser, realname := ircUserInfo(urlUser, nick, url.Query().Get("realname"))
+
 	c.client = &ircevent.Connection{
 		Server:        host,
 		Nick:          nick,
-		User:          userEmail,
-		RealName:      userEmail,
+		User:          ircUser,
+		RealName:      realname,
 		UseTLS:        useTLS,
 		ReconnectFreq: 0,
 		QuitMessage:   "Bye!",
@@ -383,24 +415,33 @@ func (c *Connection) Connect() error {
 		c.handleMode(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_WELCOME, func(msg ircmsg.Message) {
+	// Numeric callbacks are registered through addNumericCallback so that
+	// every numeric without a dedicated handler can be routed to the
+	// fallback handler below, like the Perl implementation does.
+	handledNumerics := make(map[string]bool)
+	addNumericCallback := func(code string, cb func(ircmsg.Message)) {
+		handledNumerics[code] = true
+		c.client.AddCallback(code, cb)
+	}
+
+	addNumericCallback(ircevent.RPL_WELCOME, func(msg ircmsg.Message) {
 		c.handleWelcome(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_ISUPPORT, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_ISUPPORT, func(msg ircmsg.Message) {
 		c.handleISupport(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_TOPIC, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_TOPIC, func(msg ircmsg.Message) {
 		c.handleTopicReply(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_TOPICTIME, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_TOPICTIME, func(msg ircmsg.Message) {
 		c.handleTopicWhoTime(msg)
 	})
 
 	// Add handler for user mode (RPL_UMODEIS / 221)
-	c.client.AddCallback(ircevent.RPL_UMODEIS, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_UMODEIS, func(msg ircmsg.Message) {
 		c.handleUserModeIs(msg)
 	})
 
@@ -410,20 +451,20 @@ func (c *Connection) Connect() error {
 		ircevent.RPL_SASLSUCCESS, ircevent.ERR_SASLFAIL, ircevent.ERR_SASLTOOLONG,
 		ircevent.ERR_SASLABORTED, ircevent.ERR_SASLALREADY, ircevent.RPL_SASLMECHS,
 	} {
-		c.client.AddCallback(code, func(msg ircmsg.Message) {
+		addNumericCallback(code, func(msg ircmsg.Message) {
 			c.handleNotice(msg)
 		})
 	}
 
-	c.client.AddCallback(ircevent.RPL_CHANNELMODEIS, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_CHANNELMODEIS, func(msg ircmsg.Message) {
 		c.handleChannelModeIs(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_NAMREPLY, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_NAMREPLY, func(msg ircmsg.Message) {
 		c.handleNamesReply(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_ENDOFNAMES, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_ENDOFNAMES, func(msg ircmsg.Message) {
 		c.handleEndOfNames(msg)
 	})
 
@@ -433,23 +474,23 @@ func (c *Connection) Connect() error {
 		ircevent.RPL_WHOISCHANNELS, ircevent.RPL_WHOISCERTFP, ircevent.RPL_AWAY,
 		ircevent.RPL_WHOISACCOUNT, ircevent.RPL_WHOISSECURE,
 	} {
-		c.client.AddCallback(code, func(msg ircmsg.Message) {
+		addNumericCallback(code, func(msg ircmsg.Message) {
 			c.handleWhoisReply(code, msg)
 		})
 	}
-	c.client.AddCallback(ircevent.RPL_ENDOFWHOIS, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_ENDOFWHOIS, func(msg ircmsg.Message) {
 		c.handleEndOfWhois(msg)
 	})
 
-	c.client.AddCallback(ircevent.RPL_ISON, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_ISON, func(msg ircmsg.Message) {
 		c.handleIsonReply(msg)
 	})
 
 	// LIST response accumulation
-	c.client.AddCallback(ircevent.RPL_LIST, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_LIST, func(msg ircmsg.Message) {
 		c.handleListReply(msg)
 	})
-	c.client.AddCallback(ircevent.RPL_LISTEND, func(msg ircmsg.Message) {
+	addNumericCallback(ircevent.RPL_LISTEND, func(msg ircmsg.Message) {
 		c.handleListEnd()
 	})
 
@@ -466,8 +507,32 @@ func (c *Connection) Connect() error {
 		ircevent.ERR_NOPRIVILEGES, ircevent.ERR_CHANOPRIVSNEEDED, ircevent.ERR_UNIQOPPRIVSNEEDED,
 		ircevent.ERR_NOOPERHOST, ircevent.ERR_PASSWDMISMATCH,
 	} {
-		c.client.AddCallback(code, func(msg ircmsg.Message) {
+		addNumericCallback(code, func(msg ircmsg.Message) {
 			c.handleErrorReply(msg)
+		})
+	}
+
+	// Route every numeric without a dedicated handler to the fallback, like
+	// the Perl implementation's _irc_event_fallback. Without this, messages
+	// such as "468 Your username is not valid" during registration are
+	// silently dropped and the user never learns why the connection failed.
+	// ERR_NICKNAMEINUSE is excluded: the library resolves it during
+	// registration and handleNickInUse is registered after welcome.
+	handledNumerics[ircevent.ERR_NICKNAMEINUSE] = true
+	for i := 1; i <= 999; i++ {
+		code := fmt.Sprintf("%03d", i)
+		if handledNumerics[code] {
+			continue
+		}
+		c.client.AddCallback(code, func(msg ircmsg.Message) {
+			c.handleFallback(code, msg)
+		})
+	}
+
+	// ERROR and WALLOPS reach the user through the same fallback in Perl.
+	for _, cmd := range []string{cmdError, "WALLOPS"} {
+		c.client.AddCallback(cmd, func(msg ircmsg.Message) {
+			c.handleFallback(cmd, msg)
 		})
 	}
 

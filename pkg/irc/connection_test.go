@@ -1066,6 +1066,151 @@ func TestHandleIgnoreCommand(t *testing.T) {
 	})
 }
 
+func TestIRCUserInfo(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		urlUser       string
+		nick          string
+		realnameParam string
+		wantUser      string
+		wantRealname  string
+	}{
+		{
+			name:         "nick fallback when URL has no username",
+			nick:         "crab",
+			wantUser:     "crab",
+			wantRealname: convosURL,
+		},
+		{
+			name:         "URL username wins over nick",
+			urlUser:      "ams",
+			nick:         "crab",
+			wantUser:     "ams",
+			wantRealname: convosURL,
+		},
+		{
+			name:          "realname query param is suffixed with convos URL",
+			nick:          "crab",
+			realnameParam: "Abhijit Menon-Sen",
+			wantUser:      "crab",
+			wantRealname:  "Abhijit Menon-Sen via " + convosURL,
+		},
+		{
+			name:         "leading non-alphanumeric is replaced with x",
+			urlUser:      "_ams",
+			nick:         "crab",
+			wantUser:     "xams",
+			wantRealname: convosURL,
+		},
+		{
+			name:         "empty user and nick",
+			wantUser:     "",
+			wantRealname: convosURL,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			user, realname := ircUserInfo(tt.urlUser, tt.nick, tt.realnameParam)
+			if user != tt.wantUser {
+				t.Errorf("user = %q, want %q", user, tt.wantUser)
+			}
+			if realname != tt.wantRealname {
+				t.Errorf("realname = %q, want %q", realname, tt.wantRealname)
+			}
+		})
+	}
+}
+
+func TestHandleFallback(t *testing.T) {
+	t.Parallel()
+
+	setup := func() (*core.Core, *core.User, *Connection) {
+		c := test.NewTestCore()
+		user := core.NewUser("test@example.com", c)
+		conn := NewConnection("irc://irc.libera.chat", user)
+		conn.nick = "crab"
+		return c, user, conn
+	}
+
+	expectMessage := func(t *testing.T, sub *core.Subscription, wantType core.MessageType, wantMessage string) {
+		t.Helper()
+		select {
+		case ev := <-sub.Events:
+			m, ok := ev.(*core.MessageEvent)
+			if !ok {
+				t.Fatalf("Unexpected event type: %T", ev)
+			}
+			if m.Type != wantType {
+				t.Errorf("Type = %q, want %q", m.Type, wantType)
+			}
+			if m.Message != wantMessage {
+				t.Errorf("Message = %q, want %q", m.Message, wantMessage)
+			}
+			if m.ConversationID != "" {
+				t.Errorf("ConversationID = %q, want server conversation (empty)", m.ConversationID)
+			}
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("Expected message event")
+		}
+	}
+
+	t.Run("error numeric strips current nick and emits error", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, "eu.idlepenguin.chat", "468", "crab", "USER", "Your username is not valid")
+		conn.handleFallback("468", msg)
+
+		expectMessage(t, sub, core.MessageTypeError, "USER Your username is not valid")
+	})
+
+	t.Run("unknown numeric emits notice", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, "server.net", "252", "crab", "4", "operator(s) online")
+		conn.handleFallback("252", msg)
+
+		expectMessage(t, sub, core.MessageTypeNotice, "4 operator(s) online")
+	})
+
+	t.Run("ERROR command emits error without nick stripping", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, "server.net", "ERROR", "Closing Link: banned")
+		conn.handleFallback("ERROR", msg)
+
+		expectMessage(t, sub, core.MessageTypeError, "Closing Link: banned")
+	})
+
+	t.Run("message with only the current nick is ignored", func(t *testing.T) {
+		t.Parallel()
+		c, user, conn := setup()
+		sub := c.EventEmitter.SubscribeUser(user.ID())
+		defer sub.Close()
+
+		msg := ircmsg.MakeMessage(nil, "server.net", "999", "crab")
+		conn.handleFallback("999", msg)
+
+		select {
+		case ev := <-sub.Events:
+			t.Fatalf("Expected no event, got %T: %+v", ev, ev)
+		case <-time.After(50 * time.Millisecond):
+		}
+	})
+}
+
 func TestDefaultNickFromEmail(t *testing.T) {
 	t.Parallel()
 
